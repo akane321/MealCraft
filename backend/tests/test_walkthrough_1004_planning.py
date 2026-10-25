@@ -39,6 +39,7 @@ from app.main import load_planning_pool, warm_planning_pool
 from app.planning.product_path import ProductPlanningEngine, meal_affinity
 from app.planning.recipe_quality import dish_family, incomplete
 from app.planning.recipe_similarity import wanted
+from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
 from app.repositories.recipe import RecipeRepository, _planning_pool, clear_planning_pool
@@ -218,6 +219,26 @@ def test_a_week_whose_repeats_no_different_dish_fits_stays_and_says_what_it_woul
         assert 0 < float(found.group(1)) <= round(total + 10.90 - 8, 2)
         assert answered["pending_replan"] is None and answered["plan_id"] == session["plan_id"]
         assert answered["pending_interaction"]["options"][0]["label"].startswith("Swap the ")
+
+
+def test_a_dish_that_did_not_fit_one_repeat_is_tried_again_for_the_next(monkeypatch):
+    """Task 15: a dish that took the week over in place of one repeat was never tried for a later repeat of the same
+    dish, although a swap made meanwhile can free room. Each repeat now tries every dish (owner, 2026-10-22)."""
+    from app.services.replanning import MealPlanReplanningService
+
+    tried: list[list[str]] = []
+    fitting = MealPlanReplanningService._fitting
+
+    def recorded(self, plan, constraints, recipes_by_id, swaps, entry, ranked):
+        tried.append([candidate.recipe.slug for candidate in ranked])
+        return fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked)
+
+    monkeypatch.setattr(MealPlanReplanningService, "_fitting", recorded)
+    with dish_client(monkeypatch, mains(("tofu-bowl", "firm_tofu"), ("chickpea-stew", "chickpea"))) as client:
+        session = planned(client, "Dinners for 4, S$8 total")
+        add(*mains(("salmon-bake", "salmon_fillet")))
+        say(client, session, "the dishes are boring")
+    assert sum("salmon-bake" in ranked for ranked in tried) >= 2, tried
 
 
 # P8 ------------------------------------------------------------------------------------------------------------
@@ -435,9 +456,10 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
-        assert [option.label for option in options] == ["Use S$87 for the week"]
-        # Two people's week (S$103) costs more than four's: said without its amount (2026-10-09 rehearsal).
-        assert "S$103" not in refused.messages[-1].content
+        assert [option.label for option in options] == ["Use S$70 for the week"]
+        # Two people's week (S$107 on release v2.2, S$103 on v2.1) costs more than four's: said without its amount
+        # (2026-10-09 rehearsal).
+        assert "S$107" not in refused.messages[-1].content
         assert "减少人数也不能降低这个预算" in refused.messages[-1].content
         for chosen in options:
             ready = service.reply(refused.id, chosen.value)
@@ -448,7 +470,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$86.15。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$69.99。"
     " 减少人数也不能降低这个预算。"
 )
 
@@ -470,10 +492,10 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["Use S$87 for the week"]
+    assert [option.label for option in refused.pending_interaction.options] == ["Use S$70 for the week"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
     # (ADR-0067: a budget no week fits is refused as before).
-    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 41, False)]
+    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 40, False)]
 
 
 @pytest.fixture(scope="module")
@@ -537,7 +559,9 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
             for attempt in error.trace["validation_attempts"]
             if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
         )
-        assert backed and math.ceil(backed[0]) == 103
+        # S$107 on release v2.2 (S$101 on v2.1, S$103 before task 15): the cheapest-week search bisects to the
+        # dollar with the ranked meals.
+        assert backed and math.ceil(backed[0]) == 107
         for cost in {backed[0], backed[-1]}:
             budget = math.ceil(cost)
             assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None
@@ -546,8 +570,8 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
 def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_searching_again(walked, monkeypatch):
     """Tapping an offered budget searched its week again (about 1-1.5 s) before the reply. Where the offer is the
     budget the refusal checked, the week kept by that check answers the tap's check and Plan saves it: the same week
-    a new search finds. Since the dough-only recipes left the pool the offer (S$87) is the cost of a week the check at
-    S$53 turned down for its budget alone, so the tap runs that one search."""
+    a new search finds. Since the dough-only recipes left the pool the offer (S$70 on release v2.2, S$87 on v2.1)
+    is the cost of a week the check at S$53 turned down for its budget alone, so the tap runs that one search."""
     planned = []
     plan = ProductPlanningEngine.plan
 
@@ -561,17 +585,17 @@ def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_se
         refused = service.create("一共10新币给4个人做一周")
         monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
         ready = service.reply(refused.id, refused.pending_interaction.options[0].value)
-        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 87
+        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 70
         confirmed = service.confirm(ready.id)
-        # The offered S$87 is the cost of a week the S$53 check turned down for its budget alone, so no kept week
+        # The offered S$70 is the cost of a week the S$53 check turned down for its budget alone, so no kept week
         # answers the tap: one search, where the offered amount used to be the kept week's own budget (S$53).
-        assert planned == [(4, 87.0)]
+        assert planned == [(4, 70.0)]
         monkeypatch.setattr(ProductPlanningEngine, "plan", plan)
         request = service._plan_request(ready.constraints)
         _, fresh = service.meal_plan_service._search(request, service.meal_plan_service._candidates(request))
         saved = sorted(day.recipe.slug for day in confirmed.plan.days)
         assert saved == sorted(item.recipe.slug for item in fresh.selected)
-        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 87
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 70
 
 
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
@@ -986,3 +1010,220 @@ def test_the_api_loads_the_recipe_pool_at_startup(loads):
             waited(lambda: loads == ["warm-planning-pool"])
             RecipeRepository(session).list_for_planning(courses=["main", "side", "salad", "soup"])
         assert loads == ["warm-planning-pool"]
+
+
+def _aged(runs, session_id: int, seconds: int) -> None:
+    """Every run of the session started `seconds` earlier, so its deadline is long past: what a slow search looks
+    like to the deadline, without slowing one."""
+    for run in runs.list_for_session(session_id):
+        runs.session.query(type(run)).filter_by(id=run.id).update(
+            {
+                "started_at": run.started_at - timedelta(seconds=seconds),
+                "deadline_at": run.deadline_at - timedelta(seconds=seconds),
+            }
+        )
+    runs.session.flush()
+
+
+def _ready_dinner_week(service):
+    service.starting_constraints = AgentConstraintState(
+        household_size=2,
+        weekly_budget_sgd=200,
+        pricing_mode="fixture",
+        plan_shape=MealPlanShape(meals={"dinner": MEAL_PRESETS["dinner"]["one main"]}),
+    )
+    ready = service.create("Plan dinners for 2 people this week, S$200 for the week")
+    assert ready.can_confirm, ready.messages[-1].content
+    return ready
+
+
+def test_a_confirmation_slower_than_any_deadline_still_returns_its_plan(fixture_catalog):
+    """Layer 08 PR-4 review round 3, then task 14. A confirmation runs the whole plan search inside its own run, and
+    the full meal structure can take minutes (the developer six-person S$420 week: `timing.md`). On a 120 s turn
+    budget the plan was saved and the run then marked failed, so the household saw a 409 and a retry saved a second
+    plan. A 300 s ceiling only moved that to a slower household: planning time has no hard limit and a slow plan
+    never becomes an error (owner, 2026-10-21; ADR-0080).
+
+    The search is not actually slowed here: the run's own clock is moved 601 s back while the plan is produced."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        generate = service.meal_plan_service.generate
+        runs = service.run_lifecycle.repository
+
+        def slow(request, *args, **kwargs):
+            plan = generate(request, *args, **kwargs)
+            _aged(runs, ready.id, 601)
+            return plan
+
+        service.meal_plan_service.generate = slow
+        confirmed = service.confirm(ready.id)
+        assert confirmed.plan is not None and confirmed.plan.days
+        assert confirmed.session.status == "planned"
+        plans = sorted(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "create_plan"), key=lambda run: run.id
+        )
+        confirmation = plans[-1]
+        assert confirmation.status == "committed", [run.status for run in plans]
+        assert confirmation.termination_reason_code == "PLAN_SAVED"
+        assert confirmation.error_code is None
+
+
+def test_a_slow_refusal_reaches_the_household_as_the_planners_reason(fixture_catalog):
+    """Task 14. Recording a failed planner call went through the deadline too, so a refusal that came back after
+    it raised the run's budget error in place of the planner's own reason: the household was told nothing about
+    why the week could not be planned."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        runs = service.run_lifecycle.repository
+
+        def refused(request, *args, **kwargs):
+            _aged(runs, ready.id, 601)
+            raise WeeklyPlanSelectionError("No week fits.")
+
+        service.meal_plan_service.generate = refused
+        with pytest.raises(WeeklyPlanSelectionError):
+            service.confirm(ready.id)
+        confirmation = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "create_plan"), key=lambda run: run.id
+        )
+        assert confirmation.status == "failed" and confirmation.error_code == "WeeklyPlanSelectionError"
+
+
+def test_a_replan_confirmation_slower_than_any_deadline_still_saves_the_change(fixture_catalog):
+    """Task 14: the same for `confirm_replan`, which runs a whole week's search when the change is to its shape."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        planned = service.confirm(ready.id).plan
+        dish = planned.days[1]
+        asked = service.reply(
+            ready.id, f"Swap {dish.planned_date:%A}'s {shown_title(dish.recipe.title)} for something else"
+        )
+        assert asked.pending_replan is not None, asked.messages[-1].content
+        runs = service.run_lifecycle.repository
+        confirm = service.replanning_service.confirm
+
+        def slow(*args, **kwargs):
+            result = confirm(*args, **kwargs)
+            _aged(runs, ready.id, 601)
+            return result
+
+        service.replanning_service.confirm = slow
+        applied = service.confirm_replan(ready.id)
+        assert applied.plan.revision > planned.revision
+        replan = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "replan_meal"), key=lambda run: run.id
+        )
+        assert replan.status == "committed", replan.status
+        assert replan.error_code is None
+
+
+def test_a_reply_whose_planner_search_runs_past_any_deadline_still_answers(fixture_catalog):
+    """Task 15: a reply turn now runs the planner's full searches for every plan shape (the check, the cheapest week,
+    fewer people), so it must never fail on the run's wall-time budget once planning starts, as a confirmation never
+    does (ADR-0080 section 3). The run's clock is moved 601 s back while the planner checks the new budget."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        runs = service.run_lifecycle.repository
+        check = service.meal_plan_service.check
+        checked = []
+
+        def slow(*args, **kwargs):
+            _aged(runs, ready.id, 601)
+            checked.append(True)
+            return check(*args, **kwargs)
+
+        service.meal_plan_service.check = slow
+        answered = service.reply(ready.id, "S$150 for the week")
+        assert checked and answered.can_confirm, answered.messages[-1].content
+        turn = max(runs.list_for_session(ready.id), key=lambda run: run.id)
+        assert turn.status == "ready_for_confirmation", (turn.status, turn.error_code)
+        assert turn.error_code is None
+
+
+def test_a_change_preview_slower_than_any_deadline_still_reaches_the_household(fixture_catalog):
+    """Task 15: the same for a reply to a planned week, whose preview runs the planner for the changed days."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        planned = service.confirm(ready.id).plan
+        dish = planned.days[1]
+        runs = service.run_lifecycle.repository
+        preview = service.replanning_service.preview
+
+        def slow(*args, **kwargs):
+            result = preview(*args, **kwargs)
+            _aged(runs, ready.id, 601)
+            return result
+
+        service.replanning_service.preview = slow
+        asked = service.reply(
+            ready.id, f"Swap {dish.planned_date:%A}'s {shown_title(dish.recipe.title)} for something else"
+        )
+        assert asked.pending_replan is not None, asked.messages[-1].content
+        turn = max(runs.list_for_session(ready.id), key=lambda run: run.id)
+        assert turn.status == "preview_ready", (turn.status, turn.error_code)
+        assert turn.error_code is None
+
+
+@pytest.mark.parametrize(
+    ("message", "owner", "method"),
+    [
+        ("Plan a new week with different dishes", "meal_plan_service", "generate"),
+        ("the dishes are boring", "replanning_service", "preview_variety"),
+    ],
+)
+def test_a_new_or_varied_week_slower_than_any_deadline_still_answers(fixture_catalog, message, owner, method):
+    """Task 15 review: the other two reply turns that run the planner's full searches, a new week and a varied one,
+    never fail on the run's wall-time budget either."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        service.confirm(ready.id)
+        runs = service.run_lifecycle.repository
+        target = getattr(service, owner)
+        real = getattr(target, method)
+        ran = []
+
+        def slow(*args, **kwargs):
+            result = real(*args, **kwargs)
+            _aged(runs, ready.id, 601)
+            ran.append(True)
+            return result
+
+        setattr(target, method, slow)
+        service.reply(ready.id, message)
+        turn = max(runs.list_for_session(ready.id), key=lambda run: run.id)
+        assert ran and turn.status != "failed", (turn.status, turn.error_code)
+        assert turn.error_code is None
+
+
+def test_a_slow_replan_refusal_keeps_the_planners_reason(fixture_catalog):
+    """Review of task 14: a replan the planner refuses after the deadline passed records the planner's reason, not
+    WALL_TIME_BUDGET_EXCEEDED (`confirm_replan`'s failure record skips the deadline as its success record does)."""
+    with kept_for(300), fixture_catalog() as session:
+        service = agent(session)
+        ready = _ready_dinner_week(service)
+        planned = service.confirm(ready.id).plan
+        dish = planned.days[1]
+        asked = service.reply(
+            ready.id, f"Swap {dish.planned_date:%A}'s {shown_title(dish.recipe.title)} for something else"
+        )
+        assert asked.pending_replan is not None, asked.messages[-1].content
+        runs = service.run_lifecycle.repository
+
+        def refused(*args, **kwargs):
+            _aged(runs, ready.id, 601)
+            raise WeeklyPlanSelectionError("No week fits.")
+
+        service.replanning_service.confirm = refused
+        with pytest.raises(WeeklyPlanSelectionError):
+            service.confirm_replan(ready.id)
+        replan = max(
+            (run for run in runs.list_for_session(ready.id) if run.intent == "replan_meal"), key=lambda run: run.id
+        )
+        assert replan.status == "failed", replan.status
+        assert replan.error_code == "WeeklyPlanSelectionError", replan.error_code

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator, model_serializer, model_
 
 from app.core.clock import today as local_today
 from app.data import meal_structure
+from app.schemas.catalog_tags import FeedbackKind
 from app.schemas.display import ShownTitle
 from app.schemas.household_rules import HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
@@ -170,6 +171,9 @@ class WeeklyPlanDayResponse(BaseModel):
     status: MealPlanEntryStatus
     is_locked: bool
     consumed_at: datetime | None
+    # Members home for this meal who cannot eat this dish (ADR-0071 section 1), so the plan can say "Not for
+    # Mei" beside it. Empty when everyone at the meal can eat it, and for a plan with no members.
+    not_for: list[str] = Field(default_factory=list)
 
 
 class MealPlanEntryStatusUpdate(BaseModel):
@@ -245,6 +249,13 @@ class MealPlanStatusCounts(BaseModel):
     skipped: int
 
 
+class DishReason(BaseModel):
+    """A fact true of a saved dish (layer 08 section 7.2), never why the planner chose it."""
+
+    code: Literal["preference", "cheap_main", "quick"]
+    label: str
+
+
 class NutritionDashboardDayResponse(BaseModel):
     entry_id: int
     day_index: int = Field(ge=1, le=14)
@@ -258,6 +269,15 @@ class NutritionDashboardDayResponse(BaseModel):
     meal_type: str = "dinner"
     role_id: str = "main"
     portion_share: float = 1.0
+    # Members home for this meal who cannot eat this dish (ADR-0071 section 1), so the week can say
+    # "Not for Mei" beside it. Empty when everyone at the meal can, and for a plan with no members.
+    not_for: list[str] = Field(default_factory=list)
+    # The household's Like, Dislike or Never again on this dish (ADR-0087); None when it gave none.
+    feedback: FeedbackKind | None = None
+    # Up to two facts true of this dish (layer 08 section 7.2), and its cost per serving for the facts panel; None
+    # when the week saved no grocery estimate for it.
+    reasons: list[DishReason] = Field(default_factory=list)
+    cost_per_serving_sgd: float | None = None
 
 
 class WeeklyNutritionDashboardResponse(BaseModel):

@@ -1,68 +1,41 @@
-from app.evaluation.baseline_mapping import (
-    CoverageResult,
-    IngredientMapping,
-)
+from app.evaluation.baseline_mapping import DishCoverage, IngredientMapping, PlanCoverage
 from app.evaluation.baseline_verification import verify_coverage
 
 
-def test_coverage_at_threshold_is_verifiable():
-    result = CoverageResult(
-        total_grams=1000,
-        matched_grams=900,
-        coverage=0.9,
-        mappings=(),
+def line(name: str, grams: float, ingredient_id: str | None, status: str = "matched") -> IngredientMapping:
+    return IngredientMapping(name, grams, ingredient_id, status, needs_review=status == "needs_review")
+
+
+def dish(name: str, *mappings: IngredientMapping) -> DishCoverage:
+    return DishCoverage("mon-dinner", None, name, 2, 30, mappings)
+
+
+def test_threshold_is_per_dish_not_per_plan():
+    # 94% of the plan's grams map, but the small dish maps only half of its own.
+    plan = PlanCoverage(
+        (
+            dish("big", line("rice", 850, "rice")),
+            dish("small", line("tofu", 50, "tofu"), line("mystery", 50, None, "unmatched")),
+            dish("edge", line("egg", 90, "egg"), line("odd", 10, None, "unmatched")),
+        )
     )
-
-    verified = verify_coverage(result)
-
-    assert verified.verifiable is True
-    assert verified.coverage == 0.9
-
-
-def test_coverage_below_threshold_is_not_verifiable():
-    result = CoverageResult(
-        total_grams=1000,
-        matched_grams=899,
-        coverage=0.899,
-        mappings=(),
-    )
-
-    verified = verify_coverage(result)
-
-    assert verified.verifiable is False
+    result = verify_coverage(plan)
+    assert [item.verifiable for item in result.dishes] == [True, False, True]
+    assert result.gram_coverage == 990 / 1050
+    assert result.verifiable_dish_share == 2 / 3
+    assert result.all_dishes_verifiable is False  # the strict basis
+    assert result.unmatched_count == 2
 
 
-def test_reports_mapping_failures():
-    result = CoverageResult(
-        total_grams=550,
-        matched_grams=500,
-        coverage=500 / 550,
-        mappings=(
-            IngredientMapping(
-                original_name="chicken breast",
-                quantity_g=300,
-                ingredient_id="chicken_breast",
-                status="matched",
-            ),
-            IngredientMapping(
-                original_name="mystery leaf",
-                quantity_g=30,
-                ingredient_id=None,
-                status="needs_review",
-                suggestions=("coriander",),
-            ),
-            IngredientMapping(
-                original_name="unknown powder",
-                quantity_g=20,
-                ingredient_id=None,
-                status="unmatched",
-            ),
-        ),
-    )
+def test_flagged_lines_go_to_the_review_list():
+    plan = PlanCoverage((dish("d", line("rice", 100, "rice"), line("cilantro", 10, "coriander", "needs_review")),))
+    result = verify_coverage(plan)
+    assert result.all_dishes_verifiable is True
+    assert result.needs_review_count == 1
+    assert [item.original_name for item in result.review_list] == ["cilantro"]
 
-    verified = verify_coverage(result)
 
-    assert verified.verifiable is True
-    assert verified.unmatched_grams == 50
-    assert verified.needs_review_count == 1
-    assert verified.unmatched_count == 1
+def test_empty_plan_is_not_verifiable():
+    result = verify_coverage(PlanCoverage(()))
+    assert result.all_dishes_verifiable is False
+    assert result.verifiable_dish_share is None

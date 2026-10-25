@@ -373,6 +373,10 @@ class MealPlanRepository:
             entry.recipe = proposed_recipe
             entry.recipe_id = proposed_recipe.id
             entry.recommendation_score = after["recommendation_score"]
+            # The new dish's own servings when the members who can eat it differ (ADR-0071 section 1); absent
+            # from a preview stored before the shared-dish model, which keeps the replaced dish's servings.
+            if after.get("servings") is not None:
+                entry.servings = Decimal(str(after["servings"]))
             entry.consumed_cost_sgd = after["consumed_cost_sgd"]
             entry.purchase_cost_sgd = after["purchase_cost_sgd"]
             nutrition = after["nutrition_per_person"]

@@ -1,0 +1,160 @@
+{
+  "scope": "Historical developer timing; 16 real recipes; 14 single-dish dinners; synthetic prices; no slot members; three alternating repeats",
+  "median_ms": {
+    "False": 5130.3539000000455,
+    "True": 2751.3235000005807
+  },
+  "rows": [
+    {
+      "repeat": 0,
+      "optimized": false,
+      "wall_ms": 5928.364300001704,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 113.89970000163885,
+      "stage_ms": [
+        80.18640000227606,
+        176.7686999955913,
+        184.74020000576274,
+        58.48890000197571,
+        873.3659999998054,
+        3965.12950000033
+      ],
+      "symmetry_pairs": 0
+    },
+    {
+      "repeat": 0,
+      "optimized": true,
+      "wall_ms": 1944.0762999947765,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 114.39740000059828,
+      "stage_ms": [
+        89.62869999959366,
+        94.21869999641785,
+        218.83279999747174,
+        0.0,
+        328.6816000036197,
+        1094.3170000027749
+      ],
+      "symmetry_pairs": 12
+    },
+    {
+      "repeat": 1,
+      "optimized": true,
+      "wall_ms": 3202.8248999995412,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 113.37899999489309,
+      "stage_ms": [
+        131.62949999968987,
+        124.3423000050825,
+        341.4947999990545,
+        0.0,
+        767.6139000031981,
+        1720.0235999989673
+      ],
+      "symmetry_pairs": 12
+    },
+    {
+      "repeat": 1,
+      "optimized": false,
+      "wall_ms": 5075.036700000055,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 113.87029999605147,
+      "stage_ms": [
+        74.37170000048354,
+        166.1166999983834,
+        174.52480000065407,
+        53.725000005215406,
+        817.131399999198,
+        3671.085800000583
+      ],
+      "symmetry_pairs": 0
+    },
+    {
+      "repeat": 2,
+      "optimized": false,
+      "wall_ms": 5130.3539000000455,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 110.57160000200383,
+      "stage_ms": [
+        74.0663000033237,
+        166.22430000279564,
+        205.90850000007777,
+        56.81159999949159,
+        817.3133000018424,
+        3695.3560000038124
+      ],
+      "symmetry_pairs": 0
+    },
+    {
+      "repeat": 2,
+      "optimized": true,
+      "wall_ms": 2751.3235000005807,
+      "status": "optimal_for_native_model",
+      "score": [
+        0,
+        -10,
+        4,
+        0.0,
+        6.67,
+        3400
+      ],
+      "build_ms": 111.41130000032717,
+      "stage_ms": [
+        94.16610000334913,
+        155.76120000332594,
+        342.04029999818886,
+        0.0,
+        341.16699999867706,
+        1702.783000000636
+      ],
+      "symmetry_pairs": 12
+    }
+  ],
+  "environment": {
+    "cpu_model": "not recorded",
+    "logical_cpu_count": "not recorded",
+    "physical_core_count": "not recorded",
+    "code_commit": "not recorded"
+  },
+  "worker_comparison": "Baseline used one solver worker; optimized used four. Per-run workers were not recorded in this historical artifact."
+}

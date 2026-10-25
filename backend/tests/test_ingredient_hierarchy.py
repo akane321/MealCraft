@@ -22,7 +22,7 @@ CURATED = ["firm_tofu", "cherry_tomato", "milk"]
 
 
 def catalog(root):
-    release = root / "data-engineering/data/release/v2.1"
+    release = root / "data-engineering/data/release/v2.2"
     release.mkdir(parents=True)
     release.joinpath("ingredients.jsonl").write_text(
         "\n".join(
@@ -104,7 +104,7 @@ def test_excluding_a_food_excludes_all_that_belongs_to_it_and_never_climbs(tmp_p
 def test_the_run_time_reader_sees_the_same_links_without_the_catalog(tmp_path):
     root = catalog(tmp_path)
     checked = valid(root)
-    (root / "data-engineering/data/release/v2.1/recipes.jsonl").unlink()  # the product never reads it
+    (root / "data-engineering/data/release/v2.2/recipes.jsonl").unlink()  # the product never reads it
 
     links = read_links(root)
 

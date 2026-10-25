@@ -169,6 +169,34 @@ def test_the_beam_plans_only_real_meals_and_the_staple_repeats_under_a_cap_of_on
         assert "cake" not in dishes.values() and dishes.get("main") not in {"slaw", "greens"}
 
 
+def test_unknown_main_sources_cannot_leak_through_a_mixed_course_and_structured_week():
+    from types import SimpleNamespace
+
+    from app.planning.product_path import recipe_tags
+
+    unknown = recipe("unknown-meat", "protein_main", kcal=900)
+    unknown["protein_sources"] = None
+    catalog = SimpleNamespace(
+        **(
+            unknown
+            | {"estimated": {}, "cooking_methods": [], "equipment": [], "cuisine": "test", "recipe_ingredients": []}
+        )
+    )
+    projected = recipe_tags(catalog, SimpleNamespace(ingredients=[]))
+    assert projected["meal_role"] is None
+    packet = problem(days=2, recipes=[*RECIPES, unknown])
+    legacy = packet.slots[0].model_copy(
+        update={"composition": [PlanningMealRole(role_id="main", courses=["main"])], "min_energy_kcal": None}
+    )
+    packet = packet.model_copy(update={"slots": [legacy, packet.slots[1]]})
+    solved = MealBeamPlanner().solve(packet)
+    assert solved.status == "feasible"
+    assert all(a.recipe_id != "unknown-meat" for a in solved.assignments if a.slot_id == "d2")
+    injected = [a for a in solved.assignments if not (a.slot_id == "d2" and a.role_id == "main")]
+    injected += meal(("main", "unknown-meat"), slot="d2")
+    assert {"meal_role_tag", "meal_protein_unknown"} <= failed(packet, injected)
+
+
 def test_perishable_dish_after_day_three_and_missing_equipment_are_refused():
     tagged = [
         *RECIPES,

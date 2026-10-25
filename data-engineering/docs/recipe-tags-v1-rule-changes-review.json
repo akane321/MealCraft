@@ -1,0 +1,3364 @@
+{
+  "base_commit": "ce4fbef32689a76e12538749714fd320fc7528af",
+  "tag_file_sha256": "5f2cd930482555445acd753acb2618b9549d645b269d40f76d934032beae19a9",
+  "selection_seed": 20261019,
+  "scope": "changed-case regression review, targeted plus seeded random; not independent population accuracy",
+  "changed_recipe_count": 206,
+  "changed_fields": {
+    "contains_staple": 102,
+    "flavor_tags": 9,
+    "meal_role": 127,
+    "protein_sources": 138
+  },
+  "unreviewed_model_gate_before": 422,
+  "unreviewed_model_gate_after": 422,
+  "sample_count": 25,
+  "owner_confirmed": true,
+  "records": [
+    {
+      "key": "RCP2_CB386B8363E1",
+      "title": "Marilyn'S English Pasties",
+      "course": "main",
+      "selection": "known regression",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork",
+          "beef"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/llm",
+          "method": "llm",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": true,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 1750.0,
+          "original_text": "14 c. flour"
+        },
+        {
+          "name": "salt",
+          "grams": 36.5,
+          "original_text": "2 Tbsp. salt"
+        },
+        {
+          "name": "shortening",
+          "grams": 907.2,
+          "original_text": "2 lb. Crisco"
+        },
+        {
+          "name": "water",
+          "grams": 1066.5,
+          "original_text": "4 1/2 c. water"
+        },
+        {
+          "name": "onion",
+          "grams": 453.6,
+          "original_text": "1 lb. onions, diced"
+        },
+        {
+          "name": "meat",
+          "grams": 2268.0,
+          "original_text": "5 lb. meat, cut small (beef stew or chuck roast)"
+        },
+        {
+          "name": "potato",
+          "grams": 6350.3,
+          "original_text": "14 lb. potatoes"
+        },
+        {
+          "name": "salt",
+          "grams": 54.8,
+          "original_text": "3 Tbsp. salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 6.8,
+          "original_text": "1 Tbsp. pepper"
+        },
+        {
+          "name": "rutabaga",
+          "grams": 35.0,
+          "original_text": "1/4 c. grated rutabaga"
+        }
+      ],
+      "steps": "For dough, mix first 3 ingredients.\nMix well.\nAdd water and mix as little as necessary and use as little flour as you can when rolling out the dough.\nBake at 400° for 10 minutes, then at 350° for 40 to 45 minutes until crust is golden brown.\nMake a small slit in the top of each pastie.\nWhen you remove from oven, put a little water oleo mixture into slit (1 teaspoon oleo and 1/2 teaspoon water for each pastie).\nLet sit for a few minutes.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第1项；owner回复：这5项全部同意。仅确认本次新值：有完整面皮载体的餐食、自带主食；历史模型蛋白来源未被确认，仍受原模型门禁拦截。"
+      }
+    },
+    {
+      "key": "RCP2_AA52264E15D0",
+      "title": "Chinese Pork Chops",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named pork but lists none",
+      "ingredients": [
+        {
+          "name": "water",
+          "grams": 474.0,
+          "original_text": "2 c. hot water"
+        },
+        {
+          "name": "bouillon",
+          "grams": 8.0,
+          "original_text": "2 chicken bouillon cubes"
+        },
+        {
+          "name": "ketchup",
+          "grams": 136.0,
+          "original_text": "1/2 c. catsup"
+        },
+        {
+          "name": "honey",
+          "grams": 336.0,
+          "original_text": "1 c. honey"
+        },
+        {
+          "name": "salt",
+          "grams": 9.1,
+          "original_text": "1 1/2 tsp. salt"
+        },
+        {
+          "name": "ginger",
+          "grams": 1.0,
+          "original_text": "1/2 tsp. ginger"
+        },
+        {
+          "name": "msg",
+          "grams": 2.1,
+          "original_text": "1/2 tsp. Accent"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 2.7,
+          "original_text": "1/2 tsp. soy sauce"
+        }
+      ],
+      "steps": "Marinate 8 to 10 pork chops in sauce overnight.\nPlace pork chops in shallow roasting pan and pour sauce over them.\nBake 1 1/2 hours at 325°.\nServe over hot buttered rice.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第2项；owner回复：这5项全部同意。原料缺少步骤要求的猪排，确认资料不完整并暂不用于规划；同意新值保留未知，不是确认猪肉或主食已存在。"
+      }
+    },
+    {
+      "key": "RCP2_631314414D3C",
+      "title": "Kid Friendly Jamaican Chicken",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named chicken but lists none",
+      "ingredients": [
+        {
+          "name": "brown_sugar",
+          "grams": 27.5,
+          "original_text": "2 tablespoons light brown sugar"
+        },
+        {
+          "name": "salt",
+          "grams": 9.1,
+          "original_text": "1 1/2 teaspoons salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 1.1,
+          "original_text": "1/2 teaspoon ground black pepper"
+        },
+        {
+          "name": "paprika",
+          "grams": 1.1,
+          "original_text": "1/2 teaspoon ground paprika"
+        },
+        {
+          "name": "allspice",
+          "grams": 0.9,
+          "original_text": "1/2 teaspoon ground allspice"
+        },
+        {
+          "name": "garlic_powder",
+          "grams": 0.7,
+          "original_text": "1/4 teaspoon garlic powder"
+        },
+        {
+          "name": "onion_powder",
+          "grams": 0.6,
+          "original_text": "1/4 teaspoon onion powder"
+        },
+        {
+          "name": "cayenne",
+          "grams": 0.2,
+          "original_text": "1/8 teaspoon ground cayenne pepper, as desired for additional spice"
+        },
+        {
+          "name": "cinnamon",
+          "grams": 0.3,
+          "original_text": "1/8 teaspoon ground cinnamon"
+        }
+      ],
+      "steps": "Mix all ingredients in a small bowl, set aside. Place boneless, skinless chicken breasts between sheets of plastic wrap or in large plastic bags and pound thin. Chicken breasts should be 1/2 thick or less. Rub chicken with olive oil on both sides. Sprinkle on seasoning. Place in skillet that has been pre-heated to medium-high and sprayed with non-stick cooking oil. Cook for 4 to 5 minutes per side or until done. Slice into 1/4 cubes or strips or leave whole as desired.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第3项；owner回复：这5项全部同意。原料缺少步骤要求的鸡胸肉，确认资料不完整并暂不用于规划；同意新值保留未知，不凭标题补出鸡肉。"
+      }
+    },
+    {
+      "key": "RCP2_DA28B246E699",
+      "title": "Barbecue Beef",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "boil",
+          "bake",
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "boil",
+          "bake",
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "boil",
+          "bake",
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named beef but lists none",
+      "ingredients": [
+        {
+          "name": "onion",
+          "grams": 220.0,
+          "original_text": "2 onions, diced"
+        },
+        {
+          "name": "ketchup",
+          "grams": 544.0,
+          "original_text": "1 pt. catsup"
+        },
+        {
+          "name": "worcestershire",
+          "grams": 17.0,
+          "original_text": "1 Tbsp. Worcestershire sauce"
+        },
+        {
+          "name": "vinegar",
+          "grams": 15.0,
+          "original_text": "1 Tbsp. vinegar"
+        },
+        {
+          "name": "mustard",
+          "grams": 31.0,
+          "original_text": "2 Tbsp. mustard"
+        },
+        {
+          "name": "cinnamon",
+          "grams": 2.6,
+          "original_text": "1 tsp. cinnamon"
+        },
+        {
+          "name": "sugar",
+          "grams": 25.0,
+          "original_text": "2 Tbsp. sugar"
+        },
+        {
+          "name": "beef_broth",
+          "grams": 360.0,
+          "original_text": "1 1/2 c. beef stock"
+        }
+      ],
+      "steps": "Season and brown roast.\nCook until done. Shred roast into small pieces.\nAdd remaining ingredients. Simmer 30 minutes or until mixture is thick.\nServe over toasted buns.\nYields 12 servings.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第4项；owner回复：这5项全部同意。原料只有酱料和牛高汤，没有步骤要求的烤肉，确认资料不完整并暂不用于规划；牛高汤不等于已列出牛肉，同意新值保留未知。"
+      }
+    },
+    {
+      "key": "RCP2_1D97F9CF9C30",
+      "title": "Chicken Stir-Fry",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "steam"
+        ],
+        "equipment": [
+          [
+            "steamer"
+          ]
+        ],
+        "flavor_tags": [
+          "fragrant",
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "steam"
+        ],
+        "equipment": [
+          [
+            "steamer"
+          ]
+        ],
+        "flavor_tags": [
+          "fragrant",
+          "light"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "steam"
+        ],
+        "equipment": [
+          [
+            "steamer"
+          ]
+        ],
+        "flavor_tags": [
+          "fragrant",
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "pineapple",
+          "grams": 567.0,
+          "original_text": "1 (20 oz.) pineapple chunks"
+        },
+        {
+          "name": "chicken_breast",
+          "grams": 453.6,
+          "original_text": "1 lb. chicken breasts"
+        },
+        {
+          "name": "garlic",
+          "grams": 6.0,
+          "original_text": "2 cloves garlic"
+        },
+        {
+          "name": "ginger",
+          "grams": 2.0,
+          "original_text": "1 tsp. ginger"
+        },
+        {
+          "name": "vegetable_oil",
+          "grams": 27.2,
+          "original_text": "2 Tbsp. vegetable oil"
+        },
+        {
+          "name": "carrot",
+          "grams": 122.0,
+          "original_text": "2 medium carrots"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 0.1,
+          "original_text": "1 pepper"
+        },
+        {
+          "name": "pasta",
+          "grams": 113.4,
+          "original_text": "4 oz. cooked spaghetti"
+        },
+        {
+          "name": "onion",
+          "grams": 330.0,
+          "original_text": "3 onions"
+        },
+        {
+          "name": "pineapple_juice",
+          "grams": 83.3,
+          "original_text": "1/3 c. pineapple juice"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 85.0,
+          "original_text": "1/3 c. soy sauce"
+        },
+        {
+          "name": "cornstarch",
+          "grams": 8.0,
+          "original_text": "1 Tbsp. cornstarch"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 13.6,
+          "original_text": "1 Tbsp. sesame oil"
+        }
+      ],
+      "steps": "Drain pineapple.\nReserve 1/3 cup of juice.\nSlice chicken in strips.\nStir-fry with garlic and ginger in oil.\nAdd pineapple, carrots, onions and pepper.\nSteam for 2 to 3 minutes.\nStir in spaghetti.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第一组第5项；owner回复：这5项全部同意。确认本次新值为肉类主菜、不自带足量主食：约454克鸡肉和大量蔬果，只有约113克熟意面；按既定占比规则判断，不更改阈值。不代表其他未展示字段已获确认。"
+      }
+    },
+    {
+      "key": "RCP2_3B3606EBC933",
+      "title": "Baked Macaroni And Cheese",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role"
+      ],
+      "before": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "margarine",
+          "grams": 28.4,
+          "original_text": "2 Tbsp. margarine"
+        },
+        {
+          "name": "flour",
+          "grams": 15.6,
+          "original_text": "2 Tbsp. flour"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "original_text": "1 tsp. salt"
+        },
+        {
+          "name": "mustard",
+          "grams": 5.2,
+          "original_text": "1 tsp. mustard"
+        },
+        {
+          "name": "milk",
+          "grams": 610.0,
+          "original_text": "2 1/2 c. milk"
+        },
+        {
+          "name": "macaroni",
+          "grams": 280.0,
+          "original_text": "2 c. macaroni, cooked"
+        },
+        {
+          "name": "cheese",
+          "grams": 226.0,
+          "original_text": "2 c. shredded cheese"
+        },
+        {
+          "name": "buttered_breadcrumbs",
+          "grams": 31.2,
+          "original_text": "1/4 c. buttered bread crumbs"
+        }
+      ],
+      "steps": "In saucepan, melt margarine. Blend in flour, salt and mustard. Add milk and heat, stirring constantly. The sauce will thicken a little.\nAdd 1 1/2 cups cheese, stirring often. Add macaroni with sauce. Top with remaining cheese, bread crumbs and a pinch of paprika.\nBake at 350° for 1/2 hour.\nMakes 4 to 6 servings.",
+      "verdict": {
+        "meal_role": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第6项；owner回复：西班牙米饭可判定为主食，其他全部同意。确认本次meal_role新值one_bowl，奶酪焗通心粉是自带主食的完整餐食；其他未展示字段不算本轮核验。"
+      }
+    },
+    {
+      "key": "RCP2_80E876686DA8",
+      "title": "Kalbi Beef Marinate (Flank Steak)",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "fragrant",
+          "spicy"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named beef but lists none",
+      "ingredients": [
+        {
+          "name": "soy_sauce",
+          "grams": 127.5,
+          "original_text": "1/2 cup soy sauce"
+        },
+        {
+          "name": "water",
+          "grams": 59.2,
+          "original_text": "1/4 cup water"
+        },
+        {
+          "name": "garlic",
+          "grams": 12.0,
+          "original_text": "4 clove garlic, minced"
+        },
+        {
+          "name": "ginger",
+          "grams": 2.0,
+          "original_text": "1 teaspoon ginger, minced"
+        },
+        {
+          "name": "brown_sugar",
+          "grams": 110.0,
+          "original_text": "1/2 cup brown sugar"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 54.5,
+          "original_text": "1/4 cup sesame oil"
+        },
+        {
+          "name": "sesame_seed",
+          "grams": 18.0,
+          "original_text": "2 tablespoon sesame seeds, toasted"
+        },
+        {
+          "name": "chili_paste",
+          "grams": 22.5,
+          "original_text": "1 1/2 tablespoon chili paste"
+        },
+        {
+          "name": "green_onion",
+          "grams": 75.0,
+          "original_text": "5 Green onions, chopped"
+        },
+        {
+          "name": "sake",
+          "grams": 118.5,
+          "original_text": "1/2 cup Saki wine"
+        }
+      ],
+      "steps": "Combine all ingredients except ribs in a 1 gallon ziplock bag. add flank steak and seal bag, squeezing out excess air. Work sauce into ribs by kneading bag\nMarinate for 8 hours. Remove from zip lock and grill for 6 minutes each side.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第7项；owner回复：西班牙米饭可判定为主食，其他全部同意。牛排只在步骤出现，原料未列肉及其用量，确认资料不完整并暂不用于规划；同意本次新值保留未知，不是确认牛肉已存在。"
+      }
+    },
+    {
+      "key": "RCP2_961449012D5D",
+      "title": "Acorn Squash Stuffed With Italian Sausage & Penne",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "squash",
+          "grams": 900.0,
+          "original_text": "2 medium acorn squash, halved and cleaned"
+        },
+        {
+          "name": "sausage",
+          "grams": 226.8,
+          "original_text": "1/2 lb Italian sausage, casings removed"
+        },
+        {
+          "name": "onion",
+          "grams": 80.0,
+          "original_text": "1/2 cup onion, sliced"
+        },
+        {
+          "name": "marinara",
+          "grams": 490.0,
+          "original_text": "2 cups pasta sauce"
+        },
+        {
+          "name": "pasta",
+          "grams": 226.8,
+          "original_text": "1/2 lb penne, cooked"
+        },
+        {
+          "name": "mozzarella",
+          "grams": 113.4,
+          "original_text": "1/4 lb mozzarella cheese, shredded"
+        }
+      ],
+      "steps": "Preheat the oven to 350 degrees F.\nSeason the squash with olive oil, salt and pepper. Place on a baking sheet, flesh side up and add 1/2 cup water to the pan. Cover with alluminum foil and bake until tender, about 1 hour. Remove from the oven and cool completely.\nIn a large saute pan, over medium heat, brown the sausage and onions, about 6 to 8 minutes.\nIn a large mixing bowl, toss the sausage and onions with the pasta sauce, pasta, and cheese. Season with salt and pepper. Mix well.\nSpoon the pasta mixture into the cavity of each squash. Place the filled squashes on a baking sheet and place in the oven.\nBake until the squash is heated through and the cheese melts, about 20 minutes.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第8项；owner回复：西班牙米饭可判定为主食，其他全部同意。约900克南瓜、227克香肠、227克熟意面及其他配料，按既定占比规则确认本次新值为需另配主食的主菜。不代表其他未展示字段已核验。"
+      }
+    },
+    {
+      "key": "RCP2_557753E022A8",
+      "title": "Mon-Doo(Korean Egg Rolls)",
+      "course": "snack_appetizer",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "snack",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "deep_fry",
+          "pan_fry"
+        ],
+        "equipment": [
+          [
+            "microwave"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": "snack",
+        "contains_staple": false,
+        "protein_sources": null,
+        "cooking_methods": [
+          "deep_fry",
+          "pan_fry"
+        ],
+        "equipment": [
+          [
+            "microwave"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "snack",
+        "contains_staple": false,
+        "protein_sources": null,
+        "cooking_methods": [
+          "deep_fry",
+          "pan_fry"
+        ],
+        "equipment": [
+          [
+            "microwave"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "wonton_wrapper",
+          "grams": 450.0,
+          "original_text": "egg roll wrappers (available at Oriental market)"
+        },
+        {
+          "name": "pork",
+          "grams": 907.2,
+          "original_text": "2 lb. pork or beef, cooked and cut into very small pieces"
+        },
+        {
+          "name": "green_onion",
+          "grams": 100.0,
+          "original_text": "1 c. green onions, chopped fine"
+        },
+        {
+          "name": "cabbage",
+          "grams": 178.0,
+          "original_text": "2 c. cabbage, shredded"
+        },
+        {
+          "name": "mushroom",
+          "grams": 140.0,
+          "original_text": "2 c. mushrooms, chopped small"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 15.9,
+          "original_text": "1 Tbsp. soy sauce"
+        },
+        {
+          "name": "garlic_powder",
+          "grams": 0.7,
+          "original_text": "1/4 tsp. garlic powder"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 27.2,
+          "original_text": "2 Tbsp. sesame seed oil (use 100% not blend)"
+        }
+      ],
+      "steps": "Brown meat, onions and mushrooms in 2 tablespoons sesame seed oil.\nSeason according to taste with soy sauce and garlic powder. Place a small amount into the middle of egg roll wrapper.\nRoll and seal wrapper by wetting finger with a little water (egg roll wrappers will seal tight).\nFry egg rolls in sesame seed oil or deep fry.\nCan be frozen and microwaved when needed.",
+      "verdict": {
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-19 对话复核第二组第9项；owner回复：西班牙米饭可判定为主食，其他全部同意。原文为猪肉或牛肉，确认本次蛋白来源新值应保留未知；不能认定一定是猪肉，也不能认定两种肉都存在，不能据此保证适合忌口家庭。"
+      }
+    },
+    {
+      "key": "RCP2_4F1F492DB38E",
+      "title": "Spanish Rice",
+      "corrected_values": {"meal_role": "staple", "contains_staple": true},
+      "course": "side",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "bell_pepper",
+          "grams": 120.0,
+          "original_text": "1 green pepper, chopped"
+        },
+        {
+          "name": "tomato",
+          "grams": 123.0,
+          "original_text": "1 tomato, chopped"
+        },
+        {
+          "name": "onion",
+          "grams": 110.0,
+          "original_text": "1 onion, chopped"
+        },
+        {
+          "name": "butter",
+          "grams": 28.4,
+          "original_text": "2 Tbsp. butter"
+        },
+        {
+          "name": "rice",
+          "grams": 316.0,
+          "original_text": "2 c. cooked rice"
+        },
+        {
+          "name": "water",
+          "grams": 79.0,
+          "original_text": "1/3 c. water"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "original_text": "1/2 tsp. salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 0.6,
+          "original_text": "1/4 tsp. pepper"
+        }
+      ],
+      "steps": "Cook green pepper, tomato and onion in hot butter until tender.\nStir in cooked rice, water, salt and pepper.\nHeat through, stirring occasionally.\nServes 6.",
+      "verdict": {
+        "meal_role": false,
+        "contains_staple": false,
+        "note": "【owner已确认纠正】2026-10-19 对话复核第二组第10项；owner回复：西班牙米饭可判定为主食，其他全部同意。人工正确值：{\"meal_role\":\"staple\",\"contains_staple\":true}。不同意本次规则生成的两个null值；保留before、after及规则来源作为审查快照，不把纠正记为规则原本判对，也不为此调整全局阈值。正式标签修正待本轮复核后实施。"
+      }
+    },
+    {
+      "key": "RCP2_D666EF442FE4",
+      "title": "Kim Bap (Korean Rice Rolls)",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role"
+      ],
+      "before": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "rice",
+          "grams": 632.0,
+          "original_text": "4 cups hot cooked rice"
+        },
+        {
+          "name": "rice_vinegar",
+          "grams": 5.4,
+          "original_text": "1 teaspoon rice vinegar"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 2.7,
+          "original_text": "1/2 teaspoon soy sauce"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 2.3,
+          "original_text": "1/2 teaspoon dark sesame oil"
+        },
+        {
+          "name": "seaweed",
+          "grams": 8.0,
+          "original_text": "4 sheets kim fresh seaweed"
+        },
+        {
+          "name": "carrot",
+          "grams": 61.0,
+          "original_text": "1 small carrot, julienned"
+        },
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "original_text": "2 eggs, beaten"
+        },
+        {
+          "name": "spinach",
+          "grams": 283.5,
+          "original_text": "10 ounces frozen spinach, thawed and drained"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 2.3,
+          "original_text": "1/2 teaspoon sesame oil"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 2.7,
+          "original_text": "1/2 teaspoon soy sauce"
+        },
+        {
+          "name": "daikon",
+          "grams": 40.0,
+          "original_text": "4 slices pickled yellow radishes"
+        },
+        {
+          "name": "sesame_seed",
+          "grams": 9.0,
+          "original_text": "1 tablespoon sesame seeds, toasted"
+        }
+      ],
+      "steps": "Let rice cool a bit.\nMeanwhile, mix the rice with the vinegar, soy sauce, and sesame oil.\nFry eggs as if it were a pancake.\nCut egg into strips.\nMix spinach with sesame oil and soy sauce.\nTo assemble, put rice on a bamboo roller (I do not have one and it works fine, just not as pretty).\nSpread rice over 2/3 of the sheet, lay carrots, spinach, and egg on top.\nSprinkle with sesame seeds and roll like a jelly roll.\nCut into 1/2 inch rounds.\nYou can adapt this to your own tastes, some people put imitation crab meat in them, I put marinated soy bean sprouts and cucumbers in mine, etc.",
+      "verdict": {
+        "meal_role": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第11项；owner回复：全部同意。确认本次meal_role新值one_bowl：熟饭搭配鸡蛋、菠菜和胡萝卜卷成饭卷，是自带主食的完整餐食。不代表其他未展示字段已核验。"
+      }
+    },
+    {
+      "key": "RCP2_0447589B2FD3",
+      "title": "Chicken Curry",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named chicken but lists none",
+      "ingredients": [
+        {
+          "name": "onion",
+          "grams": 80.0,
+          "original_text": "1/2 c. onion, chopped"
+        },
+        {
+          "name": "apple",
+          "grams": 55.0,
+          "original_text": "1/2 c. diced apple, peeled"
+        },
+        {
+          "name": "margarine",
+          "grams": 85.1,
+          "original_text": "6 Tbsp. oleo"
+        },
+        {
+          "name": "mushroom",
+          "grams": 226.8,
+          "original_text": "8 oz. sliced mushrooms"
+        },
+        {
+          "name": "water_chestnut",
+          "grams": 280.0,
+          "original_text": "2 c. water chestnuts, sliced"
+        },
+        {
+          "name": "flour",
+          "grams": 31.2,
+          "original_text": "4 Tbsp. flour"
+        },
+        {
+          "name": "curry_powder",
+          "grams": 12.0,
+          "original_text": "2 Tbsp. curry powder"
+        },
+        {
+          "name": "sugar",
+          "grams": 2.1,
+          "original_text": "1/2 tsp. sugar"
+        },
+        {
+          "name": "ginger",
+          "grams": 0.5,
+          "original_text": "1/4 tsp. ground ginger"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "original_text": "1 tsp. salt"
+        },
+        {
+          "name": "chicken_broth",
+          "grams": 177.4,
+          "original_text": "3/4 c. chicken broth"
+        },
+        {
+          "name": "evaporated_milk",
+          "grams": 252.0,
+          "original_text": "1 c. evaporated milk"
+        }
+      ],
+      "steps": "Saute onion, apple, oleo, mushrooms and water chestnuts until tender.\nAdd\nthe remaining ingredients in order (flour, curry powder, sugar, ginger, salt, chicken broth and evaporated milk). Cook\nabout\n15 minutes on medium heat until thickened.\nAdd 3 cups diced, cooked chicken.\nLet set for 24 hours in refrigerator. Heat and serve over hot rice.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第12项；owner回复：全部同意。步骤要求3杯熟鸡肉但原料未列，确认资料不完整并暂不用于规划；鸡汤不能代替缺失鸡肉，同意本次三个新值保留未知。"
+      }
+    },
+    {
+      "key": "RCP2_66CDC4D02656",
+      "title": "Napa Cabbage with Dried Shrimp",
+      "course": "side",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [
+          "shellfish"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/llm",
+          "method": "llm",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/llm",
+          "method": "llm",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [],
+        "cooking_methods": [
+          "stir_fry",
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": true,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "shrimp",
+          "grams": 21.2,
+          "original_text": "2 tablespoons Dried Shrimp"
+        },
+        {
+          "name": "water",
+          "grams": 177.8,
+          "original_text": "3/4 cup Boiling Water"
+        },
+        {
+          "name": "cabbage",
+          "grams": 908.0,
+          "original_text": "1 head Napa Cabbage"
+        },
+        {
+          "name": "peanut_oil",
+          "grams": 27.0,
+          "original_text": "2 tablespoons Peanut Oil"
+        },
+        {
+          "name": "green_onion",
+          "grams": 60.0,
+          "original_text": "4 Chopped Scallions"
+        },
+        {
+          "name": "ginger",
+          "grams": 6.0,
+          "original_text": "1 tablespoon Ginger"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 15.9,
+          "original_text": "1 tablespoon Soy Sauce"
+        },
+        {
+          "name": "water",
+          "grams": 14.8,
+          "original_text": "1 tablespoon Water"
+        },
+        {
+          "name": "cornstarch",
+          "grams": 5.3,
+          "original_text": "2 tsp Cornstarch"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "original_text": "1 tsp Kosher Salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 1.1,
+          "original_text": "1/2 tsp Pepper"
+        }
+      ],
+      "steps": "Dried shrimp gives this Chinese dish a punch of salty umami flavor. You can find it at an Asian grocery store in the frozen or refrigerated section. Look for small-sized dried shrimp, about a 1/4-inch in size. If you use medium or large dried shrimp, hydrate the shrimp with more water (1 cup for medium-sized shrimp, 1 1/4 cup for large) and for longer time (45 to 60 minutes), then chop it up into smaller 1/4-inch chunks. To make this recipe vegetarian, omit the dried shrimp and use four or five dried shiitake mushrooms, rehydrated, and sliced thin.\nRehydrate the dried shrimp:\nPlace the dried shrimp in a small bowl and pour the boiling water over it. Cover with a small plate and let sit for 30 minutes so the shrimp can rehydrate. The shrimp will be lighter in color and plump up slightly.\nPrep the cabbage:\nMeanwhile, split the napa cabbage in half lengthwise. Rinse the cabbage and shake it dry. Cut out the core of the cabbage and discard.\nSet out two large bowls. Cut the remaining cabbage into 1-inch pieces, putting the thicker white pieces at the bottom of the cabbage into one bowl and the top thinner leafy green pieces into the other bowl.\nDrain the shrimp:\nOnce the shrimp has rehydrated, drain it and discard the liquid.\nCook the shrimp and cabbage:\nIn a large wok or skillet over high heat add the peanut oil, swirling it around to coat the pan.\nHeat until the oil looks shimmering hot, then carefully add the scallions, ginger, and rehydrated shrimp, paying specially attention as the wet ingredients may cause the hot oil to splatter. Toss with a spatula until the scallions are bright green and the entire mixture is fragrant, about 1 minute.\nAdd the thicker white part of the napa cabbage to the pan and lower the heat to medium high. Continue to cook and stir for 3 to 4 minutes, or until the edges of the cabbage pieces start to look slightly translucent but the center of the cabbage pieces are still opaque white.\nReduce the heat to medium low and add the leafy green pieces of cabbage into the pan. Cook until the leaves are wilted, about 2 minutes.\nMake a cornstarch slurry:\nIn a small bowl, combine the soy sauce, cold water, and cornstarch, stirring to make a slurry. Then pour over the cabbage and continue to cook and stir until a sauce has thickened slightly to the consistency of whole milk.\nSeason the stir fry:\nSeason the stir fry with salt and pepper, then taste and add more salt and pepper if you wish. The cabbage will be translucent and silky looking, with specks of dried shrimp all over.",
+      "verdict": {
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第13项；owner回复：全部同意。约908克白菜搭配21克虾米，确认本次主要蛋白来源新值为空列表，虾米只是少量配料；仍含虾，虾过敏必须排除。本轮不认可冻结的旧模型主食角色，模型门禁不变。"
+      }
+    },
+    {
+      "key": "RCP2_28626CFF47A0",
+      "title": "Beef Carnitas Tacos",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named beef but lists none",
+      "ingredients": [
+        {
+          "name": "tomato",
+          "grams": 360.0,
+          "original_text": "2 cups chopped plum tomato (about 2 medium)"
+        },
+        {
+          "name": "onion",
+          "grams": 53.3,
+          "original_text": "1/3 cup chopped onion"
+        },
+        {
+          "name": "avocado",
+          "grams": 37.5,
+          "original_text": "1/4 cup diced peeled avocado"
+        },
+        {
+          "name": "cilantro",
+          "grams": 2.0,
+          "original_text": "2 tablespoons minced fresh cilantro"
+        },
+        {
+          "name": "lime_juice",
+          "grams": 15.1,
+          "original_text": "1 tablespoon fresh lime juice"
+        },
+        {
+          "name": "salt",
+          "grams": 0.8,
+          "original_text": "1/8 teaspoon salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 0.3,
+          "original_text": "1/8 teaspoon freshly ground black pepper"
+        },
+        {
+          "name": "tortilla",
+          "grams": 360.0,
+          "original_text": "8 (6-inch) corn tortillas"
+        },
+        {
+          "name": "lime",
+          "grams": 67.0,
+          "original_text": "1 lime, cut into 8 wedges"
+        }
+      ],
+      "steps": "Combine first 7 ingredients in a medium bowl; toss well. Warm tortillas according to package directions. Spoon 1/4 cup Beef Carnitas onto each tortilla; top each with about 3 tablespoons avocado mixture. Fold in half; serve with lime wedges.\nThis recipe was updated for the November, 2012 25th anniversary issue.\nMyRecipes is working with\n, the Partnership for a Healthier America, and USDA's MyPlate to give anyone looking for healthier options access to a trove of recipes that will help them create healthy, tasty plates. For more information about creating a healthy plate, visit\n.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第三组第14项；owner回复：全部同意。饼皮等原料已列但步骤要求的牛肉馅及用量缺失，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，不凭标题补肉。"
+      }
+    },
+    {
+      "key": "RCP2_010D47D8B41A",
+      "title": "Mexican Crab Salad",
+      "corrected_values": {"protein_sources": ["fish"]},
+      "course": "salad",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "fish"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "shellfish"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "salad",
+        "contains_staple": false,
+        "protein_sources": [
+          "shellfish"
+        ],
+        "cooking_methods": [
+          "raw"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "lettuce",
+          "grams": 10.0,
+          "original_text": "1 small head lettuce"
+        },
+        {
+          "name": "salsa",
+          "grams": 31.2,
+          "original_text": "2 Tbsp. medium salsa"
+        },
+        {
+          "name": "sour_cream",
+          "grams": 172.5,
+          "original_text": "3/4 c. sour cream"
+        },
+        {
+          "name": "olive",
+          "grams": 67.5,
+          "original_text": "1/2 c. black olives"
+        },
+        {
+          "name": "green_onion",
+          "grams": 50.0,
+          "original_text": "1/2 c. green onions"
+        },
+        {
+          "name": "tortilla_chips",
+          "grams": 56.0,
+          "original_text": "2 c. tortilla chips, crushed"
+        },
+        {
+          "name": "tomato",
+          "grams": 246.0,
+          "original_text": "2 tomatoes"
+        },
+        {
+          "name": "cheddar",
+          "grams": 113.0,
+          "original_text": "1 c. shredded Cheddar cheese"
+        },
+        {
+          "name": "imitation_crab",
+          "grams": 226.8,
+          "original_text": "8 oz. imitation crab meat, chunked"
+        }
+      ],
+      "steps": "Blend salsa and sour cream.\nSet aside.\nChop lettuce, olives, onions, tomatoes and crab meat.\nToss together.\nAdd cheese and chips.\nToss with the sour cream mixture.\nChill.\nEnjoy!",
+      "verdict": {
+        "protein_sources": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第三组第15项；owner回复：全部同意。原料是imitation crab meat，不能凭crab一词改判真蟹。人工正确值按现有食材库仿蟹制品归属为{\"protein_sources\":[\"fish\"]}，不同意本次规则的shellfish。具体产品全部过敏原仍须单独核实。保留生成快照，不把纠正算成规则原本判对；正式规则和标签修正待本轮复核后实施。"
+      }
+    },
+    {
+      "key": "RCP2_FAC00DA2B400",
+      "title": "Stuffed Green Peppers",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "bell_pepper",
+          "grams": 480.0,
+          "original_text": "4 green peppers"
+        },
+        {
+          "name": "beef",
+          "grams": 340.2,
+          "original_text": "3/4 lb. ground beef"
+        },
+        {
+          "name": "rice",
+          "grams": 79.0,
+          "original_text": "1/2 c. cooked rice"
+        },
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "original_text": "1 small egg"
+        },
+        {
+          "name": "water",
+          "grams": 59.2,
+          "original_text": "1/4 c. water"
+        },
+        {
+          "name": "onion",
+          "grams": 10.0,
+          "original_text": "1 Tbsp. minced onion"
+        },
+        {
+          "name": "salt",
+          "grams": 6.1,
+          "original_text": "1 tsp. salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 0.6,
+          "original_text": "1/4 tsp. pepper"
+        },
+        {
+          "name": "tomato_soup",
+          "grams": 250.0,
+          "original_text": "1 c. tomato soup"
+        }
+      ],
+      "steps": "Wash and clean peppers.\nCombine remaining ingredients except tomato soup and mix thoroughly.\nFill pepper shells lightly with meat mixture.\nPlace on rack in cooker; add soup.\nPressure cook at 15 pounds pressure for 10 minutes.\nReduce pressure.\nServes 4.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第16项；owner回复：全部同意。480克青椒、340克牛肉而熟饭只有79克，确认本次新值为需另配主食的肉类主菜；少量填馅米饭不足以承担主食。不代表其余未展示字段已核验。"
+      }
+    },
+    {
+      "key": "RCP2_975C4431AA56",
+      "title": "Chicken Teriyaki",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "grill"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named chicken but lists none",
+      "ingredients": [
+        {
+          "name": "soy_sauce",
+          "grams": 127.5,
+          "original_text": "1/2 c. soy sauce"
+        },
+        {
+          "name": "vegetable_oil",
+          "grams": 54.5,
+          "original_text": "1/4 c. salad oil"
+        },
+        {
+          "name": "molasses",
+          "grams": 40.0,
+          "original_text": "2 Tbsp. molasses"
+        },
+        {
+          "name": "ginger",
+          "grams": 4.0,
+          "original_text": "2 tsp. ground ginger"
+        },
+        {
+          "name": "garlic",
+          "grams": 18.0,
+          "original_text": "6 cloves garlic"
+        }
+      ],
+      "steps": "Mix all ingredients and pour over chicken.\nMarinate in refrigerator at least 1 hour.\nGrill over medium hot grill.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第17项；owner回复：全部同意。原料只有酱油、油、糖浆等而缺步骤要求的鸡肉，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，不凭菜名补肉。"
+      }
+    },
+    {
+      "key": "RCP2_586E24DE73A6",
+      "title": "Pumpkin Fried Rice",
+      "corrected_values": {"meal_role": "one_bowl", "contains_staple": true},
+      "course": "side",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "staple",
+        "contains_staple": true,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": [
+          "egg"
+        ],
+        "cooking_methods": [
+          "pan_fry"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "light"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "onion",
+          "grams": 55.0,
+          "original_text": "1/2 whole Large Onion, Chopped"
+        },
+        {
+          "name": "pumpkin",
+          "grams": 245.0,
+          "original_text": "1 cup Canned Pumpkin"
+        },
+        {
+          "name": "rice",
+          "grams": 316.0,
+          "original_text": "2 cups Cooked White Rice"
+        },
+        {
+          "name": "egg",
+          "grams": 100.0,
+          "original_text": "2 whole Eggs, Beaten"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 31.9,
+          "original_text": "2 Tablespoons Soy Sauce"
+        }
+      ],
+      "steps": "1. Spray a medium to large size skillet with oil and heat over medium-high.\n2. Cook onion in oil until slightly softened.\n3. Add pumpkin and rice and stir well.\n4. Push rice to one side of the pan and pour beaten eggs onto exposed skillet surface.\n5. Let cook slightly and stir in such a way that the eggs are scrambled.\n6. Stir rice mixture into eggs and sprinkle with soy. Stir and let cook a few more minutes.\n7. Remove from heat and enjoy!",
+      "verdict": {
+        "meal_role": false,
+        "contains_staple": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第四组第18项；owner回复：全部同意。316克熟饭、245克南瓜、100克鸡蛋混炒，确认可作为自带主食的完整餐食。人工正确值：{\"meal_role\":\"one_bowl\",\"contains_staple\":true}，不同意本次两个null值。保留规则输出快照，不把人工纠正算成规则原本判对；正式修正待本轮复核后实施，不据此调整全局阈值。"
+      }
+    },
+    {
+      "key": "RCP2_7B87DB0F6AFE",
+      "title": "Parmesan Chicken",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple",
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken",
+          "egg"
+        ],
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": null,
+        "contains_staple": null,
+        "protein_sources": null,
+        "cooking_methods": [
+          "bake"
+        ],
+        "equipment": [
+          [
+            "oven"
+          ]
+        ],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": "named chicken but lists none",
+      "ingredients": [
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "original_text": "1 egg"
+        },
+        {
+          "name": "milk",
+          "grams": 15.2,
+          "original_text": "1 Tbsp. milk"
+        },
+        {
+          "name": "parmesan",
+          "grams": 50.0,
+          "original_text": "1/2 c. Parmesan cheese"
+        },
+        {
+          "name": "flour",
+          "grams": 31.2,
+          "original_text": "1/4 c. flour"
+        },
+        {
+          "name": "paprika",
+          "grams": 2.3,
+          "original_text": "1 tsp. paprika"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "original_text": "1/2 tsp. salt"
+        },
+        {
+          "name": "black_pepper",
+          "grams": 0.3,
+          "original_text": "1/8 tsp. pepper"
+        }
+      ],
+      "steps": "Mix dry ingredients in plastic baggie.\nMix egg and milk.\nDip chicken in egg and milk, then place in baggie; shake well.\nPlace in pan.\nPour 1/2 stick melted butter over.\nBake at 350° for 1 hour uncovered.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第19项；owner回复：全部同意。原料只有鸡蛋、奶酪、面粉等裹料而缺鸡肉，确认资料不完整并暂不用于规划；同意本次三个新值保留未知，裹料鸡蛋不能代替缺失鸡肉。"
+      }
+    },
+    {
+      "key": "RCP2_C4333C1C5043",
+      "title": "Lo Mein",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "stir_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": null,
+        "cooking_methods": [
+          "stir_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": null,
+        "cooking_methods": [
+          "stir_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "egg_noodles",
+          "grams": 453.6,
+          "original_text": "1 lb. egg noodles (Asian lo mein noodles- fresh or dried)"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 79.7,
+          "original_text": "5 T soy sauce (or Oyster Sauce)"
+        },
+        {
+          "name": "vegetable_oil",
+          "grams": 81.8,
+          "original_text": "6 T oil"
+        },
+        {
+          "name": "egg",
+          "grams": 50.0,
+          "original_text": "1 egg"
+        },
+        {
+          "name": "cabbage",
+          "grams": 267.0,
+          "original_text": "3 cups Napa cabbage, finely shredded"
+        },
+        {
+          "name": "bamboo_shoot",
+          "grams": 65.5,
+          "original_text": "1/2 c bamboo shoots, shredded"
+        },
+        {
+          "name": "beef",
+          "grams": 135.0,
+          "original_text": "1 cup cooked beef, pork or chicken (shredded)"
+        },
+        {
+          "name": "cornstarch",
+          "grams": 5.3,
+          "original_text": "2 t cornstarch"
+        },
+        {
+          "name": "salt",
+          "grams": 3.0,
+          "original_text": "1/2 t salt"
+        },
+        {
+          "name": "green_onion",
+          "grams": 45.0,
+          "original_text": "3 stalks scallions, washed and cut into 1\" pieces."
+        }
+      ],
+      "steps": "Cook noodles in boiling salt water until al dente. Rinse under cold water. Drain.\nMix 2 T soy sauce with noodles and set aside. (You can use Oyster Sauce)\nStir any of the beef, pork or chicken in 1 T oil. Mix 1/2 t salt and 1 t cornstarch. Add this to the stir-fry. Remove it from the pan and set it aside. Add 3 T oil to wok and stir-fry cabbage ,and bamboo shoots. Add meat mixture to wok. Mix well. Beat egg and add it slowly to wok on top of everything. Add noodles. Toss until noodles are blended in with everything. Add 3 T Oyster sauce or soy sauce. You can add the scallions as garnish or throw them into the stir fry to cook them.",
+      "verdict": {
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第四组第20项；owner回复：全部同意。原文为熟牛肉、猪肉或鸡肉而未确定选择，确认本次主要肉类来源应保留未知，不再直接认定牛肉，也不据此保证适合忌口家庭。本轮不重审其他字段。"
+      }
+    },
+    {
+      "key": "RCP2_4FBC8094CB72",
+      "title": "Taco Meat Filling",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "protein_sources",
+        "flavor_tags"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "beef",
+          "grams": 453.6,
+          "original_text": "1 lb. ground beef"
+        },
+        {
+          "name": "onion",
+          "grams": 80.0,
+          "original_text": "1/2 c. chopped onion"
+        },
+        {
+          "name": "tomato_sauce",
+          "grams": 245.0,
+          "original_text": "1 c. (8 oz.) tomato sauce"
+        },
+        {
+          "name": "chili_powder",
+          "grams": 2.7,
+          "original_text": "1 tsp. chili powder"
+        },
+        {
+          "name": "salt",
+          "grams": 4.6,
+          "original_text": "3/4 tsp. salt"
+        },
+        {
+          "name": "garlic_salt",
+          "grams": 3.0,
+          "original_text": "1/2 tsp. garlic salt"
+        }
+      ],
+      "steps": "Brown beef in skillet, stirring until crumbly; drain excess fat.\nStir in remaining ingredients; simmer, covered, for 10 minutes.\nMakes filling for 8 taco shells.",
+      "verdict": {
+        "meal_role": true,
+        "protein_sources": true,
+        "flavor_tags": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第21项；owner回复：全部同意。归配料组件，不能单独成餐；主要蛋白和风味正餐标签不用于组件，不代表没有牛肉或口味清淡。仅确认展示的三个变动字段。"
+      }
+    },
+    {
+      "key": "RCP2_9E72C3378CDE",
+      "title": "Chicken Adobo",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": null,
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "braise"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "chicken",
+          "grams": 1360.8,
+          "original_text": "3 lbs Chicken, whole, disjointed & cut into serving pieces (or in combination with pork shoulder, 2\" cubes)"
+        },
+        {
+          "name": "vinegar",
+          "grams": 120.0,
+          "original_text": "1/2 cup Vinegar, cane"
+        },
+        {
+          "name": "soy_sauce",
+          "grams": 85.0,
+          "original_text": "1/3 cup Soy sauce, dark"
+        },
+        {
+          "name": "garlic",
+          "grams": 24.0,
+          "original_text": "8 cloves Garlic, peeled, crushed"
+        },
+        {
+          "name": "peppercorn",
+          "grams": 1.2,
+          "original_text": "1/2 tsp Peppercorn, black,whole,cracked"
+        },
+        {
+          "name": "bay_leaf",
+          "grams": 0.4,
+          "original_text": "2 each Bay leaves"
+        },
+        {
+          "name": "olive_oil",
+          "grams": 141.8,
+          "original_text": "21/2 Tbsp Olive oil, pure"
+        },
+        {
+          "name": "garlic",
+          "grams": 9.0,
+          "original_text": "3 cloves Garlic, peeled, chopped"
+        }
+      ],
+      "steps": "1. Combine the chicken with the vinegar, soy sauce, crushed garlic, peppercorns, and bay leaves together in a saucepan. stir to evenly coat(May be marinated up to 8 hours or overnight in the refrigerator ).\n2. Over medium heat, let it come to a simmer. Cover with a lid and lower heat for a gentle simmer, stirring occassionally. The chicken will release a lot of liquid.\n3. When the chicken is barely cooked through. Remove the pieces, draining and shaking off as much liquid as possible. Reserve the stewing liquid.\n4. Heat a heavy gauge saute pan large enough to accomodate all the chicken pieces. Add the oil and swirl to evenly coat. Add the garlic and cook over medium heat until golden, constantly stirring to avoid burning. Remove the garlic and set aside.\n5. Pan fry the chicken pieces in the garlic-infused oil over medium to high heat to get a deep brown sear. Turn to sear on all sides. Be careful with hot oil splattering. Some of the chicken pieces will stick to the bottom of the pan if the chicken was not drained well of its stewing liquid.\n6. Once all the chicken pieces are seared, add the reserved stewing liquid and the sauteed garlic with the chicken in the pan. Let the liquid reduce over medium heat until slightly thickened.\n7. Serve with steamed rice.\nOPTIONS:\n*You may add the sauteed garlic as garnish in a serving dish instead of being part of the sauce.\n**Add finely minced/pureed chicken livers in the end of cooking as a thickener and flavor enhancer.\n***For color, infuse annato seeds in the olive oil before sauteeing the garlic.",
+      "verdict": {
+        "protein_sources": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第22项；owner回复：全部同意。鸡肉允许与猪肩肉混合且没有各自比例，确认主要蛋白来源保留未知；保留肉类主菜身份，不能认定只有鸡肉或猪肉一定存在。"
+      }
+    },
+    {
+      "key": "RCP2_616F0B3CE6CC",
+      "title": "Ravioli Bolognese",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "contains_staple"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "one_bowl",
+        "contains_staple": true,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "flour",
+          "grams": 312.5,
+          "original_text": "2 1/2 cups all purpose flour"
+        },
+        {
+          "name": "egg",
+          "grams": 150.0,
+          "original_text": "3 eggs"
+        },
+        {
+          "name": "olive_oil",
+          "grams": 40.5,
+          "original_text": "3 tablespoons olive oil"
+        },
+        {
+          "name": "onion",
+          "grams": 110.0,
+          "original_text": "1 onion peeled and finely diced"
+        },
+        {
+          "name": "garlic",
+          "grams": 6.0,
+          "original_text": "2 cloves garlic peeled and finely chopped"
+        },
+        {
+          "name": "carrot",
+          "grams": 183.0,
+          "original_text": "3 carrots peeled and finely diced"
+        },
+        {
+          "name": "celery",
+          "grams": 120.0,
+          "original_text": "3 celery stalks trimmed and finely diced"
+        },
+        {
+          "name": "beef",
+          "grams": 453.6,
+          "original_text": "1 pound ground beef"
+        },
+        {
+          "name": "tomato_paste",
+          "grams": 16.4,
+          "original_text": "1 tablespoon tomato paste"
+        },
+        {
+          "name": "tomato",
+          "grams": 425.2,
+          "original_text": "15 ounces peeled tomatoes"
+        },
+        {
+          "name": "bay_leaf",
+          "grams": 0.2,
+          "original_text": "1 bay leaf"
+        },
+        {
+          "name": "vegetable_broth",
+          "grams": 119.5,
+          "original_text": "1/2 cup vegetable stock"
+        },
+        {
+          "name": "parmesan",
+          "grams": 6.2,
+          "original_text": "1 tablespoon Parmesan grated"
+        },
+        {
+          "name": "cream",
+          "grams": 29.8,
+          "original_text": "2 tablespoons heavy cream"
+        }
+      ],
+      "steps": "Mix flour, eggs, 1 tbsp oil and 1 pinch of salt to a smooth dough, cover and leave for 1 hour to rest.\nHeat remaining oil in a pan and fry onion until soft. Add beef, carrots, celery and garlic and fry over medium heat. Add tomato paste, tomatoes and bay leaf. Season to taste. Simmer for 30 mins, uncovered, until liquid is reduced. Season and leave to cool slightly.\nRoll out dough thinly on a floured surface, and divide into 4 sheets. Press one of the sheets into a non-stick ravioli tray and fill the pockets with Bolognese sauce. Brush the edges of the sheet with water. Press another sheet on top and trim excess dough. Cut out the ravioli and repeat with remaining 2 sheets. (Makes about 24 ravioli.)\nBoil salted water and cook the ravioli for 6 minutes. Meanwhile, heat remaining Bolognese with the stock, stir in Parmesan and cream. Divide ravioli onto 4 plates and top each serving with sauce.",
+      "verdict": {
+        "meal_role": true,
+        "contains_staple": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第23项；owner回复：全部同意。原料和步骤明确制作面皮并包入牛肉蔬菜馅，确认本次新值为自带主食的完整餐食，不是需另配主食的纯肉主菜。"
+      }
+    },
+    {
+      "key": "RCP2_0DA06DF48EDB",
+      "title": "Korean Fusion Butternut Squash Soup",
+      "corrected_values": {"protein_sources": null},
+      "course": "soup",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "protein_sources"
+      ],
+      "before": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "pork"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": [
+          "spicy"
+        ]
+      },
+      "after": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": [
+          "spicy"
+        ]
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "soup",
+        "contains_staple": false,
+        "protein_sources": [
+          "chicken"
+        ],
+        "cooking_methods": [
+          "pan_fry",
+          "boil",
+          "bake"
+        ],
+        "equipment": [
+          [
+            "blender"
+          ]
+        ],
+        "flavor_tags": [
+          "spicy"
+        ]
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "butternut_squash",
+          "grams": 800.0,
+          "original_text": "1 butternut squash (split and roasted for 1 hour @ 350f or until fork tender)"
+        },
+        {
+          "name": "chicken_broth",
+          "grams": 1419.6,
+          "original_text": "6 cups chicken stock (can substitute vegetable stock)"
+        },
+        {
+          "name": "carrot",
+          "grams": 122.0,
+          "original_text": "2 medium carrots (grated)"
+        },
+        {
+          "name": "onion",
+          "grams": 110.0,
+          "original_text": "1 small onion (diced)"
+        },
+        {
+          "name": "celery",
+          "grams": 40.0,
+          "original_text": "1 celery rib (diced)"
+        },
+        {
+          "name": "marjoram",
+          "grams": 0.1,
+          "original_text": "1 sprig marjoram"
+        },
+        {
+          "name": "garlic",
+          "grams": 18.0,
+          "original_text": "6 garlic cloves (smashed)"
+        },
+        {
+          "name": "bay_leaf",
+          "grams": 0.6,
+          "original_text": "3 bay leaves"
+        },
+        {
+          "name": "doenjang",
+          "grams": 31.2,
+          "original_text": "2 tablespoons soybean paste (Korean Doenjang)"
+        },
+        {
+          "name": "sausage",
+          "grams": 255.0,
+          "original_text": "3 Italian sausages (I use Turkey, can substitute vegan alternative)"
+        },
+        {
+          "name": "mushroom",
+          "grams": 18.0,
+          "original_text": "1 king oyster mushroom (Diced)"
+        },
+        {
+          "name": "garlic",
+          "grams": 18.0,
+          "original_text": "6 garlic cloves (minced)"
+        },
+        {
+          "name": "gochujang",
+          "grams": 34.0,
+          "original_text": "2 tablespoons red pepper paste (Korean Gochujang)"
+        },
+        {
+          "name": "sesame_oil",
+          "grams": 13.6,
+          "original_text": "1 tablespoon sesame oil"
+        },
+        {
+          "name": "water",
+          "grams": 355.5,
+          "original_text": "1 1/2 cups water"
+        }
+      ],
+      "steps": "Place stock, garlic, bay leaves, and marjoram into your soup pot and bring just up to a low boil for about 15 minutes, then reduce heat to simmer. Scoop out marjoram, garlic and bay leaves prior to adding next ingredients to the pot.\nWhile stock is coming up to temperature saute the Mirepoix vegetables in sesame oil until they begin to caramelize. Then transfer to the stock pot. Scoop the roasted butternut squash out of the squash skins and add to the pot as well. Now, bring heat up on pot and maintain a high simmer, just below boiling.\nJust prior to serving add Korean soybean paste then blend until smooth with an immersion blender (alternately you can transfer to a VitaMix or other blender).\nIn a small bowl, wisk together the water, hot pepper paste and sesame oil.\nRemove skins from sausage and place in a saute pan and cook until most of the pink is gone and the pork is crumbled. Next add the mushroom, garlic and pepper paste mixture and bring pan to a boil. Reduce heat and continue to cook until most of the liquid is reduced.\nServing: \tLadle soup into bowls and top with garnish and serve.",
+      "verdict": {
+        "protein_sources": false,
+        "note": "【owner已确认纠正】2026-10-20 对话复核第五组第24项；owner回复：全部同意。原料写火鸡香肠且可换素香肠，步骤却写猪肉；鸡高汤只算汤底。人工正确值为{\"protein_sources\":null}，并标资料冲突、暂不用于规划，不自行选猪肉、禽肉或素版本。保留规则输出快照，不把纠正算成规则原本判对。"
+      }
+    },
+    {
+      "key": "RCP2_0FFB8C985C34",
+      "title": "Taco Filling (Ground Beef)",
+      "course": "main",
+      "selection": "seeded random changed case",
+      "changed_fields": [
+        "meal_role",
+        "protein_sources",
+        "flavor_tags"
+      ],
+      "before": {
+        "meal_role": "protein_main",
+        "contains_staple": false,
+        "protein_sources": [
+          "beef"
+        ],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": [
+          "rich"
+        ]
+      },
+      "after": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "after_methods": {
+        "contains_staple": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "cooking_methods": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "equipment": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "flavor_tags": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "meal_role": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        },
+        "protein_sources": {
+          "batch": "recipe-tags-v1/rules",
+          "method": "rule",
+          "reviewed": false
+        }
+      },
+      "fresh_rule_proposal": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": [],
+        "cooking_methods": [
+          "boil"
+        ],
+        "equipment": [],
+        "flavor_tags": []
+      },
+      "model_batch_still_gated": false,
+      "incomplete_reason": null,
+      "ingredients": [
+        {
+          "name": "beef",
+          "grams": 453.6,
+          "original_text": "1 lb ground beef"
+        },
+        {
+          "name": "onion",
+          "grams": 110.0,
+          "original_text": "1 medium onion, chopped"
+        },
+        {
+          "name": "oregano",
+          "grams": 5.4,
+          "original_text": "1 tablespoon oregano"
+        },
+        {
+          "name": "cumin",
+          "grams": 4.4,
+          "original_text": "2 teaspoons cumin"
+        },
+        {
+          "name": "garlic_powder",
+          "grams": 2.7,
+          "original_text": "1 teaspoon garlic powder"
+        }
+      ],
+      "steps": "Brown ground beef with onion drain.\nAdd other ingredients.\nSimmer add more seasoning to taste.\nThis can be a little dry.\nThis is not Health Food!\nI have added a little cooking oil to the Mix.\nAdd salt and pepper.\nAdd ground beef to your favorite Taco shells.\nTop with cheese, sour cream, lettuce, tomato, etc.\nEnjoy!",
+      "verdict": {
+        "meal_role": true,
+        "protein_sources": true,
+        "flavor_tags": true,
+        "note": "【owner已确认】2026-10-20 对话复核第五组第25项；owner回复：全部同意。与第21项相同，牛肉馅是配料组件，不能单独成餐；清空正餐用途的主要蛋白和风味标签，不等于不含牛肉或清淡。仅确认展示的三个变动字段。"
+      }
+    }
+  ]
+}

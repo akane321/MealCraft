@@ -1,6 +1,6 @@
 """Tag every catalog recipe and ingredient for the Sprint 2 planner (layer 08; ADR-0070, ADR-0076).
 
-`python -m app.data.recipe_tags` writes two reviewed data files, which the importers copy onto the
+`python -m app.data.recipe_tags` writes two versioned tag files, which the importers copy onto the
 catalog rows (`app.data.tag_files`):
 
 - `data/recipes/recipe-tags-v1.json`, keyed by release `external_id` or curated slug: `meal_role`,
@@ -13,40 +13,53 @@ It also writes the owner's spot-check packet and the coverage report in `data-en
 
 Deterministic rules decide first, from the course, the ingredients' release food groups and dietary
 origin, the ingredient hierarchy, gram shares, title words and step keywords. The language model
-(`--llm`) is asked only for what the rules leave open: a meal role, or the protein of a dish whose
-meat the source table does not name. A value the rules and the model both leave open stays null,
+(`--llm`) may decide an allowed meal role; unknown animal identity and missing quantities are not
+sent to it to guess. A value the rules and the model both leave open stays null,
 which the planner reads as untagged. Allergen, halal and diet labels are never estimated here.
+The failed model batch stays frozen until the review batch (`REVIEW_TABLE_BATCH`, owner 2026-10-24) replaces it:
+a frozen field the rules now decide takes the rule's value, and one they leave open the human reviewer's table
+(`REVIEW_TABLE`), both unreviewed until the owner accepts that batch; the owner's dish-by-dish role decisions
+(`OWNER_ROLES`) override both (data-engineering/docs/review-table-20261024).
 
 The rules, and why:
 
 - **Meal role.** A fixed course decides it: breakfast, dessert, sauce, drink, snack, salad. A recipe that
-  is a part of a dish, not a dish (a dough, crust, batter, sauce, marinade, rub, dressing, gravy, stock,
-  broth, paste or seasoning by its title's final head noun: `component`) is a `sauce`, the role of every
-  such part, so it never fills a meal; "Chicken In Tarragon Sauce" and "Cauliflower Crust Pizza" stay
-  dishes. A salad
+  is a part of a dish, not a dish (a dough, crust, batter, filling, topping, sauce, marinade, rub, dressing,
+  gravy, stock, broth, paste or seasoning by its title's final head noun: `component`) is a `sauce`, the role of every
+  such part, so it never fills a meal; a listed meat/fish/soy-led filling is instead a protein main,
+  while cheese-led fillings and toppings remain components. "Chicken In Tarragon Sauce" and
+  "Cauliflower Crust Pizza" stay dishes. A salad
   stays a salad whatever it holds, since a salad only ever fills the vegetable side (ADR-0070); the
   planner's vegetable-led check still decides whether it may. A hearty salad (not vegetable-led, with a
   main protein) therefore fills no slot; the owner reviews them as their own stratum of the sample packet
   before deciding whether one may be a main. A dish is `vegetable` only when it is
-  vegetable-led (`app.planning.vegetable_led`, ADR-0054), so the role and the planner's rule agree.
+  vegetable-led (`app.planning.vegetable_led`, ADR-0082 amends ADR-0054 and supplements ADR-0077/0081),
+  so the role and the planner's rule agree.
   A main or soup that carries its own staple (rice, noodles, pasta, bread or other grain staples:
   `staple_share`) is `one_bowl`; a main made mostly of a staple with no protein is a `staple`. A
   main with a main protein is a `protein_main`; one led by vegetables without one is a `vegetable`.
   A soup whose noodles, rice or pasta are a tenth of it is `one_bowl` too. Baked goods go by title words
-  and sugar. Grey zones go to the model, which may not make a side, or a dish with no main protein, a
-  `protein_main`, and may answer null when no allowed role fits.
+  and sugar. A named homemade staple needs at least half listed raw starch; its binder eggs are not
+  main protein. ADR-0085 extends those names and dough-only shell evidence, keeps the 20% sugar/carbohydrate
+  ceiling except for savoury Yorkshire pudding, and counts a pizza's listed flour as its own carrier.
+  An egg/tofu/flesh-led side can be a protein main at half counted solids; whole bean-led sides,
+  batters, starch-heavy sides and condiment-type sides do not gain this role. Grey zones may stay null.
+  The owner's 2026-10-23 decisions add fufu, injera, arepas, sopes and hush puppies as staple names (cornmeal
+  and masa count only under them), and tubers and plantain as a side's staple and, at 60%, a protein-less
+  main's, unless sweeteners make 8% of the dish (candied yams). `review_roles` gives the human reviewer
+  `staple` and `one_bowl` where a zero staple share removes them from the model's options, and `staple` for a
+  bean-led side: options, never assignments.
 - **Contains staple** is true exactly for `one_bowl` and `staple` dishes, so it follows the role.
 - **Protein sources** are the sources whose ingredients make at least 5 % (meat, poultry, fish,
   seafood) or 10 % (egg, soy, legumes) of the dish's counted raw grams, so an egg that binds a
   meatloaf or bacon bits on a salad are not its protein. A line with no weight counts. Seasonings,
   stocks and fats made from meat or fish are not protein (`SEASONING_FROM_FLESH`). Turkey and other
   poultry count as chicken, goose as duck, goat as lamb, veal as beef, so the no-repeat rule errs
-  towards strictness. A title naming meat or fish names the protein of a dish whose lines hold none by
-  weight (a small line, or one the release lost), and what an unnamed meat line is; a quoted mock meat
-  (Tempeh "Bacon") and what a dish is served with ("for fish") do not count. Unnamed meat the title
-  does not name (game, generic meat, liver) goes to the model, whose answer keeps only the sources a
-  line or the title supports. Desserts, sauces and drinks have none: the eggs of a cake are not its
-  main protein.
+  towards strictness. Explicit ingredient wording, including parentheses, refines a generic meat id.
+  A title is only a missing-line check, never proof that meat exists. Generic meat stays unknown;
+  a combined weight for different animals does not prove either animal's main-protein share.
+  These evidence gaps are not sent to a model to guess. Desserts, sauces and drinks have none:
+  the eggs of a cake are not its main protein.
 - **Cooking methods** come from step and title keywords; a dish with no heating step is `raw`, and
   one that heats without a listed method (a microwave dish) has none. The "fried" of a deep-fried
   dish is not also a pan fry.
@@ -78,14 +91,18 @@ from typing import get_args
 from app.core.paths import repository_root
 from app.data.catalog import load_catalog
 from app.data.release_v2 import LINE_CORRECTIONS, release_dir
-from app.data.tag_files import INGREDIENT_TAGS, RECIPE_TAGS
+from app.data.tag_files import INGREDIENT_TAGS, RECIPE_TAGS, REVIEW_TABLE_BATCH, waits_for_review
+from app.planning.recipe_quality import missing_named_protein, reviewed_source_conflict
 from app.planning.vegetable_led import (
     COOKED_STAPLES,
     COOKED_YIELD,
+    FLESH_SHARE,
     MEAT_WORDS,
     SEASONING_FROM_FLESH,
+    STARCHY_TUBERS,
     UNCOUNTED,
     UNCOUNTED_GROUPS,
+    counted_weights,
     food_groups,
     vegetable_led,
 )
@@ -95,6 +112,24 @@ VERSION = "recipe-tags-v1"
 INGREDIENT_VERSION = "ingredient-tags-v1"
 RULE_BATCH = f"{VERSION}/rules"
 LLM_BATCH = f"{VERSION}/llm"
+# The review batch for the frozen model batch (owner 2026-10-24, ADR-0076's route; `REVIEW_TABLE_BATCH`, defined in
+# app.data.tag_files for the planner's gate). It holds two parts, both unreviewed until the owner accepts the batch
+# after the reviewer's in-person sample check:
+# - the human reviewer's table: values prefilled by AI and confirmed in chat by dish type, not checked row by row,
+#   so model-decided (`llm`), only in fields the rules leave open (data-engineering/scripts/import_review_table.py);
+# - the frozen fields the current rules decide: the rule's value (`rule`), which the gate holds back until then.
+REVIEW_TABLE = "data-engineering/docs/review-table-20261024/decisions.json"
+# The owner's own role decisions, dish by dish (owner 2026-10-24, in chat): they override the rules. A person's
+# decision, not an estimate, so written as `rule` in their own batch and reviewed. Protein sources stay the rules'.
+OWNER_BATCH = f"{VERSION}/owner-20261024"
+OWNER_ROLES = {
+    "RCP2_A84B4E56257C": "snack",  # Asian Wraps: rice-paper chicken rolls, a spring-roll snack (rule: protein_main)
+    "RCP2_E5862A12458B": "snack",  # Potato Croquettes With Parmesan: fried croquettes (rule: staple)
+    # The owner chose the rule's staple over the chat confirmation; as a decision it is read at once.
+    "RCP2_66540AABF0E0": "staple",  # Thai Sweet Potato Stew (chat: soup)
+    "RCP2_F480AAE0C111": "staple",  # Sweet Potato & Pea Curry (chat: vegetable)
+    "RCP2_3C310D373BB9": "staple",  # Pupusas (chat: one_bowl)
+}
 SAMPLE = "data-engineering/docs/recipe-tags-v1-sample.json"
 REPORT = "data-engineering/docs/recipe-tags-v1-report.md"
 BASIC_SEASONINGS = "data/ingredients/basic-seasonings-v1.json"
@@ -127,16 +162,20 @@ STAPLES = COOKED_STAPLES | {
     "mac_and_cheese",
     "rice_paper",
 }
-# Starchy sides that serve as a meal's staple when they are the dish (mashed potatoes), never inside a main.
-STARCHY = frozenset(
-    {"potato", "sweet_potato", "mashed_potatoes", "instant_mashed_potato", "hash_brown", "tater_tots", "french_fries"}
-)
+# Starchy tubers and plantain: a side's staple when they are the dish (mashed potatoes, fufu), and a protein-less
+# main's staple at `STAPLE_ONLY_SHARE` (owner 2026-10-23). Derived from the vegetable rule's tubers: no drift.
+STARCHY = STARCHY_TUBERS | {"french_fries", "plantain"}
 ONE_BOWL_SHARE = 0.15  # a main's staple share from which it carries its staple
 STAPLE_ONLY_SHARE = 0.6  # a protein-less main this much staple is the staple itself
+# A tuber or plantain dish this much sweetener by weight (candied yams, šúľance s makom) is not a staple (owner
+# 2026-10-23). Not the 20% sugar/carbohydrate ceiling: the tubers' and milk's own sugar would drop fufu and gratins.
+SWEET_TUBER_SHARE = 0.08
 GREY_SHARE = 0.05  # below this a main holds no staple; between the two the model decides
 SOUP_ONE_BOWL_SHARE = 0.3
 SOUP_GREY_SHARE = 0.1
 SIDE_STAPLE_SHARE = 0.5
+RICE_GRAINS = COOKED_STAPLES & {"rice", "brown_rice", "glutinous_rice", "wild_rice", "long_grain_wild_rice_mix"}
+RICE_DISH = re.compile(r"\b(?:rice|risotto|pilaf|paella)\s*$")
 # The noodles, rice and pasta that make a soup a one-bowl meal; barley or quinoa in a soup leave it to the model.
 SOUP_STAPLES = COOKED_STAPLES - {
     "barley", "quinoa", "oats", "grits", "bulgur", "wheat_berries", "buckwheat", "wild_rice",
@@ -156,18 +195,98 @@ PIZZA_TITLE = re.compile(r"\b(?:pizzas?|calzones?)\b")
 # Doughs, crusts and batters are one even after "and" ("Garlic And Oregano Pizza Dough") or in brackets
 # ("Masa De Empanadas (Empanada Dough)"); a sauce after "and" belongs to a dish ("Meatballs And Marinara Sauce").
 COMPONENT = re.compile(
-    r"\b(?:(doughs?|crusts?|batters?)|sauces?|marinades?|rubs?|dressings?|grav(?:y|ies)|stocks?|broths?|pastes?"
+    r"\b(?:(doughs?|crusts?|batters?|fillings?|toppings?)|sauces?|marinades?|rubs?|dressings?|grav(?:y|ies)|stocks?|broths?|pastes?"
     r"|seasonings?)$"
 )
 DISH_LINK = re.compile(r"\b(?:with|in|on|over)\b")
 AND_LINK = re.compile(r"\b(?:and|n)\b|&")
 TITLE_TAIL = re.compile(r"\s+-\s.*$|\s+for\b.*$")  # "Spaghetti Sauce - Slow Cooker", "Meatballs For Spaghetti Sauce"
 TITLE_SUFFIX = re.compile(r"(?:\s+(?:recipe|i{1,3}))+$")
+WRAPPED_MEAL = re.compile(r"\b(?:pasties|pasty|empanadas?|pierogi|ravioli|tortellini|wontons?|meat pies?)\b")
+SANDWICH = re.compile(r"\b(?:sandwich(?:es)?|banh mi|burgers?|wraps?|burritos?|tacos?|quesadillas?)\b")
+SHELL_BOWL = re.compile(r"\b(?:tortilla|taco) bowls?\b")  # An edible shell/container is not an assembled wrap.
+BREAD_CARRIERS = frozenset(
+    {
+        "bread",
+        "baguette",
+        "hamburger_bun",
+        "hot_dog_bun",
+        "dinner_roll",
+        "pita_bread",
+        "english_muffin",
+        "tortilla",
+        "taco_shell",
+    }
+)
+STAPLES |= BREAD_CARRIERS
+NAMED_RICE = re.compile(r"\b(?:rice|pilaf|risotto)\b")
+NAMED_NOODLES = re.compile(
+    r"\b(?:noodles?|pasta|macaroni|spaghetti|linguine|fettuccine|penne|lasagn[ae]|lo mein|chow mein)\b"
+)
+NAMED_BOWL = re.compile(r"\bbowls?\b")
+FILLING_TITLE = re.compile(r"\bfillings?(?:\s+for\b.*)?(?:\s*\([^)]*\))*\s*$", re.I)
+COOKED_WORD = re.compile(r"\b(?:cooked|prepared|leftover|boiled|steamed)\b", re.I)
+MASS_UNIT = re.compile(r"(?<![a-z])(?:oz|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?)\b", re.I)
+VOLUME_UNIT = re.compile(
+    r"(?<![a-z])(?:cups?|c\.?|tbsp|tsp|tablespoons?|teaspoons?|pints?|quarts?|gallons?|ml|litres?|liters?)\b", re.I
+)
+SUBSTITUTION_NOTE = re.compile(r"\b(?:substitut\w*|instead|may|alternativ\w*)\b", re.I)
+DOUGH_FLOUR = frozenset({"flour", "bread_flour", "whole_wheat_flour", "self_rising_flour", "semolina_flour"})
+HOMEMADE_STAPLE_TITLE = re.compile(
+    r"\b(?:noodles?|pasta|gnocchi|gnocches|polenta|roti|chapatis?|paratha|naan|flatbreads?|tortillas?"
+    r"|spaetzles?|spatzles?|mantou|bao|corn\s?bread|spoon bread|fry bread|(?:mealie )?pap|putupap"
+    r"|mandarin pancakes?|moo shu pancakes?|pupusas?|yorkshire puddings?"
+    r"|fufu|injera|arepas?|sopes|hush ?puppies)\b"  # the last five: owner 2026-10-23
+)
+FUFU = re.compile(r"\bfufu\b")
+# Cornmeal and masa count only here, under a staple title: a cornmeal coating does not make fried chicken a staple.
+HOMEMADE_STARCH = DOUGH_FLOUR | {
+    "cornmeal",
+    "corn_flour_masa",
+    "rice_flour",
+    "brown_rice_flour",
+    "teff_flour",
+    "millet_flour",
+    "sorghum_flour",
+}
+BATTER_STARCH = HOMEMADE_STARCH | {"cornstarch", "potato_starch", "tapioca_flour"}
+WHOLE_SOYBEANS = frozenset({"edamame", "soybean", "fermented_soybeans"})
+BATTER_SIDE_TITLE = re.compile(r"\b(?:batters?|puddings?|pancakes?|crepes?)\b", re.I)
+# A condiment or topping-type side (owner 2026-10-23): its title names a cheese or cheese substitute, a topping or
+# garnish, a ramen egg, or another dish it is made for. Its protein does not make it a protein main. A dish served
+# with cheese ("Omelette With Cheese", "Spinach And Feta Frittata") is not a cheese. The title criterion is an
+# implementer definition pending owner confirmation (ADR-0088).
+CONDIMENT_SIDE_TITLE = re.compile(
+    r"(?<!\bwith )(?<!\band )\b(?:feta|ricotta|paneer)\b"
+    r"|\b(?:(?:mock|fake|vegan|imitation) cheese|toppings?|garnish(?:es)?|ajitsuke|ajitama)\b"
+    r"|\bfor (?:ramen|noodles?|soups?|salads?|sandwich(?:es)?|burgers?|pizzas?|tacos?)\b",
+    re.I,
+)
+PIZZA_BATTER = DOUGH_FLOUR | {
+    "milk",
+    "egg",
+    "salt",
+    "black_pepper",
+    "italian_seasoning",
+    "water",
+    "vegetable_oil",
+    "olive_oil",
+    "butter",
+    "margarine",
+    "yeast",
+    "sugar",
+    "baking_powder",
+    "baking_soda",
+}
+SHELL_TITLE = re.compile(r"\b(?:tacos?|empanadas?|quiches?|wontons?|pies?|tarts?|[a-z]+(?:[ -][a-z]+)* shells?)\b")
+SHELL_DOUGH = PIZZA_BATTER | HOMEMADE_STARCH | {"shortening", "lard", "vinegar", "cornstarch"}
+BAKED_SIDE = re.compile(r"\b(?:au gratin|gratins?|bakes?|casseroles?|roasts?)\b")
+SOUP_TITLE = re.compile(r"\b(?:soups?|broths?|chowders?|bisques?|stews?)\b")
+CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
 
 PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
 FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
 SWEET_OR_CONDIMENT = frozenset({"dessert", "drink", "sauce"})
-FLESH_SHARE = 0.05
 PLANT_EGG_SHARE = 0.10
 _SOURCE_IDS = {
     "chicken": "chicken chicken_breast chicken_thigh chicken_wings cooked_chicken cornish_hen chicken_or_turkey turkey"
@@ -375,8 +494,11 @@ class Tags:
     # What the model is asked to decide: "meal_role", "protein_sources".
     open: list[str] = field(default_factory=list)
     allowed_roles: tuple[str, ...] = MEAL_ROLES
-    # The protein sources the dish's lines or title support; a model answer outside them is dropped.
+    # Only protein sources supported by ingredient lines; a title is not ingredient evidence.
     allowed_sources: frozenset[str] = frozenset(PROTEIN_SOURCES)
+    incomplete_reason: str | None = None
+    # A field's batch when it is not its method's own (`RULE_BATCH`, `LLM_BATCH`): the owner's or the review table's.
+    batches: dict = field(default_factory=dict)
 
 
 def release_name(name: str) -> str:
@@ -407,15 +529,42 @@ def source_of(name: str) -> str | None:
     return "?" if origin_of(name) == "flesh" else None
 
 
+def line_sources(line: Line) -> set[str]:
+    """Explicit ingredient wording refines generic meat; titles never fill a lost line."""
+    source = source_of(line.name)
+    if release_name(line.name) in SEASONING_FROM_FLESH:
+        return set()
+    if release_name(line.name) == "imitation_crab":
+        return {"fish"}  # The catalog's surimi product, not real crab just because its wording contains "crab".
+    text = re.sub(r"\([^)]*\b(?:substitut\w*|instead|may|alternativ\w*)\b[^)]*\)", " ", line.text or "", flags=re.I)
+    named = title_sources(text)
+    if (
+        source in FLESH_SOURCES
+        and SUBSTITUTION_NOTE.search(text)
+        and not (len(named) > 1 and re.search(r"\bor\b", text, re.I))
+    ):
+        return {source}  # A stated alternative is not a second animal in a concrete ingredient.
+    if named and (source == "?" or source in FLESH_SOURCES):
+        # Alternatives are not two animals known to be present.
+        if len(named) > 1 and re.search(r"\bor\b", text, re.I):
+            return {"?"}
+        return named
+    return {source} if source is not None else set()
+
+
 def protein_sources(dish: Dish) -> list[str] | None:
-    """The main protein sources, in `PROTEIN_SOURCES` order; None when unnamed meat or fish is one of them."""
+    """Main sources in vocabulary order; None for an unknown animal or inseparable multi-animal weight."""
     total = sum(line.grams for line in dish.lines if line.grams and counted(line))
     grams: Counter[str] = Counter()
     unweighed: set[str] = set()
     for line in dish.lines:
-        source = source_of(line.name)
-        if source is None:
+        sources = line_sources(line)
+        if not sources:
             continue
+        # A combined pork/chicken weight does not tell us either animal's share.
+        if len(sources) > 1:
+            return None
+        source = next(iter(sources))
         if line.grams:
             grams[source] += line.grams
         else:
@@ -425,16 +574,12 @@ def protein_sources(dish: Dish) -> list[str] | None:
         threshold = PLANT_EGG_SHARE if source in {"soy", "egg", "legume"} else FLESH_SHARE
         if total and weight / total >= threshold:
             found.add(source)
-    # A title naming meat or fish names the main protein of a dish whose lines hold none by weight (a small or
-    # lost line: "Chicken Fried Rice" with no chicken line), and what an unnamed meat line is. Unnamed meat the
-    # title does not name is open. Lines that hold meat or fish win over the title ("Chicken Fried Steak").
-    named = title_sources(dish.title)
     if "?" in found:
-        if not named:
-            return None
-        found = (found - {"?"}) | named
-    elif not found & FLESH_SOURCES:
-        found |= named
+        return None
+    # The owner keeps tiny seafood garnishes known, but a named land-meat main below its threshold is uncertain.
+    named_meat = title_sources(dish.title) & {"chicken", "duck", "pork", "beef", "lamb"}
+    if any(0 < grams[source] < total * FLESH_SHARE for source in named_meat):
+        return None
     return [source for source in PROTEIN_SOURCES if source in found]
 
 
@@ -449,11 +594,9 @@ def title_sources(title: str) -> set[str]:
 
 
 def model_sources(dish: Dish) -> frozenset[str]:
-    """What the model may answer for a dish's protein: what a line holds, and any meat for an unnamed meat line."""
-    held = {source_of(line.name) for line in dish.lines} - {None}
-    if "?" in held:
-        held |= FLESH_SOURCES
-    return frozenset((held - {"?"}) | title_sources(dish.title))
+    """Only explicitly supported animals, not every possible animal for an unnamed meat line."""
+    held = set().union(*(line_sources(line) for line in dish.lines))
+    return frozenset(held - {"?"})
 
 
 def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> float:
@@ -463,19 +606,101 @@ def staple_share(dish: Dish, names: frozenset[str] | set[str] = STAPLES) -> floa
         if not line.grams or not counted(line):
             continue
         name = release_name(line.name)
-        weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES else 1.0)
+        text = line.text or ""
+        # Mass-unit recipes usually weigh dry noodles then instruct "cooked and drained". Unit wins over wording.
+        mass, volume = MASS_UNIT.search(text), VOLUME_UNIT.search(text)
+        primary_mass = mass is not None and (volume is None or mass.start() < volume.start())
+        already_cooked = (
+            COOKED_WORD.search(text)
+            and not primary_mass
+            and (
+                volume
+                or re.search(
+                    r"\b(?:cooked|prepared|leftover|boiled|steamed)\s+(?:white\s+|brown\s+)?"
+                    r"(?:rice|pasta|noodles|macaroni|spaghetti|fettuccine|ziti|basmati)\b",
+                    text,
+                    re.I,
+                )
+            )
+        )
+        weight = line.grams * (COOKED_YIELD if name in COOKED_STAPLES and not already_cooked else 1.0)
         total += weight
-        if name in names:
+        # Flour is a carrier in a complete wrapped meal, not every fried coating or meatloaf binder.
+        if name in names or (
+            names == STAPLES
+            and (WRAPPED_MEAL.search(dish.title.lower()) or PIZZA_TITLE.search(dish.title.lower()))
+            and name in DOUGH_FLOUR
+        ):
             part += weight
     return part / total if total else 0.0
+
+
+def sweet_tuber(dish: Dish) -> bool:
+    """A tuber or plantain dish whose sweeteners make `SWEET_TUBER_SHARE` of its weighed solids and sweeteners."""
+    if not staple_share(dish, STARCHY):
+        return False
+    sweet = sum(line.grams for line in dish.lines if line.grams and group_of(line.name) == "sweetener")
+    solids = sum(weight for _, weight in counted_weights((line.name, line.grams, line.text) for line in dish.lines))
+    return sweet + solids > 0 and sweet / (sweet + solids) >= SWEET_TUBER_SHARE
 
 
 def dish_vegetable_led(dish: Dish) -> bool:
     return vegetable_led((line.name, line.grams, line.text) for line in dish.lines)
 
 
+def homemade_staple(dish: Dish) -> bool:
+    """A named staple made mostly from listed raw starch, not a component or a title-only invention."""
+    if dish.course in FIXED_COURSE_ROLES or dish.course == "soup" or component(dish.title, dish.course):
+        return False
+    title = dish.title.lower()
+    yorkshire = bool(re.search(r"\byorkshire puddings?\b", title))
+    if not yorkshire and dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
+        return False
+    # Yorkshire's milk lactose is not added sweetness (owner); the starch majority still applies.
+    if re.search(r"\b(?:cakes?|cookies?|desserts?|puddings?)\b", title) and not yorkshire:
+        return False
+    dumpling = bool(re.search(r"\bdumplings?\b", title))
+    if dumpling:
+        sources = protein_sources(dish)
+        if sources is None or set(sources) - {"egg"} or WRAPPED_MEAL.search(title):
+            return False
+        if any(line_sources(line) - {"egg"} for line in dish.lines):
+            return False  # Even a small or unknown flesh/soy line cannot be erased as a binder.
+    elif not HOMEMADE_STAPLE_TITLE.search(title):
+        return False
+    names = HOMEMADE_STARCH | (STARCHY if FUFU.search(title) else frozenset())
+    if dumpling:
+        names = DOUGH_FLOUR | {"potato", "instant_mashed_potato"}
+    elif re.search(r"\b(?:gnocchi|gnocches)\b", title):
+        names = names | {"potato", "sweet_potato"}
+    return staple_share(dish, names) >= SIDE_STAPLE_SHARE
+
+
+def protein_side_share(dish: Dish) -> float:
+    """Egg/tofu/flesh share of weighed solids; whole beans, batter foods and condiment-type sides are not
+    protein mains."""
+    if BATTER_SIDE_TITLE.search(dish.title) or staple_share(dish, BATTER_STARCH) >= ONE_BOWL_SHARE:
+        return 0.0  # Reuse the established 15% substantive-starch boundary, not a report-fitted threshold.
+    if CONDIMENT_SIDE_TITLE.search(dish.title):
+        return 0.0
+    eligible = FLESH_SOURCES | {"egg", "soy", "?"}
+    if any(line_sources(line) & eligible and (line.grams is None or line.grams <= 0) for line in dish.lines):
+        return 0.0
+    weights = counted_weights((line.name, line.grams, line.text) for line in dish.lines)
+    # Keep lines separate: the same ingredient can occur with different animal wording.
+    total = sum(weight for _, weight in weights)
+    protein = sum(
+        weight
+        for line in dish.lines
+        if line_sources(line) & eligible and release_name(line.name) not in WHOLE_SOYBEANS
+        for _, weight in counted_weights([(line.name, line.grams, line.text)])
+    )
+    return protein / total if total else 0.0
+
+
 def component(title: str, course: str) -> bool:
-    """A recipe that is a part of a dish, not a dish: a dough, crust, batter, sauce, marinade, rub, dressing,
+    """A recipe that is a part of a dish, not a dish: a dough, crust, batter, filling, topping, sauce, marinade,
+    rub, dressing,
     gravy, stock, broth, paste or seasoning by the final head noun of its title, with no "with", "in", "on" or
     "over" before it ("Chicken In Tarragon Sauce" is a dish). A side's dressing is a stuffing, a dish."""
     title = title.lower()
@@ -499,10 +724,22 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
     """The rule's role, or None with the roles the model may choose from."""
     title = dish.title.lower()
     open_roles = tuple(role for role in MEAL_ROLES if led or role not in {"vegetable", "salad"})
+    names = {release_name(line.name) for line in dish.lines}
+    if PIZZA_TITLE.search(title) and names & DOUGH_FLOUR and names <= PIZZA_BATTER:
+        return "sauce", ()  # Only a batter is listed; the title/steps cannot supply the missing pizza toppings.
+    if SHELL_TITLE.search(title) and names & (HOMEMADE_STARCH | {"pie_crust"}) and names <= SHELL_DOUGH | {"pie_crust"}:
+        return "sauce", ()  # Actual dough-only lines, not a wrapper/shell word alone.
+    if component(dish.title, dish.course):
+        if FILLING_TITLE.search(title) and set(sources or ()) & (FLESH_SOURCES | {"soy"}):
+            protein = sum(line.grams or 0 for line in dish.lines if line_sources(line) & (FLESH_SOURCES | {"soy"}))
+            dairy = sum(line.grams or 0 for line in dish.lines if group_of(line.name) == "dairy")
+            if protein > dairy:
+                return "protein_main", ()
+        return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
     if dish.course in FIXED_COURSE_ROLES:
         return FIXED_COURSE_ROLES[dish.course], ()
-    if component(dish.title, dish.course):
-        return "sauce", ()  # `sauce` is every non-meal part of a dish, a dough or stock as much as a sauce
+    if homemade_staple(dish):
+        return "staple", ()
     has_protein = sources is None or bool(sources)
     if dish.course == "baked_good":
         sweet = bool(dish.carbohydrate_g) and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.3
@@ -514,8 +751,15 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "staple", ()
         if sweet:
             return "dessert", ()
-        return None, ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        roles = ("breakfast", "dessert", "staple", "snack", "one_bowl", "protein_main")
+        if dish.carbohydrate_g and (dish.sugar_g or 0) / dish.carbohydrate_g >= 0.2:
+            roles = tuple(role for role in roles if role != "staple")
+        return None, roles
     share = staple_share(dish)
+    if share == 0:
+        open_roles = tuple(role for role in open_roles if role not in {"one_bowl", "staple"})
+    if dish.course != "soup" and SANDWICH.search(title) and not SHELL_BOWL.search(title) and names & BREAD_CARRIERS:
+        return "one_bowl", ()
     if dish.course == "soup":
         # A noodle soup by its title, a soup this much staple, or one whose noodles or rice are a tenth of it.
         cooked = staple_share(dish, SOUP_STAPLES) >= SOUP_GREY_SHARE
@@ -525,22 +769,61 @@ def meal_role(dish: Dish, sources: list[str] | None, led: bool) -> tuple[str | N
             return "soup", ()
         return None, ("soup", "one_bowl")
     if dish.course == "side":
+        # A rice dish may have been filed as a side; its real rice carrier still fills the staple.
+        if RICE_DISH.search(title) and staple_share(dish, RICE_GRAINS) >= ONE_BOWL_SHARE:
+            return ("one_bowl" if has_protein else "staple"), ()
+        if has_protein and protein_side_share(dish) >= SIDE_STAPLE_SHARE:
+            return "protein_main", ()
         if led:
             return "vegetable", ()
-        if staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE:
+        if staple_share(dish, STAPLES) >= SIDE_STAPLE_SHARE or (
+            staple_share(dish, STAPLES | STARCHY) >= SIDE_STAPLE_SHARE and not sweet_tuber(dish)
+        ):
             return "staple", ()
-        # A side is never the meal's main, even with bacon in it; one that is not vegetable-led may stay null.
-        return None, tuple(role for role in open_roles if role != "protein_main")
+        # A little meat does not make a main; the owner excludes bean-led sides from protein mains.
+        return None, tuple(
+            role
+            for role in open_roles
+            if role != "protein_main"
+            and not (role == "soup" and BAKED_SIDE.search(title) and not SOUP_TITLE.search(title))
+        )
     # main, and the curated catalog's mains
+    if sources == [] and staple_share(dish, STARCHY) >= STAPLE_ONLY_SHARE and not sweet_tuber(dish):
+        return "staple", ()  # a protein-less main led by tubers or plantain is the staple itself (owner 2026-10-23)
     if share >= ONE_BOWL_SHARE:
         return ("staple" if not has_protein and share >= STAPLE_ONLY_SHARE else "one_bowl"), ()
-    if share >= GREY_SHARE:
-        return None, ("one_bowl", "protein_main", "staple", *(("vegetable",) if led else ()))
+    if share >= GREY_SHARE and not sources:
+        return None, ("staple", *(("vegetable",) if led else ()))
+    if share >= GREY_SHARE and has_protein:
+        rice = names & RICE_GRAINS
+        noodles = names & (SOUP_STAPLES - RICE_GRAINS)
+        if (
+            (NAMED_RICE.search(title) and rice)
+            or (NAMED_NOODLES.search(title) and noodles)
+            or (NAMED_BOWL.search(title) and (rice or noodles))
+        ):
+            return "one_bowl", ()
     if has_protein:
         return "protein_main", ()
     if led:
         return "vegetable", ()
     return None, open_roles
+
+
+def review_roles(dish: Dish, tags: Tags) -> list[str]:
+    """The roles a human reviewer may choose (owner 2026-10-23): the rule's role, or the model's options plus
+    `staple` and `one_bowl` when a zero staple share stripped them, since the rules' vocabulary may not know the
+    dish's starch; a sweet tuber dish is never offered them. Only main and side courses widen: a baked good keeps
+    its sugar ceiling and a soup its fixed roles. A bean-led side whose role the rule leaves open is thereby
+    offered `staple` (with a staple share above 0 the model's options already hold it), never assigned it; one the
+    rule assigns (e.g. `vegetable`) shows only that role. The model prompt keeps `tags.allowed_roles`; an
+    incomplete recipe offers none."""
+    if "meal_role" not in tags.open:
+        return [tags.values["meal_role"]] if tags.values["meal_role"] is not None else []
+    roles = set(tags.allowed_roles)
+    if dish.course in {"main", "side"} and staple_share(dish) == 0 and not sweet_tuber(dish):
+        roles |= {"staple", "one_bowl"}
+    return [role for role in MEAL_ROLES if role in roles]
 
 
 def cooking_methods(dish: Dish) -> list[str]:
@@ -610,15 +893,33 @@ def flavor_tags(dish: Dish, role: str | None, methods: list[str]) -> list[str]:
     return tags
 
 
+def without_main_protein(dish: Dish, role: str | None) -> bool:
+    """A dish in this role has no main protein: a sweet or condiment dish, or a homemade staple (its binder eggs)."""
+    return role in SWEET_OR_CONDIMENT or (role == "staple" and homemade_staple(dish))
+
+
 def rule_tags(dish: Dish) -> Tags:
     tags = Tags()
     led = dish_vegetable_led(dish)
     sources = protein_sources(dish)
     role, allowed = meal_role(dish, sources, led)
+    if not dish.curated and (conflict := reviewed_source_conflict(dish.key)):
+        tags.incomplete_reason, sources = conflict, None
+    elif (
+        not dish.curated
+        and dish.course in {"main", "side", "soup"}
+        and (not component(dish.title, dish.course) or role == "protein_main")
+    ):
+        tags.incomplete_reason = missing_named_protein(dish.title, [(line.name, line.text) for line in dish.lines])
+        if tags.incomplete_reason:
+            role, allowed, sources = None, (), None
     if sources == []:  # a dish with no main protein is never a protein main, whatever the model would say
         allowed = tuple(name for name in allowed if name != "protein_main")
-    if role in SWEET_OR_CONDIMENT:
+    if without_main_protein(dish, role):
         sources = []  # the eggs of a cake are not its main protein
+    if dish.key in OWNER_ROLES:  # the owner's decision overrides the rules' role; the sources stay the rules'
+        role, allowed = OWNER_ROLES[dish.key], ()
+        tags.batches |= {"meal_role": OWNER_BATCH, "contains_staple": OWNER_BATCH}
     methods = cooking_methods(dish)
     decided = {
         "meal_role": role,
@@ -632,11 +933,10 @@ def rule_tags(dish: Dish) -> Tags:
         tags.values[name] = value
         if value is not None:
             tags.methods[name] = "rule"
-    if role is None:
+    if role is None and allowed:
         tags.open.append("meal_role")
         tags.allowed_roles = allowed
-    if sources is None:
-        tags.open.append("protein_sources")
+    # Unspecified meat and missing flesh lines are evidence gaps, not questions for a model to guess.
     tags.allowed_sources = model_sources(dish)
     return tags
 
@@ -762,13 +1062,13 @@ meal_role: what the dish is in a meal.
 - snack, dessert, sauce, drink: never a lunch or dinner dish.
 - Egg rolls, spring rolls, dumplings, fritters, dips and other finger food are snack, not protein_main.
 - A soup with noodles, rice or dumplings as a large part of it is one_bowl, not soup.
-- Read the title first: a dish the title calls a main protein keeps that protein even if a line is missing.
+- A title may signal a missing ingredient, but never proves that the ingredient exists. Do not fill a lost line.
 - When none of "allowed_meal_roles" fits the dish (a vegetable side when vegetable is not allowed), answer null.
 protein_sources: the main protein sources of the dish, from "allowed_protein_sources" only; [] when it has no
-main protein. Name only sources the ingredient lines or the title name: never add legume without a bean, lentil
+main protein. Name only sources the ingredient lines explicitly support: never add legume without a bean, lentil
 or pea line, nor egg or soy without an egg or soy line. Turkey and other poultry are chicken, goose is duck,
-goat or mutton is lamb, veal is beef; game meat goes to the closest of these. A line that is only "meat" (no
-animal named in the title, cuisine or steps) is both beef and pork.
+goat or mutton is lamb, veal is beef. An unnamed animal or a line that is only "meat" stays unknown: answer null,
+never infer beef and pork, never guess the closest animal from cuisine or the title.
 
 Recipes (JSON):
 {recipes}
@@ -845,7 +1145,7 @@ def ask_model(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict
 def merge_answer(tags: Tags, answer: dict) -> None:
     """Take the model's open fields when they are allowed; anything else stays null.
 
-    A protein the dish's lines and title do not support (a legume with no bean line) is dropped, and a role
+    A protein the dish's lines do not support (a legume with no bean line) is dropped, and a role
     the model makes sweet or a condiment has no protein, as with the rules.
     """
     role = answer.get("meal_role")
@@ -863,32 +1163,63 @@ def merge_answer(tags: Tags, answer: dict) -> None:
         tags.methods["protein_sources"] = "llm"
 
 
+def review_table_values() -> dict[str, dict]:
+    """The review table's imported values by recipe key, or none before it is imported."""
+    path = repository_root() / REVIEW_TABLE
+    return json.loads(path.read_text(encoding="utf-8"))["accepted"] if path.exists() else {}
+
+
+def merge_review_table(tags: Tags, values: dict, ruled: dict, roles: list[str]) -> None:
+    """Take the review table's values for the fields the rules (`ruled`, before any model value) leave open: a role
+    the human reviewer may choose (`roles`, `review_roles`) with its staple, and protein sources of the vocabulary.
+
+    They are model-decided in `REVIEW_TABLE_BATCH` and unreviewed until the owner accepts the batch, so the planner
+    reads none of them before; a field the rules decide keeps the rules' value.
+    """
+    role = values.get("meal_role")
+    if ruled["meal_role"] is None and role in roles:
+        tags.values |= {"meal_role": role, "contains_staple": role in {"one_bowl", "staple"}}
+        for name in ("meal_role", "contains_staple"):
+            tags.methods[name], tags.batches[name] = "llm", REVIEW_TABLE_BATCH
+    sources = values.get("protein_sources")
+    if ruled["protein_sources"] is None and sources is not None and set(sources) <= set(PROTEIN_SOURCES):
+        tags.values["protein_sources"] = [source for source in PROTEIN_SOURCES if source in sources]
+        tags.methods["protein_sources"], tags.batches["protein_sources"] = "llm", REVIEW_TABLE_BATCH
+
+
 # --- writing -----------------------------------------------------------------------------------------------
 
 
 def recipe_entry(tags: Tags, previous: dict | None = None) -> dict:
-    """The tag file's entry; a value the owner accepted (`--accept-batch`) stays reviewed while it is unchanged."""
+    """The tag file's entry; a value the owner accepted (`--accept-batch`) stays reviewed while it is unchanged, and
+    the owner's own decisions (`OWNER_BATCH`) are reviewed."""
     previous = previous or {}
     entry = {name: tags.values[name] for name in tags.values}
-    entry["estimated"] = {}
-    for name, method in tags.methods.items():
-        batch = RULE_BATCH if method == "rule" else LLM_BATCH
-        held = previous.get("estimated", {}).get(name, {})
-        same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == entry[name]
-        entry["estimated"][name] = {"method": method, "batch": batch, "reviewed": bool(same and held.get("reviewed"))}
+    entry["estimated"] = {name: field_estimate(tags, name, previous) for name in tags.methods}
     return entry
+
+
+def field_estimate(tags: Tags, name: str, previous: dict) -> dict:
+    """How the tag file records a decided field: its method, its batch, and whether it is reviewed."""
+    method = tags.methods[name]
+    batch = tags.batches.get(name) or (RULE_BATCH if method == "rule" else LLM_BATCH)
+    held = previous.get("estimated", {}).get(name, {})
+    same = held.get("batch") == batch and held.get("method") == method and previous.get(name) == tags.values[name]
+    return {"method": method, "batch": batch, "reviewed": batch == OWNER_BATCH or bool(same and held.get("reviewed"))}
 
 
 def accept_batch(batch: str) -> int:
     """Mark every model-decided value of `batch` in the recipe tag file reviewed, after the owner's spot check of
-    its sample (data-engineering/README.md); the importer then carries `reviewed` onto the rows and the planner
-    reads the values. Returns how many values were accepted."""
+    its sample (data-engineering/README.md); of `REVIEW_TABLE_BATCH`, every value, rule-decided too. The importer
+    then carries `reviewed` onto the rows and the planner reads the values; a re-run writes an accepted rule value
+    back as an ordinary rule value. Returns how many values were accepted."""
     path = repository_root() / RECIPE_TAGS
     data = json.loads(path.read_text(encoding="utf-8"))
     accepted = 0
     for entry in data["recipes"].values():
         for estimate in entry.get("estimated", {}).values():
-            if estimate["batch"] == batch and estimate["method"] == "llm" and not estimate["reviewed"]:
+            whole = estimate["method"] == "llm" or batch == REVIEW_TABLE_BATCH
+            if estimate["batch"] == batch and whole and not estimate["reviewed"]:
                 estimate["reviewed"] = True
                 accepted += 1
     header = {name: value for name, value in data.items() if name != "recipes"}
@@ -915,10 +1246,15 @@ def previous_file() -> dict:
 
 
 def previous_answers(previous: dict) -> dict[str, dict]:
-    """The model's earlier decisions, so a re-run asks only for what is still open."""
+    """The model's earlier decisions, so a re-run asks only for what is still open. The review table's values are
+    read again from their own file, not taken for the model's answers."""
     kept = {}
     for key, entry in previous.get("recipes", {}).items():
-        llm = [name for name, estimate in entry.get("estimated", {}).items() if estimate["method"] == "llm"]
+        llm = [
+            name
+            for name, estimate in entry.get("estimated", {}).items()
+            if estimate["method"] == "llm" and estimate.get("batch", LLM_BATCH) == LLM_BATCH
+        ]
         if llm:
             kept[key] = {name: entry[name] for name in llm}
     return kept
@@ -929,9 +1265,39 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
     tagged = [(dish, rule_tags(dish)) for dish in dishes]
     previous = previous_file()
     earlier = {} if reask else previous_answers(previous)
+    review_table = review_table_values()
     for dish, tags in tagged:
+        ruled = {name: tags.values[name] for name in CRITICAL_MODEL_FIELDS}
+        roles = review_roles(dish, tags)
         if dish.key in earlier and tags.open:
             merge_answer(tags, earlier[dish.key])
+        # Better rules alone do not release the failed, unreviewed model batch (owner 2026-10-24). A frozen field the
+        # rules now decide takes the rule's value into the review batch, still waiting for review; one they leave
+        # open stays frozen for the reviewer's table below, whose values come from decisions.json alone. The owner's
+        # own decisions win over all of them.
+        entry = previous.get("recipes", {}).get(dish.key, {})
+        if not reask:
+            for name in CRITICAL_MODEL_FIELDS:
+                estimate = entry.get("estimated", {}).get(name, {})
+                if not waits_for_review(estimate) or tags.batches.get(name) == OWNER_BATCH:
+                    continue
+                if ruled[name] is not None:
+                    tags.values[name], tags.methods[name] = ruled[name], "rule"
+                    tags.batches[name] = REVIEW_TABLE_BATCH
+                elif not (estimate["method"] == "llm" and estimate.get("batch") == REVIEW_TABLE_BATCH):
+                    tags.values[name], tags.methods[name] = entry[name], estimate["method"]
+                    if estimate.get("batch", LLM_BATCH) != LLM_BATCH:
+                        tags.batches[name] = estimate["batch"]
+        merge_review_table(tags, review_table.get(dish.key, {}), ruled, roles)
+        # The rules' own invariant on the final role: a sweet or condiment dish or a homemade staple has no main
+        # protein. In the review batch while the role is the batch's or waits for review, else an ordinary rule value.
+        if without_main_protein(dish, tags.values["meal_role"]):
+            role = field_estimate(tags, "meal_role", entry)
+            tags.values["protein_sources"], tags.methods["protein_sources"] = [], "rule"
+            if waits_for_review(role) or role["batch"] == REVIEW_TABLE_BATCH:
+                tags.batches["protein_sources"] = REVIEW_TABLE_BATCH
+            else:
+                tags.batches.pop("protein_sources", None)
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
@@ -1026,13 +1392,31 @@ def sample_packet(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict])
     }
 
 
-def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage: dict) -> str:
+def review_batch_counts(entries: dict[str, dict]) -> Counter:
+    """The review batch's two parts in the written tag file, and what accepting it would release."""
+    counts: Counter[str] = Counter()
+    for entry in entries.values():
+        held = {name: entry["estimated"].get(name, {}) for name in CRITICAL_MODEL_FIELDS}
+        batch = {name: estimate for name, estimate in held.items() if estimate.get("batch") == REVIEW_TABLE_BATCH}
+        for part, method in (("table", "llm"), ("rule", "rule")):
+            values = sum(estimate["method"] == method for estimate in batch.values())
+            counts[f"{part} values"] += values
+            counts[f"{part} recipes"] += bool(values)
+        counts["owner values"] += sum(estimate.get("batch") == OWNER_BATCH for estimate in held.values())
+        waiting = [name for name, estimate in held.items() if waits_for_review(estimate)]
+        if waiting:
+            counts["waiting"] += 1
+            counts["released" if all(name in batch for name in waiting) else "still gated"] += 1
+    return counts
+
+
+def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage: dict, entries: dict[str, dict]) -> str:
     fields = ("meal_role", "contains_staple", "protein_sources", "cooking_methods", "equipment", "flavor_tags")
     lines = [
         "# Recipe and ingredient tags v1: coverage",
         "",
         "Generated by `python -m app.data.recipe_tags` (rules in `backend/app/data/recipe_tags.py`); do not edit.",
-        f"Recipes: {len(tagged)} (release v2.1 recipes the importer loads, and the curated catalog). "
+        f"Recipes: {len(tagged)} (release v2.2 recipes the importer loads, and the curated catalog). "
         f"Ingredients: {len(ingredients)}.",
         "",
         "## How each recipe field was decided",
@@ -1043,6 +1427,21 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
     for name in fields:
         methods = Counter(tags.methods.get(name, "open") for _, tags in tagged)
         lines.append(f"| `{name}` | {methods['rule']} | {methods['llm']} | {methods['open']} |")
+    review = review_batch_counts(entries)
+    lines += [
+        "",
+        "## The review batch for the frozen model batch",
+        "",
+        f"`{REVIEW_TABLE_BATCH}` (owner 2026-10-24) replaces the failed model batch's frozen fields in two parts, "
+        "both waiting for the owner's acceptance after the reviewer's in-person sample check: "
+        f"{review['table values']} values on {review['table recipes']} recipes from the human reviewer's table "
+        "(`llm`: prefilled by AI and confirmed in chat by dish type, not checked row by row; only in fields the rules "
+        f"leave open), and {review['rule values']} values on {review['rule recipes']} recipes in frozen fields the "
+        f"rules now decide (`rule`). Recipes waiting for review: {review['waiting']}; accepting the batch releases "
+        f"{review['released']} of them, and {review['still gated']} still wait on frozen model fields the rules and "
+        f"the table leave open. The owner decided {review['owner values']} values dish by dish (`{OWNER_BATCH}`, "
+        "reviewed).",
+    ]
     lines += ["", "## Meal role by method", "", "| Meal role | rule | llm |", "| --- | ---: | ---: |"]
     roles = Counter((tags.values["meal_role"], tags.methods.get("meal_role", "open")) for _, tags in tagged)
     for role in (*MEAL_ROLES, None):
@@ -1072,6 +1471,19 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         "their own stratum, as it does the model's protein answers. The planner reads no model-decided value "
         "before its batch sample is reviewed.",
     ]
+    blocked = [(dish, tags) for dish, tags in tagged if tags.incomplete_reason]
+    lines += [
+        "",
+        "## Incomplete recipe evidence",
+        "",
+        "A meat-bearing title with no matching ingredient line is incomplete, not a protein inference. "
+        "The planner uses the same missing-line check. Frozen unreviewed model fields may still show their "
+        "historical value, but remain gated; no batch is accepted by this regeneration.",
+        "",
+        "| Recipe | Title | Missing-line reason |",
+        "| --- | --- | --- |",
+    ]
+    lines += [f"| {dish.key} | {dish.title.replace('|', '/')} | {tags.incomplete_reason} |" for dish, tags in blocked]
     perishable = sorted(name for name, entry in ingredients.items() if entry["perishable"])
     origin = Counter(entry["methods"]["food_group"] for entry in ingredients.values())
     lines += [
@@ -1109,21 +1521,28 @@ def main() -> None:
     parser.add_argument(
         "--max-usd", type=float, default=5.0, help="estimated spend at which the model is no longer asked"
     )
-    parser.add_argument("--reask", action="store_true", help="drop the model's earlier answers and ask again")
+    parser.add_argument(
+        "--reask",
+        action="store_true",
+        help="drop the model's earlier answers and ask again; this also lifts the freeze, so a frozen field the rules "
+        "decide is released at once, not through the review batch",
+    )
     parser.add_argument(
         "--accept-batch",
         metavar="BATCH",
-        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}) reviewed in the tag file, and stop",
+        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}, {REVIEW_TABLE_BATCH}) reviewed in the tag "
+        "file, and stop",
     )
     args = parser.parse_args()
 
     root = repository_root()
     if args.accept_batch:
-        print(f"Accepted {accept_batch(args.accept_batch)} model-decided values of {args.accept_batch}.")
+        print(f"Accepted {accept_batch(args.accept_batch)} values of {args.accept_batch}.")
         return
     previous = previous_file().get("recipes", {})
     result = build(args.llm, args.max_usd, reask=args.reask)
     tagged = result["tagged"]
+    entries = {dish.key: recipe_entry(tags, previous.get(dish.key)) for dish, tags in tagged}
     write_keyed(
         root / RECIPE_TAGS,
         {
@@ -1135,7 +1554,7 @@ def main() -> None:
             "llm_usage": result["usage"],
         },
         "recipes",
-        {dish.key: recipe_entry(tags, previous.get(dish.key)) for dish, tags in tagged},
+        entries,
     )
     ingredients = ingredient_entries()
     write_keyed(
@@ -1151,19 +1570,15 @@ def main() -> None:
         ingredients,
     )
     sample = root / SAMPLE
-    if sample.exists() and any(
-        value not in (None, "")
-        for item in json.loads(sample.read_text(encoding="utf-8"))["recipes"]
-        for value in item["verdict"].values()
-    ):
-        print(f"{SAMPLE} has verdicts; left as it is.")
+    if sample.exists():
+        print(f"{SAMPLE} is a frozen audit packet; left as it is. Generate a separate changed-case review.")
     else:
         sample.write_text(
             json.dumps(sample_packet(tagged, ingredients), indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
             newline="\n",
         )
-    (root / REPORT).write_text(report(tagged, ingredients, result["usage"]), encoding="utf-8", newline="\n")
+    (root / REPORT).write_text(report(tagged, ingredients, result["usage"], entries), encoding="utf-8", newline="\n")
     open_count = sum(1 for _, tags in tagged if any(value is None for value in tags.values.values()))
     print(f"Tagged {len(tagged)} recipes and {len(ingredients)} ingredients; {open_count} recipes keep a null field.")
 

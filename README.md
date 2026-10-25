@@ -53,7 +53,7 @@ Those operations remain deterministic and testable.
 | Household profile | One shared household profile with member servings, safety constraints, shared defaults, and immutable versions |
 | Accounts, sessions, and tenancy | Authentication, revocable browser sessions, CSRF, household-scoped private data and per-action household authorization. See [Current Status](docs/current-status.md) for what remains |
 | Planning assistant | Persistent English/Chinese conversations, bounded scope routing, structured constraints and clarification controls, confirmation, and tool delegation |
-| Weekly planning | Seven days of the meals each household chose (breakfast, lunch, dinner; dinner only by default), each meal of one or several dishes, with hard filtering, soft ranking, variety across the week, per-meal and per-day nutrition, and changes to meals and dishes by asking |
+| Weekly planning | Plans of 1 to 14 days (a second shopping trip past day 7) of the meals each household chose; the default is breakfast, lunch and a dinner that scales with the people at it, and `mvp` is the one-dish-dinner capability setting. Each meal is one or several dishes, with hard filtering, soft ranking, variety across the week, per-meal and per-day nutrition, and changes to meals and dishes by asking |
 | Grocery grounding | FairPrice product lookup with normalized packages, PostgreSQL cache, and reproducible fixtures |
 | Shopping List | Consolidated ingredient demand, known-quantity pantry deduction, package rounding, and budget results |
 | Plan execution | `planned`, `completed`, and `skipped` check-in states |

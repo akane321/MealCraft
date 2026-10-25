@@ -1,0 +1,5467 @@
+{
+  "batch": "recipe-tags-v1/review-table-20261024",
+  "method": "llm",
+  "reviewed": false,
+  "note": "AI-prefilled values the reviewer confirmed in chat by dish type, not checked row by row. Imported as an unreviewed model-decided batch, only where the current rules leave the field open; never a human label.",
+  "provenance": {
+    "workbook": "the reviewer's review workbook (not committed)",
+    "workbook_sha256": "ff85917c2821dc75c6f5e1f100191df4836309298574357fd246ad9327ed2095",
+    "sheets": [
+      "1 可用池277道",
+      "2 其余145道"
+    ],
+    "rows": 815,
+    "recipes": 422,
+    "personally_checked_rows": 0,
+    "personally_checked_note": "the 已亲自核对 column is empty on every row",
+    "packet": "data-engineering/docs/role-rules-20261023b/review.json",
+    "packet_sha256": "d7dcb750eb57802419ce519816a8f8e813ca03d30d57432cfb4f11348f2248de",
+    "base_commit": "5238449433d381af8a8304bb14d37713087b902a",
+    "owner_decisions": "backend/app/data/recipe_tags.py OWNER_ROLES (owner 2026-10-24) win over the workbook",
+    "generated_by": "data-engineering/scripts/import_review_table.py"
+  },
+  "counts": {
+    "recipes_with_an_imported_value": 108,
+    "imported": {
+      "meal_role": 106,
+      "contains_staple": 106,
+      "protein_sources": 2
+    },
+    "skipped": {
+      "rule_decided_agrees": 370,
+      "rule_decided_conflicts": 83,
+      "owner_decided": 10,
+      "outside_allowed_roles": 32,
+      "left_open": 106,
+      "skipped_by_reviewer": 0,
+      "staple_inconsistent": 0,
+      "invalid_value": 0
+    },
+    "by_field": {
+      "meal_role": {
+        "imported": 106,
+        "rule_decided_agrees": 172,
+        "rule_decided_conflicts": 42,
+        "left_open": 28,
+        "outside_allowed_roles": 16,
+        "owner_decided": 5
+      },
+      "contains_staple": {
+        "imported": 106,
+        "rule_decided_agrees": 180,
+        "rule_decided_conflicts": 34,
+        "left_open": 28,
+        "outside_allowed_roles": 16,
+        "owner_decided": 5
+      },
+      "protein_sources": {
+        "imported": 2,
+        "rule_decided_agrees": 18,
+        "left_open": 50,
+        "rule_decided_conflicts": 7
+      }
+    },
+    "imported_meal_roles": {
+      "breakfast": 1,
+      "dessert": 20,
+      "one_bowl": 1,
+      "sauce": 24,
+      "snack": 24,
+      "soup": 10,
+      "staple": 24,
+      "vegetable": 2
+    }
+  },
+  "accepted": {
+    "RCP2_00100560483E": {
+      "title": "Swedish Crescents",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_011E8E50E3E6": {
+      "title": "Feteer Meshaltet",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_02600E447144": {
+      "title": "Festivals (Jamaican Fry Bread)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_02ED221BB8C3": {
+      "title": "Snowballs(Swedish)",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_0537F95C51D2": {
+      "title": "French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_0CFF755F4ED0": {
+      "title": "Mexican Wedding Cakes",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_0F2A138F47E4": {
+      "title": "English Teaballs",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_12D50BBDB52E": {
+      "title": "Eggplant A La Parmesan",
+      "meal_role": "vegetable",
+      "contains_staple": false
+    },
+    "RCP2_130F971CF821": {
+      "title": "Ukrainian Bukovinian Nachynka (Cornbread Dressing)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_15AF96C45EB8": {
+      "title": "Paneer (Panir)",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_1656CB038FF4": {
+      "title": "Chinese Wedding Rings",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_1722D847EECE": {
+      "title": "Southern Spoon Bread",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_185C6CEAE1C2": {
+      "title": "Enchiladas",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_1ABBF278577A": {
+      "title": "Jamaican Festival (Sweet Dumpling)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_1ACC53E4DF5B": {
+      "title": "Baked Banana (Plantain) With Bacon And Cheese",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_1D11B4013577": {
+      "title": "Mango Raisin Couscous ( Cous-Cous)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_1EF61A58359F": {
+      "title": "Apple Casserole",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_201F9250C196": {
+      "title": "Algerian Vegetable Couscous",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_2056C574BA1E": {
+      "title": "Easy Spoon Bread",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_229B831CE6C7": {
+      "title": "Mexican Wedding Bells",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_241D4DF15897": {
+      "title": "Hungarian Keifleys",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_25B174021AD8": {
+      "title": "Gramma & Grampa Fjerstad'S Lefse",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_25EF3F0CA6AD": {
+      "title": "Homemade Queso Fresco In One Hour",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_2635DC1E3E4B": {
+      "title": "Pao De Queijo (Aka Brazilian Cheese Puffs)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_265F52246FE6": {
+      "title": "South African Rusks",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_290971CF4730": {
+      "title": "Mexican Wedding Rings",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_293417D0F5D5": {
+      "title": "Koulouria -- Greek Sesame Galettes",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_29BA89DD8246": {
+      "title": "Trinidadian Coconut Bake",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_2C2A13538B08": {
+      "title": "Chinese Chews",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_2C6DCB5E0B50": {
+      "title": "Chinese Egg Roll Wrap",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_2C7D7B4493C8": {
+      "title": "Kolache",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_2EAB7EB9A23D": {
+      "title": "Chorizo Ball",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_310A97E81CC3": {
+      "title": "Taco Baked Potatoes",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_313E4C8B9C7B": {
+      "title": "Betty Crocker 1950S Welsh Rarebit",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_33B9F1AECB3E": {
+      "title": "Homemade Tempeh",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_3465CC24E6FF": {
+      "title": "Pinto Beans For Burritos",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_39C56A95E326": {
+      "title": "Barbecue pork buns",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_3A80E3CCA5D1": {
+      "title": "Buttermilk Rusks, South African",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_3B11D976623D": {
+      "title": "Vegetable Tempura",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_3CC1354BC571": {
+      "title": "Brazilian Arroz De Festa (Confetti Rice)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_4070469D0041": {
+      "title": "French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_409262770DBA": {
+      "title": "Popovers(Portuguese)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_42AA5C0CA968": {
+      "title": "Potato Lasagna",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_42EA59ACAAEA": {
+      "title": "Crescents(Portuguese)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_441BD2095B93": {
+      "title": "Vietnamese Pâté Chaud",
+      "protein_sources": [
+        "pork"
+      ]
+    },
+    "RCP2_44C42897EBAD": {
+      "title": "Peruvian Alfajores",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_45EBD2FEEEB0": {
+      "title": "Paneer (Home Made)",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_472B6677B22B": {
+      "title": "Tofu Feta",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_474BD62093D1": {
+      "title": "Cha-Soh Juhn(Korean Vegetable Pancakes)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_48AF180797C2": {
+      "title": "Vidalia Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_49CA27EAC641": {
+      "title": "Alfajores De Maizena",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_4DF11493A5F5": {
+      "title": "Lemon Chicken Soup With Quinoa",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_4EC013060AE0": {
+      "title": "Luscious Layers",
+      "meal_role": "vegetable",
+      "contains_staple": false
+    },
+    "RCP2_50567B7B0B2C": {
+      "title": "Kumpir",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_515EDCDA8064": {
+      "title": "Cream Cheese Crescents(Hungarian Kifli)",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_59209F8AE7D0": {
+      "title": "South African Vetkoek",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_5954131C04AC": {
+      "title": "Scrumpets",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_5B8603D2B433": {
+      "title": "Italian Cottage Cheese",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_5C1AF74A7B55": {
+      "title": "Šúĺlance s Makom",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_5CAF86FF5D5D": {
+      "title": "Potato Borek",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_5D84F859E558": {
+      "title": "English Popovers",
+      "meal_role": "breakfast",
+      "contains_staple": false
+    },
+    "RCP2_6466F4F7BF0A": {
+      "title": "Indian Tacos",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_66D9A8C454B3": {
+      "title": "Scottish Shortbread (For A Tea Party)",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_6AD2450270A2": {
+      "title": "Russian Wafers",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_6E757674305D": {
+      "title": "Danish Dumplings",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_7123F2300609": {
+      "title": "Ethiopian Cheese",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_722E5F335AD4": {
+      "title": "Greek Shortbread",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_75BFE1C39E34": {
+      "title": "Taco Casserole",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_783368D92192": {
+      "title": "Tempura",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_806075FC7BF8": {
+      "title": "French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_81C30294D91B": {
+      "title": "Turkish Pogaca",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_87B3FDF37675": {
+      "title": "Dumplings(Italian Style)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_897B7AF05CB0": {
+      "title": "Baked Zucchini With Rice And Feta",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_8C859FF10E5B": {
+      "title": "Coconut Baked Bananas (Or Plantains)",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_8F83C05E5E00": {
+      "title": "Siopao (Filipino Steamed Buns)",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_9150197BEBD9": {
+      "title": "Japanese Marinated Soft Boiled Egg For Ramen (Ajitsuke Tamago) Recipe",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_92648ECC9FC9": {
+      "title": "Hungarian Popovers(Kati Felfujtja)",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_956FD7177508": {
+      "title": "Ramen Hot And Sour Soup",
+      "protein_sources": [
+        "egg"
+      ]
+    },
+    "RCP2_989AB5746A34": {
+      "title": "Sage Polenta",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_9C9E0673ECB8": {
+      "title": "Quickly Made Kolache",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_A4661EEE5B7A": {
+      "title": "Fainá",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_A887D44E2FC0": {
+      "title": "Sauerkraut pierogii",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_A96FC949077E": {
+      "title": "Moroccan Lentils And Couscous",
+      "meal_role": "one_bowl",
+      "contains_staple": true
+    },
+    "RCP2_ACE25C1DA124": {
+      "title": "Welsh Rabbit",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_AFE6B5248965": {
+      "title": "Moroccan Ksra",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_B2E38830A727": {
+      "title": "Scottish (Or English) Rarebit",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_B3B862477980": {
+      "title": "Jamaican Grits Rice Cooker Optional",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_B7B25D1E360E": {
+      "title": "Couscous-And-Feta Cakes",
+      "meal_role": "snack",
+      "contains_staple": false
+    },
+    "RCP2_B89951CCB635": {
+      "title": "Hearty French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_BA5501343E98": {
+      "title": "Hungarian Kifliks",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_BC3A7EE10152": {
+      "title": "Authentic Gazpacho - Southern Spain",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_BC729782E35F": {
+      "title": "Greek Egg Biscuits",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_CEEA9D67A7EE": {
+      "title": "Basic Italian Cookies",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_D698B2F5CB69": {
+      "title": "French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_D7BD0AAA0F99": {
+      "title": "Greek-Style Couscous",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_DBE7700244BE": {
+      "title": "Morrocan Couscous With Green Beans",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_DC882B3F674A": {
+      "title": "Banana Raita With Coconut",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_E4454B4519B1": {
+      "title": "Tempura",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_E58EB09D4E0D": {
+      "title": "Cheese Stuffing For Manicotti",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_E729691E63DA": {
+      "title": "Sugar Free Cranberry Almond Biscotti",
+      "meal_role": "dessert",
+      "contains_staple": false
+    },
+    "RCP2_E8D667BA918A": {
+      "title": "Fake Feta",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_EAAD839F9258": {
+      "title": "Mushroom-Barley Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_ED8C37EACE4D": {
+      "title": "Mock Feta Cheese ( Vegan Substitute )",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_EE292ED1DADA": {
+      "title": "Potato-Apple Gratin",
+      "meal_role": "staple",
+      "contains_staple": true
+    },
+    "RCP2_EFA12409FC76": {
+      "title": "Indian Raita (Cucumber Mix)",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_F0A2E3140892": {
+      "title": "Hearty French Onion Soup",
+      "meal_role": "soup",
+      "contains_staple": false
+    },
+    "RCP2_F62EDB215278": {
+      "title": "Cheese Dumplings",
+      "meal_role": "sauce",
+      "contains_staple": false
+    },
+    "RCP2_F9AC64939A2C": {
+      "title": "Welsh Rarebit",
+      "meal_role": "sauce",
+      "contains_staple": false
+    }
+  },
+  "skipped": [
+    {
+      "id": "RCP2_00100560483E",
+      "title": "Swedish Crescents",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_010100DDE2F6",
+      "title": "Cheesy Zucchini Lasagna",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_010100DDE2F6",
+      "title": "Cheesy Zucchini Lasagna",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_011288A0DAAA",
+      "title": "Hush Puppies",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_011288A0DAAA",
+      "title": "Hush Puppies",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_01D48A672ACA",
+      "title": "Sweet Potato Noodle Curry",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_01D48A672ACA",
+      "title": "Sweet Potato Noodle Curry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_03DEE14CDC60",
+      "title": "Hush Puppies",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_03DEE14CDC60",
+      "title": "Hush Puppies",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_04FA63A313E5",
+      "title": "Dumplings",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_04FA63A313E5",
+      "title": "Dumplings",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_05ED759BF701",
+      "title": "Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_062390916CFF",
+      "title": "Garden Ranch Pizza-Pampered Chef",
+      "field": "meal_role",
+      "value": null,
+      "rule": "one_bowl",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_062390916CFF",
+      "title": "Garden Ranch Pizza-Pampered Chef",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_06BA84D12D67",
+      "title": "Meat Loaf With Cheese Sauce",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_06BA84D12D67",
+      "title": "Meat Loaf With Cheese Sauce",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0780C777C0AB",
+      "title": "Stir Fry Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_0B06E6177DA3",
+      "title": "Crunchy Chicken Casserole",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0B06E6177DA3",
+      "title": "Crunchy Chicken Casserole",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0CA3F3F66929",
+      "title": "Roti Jala (Malaysian Net Crepe)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0CA3F3F66929",
+      "title": "Roti Jala (Malaysian Net Crepe)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0CFF755F4ED0",
+      "title": "Mexican Wedding Cakes",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0D6EBFF557A4",
+      "title": "Japanese Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_0DBC46FF845C",
+      "title": "Oven Polenta",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0DBC46FF845C",
+      "title": "Oven Polenta",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0DE59ED69BBF",
+      "title": "Stuffed Bell Peppers",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0DE59ED69BBF",
+      "title": "Stuffed Bell Peppers",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_0E0DC1E18373",
+      "title": "Brazilian Crock-Pot Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_0E0DC1E18373",
+      "title": "Brazilian Crock-Pot Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_0F6692A9480A",
+      "title": "Corn And Lima Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_0F6692A9480A",
+      "title": "Corn And Lima Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_1087CA73F93D",
+      "title": "Southern Smothered Green Beans",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1087CA73F93D",
+      "title": "Southern Smothered Green Beans",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1106936B4750",
+      "title": "Sweet And Sour Cabbage",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1106936B4750",
+      "title": "Sweet And Sour Cabbage",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_140233207FB1",
+      "title": "Pizza Bianco",
+      "field": "meal_role",
+      "value": null,
+      "rule": "one_bowl",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_140233207FB1",
+      "title": "Pizza Bianco",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_143B82A4800E",
+      "title": "Spaetzle Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_143B82A4800E",
+      "title": "Spaetzle Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1554F9789729",
+      "title": "Banh Mi Hotdog",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1554F9789729",
+      "title": "Banh Mi Hotdog",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_15BCD52E8739",
+      "title": "Sprouts, Chorizo & Almond Bowl",
+      "field": "meal_role",
+      "value": null,
+      "rule": "vegetable",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_15BCD52E8739",
+      "title": "Sprouts, Chorizo & Almond Bowl",
+      "field": "contains_staple",
+      "value": null,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_15F1AAB4C310",
+      "title": "Korean Gaeran Mari (Stuffed Egg Omelette W Cheese)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_15F1AAB4C310",
+      "title": "Korean Gaeran Mari (Stuffed Egg Omelette W Cheese)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_16BF42FD100D",
+      "title": "Udon Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_16BF42FD100D",
+      "title": "Udon Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1729D7258E04",
+      "title": "Egg Filling For Sushi",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1729D7258E04",
+      "title": "Egg Filling For Sushi",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_192C01503365",
+      "title": "Lasagna",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_19650787C340",
+      "title": "Ome Rice(Korean)",
+      "field": "protein_sources",
+      "value": [
+        "beef",
+        "egg"
+      ],
+      "rule": [
+        "beef",
+        "egg"
+      ],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_19FBD3D80909",
+      "title": "Texas Hash",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_19FBD3D80909",
+      "title": "Texas Hash",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1A1BA06D6CB5",
+      "title": "Never Fail Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1A1BA06D6CB5",
+      "title": "Never Fail Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1B153229C12F",
+      "title": "Six In One",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1B153229C12F",
+      "title": "Six In One",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1BBDFA22270A",
+      "title": "Sweet And Sour Lentils",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_1BBDFA22270A",
+      "title": "Sweet And Sour Lentils",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_1C43BC6CC166",
+      "title": "Stroganoff Steak Sandwiches",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1C43BC6CC166",
+      "title": "Stroganoff Steak Sandwiches",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1CB98FB35F9C",
+      "title": "Mexican Slow Cooker Chicken Burritos",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1CB98FB35F9C",
+      "title": "Mexican Slow Cooker Chicken Burritos",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1DDBB68902A6",
+      "title": "Cantonese Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_1E03BFBAFC1E",
+      "title": "Spinach Souffle",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_1E03BFBAFC1E",
+      "title": "Spinach Souffle",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_1E114667D956",
+      "title": "Cheesy Potato Lasagna",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1E114667D956",
+      "title": "Cheesy Potato Lasagna",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_1EF61A58359F",
+      "title": "Apple Casserole",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_207C22E16796",
+      "title": "Scottish Roast Chicken",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_207C22E16796",
+      "title": "Scottish Roast Chicken",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_20E9789E014D",
+      "title": "Crock-Pot Polish Cabbage Rolls",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_20E9789E014D",
+      "title": "Crock-Pot Polish Cabbage Rolls",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_212042A4393F",
+      "title": "Zucchini Stir-Fry",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_212042A4393F",
+      "title": "Zucchini Stir-Fry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_21ADEFC9A0C2",
+      "title": "Satay",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_21D46B7E4C32",
+      "title": "Spaetzles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_21D46B7E4C32",
+      "title": "Spaetzles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_224C571A890D",
+      "title": "Cheater'S Cheese Souffle",
+      "field": "meal_role",
+      "value": null,
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_224C571A890D",
+      "title": "Cheater'S Cheese Souffle",
+      "field": "contains_staple",
+      "value": null,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2258F6B702CB",
+      "title": "Korean Kimchi Burgers",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2258F6B702CB",
+      "title": "Korean Kimchi Burgers",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_22CB9F8E06FA",
+      "title": "Skillet Cornbread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_22CB9F8E06FA",
+      "title": "Skillet Cornbread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_230081AE2244",
+      "title": "Filipino Pandesal Bread ( Bread Machine )",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_230081AE2244",
+      "title": "Filipino Pandesal Bread ( Bread Machine )",
+      "field": "contains_staple",
+      "value": true,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_23AEBF1FD190",
+      "title": "Sweet And Sour Meatballs(In The Microwave)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_23DCDA368745",
+      "title": "Homemade Nama (Fresh) Udon Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_23DCDA368745",
+      "title": "Homemade Nama (Fresh) Udon Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_24B9AA68594B",
+      "title": "Mushroom Supreme",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_24B9AA68594B",
+      "title": "Mushroom Supreme",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_24D1FD24F7F1",
+      "title": "Recipe Of 1985'S Burleson County Kolache(Queen'S Kolaches, Ella Drgac Queen)",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_24D1FD24F7F1",
+      "title": "Recipe Of 1985'S Burleson County Kolache(Queen'S Kolaches, Ella Drgac Queen)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_255BF2278F68",
+      "title": "Dumplings",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_255BF2278F68",
+      "title": "Dumplings",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_275105C8694D",
+      "title": "Cornbread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_275105C8694D",
+      "title": "Cornbread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_27CF36D8964D",
+      "title": "Flour Taco Shells",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "sauce",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_27CF36D8964D",
+      "title": "Flour Taco Shells",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2848D4DD38CE",
+      "title": "Fufu",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2848D4DD38CE",
+      "title": "Fufu",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_284F4FEA733D",
+      "title": "Jamaican Boiled Dumplings",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_284F4FEA733D",
+      "title": "Jamaican Boiled Dumplings",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_29EF8FF66D07",
+      "title": "Thai Chickpea Pizza",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_29EF8FF66D07",
+      "title": "Thai Chickpea Pizza",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2AC94AA7906B",
+      "title": "Cou Cou (Caribbean Polenta)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2AC94AA7906B",
+      "title": "Cou Cou (Caribbean Polenta)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2BA45D5AB524",
+      "title": "Taco Shells",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2BA45D5AB524",
+      "title": "Taco Shells",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2BD9BFE7AE13",
+      "title": "My Mother Lillie'S Spinach Souffle",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_2BD9BFE7AE13",
+      "title": "My Mother Lillie'S Spinach Souffle",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_2C368BB10827",
+      "title": "Sweet Potato And Feta Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2C368BB10827",
+      "title": "Sweet Potato And Feta Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2C3763B662FD",
+      "title": "Venezuelan Arepas With Sesame, Chia, And Flaxseeds",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2C3763B662FD",
+      "title": "Venezuelan Arepas With Sesame, Chia, And Flaxseeds",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2CE4B2CB6AEE",
+      "title": "Diner Meat Loaf",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2CE4B2CB6AEE",
+      "title": "Diner Meat Loaf",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2DEFB0F27019",
+      "title": "Meat Croquettes",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_2E3012F8BABC",
+      "title": "Gran'S Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2E3012F8BABC",
+      "title": "Gran'S Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_2E6B4C7D3281",
+      "title": "Granny Gibbs' Famous Dumplings",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2E6B4C7D3281",
+      "title": "Granny Gibbs' Famous Dumplings",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2F5D13FF1C1A",
+      "title": "Kentucky Hush Puppies",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2F5D13FF1C1A",
+      "title": "Kentucky Hush Puppies",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_2FC102A3D309",
+      "title": "Mexican Corn Bread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_2FC102A3D309",
+      "title": "Mexican Corn Bread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_30B5AB92CC91",
+      "title": "Vietnamese Fajitas (Bo Nuong Xa)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_30B5AB92CC91",
+      "title": "Vietnamese Fajitas (Bo Nuong Xa)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_313E4C8B9C7B",
+      "title": "Betty Crocker 1950S Welsh Rarebit",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_31457FBD2E5C",
+      "title": "Indian Pinto Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_31457FBD2E5C",
+      "title": "Indian Pinto Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3314EF4C89E1",
+      "title": "Potato Gnocchi From Scratch",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3314EF4C89E1",
+      "title": "Potato Gnocchi From Scratch",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3330CF0BC620",
+      "title": "Korean Kimchi Burgers",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3330CF0BC620",
+      "title": "Korean Kimchi Burgers",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3368D505CC40",
+      "title": "Vietnamese Sandwiches",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3368D505CC40",
+      "title": "Vietnamese Sandwiches",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_35400FE238ED",
+      "title": "Instant Pot® Smoky Korean Bbq Baked Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_35400FE238ED",
+      "title": "Instant Pot® Smoky Korean Bbq Baked Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_355D74D12F4C",
+      "title": "Vietnamese Spiced Paté",
+      "field": "protein_sources",
+      "value": [
+        "chicken",
+        "pork"
+      ],
+      "rule": [
+        "chicken",
+        "pork"
+      ],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_35DC1259F6B0",
+      "title": "Soft Shell Tacos",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_35DC1259F6B0",
+      "title": "Soft Shell Tacos",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_35E7E466C238",
+      "title": "Pizza Burger'S Fcs School Recipe",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3703338B3886",
+      "title": "Spinach Pizza Topping",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3703338B3886",
+      "title": "Spinach Pizza Topping",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_370E5046B39F",
+      "title": "Spanish Rice",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_370E5046B39F",
+      "title": "Spanish Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_382B6B7AF64D",
+      "title": "Southern Spoon Bread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_382B6B7AF64D",
+      "title": "Southern Spoon Bread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_38391F938210",
+      "title": "Dreamy Polenta",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_38391F938210",
+      "title": "Dreamy Polenta",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_38C9D74E8995",
+      "title": "Nif'S Easy Baking Powder Dumplings (Crock Pot Or Stove Top)",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_38C9D74E8995",
+      "title": "Nif'S Easy Baking Powder Dumplings (Crock Pot Or Stove Top)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_392DCD1CADCE",
+      "title": "Shrimp Creole",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_392DCD1CADCE",
+      "title": "Shrimp Creole",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_39B142C1E4E8",
+      "title": "Caribbean Rice",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_39B142C1E4E8",
+      "title": "Caribbean Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_39BF39F7A6E4",
+      "title": "Banh Mi Hot Dogs",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_39BF39F7A6E4",
+      "title": "Banh Mi Hot Dogs",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_39CE51E9A95B",
+      "title": "Rosalita'S Arepas Con Queso",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_39CE51E9A95B",
+      "title": "Rosalita'S Arepas Con Queso",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3A89815DD43E",
+      "title": "Pancit(Rice Noodles)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3C310D373BB9",
+      "title": "Pupusas",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "staple",
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_3C310D373BB9",
+      "title": "Pupusas",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_3D5ADFE023AB",
+      "title": "Lamb & apricot meatballs",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3D5ADFE023AB",
+      "title": "Lamb & apricot meatballs",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_3F422D8D65F9",
+      "title": "Baked Plantains (Cooking Bananas)",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3F422D8D65F9",
+      "title": "Baked Plantains (Cooking Bananas)",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_3F422D8D65F9",
+      "title": "Baked Plantains (Cooking Bananas)",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_402F11758D8C",
+      "title": "Injera",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_402F11758D8C",
+      "title": "Injera",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_40ECCF6439F2",
+      "title": "Cajun Meat Loaf",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_420219DB3C60",
+      "title": "Fried Pheasant",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_420219DB3C60",
+      "title": "Fried Pheasant",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_428E51829F1A",
+      "title": "Korean Spiced Kidney Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_428E51829F1A",
+      "title": "Korean Spiced Kidney Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_4295A6A55D85",
+      "title": "Tropical Beef Fajitas",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_4295A6A55D85",
+      "title": "Tropical Beef Fajitas",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_43F241E2C2FA",
+      "title": "Homemade Pasta",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_43F241E2C2FA",
+      "title": "Homemade Pasta",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_44870004D5FB",
+      "title": "Lasagna Style Bow Tie Dish",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_44C42897EBAD",
+      "title": "Peruvian Alfajores",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_45391BFD9020",
+      "title": "Roti Jala (Malaysian Lacy Pancakes)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_45391BFD9020",
+      "title": "Roti Jala (Malaysian Lacy Pancakes)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4539937C1F3A",
+      "title": "Sauerkraut Dumplings",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_4539937C1F3A",
+      "title": "Sauerkraut Dumplings",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_456CCADB7128",
+      "title": "Stuffed Green Peppers",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_456CCADB7128",
+      "title": "Stuffed Green Peppers",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_45BE0219D45D",
+      "title": "Heart-Shaped Tamagoyaki (Japanese Omelet)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_45BE0219D45D",
+      "title": "Heart-Shaped Tamagoyaki (Japanese Omelet)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_47186AAC9989",
+      "title": "Creamy Polenta 10/08 Ba",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_47186AAC9989",
+      "title": "Creamy Polenta 10/08 Ba",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4808C28F01AE",
+      "title": "Refried Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_4808C28F01AE",
+      "title": "Refried Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_4869C3AEA8AD",
+      "title": "Thai Salty Egg(Side Dish)",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_4869C3AEA8AD",
+      "title": "Thai Salty Egg(Side Dish)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_486E1D6A70D8",
+      "title": "Japanese Sweet Omelet",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_486E1D6A70D8",
+      "title": "Japanese Sweet Omelet",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_491808DE2CEB",
+      "title": "Spiedies (Kabobs)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_499150EEF32D",
+      "title": "Grandma O'Neill'S Irish Soda Bread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_499150EEF32D",
+      "title": "Grandma O'Neill'S Irish Soda Bread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_4A04FF1CF1AB",
+      "title": "Watermelon Curry (Matira)",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_4A04FF1CF1AB",
+      "title": "Watermelon Curry (Matira)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_4A04FF1CF1AB",
+      "title": "Watermelon Curry (Matira)",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4A7CC5A410F0",
+      "title": "Plantains In Coconut Milk",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_4A7CC5A410F0",
+      "title": "Plantains In Coconut Milk",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_4AFAD849C677",
+      "title": "Empanadas",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4AFAD849C677",
+      "title": "Empanadas",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4B3B02F3D728",
+      "title": "Roti Canai (Malaysian Style)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4B3B02F3D728",
+      "title": "Roti Canai (Malaysian Style)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4CE4FA69CB3E",
+      "title": "Pan-fried hake, white bean & chorizo broth",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4CE4FA69CB3E",
+      "title": "Pan-fried hake, white bean & chorizo broth",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4E9F363F8876",
+      "title": "Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4E9F363F8876",
+      "title": "Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_4F7893458243",
+      "title": "Baked Sweet Potatoes With West African-Style Peanut Sauce",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_4F7893458243",
+      "title": "Baked Sweet Potatoes With West African-Style Peanut Sauce",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_507B9CC45AC6",
+      "title": "Spanish Rice",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_507B9CC45AC6",
+      "title": "Spanish Rice",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_50FF85F5FDE0",
+      "title": "Breakfast Burritos",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_50FF85F5FDE0",
+      "title": "Breakfast Burritos",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5216E8F6555E",
+      "title": "Refritos (Refried Beans)",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5216E8F6555E",
+      "title": "Refritos (Refried Beans)",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5216E8F6555E",
+      "title": "Refritos (Refried Beans)",
+      "field": "protein_sources",
+      "value": [
+        "legume"
+      ],
+      "rule": [
+        "legume"
+      ],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_53FF54F0EB32",
+      "title": "Stir-Fry Venison",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_540A9A5CDB2A",
+      "title": "Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_543A1872318A",
+      "title": "Texas Hash(Weight Watchers)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_543A1872318A",
+      "title": "Texas Hash(Weight Watchers)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_546DFF631ED4",
+      "title": "Cauliflower Au Gratin",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_546DFF631ED4",
+      "title": "Cauliflower Au Gratin",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5497ED3C29EA",
+      "title": "Soft Cornmeal Taco Shells",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5497ED3C29EA",
+      "title": "Soft Cornmeal Taco Shells",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_54B440E380EB",
+      "title": "Fry Bread For Navaho Tacos",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_54B440E380EB",
+      "title": "Fry Bread For Navaho Tacos",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_561E7EDAC82C",
+      "title": "Cuban Black Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_561E7EDAC82C",
+      "title": "Cuban Black Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_561E7EDAC82C",
+      "title": "Cuban Black Beans",
+      "field": "protein_sources",
+      "value": [
+        "legume"
+      ],
+      "rule": [
+        "legume"
+      ],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_56684132208E",
+      "title": "Ricotta Gnocchi",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_56684132208E",
+      "title": "Ricotta Gnocchi",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_57A5EE0626CD",
+      "title": "Texas Chili Con Carne",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_57E2F87CA748",
+      "title": "Grandma'S Sweet And Sauerkraut",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_57E2F87CA748",
+      "title": "Grandma'S Sweet And Sauerkraut",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_57F7D87302B2",
+      "title": "California Quiche Lorraine",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_57F7D87302B2",
+      "title": "California Quiche Lorraine",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_59D318263C91",
+      "title": "Mahshy Bandora (Stuffed Tomatoes)(Lebanese)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5A5EBBE90C92",
+      "title": "Injera",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5A5EBBE90C92",
+      "title": "Injera",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5C8F72777948",
+      "title": "Spatzle",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5C8F72777948",
+      "title": "Spatzle",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5D77EC59057C",
+      "title": "Creamy Polenta With Parmesan And Mozzarella",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5D77EC59057C",
+      "title": "Creamy Polenta With Parmesan And Mozzarella",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5ED49FFCF6D4",
+      "title": "Spanish Rice",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "one_bowl",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_5ED49FFCF6D4",
+      "title": "Spanish Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5F3868736164",
+      "title": "Homemade Dumplings",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_5F3868736164",
+      "title": "Homemade Dumplings",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_5F632D436B4E",
+      "title": "Ramen Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5F632D436B4E",
+      "title": "Ramen Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5FDC54ED6B2B",
+      "title": "Sauerkraut",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5FDC54ED6B2B",
+      "title": "Sauerkraut",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5FECAA2C747F",
+      "title": "Super Easy Pad Thai",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_5FFD99ABD34E",
+      "title": "Italian Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_5FFD99ABD34E",
+      "title": "Italian Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_607A6AFD87B4",
+      "title": "Chivito uruguayo",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_607A6AFD87B4",
+      "title": "Chivito uruguayo",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_614D0DC32132",
+      "title": "Meatballs",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_616382D3CF7F",
+      "title": "Rabbit Stew",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_628A7F873ED3",
+      "title": "Mexican Higado Tacos",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_62BE75BD23E4",
+      "title": "Zucchini Souffle",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_62BE75BD23E4",
+      "title": "Zucchini Souffle",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_6336ACA2F9AE",
+      "title": "Japanese Tamago Egg",
+      "field": "meal_role",
+      "value": "breakfast",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_6336ACA2F9AE",
+      "title": "Japanese Tamago Egg",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_634CE564B1EE",
+      "title": "Middle Eastern Burgers",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_634CE564B1EE",
+      "title": "Middle Eastern Burgers",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_634F7CFF5B86",
+      "title": "Mexican Low-Fat Pinto Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_634F7CFF5B86",
+      "title": "Mexican Low-Fat Pinto Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_641ABD3FC590",
+      "title": "Bavarian Cabbage",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_641ABD3FC590",
+      "title": "Bavarian Cabbage",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_644A347C7523",
+      "title": "Jane Cody'S Awesome Stir Fry",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_646039848924",
+      "title": "Crumb-Coated Spaetzle",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_646039848924",
+      "title": "Crumb-Coated Spaetzle",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_64DBD7C2EF10",
+      "title": "Guadalajaran Jalisco Mexican Rice",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_64DBD7C2EF10",
+      "title": "Guadalajaran Jalisco Mexican Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_65C7BEB7FEFD",
+      "title": "Riyadh Rice - Middle Eastern Favourite!",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_66540AABF0E0",
+      "title": "Thai Sweet Potato Stew",
+      "field": "meal_role",
+      "value": "soup",
+      "rule": "staple",
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_66540AABF0E0",
+      "title": "Thai Sweet Potato Stew",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_66AD2CDBCB53",
+      "title": "Guatemalan Black Beans (Frijoles Parados)",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_66AD2CDBCB53",
+      "title": "Guatemalan Black Beans (Frijoles Parados)",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_66CDC4D02656",
+      "title": "Napa Cabbage with Dried Shrimp",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_66CDC4D02656",
+      "title": "Napa Cabbage with Dried Shrimp",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_66D9A8C454B3",
+      "title": "Scottish Shortbread (For A Tea Party)",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_67A66B53DE3C",
+      "title": "Slow Cooker Chicken Curry With Quinoa",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_67A66B53DE3C",
+      "title": "Slow Cooker Chicken Curry With Quinoa",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_686557404CA1",
+      "title": "Tacos",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_6AE2F530BFEE",
+      "title": "Microwave Quick Lasagna",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_6B3C9AD9D6E0",
+      "title": "Chinese Eggs",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6B3C9AD9D6E0",
+      "title": "Chinese Eggs",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6C1E6D9E70BE",
+      "title": "Polenta(Microwave)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6C1E6D9E70BE",
+      "title": "Polenta(Microwave)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6CFCB11F79B9",
+      "title": "Thai Curry Pork Lettuce Wraps (Nam Prik Ong)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6CFCB11F79B9",
+      "title": "Thai Curry Pork Lettuce Wraps (Nam Prik Ong)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6D9B39CCD991",
+      "title": "Malaysian Roti Canai (Kinda Like A Pancake)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6D9B39CCD991",
+      "title": "Malaysian Roti Canai (Kinda Like A Pancake)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6E65362F51A9",
+      "title": "Beef Fajitas",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_6E65362F51A9",
+      "title": "Beef Fajitas",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_70B47600544A",
+      "title": "Ramen Noodles",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_70B47600544A",
+      "title": "Ramen Noodles",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_722E5F335AD4",
+      "title": "Greek Shortbread",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7248F8960BF1",
+      "title": "Spanish Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_74EFF106FE7B",
+      "title": "Pizza Stuffed Potatoes (Twice Baked)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_74EFF106FE7B",
+      "title": "Pizza Stuffed Potatoes (Twice Baked)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_765D954B952B",
+      "title": "Cheese Dumplings For Soup",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_765D954B952B",
+      "title": "Cheese Dumplings For Soup",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_76DAFDABA87D",
+      "title": "Simply English Bubble & Squeak",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_76DAFDABA87D",
+      "title": "Simply English Bubble & Squeak",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7767F8C932A9",
+      "title": "Frijoles Negros- Crock Pot Mexican Black Beans",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_7767F8C932A9",
+      "title": "Frijoles Negros- Crock Pot Mexican Black Beans",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_778D3F74C3CF",
+      "title": "Bohemian Bread Dumplings",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_778D3F74C3CF",
+      "title": "Bohemian Bread Dumplings",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7791CF2A7CDD",
+      "title": "Polenta",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7791CF2A7CDD",
+      "title": "Polenta",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7803F1FEB333",
+      "title": "Shredded Beef Chimichangas",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7803F1FEB333",
+      "title": "Shredded Beef Chimichangas",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7877BC0F4362",
+      "title": "Indian Fry Bread",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7877BC0F4362",
+      "title": "Indian Fry Bread",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_793CD2DF1D24",
+      "title": "3 Cheese Lasagne(St. Rose Student Recipe)",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_793CD2DF1D24",
+      "title": "3 Cheese Lasagne(St. Rose Student Recipe)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7B354C6F9480",
+      "title": "Sauerkraut Dumplings(Hungarian Recipe)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7B354C6F9480",
+      "title": "Sauerkraut Dumplings(Hungarian Recipe)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7DCEB197520A",
+      "title": "Korean Steamed Egg Custard",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7DCEB197520A",
+      "title": "Korean Steamed Egg Custard",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7EC289C20A2A",
+      "title": "Savory Sauerkraut Casserole",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7EC289C20A2A",
+      "title": "Savory Sauerkraut Casserole",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7EE413539148",
+      "title": "Pork Banh Mi Wraps",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7EE413539148",
+      "title": "Pork Banh Mi Wraps",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7F94EA2E2036",
+      "title": "Potato Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_7F94EA2E2036",
+      "title": "Potato Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_805CCFE62BA7",
+      "title": "Lasagna",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_805CCFE62BA7",
+      "title": "Lasagna",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8109D39756EC",
+      "title": "Pan De Sal - Filipino Bread Rolls",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_8109D39756EC",
+      "title": "Pan De Sal - Filipino Bread Rolls",
+      "field": "contains_staple",
+      "value": true,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_824A7E93FFE3",
+      "title": "Korean B.B.Q.",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_829671202485",
+      "title": "Potato Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_829671202485",
+      "title": "Potato Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_82DB38A4F424",
+      "title": "Stuffed Green Peppers",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_82DB38A4F424",
+      "title": "Stuffed Green Peppers",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_87713B74F837",
+      "title": "South African Meat Loaf",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_87713B74F837",
+      "title": "South African Meat Loaf",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_87CBA929A2C6",
+      "title": "Spicy Thai One Pot",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_888730AE4624",
+      "title": "Tamagoyaki - Japanese Rolled Omelette",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_888730AE4624",
+      "title": "Tamagoyaki - Japanese Rolled Omelette",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_88C46CBD6B93",
+      "title": "Chilean Chicken Stew With Pumpkin And Wild Rice",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_88C46CBD6B93",
+      "title": "Chilean Chicken Stew With Pumpkin And Wild Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_88FDB464A695",
+      "title": "Jang Jorim With Hard-Boiled Eggs (Korean Soy Beef Strips)",
+      "field": "meal_role",
+      "value": null,
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_88FDB464A695",
+      "title": "Jang Jorim With Hard-Boiled Eggs (Korean Soy Beef Strips)",
+      "field": "contains_staple",
+      "value": null,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_89F0058D53F5",
+      "title": "German Style Beans",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_89F0058D53F5",
+      "title": "German Style Beans",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_89F7211E3608",
+      "title": "Chinese Sweet And Sour Spareribs Vegetarian",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_89F7211E3608",
+      "title": "Chinese Sweet And Sour Spareribs Vegetarian",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_8C859FF10E5B",
+      "title": "Coconut Baked Bananas (Or Plantains)",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8C948ACDB0BC",
+      "title": "Vietnamese Beef Curry",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8C948ACDB0BC",
+      "title": "Vietnamese Beef Curry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8CDACD3A0704",
+      "title": "Vietnamese Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_8D12144D2014",
+      "title": "Pork Fajita Kabobs",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_8D12144D2014",
+      "title": "Pork Fajita Kabobs",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_8D376D61D13A",
+      "title": "Slovak Easter Cheese (Cirak)",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_8D376D61D13A",
+      "title": "Slovak Easter Cheese (Cirak)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8F7B547C1808",
+      "title": "Banh Mi Hotdog",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8F7B547C1808",
+      "title": "Banh Mi Hotdog",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_8F8576285D7F",
+      "title": "Fried Plantains",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_8F8576285D7F",
+      "title": "Fried Plantains",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_91E87A1057FC",
+      "title": "Vegetarian Kenyan Curry",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_91E87A1057FC",
+      "title": "Vegetarian Kenyan Curry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_920C40633EDD",
+      "title": "Egg Roll",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_920C40633EDD",
+      "title": "Egg Roll",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_92D0966923D6",
+      "title": "Polenta",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_92D0966923D6",
+      "title": "Polenta",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_92F5CA7EC6D3",
+      "title": "Seven Hour Eggs - Korean Sauna",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_92F5CA7EC6D3",
+      "title": "Seven Hour Eggs - Korean Sauna",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_92FA53DECB5E",
+      "title": "Mediterranean Chicken",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_92FA53DECB5E",
+      "title": "Mediterranean Chicken",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_958B37782112",
+      "title": "Basic Souffle Recipe",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_958B37782112",
+      "title": "Basic Souffle Recipe",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_9723078749EF",
+      "title": "Thai Chicken Pizza With Carrots And Cilantro",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "one_bowl",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_9723078749EF",
+      "title": "Thai Chicken Pizza With Carrots And Cilantro",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_97D659CE8E07",
+      "title": "Japchae (Korean Glass Noodles)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_98B58258E3BD",
+      "title": "Gnocches(Italian Potato Pasta)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_98B58258E3BD",
+      "title": "Gnocches(Italian Potato Pasta)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9B204E51C88D",
+      "title": "Potatoes Moussaka *",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_9B204E51C88D",
+      "title": "Potatoes Moussaka *",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_9C278A40B536",
+      "title": "Ethiopian Vegetable Bowl",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9C278A40B536",
+      "title": "Ethiopian Vegetable Bowl",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9C51F36C16C2",
+      "title": "Meat Curry",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_9C9E0673ECB8",
+      "title": "Quickly Made Kolache",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "egg"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_9CD7CD0DA72B",
+      "title": "Whole Wheat Egg Noodles Or Spaghetti Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9CD7CD0DA72B",
+      "title": "Whole Wheat Egg Noodles Or Spaghetti Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9E095D1F1FB4",
+      "title": "Korean Fried Tofu Side Dish",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_9E095D1F1FB4",
+      "title": "Korean Fried Tofu Side Dish",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A130BD59E2A1",
+      "title": "Gyro Casserole",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A130BD59E2A1",
+      "title": "Gyro Casserole",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A268F28D4812",
+      "title": "Tempeh “Bacon”",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_A268F28D4812",
+      "title": "Tempeh “Bacon”",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A26B07E48FE5",
+      "title": "Cheese Gnocchi",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_A26B07E48FE5",
+      "title": "Cheese Gnocchi",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_A31F833871D7",
+      "title": "Bread Dumplings",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A31F833871D7",
+      "title": "Bread Dumplings",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A5E3A0513E4A",
+      "title": "Pizza Meatballs",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A5E3A0513E4A",
+      "title": "Pizza Meatballs",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A660E279682A",
+      "title": "Easy Potato Dumplings",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A660E279682A",
+      "title": "Easy Potato Dumplings",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A7CE680FA0FD",
+      "title": "Slovak Egg Dumplings",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_A7CE680FA0FD",
+      "title": "Slovak Egg Dumplings",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_A804E2F5468A",
+      "title": "Meat Loaf(Published In Southern Living)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A804E2F5468A",
+      "title": "Meat Loaf(Published In Southern Living)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A84B4E56257C",
+      "title": "Asian Wraps",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "protein_main",
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_A84B4E56257C",
+      "title": "Asian Wraps",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_A86E37A6C8F4",
+      "title": "Baked Tempeh",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A86E37A6C8F4",
+      "title": "Baked Tempeh",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A986B63ED3FF",
+      "title": "Lo Mein Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_A986B63ED3FF",
+      "title": "Lo Mein Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_AAD369D32D4F",
+      "title": "Spinach Quesadilla",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_AAD369D32D4F",
+      "title": "Spinach Quesadilla",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B12163C95EC7",
+      "title": "Tofu Stir Fry",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B12163C95EC7",
+      "title": "Tofu Stir Fry",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B12163C95EC7",
+      "title": "Tofu Stir Fry",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B237C38BB623",
+      "title": "Italian Pizza With Zucchini, Cherry Tomatoes And Mozzarella Chee",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B237C38BB623",
+      "title": "Italian Pizza With Zucchini, Cherry Tomatoes And Mozzarella Chee",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B2843B21CE46",
+      "title": "Steak Teriyaki",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B2843B21CE46",
+      "title": "Steak Teriyaki",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B2843B21CE46",
+      "title": "Steak Teriyaki",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B3BCAE1F73A7",
+      "title": "Chop Suey",
+      "field": "protein_sources",
+      "value": null,
+      "rule": [
+        "beef"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_B3CA4D294329",
+      "title": "Khao Pad (Thai Fried Rice)",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B4D718862D00",
+      "title": "Mexican Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B4F178FA5B73",
+      "title": "Hot Tamales",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B4F2A550663D",
+      "title": "\"Spaghetti And Meat Sauce For 50\"",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B50E98C61A88",
+      "title": "Colombian Red Beans - Frijoles Colombianos",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B50E98C61A88",
+      "title": "Colombian Red Beans - Frijoles Colombianos",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_B6E9EAA502E0",
+      "title": "Dominican Chimichurri Burgers",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B6E9EAA502E0",
+      "title": "Dominican Chimichurri Burgers",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B788087EF2A2",
+      "title": "Chicken Quesadillas With Tomato Salad",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B788087EF2A2",
+      "title": "Chicken Quesadillas With Tomato Salad",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B7C012C51A6D",
+      "title": "Vietnamese Vegetable Baguette (Banh Mi)",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B7C012C51A6D",
+      "title": "Vietnamese Vegetable Baguette (Banh Mi)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B8238A4718B6",
+      "title": "Potato And Parmesan Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B8238A4718B6",
+      "title": "Potato And Parmesan Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B8E67A023CFD",
+      "title": "Chtitha Batata (Algerian Potato Stew)",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_B8E67A023CFD",
+      "title": "Chtitha Batata (Algerian Potato Stew)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_B941DA1AAB4A",
+      "title": "Magdalena'S Empanadas",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B941DA1AAB4A",
+      "title": "Magdalena'S Empanadas",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B9A91EEFEF2B",
+      "title": "Chinese Rice",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_B9A91EEFEF2B",
+      "title": "Chinese Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BA25EE029647",
+      "title": "Brazilian Black Beans - Vegitarian",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_BA25EE029647",
+      "title": "Brazilian Black Beans - Vegitarian",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_BA5501343E98",
+      "title": "Hungarian Kifliks",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "egg"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BA741817426B",
+      "title": "Corn Souffle",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_BA741817426B",
+      "title": "Corn Souffle",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_BA95359C23B7",
+      "title": "Fried Polenta",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BA95359C23B7",
+      "title": "Fried Polenta",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BB79A09A52AC",
+      "title": "Wonton Wrappers",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "sauce",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BB79A09A52AC",
+      "title": "Wonton Wrappers",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BBA025B49BA6",
+      "title": "Pierogi",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "one_bowl",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BBA025B49BA6",
+      "title": "Pierogi",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BBD46E78E711",
+      "title": "Pupusas (El Salvadorean Tortilla)",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BBD46E78E711",
+      "title": "Pupusas (El Salvadorean Tortilla)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BE676A0D1F6F",
+      "title": "Pressure-Cooker Asian Wraps",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BE676A0D1F6F",
+      "title": "Pressure-Cooker Asian Wraps",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_BE6A51BF97A6",
+      "title": "Sloppy Joes",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_BF6BCDCBD8C3",
+      "title": "Cabbage Casserole",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_BF6BCDCBD8C3",
+      "title": "Cabbage Casserole",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C1E68B157F31",
+      "title": "Stuffed Lamb Tomatoes",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C1E68B157F31",
+      "title": "Stuffed Lamb Tomatoes",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C25D9C4D878B",
+      "title": "Yorkshire Pudding",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C25D9C4D878B",
+      "title": "Yorkshire Pudding",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C3B5C24F13AB",
+      "title": "Tater Tot Beef Bake",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C3B5C24F13AB",
+      "title": "Tater Tot Beef Bake",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C58164F6E689",
+      "title": "Cousin Judy'S Chow Mein",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_C7CFCE59ABE9",
+      "title": "Indian Potatoes With Cauliflower - Aloo Gobi",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C7CFCE59ABE9",
+      "title": "Indian Potatoes With Cauliflower - Aloo Gobi",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C7D3BB6B2788",
+      "title": "Easy Lasagne",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C7D3BB6B2788",
+      "title": "Easy Lasagne",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C81AEF8EF1AC",
+      "title": "Onion Creme Brulee",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C81AEF8EF1AC",
+      "title": "Onion Creme Brulee",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B5EA27D62D",
+      "title": "Thai Chicken Tacos",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B5EA27D62D",
+      "title": "Thai Chicken Tacos",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B759477F8B",
+      "title": "Gözleme (Turkish Flatbread)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B759477F8B",
+      "title": "Gözleme (Turkish Flatbread)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B86F1875A5",
+      "title": "Li'L Cheddar Meat Loaves",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8B86F1875A5",
+      "title": "Li'L Cheddar Meat Loaves",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C8FFCB4AA279",
+      "title": "Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_C94A3B3DAD51",
+      "title": "Grilled Steak Sandwiches With Chimichurri And Bell Peppers",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_C94A3B3DAD51",
+      "title": "Grilled Steak Sandwiches With Chimichurri And Bell Peppers",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CAE614EE3D95",
+      "title": "Italian Meatballs Pat'S Reciepe",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_CB386B8363E1",
+      "title": "Marilyn'S English Pasties",
+      "field": "protein_sources",
+      "value": [
+        "beef"
+      ],
+      "rule": [
+        "beef"
+      ],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CB88A5A0DF4C",
+      "title": "Africa-Bobotie",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CB88A5A0DF4C",
+      "title": "Africa-Bobotie",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CC48BBF1CD0E",
+      "title": "Moo Shu Pancakes",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CC48BBF1CD0E",
+      "title": "Moo Shu Pancakes",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CEEA9D67A7EE",
+      "title": "Basic Italian Cookies",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "egg"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_CEF5851EE683",
+      "title": "Enchilada Casserole",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_CF40179BCF86",
+      "title": "Easy Bobotie For Kid Chefs",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_CF40179BCF86",
+      "title": "Easy Bobotie For Kid Chefs",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D0F3CE9D133F",
+      "title": "Hot Chicken Salad",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D0F3CE9D133F",
+      "title": "Hot Chicken Salad",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D1A78AFA0C85",
+      "title": "Teenage Sloppy Joes",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D1A78AFA0C85",
+      "title": "Teenage Sloppy Joes",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D1E77FB18316",
+      "title": "Lasagne",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D1E77FB18316",
+      "title": "Lasagne",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D2771697D5AB",
+      "title": "Rolled Dumplings",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_D2771697D5AB",
+      "title": "Rolled Dumplings",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_D2B871893000",
+      "title": "Never-Fail Meat Loaf",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D2B871893000",
+      "title": "Never-Fail Meat Loaf",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D30FB234E549",
+      "title": "Rice And Sorghum Injera",
+      "field": "meal_role",
+      "value": null,
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_D30FB234E549",
+      "title": "Rice And Sorghum Injera",
+      "field": "contains_staple",
+      "value": null,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_D453A4530ADE",
+      "title": "Meat and Potatoes in Broth (Niku Jaga)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D453A4530ADE",
+      "title": "Meat and Potatoes in Broth (Niku Jaga)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D4970386CD19",
+      "title": "Royal Broccoli Souffle",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_D4970386CD19",
+      "title": "Royal Broccoli Souffle",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_D57A6F473637",
+      "title": "Gnocchi",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D57A6F473637",
+      "title": "Gnocchi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D803B75A27D8",
+      "title": "Easy Cheese Lasagna",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D803B75A27D8",
+      "title": "Easy Cheese Lasagna",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D82148B9AE3C",
+      "title": "Broccoli Pizza",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D82148B9AE3C",
+      "title": "Broccoli Pizza",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D86FDF8D821E",
+      "title": "Sweet And Sour Cabbage",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D86FDF8D821E",
+      "title": "Sweet And Sour Cabbage",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D875F1D29484",
+      "title": "Kalbi Venison",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_D8E98D9FFC37",
+      "title": "Tomatoes Provencale",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_D8E98D9FFC37",
+      "title": "Tomatoes Provencale",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_DB61A80B71EF",
+      "title": "Sinigang",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_DBF17212D390",
+      "title": "Easy Mexican Sopes",
+      "field": "meal_role",
+      "value": "sauce",
+      "rule": "staple",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_DBF17212D390",
+      "title": "Easy Mexican Sopes",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_DBFF4DB83EF2",
+      "title": "Butternut Squash Curry",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_DBFF4DB83EF2",
+      "title": "Butternut Squash Curry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_DC882B3F674A",
+      "title": "Banana Raita With Coconut",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_DD44C3D25E8E",
+      "title": "Banh Mi Bo Kho",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_DD44C3D25E8E",
+      "title": "Banh Mi Bo Kho",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E091A77EFBE5",
+      "title": "Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut)",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E091A77EFBE5",
+      "title": "Sauerkraut Auf Bayische Art(Bavarian Style Sauerkraut)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E20C08DE6172",
+      "title": "Polenta Gnocchi With Gorgonzola",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E20C08DE6172",
+      "title": "Polenta Gnocchi With Gorgonzola",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E34384C91EB9",
+      "title": "Chinese Hand-Pulled Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E34384C91EB9",
+      "title": "Chinese Hand-Pulled Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_E3B3B3009341",
+      "title": "Teriyaki Steak",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E3B3B3009341",
+      "title": "Teriyaki Steak",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E3B3B3009341",
+      "title": "Teriyaki Steak",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E5862A12458B",
+      "title": "Potato Croquettes With Parmesan",
+      "field": "meal_role",
+      "value": "snack",
+      "rule": "staple",
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_E5862A12458B",
+      "title": "Potato Croquettes With Parmesan",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_E5A66F91CB58",
+      "title": "Meat Ball Casserole",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E68974FE5EFE",
+      "title": "West African Meat Kebabs",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E6D5DE6253DA",
+      "title": "Easy Manicotti",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E6D5DE6253DA",
+      "title": "Easy Manicotti",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_E729691E63DA",
+      "title": "Sugar Free Cranberry Almond Biscotti",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "egg"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_E8D667BA918A",
+      "title": "Fake Feta",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "soy"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_EA7BB1D1BA3A",
+      "title": "Fried Rice",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_EC29565337D3",
+      "title": "Dumpling Noodles",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_EC29565337D3",
+      "title": "Dumpling Noodles",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_ED8C37EACE4D",
+      "title": "Mock Feta Cheese ( Vegan Substitute )",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [
+        "soy"
+      ],
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_EDF4D1848F6C",
+      "title": "Mexican Rice",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_EDF4D1848F6C",
+      "title": "Mexican Rice",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_EEA0EE59804C",
+      "title": "Putupap (South African Mealie Pap)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_EEA0EE59804C",
+      "title": "Putupap (South African Mealie Pap)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_EFA12409FC76",
+      "title": "Indian Raita (Cucumber Mix)",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F015BE03BD1C",
+      "title": "Bubble And Squeak",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "vegetable",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F015BE03BD1C",
+      "title": "Bubble And Squeak",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F12F72458249",
+      "title": "Bread Dumplings (Houskove Knedliky)",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F12F72458249",
+      "title": "Bread Dumplings (Houskove Knedliky)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F14B2A2B76D7",
+      "title": "Teriyaki Rice Paper Salmon (Baked)",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F14B2A2B76D7",
+      "title": "Teriyaki Rice Paper Salmon (Baked)",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F19948BC59AA",
+      "title": "Hungarian Goulash(Serves 6 To 8)",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_F19948BC59AA",
+      "title": "Hungarian Goulash(Serves 6 To 8)",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_F34E700C89B5",
+      "title": "Thai Red Curry",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_F36753718C88",
+      "title": "Chicken Thai Pizza",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F36753718C88",
+      "title": "Chicken Thai Pizza",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F480AAE0C111",
+      "title": "Sweet Potato & Pea Curry",
+      "field": "meal_role",
+      "value": "vegetable",
+      "rule": "staple",
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_F480AAE0C111",
+      "title": "Sweet Potato & Pea Curry",
+      "field": "contains_staple",
+      "value": false,
+      "rule": true,
+      "reason": "owner_decided"
+    },
+    {
+      "id": "RCP2_F484CD172351",
+      "title": "Post Thanksgiving Turkey Casserole",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F484CD172351",
+      "title": "Post Thanksgiving Turkey Casserole",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F58B8FD2E4BB",
+      "title": "Country Pâté Banh Mi",
+      "field": "protein_sources",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_F5998F6963E8",
+      "title": "Sauerkraut pierogi",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F5998F6963E8",
+      "title": "Sauerkraut pierogi",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F79DA309FE66",
+      "title": "Big Mac",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "protein_main",
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_F79DA309FE66",
+      "title": "Big Mac",
+      "field": "contains_staple",
+      "value": true,
+      "rule": false,
+      "reason": "rule_decided_conflicts"
+    },
+    {
+      "id": "RCP2_F8E5BA1851FC",
+      "title": "Quesadilla Casserole",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F8E5BA1851FC",
+      "title": "Quesadilla Casserole",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F8F9D659EDAB",
+      "title": "German Potato Salad With Cajun Sausage",
+      "field": "meal_role",
+      "value": "salad",
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_F8F9D659EDAB",
+      "title": "German Potato Salad With Cajun Sausage",
+      "field": "contains_staple",
+      "value": false,
+      "rule": null,
+      "reason": "outside_allowed_roles"
+    },
+    {
+      "id": "RCP2_F918B184F959",
+      "title": "Spaetzle",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F918B184F959",
+      "title": "Spaetzle",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F96C60076A19",
+      "title": "Korean Noodles And Beef(Main Course From Abroad - Pungent Dish)",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F96C60076A19",
+      "title": "Korean Noodles And Beef(Main Course From Abroad - Pungent Dish)",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
+      "field": "protein_sources",
+      "value": [],
+      "rule": [],
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FAC0F736C662",
+      "title": "Hoisin Chicken Wraps",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FAC0F736C662",
+      "title": "Hoisin Chicken Wraps",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FAD4D33E3669",
+      "title": "Rice Paper Wrapped Fish",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FAD4D33E3669",
+      "title": "Rice Paper Wrapped Fish",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FB5F31874C8A",
+      "title": "Fresh Ramen Egg Noodles From Scratch",
+      "field": "meal_role",
+      "value": "staple",
+      "rule": "staple",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FB5F31874C8A",
+      "title": "Fresh Ramen Egg Noodles From Scratch",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FBB45D25EC0B",
+      "title": "Seriously Asian: Hooked On Udon Recipe",
+      "field": "meal_role",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_FBB45D25EC0B",
+      "title": "Seriously Asian: Hooked On Udon Recipe",
+      "field": "contains_staple",
+      "value": null,
+      "rule": null,
+      "reason": "left_open"
+    },
+    {
+      "id": "RCP2_FE6B12FA54B8",
+      "title": "Crackling Rice Paper-Wrapped Fish",
+      "field": "meal_role",
+      "value": "protein_main",
+      "rule": "protein_main",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FE6B12FA54B8",
+      "title": "Crackling Rice Paper-Wrapped Fish",
+      "field": "contains_staple",
+      "value": false,
+      "rule": false,
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FF3C50B5519E",
+      "title": "Vietnamese \"Banh Mi\" Chicken Burger",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "rule": "one_bowl",
+      "reason": "rule_decided_agrees"
+    },
+    {
+      "id": "RCP2_FF3C50B5519E",
+      "title": "Vietnamese \"Banh Mi\" Chicken Burger",
+      "field": "contains_staple",
+      "value": true,
+      "rule": true,
+      "reason": "rule_decided_agrees"
+    }
+  ]
+}

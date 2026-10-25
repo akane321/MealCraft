@@ -75,6 +75,56 @@ unchanged; overlap is a preference signal, not evidence of a cheaper checkout.
 Console wiring and production catalog classification are separate integration
 steps. A caller must not describe an unclassified legacy result as P3 compliant.
 
+## Recipe-pair signals for the next diversity policy
+
+`app/planning/recipe_pair_similarity.py` prepares a supplied candidate pool and
+returns three separate signals for each pair: Jaccard overlap of cleaned title
+words, Jaccard overlap of canonical ingredient names, and cosine similarity of
+the committed recipe vectors. Ingredient rows are deduplicated; quantities and
+ingredient hierarchy equivalence are not inferred. Shared ingredients alone do
+not mean two dishes are equivalent: tomato soup and tomato salad may share them.
+
+The vector source records its model, dimensions and source-text digest. Stored
+signed int8 rows are normalized before comparison. Missing, zero or truncated
+rows yield an unknown vector signal, never a zero similarity or a perfect match.
+Empty title or ingredient evidence is unknown too. No model request is made.
+The vector snapshot's digest identifies its source; it does not verify that a
+recipe edited since embedding still has a matching vector.
+
+This is a signal calculation component for developer calibration. It does not
+alter product ranking, change eligibility or replace the
+independent validator. A near-duplicate threshold and grouping policy must be
+checked on developer examples before these signals decide the new shared
+objective; existing title-based product ordering remains in place meanwhile.
+
+The developer calibration now lives in `docs/evaluation/algorithm-dev/`.
+`algorithm_objective.py` and `diversity_greedy.py` consume an explicitly supplied
+policy in a separate experimental algorithm arm. Product defaults are unchanged.
+The ordering is lexicographic: fill optional positions, maximize conservative
+distinct representatives, minimize repeat pairs, normalized soft nutrition
+deviation, declared ranking loss, then exact package checkout cost. Representatives
+are selected in stable key order, accepting only keys distinct from every prior
+representative. This is a conservative count, not maximum independent-set
+optimization. Unknown pairs earn no distinctness credit and incur repeat cost.
+Staple exemptions follow the problem; hard constraints remain hard.
+
+The greedy arm reuses meal candidate generation and checks exact package cost
+with one-meal lookahead. A complete result must pass the independent validator.
+Search failure does not prove infeasibility. The shared objective can rescore
+other validated results, but existing beam search has not been changed to
+optimize it. Comparisons must freeze candidates, limits, ranking inputs and
+nutrition scales before drawing conclusions about algorithm quality.
+
+`near_duplicate_groups.py` provides an experimental consumer with explicit,
+versioned thresholds and no production defaults. All three signals must meet
+their thresholds; missing evidence yields `unknown`. It builds complete-link
+groups in stable key order, so every pair inside a group is near under the
+supplied policy. This avoids transitive chains merging dissimilar endpoints.
+It is not an optimal-clustering claim. Unknown pairs and all near pairs are
+returned alongside the groups: two groups may still contain a near pair, so
+group count alone must not be presented as proven variety. Synthetic test
+thresholds verify mechanics only, not catalog accuracy or calibration.
+
 
 ## Composed meal soft terms
 

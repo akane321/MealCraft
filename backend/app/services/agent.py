@@ -1,6 +1,7 @@
 import math
 import re
 from collections.abc import Callable
+from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -141,6 +142,12 @@ def _variety_decision(message: str) -> ScopeDecision:
 
 REPLAN_REFUSED = "REPLAN_REFUSED"
 
+# A confirmation runs the whole plan search inside its own run, and the full meal structure (ADR-0070) can take
+# minutes for a large household on a tight budget (the developer six-person S$420 week: `timing.md`). Planning time
+# has no hard limit and a slow plan never becomes an error (owner, 2026-10-21; ADR-0080): the run's wall-time budget
+# is checked before the planner starts, never on the records that follow it (`record_tool(check_deadline=False)`).
+# A fixed longer ceiling (300 s) only moved the error to a slower household.
+
 
 def _refused(decision: ScopeDecision) -> ScopeDecision:
     """The decision of a turn whose change the planner could not make: the reply says why and nothing changed."""
@@ -163,9 +170,12 @@ def profile_constraints(version) -> AgentConstraintState:
             "max_cooking_time_minutes": version.max_cooking_time_minutes,
             "budget_per_meal_sgd": version.budget_per_meal_sgd,
             "weekly_budget_sgd": version.weekly_budget_sgd,
+            # The whole household's allergens; each member's exclusions and diet stay with the member in
+            # `household` (ADR-0071 sections 1 and 2). What the conversation itself states is the household's,
+            # the safe reading for an allergen named out loud.
             "allergens": version.allergens,
-            "excluded_ingredients": version.excluded_ingredients,
-            "dietary_preferences": version.dietary_preferences,
+            "excluded_ingredients": [],
+            "dietary_preferences": [],
             "health_preferences": version.health_preferences,
             "nutrition_targets": version.nutrition_targets,
             "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,
@@ -1177,15 +1187,18 @@ class AgentSessionService:
         try:
             plan = self.meal_plan_service.generate(request)
         except Exception as error:
-            self.run_lifecycle.record_tool(
-                run,
-                tool_name="generate_plan_preview",
-                effect=ToolEffect.PREVIEW,
-                status=ToolRunStatus.FAILED,
-                arguments=request.model_dump(mode="json"),
-                provider_mode=constraints.pricing_mode,
-                error_code=type(error).__name__,
-            )
+            # Recording the failure must never replace it: the household is owed the planner's own reason.
+            with suppress(AgentRunLifecycleError):
+                self.run_lifecycle.record_tool(
+                    run,
+                    tool_name="generate_plan_preview",
+                    effect=ToolEffect.PREVIEW,
+                    status=ToolRunStatus.FAILED,
+                    arguments=request.model_dump(mode="json"),
+                    provider_mode=constraints.pricing_mode,
+                    error_code=type(error).__name__,
+                    check_deadline=False,
+                )
             self._fail_run(run, error)
             if isinstance(error, WeeklyPlanSelectionError):
                 raise WeeklyPlanSelectionError(self._explain_unplanned(snapshot, error, lang)) from error
@@ -1198,6 +1211,7 @@ class AgentSessionService:
             arguments=request.model_dump(mode="json"),
             result_reference=f"meal-plan:{plan.id}:revision:{plan.revision}",
             provider_mode=constraints.pricing_mode,
+            check_deadline=False,
         )
         updated = self.repository.mark_planned(session_id, plan_id=plan.id, assistant_message=say("planned", lang))
         if updated is None:
@@ -1211,6 +1225,7 @@ class AgentSessionService:
             arguments={"plan_id": plan.id, "revision": plan.revision},
             result_reference=f"meal-plan:{plan.id}:revision:{plan.revision}",
             provider_mode=constraints.pricing_mode,
+            check_deadline=False,
         )
         run = self.run_lifecycle.checkpoint(
             run,
@@ -1263,14 +1278,16 @@ class AgentSessionService:
         try:
             result = self.replanning_service.confirm(plan_id=plan_id, event_id=event_id)
         except Exception as error:
-            self.run_lifecycle.record_tool(
-                run,
-                tool_name="confirm_replan",
-                effect=ToolEffect.COMMIT,
-                status=ToolRunStatus.FAILED,
-                arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
-                error_code=type(error).__name__,
-            )
+            with suppress(AgentRunLifecycleError):  # never in place of the planner's own reason
+                self.run_lifecycle.record_tool(
+                    run,
+                    tool_name="confirm_replan",
+                    effect=ToolEffect.COMMIT,
+                    status=ToolRunStatus.FAILED,
+                    arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
+                    error_code=type(error).__name__,
+                    check_deadline=False,
+                )
             self._fail_run(run, error)
             raise
         run = self.run_lifecycle.record_tool(
@@ -1280,6 +1297,7 @@ class AgentSessionService:
             status=ToolRunStatus.SUCCEEDED,
             arguments={"plan_id": plan_id, "event_id": event_id, "base_revision": base_revision},
             result_reference=f"meal-plan:{plan_id}:revision:{result.plan.revision}",
+            check_deadline=False,
         )
         ask_keep = (
             result.event.shape_change is not None
@@ -1439,11 +1457,13 @@ class AgentSessionService:
         idempotency_key: str | None,
         plan_revision: int | None = None,
         scope_decision: ScopeDecision | None = None,
+        max_wall_seconds: int | None = None,
         now: datetime | None = None,
     ) -> StartedRun:
         normalized_key = (idempotency_key or f"generated:{uuid4().hex}").strip()
         if not normalized_key or len(normalized_key) > 120:
             raise AgentRunLifecycleError("Idempotency-Key must contain 1 to 120 characters.")
+        budget = {} if max_wall_seconds is None else {"max_wall_seconds": max_wall_seconds}
         return self.run_lifecycle.start(
             agent_session_id=agent_session_id,
             idempotency_key=normalized_key,
@@ -1455,6 +1475,7 @@ class AgentSessionService:
             model_config=self.model_config(),
             actor_user_id=self.actor_user_id,
             household_id=self.household_id,
+            **budget,
             now=now,
         )
 

@@ -132,6 +132,8 @@ watch(() => session.value?.pending_replan, (now, before) => {
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const readOnly = computed(() => Boolean(plan.value && replaced.value));
+// A viewer only reads the week; anyone who checks meals in may give a dish feedback (ADR-0087).
+const canGiveFeedback = computed(() => Boolean(actor.value?.household_role && actor.value.household_role !== "viewer"));
 // The preview's buttons say what each does to this kind of change (a lock is kept, not "changed").
 const choices = computed(() => previewChoices(session.value?.pending_replan?.event_type ?? "REPLACE_MEAL"));
 // How far the suggested change takes the week over its budget, said before the household confirms it.
@@ -651,7 +653,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <button type="button" class="mc-btn primary" :disabled="isLoading" @click="agent.confirm()">
                   {{ isLoading ? "Planning your week…" : "Plan my week" }}
                 </button>
-                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take up to half a minute to plan.</p>
+                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 
@@ -799,7 +801,19 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 @open-recipe="recipeSlug = $event"
                 @swap="swap"
               />
-              <HomeMealList :days="days" :readonly="readOnly" :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" @open-recipe="recipeSlug = $event" @ask="suggest" />
+              <HomeMealList
+                :days="days"
+                :readonly="readOnly"
+                :plan-id="plan.id"
+                :revision="plan.revision"
+                :start-date="plan.start_date"
+                :can-give-feedback="canGiveFeedback"
+                :feedback-recipe-id="nutrition.feedbackRecipeId.value"
+                :feedback-error="nutrition.feedbackError.value"
+                @open-recipe="recipeSlug = $event"
+                @ask="suggest"
+                @feedback="nutrition.setFeedback"
+              />
             </template>
             <HomeGroceryList v-else-if="tab === 'groceries'" :estimate="plan.grocery_estimate" />
             <HomeNutritionSummary

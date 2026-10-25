@@ -8,16 +8,18 @@ from app.data.household_reference import hpb
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
-from app.planning.household_slots import limit_targets, rules_on, slot_time_limit
+from app.planning.household_slots import limit_targets, rules_on, slot_members, slot_time_limit
 from app.planning.meal_composition import (
     catalog_role_admits,
     equipment_met,
     fills_staple,
     meal_minutes,
+    meal_role_of,
     portion_shares,
     role_base,
     structured_shares,
 )
+from app.planning.member_coverage import CoverageDish, catalog_can_eat, coverage_failures
 from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day, pool_courses, pool_for
 from app.planning.recipe_quality import dish_family
 from app.planning.recipe_similarity import RecipeSimilarity
@@ -30,6 +32,7 @@ from app.repositories.meal_plan import (
     grocery_share,
 )
 from app.repositories.recipe import RecipeRepository
+from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
 from app.schemas.display import shown_title
 from app.schemas.meal_plan import (
     MealPlanEntrySnapshot,
@@ -135,6 +138,7 @@ class MealPlanReplanningService:
         grocery_aggregator: WeeklyGroceryAggregator,
         request_similarity: RecipeSimilarity | None = None,
         meal_plan_service: WeeklyMealPlanService | None = None,
+        live_feedback: bool = False,
     ) -> None:
         self.repository = repository
         self.recipe_repository = recipe_repository
@@ -144,6 +148,17 @@ class MealPlanReplanningService:
         self.request_similarity = request_similarity
         # Plans the dishes of a shape change (ADR-0046 section 2).
         self.meal_plan_service = meal_plan_service
+        # A change plans without the household's "Never again" dishes as they are now (ADR-0087).
+        self.live_feedback = live_feedback
+
+    def _constraints(self, plan: MealPlan) -> WeeklyMealPlanRequest:
+        """The request a change to `plan` is planned with, priced at snapshot prices."""
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
+            update={"pricing_mode": "fixture"}
+        )
+        if not self.live_feedback:
+            return constraints
+        return with_never_again(constraints, self.repository.session, self.repository.household_id)
 
     def preview(
         self,
@@ -159,9 +174,7 @@ class MealPlanReplanningService:
             raise MealPlanReplanNotFoundError("Meal-plan entry not found")
         self._validate_target(entry, request)
 
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         role = self._role(constraints, entry)
         meals = [(entry.meal_type, [role])] if role is not None else None
         recipes = pool_for(meals, self.recipe_repository.list_for_planning(courses=pool_courses(meals)))
@@ -191,7 +204,13 @@ class MealPlanReplanningService:
                 and item.meal_type == entry.meal_type
                 and (item.id == entry.id or not (item.is_locked or item.status in {"completed", "skipped"}))
             ]
-        after_entry = self._after_entry_snapshot(entry, request, recommendation, plan.household_size)
+        # The new dish is cooked for the members home for that meal who can eat it (ADR-0071 section 1).
+        swapped = (
+            self._swap_servings(constraints, entry, recipes_by_id[recommendation.recipe.id])
+            if recommendation is not None
+            else None
+        )
+        after_entry = self._after_entry_snapshot(entry, request, recommendation, plan.household_size, swapped)
         before_grocery = self._current_grocery(plan)
         if request.event_type == "LOCK_MEAL":
             after_grocery = before_grocery
@@ -203,6 +222,7 @@ class MealPlanReplanningService:
                 event_type=request.event_type,
                 proposed_recipe_id=recommendation.recipe.id if recommendation else None,
                 recipes_by_id=recipes_by_id,
+                swapped_servings=swapped,
             )
             after_grocery = self._as_saved(
                 plan,
@@ -249,9 +269,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         meal = request.meal_type
         today = today or local_today()
         if any(day > plan.day_count for day in request.day_indexes or []):
@@ -376,9 +394,7 @@ class MealPlanReplanningService:
         plan = self.repository.get(plan_id)
         if plan is None:
             raise MealPlanReplanNotFoundError("Meal plan not found")
-        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
-        )
+        constraints = self._constraints(plan)
         eaten = sorted((item for item in plan.entries if item.status != "skipped"), key=lambda e: (e.day_index, e.id))
         same: dict[str, list[MealPlanEntry]] = {}
         for item in eaten:
@@ -407,25 +423,18 @@ class MealPlanReplanningService:
         swaps: dict[int, RecipeRecommendationResponse] = {}
         short = None
         changed: set[tuple[int, str]] = set()
-        # The dishes that took the week over in place of one repeat of a dish are not tried for its next: the
-        # week differs only by the swaps made meanwhile, each within what it can spend.
-        # ponytail: a swap that freed room could let one fit; trying every dish again for every repeat took a
-        # week of seventeen repeats 15 s (ADR-0046 section 3: an answer within 10 s).
-        misfits: dict[tuple, set[int]] = {}
+        # Every repeat tries every dish again, also one that took the week over for an earlier repeat: a swap made
+        # meanwhile can free room, and a dish on another day can share or split packages differently (a plan of two
+        # trips buys each on its own trip). Skipping them saved time only (owner, 2026-10-22; ADR-0080).
         for entry in repeats:
             if (entry.day_index, entry.meal_type) in changed:
                 continue  # one dish a meal: a meal is checked with the dishes it keeps (`_meal_still_holds`)
             candidates = self._replacements(plan, entry, constraints, pool, recipes_by_id, avoid=served)
-            tried = misfits.setdefault((entry.meal_type, entry.role_id, dish_family(entry.recipe.title)), set())
-            ranked = sorted(
-                (c for c in candidates if c.recipe.id not in tried),
-                key=lambda c: (c.total_score, -c.recipe.id),
-                reverse=True,
-            )
+            ranked = sorted(candidates, key=lambda c: (c.total_score, -c.recipe.id), reverse=True)
             if not ranked:
                 continue
             made = {entry_id: choice.recipe.id for entry_id, choice in swaps.items()}
-            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked, tried)
+            choice, extra = self._fitting(plan, constraints, recipes_by_id, made, entry, ranked)
             if extra is not None:
                 short = extra if short is None else min(short, extra)
                 continue
@@ -445,8 +454,8 @@ class MealPlanReplanningService:
                     role_id=item.role_id,
                     portion_share=Fraction(str(item.portion_share)),
                     recommendation=swaps[item.id],
-                    # The new dish is cooked for the replaced one's servings.
-                    servings=Fraction(str(item.servings)) if item.servings is not None else None,
+                    # The new dish is cooked for the members who can eat it (ADR-0071 section 1).
+                    servings=self._swap_servings(constraints, item, recipes_by_id[swaps[item.id].recipe.id]),
                     household_size=plan.household_size,
                 )
             )
@@ -603,7 +612,7 @@ class MealPlanReplanningService:
         recipes = {r.id: r for r in self.recipe_repository.list_by_ids(list({i.recipe_id for i in kept}))}
         rest = [(recipes[item.recipe_id], grocery_share(item, constraints.household_size)) for item in kept]
         left = None
-        if budget is not None:
+        if budget is not None and constraints.day_count <= meal_structure.trip_days():
             # What is left is what the rest of the week does not spend at the checkout, in whole packages:
             # what its dishes use leaves room the week has already paid for, and a plan made to fit that
             # room would go over the budget without trying the cheapest plans first.
@@ -615,7 +624,7 @@ class MealPlanReplanningService:
             update={
                 "plan_shape": MealPlanShape(meals={meal: roles}),
                 "meal_composition": None,
-                "weekly_budget_sgd": left,
+                "weekly_budget_sgd": budget if constraints.day_count > meal_structure.trip_days() else left,
             }
         )
         first = min(days)
@@ -627,6 +636,16 @@ class MealPlanReplanningService:
             # of it, made a repeat up to twice as dear on two meals a day: dear varied changes beat the cheapest.
             meals = len({(item.day_index, item.meal_type) for item in kept} | {(day, meal) for day in days})
             over_budget = round(budget * len(days) / meals, 2)
+        trip_penalties = None
+        if budget is not None and constraints.day_count > meal_structure.trip_days():
+            interval = meal_structure.trip_days()
+            trip_penalties = {}
+            for trip in {1 + (day - 1) // interval for day in days}:
+                trip_days = {day for day in days if 1 + (day - 1) // interval == trip}
+                trip_meals = {
+                    (item.day_index, item.meal_type) for item in kept if 1 + (item.day_index - 1) // interval == trip
+                } | {(day, meal) for day in trip_days}
+                trip_penalties[trip] = round(budget * len(trip_days) / len(trip_meals), 2)
         try:
             dishes = self.meal_plan_service.plan_dishes(
                 partial,
@@ -634,6 +653,8 @@ class MealPlanReplanningService:
                 day_count=len(days),
                 day_indices=sorted(days),
                 rest=rest,
+                rest_days=[item.day_index for item in kept],
+                over_budget_by_trip=trip_penalties,
                 keep=self._dishes_kept_when_adding(roles, removed),
                 over_budget=over_budget,
                 by_weight=weighed,
@@ -681,6 +702,11 @@ class MealPlanReplanningService:
             raise MealPlanReplanConflictError(
                 "This preview is stale because the meal plan has changed. Generate a new preview."
             )
+        if self.live_feedback and self._brings_never_again(event):
+            # A Never again pressed after the preview does not change the plan's revision (ADR-0087).
+            raise MealPlanReplanConflictError(
+                "This preview is stale because the meal plan has changed. Generate a new preview."
+            )
 
         proposed = self.recipe_repository.list_by_ids([event.proposed_recipe_id] if event.proposed_recipe_id else [])
         proposed_recipe = proposed[0] if proposed else None
@@ -720,6 +746,14 @@ class MealPlanReplanningService:
             event=self._event_response(applied_event),
             plan=WeeklyMealPlanService._to_response(applied_plan),
         )
+
+    def _brings_never_again(self, event: MealPlanEvent) -> bool:
+        """Whether confirming `event` would plan a dish the household now marks "Never again"."""
+        brought = {event.proposed_recipe_id} | {
+            values["recipe_id"] for values in (event.shape_change or {}).get("new_entries", [])
+        }
+        states = RecipeFeedbackRepository(self.repository.session, household_id=self.repository.household_id).states()
+        return any(states.get(recipe_id) == "never_again" for recipe_id in brought)
 
     def list_events(self, *, plan_id: int, limit: int) -> MealPlanReplanEventCollectionResponse:
         if self.repository.get(plan_id) is None:
@@ -887,6 +921,16 @@ class MealPlanReplanningService:
                     for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
                 }
             ]
+        if self._slot_members(constraints, entry):
+            # Every meal, composed or not: a swap may not leave a member at the table with nothing to eat
+            # (ADR-0071 section 1). `_meal_still_holds` only runs for a dish of a composed meal, so a one-dish
+            # dinner would otherwise be swapped with no coverage check at all, while the planner refuses the
+            # same meal. Without members this is identity, so a request with no household block is untouched.
+            candidates = [
+                item
+                for item in candidates
+                if self._coverage_after_swap(constraints, entry, recipes_by_id[item.recipe.id], plan)
+            ]
         role = self._role(constraints, entry)
         if role is not None:
             # One dish of a composed meal: it fills the same role, and the meal must still hold
@@ -913,10 +957,9 @@ class MealPlanReplanningService:
             trips=entry_trips(plan, eaten),
         )
 
-    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked, misfits=None) -> tuple:
+    def _fitting(self, plan, constraints, recipes_by_id, swaps, entry, ranked) -> tuple:
         """The first of `ranked` for `entry` that keeps the week within its budget, or no further over it than it
-        is, with `swaps` also made, and None; else the one that takes it over least, and by how much. Each one
-        that does not fit is added to `misfits`.
+        is, with `swaps` also made, and None; else the one that takes it over least, and by how much.
 
         Whole packages decide, given what the rest of the week buys: a dish sharing the week's cabbage costs
         less than its own estimate says (the walkthrough's swaps took the week S$9 to S$17 over its budget).
@@ -933,8 +976,6 @@ class MealPlanReplanningService:
             cents = drift + round(grocery.purchase_total_sgd * 100)
             if cents <= ceiling:
                 return candidate, None
-            if misfits is not None:
-                misfits.add(candidate.recipe.id)
             if least is None or cents < least[1]:
                 least = (candidate, cents)
         return least[0], (least[1] - ceiling) / 100
@@ -999,7 +1040,18 @@ class MealPlanReplanningService:
         policy = STRUCTURED_TIME if structured(roles) else PlanningCompositionPolicy()
         if limit is not None and meal_minutes(dishes, policy) > limit:
             return False
-        if structured(roles) and not MealPlanReplanningService._real_meal_holds(entry, candidate, others, roles):
+        at_table = bool(MealPlanReplanningService._slot_members(constraints, entry))
+        if structured(roles) and not MealPlanReplanningService._real_meal_holds(
+            entry, candidate, others, roles, at_table
+        ):
+            return False
+        # The filling core and the vegetable dish are a lunch-and-dinner rule (`meal_composition.real_meal_issues`
+        # returns before them for any other meal). A structured breakfast holds no protein main, staple or
+        # one-bowl dish, so applying them there refused every breakfast swap; `_coverage_after_swap` holds it to
+        # the weakest form instead, which is the one the planner uses for it.
+        if MealPlanReplanningService._fully_covered(roles, entry) and not MealPlanReplanningService._coverage_holds(
+            constraints, entry, candidate, others
+        ):
             return False
         if rules_on(constraints) and MealPlanReplanningService._perishable_late(plan, entry, candidate):
             return False
@@ -1023,6 +1075,91 @@ class MealPlanReplanningService:
         return True
 
     @staticmethod
+    def _slot_members(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry) -> list:
+        """The members home for the swapped dish's meal, with each one's own limits (ADR-0071 section 1)."""
+        return slot_members(
+            constraints.household,
+            entry.planned_date,
+            entry.meal_type,
+            meal_structure.energy_floor_share(entry.meal_type),
+        )
+
+    @staticmethod
+    def _swap_servings(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry, candidate: Recipe) -> Fraction | None:
+        """The servings the new dish is cooked for: the members home for that meal who can eat it, at the
+        replaced dish's share of the meal (ADR-0071 section 1).
+
+        Without members, the replaced dish's own servings, as before: a swap changed the dish, not the table.
+        """
+        kept = Fraction(str(entry.servings)) if entry.servings is not None else None
+        members = MealPlanReplanningService._slot_members(constraints, entry)
+        cooked = alternatives.lines(candidate, constraints)
+        able = [member for member in members if catalog_can_eat(member, candidate, cooked)]
+        if not able:
+            return kept
+        base = sum((Fraction(str(member.servings)) for member in able), Fraction(0))
+        return base * Fraction(str(entry.portion_share))
+
+    @staticmethod
+    def _coverage_holds(
+        constraints: WeeklyMealPlanRequest, entry: MealPlanEntry, candidate: Recipe, others: list[MealPlanEntry]
+    ) -> bool:
+        """Whether every member home for the meal is still covered after the swap (ADR-0071 section 1)."""
+        members = MealPlanReplanningService._slot_members(constraints, entry)
+        if not members:
+            return True
+
+        def dish(role_id: str, recipe: Recipe, share) -> CoverageDish:
+            return CoverageDish(
+                role_id=role_id or "main",
+                protein_main=meal_role_of(recipe) == "protein_main",
+                carries_staple=fills_staple(recipe),
+                calories_kcal=float(recipe.nutrition.calories_kcal) if recipe.nutrition is not None else 0.0,
+                share=float(share),
+                eaten_by=frozenset(
+                    m.name for m in members if catalog_can_eat(m, recipe, alternatives.lines(recipe, constraints))
+                ),
+            )
+
+        dishes = [dish(item.role_id, item.recipe, item.portion_share) for item in others]
+        dishes.append(dish(entry.role_id, candidate, entry.portion_share))
+        return not coverage_failures(members, dishes)
+
+    @staticmethod
+    def _fully_covered(roles, entry: MealPlanEntry) -> bool:
+        """Whether this meal is one the full coverage rules can judge: a structured lunch or dinner.
+
+        The same line `meal_composition.real_meal_issues` draws, so a swap is held to exactly what the planner
+        held the meal to when it made it.
+        """
+        return structured(roles) and entry.meal_type in ("lunch", "dinner")
+
+    @staticmethod
+    def _coverage_after_swap(
+        constraints: WeeklyMealPlanRequest, entry: MealPlanEntry, candidate: Recipe, plan: MealPlan
+    ) -> bool:
+        """Whether every member home for the meal still has a dish to eat once `candidate` replaces the entry.
+
+        A structured lunch or dinner is judged by the full rules in `_meal_still_holds`; this is the weakest
+        form (`member_coverage.member_has_a_dish`), which holds everywhere, so a breakfast, a one-dish dinner or
+        a meal of course roles cannot leave a member with an empty plate (ADR-0071 section 1).
+        """
+        members = MealPlanReplanningService._slot_members(constraints, entry)
+        if not members:
+            return True
+        others = [
+            item
+            for item in plan.entries
+            if item.day_index == entry.day_index
+            and item.meal_type == entry.meal_type
+            and item.id != entry.id
+            and item.status != "skipped"
+        ]
+        served = [item.recipe for item in others] + [candidate]
+        cooked = {recipe.id: alternatives.lines(recipe, constraints) for recipe in served}
+        return all(any(catalog_can_eat(member, recipe, cooked[recipe.id]) for recipe in served) for member in members)
+
+    @staticmethod
     def _meal_roles(constraints: WeeklyMealPlanRequest, entry: MealPlanEntry) -> list:
         roles = (
             constraints.plan_shape.meals.get(entry.meal_type)
@@ -1032,23 +1169,26 @@ class MealPlanReplanningService:
         return list(roles or [])
 
     @staticmethod
-    def _real_meal_holds(entry: MealPlanEntry, candidate: Recipe, others: list[MealPlanEntry], roles) -> bool:
+    def _real_meal_holds(
+        entry: MealPlanEntry, candidate: Recipe, others: list[MealPlanEntry], roles, members_present: bool = False
+    ) -> bool:
         """A swap in a structured meal keeps it a real meal (ADR-0070): a core dish keeps whether it carries the
         staple, a protein main shares no protein source with the meal's other mains, and a lunch or dinner keeps
         its energy floor per serving. Tags hold by the role (`catalog_role_admits`)."""
         core = core_role(roles)
         if core is not None and entry.role_id == core.role_id and fills_staple(candidate) != fills_staple(entry.recipe):
             return False
+        mains = [item.recipe for item in others if role_base(item.role_id) == "main"]
         if role_base(entry.role_id) == "main":
-            taken = {
-                source
-                for item in others
-                if role_base(item.role_id) == "main"
-                for source in getattr(item.recipe, "protein_sources", None) or []
-            }
-            if taken & set(getattr(candidate, "protein_sources", None) or []):
+            mains.append(candidate)
+        taken = set()
+        for main in mains:
+            sources = getattr(main, "protein_sources", None)
+            if sources is None or taken.intersection(sources):
                 return False
-        share = meal_structure.energy_floor_share(entry.meal_type)
+            taken.update(sources)
+        # With members at the table each one's own floor is checked instead (`_coverage_holds`).
+        share = None if members_present else meal_structure.energy_floor_share(entry.meal_type)
         if share and candidate.nutrition is not None:
             energy = sum(float(item.calories_kcal) for item in others)
             energy += float(candidate.nutrition.calories_kcal) * float(entry.portion_share)
@@ -1072,8 +1212,12 @@ class MealPlanReplanningService:
         event_type: str,
         proposed_recipe_id: int | None,
         recipes_by_id: dict[int, Recipe],
+        swapped_servings: Fraction | None = None,
     ) -> list[tuple[Recipe, float, MealPlanEntry]]:
-        """Each dish still eaten after the event, with its portion share and its entry."""
+        """Each dish still eaten after the event, with its portion share and its entry.
+
+        `swapped_servings` are the new dish's own servings, which may differ from the replaced dish's when the
+        members who can eat it differ (ADR-0071 section 1)."""
         recipes: list[tuple[Recipe, float, MealPlanEntry]] = []
         for entry in plan.entries:
             if entry.status == "skipped" or (entry.id == target.id and event_type == "CANCEL_MEAL"):
@@ -1084,7 +1228,10 @@ class MealPlanReplanningService:
             recipe = recipes_by_id.get(recipe_id)
             if recipe is None:
                 raise MealPlanReplanNotFoundError("A recipe used by this plan no longer exists")
-            recipes.append((recipe, grocery_share(entry, plan.household_size), entry))
+            share = grocery_share(entry, plan.household_size)
+            if entry.id == target.id and swapped_servings is not None and plan.household_size:
+                share = float(swapped_servings) / plan.household_size
+            recipes.append((recipe, share, entry))
         return recipes
 
     @staticmethod
@@ -1113,6 +1260,7 @@ class MealPlanReplanningService:
         request: MealPlanReplanPreviewRequest,
         recommendation: RecipeRecommendationResponse | None,
         household_size: int | None = None,
+        servings: Fraction | None = None,
     ) -> dict:
         snapshot = MealPlanReplanningService._entry_snapshot(entry)
         if request.event_type == "LOCK_MEAL":
@@ -1122,8 +1270,11 @@ class MealPlanReplanningService:
         elif recommendation is not None:
             estimate = recommendation.grocery_estimate
             share = float(entry.portion_share)
-            # Its cost is for the replaced dish's servings: the estimate is for the household size.
+            # Its cost is for the servings it is cooked for: the estimate is for the household size.
             cost_share = grocery_share(entry, household_size) if household_size else share
+            if servings is not None and household_size:
+                cost_share = float(servings) / household_size
+                snapshot["servings"] = round(float(servings), 3)
             snapshot.update(
                 {
                     "recipe_id": recommendation.recipe.id,

@@ -1,0 +1,61 @@
+{
+  "dictionary_version": "sprint2-fields-v1",
+  "description": "Neutral user-request vocabulary, not application internals. Inline schemas only; extend before freezing and hash exact bytes.",
+  "scopes": {
+    "household": "All household members unless explicitly targeted",
+    "member": "Members named by target_member_ids on the constraint",
+    "meal": "Each requested meal",
+    "day": "Each requested day",
+    "week": "Each seven-day budget period, including a shorter final period",
+    "trip": "Each shopping trip separately",
+    "plan": "The entire requested date range"
+  },
+  "fields": {
+    "action": {"units": ["none"], "schema": {"type": "string", "enum": ["plan", "swap", "change_meal_structure", "change_budget", "food_qa", "record_preference", "clarify", "refuse"]}},
+    "request_scope": {"units": ["none"], "schema": {"type": "string", "enum": ["meal", "day", "week", "range"]}},
+    "household_size": {"units": ["people"], "schema": {"type": "integer", "minimum": 1}},
+    "start_date": {"units": ["date"], "schema": {"type": "string", "format": "date"}},
+    "horizon_days": {"units": ["days"], "schema": {"type": "integer", "minimum": 1, "maximum": 14}},
+    "meal_types": {"units": ["none"], "schema": {"type": "array", "uniqueItems": true, "items": {"enum": ["breakfast", "lunch", "dinner"]}}},
+    "members": {"units": ["people"], "schema": {"type": "array", "items": {"type": "object", "required": ["member_id"], "additionalProperties": false, "properties": {
+      "member_id": {"type": "string", "minLength": 1},
+      "age_band": {"enum": ["toddler", "child", "teen", "adult", "older_adult", "unknown"]},
+      "sex": {"enum": ["female", "male", "unknown"]},
+      "portion_factor": {"type": "number", "exclusiveMinimum": 0},
+      "dietary_requirements": {"type": "array", "items": {"type": "string"}},
+      "allergens": {"type": "array", "items": {"type": "string"}},
+      "excluded_ingredients": {"type": "array", "items": {"type": "string"}}
+    }}}},
+    "attendance": {"units": ["none"], "schema": {"type": "array", "items": {"type": "object", "required": ["date", "meal_type", "absent_member_ids"], "additionalProperties": false, "properties": {
+      "date": {"type": "string", "format": "date"},
+      "meal_type": {"enum": ["breakfast", "lunch", "dinner"]},
+      "absent_member_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+    }}}},
+    "meal_structure": {"units": ["dishes"], "schema": {"type": "object", "propertyNames": {"enum": ["breakfast", "lunch", "dinner"]}, "additionalProperties": {"type": "object", "additionalProperties": false, "properties": {
+      "protein_mains": {"type": "integer", "minimum": 0}, "vegetables": {"type": "integer", "minimum": 0},
+      "soups": {"type": "integer", "minimum": 0}, "staples": {"type": "integer", "minimum": 0},
+      "breakfast_dishes": {"type": "integer", "minimum": 0}, "counts_explicit": {"type": "boolean"}
+    }}}},
+    "weekly_budget_sgd": {"units": ["SGD"], "schema": {"type": "number", "minimum": 0}},
+    "budget_basis": {"units": ["none"], "schema": {"const": "per_shopping_trip"}},
+    "shopping_trip_days": {"units": ["day_numbers"], "schema": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 1, "maximum": 14}}},
+    "perishable_window_days": {"units": ["days"], "schema": {"const": 3}},
+    "sodium_limit_enabled": {"units": ["none"], "schema": {"type": "boolean"}},
+    "sodium_limit_mg": {"units": ["mg"], "schema": {"type": "number", "minimum": 0}},
+    "dinner_sodium_share": {"units": ["fraction"], "schema": {"type": "number", "minimum": 0, "maximum": 1}},
+    "allergens": {"units": ["none"], "schema": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}},
+    "allergen_avoidance_scope": {"units": ["none"], "schema": {"enum": ["household", "member"]}},
+    "dietary_requirements": {"units": ["none"], "schema": {"type": "array", "items": {"type": "string", "minLength": 1}}},
+    "excluded_ingredients": {"units": ["none"], "schema": {"type": "array", "items": {"type": "string", "minLength": 1}}},
+    "halal_required": {"units": ["none"], "schema": {"type": "boolean"}},
+    "basic_seasonings": {"units": ["none"], "schema": {"type": "object", "required": ["available", "run_out"], "additionalProperties": false, "properties": {
+      "available": {"type": "array", "items": {"type": "string"}}, "run_out": {"type": "array", "items": {"type": "string"}}
+    }}},
+    "pantry": {"units": ["none"], "schema": {"type": "array", "items": {"type": "object", "required": ["ingredient", "quantity", "unit"], "additionalProperties": false, "properties": {
+      "ingredient": {"type": "string", "minLength": 1}, "quantity": {"type": ["number", "null"], "minimum": 0}, "unit": {"enum": ["g", "ml", "count", "unknown"]}
+    }}}},
+    "cooking_time_minutes": {"units": ["minutes"], "schema": {"type": "number", "minimum": 0}},
+    "maximum_repeats": {"units": ["occurrences"], "schema": {"type": "integer", "minimum": 0}},
+    "preferences": {"units": ["none"], "schema": {"type": "array", "items": {"type": "string"}}}
+  }
+}

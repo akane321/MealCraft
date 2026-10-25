@@ -8,6 +8,7 @@ from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_lo
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import dish_servings, require_one_dish_slots
+from app.planning.member_coverage import servable
 from app.planning.nutrition_scope import nutrition_guard_loss
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
@@ -108,6 +109,8 @@ class FinalScopeReferencePlanner:
             if ingredient_ids.intersection(problem.excluded_ingredients):
                 continue
             if not set(problem.dietary_requirements).issubset(recipe.dietary_tags):
+                continue
+            if not servable(slot, recipe):
                 continue
             eligible.append(recipe)
         return eligible

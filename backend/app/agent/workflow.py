@@ -12,6 +12,7 @@ from app.agent.replies import language, say
 from app.agent.shape_change import setup_shape
 from app.core import clock
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
+from app.schemas.household_rules import HouseholdPlanning, limits_of_every_member
 from app.schemas.meal_plan import default_plan_shape
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
@@ -207,8 +208,13 @@ class AgentConstraintWorkflow:
             and state.get("household")
         ):
             # A size the conversation states wins over the saved members and who is home; the basics, time
-            # rules and limits stay (layer 08).
+            # rules and limits stay (layer 08). The members' own limits do not go with them: with nobody left
+            # to hold a diet, an exclusion or an allergen against, each one becomes the whole household's
+            # (ADR-0071 section 1 keeps a limit with its member only while that member is in the request).
+            folded = limits_of_every_member(HouseholdPlanning.model_validate(state["household"]))
             state["household"] = {**state["household"], "members": None, "presence_rules": []}
+            for field, values in folded.items():
+                state[field] = list(dict.fromkeys([*state[field], *values]))
 
         for field in ("allergens", "excluded_ingredients", "dietary_preferences", "health_preferences"):
             values = getattr(extraction, field)

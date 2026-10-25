@@ -43,7 +43,6 @@ from app.planning.meal_beam import MealBeamPlanner, dish_eligible
 from app.planning.meal_composition import dish_servings, meal_minutes, role_admits
 from app.planning.meal_cp_sat import MealCpSatLimits, MealCpSatPlanner
 from app.schemas.agent import AgentConstraintState
-from app.schemas.meal_plan import week_shape
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
@@ -111,22 +110,19 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
     pool = [catalog.by_slug[slug] for slug in scenario["recipe_candidate_slugs"]]
     allowed = set(scenario["fairprice_product_ids"])
     start = date.fromisoformat(scenario["planning_horizon"]["start_date"])
-    shape = week_shape(scenario["household_profile"])
-    slots = scenario["planning_horizon"]["slots"]
-    days = {slot.split("-", 1)[0]: index for index, slot in enumerate(dict.fromkeys(s.split("-", 1)[0] for s in slots))}
     return FinalPlanningProblem.model_validate(
         {
             "problem_id": episode["episode_id"],
             "slots": [
                 {
                     "slot_id": slot,
-                    "planned_date": (start + timedelta(days=days[slot.split("-", 1)[0]])).isoformat(),
-                    "meal_type": slot.split("-", 1)[1],
+                    "planned_date": (start + timedelta(days=index)).isoformat(),
+                    "meal_type": "dinner",
                     "servings": understood.household_size,
                     "max_time_minutes": understood.max_minutes,
-                    "composition": shape.meals[slot.split("-", 1)[1]],
+                    "composition": scenario["household_profile"]["meal_composition"],
                 }
-                for slot in slots
+                for index, slot in enumerate(scenario["planning_horizon"]["slots"])
             ],
             "recipes": [
                 {

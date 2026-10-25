@@ -1,7 +1,7 @@
-"""The vegetable dish of a meal (素菜) is a side dish or salad of vegetables without meat (owner, 2026-10-02).
+"""A vegetable dish is vegetable-led, with at most a measured small flesh seasoning (owner, 2026-10-22).
 
 The `vegetable` role admitted any side or salad, so the walkthrough's dinners got "Fettuccine Noodles"
-and "Refried Beans" as their vegetable. A dish may fill the role only when it holds no meat or fish and
+and "Refried Beans" as their vegetable. A dish may fill the role only when
 vegetables are at least half of what it is made of, by the grams of its ingredient lines and each
 ingredient's release food group:
 
@@ -13,25 +13,33 @@ ingredient's release food group:
 - everything else is food that is not a vegetable: grains, pasta, bread, potatoes, beans and pulses,
   meat, fish, eggs, cheese, fruit, nuts.
 
+Owner amendment 2026-10-23: starchy tubers also count as vegetables only when other vegetables
+already reach 40% of counted food. Total vegetables must still reach 50%; the flesh caps do not change.
+
 Dry rice, pasta, noodles and grains count at 2.5 times their weight, about what they weigh cooked: by
 raw weight, Spanish rice and Mexican rice were more tomato than rice. A curated ingredient takes the
 group of the release ingredient it is a kind of (`baby_spinach` is `spinach`); one with no group at all is
 counted as not a vegetable, so it never makes a dish vegetable-led.
 
 A whole cabbage, cauliflower, lettuce or broccoli written without a unit ("1 small head cabbage",
-"1/2 cauliflower") is weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Such a
+"1/2 cauliflower") was weighed by release v2.1 as one leaf or floret: 100 g, 25 g, 10 g, 20 g. Release v2.2
+weighs most such lines as a head (data-engineering/scripts/correct_release_v22.py); for any it leaves, a
 line is recognised by its grams being exactly its count times that piece weight, and is counted at the
 weight the line states for itself ("1 small head cabbage (about 1 lb.)" is 454 g), or else at the
 release's own weight for a head of that vegetable (`WHOLE`). Only the share reads this; shopping keeps
 the release's grams.
 
-The threshold of one half is where release v2.1's sides and salads turn from mostly other dishes into
+The threshold of one half is where release v2.1's (and v2.2's) sides and salads turn from mostly other dishes into
 mostly vegetable dishes. Their shares are bimodal, most under 0.1 or over 0.9; of the few in between,
 those under one half are mostly rice, couscous, potato, bean and meat dishes, those over it mostly
 vegetable dishes. Yogurt raitas and tomato-heavy rice dishes still reach it.
 
-素菜 has no meat (owner, 2026-10-02): a dish with a line of meat, poultry, fish or seafood never fills the
-role, however little of it there is. Meat or fish is an ingredient of animal flesh (the release's
+Listed cured/dried flesh and minced land-animal meat may season a vegetable dish up to 20% of counted
+weight. Other flesh is limited to 5%; when both occur, total flesh must still be at most 20%.
+An unweighed flesh line cannot qualify as a little. Bonito flakes are weighed flesh for this role;
+the older stock/sauce/fat exemptions otherwise remain (ADR-0082 supplements ADR-0054).
+This role is not a vegetarian-diet claim: each member's ingredient and diet checks still apply.
+Meat or fish is an ingredient of animal flesh (the release's
 `dietary_origin`), except the seasonings, stocks and cooking fats made from it (`SEASONING_FROM_FLESH`):
 fish sauce and Worcestershire flavour a dish the way salt does. Eggs and dairy are not meat. A line whose
 wording names a meat or fish the release mapped to something else is meat too: "1 garlic cloves, minced
@@ -52,7 +60,48 @@ from app.data.ingredient_hierarchy import runtime
 
 VEGETABLE_ROLE = "vegetable"
 VEGETABLE_LED_SHARE = 0.5
+NON_TUBER_VEGETABLE_SHARE = 0.4
+MEAT_SEASONING_SHARE = 0.2
+FLESH_SHARE = 0.05
 COOKED_YIELD = 2.5
+SEASONING_MEAT_IDS = frozenset(
+    {
+        "bacon",
+        "turkey_bacon",
+        "pancetta",
+        "ham",
+        "prosciutto",
+        "chorizo",
+        "salami",
+        "pepperoni",
+        "sausage",
+        "lap_cheong",
+        "ground_beef",
+        "ground_pork",
+        "corned_beef",
+        "pastrami",
+        "salt_cod",
+        "smoked_haddock",
+        "bonito_flakes",
+        "dried_shrimp",
+        "dried_anchovy",
+        "ikan_bilis",
+    }
+)
+LAND_MEAT = r"(?:meat|beef|pork|chicken|turkey|lamb|mutton|veal|duck)"
+MINCED_MEAT = re.compile(
+    rf"\b(?:ground|minced)\s+(?:(?:lean|fresh|boneless|skinless)\s+)*{LAND_MEAT}\b"
+    rf"|\b{LAND_MEAT}(?:\s+(?:breasts?|thighs?|meat))?\s*[,;]?\s*(?:finely\s+)?"
+    r"(?:ground|minced)\b(?!\s+[a-z])",
+    re.I,
+)
+PRESERVED_MEAT = re.compile(
+    rf"\b(?:dried|smoked|cured|salted)\s+(?:(?:small|baby)\s+)*"
+    rf"(?:{LAND_MEAT}|fish|salmon|cod|shrimps?|prawns?|anchov(?:y|ies)|bonito)\b"
+    r"|\b(?:shrimps?|prawns?|anchov(?:y|ies))\s*,?\s*dried\b"
+    r"|\b(?:lap[\s-]+cheong|ikan[\s-]+bilis|bonito[\s-]+flakes?)\b",
+    re.I,
+)
 
 VEGETABLE_GROUPS = frozenset({"vegetable", "herb"})
 UNCOUNTED_GROUPS = frozenset(
@@ -74,6 +123,7 @@ NOT_VEGETABLES = frozenset(
         "french_fried_onions",
     }
 )
+STARCHY_TUBERS = NOT_VEGETABLES - {"french_fried_onions"}
 UNCOUNTED = frozenset(
     {
         # sauces, broths, soups and their mixes
@@ -230,10 +280,10 @@ def food_groups() -> dict[str, tuple[str, str, str]]:
     """Each ingredient's release id, food group and dietary origin, by the normalized name the catalog and the
     planner use.
 
-    An ingredient release v2.1 does not hold (the curated `baby_spinach`) takes the release ingredient it is
+    An ingredient the release does not hold (the curated `baby_spinach`) takes the release ingredient it is
     the same as or a variety of in the ingredient hierarchy (`spinach`).
     """
-    path = repository_root() / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    path = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     groups = {
         name: (name, row["food_group"], row["dietary_origin"])
@@ -270,20 +320,32 @@ def whole_grams(name: str, grams, text: str | None):
     return count * head
 
 
-def vegetable_share(lines: Iterable[tuple]) -> float | None:
-    """Vegetables' share of a dish's counted grams, from its (ingredient, grams[, original text]) lines; None when
-    nothing counts."""
+def counted_weights(lines: Iterable[tuple]) -> list[tuple[str, float]]:
+    """Solid-food weights under the vegetable-share convention, retaining the original ingredient id."""
     groups = food_groups()
-    vegetables = total = 0.0
+    weights = []
     for name, grams, *text in lines:
-        name, group, _ = groups.get(name, (name, None, None))
-        grams = whole_grams(name, grams, text[0] if text else None)
-        if not grams or name in UNCOUNTED or group in UNCOUNTED_GROUPS:
+        release, group, _ = groups.get(name, (name, None, None))
+        grams = whole_grams(release, grams, text[0] if text else None)
+        if not grams or release in UNCOUNTED or (group in UNCOUNTED_GROUPS and release != "bonito_flakes"):
             continue
-        weight = float(grams) * (COOKED_YIELD if name in COOKED_STAPLES else 1.0)
+        weights.append((name, float(grams) * (COOKED_YIELD if release in COOKED_STAPLES else 1.0)))
+    return weights
+
+
+def vegetable_share(lines: Iterable[tuple]) -> float | None:
+    """Vegetables' share of counted grams; None when nothing counts."""
+    groups = food_groups()
+    vegetables = tubers = total = 0.0
+    for name, weight in counted_weights(lines):
+        release, group, _ = groups.get(name, (name, None, None))
         total += weight
-        if name in VEGETABLES or (group in VEGETABLE_GROUPS and name not in NOT_VEGETABLES):
+        if release in STARCHY_TUBERS:
+            tubers += weight
+        if release in VEGETABLES or (group in VEGETABLE_GROUPS and release not in NOT_VEGETABLES):
             vegetables += weight
+    if total and vegetables / total >= NON_TUBER_VEGETABLE_SHARE:
+        vegetables += tubers
     return vegetables / total if total else None
 
 
@@ -291,23 +353,58 @@ def meat_or_fish(name: str, text: str | None = None) -> bool:
     """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it, or a line
     whose wording names one (`MEAT_WORDS`) that the release mapped to something else."""
     release, _, origin = food_groups().get(name, (name, None, None))
-    return release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
-
-
-def vegetable_led(lines: Iterable[tuple]) -> bool:
-    """At least half vegetables (`vegetable_share`) and no line of meat or fish, weighed or not."""
-    lines = list(lines)
-    share = vegetable_share(lines)
-    return (
-        share is not None
-        and share >= VEGETABLE_LED_SHARE
-        and not any(meat_or_fish(name, *text) for name, _, *text in lines)
+    return release == "bonito_flakes" or (
+        release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
     )
 
 
+def seasoning_meat(name: str, text: str | None = None) -> bool:
+    """Only the actual ingredient id/wording establishes preserved or minced meat, never the recipe title."""
+    release = food_groups().get(name, (name, None, None))[0]
+    text = re.split(r"\b(?:with|plus)\b", text or "", maxsplit=1, flags=re.I)[0]
+    if re.search(r"\b(?:and|or)\b", text, re.I) and len(MEAT_WORDS.findall(text)) > 1:
+        return False  # One combined amount cannot establish separate preserved/fresh shares.
+    return release in SEASONING_MEAT_IDS or bool(text and (MINCED_MEAT.search(text) or PRESERVED_MEAT.search(text)))
+
+
+def vegetable_led(lines: Iterable[tuple]) -> bool:
+    """Half vegetables, total measured flesh <=20%, other flesh <=5%; never a diet claim."""
+    lines = list(lines)
+    share = vegetable_share(lines)
+    flesh = meat_share(lines)
+    fresh = meat_share(lines, fresh_only=True)
+    return (
+        share is not None
+        and share >= VEGETABLE_LED_SHARE
+        and flesh is not None
+        and flesh <= MEAT_SEASONING_SHARE
+        and fresh is not None
+        and fresh <= FLESH_SHARE
+    )
+
+
+def meat_share(lines: Iterable[tuple], *, fresh_only: bool = False) -> float | None:
+    """Flesh over counted food; unknown/invalid flesh quantity is not a small seasoning."""
+    lines = list(lines)
+    if any(
+        meat_or_fish(name, *text)
+        and (grams is None or grams <= 0 or food_groups().get(name, (name, None, None))[2] != "flesh")
+        for name, grams, *text in lines
+    ):
+        return None
+    total = sum(weight for _, weight in counted_weights(lines))
+    meat = sum(
+        float(grams)
+        for name, grams, *text in lines
+        if meat_or_fish(name, *text) and (not fresh_only or not seasoning_meat(name, *text))
+    )
+    return meat / total if total else (0.0 if not meat else None)
+
+
 def vegetable_role(role_id: str) -> bool:
-    """The vegetable role and its copies ("vegetable-2"), as the profile editor and the shape change name them."""
-    return re.sub(r"-\d+$", "", role_id) == VEGETABLE_ROLE
+    """The vegetable role and its copies ("vegetable-2"), read as every other gate reads a role id: the part before
+    the first hyphen (`meal_composition.role_base`), so "vegetable-side" is a vegetable role everywhere."""
+    return role_id.split("-")[0] == VEGETABLE_ROLE
 
 
 def weighed(lines: Iterable[tuple]) -> list[tuple]:

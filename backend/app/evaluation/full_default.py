@@ -9,8 +9,8 @@ perishables within their days after the trip, and the kitchen's equipment. A pla
 on the trip whose days use it.
 
 Wall time differs by machine, so it is printed and never written to `latest.*` (CI diffs them); `--timing-report`
-writes it beside them on request. The variety pass is run to completion here, not cut at its two seconds, so
-the plans do not depend on the machine either.
+writes it beside them on request. The variety pass always runs every start (ADR-0080), so the plans do not
+depend on the machine either.
 
     python -m app.evaluation.full_default [--timing-report]
 """
@@ -37,7 +37,6 @@ from app.data.release_v2 import release_dir
 from app.evaluation.meal_day_week_runner import HOUSEHOLD as HOUSEHOLD_ID
 from app.evaluation.meal_day_week_runner import product_database
 from app.models.recipe import Recipe, RecipeIngredient
-from app.planning import product_path
 from app.planning.grocery_estimator import not_purchased
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.schemas.meal_plan import MEAL_ORDER, WeeklyMealPlanRequest, default_plan_shape
@@ -62,13 +61,13 @@ CASES = [
     {
         "case": "four-with-vegetarian",
         "about": (
-            "Two adults, a teen and a child, one of them vegetarian (the household plans vegetarian, PR-1's union); "
-            "a grandparent joins weekend dinners, so those dinners are for five."
+            "Two adults, a teen and a child, Ann vegetarian (her own diet, not the household's: ADR-0071's "
+            "shared-dish model); a grandparent joins weekend dinners, so those dinners are for five."
         ),
-        "request": {"household_size": 4, "day_count": 7, "dietary_preferences": ["vegetarian"]},
+        "request": {"household_size": 4, "day_count": 7},
         "household": {
             "members": [
-                {"name": "Ann", "servings": 0.88},
+                {"name": "Ann", "servings": 0.88, "dietary_preferences": ["vegetarian"]},
                 {"name": "Ben", "servings": 1.12},
                 {"name": "Kai", "servings": 1.35},
                 {"name": "Mei", "servings": 0.73},
@@ -240,8 +239,11 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             for role, recipe in tags.items()
         ):
             failures["no_non_meal_dish"] += 1
-        sources = [set(recipe.protein_sources or ()) for role, recipe in tags.items() if _kind(role) == "main"]
-        if sum(map(len, sources)) != len(set().union(*sources)):
+        mains = [recipe for role, recipe in tags.items() if _kind(role) == "main"]
+        sources = [set(recipe.protein_sources) for recipe in mains if recipe.protein_sources is not None]
+        if any(recipe.protein_sources is None for recipe in mains) or sum(map(len, sources)) != len(
+            set().union(*sources)
+        ):
             failures["protein_sources_distinct"] += 1
         per_serving = sum(d["nutrition_per_person"]["calories_kcal"] for d in dishes)
         energy.append(per_serving >= floor[meal] - 1e-6)
@@ -294,6 +296,8 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             "meals": len(meals),
             "dishes": len(week["days"]),
             "distinct_dishes_excluding_staples": len(set(titles)),
+            # The worst repeat: how often the most served dish comes, staples aside (task 15).
+            "most_uses_of_one_dish": max(Counter(titles).values(), default=0),
             "staples": sorted({d["recipe"]["title"] for d in week["days"] if d["role_id"] == "staple"}),
             "cuisine_groups_per_meal": round(statistics.mean(groups), 2) if groups else None,
             "meals_with_two_deep_fried": fried_meals,
@@ -350,20 +354,14 @@ def run_case(plans, session, case: dict) -> tuple[dict, float]:
 
 
 def evaluate(repeats: int = 0) -> tuple[dict, dict]:
-    """The report, and wall times per case: the report's own run (variety pass to completion), then `repeats` warm
-    runs as the product plans (its variety pass cut at `VARIETY_PASS_SECONDS`)."""
+    """The report, and wall times per case: the report's own run, then `repeats` warm runs."""
     lines = (release_dir() / "recipes.jsonl").read_text("utf-8").splitlines()
     catalog = {"scenario": {"recipe_candidate_slugs": [json.loads(line)["recipe_id"] for line in lines]}}
     seconds, results = {}, []
-    product_seconds = product_path.VARIETY_PASS_SECONDS
     with product_database(catalog) as factory, factory() as session:
         plans = build_meal_plan_service(session, HOUSEHOLD_ID)
         for case in CASES:
-            product_path.VARIETY_PASS_SECONDS = float("inf")  # the module docstring: plans independent of the machine
-            try:
-                result, first = run_case(plans, session, case)
-            finally:
-                product_path.VARIETY_PASS_SECONDS = product_seconds
+            result, first = run_case(plans, session, case)
             results.append(result)
             warm = [run_case(plans, session, case)[1] for _ in range(repeats)]
             seconds[case["case"]] = {"first": round(first, 2), "warm": [round(s, 2) for s in warm]}
@@ -388,7 +386,7 @@ def markdown(report: dict) -> str:
         "> Scope: five fixed households planned with the full meal structure (ADR-0070) on the whole release "
         "catalog, fixture prices, the product path; developer cases, no held-out data. It is a regression check "
         "of the real-meal rules, not a quality score: PASS says nothing about speed. Wall time is not in this "
-        "file (it differs by machine): `timing.md` beside it marks each case over the ADR-0075 target.",
+        "file (it differs by machine): `timing.md` beside it reads each case against the ADR-0079 guidance.",
         "",
         "Generated by `python -m app.evaluation.full_default`.",
         "",
@@ -445,47 +443,116 @@ def meal_table(rows: list[dict]) -> list[str]:
     return [*lines, ""]
 
 
-TARGET_SECONDS = 4.0  # ADR-0075: about 4 s for a common request
+# ADR-0079: how long is acceptable follows how hard the request is. A simple request should still come back
+# quickly; a complex one may take up to about a minute. Only past that is a case marked over, and a case is
+# never cut short to meet either figure.
+QUICK_SECONDS = 4.0
+OVER_SECONDS = 60.0
 
-# Why a case is slow, from a profile of one warm run (cProfile, 2026-10-19, after `meal_beam.core_combinations`
-# skipped the dinners whose filling core fails). Written by hand when a case is profiled, so a newly slow case
-# reads "not profiled yet" until someone looks.
+
+def timing_band(taken: float) -> str:
+    """How a case's warm median reads against the ADR-0079 guidance."""
+    if taken > OVER_SECONDS:
+        return "over"
+    return "quick" if taken <= QUICK_SECONDS else "complex"
+
+
+BAND_LABEL = {
+    "quick": "quick",
+    "complex": "within the guidance for a complex request",
+    "over": f"over ~{OVER_SECONDS:g} s",
+}
+
+# Why a case takes as long as it does, from a cProfile of one warm product run of each case (task 14, 2026-10-21,
+# Windows, after the shared-dish candidate changes). Shares are of the profiled run, which the profiler slows about
+# twofold (threefold for six-tight-budget, re-profiled the same day without the variety cutoff). Every case past the
+# quick figure has one: ADR-0079 section 4 asks for the cause of each, not only of the ones over a minute.
+# seven-with-young-children was profiled again on 2026-10-22 (task 15), when the exact root raised its time.
+# Rewrite a case's entry whenever a change moves its time.
+MEAL_CHECKS = (
+    "building each meal's dish combinations and checking every one as a real meal (`meal_beam._meal_options` -> "
+    "`meal_permitted` -> `meal_composition.real_meal_issues`)"
+)
+MEMBER_CHECKS = (
+    "`member_coverage.member_can_eat` (asked again for every member, dish and combination, with nothing cached per "
+    "member and recipe)"
+)
+# Said honestly for a case nobody has profiled at its current time, rather than a guess.
+UNKNOWN_CAUSE = "cause unknown: this time has not been profiled; profile one warm run and add it to SLOW_CAUSES."
 SLOW_CAUSES = {
+    "one-adult": (
+        f"one week-long beam search; {MEAL_CHECKS} is about 40% of the run and reading the candidates (recipes and "
+        "fixture prices) about 25%; at three meals a day for seven days that is 21 slots of combinations."
+    ),
+    "four-with-vegetarian": (
+        f"one beam search, three-quarters of the run; {MEAL_CHECKS} is about 63%, and a third of the run is "
+        f"{MEMBER_CHECKS}. The vegetarian member's own candidates add up to 40 dishes a kind to the packet "
+        "(`product_path._packet_covering`), so a meal has more combinations to check than before the shared-dish "
+        "model."
+    ),
     "six-tight-budget": (
-        "four whole-week beam searches instead of one: the ranked search keeps no week filled with no dish twice "
-        "under the budget, so the three budget-led searches (`product_path.limit_led`) run as well. Each builds "
-        "every six-dish dinner of its candidates again (about 90,000 combinations a search, 360,000 real-meal "
-        "checks in all, half the run) and expands 32 partial weeks by 256 meals a slot (the other half). "
-        "Upgrade path: share the meal checks between the four searches (they do not depend on the ranking) "
-        "and price beam states incrementally."
+        "four whole-week beam searches instead of one, and a variety pass over 16 starts that no longer stops at two "
+        "seconds (ADR-0080). In a profiled warm run of 2026-10-21, after that cutoff was removed, the variety pass "
+        "(`product_path._vary_starts`) is about 50% of the run and the three budget-led searches "
+        "(`product_path.limit_led`, which run because the ranked search keeps no week filled with no dish twice "
+        f"under the budget) about 33%; the ranked search and the setup are the rest. Across the run {MEAL_CHECKS} "
+        f"is about 46%, and {MEMBER_CHECKS} is about 43%. Upgrade path, none of it changing a plan: make the variety "
+        "pass faster (now the largest single cost), share the meal checks between the four searches (they do not "
+        "depend on the ranking) and cache the member checks. The owner accepted this case's time (ADR-0079 section "
+        "5, ADR-0080): over the line is a known exception, not a failure."
+    ),
+    "two-no-oven-ten-days": (
+        f"one beam search over ten days and two shopping trips, about two-thirds of the run; {MEAL_CHECKS} is about "
+        "42%, and reading the candidates about 15%; the plan has 30 slots of combinations to build."
+    ),
+    "seven-with-young-children": (
+        "one beam search, about 97% of the run, over seven-dish dinners for a household of seven. Since task 15 "
+        "(2026-10-22) the combination cap's root per role is exact, so each of a dinner's seven roles keeps four "
+        "dishes instead of three (`int(16384 ** (1 / 7))` gave three; 4^7 is 16,384): up to 16,384 combinations a "
+        "dinner instead of 2,187, and the run went from about 9 s to about 36 s. In a profiled warm run of "
+        f"2026-10-22 {MEAL_CHECKS} is about 96%, and {MEMBER_CHECKS} about 49% (8.5 million calls). Upgrade path, "
+        "none of it changing a plan: cache the member checks per member and recipe, and a recipe's meal role."
     ),
 }
 
 
 def timing_markdown(timing: dict) -> str:
-    over = [case for case, row in timing["cases"].items() if (row["median"] or row["first"]) > TARGET_SECONDS]
+    bands = {case: timing_band(row["median"] or row["first"]) for case, row in timing["cases"].items()}
+    over = [case for case, band in bands.items() if band == "over"]
+    explained = [case for case, band in bands.items() if band in ("complex", "over")]
     lines = [
         "# Full default: plan wall time",
         "",
-        "> Scope: the cases of `latest.md`, one machine. The report's run lets the variety pass finish (and "
-        "warms the candidate cache); the warm runs plan as the product does, the variety pass cut at its two "
-        f"seconds. Median and slowest of the warm runs. ADR-0075 targets about {TARGET_SECONDS:g} s for a common "
-        "request: a case whose warm median is over it is marked, and no feature is cut to meet it.",
+        "> Scope: the cases of `latest.md`, one machine. The report's run warms the candidate cache; the warm "
+        "runs are the same plan again. Median and slowest of the warm runs. ADR-0079 sets how long is "
+        "acceptable by how hard the "
+        f"request is: a simple request should still come back within about {QUICK_SECONDS:g} s, a complex one "
+        f"may take up to about {OVER_SECONDS:g} s, and only past that is a case marked over. A case is never "
+        "cut short to meet either figure, and no feature is dropped to make one faster.",
         "",
         f"Machine: {timing['machine']}. The code commit is in `timing.json` beside this file.",
         "",
-        f"| Case | Report run (s) | Warm median (s) | Warm max (s) | Against ~{TARGET_SECONDS:g} s |",
+        "| Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |",
         "|---|---:|---:|---:|---|",
         *[
-            f"| {case} | {row['first']} | {row['median']} | {row['max']} | "
-            f"{'over target' if case in over else 'within'} |"
+            f"| {case} | {row['first']} | {row['median'] if row['median'] is not None else '-'} "
+            f"| {row['max'] if row['max'] is not None else '-'} | {BAND_LABEL[bands[case]]} |"
             for case, row in timing["cases"].items()
         ],
         "",
-        f"Over target: {', '.join(over) or 'none'}.",
+        f"Over ~{OVER_SECONDS:g} s: {', '.join(over) or 'none'}.",
     ]
-    for case in over:
-        lines += ["", f"- `{case}`: {SLOW_CAUSES.get(case, 'not profiled yet.')}"]
+    if any(row["median"] is None for row in timing["cases"].values()):
+        lines += [
+            "",
+            "A case with `-` ran once, the report's run: a warm run of it takes as long again (some take almost an "
+            "hour), and the report run is read against the guidance in its place.",
+        ]
+    for case in explained:
+        lines += [
+            "",
+            f"- `{case}` ({BAND_LABEL[bands[case]]}): {SLOW_CAUSES.get(case, UNKNOWN_CAUSE)}",
+        ]
     return "\n".join(lines) + "\n"
 
 
