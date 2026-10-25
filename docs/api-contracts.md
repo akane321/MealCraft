@@ -479,6 +479,12 @@ and raw provider payloads are absent from this user-facing contract.
   and a conversation; the planning evaluation scenarios keep the 60 minutes they
   were written with, `SCENARIO_UNSTATED_TIME_LIMIT`)
 - allergens, excluded ingredient IDs, and dietary requirements
+- an explicit `requires_halal` boolean (required at this HTTP boundary, and at
+  `/api/plans/generate`; omitted or null returns 422, never implicit false).
+  The internal/stored request model retains its legacy default only for reading
+  old records; that default does not satisfy a new HTTP declaration. Until the
+  halal source is decided, conversation requests for halal are declined as not
+  yet supported (ADR-0091).
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
 - available ingredients with optional quantities and units

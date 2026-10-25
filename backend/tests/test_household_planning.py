@@ -48,7 +48,7 @@ def rule(member, present, weekdays=(), meals=()):
 
 def plan(client, **request):
     body = {"start_date": START, "household_size": 2, "pricing_mode": "fixture", "plan_shape": LUNCH_AND_DINNER}
-    response = client.post("/api/plans/generate", json={**body, **request})
+    response = client.post("/api/plans/generate", json={"requires_halal": False, **{**body, **request}})
     assert response.status_code == 201, response.text
     return response.json()
 

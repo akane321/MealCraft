@@ -1,6 +1,7 @@
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import Field
 from sqlalchemy.orm import Session
 
 from app.api.routes.auth import (
@@ -116,9 +117,14 @@ def get_replanning_service(
 ReplanningServiceDependency = Annotated[MealPlanReplanningService, Depends(get_replanning_service)]
 
 
+class WeeklyMealPlanInput(WeeklyMealPlanRequest):
+    # Only the HTTP boundary requires a declaration; old stored plans remain readable.
+    requires_halal: bool = Field(...)
+
+
 @router.post("/generate", response_model=WeeklyMealPlanResponse, status_code=status.HTTP_201_CREATED)
 def generate_weekly_plan(
-    constraints: WeeklyMealPlanRequest,
+    constraints: WeeklyMealPlanInput,
     service: MealPlanServiceDependency,
     _current: CurrentHouseholdCreatePlanCsrfDependency,
 ) -> WeeklyMealPlanResponse:

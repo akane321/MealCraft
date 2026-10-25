@@ -390,3 +390,230 @@ def test_ordered_constraints_require_numbers_not_bool_or_containers(operator):
         case["gold"]["hard_constraints"][0].update(field=field, value=value, unit=unit, operator=operator)
         errors, _ = checker.check(bundle([case]), format_only=True)
         assert (errors == []) == valid, (operator, field, errors)
+
+
+# Review attestation: imaginary robots again. The content keeps its authored, pending review fields; the
+# attestation, bound to the exact content bytes, records two reviewers and an AI-executed review truthfully.
+
+
+def pending_content():
+    """The ready fixture as authored: draft purpose, no reviewer, every per-case review still pending."""
+    data = ready_format_fixture()
+    data.update(purpose="author_draft", reviewer_id=None)
+    for case in data["cases"]:
+        case["gold"].update(review_status="pending", reviewer_id=None)
+        case["source"]["pii_reviewed"] = False
+    return data
+
+
+def content_bytes(data):
+    return json.dumps(data, ensure_ascii=False, indent=1).encode("utf-8")
+
+
+def attestation_for(data, executed_by="ai", second_share=31):
+    ids = [case["id"] for case in data["cases"]]
+    split = len(ids) - second_share
+    return {
+        "schema_version": "sprint2-review-attestation-v1",
+        "content_sha256": hashlib.sha256(content_bytes(data)).hexdigest(),
+        "fields_sha256": data["quota_manifest"]["fields_sha256"],
+        "purpose": "freeze_candidate",
+        "author_id": data["author_id"],
+        "recorded_on": "2026-01-02",
+        "reviewers": [
+            {"reviewer_id": "SYN_REVIEWER_ONE", "executed_by": executed_by},
+            {"reviewer_id": "SYN_REVIEWER_TWO", "executed_by": executed_by},
+        ],
+        "dictionary_review": {"reviewer_id": "SYN_REVIEWER_TWO", "status": "independently_checked"},
+        "cases": {
+            case_id: {
+                "gold_review": {
+                    "reviewer_id": "SYN_REVIEWER_ONE" if index < split else "SYN_REVIEWER_TWO",
+                    "status": "independently_checked",
+                },
+                "anonymisation_review": {"reviewer_id": "SYN_REVIEWER_TWO", "status": "independently_checked"},
+            }
+            for index, case_id in enumerate(ids)
+        },
+    }
+
+
+def check_attested(data, attestation):
+    return checker.check(
+        data,
+        attestation=attestation,
+        content_sha256=hashlib.sha256(content_bytes(data)).hexdigest(),
+        attestation_sha256="0" * 64,
+    )
+
+
+def test_pending_content_fails_readiness_without_an_attestation():
+    errors, _ = checker.check(pending_content())
+    assert any("purpose=freeze_candidate" in e for e in errors)
+    assert any("independent gold review missing" in e for e in errors)
+
+
+def test_an_attestation_makes_pending_content_ready_without_editing_it():
+    data = pending_content()
+    before = content_bytes(data)
+    errors, summary = check_attested(data, attestation_for(data))
+    assert errors == []
+    assert content_bytes(data) == before
+    reviewers = summary["attestation"]["reviewers"]
+    assert reviewers["SYN_REVIEWER_ONE"]["gold_reviews"] == len(data["cases"]) - 31
+    assert reviewers["SYN_REVIEWER_TWO"]["gold_reviews"] == 31
+    # An AI-executed review passes but is reported as what it is.
+    assert any("anonymisation_review" in item and "AI" in item for item in summary["limitations"])
+    assert any("dictionary_review" in item for item in summary["limitations"])
+
+
+def test_human_reviews_carry_no_limitation():
+    data = pending_content()
+    errors, summary = check_attested(data, attestation_for(data, executed_by="human"))
+    assert errors == [] and summary["limitations"] == []
+
+
+def test_the_attestation_is_bound_to_the_exact_content_bytes():
+    data = pending_content()
+    attestation = attestation_for(data)
+    attestation["content_sha256"] = "a" * 64
+    errors, _ = check_attested(data, attestation)
+    assert any("content_sha256 does not match" in e for e in errors)
+    attestation = attestation_for(data)
+    attestation["fields_sha256"] = "b" * 64
+    errors, _ = check_attested(data, attestation)
+    assert any("fields_sha256 does not match" in e for e in errors)
+
+
+def test_every_case_needs_one_entry_and_errors_echo_no_case_id():
+    data = pending_content()
+    attestation = attestation_for(data)
+    removed = data["cases"][5]["id"]
+    del attestation["cases"][removed]
+    attestation["cases"]["FORMAT_UNKNOWN_ROBOT"] = attestation["cases"][data["cases"][6]["id"]]
+    errors, summary = check_attested(data, attestation)
+    assert any("1 case(s) have no review entry" in e for e in errors)
+    assert any("name no case in the content file" in e for e in errors)
+    assert "FORMAT_" not in json.dumps([errors, summary])
+
+
+def test_reviewers_must_be_independent_and_listed():
+    data = pending_content()
+    for reviewer in (data["author_id"], data["quota_manifest"]["approved_by"]):
+        attestation = attestation_for(data)
+        attestation["reviewers"][0]["reviewer_id"] = reviewer
+        for entry in attestation["cases"].values():
+            if entry["gold_review"]["reviewer_id"] == "SYN_REVIEWER_ONE":
+                entry["gold_review"]["reviewer_id"] = reviewer
+        errors, _ = check_attested(data, attestation)
+        assert any("the author or the quota approver" in e for e in errors), reviewer
+    attestation = attestation_for(data)
+    attestation["dictionary_review"]["reviewer_id"] = "SYN_NOT_LISTED"
+    errors, _ = check_attested(data, attestation)
+    assert any("not listed" in e for e in errors)
+    attestation = attestation_for(data)
+    attestation["reviewers"].append(dict(attestation["reviewers"][0]))
+    errors, _ = check_attested(data, attestation)
+    assert any("listed twice" in e for e in errors)
+
+
+def test_a_content_reviewer_that_contradicts_the_attestation_fails():
+    data = pending_content()
+    data["cases"][0]["gold"]["reviewer_id"] = "SYN_SOMEONE_ELSE"
+    errors, _ = check_attested(data, attestation_for(data))
+    assert any("different gold reviewer" in e for e in errors)
+
+
+def test_an_attestation_only_in_readiness_and_with_content_bytes():
+    data = pending_content()
+    with pytest.raises(ValueError):
+        checker.check(data, format_only=True, attestation=attestation_for(data), content_sha256="0" * 64)
+    with pytest.raises(ValueError):
+        checker.check(data, attestation=attestation_for(data))
+
+
+def test_attestation_schema_errors_do_not_echo_values():
+    data = pending_content()
+    attestation = attestation_for(data)
+    attestation["reviewers"][0]["executed_by"] = "SECRET_FORMAT_SENTINEL"
+    errors, _ = check_attested(data, attestation)
+    assert errors and not any("SECRET_FORMAT_SENTINEL" in e for e in errors)
+
+
+def test_cli_reads_an_attestation_and_refuses_it_with_format_only(tmp_path):
+    data = pending_content()
+    content = tmp_path / "author-draft.json"
+    content.write_bytes(content_bytes(data))
+    attested = tmp_path / "attestation.json"
+    attested.write_text(json.dumps(attestation_for(data)), encoding="utf-8")
+    base = [sys.executable, str(SCRIPT), "--input", str(content), "--attestation", str(attested)]
+    run = subprocess.run(base, capture_output=True, text=True)
+    report = json.loads(run.stdout)
+    assert run.returncode == 0, report["errors"]
+    assert report["mode"] == "readiness_with_attestation" and report["checker_version"] == checker.CHECKER_VERSION
+    assert report["summary"]["attestation"]["sha256"] == hashlib.sha256(attested.read_bytes()).hexdigest()
+    refused = subprocess.run([*base, "--format-only"], capture_output=True, text=True)
+    assert refused.returncode == 2 and not refused.stdout
+
+
+def test_the_content_reviewer_must_be_an_attested_independent_reviewer():
+    data = pending_content()
+    for reviewer in (data["author_id"], data["quota_manifest"]["approved_by"], "SYN_SOMEONE_ELSE"):
+        data["reviewer_id"] = reviewer
+        errors, _ = check_attested(data, attestation_for(data))
+        assert any("reviewer_id is not an attested reviewer" in e for e in errors), reviewer
+    data["reviewer_id"] = "SYN_REVIEWER_ONE"
+    assert check_attested(data, attestation_for(data))[0] == []
+
+
+def test_a_format_demo_is_not_a_release_even_with_an_attestation():
+    data = pending_content()
+    data["purpose"] = "format_demo"
+    errors, _ = check_attested(data, attestation_for(data))
+    assert any("format demo" in e for e in errors)
+
+
+def test_a_human_anonymisation_claim_cannot_be_attested_as_ai():
+    data = pending_content()
+    data["cases"][0]["source"]["pii_reviewed"] = True
+    errors, _ = check_attested(data, attestation_for(data, executed_by="ai"))
+    assert any("1 case(s) mark a human anonymisation review" in e for e in errors)
+    assert check_attested(data, attestation_for(data, executed_by="human"))[0] == []
+
+
+def test_upper_case_digests_match_and_reviewer_ids_are_pseudonyms():
+    data = pending_content()
+    attestation = attestation_for(data)
+    attestation["content_sha256"] = attestation["content_sha256"].upper()
+    attestation["fields_sha256"] = attestation["fields_sha256"].upper()
+    assert check_attested(data, attestation)[0] == []
+    attestation = attestation_for(data)
+    attestation["reviewers"][0]["reviewer_id"] = "someone@example.invalid"
+    errors, _ = check_attested(data, attestation)
+    assert errors and not any("example.invalid" in e for e in errors)
+
+
+def test_repeated_json_keys_are_rejected():
+    with pytest.raises(ValueError):
+        checker.parse_json(b'{"executed_by": "ai", "executed_by": "human"}')
+
+
+def test_cli_puts_ai_limitations_at_the_top_level(tmp_path):
+    data = pending_content()
+    content = tmp_path / "author-draft.json"
+    content.write_bytes(content_bytes(data))
+    attested = tmp_path / "attestation.json"
+    attested.write_text(json.dumps(attestation_for(data)), encoding="utf-8")
+    run = subprocess.run(
+        [sys.executable, str(SCRIPT), "--input", str(content), "--attestation", str(attested)],
+        capture_output=True,
+        text=True,
+    )
+    report = json.loads(run.stdout)
+    assert report["passed"] and any("AI" in item for item in report["limitations"])
+
+
+def test_an_attestation_in_a_protected_directory_is_rejected_before_read():
+    with patch.object(Path, "read_bytes", side_effect=AssertionError("Must not read")):
+        with pytest.raises(ValueError):
+            checker.read_author_bytes(Path("fiction") / "heldout" / "attestation.json")

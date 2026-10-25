@@ -45,8 +45,11 @@ services:
       - ./backend/alembic:/app/alembic
       - ./backend/tests:/app/tests
       - ./data:/app/data:ro
-      # Release v2.1 recipes, loaded beside the curated catalog; the importer skips
+      # Release v2.2 recipes, loaded beside the curated catalog; the importer skips
       # them when the recorded digest already matches.
+      - ./data-engineering/data/release/v2.2:/app/data-engineering/data/release/v2.2:ro
+      # Release v2.1 stays mounted: protocol v2-multidish and the v3 meal/day/week
+      # runner read it as frozen facts (app.evaluation.release_catalog).
       - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
       - ./docs:/app/docs
       # The repository-level scripts are part of the documented workflow: the
@@ -84,6 +87,7 @@ services:
     volumes:
       - ./backend/app:/app/app
       - ./data:/app/data:ro
+      - ./data-engineering/data/release/v2.2:/app/data-engineering/data/release/v2.2:ro
       - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
     depends_on:
       backend:

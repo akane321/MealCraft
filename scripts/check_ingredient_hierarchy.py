@@ -30,7 +30,7 @@ from app.data.ingredient_hierarchy import FILES, empty_groups, load, look_alikes
 def _recipe_lines(ingredient_id: str, limit: int) -> list[str]:
     """How recipes actually write this ingredient: the evidence a decision should rest on."""
     lines: list[str] = []
-    release = ROOT / "data-engineering/data/release/v2.1/recipes.jsonl"
+    release = ROOT / "data-engineering/data/release/v2.2/recipes.jsonl"
     for raw in release.read_text(encoding="utf-8").splitlines():
         if not raw.strip():
             continue

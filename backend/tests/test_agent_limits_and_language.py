@@ -966,7 +966,7 @@ def test_every_plan_shape_ends_with_the_cheapest_week_search(composed_client, mo
         "weekly_budget_sgd": 1,
         "plan_shape": {"meals": {"dinner": [*dinner, {"role_id": "soup", "courses": ["soup"]}, *extra]}},
     }
-    response = composed_client.post("/api/plans/generate", json=request)
+    response = composed_client.post("/api/plans/generate", json={"requires_halal": False, **request})
 
     assert response.status_code == 422, response.text
     assert probes

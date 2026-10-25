@@ -112,13 +112,26 @@ def unverifiable_for(member) -> list[str]:
     return sorted(set(member.allergens) - checked_allergens())
 
 
+def unknown_safety_for(member, recipe) -> list[str]:
+    """Unknown evidence cannot cover the member who has that safety requirement."""
+    unknown = set(recipe.unknown_safety or ())
+    return [
+        code
+        for field, required, code in (
+            ("allergens", member.allergens, "allergen_status_unknown"),
+            ("diet", member.dietary_requirements, "dietary_status_unknown"),
+        )
+        if required and field in unknown
+    ]
+
+
 def member_can_eat(member, recipe) -> bool:
     """Whether this dish is this member's food: their own allergens, exclusions and diet.
 
     `recipe` is a planning candidate. The household-wide limits are checked once for the dish itself
     (`dish_eligible`, the validator's dish checks); this is only what differs between members at one table.
     """
-    if unverifiable_for(member):
+    if unverifiable_for(member) or unknown_safety_for(member, recipe):
         return False
     if set(recipe.allergens) & set(member.allergens):
         return False
@@ -137,7 +150,7 @@ def catalog_can_eat(member, recipe, lines=None) -> bool:
     options are each answered about the one that reaches the table rather than about the combined line.
     Without them the recipe's own lines are read, which is what the combined line used to mean.
     """
-    if unverifiable_for(member):
+    if unverifiable_for(member) or unknown_safety_for(member, recipe):
         return False
     lines = recipe.recipe_ingredients if lines is None else lines
     allergens = {*(recipe.allergens or ()), *(a for item in lines for a in (item.ingredient.allergens or ()))}

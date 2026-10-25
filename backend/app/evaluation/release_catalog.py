@@ -1,5 +1,8 @@
 """Release v2.1 as the frozen facts of protocol v2-multidish (docs/evaluation/protocol-v2-multidish.md).
 
+The protocol stays on v2.1 (its developer labels were proven on it); the baselines read release v2.2 through the
+`release` argument (`app.evaluation.baseline_resources`).
+
 The v2 scorer and packets read the curated catalog's row shape. This projects
 release recipes, their ingredients and the FairPrice v2 mapping into that
 shape. Quantities are the release's per-line grams; products are sold in
@@ -42,8 +45,8 @@ class ReleaseCatalog:
         return {row["slug"]: row for row in self.recipes}
 
 
-@lru_cache(maxsize=1)
-def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
+@lru_cache(maxsize=2)
+def load_release_catalog(root: Path | None = None, release: Path = RELEASE) -> ReleaseCatalog:
     root = root or repository_root()
     snapshot = json.loads((root / SNAPSHOT).read_text(encoding="utf-8"))["ingredients"]
     products, priced = [], set()
@@ -71,7 +74,7 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
             priced.add(key)
 
     ingredients = []
-    for line in (root / RELEASE / "ingredients.jsonl").read_text(encoding="utf-8").splitlines():
+    for line in (root / release / "ingredients.jsonl").read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         ingredients.append(
             {
@@ -82,7 +85,7 @@ def load_release_catalog(root: Path | None = None) -> ReleaseCatalog:
         )
 
     recipes = []
-    for line in (root / RELEASE / "recipes.jsonl").read_text(encoding="utf-8").splitlines():
+    for line in (root / release / "recipes.jsonl").read_text(encoding="utf-8").splitlines():
         record = json.loads(line)
         lines = [
             {
