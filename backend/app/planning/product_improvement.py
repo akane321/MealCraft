@@ -31,7 +31,7 @@ def adjacent_repetitions(problem, assignments):
     return sum(len(left & right) for left, right in zip(filled, filled[1:], strict=False))
 
 
-def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, validate=None):
+def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, validate=None, priority="variety"):
     """Keep a validated beam incumbent; never invoke CP-SAT or change member eligibility."""
     groups = defaultdict(list)
     for recipe in problem.recipes:
@@ -49,6 +49,7 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, 
         keys,
         {recipe_id: losses[recipe_id] for recipe_id in keys},
         scales,
+        priority=priority,
     )
     initial = FinalPlanningSolution(
         problem_id=problem.problem_id,
@@ -76,6 +77,7 @@ def improve_product_plan(problem, result, losses, *, steps=50, candidates=None, 
         "algorithm": "beam+simulated-annealing",
         "seed": 0,
         "steps": steps,
+        "objective_priority": priority,
         "variety_basis": "table-product-dish-kind",
         "before": before,
         "after": after,

@@ -18,8 +18,10 @@ This does not change the offline objective or turn repetition into a new hard
 feasibility constraint.
 The pass uses seed 0 and 50 proposals, with no wall-clock cutoff or CP-SAT call.
 It runs for ordinary hard-budget beam requests, including requests without a
-stated budget. Cheapest-price searches, the greedy baseline and explicit
-over-budget preview selection retain their separate paths.
+stated budget. Cheapest-price searches use the same improvement pass with
+checkout cents first, while preserving the requested minimum recipe count.
+The greedy baseline and explicit over-budget preview selection retain their
+separate paths. This heuristic supplies a checked price, not a proven minimum.
 
 The product keeps whole-table title-based `dish_kind` grouping. It does not
 adopt the offline member-mean objective or unreviewed recipe-pair thresholds
