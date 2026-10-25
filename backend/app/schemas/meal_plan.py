@@ -8,7 +8,7 @@ from app.core.clock import today as local_today
 from app.data import meal_structure
 from app.schemas.catalog_tags import FeedbackKind
 from app.schemas.display import ShownTitle
-from app.schemas.household_rules import HouseholdPlanning
+from app.schemas.household_rules import HouseholdPlanning, PlanningPreferences
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition, real_meal_roles
 from app.schemas.product import GroceryLineEstimate, PricingMode
@@ -139,6 +139,8 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
         data = handler(self)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
+        if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
+            data.pop("planning_preferences", None)
         return data
 
     @model_validator(mode="after")

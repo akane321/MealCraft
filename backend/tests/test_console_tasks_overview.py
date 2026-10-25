@@ -195,11 +195,14 @@ def test_planning_run_shows_the_warnings_of_the_plan_it_saved(console) -> None: 
     plan = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 40,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 40,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert plan.status_code == 201
@@ -219,11 +222,14 @@ def _generate_plan(client):
     plan = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 40,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 40,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert plan.status_code == 201

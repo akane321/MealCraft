@@ -192,22 +192,28 @@ def test_planning_replay_uses_the_stored_request_and_saves_no_plan(console) -> N
     plan = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 40,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 40,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert plan.status_code == 201
     failed = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 5,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 5,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert failed.status_code == 422
@@ -403,10 +409,13 @@ def _second_account(factory: sessionmaker) -> int:
         plan = other.post(
             "/api/plans/generate",
             json={
-                "household_size": 2,
-                "max_cooking_time_minutes": 60,
-                "weekly_budget_sgd": 40,
-                "pricing_mode": "fixture",
+                "requires_halal": False,
+                **{
+                    "household_size": 2,
+                    "max_cooking_time_minutes": 60,
+                    "weekly_budget_sgd": 40,
+                    "pricing_mode": "fixture",
+                },
             },
         )
         assert plan.status_code == 201

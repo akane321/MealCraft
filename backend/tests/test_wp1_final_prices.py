@@ -275,7 +275,8 @@ def test_generation_persists_prices_and_preview_only_refreshes_when_confirmed(mo
     monkeypatch.setattr(ProductSnapshotRepository, "get_fresh", lambda *args, **kwargs: [])
     with dish_client(monkeypatch, dishes()) as client:
         response = client.post(
-            "/api/plans/generate", json={"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}
+            "/api/plans/generate",
+            json={"requires_halal": False, **{"household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"}},
         )
         assert response.status_code == 201, response.text
         plan = response.json()

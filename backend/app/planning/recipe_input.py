@@ -6,6 +6,7 @@ from typing import get_args
 from pydantic import ValidationError
 
 from app.planning.input_audit import nonfinite_issues
+from app.planning.vegetable_led import vegetable_share, weighed
 from app.schemas.planning_v2 import DishCourse, MealType, PlanningRecipeCandidate
 from app.schemas.recipe import RecipeDetailResponse
 
@@ -42,6 +43,8 @@ def recipe_input(
         allowed_meal_types=sorted(set(allowed_meal_types)),
         total_time_minutes=source.total_time_minutes,
         dietary_tags=list(source.dietary_tags),
+        unknown_safety=list(source.unknown_safety or []),
+        halal_status=source.halal_status,
         allergens=sorted({allergen for i in source.ingredients for allergen in i.allergens}),
         ingredients=[
             dict(ingredient_id=i.normalized_name, quantity=i.quantity, unit=i.unit, original_text=i.original_text)
@@ -50,6 +53,10 @@ def recipe_input(
         nutrients_per_serving=source.nutrition.model_dump(),
         cuisine=source.cuisine,
         course=source.course if source.course in KNOWN_COURSES else None,
+        flavor_tags=source.flavor_tags,
+        vegetable_share=vegetable_share(
+            weighed((item.normalized_name, item.quantity, item.unit, item.original_text) for item in source.ingredients)
+        ),
     )
     if (
         source.prep_time_minutes is not None
