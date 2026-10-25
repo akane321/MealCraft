@@ -51,6 +51,20 @@ def test_voided_cases_are_reported_and_leave_the_denominator():
     assert got["failure_n"] == 1
 
 
+def test_all_voided_cases_have_no_success_rate():
+    records = [outcome("c1", run=run, voided=True) for run in (1, 2)]
+    got = cell(aggregate(records))
+    assert (got["declared_n"], got["voided_n"], got["remaining_n"]) == (1, 1, 0)
+    assert got["success_n"] == 0
+    assert got["success_rate"] is None
+    assert got["per_run_success_rate"] == [None, None]
+
+
+def test_no_outcomes_are_rejected_instead_of_reporting_success():
+    with pytest.raises(ValueError, match="no outcomes"):
+        aggregate([])
+
+
 def test_void_must_be_identical_for_every_system():
     records = [
         outcome("c1", system_id="s1", voided=True),

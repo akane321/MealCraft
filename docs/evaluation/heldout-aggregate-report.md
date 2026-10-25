@@ -25,6 +25,12 @@ Not covered: a cell with very few cases can identify a single question; whether 
 decided here. The report does not choose failure cases for analysis, load the sealed file, run any system or
 decide which cases are void.
 
+Coverage checks are relative to the supplied records, not to an expected manifest. The sealed-side caller must
+check the expected cases, systems and runs before export. If every supplied run omits the same case, or an
+entire system or run is absent, this generator cannot discover the omission. A wholly failed run must therefore
+still supply one `missing`, `timeout` or `error` outcome for every expected case. This module alone is not a
+completeness or disclosure gate; small-cell policy and manifest validation remain prerequisites for formal use.
+
 ```text
 PYTHONPATH=backend python -m pytest backend/tests/test_heldout_report.py -p no:cacheprovider --basetemp <new-temporary-directory>
 ```
