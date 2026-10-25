@@ -1,5 +1,11 @@
 # Sprint 2 LLM work status (developer-set only)
 
+> Historical worktree evidence, not current product acceptance. See
+> `docs/current-status.md` for merged capabilities and `docs/api-contracts.md`
+> for the current execution boundary. In particular, the command suggested in
+> limitation 3 below is now disabled by owner decision; restored API credits
+> do not authorize running it. A separate pre-request cost policy is required.
+
 Updated: 2026-10-23
 
 ## Implemented in this worktree

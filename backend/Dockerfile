@@ -14,6 +14,7 @@ COPY backend/app ./app
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./alembic.ini
 COPY backend/tests ./tests
+COPY backend/scripts/evaluate_sprint2_live_dev.py ./backend/scripts/evaluate_sprint2_live_dev.py
 COPY data ./data
 COPY data-engineering/data/fixtures/ops ./data-engineering/data/fixtures/ops
 COPY data-engineering/config/ingredient_aliases.csv ./data-engineering/config/ingredient_aliases.csv
