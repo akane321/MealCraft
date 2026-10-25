@@ -16,7 +16,7 @@ from app.planning.input_audit import require_finite_problem
 
 
 class SharedScoreCpSat(DiversityAwareGreedyPlanner):
-    def solve_exact(self, problem, *, max_states=10000, time_limit=10, min_dish_kinds=0):
+    def solve_exact(self, problem, *, max_states=10000, time_limit=10, min_dish_kinds=0, validate=None):
         from ortools.sat.python import cp_model
 
         require_finite_problem(problem)
@@ -28,7 +28,8 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
         slots, pools = domains(self, problem)
         first = slots[0].model_dump(exclude={"slot_id", "planned_date"})
         compressible = (
-            not (problem.diversity_policy or problem.perishable_days is not None or problem.nutrition_bands)
+            validate is None
+            and not (problem.diversity_policy or problem.perishable_days is not None or problem.nutrition_bands)
             and not any(
                 s.composition
                 or not s.required
@@ -66,7 +67,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
         )
         for selected in selections:
             choices = tuple((s.slot_id, option) for s, option in zip(slots, selected, strict=True))
-            score, _, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
+            score, _, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds, validate=validate)
             unknown += report.status == "indeterminate"
             if score is not None:
                 rows.append(score)
@@ -104,7 +105,7 @@ class SharedScoreCpSat(DiversityAwareGreedyPlanner):
                 return output
             model.Add(term == solver.Value(term))
         score, assignments, shopping, report = evaluate(
-            self, problem, choices_by_row[solver.Value(chosen)], min_dish_kinds=min_dish_kinds
+            self, problem, choices_by_row[solver.Value(chosen)], min_dish_kinds=min_dish_kinds, validate=validate
         )
         if report.status != "passed" or score != rows[solver.Value(chosen)]:
             raise RuntimeError("CP-SAT result failed independent score verification")

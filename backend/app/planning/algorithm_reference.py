@@ -39,7 +39,7 @@ def evaluate(planner, problem, choices, *, min_dish_kinds=0, validate=None):
 class EnumeratedReference(DiversityAwareGreedyPlanner):
     """Exact only over generated options and the fixed shopping policy."""
 
-    def solve_reference(self, problem, *, max_combinations=10000, min_dish_kinds=0):
+    def solve_reference(self, problem, *, max_combinations=10000, min_dish_kinds=0, validate=None):
         require_finite_problem(problem)
         require_min_dish_kinds(min_dish_kinds)
         if max_combinations < 1:
@@ -61,7 +61,9 @@ class EnumeratedReference(DiversityAwareGreedyPlanner):
             return result
         for selection in product(*options):
             choices = tuple((s.slot_id, dishes) for s, dishes in zip(slots, selection, strict=True))
-            score, assignments, _, report = evaluate(self, problem, choices, min_dish_kinds=min_dish_kinds)
+            score, assignments, _, report = evaluate(
+                self, problem, choices, min_dish_kinds=min_dish_kinds, validate=validate
+            )
             result["checked"] += 1
             result["unknown"] += report.status == "indeterminate"
             if score is not None and (result["score"] is None or score < result["score"]):
