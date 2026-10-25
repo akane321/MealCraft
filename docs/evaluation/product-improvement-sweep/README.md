@@ -42,7 +42,7 @@ Background machine load is uncontrolled; timings do not establish statistically 
 No product default is changed by this diagnostic. Raw records include packet hashes,
 table-kind counts, checkout totals, per-case outcomes and before/after scores.
 
-Recorded evaluation rounds: 36. Source commits: `ec0bcdde39fa8de11da59d5e478f62dea14fb0bd`.
+Recorded evaluation rounds: 36. Source revisions are retained in the [raw run records](w16-s0-r0.json).
 
 At width 32, mean table kinds are 6.611 without improvement, 6.778 at 50 proposals and 6.778 at 200 proposals.
 More proposals are not automatically a better default. The weekly objective prioritizes variety

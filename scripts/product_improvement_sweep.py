@@ -126,9 +126,8 @@ def summarize(parts):
         "No product default is changed by this diagnostic. Raw records include packet hashes,",
         "table-kind counts, checkout totals, per-case outcomes and before/after scores.",
         "",
-        f"Recorded evaluation rounds: {len(parts)}. Source commits: "
-        + ", ".join(f"`{v}`" for v in sorted({p["commit"] for p in parts}))
-        + ".",
+        f"Recorded evaluation rounds: {len(parts)}. Source revisions are retained in the "
+        f"[raw run records](w{parts[0]['width']}-s{parts[0]['steps']}-r{parts[0]['repeat']}.json).",
         "",
     ]
     if all((32, steps) in grouped for steps in (0, 50, 200)):

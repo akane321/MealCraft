@@ -26,6 +26,6 @@ Investigate proposal acceptance and stage costs before expanding the iteration c
 Raw JSON retains every check and the planned dishes. A passing check is not proof of user preference.
 The ten-day household exercises two shopping trips; this does not replace the separate 14-day regression suite.
 
-Source commit: `ec0bcdde39fa8de11da59d5e478f62dea14fb0bd`.
+Source revisions and measured values are retained in the [beam-only record](steps-0.json) and [50-proposal record](steps-50.json).
 Reproduce with `python scripts/product_household_comparison.py --output <fresh-directory>`
 and `python scripts/summarize_product_households.py <fresh-directory>`.
