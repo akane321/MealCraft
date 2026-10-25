@@ -24,6 +24,12 @@ class Tally:
     output_tokens: int = 0
     cached_input_tokens: int = 0
     embedding_tokens: int = 0
+    max_requests: int | None = None
+    sent: int = 0
+
+
+class ModelCallLimitReached(RuntimeError):
+    pass
 
 
 _turn: ContextVar[Tally | None] = ContextVar("model_requests", default=None)
@@ -35,6 +41,11 @@ _lock = threading.Lock()  # LangGraph's workers and concurrent requests share th
 def _count(request) -> None:
     tally = _turn.get()
     with _lock:
+        if tally is not None and tally.max_requests is not None and tally.sent >= tally.max_requests:
+            tally.fell_back = True
+            raise ModelCallLimitReached("This turn's model request budget is exhausted.")
+        if tally is not None:
+            tally.sent += 1
         (tally if tally is not None else _unrecorded).requests += 1
 
 
@@ -70,6 +81,9 @@ def _count_response_usage(response) -> None:
     if tally is None:
         return
     try:
+        if "text/event-stream" in response.headers.get("content-type", ""):
+            return  # This hook accounts for non-streaming JSON responses only.
+        response.read()  # HTTPX response hooks run before the response body is read.
         payload = response.json()
         usage = payload.get("usage") or {}
         if response.request.url.path.rstrip("/").endswith("/embeddings"):
@@ -88,11 +102,11 @@ def http_client():
 
 
 @contextmanager
-def counting() -> Iterator[None]:
+def counting(*, max_requests: int | None = None) -> Iterator[None]:
     """Counts the model requests made inside the block, by this thread and the work it hands to others
     (LangGraph copies the context into its workers). Also a decorator. What the block does not take is
     counted as unrecorded."""
-    token = _turn.set(Tally())
+    token = _turn.set(Tally(max_requests=max_requests))
     try:
         yield
     finally:

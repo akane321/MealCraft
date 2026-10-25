@@ -2,6 +2,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 
 import httpx
+import pytest
 
 from app.agent import model_client
 from app.services.agent import AgentSessionService
@@ -71,3 +72,43 @@ def test_openai_response_hook_counts_chat_and_embedding_usage(monkeypatch):
     assert tally.cached_input_tokens == 20
     assert tally.output_tokens == 15
     assert tally.embedding_tokens == 9
+
+
+def test_response_hook_reads_a_streamed_transport_body_before_accounting():
+    # Unlike Response(json=...), this body is unread when HTTPX invokes response hooks.
+    transport = httpx.MockTransport(
+        lambda request: httpx.Response(
+            200,
+            stream=httpx.ByteStream(b'{"usage":{"prompt_tokens":17,"completion_tokens":3}}'),
+            headers={"content-type": "application/json"},
+        )
+    )
+    with (
+        model_client.counting(),
+        httpx.Client(
+            transport=transport,
+            event_hooks={"response": [model_client._count_response_usage]},
+        ) as client,
+    ):
+        assert client.post("http://127.0.0.1/v1/chat/completions").json()["usage"]["prompt_tokens"] == 17
+        tally = model_client.take()
+    assert (tally.input_tokens, tally.output_tokens) == (17, 3)
+
+
+def test_request_budget_blocks_before_transport_and_take_cannot_reset_it():
+    sent = []
+    transport = httpx.MockTransport(lambda request: (sent.append(request), httpx.Response(200, json={}))[1])
+    with (
+        model_client.counting(max_requests=2),
+        httpx.Client(
+            transport=transport,
+            event_hooks={"request": [model_client._count]},
+        ) as client,
+    ):
+        client.post("http://127.0.0.1/first")
+        assert model_client.take().requests == 1
+        client.post("http://127.0.0.1/second")
+        with pytest.raises(model_client.ModelCallLimitReached):
+            client.post("http://127.0.0.1/third")
+        assert model_client.take().requests == 1
+    assert len(sent) == 2

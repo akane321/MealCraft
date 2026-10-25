@@ -175,6 +175,9 @@ Recent conversation:\n{recent}\nLatest user message:\n{message}"""
         # A clear lexical out-of-scope result cannot be converted into a state-changing action by the model.
         if reference.scope_class is ScopeClass.OUT_OF_SCOPE:
             return reference
+        if self.policy.has_food_restriction(message) and reference.should_mutate_state:
+            # A social/out-of-scope model error must not discard a newly stated safety restriction.
+            return reference
         if prediction.scope_class in {ScopeClass.ADVERSARIAL, ScopeClass.RESTRICTED}:
             return ScopeDecision(
                 scope_class=prediction.scope_class,

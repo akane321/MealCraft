@@ -9,7 +9,7 @@ from uuid import uuid4
 from pydantic_core import to_jsonable_python
 
 from app.agent import limits, model_client
-from app.agent.parser import ConstraintParser
+from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
@@ -431,7 +431,7 @@ class AgentSessionService:
         return self.web_food_question_answerer.answer(message, lang=lang)
 
     # Count this turn from its start, before its run exists.
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
     def create(
         self, message: str, *, idempotency_key: str | None = None, plan_id: int | None = None
     ) -> AgentSessionResponse:
@@ -520,7 +520,7 @@ class AgentSessionService:
             items=[self._to_response(item) for item in self.repository.list_recent(limit=limit)]
         )
 
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
     def update_preferences(self, session_id: int, change: AgentPreferenceUpdate) -> AgentSessionResponse:
         saved = self.repository.get(session_id)
         if saved is None:
@@ -560,7 +560,7 @@ class AgentSessionService:
             self._fail_run(run, error)
             raise error
 
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
     def reply(
         self,
         session_id: int,
@@ -588,7 +588,7 @@ class AgentSessionService:
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
         self._require_context_version(session_id, snapshot.context_version, run)
-        if snapshot.plan_id is not None:
+        if snapshot.plan_id is not None and not (snapshot.constraints.requires_halal or requests_halal(message)):
             self.repository.end_read_transaction()
             try:
                 response = (
@@ -1381,6 +1381,9 @@ class AgentSessionService:
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
+        if AgentConstraintState.model_validate(agent_session.constraints).requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", agent_session.messages)))
         snapshot = self._to_response(agent_session)
         self.repository.end_read_transaction()
         started = self._start_run(
@@ -1478,6 +1481,9 @@ class AgentSessionService:
         if agent_session is None:
             raise AgentSessionNotFoundError
         snapshot = self._to_response(agent_session)
+        if snapshot.constraints.requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", snapshot.messages)))
         if snapshot.plan_id is None or snapshot.pending_replan is None:
             self.repository.end_read_transaction()
             raise AgentSessionNotReadyError("There is no replanning preview to confirm.")
@@ -1795,9 +1801,8 @@ class AgentSessionService:
         A record of work already done, so neither the deadline nor the limit is checked here: the turn is over,
         and a budget stop now would fail a turn whose reply is already saved, or hide why it failed."""
         taken = model_client.take()
-        # ponytail: the table holds used <= max, so a turn past its limit records the limit; a turn sends at most
-        # 4 (one chat and one embedding request, each retried once), so check before each request if that grows.
-        run.used_llm_calls = min(run.used_llm_calls + taken.requests, run.max_llm_calls)
+        # The HTTP request hook refuses the next call before sending; never hide sent requests by clamping.
+        run.used_llm_calls += taken.requests
         run.model_config = {
             **(run.model_config or {}),
             "token_usage": {
@@ -1904,7 +1909,11 @@ class AgentSessionService:
                 else None
             ),
             latest_run=AgentRunResponse.model_validate(latest_run) if latest_run is not None else None,
-            can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
+            can_confirm=(
+                agent_session.status == "ready"
+                and agent_session.plan_id is None
+                and not AgentConstraintState.model_validate(agent_session.constraints).requires_halal
+            ),
             title=agent_session.title,
             pinned_at=agent_session.pinned_at,
             created_at=agent_session.created_at,

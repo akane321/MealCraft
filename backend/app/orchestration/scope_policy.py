@@ -6,6 +6,25 @@ from app.orchestration.contracts import ScopeClass, ScopeDecision
 class ReferenceScopePolicy:
     """Deterministic starter policy, not the final multilingual scope classifier."""
 
+    @staticmethod
+    def has_food_restriction(message: str) -> bool:
+        from app.agent.parser import ENGLISH_EXCLUSION, RuleBasedConstraintParser
+
+        if re.search(
+            r"\b(?:allerg\w*|vegetarian|vegan|halal|gluten[- ]free|dairy[- ]free)\b"
+            r"|不吃|不喝|过敏|忌口|清真|素食|纯素|不含",
+            message,
+            re.IGNORECASE,
+        ):
+            return True
+        # Reuse the parser's food vocabulary; 'no movies' must not become a meal action.
+        aliases = {*RuleBasedConstraintParser._ingredient_aliases, *RuleBasedConstraintParser._allergen_aliases}
+        return any(
+            re.search(ENGLISH_EXCLUSION + re.escape(alias) + r"s?\b", message, re.IGNORECASE)
+            for alias in aliases
+            if alias.isascii()
+        )
+
     _social_patterns = (
         r"^(?:hi|hello|hey|thanks|thank you)[!. ]*$",
         r"^(?:你好(?:呀)?|您好|谢谢(?:你)?|多谢(?:啦)?)[！!。,. ]*$",
@@ -266,13 +285,14 @@ class ReferenceScopePolicy:
         asks_food_question = any(re.search(pattern, lower) for pattern in self._food_question_patterns)
         has_domain = (
             any(token in lower for token in self._domain_tokens)
+            or self.has_food_restriction(lower)
             or mentions_money(lower)
             or read_start(lower, clock.today()) is not None
             or asks_saved_plan_question
             or asks_food_question
         )
         has_off_topic = any(token in lower for token in self._off_topic_tokens)
-        strong_domain = any(
+        strong_domain = self.has_food_restriction(lower) or any(
             token in lower
             for token in (
                 "meal",
@@ -381,7 +401,7 @@ class ReferenceScopePolicy:
         segments = [
             segment.strip(" \t\r\n.,!?。！？")
             for segment in re.split(
-                r"(?:[。！？!?;；]|，再|，然后|,\s*then\s+|\s+and\s+then\s+|"
+                r"(?:[。！？!?;；]|\.(?=\s|$)|，再|，然后|,\s*then\s+|\s+and\s+then\s+|"
                 r"\s+and\s+(?=(?:plan|create|find|recommend|book|show|tell|write)\b)|"
                 r"(?=并(?:规划|计划|查找|推荐|预订|查询|写)))",
                 message,
@@ -393,7 +413,7 @@ class ReferenceScopePolicy:
         unsupported: list[str] = []
         for segment in segments:
             lower = segment.lower()
-            has_domain = any(token in lower for token in self._domain_tokens)
+            has_domain = any(token in lower for token in self._domain_tokens) or self.has_food_restriction(lower)
             has_off_topic = any(token in lower for token in self._off_topic_tokens)
             if has_domain and not has_off_topic:
                 supported.append(segment)

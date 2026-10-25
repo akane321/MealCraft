@@ -843,7 +843,10 @@ not a cross-device undo history. It is unavailable after another state change
 or conversation switch. An explicit hard no-repeat constraint remains in force
 even when a soft repeat preference is edited.
 
-Every message first passes through the deterministic reference scope gate.
+Every message first passes deterministic safety guards. In model mode the model
+proposes scope and the application guards its state/tool permissions; fixture
+mode uses the reference policy. Explicit food restrictions recognized by the
+parser's vocabulary cannot be discarded by a model's social/off-topic mistake.
 Supported meal-planning input may reach constraint parsing. Social, off-topic,
 disease-treatment and adversarial requests receive a bounded response without
 changing constraints, clarification state, pending interaction or context
@@ -869,14 +872,28 @@ whole-week request: it runs the weekly planner again, avoids recipes from the
 current week while alternatives remain, and saves the new week as replacing
 the old one. An explicit "no dish twice" request also limits each recipe to
 one use in that new week.
-A mixed request sends only
-its supported segment to the parser. The persisted `last_scope_decision` makes
+A mixed request sends only its supported segments to the parser, retaining
+separate allergy/exclusion clauses and splitting English sentence boundaries
+without splitting decimal quantities. The persisted `last_scope_decision` makes
 this routing visible to clients and tests. Every templated reply is written in
 the language of the household's message, or, for a message with no words to
 tell by (a number, "ok"), of their last one that had some
 (`backend/app/agent/replies.py`). That includes the reason the planner or a
 change to a saved week gives for turning a request down; one with no Chinese
 wording yet is said in general terms rather than in English.
+
+Under ADR-0091, an explicit halal request is declined as not yet supported,
+without invoking the parser or planner. The requirement is retained with
+`HALAL_NOT_SUPPORTED`, invalidating any prior ready card. Stored ready states
+and replan previews cannot bypass this guard through confirmation. This is an
+unsupported capability, not a claim that an ordinary menu satisfies halal.
+
+Counted create/reply turns have the existing four-request allowance enforced
+before each external request, including retries. Accounting records sent
+requests rather than clamping them to the allowance. Non-streaming HTTP usage
+is read after loading the response body, including embedding usage; zero-call
+fixture turns remain zero. This request-count guard is not a dollar budget for
+standalone developer evaluation scripts.
 
 The assistant requires household size and resolves any unquantified available
 ingredient before confirmation. A user may answer `unknown`; the quantity then
