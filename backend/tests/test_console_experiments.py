@@ -86,6 +86,7 @@ def test_developer_planning_records_only_what_it_reads_and_keeps_every_scenario(
         client, {"evaluation": "developer-planning", "overrides": {"planner": "greedy-baseline"}}, "greedy"
     ).json()
     assert product["configuration"] == {"planner": "product-planner"}
+    # Product improvement must not add adjacent repeats to the validated beam seed.
     assert (product["metrics"]["failure_case_count"], greedy["metrics"]["failure_case_count"]) == (0, 18)
 
     detail = client.get(f"/api/ops/experiments/{product['id']}").json()
@@ -93,6 +94,8 @@ def test_developer_planning_records_only_what_it_reads_and_keeps_every_scenario(
     # The run says which planner the option ran, as the runner's names alone do not.
     assert detail["report"]["planner"].startswith("ProductPlanningEngine, beam search")
     assert len(detail["report"]["runs"]) == 20
+    failures = [r for r in detail["report"]["runs"] if r["status"] == "failed"]
+    assert failures == []
     assert sum(item["scenario_count"] for item in detail["report"]["category_metrics"].values()) == 20
     # The inline runner records the file hash as "sha256"; it counts. A semantic digest it never made does not.
     assert "dataset.file_sha256" not in detail["reproducibility"]["missing"]
