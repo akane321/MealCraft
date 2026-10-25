@@ -1,5 +1,8 @@
 """Profile member fields, rules, basics and limits through the API (layer 08 PR-1)."""
 
+import pytest
+
+from app.core import clock
 from tests.test_recipes import recipe_client as recipe_client
 
 RULE = {
@@ -189,9 +192,13 @@ def test_a_plan_from_a_profile_carries_each_members_limits_and_not_the_union(rec
         assert dish["not_for"] == []
 
 
-def test_a_one_dish_dinner_nobody_can_share_is_refused_rather_than_leaving_a_member_unfed(recipe_client):
-    """Fix for the review: coverage used to be checked only on the full meal structure, so a one-dish dinner
-    could be planned with nothing on it a vegetarian member could eat. Now it is refused instead."""
+@pytest.mark.parametrize("start_date, expected_status", [("2026-10-19", 422), ("2026-10-24", 201)])
+def test_one_dish_member_coverage_respects_the_planned_days_time_limit(
+    recipe_client, monkeypatch, start_date, expected_status
+):
+    # The only shared dish takes 40 minutes. The 30-minute rule applies on weekdays only.
+    # Freeze today as well so explicit dates never become past dates as the suite ages.
+    monkeypatch.setattr(clock, "simulated", lambda: "2026-10-19T12:00")
     body = payload(
         members=[
             {"name": "Ann", "servings_per_meal": 1, "dietary_preferences": ["vegetarian"]},
@@ -201,8 +208,16 @@ def test_a_one_dish_dinner_nobody_can_share_is_refused_rather_than_leaving_a_mem
     )
     created = recipe_client.post("/api/household-profiles", json=body)
     assert created.status_code == 201, created.text
-    refused = recipe_client.post(f"/api/household-profiles/{created.json()['id']}/plans", json={"day_count": 1})
-    assert refused.status_code == 422, refused.text
+    response = recipe_client.post(
+        f"/api/household-profiles/{created.json()['id']}/plans",
+        json={"day_count": 1, "start_date": start_date},
+    )
+    assert response.status_code == expected_status, response.text
+    if expected_status == 201:
+        plan = response.json()["plan"]
+        assert plan["start_date"] == start_date
+        assert [dish["recipe"]["slug"] for dish in plan["days"]] == ["tofu-soba"]
+        assert all(dish["not_for"] == [] for dish in plan["days"])
 
 
 def test_a_size_stated_in_the_conversation_keeps_every_members_limits(recipe_client):

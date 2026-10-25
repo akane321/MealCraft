@@ -348,8 +348,13 @@ def test_owner_reviewed_source_conflict_is_unknown_without_erasing_the_known_sou
     assert found.incomplete_reason.startswith("ingredient/step conflict")
 
 
-def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) -> None:
+def test_rule_regeneration_keeps_the_unreviewed_model_batch_gated(monkeypatch) -> None:
+    """A frozen field the rules now decide takes the rule's value into the review batch (owner 2026-10-24), still
+    waiting for review: better rules alone release nothing."""
+    from types import SimpleNamespace
+
     from app.data import recipe_tags
+    from app.planning.meal_composition import unreviewed
 
     item = dish("Bobotie", "main", [("beef", 454), ("bread", 58), ("egg", 100), ("onion", 110)])
     old = {
@@ -369,16 +374,20 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_frozen(monkeypatch) 
     fresh = rule_tags(item)
     assert fresh.values["meal_role"] == "protein_main"
     frozen = recipe_tags.build(False, 0)["tagged"][0][1]
-    assert frozen.values["meal_role"] == "one_bowl" and frozen.methods["meal_role"] == "llm"
     assert frozen.values["protein_sources"] == fresh.values["protein_sources"]  # Only model decisions are frozen.
     entry = recipe_tags.recipe_entry(frozen, old)
+    assert (entry["meal_role"], entry["contains_staple"]) == ("protein_main", False)
     for name in ("meal_role", "contains_staple"):
-        assert entry[name] == old[name]
-        assert entry["estimated"][name] == old["estimated"][name]
-    assert entry["estimated"]["protein_sources"]["method"] == "rule"
+        assert entry["estimated"][name] == {
+            "method": "rule",
+            "batch": recipe_tags.REVIEW_TABLE_BATCH,
+            "reviewed": False,
+        }
+    assert entry["estimated"]["protein_sources"] == old["estimated"]["protein_sources"]
+    assert unreviewed(SimpleNamespace(**entry))
 
 
-def test_a_frozen_homemade_staple_updates_only_its_rule_owned_sources(monkeypatch) -> None:
+def test_a_frozen_homemade_staple_takes_the_rules_staple_but_stays_gated(monkeypatch) -> None:
     from types import SimpleNamespace
 
     from app.data import recipe_tags
@@ -394,9 +403,9 @@ def test_a_frozen_homemade_staple_updates_only_its_rule_owned_sources(monkeypatc
     monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": {item.key: old}})
     monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
     regenerated = recipe_tags.recipe_entry(recipe_tags.build(False, 0)["tagged"][0][1], old)
+    assert (regenerated["meal_role"], regenerated["contains_staple"]) == ("staple", True)  # the rule's, gated
     for name in ("meal_role", "contains_staple"):
-        assert regenerated[name] == old[name]
-        assert regenerated["estimated"][name] == old["estimated"][name]
+        assert regenerated["estimated"][name]["batch"] == recipe_tags.REVIEW_TABLE_BATCH
     assert regenerated["protein_sources"] == []
     assert regenerated["estimated"]["protein_sources"]["method"] == "rule"
     assert meal_role_of(SimpleNamespace(**regenerated)) is None
@@ -540,20 +549,27 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
 
 
 def test_the_tag_files_are_current_with_the_rules() -> None:
-    """A rule-decided value is what the rules give today; re-run `python -m app.data.recipe_tags` after a change."""
+    """A rule-decided value is what the rules give today, for the dish's final role (a dessert's sources are none);
+    re-run `python -m app.data.recipe_tags` after a change. It holds before and after the owner accepts a batch."""
+    from app.data.recipe_tags import without_main_protein
+
     entries = committed(tag_files.RECIPE_TAGS, "recipes")
     stale = []
     for key, item in dishes().items():
         found = rule_tags(item)
         for field, estimate in entries[key]["estimated"].items():
-            if estimate["method"] == "rule" and found.values[field] != entries[key][field]:
+            final = field == "protein_sources" and without_main_protein(item, entries[key]["meal_role"])
+            expected = [] if final else found.values[field]
+            if estimate["method"] == "rule" and expected != entries[key][field]:
                 stale.append((key, field))
-            sweet = field == "protein_sources" and entries[key]["meal_role"] in {"dessert", "drink", "sauce"}
+            # An accepted model or table value stands only where the rules leave the field open.
             if (
                 estimate["method"] == "llm"
                 and estimate["reviewed"]
-                and field not in {"contains_staple", *found.open}
-                and not sweet
+                and field != "contains_staple"
+                and field not in found.open
+                and found.values[field] is not None
+                and not final
             ):
                 stale.append((key, field))
     assert not stale, stale[:10]
@@ -696,7 +712,11 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     shutil.copy(repository_root() / tag_files.RECIPE_TAGS, target)
     monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
     before = json.loads(target.read_text(encoding="utf-8"))
-    model = sum(e["method"] == "llm" for entry in before["recipes"].values() for e in entry["estimated"].values())
+    model = sum(
+        e["method"] == "llm" and e["batch"] == recipe_tags.LLM_BATCH and not e["reviewed"]
+        for entry in before["recipes"].values()
+        for e in entry["estimated"].values()
+    )
     assert model and recipe_tags.accept_batch("recipe-tags-v1/other") == 0
 
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == model
@@ -704,12 +724,18 @@ def test_accepting_a_batch_marks_its_model_values_reviewed_and_a_re_run_keeps_th
     assert {k: v for k, v in after.items() if k != "recipes"} == {k: v for k, v in before.items() if k != "recipes"}
     for key, entry in after["recipes"].items():
         for name, estimate in entry["estimated"].items():
-            assert estimate["reviewed"] is (estimate["method"] == "llm"), (key, name)
+            # Only the model's batch changes; the review batch keeps whatever state its own acceptance left.
+            held = before["recipes"][key]["estimated"][name]
+            assert estimate["reviewed"] is (held["reviewed"] or estimate["batch"] == recipe_tags.LLM_BATCH)
             assert entry[name] == before["recipes"][key][name]
     assert recipe_tags.accept_batch(recipe_tags.LLM_BATCH) == 0
 
     # A re-run keeps an accepted value reviewed while it is unchanged, and a changed one goes back to review.
-    key, entry = next((k, e) for k, e in after["recipes"].items() if e["estimated"]["meal_role"]["method"] == "llm")
+    key, entry = next(
+        (k, e)
+        for k, e in after["recipes"].items()
+        if e["estimated"].get("meal_role", {}).get("batch") == recipe_tags.LLM_BATCH
+    )
     tags = recipe_tags.Tags(values={name: entry[name] for name in tag_files.RECIPE_TAG_FIELDS})
     tags.methods = {name: e["method"] for name, e in entry["estimated"].items()}
     assert recipe_tags.recipe_entry(tags, entry)["estimated"]["meal_role"]["reviewed"] is True

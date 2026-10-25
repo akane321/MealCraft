@@ -230,6 +230,10 @@ REPLIES: dict[str, tuple[str, str]] = {
         "dietary constraints, groceries, budgets, or an existing meal plan.",
         "这个请求不在 MealCraft 的饮食规划范围内。我可以帮你处理食谱、饮食限制、买菜、预算，或调整已有的计划。",
     ),
+    "halal_unsupported": (
+        "Halal meal planning is not supported yet. I won't plan this request as ordinary meals.",
+        "目前暂不支持清真排餐，我不会把这项要求忽略后按普通饮食排餐。",
+    ),
     "restricted": (
         "MealCraft does not create disease-treatment diets or medical prescriptions. "
         "I can apply explicit allergens, general preferences, and nutrition targets you provide.",

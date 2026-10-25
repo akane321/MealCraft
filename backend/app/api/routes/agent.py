@@ -31,6 +31,7 @@ from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentInteractionInput,
     AgentMessageInput,
+    AgentPreferenceUpdate,
     AgentReplanConfirmationResponse,
     AgentRunCollectionResponse,
     AgentRunResponse,
@@ -211,6 +212,21 @@ def get_agent_session(session_id: int, service: AgentServiceDependency) -> Agent
     if agent_session is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found")
     return agent_session
+
+
+@router.put("/{session_id}/preferences", response_model=AgentSessionResponse)
+def update_agent_preferences(
+    session_id: int,
+    payload: AgentPreferenceUpdate,
+    service: AgentServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> AgentSessionResponse:
+    try:
+        return service.update_preferences(session_id, payload)
+    except AgentSessionNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent session not found") from error
+    except (AgentSessionNotReadyError, AgentRunLifecycleError) as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 @router.post("/{session_id}/messages", response_model=AgentSessionResponse)

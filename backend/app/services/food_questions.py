@@ -35,6 +35,44 @@ RANKING_CUES = (
 )
 
 
+def _lower_metric(lower: str, aliases: tuple[str, ...]) -> bool:
+    for alias in aliases:
+        match = re.search(re.escape(alias), lower)
+        if match is None:
+            continue
+        before, after = lower[max(0, match.start() - 40) : match.start()], lower[match.end() :]
+        if re.search(
+            r"(?:\b(?:lowest|lower|least|low)[ -]*(?:(?:amount|content|level)\s+of\s+)?|最低|最少|较低|低|少)$", before
+        ):
+            return True
+        if re.match(r"^(?:(?:的)?(?:含量|水平|值))?(?:最低|最少|较低|低|少)", after):
+            return True
+        if re.match(
+            r"^\s+(?:(?:content|level|amount)\s+)?(?:is|are|should be)\s+(?:the\s+)?(?:lowest|least|low|lower)\b", after
+        ):
+            return True
+    return False
+
+
+def _requires_catalog_facts(text: str) -> bool:
+    # URLs/citation markers are provenance, not food quantities. Never treat them as fact verification.
+    prose = re.sub(r"https?://[^\s)]+|\[\d+\]", "", text.casefold().replace("_", " "))
+    return bool(
+        re.search(
+            r"\d|\b(?:calories?|kcal|protein|carbs?|carbohydrates?|sodium|sugar|fat|nutrition|nutrients?|"
+            r"allerg\w*|halal|kosher|vegan|vegetarian|gluten|dairy[- ]free|safe|unsafe|safety|"
+            r"suitable for|free of|free from|contains no|does not contain|temperature|how long|servings?|"
+            r"celiac|coeliac|lactose|diabet\w*|pregnan\w*|poison\w*|salmonella|cross[- ]contact)\b"
+            r"|\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|"
+            r"fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|"
+            r"hundred|thousand|half|quarter)\b"
+            r"|营养|蛋白|热量|卡路里|碳水|脂肪|钠|糖|过敏|清真|素食|纯素|麸质|安全|不含|几度|多久|温度|份量"
+            r"|[一二三四五六七八九十百千两零〇]+(?:克|毫克|千卡|分钟|小时|度|汤匙|茶匙)",
+            prose,
+        )
+    )
+
+
 class CatalogFoodQuestionAnswerer:
     """Answer nutrient-ranking questions from visible recipe records and their catalog provenance."""
 
@@ -48,7 +86,7 @@ class CatalogFoodQuestionAnswerer:
             return None
         metric = next(
             (
-                (field, en_unit, zh_unit)
+                (field, aliases, en_unit, zh_unit)
                 for field, aliases, en_unit, zh_unit in METRICS
                 if any(alias in lower for alias in aliases)
             ),
@@ -56,10 +94,8 @@ class CatalogFoodQuestionAnswerer:
         )
         if metric is None:
             return None
-        metric_name, en_unit, zh_unit = metric
-        descending = not any(
-            cue in lower for cue in ("lowest", "least", "low", "最低", "最少", "较低", "少盐", "低热量")
-        )
+        metric_name, aliases, en_unit, zh_unit = metric
+        descending = not _lower_metric(lower, aliases)
         recipes = self.repository.rank_by_nutrition(
             metric_name,
             descending=descending,
@@ -84,7 +120,7 @@ class CatalogFoodQuestionAnswerer:
 
 
 class OpenAIWebFoodQuestionAnswerer:
-    """Answer catalog misses from required web search and display only cited sources."""
+    """General culinary references only; numerical and safety facts require catalog tools."""
 
     def __init__(self, *, api_key: str, model: str, timeout_seconds: float = 15.0, client=None) -> None:
         self.model = model
@@ -96,7 +132,7 @@ class OpenAIWebFoodQuestionAnswerer:
 
     def answer(self, message: str, *, lang: str) -> str | None:
         query = " ".join(message.split())
-        if not query or len(query) > 500:
+        if not query or len(query) > 500 or _requires_catalog_facts(query):
             return None
         language = "Chinese" if lang == "zh" else "English"
         try:
@@ -111,7 +147,9 @@ class OpenAIWebFoodQuestionAnswerer:
                     "make only claims supported by the searched sources. Do not provide medical or disease-specific "
                     "dietary advice, invent nutrition values, or fabricate citations. "
                     "If reliable evidence is not found, "
-                    "say so. Return answer text only; the application will append verified source citations."
+                    "say so. Do not output quantities, nutrition, dietary or safety conclusions. "
+                    "Return answer text only; the application will append retrieved source citations, "
+                    "not a verification guarantee."
                 ),
                 input=query,
             )
@@ -120,7 +158,7 @@ class OpenAIWebFoodQuestionAnswerer:
             return None
         text = getattr(response, "output_text", "")
         sources = _web_citation_sources(response)
-        if not isinstance(text, str) or not text.strip() or not sources:
+        if not isinstance(text, str) or not text.strip() or not sources or _requires_catalog_facts(text):
             return None
         source_lines = [f"{title}: {url}" for title, url in sources[:5]]
         if lang == "zh":

@@ -257,10 +257,13 @@ def test_two_trip_shape_preview_reaches_trip_cost_path(monkeypatch):
         generated = client.post(
             "/api/plans/generate",
             json={
-                "household_size": 2,
-                "day_count": 14,
-                "weekly_budget_sgd": 100,
-                "meal_composition": [{"role_id": "main", "courses": ["main"]}],
+                "requires_halal": False,
+                **{
+                    "household_size": 2,
+                    "day_count": 14,
+                    "weekly_budget_sgd": 100,
+                    "meal_composition": [{"role_id": "main", "courses": ["main"]}],
+                },
             },
         )
         assert generated.status_code == 201, generated.text

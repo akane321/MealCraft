@@ -3,6 +3,8 @@ import { allergenLabel } from "~/lib/allergens";
 import { budgetGap, budgetLine, changedMealWhen, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
+import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
@@ -54,6 +56,29 @@ const filmPlaying = ref(true);
 const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
 const interaction = computed(() => session.value?.pending_interaction ?? null);
 const constraints = computed(() => session.value?.constraints ?? null);
+const editingPreferences = ref(false);
+const preferencesVersion = ref(0);
+const preferencesUndo = ref<{ sessionId: number; version: number; value: PlanningPreferencesView } | null>(null);
+const canUndoPreferences = computed(() => !!preferencesUndo.value && preferencesUndo.value.sessionId === session.value?.id
+  && preferencesUndo.value?.version === session.value?.context_version);
+
+function editPreferences() {
+  preferencesVersion.value = session.value!.context_version;
+  editingPreferences.value = true;
+}
+async function savePreferences(value: PlanningPreferencesView) {
+  const before = copyPlanningPreferences(constraints.value?.planning_preferences);
+  const result = await agent.updatePreferences(value, preferencesVersion.value);
+  if (!result) return;
+  preferencesUndo.value = { sessionId: result.id, version: result.context_version, value: before };
+  editingPreferences.value = false;
+}
+async function undoPreferences() {
+  if (!canUndoPreferences.value || !preferencesUndo.value) return;
+  const result = await agent.updatePreferences(preferencesUndo.value.value, preferencesUndo.value.version);
+  if (result) preferencesUndo.value = null;
+}
+watch(() => session.value?.id, () => { editingPreferences.value = false; preferencesUndo.value = null; });
 // A stated cap on how often a dish may come back; 1 is the usual ask.
 const repeatLabel = (cap: number | null | undefined) => (cap == null ? null : cap === 1 ? "No repeats" : `Each dish up to ${cap} times`);
 const contextLabel = computed(() => {
@@ -73,6 +98,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
+    ...planningPreferenceLabels(c.planning_preferences).map(value => ({ text: "Preference", value })),
   ];
 });
 // The household's own name for the conversation, else its first message.
@@ -648,9 +674,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   </label>
                 </div>
                 <p>Ready to plan your week with these details.</p>
+                <div v-if="!editingPreferences" class="options">
+                  <button type="button" class="mc-btn secondary sm" :disabled="isLoading || readOnly || !canGiveFeedback" @click="editPreferences">Edit preferences</button>
+                  <button v-if="canUndoPreferences" type="button" class="mc-btn secondary sm" :disabled="isLoading || readOnly || !canGiveFeedback" @click="undoPreferences">Undo last preference change</button>
+                </div>
+                <HomePreferencesEditor v-else :value="copyPlanningPreferences(constraints?.planning_preferences)" :disabled="isLoading" @save="savePreferences" @cancel="editingPreferences = false" />
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading" @click="agent.confirm()">
+                <button type="button" class="mc-btn primary" :disabled="isLoading || editingPreferences || !canGiveFeedback" @click="agent.confirm()">
                   {{ isLoading ? "Planning your week…" : "Plan my week" }}
                 </button>
                 <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take a few minutes to plan.</p>

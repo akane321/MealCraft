@@ -228,15 +228,18 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 45,
-            "allergens": ["soy"],
-            "health_preferences": ["low-sodium"],
-            "nutrition_targets": {"calories_kcal": 500, "protein_g": 40},
-            "available_ingredients": [
-                {"normalized_name": "lemon", "quantity": None, "unit": None},
-                {"normalized_name": "chicken_breast", "quantity": 150, "unit": "g"},
-            ],
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 45,
+                "allergens": ["soy"],
+                "health_preferences": ["low-sodium"],
+                "nutrition_targets": {"calories_kcal": 500, "protein_g": 40},
+                "available_ingredients": [
+                    {"normalized_name": "lemon", "quantity": None, "unit": None},
+                    {"normalized_name": "chicken_breast", "quantity": 150, "unit": "g"},
+                ],
+            },
         },
     )
 
@@ -253,7 +256,10 @@ def test_recommendations_apply_hard_filters_and_return_score_reasons(recipe_clie
 def test_an_allergen_nobody_checked_for_excludes_every_recipe(recipe_client: TestClient) -> None:
     # mustard is outside data/ingredients/allergen-vocabulary.json, so no recipe
     # can be shown to be free of it: unknown is excluded, not admitted.
-    response = recipe_client.post("/api/recommendations/recipes", json={"household_size": 2, "allergens": ["mustard"]})
+    response = recipe_client.post(
+        "/api/recommendations/recipes",
+        json={"requires_halal": False, **{"household_size": 2, "allergens": ["mustard"]}},
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -265,10 +271,13 @@ def test_recommendations_enforce_budget_with_fixture_product_costs(recipe_client
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "budget_per_meal_sgd": 4.3,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "budget_per_meal_sgd": 4.3,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -294,12 +303,15 @@ def test_known_pantry_quantity_is_deducted_but_unknown_quantity_is_not(recipe_cl
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 35,
-            "available_ingredients": [
-                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
-                {"normalized_name": "lemon", "quantity": None, "unit": None},
-            ],
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 35,
+                "available_ingredients": [
+                    {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+                    {"normalized_name": "lemon", "quantity": None, "unit": None},
+                ],
+            },
         },
     )
 
@@ -326,9 +338,12 @@ def test_recommendation_rejects_known_quantity_without_unit(recipe_client: TestC
     response = recipe_client.post(
         "/api/recommendations/recipes",
         json={
-            "available_ingredients": [
-                {"normalized_name": "lemon", "quantity": 1, "unit": None},
-            ]
+            "requires_halal": False,
+            **{
+                "available_ingredients": [
+                    {"normalized_name": "lemon", "quantity": 1, "unit": None},
+                ]
+            },
         },
     )
 
@@ -801,14 +816,17 @@ def test_weekly_plan_is_persisted_without_consecutive_repeats(recipe_client: Tes
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 40,
-            "pricing_mode": "fixture",
-            "available_ingredients": [
-                {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
-            ],
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 40,
+                "pricing_mode": "fixture",
+                "available_ingredients": [
+                    {"normalized_name": "chicken_breast", "quantity": 300, "unit": "g"},
+                ],
+            },
         },
     )
 
@@ -842,11 +860,14 @@ def test_weekly_plan_respects_allergen_filter_and_explains_unavoidable_repeat(
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-08",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "allergens": ["soy"],
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-08",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "allergens": ["soy"],
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -878,7 +899,7 @@ def test_live_plan_selects_offline_and_only_checks_the_final_basket(
     monkeypatch.setattr(provider_module, "urlopen", offline)
     response = recipe_client.post(
         "/api/plans/generate",
-        json={"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"},
+        json={"requires_halal": False, **{"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "live"}},
     )
 
     assert response.status_code == 201
@@ -894,9 +915,12 @@ def test_weekly_plan_returns_422_when_no_recipe_meets_hard_constraints(recipe_cl
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 20,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 20,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -909,11 +933,14 @@ def test_meal_checkin_is_idempotent_and_dashboard_counts_completed_meals(recipe_
     generated = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-15",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
-            "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-15",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+                "nutrition_targets": {"calories_kcal": 500, "protein_g": 35},
+            },
         },
     )
     assert generated.status_code == 201
@@ -963,9 +990,12 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
     generated = recipe_client.post(
         "/api/plans/generate",
         json={
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
     plan_id = generated.json()["id"]
@@ -987,10 +1017,12 @@ def test_meal_checkin_rejects_unknown_entry_and_invalid_status(recipe_client: Te
 def test_a_weekly_total_equal_to_the_budget_is_within_it_to_the_cent(recipe_client: TestClient) -> None:
     # ADR-0021: budgets are compared in whole cents on every path.
     request = {"start_date": "2026-09-08", "household_size": 2, "pricing_mode": "fixture"}
-    unbudgeted = recipe_client.post("/api/plans/generate", json=request).json()
+    unbudgeted = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **request}).json()
     total = unbudgeted["grocery_estimate"]["purchase_total_sgd"]
 
-    exact = recipe_client.post("/api/plans/generate", json={**request, "weekly_budget_sgd": total}).json()
+    exact = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**request, "weekly_budget_sgd": total}}
+    ).json()
 
     assert exact["grocery_estimate"]["purchase_total_sgd"] <= total
     assert exact["grocery_estimate"]["within_weekly_budget"] is True
@@ -1000,11 +1032,14 @@ def _generate_replanning_fixture(recipe_client: TestClient, start_date: str) -> 
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": start_date,
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "weekly_budget_sgd": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": start_date,
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "weekly_budget_sgd": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
     assert response.status_code == 201
@@ -1501,10 +1536,13 @@ def test_private_routes_require_authentication_and_reject_cross_household_ids(
     plan = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     ).json()
     agent_session = recipe_client.post(
@@ -1583,10 +1621,13 @@ def test_plan_writes_enforce_create_plan_action(
     response = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-08",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-08",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     )
 
@@ -1628,10 +1669,13 @@ def test_check_in_writes_enforce_check_in_action(
     plan = recipe_client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-12-15",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
+            "requires_halal": False,
+            **{
+                "start_date": "2026-12-15",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+            },
         },
     ).json()
     _set_authenticated_household_role(role)
@@ -1663,10 +1707,13 @@ def test_authorized_write_still_requires_csrf(recipe_client: TestClient) -> None
         response = recipe_client.post(
             "/api/plans/generate",
             json={
-                "start_date": "2026-12-22",
-                "household_size": 2,
-                "max_cooking_time_minutes": 60,
-                "pricing_mode": "fixture",
+                "requires_halal": False,
+                **{
+                    "start_date": "2026-12-22",
+                    "household_size": 2,
+                    "max_cooking_time_minutes": 60,
+                    "pricing_mode": "fixture",
+                },
             },
         )
     finally:

@@ -32,6 +32,15 @@ NUMBER_WORDS = {
     "eleven": 11,
     "twelve": 12,
 }
+
+
+def requests_halal(message: str) -> bool:
+    text = message.lower()
+    return bool(re.search(r"\bhalal\b|清真", text)) and not bool(
+        re.search(r"\b(?:not|no need for|don't need|do not need)\s+(?:to be\s+)?halal\b|(?:不用|不需要|无需)清真", text)
+    )
+
+
 CHINESE_NUMBERS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 # "No pork", "we don't eat pork", "exclude mushrooms", "skip the onion".
 ENGLISH_EXCLUSION = (
@@ -425,10 +434,7 @@ class RuleBasedConstraintParser:
             if token in lower and value not in dietary:
                 dietary.append(value)
         extraction.dietary_preferences = dietary or None
-        halal_request = re.search(r"\bhalal\b|清真", lower) and not re.search(
-            r"\b(?:not|no need for|don't need|do not need)\s+(?:to be\s+)?halal\b|(?:不用|不需要|无需)清真", lower
-        )
-        if halal_request:
+        if requests_halal(message):
             extraction.requires_halal = True
 
         allergy_context = any(token in lower for token in ("allerg", "过敏"))

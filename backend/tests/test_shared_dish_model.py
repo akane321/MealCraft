@@ -424,6 +424,7 @@ def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=Non
         recipe_ingredients=[line],
         dietary_tags=list(tags),
         allergens=list(allergens),
+        unknown_safety=[],
         meal_role=role,
         prep_time_minutes=10,
         cook_time_minutes=20,

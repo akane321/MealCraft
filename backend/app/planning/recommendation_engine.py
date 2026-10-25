@@ -6,7 +6,7 @@ from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
-from app.planning.member_coverage import MemberLimits, member_limits, title_mentions
+from app.planning.member_coverage import MemberLimits, member_limits, title_mentions, unknown_safety_for
 from app.planning.vegetable_led import vegetable_share, weighed
 from app.schemas.recipe import RecipeListItemResponse
 from app.schemas.recommendation import (
@@ -148,6 +148,7 @@ class RecipeRecommendationEngine:
     def _member_reasons(self, recipe: Recipe, cooked: list, member: MemberLimits) -> list[str]:
         """Why this one member cannot eat the recipe: their own allergens, exclusions and diet."""
         reasons: list[str] = []
+        reasons.extend(unknown_safety_for(member, recipe))
         recipe_allergens = {allergen for item in cooked for allergen in item.ingredient.allergens}
         present, unverifiable = allergen_conflicts(sorted(member.allergens), recipe_allergens)
         reasons.extend(conflict_reasons(present, unverifiable))

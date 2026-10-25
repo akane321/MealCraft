@@ -9,7 +9,7 @@ from uuid import uuid4
 from pydantic_core import to_jsonable_python
 
 from app.agent import limits, model_client
-from app.agent.parser import ConstraintParser
+from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
 from app.agent.replies import language, listed, planner_message, say, weekday, word
@@ -60,6 +60,7 @@ from app.schemas.agent import (
     AgentConfirmationResponse,
     AgentConstraintState,
     AgentMessageResponse,
+    AgentPreferenceUpdate,
     AgentReplanConfirmationResponse,
     AgentReplanDraft,
     AgentRunCollectionResponse,
@@ -430,7 +431,7 @@ class AgentSessionService:
         return self.web_food_question_answerer.answer(message, lang=lang)
 
     # Count this turn from its start, before its run exists.
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
     def create(
         self, message: str, *, idempotency_key: str | None = None, plan_id: int | None = None
     ) -> AgentSessionResponse:
@@ -519,7 +520,47 @@ class AgentSessionService:
             items=[self._to_response(item) for item in self.repository.list_recent(limit=limit)]
         )
 
-    @model_client.counting()
+    @model_client.counting(max_requests=4)
+    def update_preferences(self, session_id: int, change: AgentPreferenceUpdate) -> AgentSessionResponse:
+        saved = self.repository.get(session_id)
+        if saved is None:
+            raise AgentSessionNotFoundError
+        snapshot = self._to_response(saved)
+        self.repository.end_read_transaction()
+        if (
+            not snapshot.can_confirm
+            or snapshot.plan_id is not None
+            or snapshot.context_version != change.context_version
+        ):
+            raise AgentSessionNotReadyError("The confirmation card changed. Reopen it before editing preferences.")
+        constraints = snapshot.constraints.model_copy(update={"planning_preferences": change.planning_preferences})
+        started = self._start_run(
+            agent_session_id=session_id,
+            intent="create_plan",
+            input_payload={"operation": "edit_preferences", **change.model_dump(mode="json")},
+            context_version=change.context_version,
+            idempotency_key=None,
+        )
+        run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        updated = self.repository.replace_preferences(
+            session_id, expected_version=change.context_version, constraints=constraints, run_id=run.id
+        )
+        if updated is None:
+            error = AgentSessionNotReadyError("This conversation changed or is busy. Reopen it before editing.")
+            self._fail_run(run, error)
+            raise error
+        self._finish_turn_run(run, result_status="ready", scope_decision=snapshot.last_scope_decision)
+        return self._to_response(updated)
+
+    def _require_context_version(self, session_id: int, version: int, run: AgentRun) -> None:
+        self.repository.end_read_transaction()
+        current = self.repository.get(session_id)
+        if current is None or current.context_version != version:
+            error = AgentSessionNotReadyError("This conversation changed. Review the latest details first.")
+            self._fail_run(run, error)
+            raise error
+
+    @model_client.counting(max_requests=4)
     def reply(
         self,
         session_id: int,
@@ -546,7 +587,8 @@ class AgentSessionService:
             self.repository.end_read_transaction()
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
-        if snapshot.plan_id is not None:
+        self._require_context_version(session_id, snapshot.context_version, run)
+        if snapshot.plan_id is not None and not (snapshot.constraints.requires_halal or requests_halal(message)):
             self.repository.end_read_transaction()
             try:
                 response = (
@@ -1339,6 +1381,9 @@ class AgentSessionService:
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
+        if AgentConstraintState.model_validate(agent_session.constraints).requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", agent_session.messages)))
         snapshot = self._to_response(agent_session)
         self.repository.end_read_transaction()
         started = self._start_run(
@@ -1368,6 +1413,7 @@ class AgentSessionService:
         constraints = snapshot.constraints
         lang = language("", snapshot.messages)
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
+        self._require_context_version(session_id, snapshot.context_version, run)
         request = self._plan_request(constraints)
         try:
             plan = self.meal_plan_service.generate(request)
@@ -1435,6 +1481,9 @@ class AgentSessionService:
         if agent_session is None:
             raise AgentSessionNotFoundError
         snapshot = self._to_response(agent_session)
+        if snapshot.constraints.requires_halal:
+            self.repository.end_read_transaction()
+            raise AgentSessionNotReadyError(say("halal_unsupported", language("", snapshot.messages)))
         if snapshot.plan_id is None or snapshot.pending_replan is None:
             self.repository.end_read_transaction()
             raise AgentSessionNotReadyError("There is no replanning preview to confirm.")
@@ -1752,9 +1801,8 @@ class AgentSessionService:
         A record of work already done, so neither the deadline nor the limit is checked here: the turn is over,
         and a budget stop now would fail a turn whose reply is already saved, or hide why it failed."""
         taken = model_client.take()
-        # ponytail: the table holds used <= max, so a turn past its limit records the limit; a turn sends at most
-        # 4 (one chat and one embedding request, each retried once), so check before each request if that grows.
-        run.used_llm_calls = min(run.used_llm_calls + taken.requests, run.max_llm_calls)
+        # The HTTP request hook refuses the next call before sending; never hide sent requests by clamping.
+        run.used_llm_calls += taken.requests
         run.model_config = {
             **(run.model_config or {}),
             "token_usage": {
@@ -1861,7 +1909,11 @@ class AgentSessionService:
                 else None
             ),
             latest_run=AgentRunResponse.model_validate(latest_run) if latest_run is not None else None,
-            can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
+            can_confirm=(
+                agent_session.status == "ready"
+                and agent_session.plan_id is None
+                and not AgentConstraintState.model_validate(agent_session.constraints).requires_halal
+            ),
             title=agent_session.title,
             pinned_at=agent_session.pinned_at,
             created_at=agent_session.created_at,
