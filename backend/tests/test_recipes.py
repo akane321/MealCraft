@@ -1270,7 +1270,7 @@ def test_model_substitution_suggestion_route_filters_catalog_candidates_for_hous
 
     response = recipe_client.post(
         "/api/ingredient-substitutions/suggest",
-        json={"source_ingredient": "butter", "use_context": "for frying"},
+        json={"source_ingredient": "butter", "use_context": "for frying", "requires_halal": False},
     )
 
     assert response.status_code == 200
@@ -1351,7 +1351,7 @@ def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
 
     response = recipe_client.post(
         "/api/external-recipes/search-and-intake",
-        json={"query": "ginger tofu dinner"},
+        json={"query": "ginger tofu dinner", "requires_halal": False},
     )
 
     assert response.status_code == 200
@@ -1444,7 +1444,7 @@ def test_external_recipe_block_returns_similar_household_safe_catalog_dishes(
 
     response = recipe_client.post(
         "/api/external-recipes/intake",
-        json={"draft": draft.model_dump(mode="json")},
+        json={"draft": draft.model_dump(mode="json"), "requires_halal": False},
     )
 
     assert response.status_code == 200
@@ -1463,7 +1463,9 @@ def test_external_recipe_search_failure_is_saved_as_an_operations_trace(
     from app.services.operations import OperationsService
 
     monkeypatch.setitem(app.dependency_overrides, get_settings, lambda: config.Settings(openai_api_key=None))
-    response = recipe_client.post("/api/external-recipes/search-and-intake", json={"query": "ginger tofu"})
+    response = recipe_client.post(
+        "/api/external-recipes/search-and-intake", json={"query": "ginger tofu", "requires_halal": False}
+    )
     assert response.status_code == 503
     assert response.json()["detail"]["reason"] == "api_key_missing"
     assert response.json()["detail"]["suggestions"] == [{"slug": "tofu-soba", "title": "Tofu Soba"}]

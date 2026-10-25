@@ -53,9 +53,9 @@ class RecipeSearchError(ValueError):
 class OpenAIRecipeSearchExtractor:
     """Use Responses web search, then require the chosen page to be cited."""
 
-    def __init__(self, *, api_key: str, model: str, client=None) -> None:
+    def __init__(self, *, api_key: str, model: str, timeout_seconds: float = 60.0, client=None) -> None:
         self.model = model
-        self.client = client or OpenAI(api_key=api_key, http_client=model_client.http_client())
+        self.client = client or OpenAI(api_key=api_key, timeout=timeout_seconds, http_client=model_client.http_client())
 
     def search_and_extract(self, query: str) -> ExternalRecipeDraft:
         normalized_query = " ".join(query.split())
@@ -94,6 +94,13 @@ class OpenAIRecipeSearchExtractor:
         if _normalize_url(source_url) not in {_normalize_url(url) for url in citation_urls}:
             raise RecipeSearchError("Extracted recipe source is not present in verified search citations")
 
+        try:
+            return self._draft(extracted)
+        except ValidationError as error:
+            raise RecipeSearchError("Search returned an invalid recipe draft") from error
+
+    @staticmethod
+    def _draft(extracted: ExtractedRecipe) -> ExternalRecipeDraft:
         return ExternalRecipeDraft(
             title=extracted.title,
             source_url=extracted.source_url,

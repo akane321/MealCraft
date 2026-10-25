@@ -178,6 +178,9 @@ def test_admitted_recipe_is_persisted_privately_with_source_and_gram_lines() -> 
 
         assert created is True
         assert recipe.owner_household_id == 12
+        assert recipe.meal_role == "one_bowl"
+        assert recipe.contains_staple is True
+        assert recipe.protein_sources == ["soy"]
         assert recipe.unknown_safety == ["diet"]
         assert recipe.halal_status == "halal"
         assert recipe.source["tier"] == 2
@@ -389,3 +392,114 @@ def test_external_extraction_cannot_self_assert_canonical_identity_or_safety(tmp
     review = review_external_recipe(mapped, requires_halal=True)
     assert {"allergens", "halal"} <= set(review.unknown_safety)
     assert review.eligible_for_household is False
+
+
+def test_needs_halal_certification_is_not_verified_halal():
+    value = draft()
+    value.ingredients[0].halal_status = "needs_certification"
+    review = review_external_recipe(value, requires_halal=True)
+    assert "halal" in review.unknown_safety
+    assert review.eligible_for_household is False
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("difficulty", "simple", "supported_difficulty"),
+        ("course", "starter", "supported_course"),
+        ("meal_types", ["brunch"], "supported_meal_types"),
+    ],
+)
+def test_nonempty_invalid_planning_vocab_is_rejected_during_review(field, value, reason):
+    review = review_external_recipe(draft(**{field: value}))
+    assert review.eligible_for_household is False
+    assert reason in review.missing_fields
+
+
+def test_unresolved_role_is_not_admitted_without_model_guess():
+    review = review_external_recipe(
+        draft(
+            title="Mystery Side",
+            course="side",
+            ingredients=[
+                {
+                    "source_name": "olive oil",
+                    "canonical_id": "olive_oil",
+                    "grams": 20,
+                    "match_confidence": 1,
+                    "allergens": [],
+                    "halal_status": "halal",
+                }
+            ],
+        )
+    )
+    assert review.eligible_for_household is False
+    assert "meal_role" in review.missing_fields
+
+
+def test_distinct_chinese_recipe_titles_do_not_collapse_to_empty_identity():
+    existing = SimpleNamespace(
+        title="麻婆豆腐",
+        recipe_ingredients=[
+            SimpleNamespace(ingredient=SimpleNamespace(normalized_name=name)) for name in ("firm_tofu", "brown_rice")
+        ],
+    )
+    assert find_duplicate_recipe(draft(title="红烧豆腐"), [existing]) is None
+    assert find_duplicate_recipe(draft(title="麻婆豆腐！"), [existing]) is existing
+
+
+def test_same_url_title_with_different_ingredients_has_distinct_slug():
+    engine = create_engine("sqlite+pysqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        root = repository_root()
+        import_catalog(
+            session, load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+        )
+        first = draft()
+        second = draft(ingredients=[first.ingredients[0].model_dump()])
+        a, created_a = persist_admitted_recipe(session, first, review_external_recipe(first), household_id=12)
+        b, created_b = persist_admitted_recipe(session, second, review_external_recipe(second), household_id=12)
+        session.commit()
+        assert created_a and created_b
+        assert a.slug != b.slug
+        again, created = persist_admitted_recipe(session, second, review_external_recipe(second), household_id=12)
+        assert again.id == b.id and created is False
+
+
+def test_concurrent_identity_winner_is_reused_without_rolling_back_session(monkeypatch):
+    from contextlib import contextmanager
+
+    from sqlalchemy.exc import IntegrityError
+
+    from app.services import external_recipe_intake as intake
+
+    engine = create_engine("sqlite+pysqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        root = repository_root()
+        import_catalog(
+            session, load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+        )
+        value = draft()
+        winner, _ = persist_admitted_recipe(session, value, review_external_recipe(value), household_id=12)
+        session.commit()
+        original_find = intake.find_duplicate_recipe
+        calls = 0
+
+        def concurrent_find(candidate, existing):
+            nonlocal calls
+            calls += 1
+            # The first snapshot misses a winner committed before the attempted insert.
+            return None if calls <= 2 else original_find(candidate, existing)
+
+        @contextmanager
+        def duplicate_insert():
+            raise IntegrityError("unique slug", {}, Exception("concurrent winner"))
+            yield  # pragma: no cover
+
+        monkeypatch.setattr(intake, "find_duplicate_recipe", concurrent_find)
+        monkeypatch.setattr(session, "begin_nested", duplicate_insert)
+        found, created = persist_admitted_recipe(session, value, review_external_recipe(value), household_id=12)
+        assert found.id == winner.id and created is False
+        assert session.is_active

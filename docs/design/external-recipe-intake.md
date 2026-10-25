@@ -108,6 +108,28 @@ nutrition, prep/cook/passive minutes, course, cuisine, meal types, difficulty,
 and rule-derived allergens. Anything short of that is stored as a candidate and
 is not planned; the user is told which piece is missing.
 
+The runtime admission gate also validates the canonical course, meal-type and
+difficulty vocabularies. It derives meal role, staple presence and protein
+sources using the existing deterministic catalog tag rules, recording automatic
+rule provenance. An unresolved role, unknown main protein source or incomplete
+ingredient evidence is reported as missing, not guessed by the model. These
+tags do not certify dietary compatibility; that evidence stays unknown until
+verified by the corresponding producer.
+
+Both intake interfaces require an explicit `requires_halal` boolean; omitted or
+null is invalid (ADR-0091). `needs_certification` is not verified halal.
+With no named eater, admission and fallback suggestions include every member's
+allergies, including self-only allergies. Recipe identity uses the normalized
+Unicode title and canonical ingredient set, scoped to the household. Accents
+and punctuation normalize, but distinct Chinese names do not collapse to an
+empty string. A changed ingredient set cannot collide merely because a page URL
+and title were reused. Concurrent imports of the same identity reuse the stored
+record without rolling back unrelated session work.
+
+Extraction-to-draft validation failures are bounded search errors, not server
+errors. The model client follows the configured runtime timeout. Nutrition uses
+the runtime importer's selected release, not a separately hard-coded version.
+
 ## Sources and what is stored (ADR-0032 section 2)
 
 **Tier 1 — redistribution allowed.** Full record including the source's step

@@ -39,12 +39,12 @@ router = APIRouter(prefix="/external-recipes", tags=["external recipe intake"])
 
 class ExternalRecipeIntakeRequest(BaseModel):
     draft: ExternalRecipeDraft
-    requires_halal: bool = False
+    requires_halal: bool
 
 
 class ExternalRecipeSearchRequest(BaseModel):
-    query: str
-    requires_halal: bool = False
+    query: str = Field(min_length=1, max_length=500)
+    requires_halal: bool
 
 
 class ExternalRecipeSuggestion(BaseModel):
@@ -124,6 +124,7 @@ def search_and_intake_external_recipe(
         draft = OpenAIRecipeSearchExtractor(
             api_key=settings.openai_api_key.get_secret_value(),
             model=settings.openai_model,
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         ).search_and_extract(payload.query)
     except RecipeSearchError as error:
         suggestions = _similar_household_recipes(
@@ -153,7 +154,7 @@ def search_and_intake_external_recipe(
                 "suggestions": [item.model_dump() for item in suggestions],
             },
         ) from error
-    except APIError as error:
+    except (APIError, TimeoutError, ConnectionError) as error:
         suggestions = _similar_household_recipes(
             database,
             household_id=current.active_membership.household_id,
@@ -232,7 +233,11 @@ def _review_and_persist(
     review_started = time.perf_counter()
     review = review_external_recipe(
         mapped,
-        household_allergens=list(version.allergens) if version else [],
+        household_allergens=(
+            [*version.allergens, *(item for member in version.members for item in member.get("allergens", []))]
+            if version
+            else []
+        ),
         excluded_ingredients=list(version.excluded_ingredients) if version else [],
         requires_halal=requires_halal,
         household_dietary_preferences=list(version.dietary_preferences) if version else [],
@@ -318,7 +323,11 @@ def _similar_household_recipes(database: Session, *, household_id: int, version,
     constraints = RecipeRecommendationRequest(
         household_size=version.planning_household_size if version else 2,
         max_cooking_time_minutes=version.max_cooking_time_minutes if version else 240,
-        allergens=list(version.allergens) if version else [],
+        allergens=(
+            [*version.allergens, *(item for member in version.members for item in member.get("allergens", []))]
+            if version
+            else []
+        ),
         excluded_ingredients=list(version.excluded_ingredients) if version else [],
         dietary_preferences=list(version.dietary_preferences) if version else [],
         requires_halal=requires_halal,

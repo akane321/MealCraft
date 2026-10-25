@@ -93,3 +93,23 @@ def test_search_drafts_stay_tier_two_until_license_is_policy_verified() -> None:
     draft = extractor.search_and_extract("recipe")
     assert draft.source_tier == 2
     assert draft.license.startswith("Unverified;")
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"servings_basis": None},
+        {"prep_time_minutes": 0, "cook_time_minutes": 0},
+        {"steps": ["x" * 501]},
+    ],
+)
+def test_draft_validation_errors_are_bounded_search_errors(updates):
+    result = response()
+    payload = json.loads(result.output_text)
+    payload.update(updates)
+    result.output_text = json.dumps(payload)
+    extractor = OpenAIRecipeSearchExtractor(
+        api_key="unused", model="test", client=SimpleNamespace(responses=FakeResponses(result))
+    )
+    with pytest.raises(RecipeSearchError, match="invalid recipe draft"):
+        extractor.search_and_extract("ginger tofu")

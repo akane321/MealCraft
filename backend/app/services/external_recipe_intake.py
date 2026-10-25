@@ -16,6 +16,7 @@ from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.paths import repository_root
@@ -26,6 +27,8 @@ from app.data.external_source_policies import (
     AcquisitionMethod,
     resolve_external_source_policy,
 )
+from app.data.recipe_tags import Dish, Line, rule_tags
+from app.data.release_v2 import RELEASE_VERSION
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 from app.schemas.planning_v2 import DishCourse, MealType
 
@@ -147,7 +150,7 @@ NUTRIENT_FIELDS = {
 @lru_cache(maxsize=1)
 def _released_nutrition_per_100g() -> dict[str, dict[str, float]]:
     """Load the released canonical ingredient nutrition used for deterministic intake totals."""
-    path = repository_root() / "data-engineering/data/release/v2.1/ingredients.jsonl"
+    path = repository_root() / f"data-engineering/data/release/{RELEASE_VERSION}/ingredients.jsonl"
     values: dict[str, dict[str, float]] = {}
     for raw in path.read_text(encoding="utf-8").splitlines():
         if not raw.strip():
@@ -253,6 +256,16 @@ def review_external_recipe(
         "steps": draft.steps,
     }
     missing = [name for name, value in required.items() if value is None or value == "" or value == []]
+    if draft.course not in get_args(DishCourse):
+        missing.append("supported_course")
+    if not draft.meal_types or any(item not in get_args(MealType) for item in draft.meal_types):
+        missing.append("supported_meal_types")
+    if draft.difficulty not in {"easy", "medium", "hard"}:
+        missing.append("supported_difficulty")
+    tags = _planning_tags(draft)
+    missing.extend(name for name in ("meal_role", "contains_staple", "protein_sources") if tags.values[name] is None)
+    if tags.incomplete_reason:
+        missing.append("incomplete_ingredient_evidence")
     if draft.steps_basis != "rewritten":
         missing.append("rewritten_steps")
     if draft.license is None:
@@ -276,7 +289,7 @@ def review_external_recipe(
     excluded = {item.casefold() for item in excluded_ingredients or []}
     known_allergens = {allergen.casefold() for line in draft.ingredients for allergen in (line.allergens or [])}
     unknown_allergens = any(line.allergens is None for line in draft.ingredients)
-    unknown_halal = any(line.halal_status in {None, "uncertain"} for line in draft.ingredients)
+    unknown_halal = any(line.halal_status in {None, "uncertain", "needs_certification"} for line in draft.ingredients)
     unknown_mapping = any(line.canonical_id is None for line in draft.ingredients)
     unknown_dietary_tags = True  # External diet labels are not yet reviewed against our tag definitions.
     conflicts: set[str] = set()
@@ -328,8 +341,30 @@ def review_external_recipe(
 def normalize_recipe_title(title: str) -> str:
     """Normalize punctuation and accents for deterministic duplicate checks."""
     folded = unicodedata.normalize("NFKD", title).casefold()
-    ascii_text = folded.encode("ascii", "ignore").decode("ascii")
-    return " ".join(re.findall(r"[a-z0-9]+", ascii_text))
+    letters = "".join(char for char in folded if not unicodedata.combining(char))
+    return " ".join(re.findall(r"[^\W_]+", letters, flags=re.UNICODE))
+
+
+def _planning_tags(draft: ExternalRecipeDraft):
+    nutrients = draft.nutrition_per_serving or {}
+    return rule_tags(
+        Dish(
+            key="external-intake",
+            title=draft.title or "",
+            course=draft.course or "",
+            cuisine=draft.cuisine or "",
+            servings=draft.servings or 1,
+            kcal=nutrients.get("calories_kcal"),
+            fat_g=nutrients.get("fat_g"),
+            sugar_g=nutrients.get("sugar_g"),
+            carbohydrate_g=nutrients.get("carbohydrate_g"),
+            lines=[
+                Line(name=line.canonical_id or "", grams=line.grams, text=line.source_name)
+                for line in draft.ingredients
+            ],
+            steps="\n".join(draft.steps),
+        )
+    )
 
 
 def find_duplicate_recipe(draft: ExternalRecipeDraft, existing_recipes: Iterable[object]) -> object | None:
@@ -387,6 +422,13 @@ def persist_admitted_recipe(
         raise ValueError("The candidate is missing nutrition or steps")
     if draft.steps_basis != "rewritten":
         raise ValueError("Unverified external source steps must be rewritten before persistence")
+    if review.requires_halal and any(line.halal_status != "halal" for line in draft.ingredients):
+        raise ValueError("Every ingredient must have verified halal status")
+    tags = _planning_tags(draft)
+    if tags.incomplete_reason or any(
+        tags.values[name] is None for name in ("meal_role", "contains_staple", "protein_sources")
+    ):
+        raise ValueError("The candidate has no verified planning role or protein evidence")
 
     ingredient_names = {line.canonical_id for line in draft.ingredients}
     ingredients = {
@@ -441,8 +483,10 @@ def persist_admitted_recipe(
         return shared_duplicate, False
 
     stem = normalize_recipe_title(draft.title).replace(" ", "-")[:90].strip("-") or "external-recipe"
-    digest_input = f"{household_id}:{draft.source_url}:{normalize_recipe_title(draft.title)}"
-    digest = sha256(digest_input.encode()).hexdigest()[:12]
+    digest_input = json.dumps(
+        [household_id, normalize_recipe_title(draft.title), sorted(ingredient_names)], ensure_ascii=False
+    )
+    digest = sha256(digest_input.encode()).hexdigest()[:24]
     slug = f"external-{stem}-{digest}"[:160]
     nutrients = draft.nutrition_per_serving
     known_allergens = sorted({allergen for line in draft.ingredients for allergen in (line.allergens or [])})
@@ -476,6 +520,10 @@ def persist_admitted_recipe(
         source=source,
         halal_status=halal_status,
         unknown_safety=["diet" if item == "dietary_tags" else item for item in review.unknown_safety],
+        **tags.values,
+        estimated={
+            name: {"method": "rule", "reviewed": True, "batch": "external-intake-rule-v1"} for name in tags.values
+        },
         owner_household_id=household_id,
         nutrition=RecipeNutrition(
             **{
@@ -483,20 +531,28 @@ def persist_admitted_recipe(
                 for key in ("calories_kcal", "protein_g", "carbohydrate_g", "fat_g", "sodium_mg", "sugar_g")
             }
         ),
-        recipe_ingredients=[
-            RecipeIngredient(
-                ingredient=ingredients[line.canonical_id],
-                quantity=Decimal(str(line.grams)),
-                unit="g",
-                grams=Decimal(str(line.grams)),
-                original_text=line.source_name,
-                sort_order=index,
-                provenance={"source": "external-intake", "match_confidence": line.match_confidence},
-            )
-            for index, line in enumerate(draft.ingredients, start=1)
-        ],
         steps=[RecipeStep(step_number=index, instruction=step) for index, step in enumerate(draft.steps, start=1)],
     )
-    session.add(recipe)
-    session.flush()
+    try:
+        with session.begin_nested():
+            recipe.recipe_ingredients = [
+                RecipeIngredient(
+                    ingredient=ingredients[line.canonical_id],
+                    quantity=Decimal(str(line.grams)),
+                    unit="g",
+                    grams=Decimal(str(line.grams)),
+                    original_text=line.source_name,
+                    sort_order=index,
+                    provenance={"source": "external-intake", "match_confidence": line.match_confidence},
+                )
+                for index, line in enumerate(draft.ingredients, start=1)
+            ]
+            session.add(recipe)
+            session.flush()
+    except IntegrityError:
+        # A concurrent import of the same household/title/ingredient identity may win the unique slug.
+        winner = session.scalar(select(Recipe).where(Recipe.slug == slug, Recipe.owner_household_id == household_id))
+        if winner is None or find_duplicate_recipe(draft, [winner]) is None:
+            raise
+        return winner, False
     return recipe, True
