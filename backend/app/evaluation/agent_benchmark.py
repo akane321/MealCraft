@@ -107,10 +107,10 @@ def _build_parser(
 
 
 def runtime_vocabulary() -> ConstraintVocabulary:
-    """The ingredient ids the product's database holds: the curated catalog and release v2.1."""
+    """The ingredient ids the product's database holds: the curated catalog and release v2.2."""
     root = repository_root()
     curated = json.loads((root / "data/ingredients/ingredients.json").read_text(encoding="utf-8"))
-    release = (root / "data-engineering/data/release/v2.1/ingredients.jsonl").read_text(encoding="utf-8")
+    release = (root / "data-engineering/data/release/v2.2/ingredients.jsonl").read_text(encoding="utf-8")
     names = {row["normalized_name"] for row in curated}
     names |= {normalized_name(json.loads(line)["ingredient_id"]) for line in release.splitlines() if line.strip()}
     return ConstraintVocabulary(ingredients=frozenset(names), groups=catalog_groups())

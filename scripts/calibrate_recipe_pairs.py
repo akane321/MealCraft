@@ -21,7 +21,7 @@ OUT = ROOT / "docs/evaluation/algorithm-dev/near-duplicates.json"
 
 def catalog_recipes(keys):
     recipes = {}
-    release = ROOT / "data-engineering/data/release/v2.1/recipes.jsonl"
+    release = ROOT / "data-engineering/data/release/v2.2/recipes.jsonl"
     for line in release.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         key = row["recipe_id"]

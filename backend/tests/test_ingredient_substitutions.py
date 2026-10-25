@@ -138,3 +138,51 @@ def test_model_suggestion_generator_rejects_invalid_output():
 
     with pytest.raises(ValueError, match="invalid candidate list"):
         generator.suggest("butter")
+
+
+@pytest.mark.parametrize("error", [ValueError("invalid"), TimeoutError("timeout"), ConnectionError("offline")])
+def test_substitution_failure_is_bounded_not_a_web_fallback(error):
+    class Generator:
+        def suggest(self, source):
+            raise error
+
+    answerer = IngredientSubstitutionFoodQuestionAnswerer(
+        None, generator=Generator(), mapper=ReviewedIngredientMapper({"butter": {"butter"}})
+    )
+    assert "won't suggest unverified" in answerer.answer(
+        "What can I use instead of butter?", "en", AgentConstraintState()
+    )
+    assert "won't suggest unverified" in answerer.answer(
+        "What can I use instead of unknown?", "en", AgentConstraintState()
+    )
+    assert answerer.answer("What is miso?", "en", AgentConstraintState()) is None
+
+
+def test_member_only_limits_are_not_lost_in_substitution():
+    mapper = ReviewedIngredientMapper({"butter": {"butter"}, "peanut oil": {"peanut_oil"}, "olive oil": {"olive_oil"}})
+    catalog = [ingredient("peanut_oil", allergens=["peanut"]), ingredient("olive_oil", allergens=[])]
+    answerer = IngredientSubstitutionFoodQuestionAnswerer(
+        SimpleNamespace(scalars=lambda _: iter(catalog)),
+        generator=SimpleNamespace(suggest=lambda _: ["peanut oil", "olive oil"]),
+        mapper=mapper,
+    )
+    constraints = AgentConstraintState.model_validate(
+        {
+            "household": {
+                "members": [
+                    {"name": "Ann", "servings": 1, "allergens": ["peanut"], "excluded_ingredients": ["olive_oil"]}
+                ]
+            }
+        }
+    )
+    answer = answerer.answer("What can I use instead of butter?", "en", constraints)
+    assert "couldn’t find" in answer
+    constraints.household.members[0].dietary_preferences = ["vegan"]
+    assert "dietary preferences" in answerer.answer("What can I use instead of butter?", "en", constraints)
+
+
+def test_substitution_client_uses_configured_timeout(monkeypatch):
+    captured = {}
+    monkeypatch.setattr("app.services.ingredient_substitutions.OpenAI", lambda **kw: captured.update(kw) or object())
+    OpenAISubstituteGenerator(api_key="unused", model="test", timeout_seconds=47)
+    assert captured["timeout"] == 47

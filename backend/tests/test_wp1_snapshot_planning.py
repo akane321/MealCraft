@@ -72,10 +72,13 @@ def test_live_plan_preview_keeps_network_out_of_selection(monkeypatch, offline_s
         generated = client.post(
             "/api/plans/generate",
             json={
-                "household_size": 2,
-                "weekly_budget_sgd": 100,
-                "pricing_mode": "live",
-                "start_date": local_today().isoformat(),
+                "requires_halal": False,
+                **{
+                    "household_size": 2,
+                    "weekly_budget_sgd": 100,
+                    "pricing_mode": "live",
+                    "start_date": local_today().isoformat(),
+                },
             },
         )
         assert generated.status_code == 201, generated.text

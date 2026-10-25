@@ -26,13 +26,13 @@ router = APIRouter(prefix="/ingredient-substitutions", tags=["ingredient substit
 class SubstituteReviewRequest(BaseModel):
     source_ingredient: str = Field(min_length=1, max_length=160)
     candidates: list[Annotated[str, Field(min_length=1, max_length=160)]] = Field(min_length=1, max_length=12)
-    requires_halal: bool = False
+    requires_halal: bool
 
 
 class SubstituteSuggestionRequest(BaseModel):
     source_ingredient: str = Field(min_length=1, max_length=160)
     use_context: str | None = Field(default=None, max_length=500)
-    requires_halal: bool = False
+    requires_halal: bool
 
 
 class SubstituteReviewResponse(BaseModel):
@@ -72,8 +72,9 @@ def suggest_safe_substitutes(
         candidates = OpenAISubstituteGenerator(
             api_key=settings.openai_api_key.get_secret_value(),
             model=settings.openai_model,
+            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
         ).suggest(payload.source_ingredient, use_context=payload.use_context)
-    except (APIError, ValueError) as error:
+    except (APIError, ValueError, TimeoutError, ConnectionError) as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Ingredient substitution suggestions are temporarily unavailable",
@@ -99,7 +100,13 @@ def _filter_for_household(
     profiles = HouseholdProfileRepository(database, household_id=household_id)
     profile = profiles.get_current()
     version = HouseholdProfileRepository.current_version(profile) if profile else None
+    # With no named eater, an ingredient suggestion must not bypass any member's diet.
+    # Ingredient records do not certify these diets yet, so do not label a suggestion safe.
+    if version and version.dietary_preferences:
+        return SubstituteReviewResponse(safe_candidates=[])
     allergens = list(version.allergens) if version else []
+    if version:
+        allergens.extend(item for member in version.members for item in member.get("allergens", []))
     excluded = list(version.excluded_ingredients) if version else []
 
     mapper = reviewed_ingredient_mapper()

@@ -29,11 +29,14 @@ def test_a_lunch_and_dinner_replay_keeps_every_meal_and_applies_the_search_overr
     plan = client.post(
         "/api/plans/generate",
         json={
-            "start_date": "2026-09-01",
-            "household_size": 2,
-            "max_cooking_time_minutes": 60,
-            "pricing_mode": "fixture",
-            "plan_shape": LUNCH_AND_DINNER,
+            "requires_halal": False,
+            **{
+                "start_date": "2026-09-01",
+                "household_size": 2,
+                "max_cooking_time_minutes": 60,
+                "pricing_mode": "fixture",
+                "plan_shape": LUNCH_AND_DINNER,
+            },
         },
     )
     assert plan.status_code == 201, plan.text
@@ -66,7 +69,7 @@ def test_a_composed_replay_that_runs_out_of_steps_says_so_not_that_details_are_m
         database.add(party)
         database.commit()
     week = {"start_date": "2026-09-01", "household_size": 2, "pricing_mode": "fixture", "plan_shape": LUNCH_AND_DINNER}
-    assert client.post("/api/plans/generate", json=week).status_code == 201
+    assert client.post("/api/plans/generate", json={"requires_halal": False, **week}).status_code == 201
     (run_id,) = _planning_run_ids(factory)
     with factory() as database:
         stored = database.get(OperationRun, run_id).artifact_references[0]["data"]
@@ -85,7 +88,7 @@ def test_a_composed_week_refused_before_its_search_replays_with_its_own_step_bud
     client, factory = console
     monkeypatch.setattr(get_settings(), "planning_capability", "mvp")
     week = {"start_date": "2026-09-01", "household_size": 2, "pricing_mode": "fixture", "plan_shape": LUNCH_AND_DINNER}
-    assert client.post("/api/plans/generate", json=week).status_code == 422
+    assert client.post("/api/plans/generate", json={"requires_halal": False, **week}).status_code == 422
     (run_id,) = _planning_run_ids(factory)
 
     on = {"planning_capability": "full"}
@@ -113,7 +116,9 @@ def test_a_refused_budget_offers_the_same_cheapest_week_whatever_it_was(recipe_c
     _fixture_catalog()
 
     def plan(budget):
-        return recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": budget})
+        return recipe_client.post(
+            "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": budget}}
+        )
 
     offers = set()
     for budget in (10, 20, 28):  # S$31.70, S$46.50 and S$43.25 when the fallback read the budget
@@ -135,7 +140,9 @@ def test_a_budget_with_room_for_variety_plans_as_varied_a_week_as_before(recipe_
     cheapest dish alone, the fixture 2-person week at S$60 was one curry four times (S$46.50); main's weights
     against the budget planned five different dinners (S$55.55), and they are searched again."""
     _fixture_catalog()
-    week = recipe_client.post("/api/plans/generate", json={**REQUEST, "weekly_budget_sgd": 60})
+    week = recipe_client.post(
+        "/api/plans/generate", json={"requires_halal": False, **{**REQUEST, "weekly_budget_sgd": 60}}
+    )
     assert week.status_code == 201, week.text
     dinners = [day["recipe"]["slug"] for day in sorted(week.json()["days"], key=lambda day: day["day_index"])]
     assert len(set(dinners)) >= 5
