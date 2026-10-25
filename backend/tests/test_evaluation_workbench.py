@@ -5,6 +5,8 @@ import pytest
 from app.agent.parser import AgentConfigurationError
 from app.core.paths import repository_root
 from app.evaluation.agent_benchmark import evaluate_agent
+from app.evaluation.ingredient_retrieval_benchmark import evaluate_ingredient_retrieval
+from app.evaluation.meal_shape_benchmark import evaluate_meal_shape_changes
 from app.evaluation.orchestration_benchmark import evaluate_grounding, evaluate_scope_policy
 from app.evaluation.runner import evaluate
 
@@ -14,6 +16,10 @@ RECIPES = ROOT / "data/recipes/recipes.json"
 HELDOUT = ROOT / "data/evaluation/heldout/planning-v1.json"
 DEVELOPER = ROOT / "data/evaluation/dev/planning-v1.json"
 AGENT_CASES = ROOT / "data/evaluation/agent/fixture-v1.json"
+CONSTRAINT_DEV_CASES = ROOT / "data/evaluation/agent/constraint-understanding-dev-v1.json"
+MEAL_SHAPE_DEV_CASES = ROOT / "data/evaluation/agent/meal-shape-change-dev-v1.json"
+INGREDIENT_EN_DEV = ROOT / "data/evaluation/agent/ingredient-matching-dev.json"
+INGREDIENT_ZH_DEV = ROOT / "data/evaluation/agent/ingredient-matching-zh-dev.json"
 FIXTURES = ROOT / "data/fixtures/fairprice-products.json"
 SCOPE_CASES = ROOT / "data/evaluation/agent-orchestration/scope-developer-v1.json"
 GROUNDING_CASES = ROOT / "data/evaluation/agent-orchestration/grounding-developer-v1.json"
@@ -83,6 +89,45 @@ def test_fixture_agent_benchmark_is_offline_and_keeps_failures_visible() -> None
     # It reached 0 on 2026-09-26 with the misses fixed in view: this developer set no
     # longer separates parser versions, and a new parser claim needs new cases.
     assert report["metrics"]["failure_case_count"] == 0
+
+
+def test_constraint_understanding_developer_set_reports_failures_without_live_api() -> None:
+    report = evaluate_agent(dataset_path=CONSTRAINT_DEV_CASES)
+
+    assert report["provider"] == "fixture"
+    assert report["live_api_used"] is False
+    assert report["metrics"]["case_count"] >= 150
+    assert report["language_metrics"]["zh"]["case_count"] / report["metrics"]["case_count"] >= 1 / 3
+    assert report["metrics"]["exact_case_rate"] == 1.0
+    assert report["metrics"]["failure_case_count"] == 0
+    assert report["language_metrics"]["en"]["case_count"] > 0
+    assert report["language_metrics"]["zh"]["case_count"] > 0
+    assert report["language_metrics"]["en"]["exact_case_rate"] == report["language_metrics"]["zh"]["exact_case_rate"]
+
+
+def test_meal_shape_change_developer_set_measures_add_drop_and_false_positives() -> None:
+    report = evaluate_meal_shape_changes(dataset_path=MEAL_SHAPE_DEV_CASES)
+
+    assert report["evaluation_role"] == "developer_set"
+    assert report["live_api_used"] is False
+    assert report["metrics"] == {
+        "case_count": 20,
+        "exact_match_rate": 1.0,
+        "false_positive_count": 0,
+        "false_negative_count": 0,
+    }
+    assert report["language_metrics"]["en"]["exact_match_rate"] == report["language_metrics"]["zh"]["exact_match_rate"]
+
+
+def test_ingredient_retrieval_report_separates_spelling_baseline_and_unknown_terms() -> None:
+    report = evaluate_ingredient_retrieval(datasets={"en": INGREDIENT_EN_DEV, "zh": INGREDIENT_ZH_DEV})
+
+    assert report["live_api_used"] is False
+    assert report["embedding_retrieval_measured"] is False
+    assert report["metrics"]["case_count"] == 122
+    assert report["metrics"]["recall_at_4"] == 1.0
+    assert report["metrics"]["none_cases_returning_candidates"] == 0
+    assert report["dataset_metrics"]["zh"]["recall_at_4"] == 1.0
 
 
 def test_openai_benchmark_requires_explicit_live_api_opt_in() -> None:

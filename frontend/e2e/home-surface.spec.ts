@@ -2,6 +2,70 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SHOTS = process.env.HOME_SURFACE_SHOTS;
 
+test("confirmation preferences really save, cancel and undo without changing hard limits", async ({ page }) => {
+  await stubApi(page);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  let current = session(false);
+  const updates: Array<{ context_version: number; planning_preferences: Record<string, unknown> }> = [];
+  await page.route("**/api/agent/sessions/51/preferences", async (route) => {
+    const body = route.request().postDataJSON();
+    expect(body.context_version).toBe(current.context_version);
+    expect(Object.keys(body).sort()).toEqual(["context_version", "planning_preferences"]);
+    updates.push(body);
+    current = { ...current, context_version: current.context_version + 1 };
+    await route.fulfill({ json: { ...current, constraints: { ...current.constraints, planning_preferences: body.planning_preferences } } });
+  });
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Edit preferences", exact: true }).click();
+  const editor = page.getByRole("form", { name: "Edit meal preferences" });
+  await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toBeDisabled();
+  await editor.getByLabel("More vegetables", { exact: true }).check();
+  await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(updates).toEqual([]);
+  await page.getByRole("button", { name: "Edit preferences", exact: true }).click();
+  await expect(editor.getByLabel("More vegetables", { exact: true })).not.toBeChecked();
+  await editor.getByLabel("More vegetables", { exact: true }).check();
+  await editor.getByLabel("Breakfast", { exact: true }).check();
+  await editor.getByRole("button", { name: "Add flavour", exact: true }).click();
+  await editor.getByLabel("Days for flavour 1", { exact: true }).selectOption(["friday"]);
+  await editor.getByLabel("Meals for flavour 1", { exact: true }).selectOption(["dinner"]);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/preferences-edit.png` });
+  await editor.getByRole("button", { name: "Save preferences", exact: true }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(page.getByText("More vegetables", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fragrant · Fri dinner", { exact: true })).toBeVisible();
+  expect(updates[0]!.planning_preferences).toMatchObject({ more_vegetables: true, repeat_allowed_meals: ["breakfast"] });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/preferences-saved.png` });
+  await page.getByRole("button", { name: "Undo last preference change", exact: true }).click();
+  await expect(page.getByText("More vegetables", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Undo last preference change", exact: true })).toHaveCount(0);
+  expect(updates[1]!.planning_preferences).toEqual({ repeat_allowed_meals: [], flavor_boosts: [], more_vegetables: false, lighter: false });
+  await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toBeEnabled();
+  expect(errors).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("a stale preference edit keeps the draft and does not claim it was saved", async ({ page }) => {
+  await stubApi(page);
+  await page.route("**/api/agent/sessions/51/preferences", route => route.fulfill({ status: 409, json: { detail: "The confirmation card changed. Reopen it before editing preferences." } }));
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Edit preferences", exact: true }).click();
+  const editor = page.getByRole("form", { name: "Edit meal preferences" });
+  await editor.getByLabel("More vegetables", { exact: true }).check();
+  await editor.getByRole("button", { name: "Save preferences", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("confirmation card changed");
+  await expect(editor.getByLabel("More vegetables", { exact: true })).toBeChecked();
+  await expect(page.getByRole("button", { name: "Undo last preference change", exact: true })).toHaveCount(0);
+  await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.getByRole("button", { name: "Edit preferences", exact: true }).click();
+  await expect(editor.getByLabel("More vegetables", { exact: true })).not.toBeChecked();
+});
+
 test("a long shopping list exports every category and its items for print review", async ({ page }, testInfo) => {
   await stubApi(page);
   const items = Array.from({ length: 24 }, (_, i) => grocery(`Print item ${i + 1}`, `Print category ${i + 1}`, 3, 500));

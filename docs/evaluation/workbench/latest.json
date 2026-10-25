@@ -4944,6 +4944,23 @@
         "failure_case_count": 0
       }
     },
+    "language_metrics": {
+      "en": {
+        "case_count": 19,
+        "exact_case_rate": 1.0,
+        "clarification_accuracy": 1.0
+      },
+      "mixed": {
+        "case_count": 1,
+        "exact_case_rate": 1.0,
+        "clarification_accuracy": 1.0
+      },
+      "zh": {
+        "case_count": 4,
+        "exact_case_rate": 1.0,
+        "clarification_accuracy": 1.0
+      }
+    },
     "failure_cases": [],
     "cases": [
       {
@@ -5713,6 +5730,26 @@
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0
+      }
+    },
+    "language_metrics": {
+      "en": {
+        "case_count": 20,
+        "classification_accuracy": 1.0,
+        "false_accept_count": 0,
+        "false_reject_count": 0
+      },
+      "mixed": {
+        "case_count": 1,
+        "classification_accuracy": 1.0,
+        "false_accept_count": 0,
+        "false_reject_count": 0
+      },
+      "zh": {
+        "case_count": 15,
+        "classification_accuracy": 1.0,
+        "false_accept_count": 0,
+        "false_reject_count": 0
       }
     },
     "failure_cases": [],

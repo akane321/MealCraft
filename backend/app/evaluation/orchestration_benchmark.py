@@ -171,6 +171,22 @@ def evaluate_scope_policy(*, dataset_path: Path) -> dict[str, Any]:
     classification_correct = sum(item.classification_correct for item in results)
     tool_policy_correct = sum(item.expected_tool_call == item.actual_tool_call for item in results)
     language_counts = Counter(item.language for item in results)
+    language_metrics = {
+        language: {
+            "case_count": len(group),
+            "classification_accuracy": round(
+                sum(item.classification_correct for item in group) / max(len(group), 1), 4
+            ),
+            "false_accept_count": sum(
+                not item.expected_state_mutation and item.actual_state_mutation for item in group
+            ),
+            "false_reject_count": sum(
+                item.expected_state_mutation and not item.actual_state_mutation for item in group
+            ),
+        }
+        for language in sorted(language_counts)
+        for group in [[item for item in results if item.language == language]]
+    }
     return {
         "schema_version": "1.0",
         "evaluation_role": "developer_set",
@@ -197,6 +213,7 @@ def evaluate_scope_policy(*, dataset_path: Path) -> dict[str, Any]:
             "failure_case_count": sum(bool(item.failure_reasons) for item in results),
         },
         "class_metrics": class_metrics,
+        "language_metrics": language_metrics,
         "failure_cases": [asdict(item) for item in results if item.failure_reasons],
         "cases": [asdict(item) for item in results],
     }

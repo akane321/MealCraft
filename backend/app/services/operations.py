@@ -208,6 +208,17 @@ class OperationsService:
             )
             items += [_planning_summary(run) for run in runs]
             total += count
+        if kind in (None, "intake"):
+            runs, count = self.repository.task_page(
+                OperationRun,
+                where=[OperationRun.run_type == "external_recipe_intake"],
+                status=status,
+                since=since,
+                until=until,
+                fetch=fetch,
+            )
+            items += [_external_intake_summary(run) for run in runs]
+            total += count
         items.sort(key=lambda item: (_aware(item.created_at), item.id), reverse=True)
         return OperationsTaskCollectionResponse(items=items[offset:fetch], total=total)
 
@@ -215,6 +226,9 @@ class OperationsService:
         if kind == "agent":
             run = self.repository.agent_run(task_id)
             return _agent_detail(run) if run is not None else None
+        if kind == "intake":
+            run = self.repository.external_intake_run(task_id)
+            return _external_intake_detail(run) if run is not None else None
         run = self.repository.planning_run(task_id)
         if run is None:
             return None
@@ -425,6 +439,48 @@ def _planning_summary(run: OperationRun) -> OperationsTaskSummary:
         provider_mode=run.provider_mode,
         created_at=run.created_at,
         duration_seconds=_duration(run.started_at, run.finished_at),
+    )
+
+
+def _external_intake_data(run: OperationRun) -> dict:
+    for reference in run.artifact_references or []:
+        if reference.get("kind") == "external_recipe_intake" and isinstance(reference.get("data"), dict):
+            return reference["data"]
+    return {}
+
+
+def _external_intake_summary(run: OperationRun) -> OperationsTaskSummary:
+    data = _external_intake_data(run)
+    label = data.get("title") or data.get("source_url") or "External recipe intake"
+    return OperationsTaskSummary(
+        kind="intake",
+        id=run.id,
+        label=f"External recipe: {label}",
+        status=run.status,
+        error_code=run.error_code,
+        provider_mode=run.provider_mode,
+        created_at=run.created_at,
+        duration_seconds=_duration(run.started_at, run.finished_at),
+    )
+
+
+def _external_intake_detail(run: OperationRun) -> OperationsTaskDetail:
+    data = _redact(_external_intake_data(run))
+    return OperationsTaskDetail(
+        summary=_external_intake_summary(run),
+        inputs={"input_digest": run.input_digest, "source_url": data.get("source_url")},
+        trace={"stages": data.get("stages", [])},
+        validation={"admitted": data.get("admitted"), "recipe_slug": data.get("recipe_slug")},
+        evidence={"trace_id": run.trace_id},
+        model_configuration={"provider_mode": run.provider_mode},
+        timings={
+            "created_at": run.created_at,
+            "started_at": run.started_at,
+            "finished_at": run.finished_at,
+            "duration_seconds": _duration(run.started_at, run.finished_at),
+        },
+        error_detail=run.error_detail,
+        warnings=list(run.warnings or []),
     )
 
 
