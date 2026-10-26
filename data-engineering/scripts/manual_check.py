@@ -245,7 +245,7 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         f"Filled sheet SHA-256 `{digest}`; sample `sample.json` (seed {sample['seed']}, stratified by course). "
         "Only rows the reviewer marked 是 count.",
         "",
-        f"- Sampled {result['sampled']}, checked in person {result['checked']}, unchecked {result['unchecked']}, "
+        f"- Sampled {result['sampled']}, marked 是 (checked) {result['checked']}, unchecked {result['unchecked']}, "
         f"with a 看不出 {len(result['unsure'])}, to refill {len(result['refill'])}.",
         f"- Correct on all three checks: {result['correct']} of {result['checked']}, **{percent(rate)}** "
         f"(Wilson 95% {interval(result['wilson95'])}); target {percent(result['target'])}: {met}.",

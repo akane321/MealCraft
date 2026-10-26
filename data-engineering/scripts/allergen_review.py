@@ -294,7 +294,7 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         f"Filled sheet SHA-256 `{digest}`; sample `sample.json` ({sample['size']} recipes, seed {sample['seed']}, "
         "stratified by the rarest catalog allergen of each recipe). Only rows the reviewer marked 是 count.",
         "",
-        f"- Sampled {result['sampled']}, checked in person {result['checked']}, unchecked {result['unchecked']}, "
+        f"- Sampled {result['sampled']}, marked 是 (checked) {result['checked']}, unchecked {result['unchecked']}, "
         f"marked null (cannot tell) {result['cannot_tell']}, to refill {len(result['refill'])}.",
         f"- Recipes whose catalog allergens equal the reviewer's: {result['agree']} of {result['checked']} "
         f"({percent(result['agreement_unweighted'])}, Wilson 95% {interval(result['wilson95_unweighted'])}).",
