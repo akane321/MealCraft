@@ -511,11 +511,24 @@ configured OpenAI provider; unavailable providers return 503.
 Model candidates are only proposals. Exact reviewed aliases resolve them to
 catalog ingredients; unknown source identities return no candidates. Without a
 named eater, filtering includes every member's allergies and exclusions,
-including self-only allergies. Ingredient records do not currently certify diet
-compatibility, so a declared member diet returns no verified substitutions.
-Unknown allergen facts fail closed for the relevant limit; halal requires an
-explicit verified `halal` record, never an unknown status. The model client's
-timeout follows the runtime OpenAI timeout setting.
+including self-only allergies. The two endpoints do not yet check diets, so a
+declared member diet returns no verified substitutions from them.
+Unknown allergen facts fail closed for the relevant limit; an ingredient the
+release holds with an allergen status other than `confirmed` has unknown
+allergens. Halal requires an explicit verified `halal` record, never an unknown
+status. The model client's timeout follows the runtime OpenAI timeout setting.
+
+A replacement question in chat ("What can I use instead of fish sauce?") applies
+the same gate with the allergens and exclusions of the household and every
+member, and checks each candidate against every diet at the table, the
+household's and each member's, by the rules that tag release recipes
+(`data-engineering/scripts/derive_dietary_tags.py`) on the release's
+`dietary_origin`, food group and the catalog's allergens: vegetarian is no
+`flesh` origin, vegan is `plant` origin only, dairy-free is no `dairy` food group
+and no dairy allergen, gluten-free is no gluten allergen. A candidate that breaks
+a diet is left out. One whose origin, food group or allergens are unknown (not in
+the release, or allergens not confirmed) is left out too, and the answer says
+whose diet it could not be verified for; the other candidates are still offered.
 
 Catalog nutrition ranking is deterministic and names each recipe and catalog
 serving. Ranking direction is attached to the selected nutrient, not another
