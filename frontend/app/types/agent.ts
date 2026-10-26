@@ -131,6 +131,8 @@ export interface AgentSession {
   last_scope_decision: AgentScopeDecision | null;
   pending_interaction: AgentInteractionRequest | null;
   can_confirm: boolean;
+  // How the latest turn's run ended: PLAN_SAVED or REPLAN_APPLIED after a confirmation typed in the chat (ADR-0098).
+  latest_run?: { status: string; termination_reason_code: string | null } | null;
   // The household's own name for it (null: its first message stands in) and when it was pinned (null: not pinned).
   title?: string | null;
   pinned_at?: string | null;

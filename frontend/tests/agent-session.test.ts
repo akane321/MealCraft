@@ -90,6 +90,45 @@ describe("switching agent conversations", () => {
   });
 });
 
+describe("a confirmation typed in the chat (ADR-0098)", () => {
+  it.each(["PLAN_SAVED", "REPLAN_APPLIED"])("hands the plan panel the week it saved (%s)", async (ended) => {
+    const { fetch, agent } = setup();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: null });
+    await agent.create("Dinners for two");
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: 9001, latest_run: { status: "committed", termination_reason_code: ended } })
+      .mockResolvedValueOnce({ id: 9001, revision: 2 });
+    await agent.reply("I confirm. Please proceed.");
+    expect(fetch).toHaveBeenLastCalledWith("/api/plans/9001");
+    expect(agent.session.value?.plan_id).toBe(9001);
+    expect(agent.generatedPlan.value).toEqual({ id: 9001, revision: 2 });
+  });
+
+  it("leaves the plan panel alone after a turn that saved nothing", async () => {
+    const { fetch, agent } = setup();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: 9001 });
+    await agent.create("Swap Monday's dinner");
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: 9001, latest_run: { status: "committed", termination_reason_code: "SCOPE_SOCIAL" } });
+    await agent.reply("ok");
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(agent.generatedPlan.value).toBeNull();
+  });
+
+  it("does not hand a week saved in a conversation left meanwhile to the one opened afterwards", async () => {
+    const { fetch, agent } = setup();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: null });
+    await agent.create("Dinners for two");
+    const saved = deferred<unknown>();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], plan_id: 9001, latest_run: { status: "committed", termination_reason_code: "PLAN_SAVED" } })
+      .mockReturnValueOnce(saved.promise);
+    const replied = agent.reply("确认");
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
+    agent.reset();
+    saved.resolve({ id: 9001 });
+    await replied;
+    expect(agent.generatedPlan.value).toBeNull();
+  });
+});
+
 describe("the household's words on their way", () => {
   const words = "Plan next week, 7 days, three meals a day, budget S$250";
 

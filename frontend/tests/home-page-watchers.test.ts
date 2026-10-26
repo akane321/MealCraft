@@ -11,4 +11,13 @@ describe("home page week guard", () => {
     expect(start).toBeGreaterThanOrEqual(0);
     expect(source.slice(start, end)).toMatch(/},\s*{\s*flush:\s*["']sync["']\s*}\);/);
   });
+
+  it("shows a saved week in the plan panel, whether a button or a confirmation typed in the chat saved it", () => {
+    const source = readFileSync(new URL("../app/pages/index.vue", import.meta.url), "utf8");
+    const start = source.indexOf("watch(generatedPlan,");
+    const end = source.indexOf("\nwatch(", start + 1);
+
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(source.slice(start, end)).toContain("void loadPlan(value.id);");
+  });
 });
