@@ -5,8 +5,9 @@ by course, and the reviewer's three checks on every recipe: complete, steps sens
     python -I -X utf8 data-engineering/scripts/manual_check.py score <filled.xlsx>    # report.md and report.json
 
 Nothing in the sheet is prefilled. Only rows the reviewer marked 是 count. A recipe is correct when all three checks
-are 对; each 错 counts under its check, so a recipe can count under more than one. A recipe with any 看不出 is
-reported apart and counts neither way. The correct rate carries a Wilson 95% interval; the 03 plan's target is 95%.
+are 对 and wrong when any is 错; each 错 counts under its check, so a recipe can count under more than one. A recipe
+with no 错 and some 看不出 is reported apart and counts neither way. The correct rate carries a Wilson 95% interval;
+the 03 plan's target is 95%.
 Offline, with a Python that has openpyxl, from the repository root.
 """
 
@@ -202,7 +203,7 @@ def score(rows: list[dict], sample: dict) -> dict:
         if any(verdict not in VERDICTS for verdict in row["verdicts"]):
             refill.append({"id": row["id"], "title": row["title"], "verdicts": row["verdicts"]})
             continue
-        if "看不出" in row["verdicts"]:
+        if "看不出" in row["verdicts"] and "错" not in row["verdicts"]:
             unsure.append({"id": row["id"], "title": row["title"], "note": row["note"]})
             continue
         course = by_course[drawn[row["id"]]["course"]]

@@ -116,18 +116,20 @@ def test_manual_check_rate_errors_and_unsure() -> None:
     sample = {
         "release": "v",
         "seed": 1,
-        "size": 4,
-        "recipes": [{"id": key, "course": "main"} for key in "ABCD"],
+        "size": 5,
+        "recipes": [{"id": key, "course": "main"} for key in "ABCDE"],
     }
     rows = [
         {"id": "A", "title": "A", "verdicts": ["对", "对", "对"], "note": None, "checked": True},
         {"id": "B", "title": "B", "verdicts": ["错", "错", "对"], "note": "no filling", "checked": True},
         {"id": "C", "title": "C", "verdicts": ["对", "看不出", "对"], "note": None, "checked": True},
         {"id": "D", "title": "D", "verdicts": ["对", "", "对"], "note": None, "checked": True},
+        {"id": "E", "title": "E", "verdicts": ["错", "对", "看不出"], "note": "no rice", "checked": True},
     ]
     result = manual.score(rows, sample)
-    assert (result["checked"], result["correct"], result["rate"]) == (2, 1, 0.5)
-    assert result["errors_by_check"]["菜谱完整"] == {"recipes": 1, "share_of_errors": 0.5}
+    # E is wrong on a check it could judge, whatever its 看不出.
+    assert (result["checked"], result["correct"], result["rate"]) == (3, 1, 0.333)
+    assert result["errors_by_check"]["菜谱完整"] == {"recipes": 2, "share_of_errors": 0.667}
     assert result["errors_by_check"]["份量正常"] == {"recipes": 0, "share_of_errors": 0.0}
     assert [row["id"] for row in result["unsure"]] == ["C"]
     assert [row["id"] for row in result["refill"]] == ["D"]
