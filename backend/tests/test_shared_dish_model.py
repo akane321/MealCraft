@@ -419,6 +419,7 @@ def _catalog(recipe_id, role, *, calories, tags=(), allergens=(), ingredient=Non
     )
     return SimpleNamespace(
         id=abs(hash(recipe_id)) % 10000,
+        external_id=None,  # Local recipes use their slug for similarity lookup.
         slug=recipe_id,
         title=recipe_id,
         recipe_ingredients=[line],
