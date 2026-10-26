@@ -1,0 +1,216 @@
+{
+ "sampled": 50,
+ "checked": 50,
+ "agree": 47,
+ "unchecked": 0,
+ "cannot_tell": 0,
+ "refill": [],
+ "agreement_unweighted": 0.94,
+ "wilson95_unweighted": [
+  0.838,
+  0.979
+ ],
+ "agreement_weighted": 0.963,
+ "weighted_cover": {
+  "recipes": 8968,
+  "of": 8968
+ },
+ "strata": {
+  "crustaceans": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 343,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "eggs": {
+   "checked": 5,
+   "agree": 5,
+   "recipes_in_release": 1543,
+   "agreement": 1.0,
+   "wilson95": [
+    0.566,
+    1.0
+   ]
+  },
+  "fish": {
+   "checked": 4,
+   "agree": 3,
+   "recipes_in_release": 610,
+   "agreement": 0.75,
+   "wilson95": [
+    0.301,
+    0.954
+   ]
+  },
+  "gluten": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 298,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "gluten_candidate": {
+   "checked": 3,
+   "agree": 2,
+   "recipes_in_release": 379,
+   "agreement": 0.667,
+   "wilson95": [
+    0.208,
+    0.939
+   ]
+  },
+  "milk": {
+   "checked": 5,
+   "agree": 5,
+   "recipes_in_release": 1500,
+   "agreement": 1.0,
+   "wilson95": [
+    0.566,
+    1.0
+   ]
+  },
+  "molluscs": {
+   "checked": 3,
+   "agree": 2,
+   "recipes_in_release": 157,
+   "agreement": 0.667,
+   "wilson95": [
+    0.208,
+    0.939
+   ]
+  },
+  "none": {
+   "checked": 5,
+   "agree": 5,
+   "recipes_in_release": 1459,
+   "agreement": 1.0,
+   "wilson95": [
+    0.566,
+    1.0
+   ]
+  },
+  "peanuts": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 403,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "sesame": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 532,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "soy": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 929,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "sulfites": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 376,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "tree_nuts": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 439,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  }
+ },
+ "missed_by_catalog": {
+  "gluten": 1
+ },
+ "extra_in_catalog": {
+  "fish": 2,
+  "gluten_candidate": 1
+ },
+ "corrections": [
+  {
+   "id": "RCP2_6D9260FF41F2",
+   "title": "Beef Fajitas",
+   "catalog": [
+    "gluten_candidate"
+   ],
+   "confirmed": [
+    "gluten"
+   ],
+   "missed": [
+    "gluten"
+   ],
+   "extra": [
+    "gluten_candidate"
+   ],
+   "note": "用户确认1A：flour tortillas确定gluten；步骤中sour cream作为上桌建议，若实际使用另含milk。"
+  },
+  {
+   "id": "RCP2_926AF43F7266",
+   "title": "Crock Pot Thai Beef",
+   "catalog": [
+    "fish",
+    "gluten"
+   ],
+   "confirmed": [
+    "gluten"
+   ],
+   "missed": [],
+   "extra": [
+    "fish"
+   ],
+   "note": "用户确认：普通面粉确定含gluten；鱼露或酱油二选一，不把fish和soy同时作为确定标签。"
+  },
+  {
+   "id": "RCP2_C5720A5B4A5A",
+   "title": "Steamed Thai Mussels",
+   "catalog": [
+    "fish",
+    "molluscs"
+   ],
+   "confirmed": [
+    "molluscs"
+   ],
+   "missed": [],
+   "extra": [
+    "fish"
+   ],
+   "note": "用户确认：贻贝确定含molluscs；鱼露或酱油二选一，其他过敏原按实际调料判定。"
+  }
+ ],
+ "ai_candidates": {
+  "agree": 48,
+  "checked": 50,
+  "wilson95": [
+   0.865,
+   0.989
+  ]
+ }
+}
