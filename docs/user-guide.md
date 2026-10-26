@@ -294,11 +294,14 @@ complex one is allowed the longer wait rather than being cut short.
 
 Instead of pressing **Plan my week** (or **Confirm change**, section 5), you can
 type a clear confirmation in the conversation while the plan or change waits
-for it. Only these whole statements count; case, spaces and punctuation do not
-matter: "I confirm. Please proceed.", "I confirm", "Confirm", "Yes, apply it",
-"Apply the changes", "Please proceed", 确认, 我确认, 确认，继续 and 确认应用. One
-of them does exactly what the button does, with the same checks, and the reply
-says the week was planned or changed. Anything else stays ordinary conversation
+for it. Only these whole statements count: "I confirm. Please proceed.", "I
+confirm", "Confirm", "Yes, apply it", "Apply the changes", "Please proceed",
+确认, 我确认, 确认，继续 and 确认应用. Case, spaces and common punctuation
+(commas, full stops, colons, semicolons, exclamation marks and tildes) do not
+matter; a statement written with other marks, such as a dash, an ellipsis or
+quotation marks, is ordinary conversation. One of them does exactly what the
+button does, with the same checks, and the reply says the week was planned or
+changed. Anything else stays ordinary conversation
 and saves nothing: vague agreement ("ok", "sure", "yes", 好, 嗯, 可以), any
 question, and a confirmation that adds a change ("yes but swap Tuesday",
 确认，但是换掉周二). When nothing waits for confirmation, the same statements are

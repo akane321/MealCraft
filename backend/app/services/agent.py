@@ -139,20 +139,23 @@ def keep_shape_answer(message: str) -> bool | None:
 
 
 def _confirmation_words(message: str) -> str:
-    """A message as the clear-confirmation set is matched: lower case, with no spaces or punctuation."""
+    """A message as the clear-confirmation set is matched: lower case, without spaces and common punctuation."""
     return re.sub(r"[\s,.;:!~，。；：！、～]+", "", message.lower())
 
 
 # The clear confirmations (ADR-0098): typed in the chat while a plan or a change to the week waits for confirmation,
 # one of these whole statements does what that preview's confirm button does, through the same checks (ADR-0016).
-# Matched after case, spaces and punctuation, so "confirm!" and "确认继续" count. Anything else is ordinary chat, as
-# is any of these when nothing waits: vague agreement ("ok", "sure", "yes", "好", "嗯", "可以"), any question, and a
-# confirmation that adds a change ("yes but swap Tuesday", "确认，但是换掉周二"). Kept small on purpose; the user
-# guide lists the same statements.
+# Matched after case, spaces and the common punctuation `_confirmation_words` removes (commas, full stops, colons,
+# semicolons, exclamation marks, tildes), so "confirm!" and "确认继续" count. Other marks (dashes, ellipses, quotes)
+# stay, so such a message is ordinary chat, as is anything else, and any of these when nothing waits: vague
+# agreement ("ok", "sure", "yes", "好", "嗯", "可以"), any question, and a confirmation that adds a change ("yes but
+# swap Tuesday", "确认，但是换掉周二"). Kept small on purpose; the user guide lists the same statements.
 CLEAR_CONFIRMATIONS = frozenset(
     _confirmation_words(statement)
     for statement in (
-        "I confirm. Please proceed.",  # the evaluation adapter's fixed confirmation message (ADR-0092 item 2)
+        # The evaluation adapter's fixed confirmation (ADR-0092 item 2, ADR-0098 item 4): if those bytes change, this
+        # set changes with them; tests/test_agent_chat_confirmation.py checks the adapter's message is in it.
+        "I confirm. Please proceed.",
         *("I confirm", "Confirm", "Yes, apply it", "Apply the changes", "Please proceed"),
         *("确认", "我确认", "确认，继续", "确认应用"),
     )
@@ -162,6 +165,11 @@ CLEAR_CONFIRMATIONS = frozenset(
 def clear_confirmation(message: str) -> bool:
     """Whether the whole message is one of CLEAR_CONFIRMATIONS; a question never is."""
     return not re.search(r"[?？]", message) and _confirmation_words(message) in CLEAR_CONFIRMATIONS
+
+
+def _change_waits(snapshot: AgentSessionResponse) -> bool:
+    """Whether a change to the week waits for confirmation: the session links a preview not yet applied."""
+    return snapshot.pending_replan is not None and snapshot.pending_replan.status == "previewed"
 
 
 def _chat_confirmation(message: str, intent: str, *, applied: bool) -> ScopeDecision:
@@ -615,7 +623,7 @@ class AgentSessionService:
         if plan_id is not None and agent_session.plan_id != plan_id:
             agent_session = self._take_plan(agent_session, plan_id)
         snapshot = self._to_response(agent_session)
-        if (snapshot.can_confirm or snapshot.pending_replan is not None) and clear_confirmation(message):
+        if (snapshot.can_confirm or _change_waits(snapshot)) and clear_confirmation(message):
             self.repository.end_read_transaction()
             return self._confirm_in_chat(snapshot, message, idempotency_key=idempotency_key)
         started = self._start_run(
@@ -1421,7 +1429,7 @@ class AgentSessionService:
         """A clear confirmation typed while a preview waits (ADR-0098): that preview's confirm button, `confirm` or
         `confirm_replan` with every check of theirs (ADR-0016), with the household's words before the reply. One the
         checks turn down saves nothing and says why in the chat."""
-        replan = snapshot.pending_replan is not None
+        replan = _change_waits(snapshot)
         try:
             if replan:
                 return self.confirm_replan(snapshot.id, idempotency_key=idempotency_key, said=message).session
@@ -1437,13 +1445,24 @@ class AgentSessionService:
             reason = str(error) if language(str(error)) == lang else planner_message(str(error), lang)
             reply = say("not_confirmed", lang, reason=reason)
             decision = _chat_confirmation(message, "confirm_replan" if replan else "confirm_plan", applied=False)
-            if replan and not isinstance(error, AgentSessionNotReadyError):
-                # A preview that is stale or gone can never be confirmed: its card goes, as after a refused button.
+            self.repository.end_read_transaction()  # read the session as it is now, not as this request loaded it
+            current = self.get(snapshot.id)
+            attempted = snapshot.pending_replan.id if replan and snapshot.pending_replan is not None else None
+            if (
+                replan
+                and not isinstance(error, AgentSessionNotReadyError)
+                and current is not None
+                and current.pending_replan is not None
+                and current.pending_replan.id == attempted
+            ):
+                # The preview this tried, stale or gone, can never be confirmed: its card goes, as after a refused
+                # button. One the session moved on from meanwhile (a confirmation that got there first left its
+                # question, or a new preview) is kept. ponytail: read then write, not one guarded update; a turn
+                # landing in between could still be cleared.
                 updated = self.repository.finish_replan(
                     snapshot.id, assistant_message=reply, user_message=message, scope_decision=decision
                 )
             else:
-                current = self.get(snapshot.id)
                 updated = self.repository.append_bounded_exchange(
                     snapshot.id,
                     user_message=message,

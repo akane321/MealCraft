@@ -3,10 +3,12 @@
 import pytest
 
 from app.db.session import get_db_session
+from app.evaluation.conversation_adapter import CONFIRMATION_MESSAGE
 from app.main import app
 from app.models.agent import AgentSession
 from app.models.meal_plan import MealPlan
 from app.services.agent import AgentSessionService, clear_confirmation
+from app.services.replanning import MealPlanReplanConflictError, MealPlanReplanningService
 from tests.test_recipes import _set_authenticated_household_role
 from tests.test_recipes import recipe_client as recipe_client
 
@@ -68,6 +70,11 @@ def test_vague_agreement_questions_and_added_changes_are_not_clear_confirmations
     assert not clear_confirmation(message)
 
 
+def test_the_evaluation_harness_confirmation_is_a_clear_confirmation():
+    """ADR-0098 item 4: the bytes every system receives confirm the product too (the product never imports them)."""
+    assert clear_confirmation(CONFIRMATION_MESSAGE)
+
+
 def _database():
     generator = app.dependency_overrides[get_db_session]()
     return generator, next(generator)
@@ -115,6 +122,23 @@ def _applied(client, plan_id):
     ]
 
 
+CHAT_CONFIRMATION_CODES = {"CHAT_CONFIRMATION", "CHAT_CONFIRMATION_NOT_APPLIED"}
+CONFIRM_TOOLS = {"generate_plan_preview", "save_plan_revision", "confirm_replan"}
+
+
+def _runs(client, session_id):
+    return client.get(f"/api/agent/sessions/{session_id}/runs").json()["items"]
+
+
+def _answered_as_chat(client, answered, runs_before):
+    """The words went through the chat, not the confirm logic: a scope of their own and one ordinary turn's run."""
+    assert (answered["last_scope_decision"] or {}).get("reason_code") not in CHAT_CONFIRMATION_CODES
+    runs = _runs(client, answered["id"])
+    assert len(runs) == runs_before + 1
+    assert "turn_completed" in {checkpoint["stage"] for checkpoint in runs[0]["checkpoints"]}
+    assert not {tool["tool_name"] for tool in runs[0]["tool_executions"]} & CONFIRM_TOOLS
+
+
 def _commits(client, session_id):
     runs = client.get(f"/api/agent/sessions/{session_id}/runs").json()["items"]
     return [
@@ -144,7 +168,9 @@ def test_a_clear_confirmation_saves_the_waiting_plan_once(
     assert _commits(recipe_client, session["id"]) == ["save_plan_revision"]
 
     # Nothing waits any more: a second confirmation is ordinary chat and saves nothing.
+    runs_before = len(_runs(recipe_client, session["id"]))
     second = _say(recipe_client, session["id"], again)
+    _answered_as_chat(recipe_client, second, runs_before)
     assert second["plan_id"] == confirmed["plan_id"]
     assert [item["id"] for item in _plans(recipe_client)] == [confirmed["plan_id"]]
     assert recipe_client.get(f"/api/plans/{confirmed['plan_id']}").json()["revision"] == 1
@@ -163,10 +189,11 @@ def test_resending_a_confirmation_with_its_key_replays_it(recipe_client):
 def test_a_confirmation_with_no_plan_waiting_is_ordinary_chat(recipe_client, start, clear):
     created = recipe_client.post("/api/agent/sessions", json={"message": start}).json()
     assert not created["can_confirm"]
+    runs_before = len(_runs(recipe_client, created["id"]))
     answered = _say(recipe_client, created["id"], clear)
     assert answered["plan_id"] is None and _plans(recipe_client) == []
     assert answered["messages"][-2]["content"] == clear and answered["messages"][-1]["role"] == "assistant"
-    assert answered["latest_run"]["termination_reason_code"] != "PLAN_SAVED"
+    _answered_as_chat(recipe_client, answered, runs_before)
 
 
 @pytest.mark.parametrize("message", NOT_CLEAR)
@@ -207,6 +234,7 @@ def test_a_week_the_planner_cannot_find_is_explained_after_the_typed_confirmatio
     assert [m["role"] for m in answered["messages"][-2:]] == ["user", "assistant"]
     assert answered["messages"][-2]["content"] == "Confirm"
     assert "S$" in answered["messages"][-1]["content"]  # the planner's own reason, as after the button
+    assert answered["last_scope_decision"]["reason_code"] == "CHAT_CONFIRMATION_NOT_APPLIED"
     assert answered["latest_run"]["status"] == "failed"
 
 
@@ -250,12 +278,25 @@ def test_a_clear_confirmation_applies_the_waiting_change_once(
     assert applied["messages"][-2]["content"] == clear
     assert applied["messages"][-1]["content"].startswith(("Done.", "好了"))
     assert applied["latest_run"]["termination_reason_code"] == "REPLAN_APPLIED"
+    assert applied["last_scope_decision"]["reason_code"] == "CHAT_CONFIRMATION"
 
+    runs_before = len(_runs(recipe_client, previewed["id"]))
     second = _say(recipe_client, previewed["id"], again)
+    _answered_as_chat(recipe_client, second, runs_before)
     assert second["pending_replan"] is None
     assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"] + 1
     assert len(_applied(recipe_client, plan["id"])) == 1
     assert len(_plans(recipe_client)) == 1
+
+
+def test_resending_a_change_confirmation_with_its_key_replays_it(recipe_client):
+    previewed, plan = _previewed(recipe_client, *ENGLISH)
+    first = _say(recipe_client, previewed["id"], "Confirm", **{"Idempotency-Key": "typed-change"})
+    replay = _say(recipe_client, previewed["id"], "Confirm", **{"Idempotency-Key": "typed-change"})  # not a 409
+    assert len(replay["messages"]) == len(first["messages"])
+    assert replay["latest_run"]["id"] == first["latest_run"]["id"]
+    assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"] + 1
+    assert len(_applied(recipe_client, plan["id"])) == 1
 
 
 @pytest.mark.parametrize(("request_text", "change", "clear", "again", "saved", "refused"), LANGUAGES)
@@ -264,11 +305,13 @@ def test_a_confirmation_with_no_change_waiting_is_ordinary_chat(
 ):
     session = _ready(recipe_client, request_text)
     plan = recipe_client.post(f"/api/agent/sessions/{session['id']}/confirm").json()["plan"]
+    runs_before = len(_runs(recipe_client, session["id"]))
     answered = _say(recipe_client, session["id"], clear)
     assert answered["pending_replan"] is None
     assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"]
     assert _applied(recipe_client, plan["id"]) == [] and len(_plans(recipe_client)) == 1
     assert answered["messages"][-2]["content"] == clear and answered["messages"][-1]["role"] == "assistant"
+    _answered_as_chat(recipe_client, answered, runs_before)
 
 
 @pytest.mark.parametrize("message", NOT_CLEAR)
@@ -295,17 +338,41 @@ def test_a_change_previewed_on_an_older_revision_is_not_applied(
 
 
 @pytest.mark.parametrize(("request_text", "change", "clear", "again", "saved", "refused"), LANGUAGES)
-def test_a_change_already_applied_elsewhere_is_not_applied_again(
+def test_a_change_already_applied_elsewhere_waits_for_nothing(
     recipe_client, request_text, change, clear, again, saved, refused
 ):
+    """The conversation still links the preview the week's page applied: nothing waits, so the words are chat."""
     previewed, plan = _previewed(recipe_client, request_text, change)
     event_id = previewed["pending_replan"]["id"]
     assert recipe_client.post(f"/api/plans/{plan['id']}/replan/{event_id}/confirm").status_code == 200
+    runs_before = len(_runs(recipe_client, previewed["id"]))
     answered = _say(recipe_client, previewed["id"], clear)
     assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"] + 1
     assert [event["id"] for event in _applied(recipe_client, plan["id"])] == [event_id]
-    assert answered["messages"][-1]["content"].startswith(refused)
-    assert answered["pending_replan"] is None
+    _answered_as_chat(recipe_client, answered, runs_before)
+
+
+def test_a_late_refused_confirmation_keeps_what_the_session_moved_on_to(recipe_client, monkeypatch):
+    """Two confirmations at once: the one that lands second, refused, leaves the session's newer state alone."""
+    previewed, plan = _previewed(recipe_client, *ENGLISH)
+    newer = recipe_client.post(
+        f"/api/plans/{plan['id']}/replan/preview",
+        json={"event_type": "LOCK_MEAL", "entry_id": plan["days"][0]["entry_id"]},
+    )
+    assert newer.status_code == 201, newer.text
+
+    def overtaken(self, *, plan_id, event_id):
+        # Meanwhile the conversation moved on to a new preview, and the one this tried went stale.
+        _change(AgentSession, previewed["id"], pending_event_id=newer.json()["id"])
+        raise MealPlanReplanConflictError(
+            "This preview is stale because the meal plan has changed. Generate a new preview."
+        )
+
+    monkeypatch.setattr(MealPlanReplanningService, "confirm", overtaken)
+    answered = _say(recipe_client, previewed["id"], "Confirm")
+    assert answered["messages"][-1]["content"].startswith("Nothing was saved.")
+    assert answered["pending_replan"]["id"] == newer.json()["id"]
+    assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"]
 
 
 def test_a_viewer_cannot_apply_the_change_by_typing_a_confirmation(recipe_client):
