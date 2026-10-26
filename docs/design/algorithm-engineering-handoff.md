@@ -23,7 +23,7 @@ checkout cents first, while preserving the requested minimum recipe count.
 The greedy baseline and explicit over-budget preview selection retain their
 separate paths. This heuristic supplies a checked price, not a proven minimum.
 
-The product keeps whole-table title-based `dish_kind` grouping. It does not
+The product improvement pass keeps whole-table title-based `dish_kind` grouping. It does not
 adopt the offline member-mean objective or unreviewed recipe-pair thresholds
 (ADR-0089). Member eligibility remains enforced by validation. The score orders
 empty optional positions, table kinds, repetition, soft nutrition deviation,
@@ -46,6 +46,24 @@ These stage durations are inclusive and overlap, so they must not be summed
 as total runtime. `--cases` selects named developer households and `--steps`
 selects iteration counts; omitted options retain the full comparison. Profiling
 adds overhead and does not enter product traces, scores or stopping rules.
+
+### Replacement near-dish checks
+
+`planning/swap_diversity.py` supplies separate recipe-pair evidence for
+`ReplanningService._select_replacement`. Known near matches to the replaced
+dish or another retained dish in the same meal are excluded. Repetition
+penalties also count known near matches elsewhere in the week. Existing
+eligibility, role, member coverage and whole-week shopping checks still apply.
+Missing vectors remain unknown and retain the existing eligibility behavior;
+they do not prove that the replacement is different. This does not change the
+product improvement objective or its `dish_kind` grouping (ADR-0089).
+
+The explicit developer policy combines title and ingredient overlap with
+vector cosine. A lower cosine threshold applies only when both titles name
+fried rice, excluding titles that indicate soup, cakes or other listed forms.
+The policy and thresholds live in `SWAP_POLICY`; this title cue is not a
+general understanding of cooking methods. Developer regression agreement is
+not independent accuracy or a frozen near-duplicate acceptance result.
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final

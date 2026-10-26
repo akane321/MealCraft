@@ -24,6 +24,7 @@ from app.planning.member_coverage import CoverageDish, catalog_can_eat, coverage
 from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day, pool_courses, pool_for
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recipe_similarity import RecipeSimilarity
+from app.planning.swap_diversity import SwapDiversity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import (
     MealPlanRepository,
@@ -832,6 +833,17 @@ class MealPlanReplanningService:
         candidates = self._replacements(
             plan, entry, constraints, result.recommendations, recipes_by_id, unavailable=request.unavailable_ingredient
         )
+        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
+        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
+        diversity = SwapDiversity(list(evidence_recipes.values()))
+        same_meal = {
+            item.recipe_id
+            for item in plan.entries
+            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+        } | {entry.recipe_id}
+        candidates = [
+            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
+        ]
         if not candidates:
             if request.unavailable_ingredient:
                 # Never a dish with what the shop lacks, however little else fits.
@@ -841,7 +853,8 @@ class MealPlanReplanningService:
                     "under the current hard constraints."
                 )
             raise MealPlanReplanValidationError(
-                f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
+                f"No different dish from {shown_title(entry.recipe.title)} satisfies the current constraints "
+                "and near-duplicate check."
             )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
@@ -861,6 +874,12 @@ class MealPlanReplanningService:
         use_counts = Counter(
             item.recipe_id for item in plan.entries if item.id != entry.id and item.status != "skipped"
         )
+        near_counts = {
+            candidate.recipe.id: sum(
+                count for recipe_id, count in use_counts.items() if diversity.near(candidate.recipe.id, recipe_id)
+            )
+            for candidate in candidates
+        }
 
         # "Can Wednesday be fish instead?": among the candidates that already hold every hard constraint,
         # what was asked for leads and the recommendation score only breaks near-ties. Nothing described,
@@ -885,7 +904,7 @@ class MealPlanReplanningService:
                 if asked
                 else candidate.total_score
             )
-            value = fit - use_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
+            value = fit - near_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
             return value, -candidate.recipe.id
 
         ranked = sorted(candidates, key=score, reverse=True)
