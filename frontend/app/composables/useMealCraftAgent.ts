@@ -16,12 +16,15 @@ export function useMealCraftAgent() {
   const errorMessage = ref<string | null>(null);
   const isLoading = ref(false);
   const recent = ref<AgentSession[]>([]);
+  // The household's words on their way: the conversation shows them at once, until the answer that records them.
+  const pending = ref<string | null>(null);
   // Switching conversations invalidates their in-flight answers, not the household's saved week.
   let generation = 0;
 
-  async function run<T>(request: () => Promise<T>): Promise<T | null> {
+  async function run<T>(request: () => Promise<T>, said: string | null = null): Promise<T | null> {
     const current = generation;
     isLoading.value = true;
+    if (said) pending.value = said;
     errorMessage.value = null;
     try {
       const result = await request();
@@ -35,7 +38,11 @@ export function useMealCraftAgent() {
       return null;
     }
     finally {
-      if (current === generation) isLoading.value = false;
+      if (current === generation) {
+        isLoading.value = false;
+        // A rename or a list read meanwhile leaves the words in place.
+        if (said) pending.value = null;
+      }
     }
   }
 
@@ -45,7 +52,7 @@ export function useMealCraftAgent() {
     const result = await run(() => apiFetch<AgentSession>(`${config.public.apiBase}/api/agent/sessions`, {
       method: "POST",
       body: { message, plan_id: planId },
-    }));
+    }), message);
     if (result) session.value = result;
     return result;
   }
@@ -65,7 +72,7 @@ export function useMealCraftAgent() {
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
       { method: "POST", body: { message, plan_id: planId } },
-    ));
+    ), message);
     if (result) {
       session.value = result;
       await showSaved(result, current);
@@ -79,7 +86,7 @@ export function useMealCraftAgent() {
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/interactions`,
       { method: "POST", body: answer },
-    ));
+    ), answer.free_text);
     if (result) {
       session.value = result;
       await showSaved(result, current);
@@ -197,6 +204,7 @@ export function useMealCraftAgent() {
     generatedPlan.value = null;
     errorMessage.value = null;
     isLoading.value = false;
+    pending.value = null;
   }
 
   return {
@@ -209,6 +217,7 @@ export function useMealCraftAgent() {
     generatedPlan,
     isLoading,
     label,
+    pending,
     recent,
     remove,
     reply,

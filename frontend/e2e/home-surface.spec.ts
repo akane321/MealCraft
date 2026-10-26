@@ -114,6 +114,44 @@ test("New plan keeps its fresh draft when the previous conversation's delayed re
   await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toHaveCount(0);
 });
 
+test("a sent message shows at once beside a note on the wait, and comes back to the composer when it fails", async ({ page }) => {
+  await stubApi(page);
+  const words = "Plan next week, 7 days, three meals a day, budget S$250";
+  const releases: Array<() => void> = [];
+  await page.route("**/api/agent/sessions", async (route) => {
+    await new Promise<void>((resolve) => { releases.push(resolve); });
+    await route.fulfill(releases.length === 1
+      ? { status: 503, json: { detail: "The planner could not be reached." } }
+      : { status: 201, json: session(false) });
+  });
+  const thread = page.getByRole("region", { name: "Conversation" });
+  const note = page.getByRole("status").filter({ hasText: "Checking your limits and this week's prices." });
+
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByLabel("Message MealCraft").fill(words);
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(thread.getByText(words, { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue("");
+  await expect(note).toBeVisible();
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/sent-waiting.png` });
+  await expect.poll(() => releases.length).toBe(1);
+  releases[0]!();
+  await expect(page.getByRole("alert")).toHaveText("The planner could not be reached.");
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue(words);
+  await expect(thread.getByText(words, { exact: true })).toHaveCount(0);
+  await expect(note).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(note).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect.poll(() => releases.length).toBe(2);
+  releases[1]!();
+  await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toBeVisible();
+  await expect(note).toHaveCount(0);
+  await expect(page.getByLabel("Message MealCraft")).toHaveValue("");
+});
+
 test("New plan supersedes an initial week reopen that has not listed the household's plans yet", async ({ page }) => {
   const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
   await page.route("**/api/**", route => route.fulfill(json({ items: [] })));

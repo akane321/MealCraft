@@ -21,7 +21,7 @@ const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
 const { actor, logout } = useAuth();
 const agent = useMealCraftAgent();
-const { session, isLoading, errorMessage, generatedPlan } = agent;
+const { session, isLoading, errorMessage, generatedPlan, pending } = agent;
 const nutrition = useNutritionDashboard();
 const household = useHouseholdProfile();
 
@@ -351,27 +351,36 @@ async function send(text = draft.value) {
     else await changeWeek(message, week);
     return;
   }
-  const pending = interaction.value;
-  let sent;
-  if (pending?.allow_free_text) {
-    sent = await agent.answerInteraction({
-      question_id: pending.question_id,
-      option_ids: [],
-      free_text: message,
-      context_version: pending.context_version,
-      plan_revision: pending.plan_revision,
-    });
-  }
-  else if (session.value) sent = await agent.reply(message);
-  else sent = await agent.create(message);
-  if (sent && draft.value === message) draft.value = "";
+  const asked = interaction.value;
+  await deliver(message, () => (asked?.allow_free_text
+    ? agent.answerInteraction({
+        question_id: asked.question_id,
+        option_ids: [],
+        free_text: message,
+        context_version: asked.context_version,
+        plan_revision: asked.plan_revision,
+      })
+    : session.value ? agent.reply(message) : agent.create(message)));
 }
 
 /** This conversation takes `week` on and changes it with `message`. */
 async function changeWeek(message: string, week: number) {
   takeOn.value = null;
-  const sent = await (session.value ? agent.reply(message, week) : agent.create(message, week));
-  if (sent && draft.value === message) draft.value = "";
+  await deliver(message, () => (session.value ? agent.reply(message, week) : agent.create(message, week)));
+}
+
+/**
+ * Sends `message`: it leaves the composer at once, and the conversation shows it while the answer is on its way
+ * (a first answer checks the limits against the week's prices, which may take minutes: ADR-0080). A failure puts it
+ * back, with the dish it came from, to send again, unless something new was typed or another conversation opened.
+ */
+async function deliver(message: string, request: () => Promise<AgentSession | null | undefined>) {
+  const action = dishAction.value;
+  const version = conversationVersion;
+  if (draft.value === message) draft.value = "";
+  if (await request() || version !== conversationVersion || draft.value) return;
+  draft.value = message;
+  dishAction.value = action;
 }
 
 function keepPlanning() {
@@ -778,7 +787,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
             <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat mc-small">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
             <div v-if="stamp" class="stamp" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>Change made</div>
+            <div v-if="pending" class="me mc-rise">{{ pending }}</div>
             <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
+            <p v-if="pending" class="mc-small wait" role="status">Checking your limits and this week's prices. A large household on a tight budget can take a few minutes to plan.</p>
             <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
           </div>
         </section>
@@ -1033,6 +1044,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .stamp svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 @keyframes mc-stamp { 0% { opacity: 0; transform: rotate(-3deg) scale(1.8); } 60% { opacity: 1; transform: rotate(-3deg) scale(0.94); } 100% { transform: rotate(-3deg) scale(1); } }
 .typing { display: flex; gap: 5px; padding: 8px 0; }
+.wait { margin: -12px 0 0; }
 .typing span { width: 7px; height: 7px; border-radius: 999px; background: var(--c-muted); animation: mc-dot 1.2s ease-in-out infinite; }
 .typing span:nth-child(2) { animation-delay: 150ms; }
 .typing span:nth-child(3) { animation-delay: 300ms; }

@@ -128,3 +128,68 @@ describe("a confirmation typed in the chat (ADR-0098)", () => {
     expect(agent.generatedPlan.value).toBeNull();
   });
 });
+
+describe("the household's words on their way", () => {
+  const words = "Plan next week, 7 days, three meals a day, budget S$250";
+
+  it.each(["create", "reply"] as const)("%s shows the message at once and until its answer arrives", async (method) => {
+    const { fetch, agent } = setup();
+    if (method === "reply") {
+      fetch.mockResolvedValueOnce({ id: 51, messages: [] });
+      await agent.create("Dinners for three");
+    }
+    const answer = deferred<unknown>();
+    fetch.mockReturnValueOnce(answer.promise);
+    const sending = agent[method](words);
+    expect(agent.pending.value).toBe(words);
+    expect(agent.isLoading.value).toBe(true);
+    answer.resolve({ id: 51, messages: [{ id: 1, role: "user", content: words }] });
+    await sending;
+    expect(agent.pending.value).toBeNull();
+    expect(agent.isLoading.value).toBe(false);
+    expect(agent.session.value?.messages).toHaveLength(1);
+  });
+
+  it("goes with a failed request, whose error stays to be read, and the request answers null", async () => {
+    const { fetch, agent } = setup();
+    const answer = deferred<unknown>();
+    fetch.mockReturnValueOnce(answer.promise);
+    const sending = agent.create(words);
+    expect(agent.pending.value).toBe(words);
+    answer.reject({ data: { detail: "The planner could not be reached." } });
+    expect(await sending).toBeNull();
+    expect(agent.pending.value).toBeNull();
+    expect(agent.isLoading.value).toBe(false);
+    expect(agent.errorMessage.value).toBe("The planner could not be reached.");
+  });
+
+  it("are a typed answer's, never a tapped option's, and stay through a rename", async () => {
+    const { fetch, agent } = setup();
+    fetch.mockResolvedValueOnce({ id: 51, messages: [] });
+    await agent.create("Dinners");
+    const base = { question_id: "q", context_version: 1, plan_revision: null };
+    const typed = deferred<unknown>();
+    fetch.mockReturnValueOnce(typed.promise);
+    const answering = agent.answerInteraction({ ...base, option_ids: [], free_text: "three of us" });
+    expect(agent.pending.value).toBe("three of us");
+    fetch.mockResolvedValueOnce({ id: 51, messages: [], title: "Dinners" });
+    await agent.label(51, { title: "Dinners" });
+    expect(agent.pending.value).toBe("three of us");
+    typed.resolve({ id: 51, messages: [] });
+    await answering;
+    const tapped = deferred<unknown>();
+    fetch.mockReturnValueOnce(tapped.promise);
+    const choosing = agent.answerInteraction({ ...base, option_ids: ["household_size_3"], free_text: null });
+    expect(agent.pending.value).toBeNull();
+    tapped.resolve({ id: 51, messages: [] });
+    await choosing;
+  });
+
+  it("are dropped with the conversation they were sent to", () => {
+    const { fetch, agent } = setup();
+    fetch.mockReturnValueOnce(new Promise(() => {}));
+    void agent.create(words);
+    agent.reset();
+    expect(agent.pending.value).toBeNull();
+  });
+});
