@@ -12,11 +12,13 @@ from sqlalchemy.orm import Session
 
 from app.agent import model_client
 from app.agent.ingredient_matcher import names_of
+from app.agent.replies import listed, word
 from app.core.paths import repository_root
 from app.data.allergens import allergen_conflicts
 from app.data.external_ingredient_mapping import ReviewedIngredientMapper, normalize_alias
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.models.recipe import Ingredient
+from app.planning.vegetable_led import food_groups
 from app.schemas.agent import AgentConstraintState
 
 
@@ -119,15 +121,11 @@ class IngredientSubstitutionFoodQuestionAnswerer:
                     resolved = self.mapper.resolve(next(alias for alias in matching_aliases if len(alias) == longest))
         if resolved.canonical_id is None:
             return self._unverified(lang)
-        # Ingredient-level catalog facts do not certify vegan/vegetarian status. Fail closed for these requests.
         members = constraints.household.members if constraints.household and constraints.household.members else []
-        if constraints.dietary_preferences or any(member.dietary_preferences for member in members):
-            if lang == "zh":
-                return "我无法核实替代食材是否满足家庭的饮食偏好，因此不会推荐未经核验的选项。"
-            return (
-                "I can’t verify that substitute options meet the household’s dietary preferences, "
-                "so I won’t suggest unverified options."
-            )
+        # Every diet at the table, and whose it is (None: the household's own); each candidate must suit all of them.
+        diets = [(None, diet) for diet in constraints.dietary_preferences] + [
+            (member.name, diet) for member in members for diet in member.dietary_preferences
+        ]
 
         try:
             proposed = self.generator.suggest(source)
@@ -149,16 +147,54 @@ class IngredientSubstitutionFoodQuestionAnswerer:
             excluded_ingredients=exclusions,
             requires_halal=constraints.requires_halal,
         )
-        if not safe:
+        # A candidate that breaks a diet is dropped; one the catalog cannot vouch for is dropped and said.
+        by_id = {str(item.normalized_name).casefold(): item for item in catalog}
+        kept, unknown = [], set()
+        for item in safe:
+            verdicts = {(who, diet): suits_diet(by_id[item.ingredient_id], diet) for who, diet in diets}
+            if False in verdicts.values():
+                continue
+            if None in verdicts.values():
+                unknown.update(key for key, verdict in verdicts.items() if verdict is None)
+                continue
+            kept.append(item)
+        note = self._unverified_diets([key for key in dict.fromkeys(diets) if key in unknown], lang, others=bool(kept))
+        if not kept:
             return (
                 "目录中没有找到通过家庭限制核验的替代食材。"
                 if lang == "zh"
                 else "I couldn’t find a catalog substitute verified against the household’s constraints."
-            )
-        options = ", ".join(item.display_name for item in safe)
+            ) + note
+        options = ", ".join(item.display_name for item in kept)
         if lang == "zh":
+            if diets:
+                return (
+                    f"可考虑：{options}。这些选项已按食材目录中的过敏原、饮食来源和清真信息，"
+                    f"核对了每位家庭成员的过敏原、饮食和忌口。{note}"
+                )
             return f"可考虑：{options}。这些选项已按食材目录中的过敏原、忌口和清真信息筛选。"
+        if diets:
+            return (
+                f"Possible options: {options}. These were checked against every member’s allergens, diet, and "
+                f"exclusions using catalog allergen, dietary-origin, and halal data.{note}"
+            )
         return f"Possible options: {options}. These were filtered using catalog allergen, exclusion, and halal data."
+
+    @staticmethod
+    def _unverified_diets(diets: list[tuple[str | None, str]], lang: str, *, others: bool) -> str:
+        """The sentence naming whose diets some suggestions could not be verified for, or "" when none."""
+        if not diets:
+            return ""
+        whose: dict[str | None, list[str]] = {}
+        for who, diet in diets:
+            whose.setdefault(who, []).append(word(diet, lang))
+        if lang == "zh":
+            named = listed([f"{who or '家庭'}的{listed(names, lang)}饮食" for who, names in whose.items()], lang)
+            return f"{'其他' if others else '部分'}建议未列出，因为我无法核实它们是否符合{named}。"
+        named = listed([f"{who or 'the household'}’s {listed(names, lang)} diet" for who, names in whose.items()], lang)
+        return (
+            f" {'Other' if others else 'Some'} suggestions were left out because I couldn’t verify they suit {named}."
+        )
 
     @staticmethod
     def _unverified(lang: str) -> str:
@@ -192,7 +228,7 @@ def filter_safe_substitutes(
         if not ingredient_id or ingredient_id in excluded:
             continue
 
-        allergens = getattr(ingredient, "allergens", None)
+        allergens = _confirmed_allergens(ingredient)
         if allergens is None and wanted_allergens:
             continue
         present, unverifiable = allergen_conflicts(wanted_allergens, allergens or [])
@@ -209,3 +245,42 @@ def filter_safe_substitutes(
             )
         )
     return safe
+
+
+def _confirmed_allergens(ingredient: object) -> list[str] | None:
+    """The catalog's allergens for an ingredient; None (unknown) when it has none recorded or the release holds it
+    with an allergen status other than confirmed."""
+    release = food_groups().get(str(getattr(ingredient, "normalized_name", "")).casefold())
+    if release is not None and release[3] != "confirmed":
+        return None
+    return getattr(ingredient, "allergens", None)
+
+
+def suits_diet(ingredient: object, diet: str) -> bool | None:
+    """Whether catalog facts show an ingredient suits one diet: True, False, or None when they cannot tell.
+
+    The rules are the ones that tag release recipes (data-engineering/scripts/derive_dietary_tags.py), read on
+    the release's `dietary_origin` and food group and the catalog's checked allergens:
+
+    - vegetarian: not of `flesh` origin (dairy, eggs and honey are `secretion` and allowed);
+    - vegan: of `plant` origin only;
+    - dairy-free: not in the `dairy` food group and no dairy allergen;
+    - gluten-free: no gluten allergen (the release's `gluten_candidate` is imported as gluten).
+
+    An ingredient the release does not hold has no known origin or food group, and one without confirmed
+    allergens has none known: unknown is never read as suiting a diet (ADR-0076). A diet with no rule here is
+    unknown for every ingredient.
+    """
+    _, group, origin, _ = food_groups().get(str(getattr(ingredient, "normalized_name", "")).casefold(), (None,) * 4)
+    allergens = _confirmed_allergens(ingredient)
+    if diet == "vegetarian":
+        return None if origin is None else origin != "flesh"
+    if diet == "vegan":
+        return None if origin is None else origin == "plant"
+    if diet == "dairy-free":
+        if group == "dairy" or (allergens is not None and {"dairy", "milk"} & set(allergens)):
+            return False
+        return None if group is None or allergens is None else True
+    if diet == "gluten-free":
+        return None if allergens is None else "gluten" not in allergens
+    return None

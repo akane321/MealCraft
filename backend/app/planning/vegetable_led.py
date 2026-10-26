@@ -276,9 +276,9 @@ MEAT_WORDS = re.compile(
 
 
 @cache
-def food_groups() -> dict[str, tuple[str, str, str]]:
-    """Each ingredient's release id, food group and dietary origin, by the normalized name the catalog and the
-    planner use.
+def food_groups() -> dict[str, tuple[str, str, str, str]]:
+    """Each ingredient's release id, food group, dietary origin and allergen status, by the normalized name the
+    catalog and the planner use.
 
     An ingredient the release does not hold (the curated `baby_spinach`) takes the release ingredient it is
     the same as or a variety of in the ingredient hierarchy (`spinach`).
@@ -286,13 +286,13 @@ def food_groups() -> dict[str, tuple[str, str, str]]:
     path = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     groups = {
-        name: (name, row["food_group"], row["dietary_origin"])
+        name: (name, row["food_group"], row["dietary_origin"], row["allergen_status"])
         for row in rows
         for name in [row["ingredient_id"].removeprefix("ING_").lower()]
     }
     entries = runtime().entries
 
-    def release(name: str, seen: frozenset[str] = frozenset()) -> tuple[str, str, str] | None:
+    def release(name: str, seen: frozenset[str] = frozenset()) -> tuple[str, str, str, str] | None:
         if name in groups:
             return groups[name]
         parents = [p["id"] for p in entries.get(name, {}).get("parents", []) if p["relation"] in ("same", "variety")]
@@ -325,7 +325,7 @@ def counted_weights(lines: Iterable[tuple]) -> list[tuple[str, float]]:
     groups = food_groups()
     weights = []
     for name, grams, *text in lines:
-        release, group, _ = groups.get(name, (name, None, None))
+        release, group, *_ = groups.get(name, (name, None, None))
         grams = whole_grams(release, grams, text[0] if text else None)
         if not grams or release in UNCOUNTED or (group in UNCOUNTED_GROUPS and release != "bonito_flakes"):
             continue
@@ -338,7 +338,7 @@ def vegetable_share(lines: Iterable[tuple]) -> float | None:
     groups = food_groups()
     vegetables = tubers = total = 0.0
     for name, weight in counted_weights(lines):
-        release, group, _ = groups.get(name, (name, None, None))
+        release, group, *_ = groups.get(name, (name, None, None))
         total += weight
         if release in STARCHY_TUBERS:
             tubers += weight
@@ -352,7 +352,7 @@ def vegetable_share(lines: Iterable[tuple]) -> float | None:
 def meat_or_fish(name: str, text: str | None = None) -> bool:
     """Meat, poultry, fish or seafood: animal flesh that is not a seasoning, stock or fat made from it, or a line
     whose wording names one (`MEAT_WORDS`) that the release mapped to something else."""
-    release, _, origin = food_groups().get(name, (name, None, None))
+    release, _, origin, *_ = food_groups().get(name, (name, None, None))
     return release == "bonito_flakes" or (
         release not in SEASONING_FROM_FLESH and (origin == "flesh" or bool(text and MEAT_WORDS.search(text)))
     )

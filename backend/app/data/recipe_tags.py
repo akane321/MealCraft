@@ -1030,7 +1030,7 @@ def catalog_ingredients() -> list[str]:
 
 def ingredient_entry(name: str, basics: set[str]) -> dict:
     groups = food_groups()
-    release, group, _ = groups.get(name, (name, None, None))
+    release, group, *_ = groups.get(name, (name, None, None))
     perishable = (name in PERISHABLE or release in PERISHABLE) and not PRESERVED.search(name)
     return {
         "food_group": group,
