@@ -288,7 +288,11 @@ are excluded from this short-lived class. The shopping list marks the fresh item
 
 Most plans take a few seconds. A large household on a tight budget takes longer,
 a few minutes, while the planner searches for a week that fits the
-budget; the button says "Planning…" until the plan is ready. How long is
+budget; the button says "Planning…" until the plan is ready. Most of that
+search runs when the request is sent, as the assistant checks the limits against
+this week's prices before it offers Plan my week: the message shows in the
+conversation at once, with a note that this can take a few minutes, and Plan my
+week pressed soon after saves the week that check found. How long is
 acceptable follows how hard the request is: a simple week comes back quickly, a
 complex one is allowed the longer wait rather than being cut short.
 
