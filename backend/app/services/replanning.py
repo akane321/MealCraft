@@ -836,14 +836,6 @@ class MealPlanReplanningService:
         evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
         evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
         diversity = SwapDiversity(list(evidence_recipes.values()))
-        same_meal = {
-            item.recipe_id
-            for item in plan.entries
-            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
-        } | {entry.recipe_id}
-        candidates = [
-            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
-        ]
         if not candidates:
             if request.unavailable_ingredient:
                 # Never a dish with what the shop lacks, however little else fits.
@@ -964,6 +956,18 @@ class MealPlanReplanningService:
             # release's "tofu, firm, cubed"), as this household would cook the dish.
             gone = same_food(unavailable)
             candidates = [item for item in candidates if not uses(recipes_by_id[item.recipe.id], constraints, gone)]
+        # Exclude near dishes before choosing the default repeat-cap fallback.
+        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
+        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
+        diversity = SwapDiversity(list(evidence_recipes.values()))
+        same_meal = {
+            item.recipe_id
+            for item in plan.entries
+            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+        } | {entry.recipe_id}
+        candidates = [
+            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
+        ]
         if self._slot_members(constraints, entry):
             # Every meal, composed or not: a swap may not leave a member at the table with nothing to eat
             # (ADR-0071 section 1). `_meal_still_holds` only runs for a dish of a composed meal, so a one-dish
