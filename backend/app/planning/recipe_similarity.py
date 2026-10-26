@@ -31,7 +31,9 @@ _FILLER = re.compile(
     r"make|want|like|feel|something|anything|some|else|with|dinner|lunch|meal|dish|tonight|today|tomorrow|day|"
     r"replace|swap|change|switch|different|another|other|new|"
     r"monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun|"
-    r"\d+)\b|(?:'s|’s)\b"
+    # A day as a day chip says it: "Wed 4 Nov", "周三 11月4日".
+    r"jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|"
+    r"\d+)\b|(?:'s|’s)\b|\d+月\d+[日号]"
     r"|换成|换掉|换一个|换个|替换|换|改成|周[一二三四五六日天]|星期[一二三四五六日天]|今天|明天|第.天|"
     r"我想吃|想吃|我想|想要|来点|来个|有没有|吧|的|一下|晚饭|晚餐|那顿|这顿|吗|呢|[?？!！,，.。]",
     re.IGNORECASE,

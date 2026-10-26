@@ -4,6 +4,7 @@ from collections.abc import Callable
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from functools import cache
 from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
@@ -980,13 +981,17 @@ class AgentSessionService:
                 raise AgentSessionNotFoundError
             return self._to_response(updated)
 
+        # The dishes still to cook that use an ingredient the shop lacks (asked at most once a turn).
+        using = cache(lambda ingredient: self.replanning_service.entries_using(plan_id=plan.id, ingredient=ingredient))
         draft, questions = self.replan_interpreter.parse(
             message,
             plan=plan,
             current=snapshot.replan_draft,
             lang=lang,
+            using=using,
         )
         if questions:
+            options = self.replan_interpreter.choices(draft, plan, lang, using)
             updated = self.repository.append_replan_exchange(
                 session_id,
                 user_message=message,
@@ -995,7 +1000,7 @@ class AgentSessionService:
                 clarification_questions=questions,
                 pending_event_id=None,
                 scope_decision=scope_decision,
-                pending_interaction=self._choices(snapshot, self.replan_interpreter.choices(draft, plan, lang), lang),
+                pending_interaction=self._choices(snapshot, options, lang),
             )
         elif draft.event_type == "LOCK_MEAL" and (kept := self._already_kept(plan, draft, lang)) is not None:
             updated = self.repository.append_replan_exchange(

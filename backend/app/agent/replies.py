@@ -165,6 +165,10 @@ PLANNER_ZH_PATTERNS = (
         r"No dish other than (?P<title>.+) satisfies the current hard constraints\.",
         "除了{title}，没有别的菜符合现在的限制。",
     ),
+    (
+        r"No dish without (?P<ingredient>.+?) can replace (?P<title>.+) under the current hard constraints\.",
+        "没有不含{ingredient}、又符合现在限制的菜能替换{title}。",
+    ),
 )
 
 
@@ -180,6 +184,8 @@ def planner_message(message: str, lang: str) -> str:
             values = found.groupdict()
             if "meal" in values:
                 values["meal"] = word(values["meal"].lower(), lang)
+            if "ingredient" in values:
+                values["ingredient"] = word(values["ingredient"].replace(" ", "_"), lang)
             return chinese.format(**values)
     return "有个限制这次满足不了。"
 
@@ -375,8 +381,9 @@ REPLIES: dict[str, tuple[str, str]] = {
     "lock_say": ("Lock a meal", "锁定一顿"),
     "unavailable": ("An ingredient is out of stock", "有食材买不到"),
     "unavailable_say": ("I can't buy an ingredient", "有食材买不到"),
-    "day_say": ("Day {index}", "第{index}天"),
     "dish_say": ("The {title}", "就是{title}这道"),
+    "dish_when": ("{title} ({day}, {meal})", "{day}{meal}的{title}"),
+    "dish_on_say": ("The {title} on {day}, {meal}", "{day}{meal}的{title}"),
     "people_say": ("{count} people", "{count}人"),
     "keep_usual": ("Keep it as our usual", "保存为常用安排"),
     "keep_usual_say": ("Keep it as our usual", "保存为我们的常用安排"),
@@ -398,6 +405,15 @@ REPLIES: dict[str, tuple[str, str]] = {
         "我一次换一道菜，确认之前什么都不会改。先从哪一天开始？",
     ),
     "ask_ingredient": ("Which ingredient is unavailable?", "哪一种食材买不到？"),
+    # "I can't buy tofu this week": only the dishes still to cook that use it (agent/replanning.py).
+    "ask_using": (
+        "{count} dishes still to come use {ingredient}: {dishes}. Which one should I change?",
+        "接下来有 {count} 道菜用到{ingredient}：{dishes}。要换哪一道？",
+    ),
+    "unavailable_unused": (
+        "No dish still to come uses {ingredient}, so nothing needs to change.",
+        "接下来的菜都没有用到{ingredient}，不需要调整。",
+    ),
     "preview_lock": ("Keep {title} as it is?", "保留{title}不变？"),
     # "Don't change Monday's dinner": every dish of that meal, in one preview.
     "preview_lock_meal": ("Keep the {meal} on {day} as it is ({titles})?", "保留{day}的{meal}不变（{titles}）？"),

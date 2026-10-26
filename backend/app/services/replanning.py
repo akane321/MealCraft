@@ -5,6 +5,7 @@ from fractions import Fraction
 from app.core.clock import today as local_today
 from app.data import meal_structure
 from app.data.household_reference import hpb
+from app.data.ingredient_hierarchy import same_food
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent
 from app.models.recipe import Recipe
 from app.planning import alternatives
@@ -21,7 +22,7 @@ from app.planning.meal_composition import (
 )
 from app.planning.member_coverage import CoverageDish, catalog_can_eat, coverage_failures
 from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day, pool_courses, pool_for
-from app.planning.recipe_quality import dish_family
+from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recipe_similarity import RecipeSimilarity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import (
@@ -59,6 +60,11 @@ def by_weight(grocery: WeeklyGroceryEstimateResponse) -> set[str]:
     """What the list buys by weight. A change keeps it so: the week was planned with a dish that measures
     milk in grams, and a swap keeps buying the milk the other dishes measure in millilitres by weight."""
     return {line.ingredient_name for line in grocery.items if line.unit == "g"}
+
+
+def uses(recipe: Recipe, constraints, names: set[str]) -> bool:
+    """Whether `recipe`, as this household would cook it (`alternatives.lines`), uses any of `names`."""
+    return bool(names & {line.ingredient.normalized_name for line in alternatives.lines(recipe, constraints)})
 
 
 def _at_share(value, share: float):
@@ -783,6 +789,24 @@ class MealPlanReplanningService:
                     used[name].append(item.recipe.title)
         return used
 
+    def entries_using(self, *, plan_id: int, ingredient: str, today: date | None = None) -> list[int]:
+        """The dishes still to cook, from today on, that use `ingredient` under any of its ids or kinds
+        (`same_food`), as cooked for this household: what "I can't buy tofu this week" may change. A cooked,
+        skipped or locked dish cannot change and is not one of them."""
+        plan = self.repository.get(plan_id)
+        if plan is None:
+            return []
+        constraints = WeeklyMealPlanRequest.model_validate(plan.constraints)
+        gone, today = same_food(ingredient), today or local_today()
+        return [
+            item.id
+            for item in plan.entries
+            if item.status == "planned"
+            and not item.is_locked
+            and item.planned_date >= today
+            and uses(item.recipe, constraints, gone)
+        ]
+
     @staticmethod
     def _validate_target(entry: MealPlanEntry, request: MealPlanReplanPreviewRequest) -> None:
         if entry.status == "completed":
@@ -809,6 +833,13 @@ class MealPlanReplanningService:
             plan, entry, constraints, result.recommendations, recipes_by_id, unavailable=request.unavailable_ingredient
         )
         if not candidates:
+            if request.unavailable_ingredient:
+                # Never a dish with what the shop lacks, however little else fits.
+                missing = request.unavailable_ingredient.replace("_", " ")
+                raise MealPlanReplanValidationError(
+                    f"No dish without {missing} can replace {shown_title(entry.recipe.title)} "
+                    "under the current hard constraints."
+                )
             raise MealPlanReplanValidationError(
                 f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
             )
@@ -865,13 +896,11 @@ class MealPlanReplanningService:
             ranked = alike
         else:
             # Nothing described: a dish the week does not serve yet comes first, and one it does only when no other
-            # fits the budget, as the planner fills a week (ADR-0044).
-            served = {
-                dish_family(item.recipe.title)
-                for item in plan.entries
-                if item.id != entry.id and item.status != "skipped"
-            }
-            ranked.sort(key=lambda candidate: dish_family(candidate.recipe.title) in served)
+            # fits the budget, as the planner fills a week (ADR-0044); the fewer times served, and then the fewer
+            # dishes of its kind ("fried rice"), the earlier, as the planner orders weeks (`sameness`).
+            others = [item.recipe.title for item in plan.entries if item.id != entry.id and item.status != "skipped"]
+            families, kinds = Counter(map(dish_family, others)), Counter(map(dish_kind, others))
+            ranked.sort(key=lambda c: (families[dish_family(c.recipe.title)], kinds[dish_kind(c.recipe.title)]))
         return self._fitting(plan, constraints, recipes_by_id, {}, entry, ranked)[0]
 
     def _replacements(
@@ -912,15 +941,10 @@ class MealPlanReplanningService:
                 if equipment_met(getattr(recipes_by_id[item.recipe.id], "equipment", None), household.missing_equipment)
             ]
         if unavailable:
-            candidates = [
-                item
-                for item in candidates
-                if unavailable
-                not in {
-                    ingredient.ingredient.normalized_name
-                    for ingredient in alternatives.lines(recipes_by_id[item.recipe.id], constraints)
-                }
-            ]
+            # Not the ingredient the shop lacks, under any of its ids or kinds (2026-10-26: "tofu" left in the
+            # release's "tofu, firm, cubed"), as this household would cook the dish.
+            gone = same_food(unavailable)
+            candidates = [item for item in candidates if not uses(recipes_by_id[item.recipe.id], constraints, gone)]
         if self._slot_members(constraints, entry):
             # Every meal, composed or not: a swap may not leave a member at the table with nothing to eat
             # (ADR-0071 section 1). `_meal_still_holds` only runs for a dish of a composed meal, so a one-dish
@@ -944,7 +968,38 @@ class MealPlanReplanningService:
         # A dinner takes a dinner dish whenever one fits, as the planner fills a slot (ADR-0044, every meal since
         # ADR-0046): the 2026-10-04 walkthrough swapped in "Fried Rice In A Mug" (a lunch or snack) for a dinner.
         fitting = [item for item in candidates if entry.meal_type in meal_affinity(recipes_by_id[item.recipe.id])]
-        return fitting or candidates
+        candidates = fitting or candidates
+        served, limit = self._repeat_limit(plan, entry, constraints)
+        if limit is None:
+            return candidates
+        # A stated cap always holds. Otherwise a dish comes more often than the week allows only when no other dish
+        # can take the place at all, whatever the budget (2026-10-26: Malaysian Fried Noodles a third time).
+        within = [item for item in candidates if served[dish_family(item.recipe.title)] < limit]
+        return within if within or constraints.max_uses_per_recipe is not None else candidates
+
+    @staticmethod
+    def _repeat_limit(plan: MealPlan, entry: MealPlanEntry, constraints) -> tuple[Counter, int | None]:
+        """How often each dish family of `entry`'s kind (main, vegetable, soup) is served elsewhere in the week, and
+        how often a swap may make one come: a stated cap on uses, else as often as the week's most-served dish of
+        that kind comes now, and twice at least (ADR-0044: a repeat when nothing else fits; ADR-0024 and ADR-0056:
+        not the same dish a third time when the week has none so often). None for a staple (ADR-0070) or a meal
+        the household lets repeat, as the planner counts them."""
+        free = set(constraints.planning_preferences.repeat_allowed_meals)
+
+        def counted(item: MealPlanEntry) -> bool:
+            return (
+                item.status != "skipped"
+                and item.role_id != STAPLE_ROLE
+                and item.meal_type not in free
+                and role_base(item.role_id) == role_base(entry.role_id)
+            )
+
+        if not counted(entry):
+            return Counter(), None
+        week = Counter(dish_family(item.recipe.title) for item in plan.entries if counted(item))
+        served = week - Counter([dish_family(entry.recipe.title)])
+        cap = constraints.max_uses_per_recipe
+        return served, cap if cap is not None else max(2, *week.values())
 
     def _week_grocery(self, plan: MealPlan, constraints, recipes_by_id, swaps: dict[int, int]):
         """The week's shopping with `swaps` (entry id -> recipe id) made."""
