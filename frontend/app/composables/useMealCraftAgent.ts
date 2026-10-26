@@ -50,23 +50,40 @@ export function useMealCraftAgent() {
     return result;
   }
 
+  // A clear confirmation typed in the chat saves the plan or the change as its button does (ADR-0098): the saved
+  // week is fetched, as the button returns it, so the plan panel shows it.
+  async function showSaved(result: AgentSession, current: number) {
+    const ended = result.latest_run?.termination_reason_code;
+    if (!result.plan_id || (ended !== "PLAN_SAVED" && ended !== "REPLAN_APPLIED")) return;
+    const saved = await apiFetch<AgentConfirmation["plan"]>(`${config.public.apiBase}/api/plans/${result.plan_id}`).catch(() => null);
+    if (saved && current === generation) generatedPlan.value = saved;
+  }
+
   async function reply(message: string, planId: number | null = null) {
     if (!session.value) return;
+    const current = generation;
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/messages`,
       { method: "POST", body: { message, plan_id: planId } },
     ));
-    if (result) session.value = result;
+    if (result) {
+      session.value = result;
+      await showSaved(result, current);
+    }
     return result;
   }
 
   async function answerInteraction(answer: AgentInteractionAnswer) {
     if (!session.value) return;
+    const current = generation;
     const result = await run(() => apiFetch<AgentSession>(
       `${config.public.apiBase}/api/agent/sessions/${session.value?.id}/interactions`,
       { method: "POST", body: answer },
     ));
-    if (result) session.value = result;
+    if (result) {
+      session.value = result;
+      await showSaved(result, current);
+    }
     return result;
   }
 

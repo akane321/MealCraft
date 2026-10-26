@@ -292,6 +292,19 @@ budget; the button says "Planning…" until the plan is ready. How long is
 acceptable follows how hard the request is: a simple week comes back quickly, a
 complex one is allowed the longer wait rather than being cut short.
 
+Instead of pressing **Plan my week** (or **Confirm change**, section 5), you can
+type a clear confirmation in the conversation while the plan or change waits
+for it. Only these whole statements count; case, spaces and punctuation do not
+matter: "I confirm. Please proceed.", "I confirm", "Confirm", "Yes, apply it",
+"Apply the changes", "Please proceed", 确认, 我确认, 确认，继续 and 确认应用. One
+of them does exactly what the button does, with the same checks, and the reply
+says the week was planned or changed. Anything else stays ordinary conversation
+and saves nothing: vague agreement ("ok", "sure", "yes", 好, 嗯, 可以), any
+question, and a confirmation that adds a change ("yes but swap Tuesday",
+确认，但是换掉周二). When nothing waits for confirmation, the same statements are
+ordinary conversation too. If what waited changed in the meantime, the reply
+says nothing was saved and why.
+
 MealCraft handles meal planning, recipes, groceries, budgets and explicit
 dietary constraints. Social, unrelated, disease-treatment and
 instruction-bypassing requests receive a scope boundary and do not change
@@ -388,7 +401,8 @@ Ask in the conversation. Two kinds of change are understood:
 Every change is shown as a preview first, with the new dishes and the grocery
 difference. With live pricing this is an estimate: only selected products are
 checked again on confirmation, so the confirmed cost may differ without changing
-the dishes. **Confirm change** applies it; **Keep as is** discards it. A lock's
+the dishes. **Confirm change** applies it, as does a clear confirmation typed in
+the conversation (section 2); **Keep as is** discards it. A lock's
 preview offers **Keep it locked** and **Cancel**. The week's change list dates
 each changed dish by its own day and meal ("Thu dinner"). Cooked
 and locked meals never change, and a stale preview is rejected after another

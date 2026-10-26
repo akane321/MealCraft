@@ -1108,6 +1108,36 @@ with the same revision check as the plan API. `discard` clears the session link
 and draft without modifying the plan. The draft and event link survive reloads
 and container restarts.
 
+### A confirmation typed in the chat (ADR-0098)
+
+The messages endpoint (and a free-text answer through `/interactions`, which is
+sent on as a message) accepts a clear confirmation as the confirm button of what
+waits: with `can_confirm=true` it runs the `/confirm` logic, and with a
+`pending_replan` the `/replan/confirm` logic, through the same service methods
+and every check they make (ADR-0016): the route's household permission, the
+conversation's context version for a plan, and for a change the preview's status
+and base revision and the week being current. The clear set is
+`CLEAR_CONFIRMATIONS` in `backend/app/services/agent.py`: "I confirm. Please
+proceed.", "I confirm", "Confirm", "Yes, apply it", "Apply the changes", "Please
+proceed", 确认, 我确认, 确认，继续 and 确认应用, each matched as the whole message
+after lower-casing and removing spaces and punctuation. A message containing `?`
+or `？` never matches. Anything else, including vague agreement ("ok", "yes",
+好, 可以) and a confirmation that adds a change, is ordinary chat, as is any
+message while nothing waits.
+
+The response is the session, HTTP 200. When the commit succeeds, the message and
+the button's reply are added to the conversation, `plan_id` is set (a plan) or
+`pending_replan` is cleared and the plan's revision moves (a change),
+`last_scope_decision.reason_code` is `CHAT_CONFIRMATION`, and `latest_run` ends
+with `PLAN_SAVED` or `REPLAN_APPLIED`; the home page then loads the saved week
+into the plan panel as after the button. When a check refuses it, nothing is
+saved: the reply begins "Nothing was saved." (没有保存任何改动。) with the reason,
+the reason code is `CHAT_CONFIRMATION_NOT_APPLIED`, and a change preview that is
+stale or gone is cleared, as the home page clears it after a refused button.
+When the planner finds no week, the explanation is added as after the button,
+with HTTP 200 instead of 422. Sending the same message again with the same
+`Idempotency-Key` replays the run rather than saving twice.
+
 ### Orchestration runs, recovery and remaining target
 
 The `backend/app/orchestration/` package supplies the scope gate, structured
