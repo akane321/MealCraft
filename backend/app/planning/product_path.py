@@ -61,6 +61,7 @@ from app.planning.member_coverage import (
     member_limits,
 )
 from app.planning.nutrition_scope import compile_nutrition_targets, nutrition_guard_loss
+from app.planning.product_candidates import ProductMealCandidates
 from app.planning.product_improvement import improve_product_plan
 from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
@@ -926,7 +927,7 @@ class ProductPlanningEngine:
                     distinct_kinds=True,
                     rotate_candidates=True,
                 )
-                meal_beam = MealBeamPlanner(replace(meal_limits, **self.overrides), local_losses=losses)
+                meal_beam = ProductMealCandidates(replace(meal_limits, **self.overrides), local_losses=losses)
                 # The cheapest week is searched by the cost-led search alone (below).
                 search = (
                     MealBeamResult((), 0, False, False, ())
