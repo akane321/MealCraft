@@ -130,6 +130,19 @@ PLANNER_ZH = {
     "Completed meals are historical records and cannot be replanned.": "已经做过的饭菜是历史记录，不能再调整。",
     "This meal is locked and cannot be replanned.": "这顿饭已经锁定，不能调整。",
     "This meal is already cancelled.": "这顿饭已经取消了。",
+    # Why a confirmation was turned down (services/agent.py `confirm`, `confirm_replan`), said in the chat.
+    "This preview is stale because the meal plan has changed. Generate a new preview.": (
+        "这个修改预览已经过时了，因为这周的计划已经变了。请重新让我生成一个预览。"
+    ),
+    "This week was replaced. Open the current week to make changes.": (
+        "这一周已经被新的一周替换了，请打开当前这一周再修改。"
+    ),
+    "Replanning preview not found": "找不到这个修改预览。",
+    "The target meal or proposed recipe no longer exists": "要改的那顿饭或建议的菜已经不存在了。",
+    "There is no replanning preview to confirm.": "现在没有等待确认的修改。",
+    "Resolve the outstanding clarification before generating a plan.": "还有问题没回答，回答之后才能生成计划。",
+    "This conversation changed. Review the latest details first.": "这段对话已经有了变化，请先看一下最新的内容。",
+    "The previous request with this idempotency key did not save a plan.": "上一次同样的请求没有保存计划。",
 }
 # ... and those that carry a value: a meal is named in Chinese, a dish by its title.
 PLANNER_ZH_PATTERNS = (
@@ -461,6 +474,8 @@ REPLIES: dict[str, tuple[str, str]] = {
     ),
     "replanned": ("Done. Your week and shopping list are updated.", "好了，这周的计划和购物清单都更新了。"),
     "discarded": ("OK, your week stays as it is.", "好的，这周保持原样。"),
+    # A clear confirmation typed in the chat (ADR-0098) that its checks turned down.
+    "not_confirmed": ("Nothing was saved. {reason}", "没有保存任何改动。{reason}"),
     "planned": (
         "Here's your week. Click a dinner for the recipe, or ask me to swap anything.",
         "这是你这一周的安排。点一道菜看食谱，想换什么都可以告诉我。",
