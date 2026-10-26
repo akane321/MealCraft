@@ -1017,11 +1017,14 @@ def test_swap_every_dish_asks_for_a_day_with_the_weeks_days_as_choices(composed_
     asked = say(composed_client, session, "swap every dish")
     assert asked["messages"][-1]["content"].startswith("I change one dish at a time")
     days = asked["pending_interaction"]["options"]
-    assert [option["value"] for option in days] == [f"Day {n}" for n in range(1, 8)]
-    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", days[0]["label"])
+    assert len(days) == 7 and re.fullmatch(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", days[0]["label"])
+    # A day chip says the day as it is shown, and the conversation echoes that, not "Day 2" (2026-10-26).
+    assert [option["value"] for option in days] == [option["label"] for option in days]
 
     # Day 2 holds a main and a vegetable: its dishes are the next choices, and one leads to a preview.
     which = tap(composed_client, asked, days[1]["label"])
+    echoed = which["messages"][-2]
+    assert (echoed["role"], echoed["content"]) == ("user", days[1]["label"])
     dishes = [option["label"] for option in which["pending_interaction"]["options"]]
     assert len(dishes) == 2 and which["messages"][-1]["content"].startswith("That day has 2 dishes")
     previewed = tap(composed_client, which, dishes[0])
@@ -1039,8 +1042,10 @@ def test_a_chinese_week_is_planned_and_changed_in_chinese(composed_client):  # n
     every = say(composed_client, session, "所有菜都换掉")
     assert every["messages"][-1]["content"] == "我一次换一道菜，确认之前什么都不会改。先从哪一天开始？"
     first_day = every["pending_interaction"]["options"][0]
-    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", first_day["label"]) and first_day["value"] == "第1天"
+    assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", first_day["label"])
+    assert re.fullmatch(r"周[一二三四五六日] \d{1,2}月\d{1,2}日", first_day["value"])
     which = tap(composed_client, every, first_day["label"])
+    assert which["messages"][-2]["content"] == first_day["value"]
     assert which["messages"][-1]["content"].startswith("那天有 2 道菜")
     dish = which["pending_interaction"]["options"][0]["label"]
     previewed = tap(composed_client, which, dish)

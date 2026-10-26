@@ -1,7 +1,8 @@
 import re
+from collections.abc import Callable
 from datetime import timedelta
 
-from app.agent.replies import language, say, weekday
+from app.agent.replies import language, listed, say, weekday, word
 from app.agent.shape_change import asks_for_shape, drops_a_dish
 from app.core.clock import today as local_today
 from app.planning.recipe_similarity import wanted
@@ -14,21 +15,25 @@ MEAL_WORDS = {
     "lunch": ("lunch", "午饭", "午餐", "中饭"),
     "dinner": ("dinner", "supper", "tonight", "晚饭", "晚餐", "今晚"),
 }
+# An ingredient -> the entry ids of the dishes still to cook that use it.
+Using = Callable[[str], list[int]]
 
 
 class AgentReplanInterpreter:
     """Deterministically translate a short user message into one meal-plan event draft."""
 
+    # A word names the food it says, not one kind of it: "tofu" is `tofu`, which takes `firm_tofu` with it
+    # (`ingredient_hierarchy.same_food`); as `firm_tofu` it left the release's tofu dishes in (2026-10-26).
     _ingredient_aliases = {
         "chicken breast": "chicken_breast",
-        "chicken": "chicken_breast",
+        "chicken": "chicken",
         "鸡胸肉": "chicken_breast",
-        "鸡肉": "chicken_breast",
+        "鸡肉": "chicken",
         "brown rice": "brown_rice",
         "糙米": "brown_rice",
         "firm tofu": "firm_tofu",
-        "tofu": "firm_tofu",
-        "豆腐": "firm_tofu",
+        "tofu": "tofu",
+        "豆腐": "tofu",
         "soba noodle": "soba_noodle",
         "soba": "soba_noodle",
         "荞麦面": "soba_noodle",
@@ -93,7 +98,10 @@ class AgentReplanInterpreter:
         plan: WeeklyMealPlanResponse,
         current: AgentReplanDraft,
         lang: str | None = None,
+        using: Using | None = None,
     ) -> tuple[AgentReplanDraft, list[str]]:
+        """`using` names the dishes still to cook that use an ingredient (`MealPlanReplanningService.entries_using`):
+        "I can't buy tofu this week" changes one of those, not a dish of a day asked for first."""
         text = message.strip()
         lower = text.lower()
         draft = current.model_copy(deep=True)
@@ -123,8 +131,38 @@ class AgentReplanInterpreter:
 
         draft.reason = text
         lang = lang or language(text)
-        question = self._first_question(draft, lang=lang, plan=plan, every=self._every.search(lower) is not None)
+        users = self.using_dishes(draft, plan, using)
+        if len(users) == 1:
+            draft.entry_id, draft.day_index = users[0].entry_id, users[0].day_index
+        elif not users and using is not None and self._unplaced_shortage(draft):
+            # No dish still to cook uses it: there is nothing to change, and nothing is asked.
+            missing = word(draft.unavailable_ingredient, lang)
+            return AgentReplanDraft(), [say("unavailable_unused", lang, ingredient=missing)]
+        question = self._first_question(
+            draft, lang=lang, plan=plan, every=self._every.search(lower) is not None, users=users
+        )
         return draft, [question] if question else []
+
+    @staticmethod
+    def _unplaced_shortage(draft: AgentReplanDraft) -> bool:
+        """An ingredient the shop lacks, named with no dish and no day."""
+        return (
+            draft.event_type == "ITEM_UNAVAILABLE"
+            and draft.unavailable_ingredient is not None
+            and draft.entry_id is None
+            and draft.day_index is None
+        )
+
+    @staticmethod
+    def using_dishes(draft: AgentReplanDraft, plan: WeeklyMealPlanResponse, using: Using | None) -> list:
+        """The dishes still to cook that use the ingredient the shop lacks, on the day named if one was; empty when
+        a dish is already chosen or no ingredient is named."""
+        if using is None or draft.event_type != "ITEM_UNAVAILABLE" or draft.entry_id is not None:
+            return []
+        if draft.unavailable_ingredient is None:
+            return []
+        ids = set(using(draft.unavailable_ingredient))
+        return [dish for dish in plan.days if dish.entry_id in ids and draft.day_index in (None, dish.day_index)]
 
     # "Swap every dish", "change all the meals", 所有菜都换: more than one dish, said at once.
     _every = re.compile(
@@ -138,7 +176,9 @@ class AgentReplanInterpreter:
         return tuple(dict.fromkeys(dish.recipe.title.lower() for dish in plan.days))
 
     @staticmethod
-    def choices(draft: AgentReplanDraft, plan: WeeklyMealPlanResponse | None, lang: str) -> list[tuple[str, str]]:
+    def choices(
+        draft: AgentReplanDraft, plan: WeeklyMealPlanResponse | None, lang: str, using: Using | None = None
+    ) -> list[tuple[str, str]]:
         """What the household can tap to answer the question `parse` asked: (label, what it says)."""
         if draft.event_type is None:
             return [
@@ -149,9 +189,31 @@ class AgentReplanInterpreter:
             ]
         if plan is None:
             return []
+        users = AgentReplanInterpreter.using_dishes(draft, plan, using)
+        if len(users) > 1:
+            return [
+                (
+                    say(
+                        "dish_when",
+                        "en",
+                        title=dish.recipe.title,
+                        day=weekday(dish.planned_date, "en"),
+                        meal=dish.meal_type,
+                    ),
+                    say(
+                        "dish_on_say",
+                        lang,
+                        title=dish.recipe.title,
+                        day=weekday(dish.planned_date, lang),
+                        meal=word(dish.meal_type, lang),
+                    ),
+                )
+                for dish in users
+            ]
         if draft.entry_id is None and draft.day_index is None:
+            # The day is said as it is shown ("Wed 4 Nov"), and so it is echoed, not as "Day 3".
             days = sorted({day.day_index: day.planned_date for day in plan.days}.items())
-            return [(weekday(date_, "en"), say("day_say", lang, index=index)) for index, date_ in days]
+            return [(weekday(date_, "en"), weekday(date_, lang)) for _, date_ in days]
         if draft.entry_id is None:
             titles = [shown_title(day.recipe.title) for day in plan.days if day.day_index == draft.day_index]
             return [(title, say("dish_say", lang, title=title)) for title in dict.fromkeys(titles)]
@@ -232,7 +294,21 @@ class AgentReplanInterpreter:
             return "LOCK_MEAL"
         return None
 
+    # A day as the plan shows it: "Wed 4 Nov", "周三 11月4日" (`replies.weekday`), which a day chip says.
+    _months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+    _day_month = re.compile(rf"(?<!\d)(\d{{1,2}}) ({'|'.join(_months)})[a-z]*|(\d{{1,2}})月(\d{{1,2}})[日号]")
+
     def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
+        dated = self._day_month.search(text)
+        if dated:
+            day, month = (
+                (int(dated[1]), self._months.index(dated[2]) + 1) if dated[1] else (int(dated[4]), int(dated[3]))
+            )
+            found = next(
+                (d.day_index for d in plan.days if (d.planned_date.day, d.planned_date.month) == (day, month)), None
+            )
+            if found is not None:
+                return found
         numbered = re.search(r"(?:day\s*|第\s*)([1-7一二三四五六七])(?:\s*天)?", text)
         if numbered:
             value = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7}.get(
@@ -336,6 +412,10 @@ class AgentReplanInterpreter:
         return None, False
 
     def _ingredient(self, text: str, plan: WeeklyMealPlanResponse) -> str | None:
+        # A dish's title is not what the shop lacks: "...for Friday's Mongolian Tofu And Green Beans: green beans".
+        titles = {title.lower() for dish in plan.days for title in (dish.recipe.title, shown_title(dish.recipe.title))}
+        for title in sorted((title for title in titles if " " in title), key=len, reverse=True):
+            text = text.replace(title, " ")
         for alias in sorted(self._ingredient_aliases, key=len, reverse=True):
             if alias in text:
                 return self._ingredient_aliases[alias]
@@ -347,10 +427,29 @@ class AgentReplanInterpreter:
 
     @staticmethod
     def _first_question(
-        draft: AgentReplanDraft, *, lang: str, plan: WeeklyMealPlanResponse | None = None, every: bool = False
+        draft: AgentReplanDraft,
+        *,
+        lang: str,
+        plan: WeeklyMealPlanResponse | None = None,
+        every: bool = False,
+        users: list | None = None,
     ) -> str | None:
         if draft.event_type is None:
             return say("ask_event", lang)
+        if users and len(users) > 1:
+            # Only the dishes that use it, each with its day and meal.
+            dishes = [
+                say(
+                    "dish_when",
+                    lang,
+                    title=dish.recipe.title,
+                    day=weekday(dish.planned_date, lang),
+                    meal=word(dish.meal_type, lang),
+                )
+                for dish in users
+            ]
+            missing = word(draft.unavailable_ingredient or "", lang)
+            return say("ask_using", lang, count=len(users), ingredient=missing, dishes=listed(dishes, lang))
         if draft.entry_id is None and draft.day_index is not None and plan is not None:
             titles = [day.recipe.title for day in plan.days if day.day_index == draft.day_index]
             return say("ask_dish", lang, count=len(titles), titles=("、" if lang == "zh" else ", ").join(titles))

@@ -83,22 +83,24 @@ class Hierarchy:
 
     # ----- expansion -----
 
-    def children(self) -> dict[str, set[str]]:
+    def children(self, relations: Iterable[str] = RELATIONS) -> dict[str, set[str]]:
         down: dict[str, set[str]] = defaultdict(set)
         for child, entry in self.entries.items():
             for parent in entry.get("parents", []):
+                if parent["relation"] not in relations:
+                    continue
                 down[parent["id"]].add(child)
                 if parent["relation"] == "same":
                     down[child].add(parent["id"])  # the same food, whichever id the user named
         return down
 
-    def expand(self, excluded: Iterable[str]) -> set[str]:
-        """Everything excluding these ids excludes: themselves and all that belong to them.
+    def expand(self, excluded: Iterable[str], relations: Iterable[str] = RELATIONS) -> set[str]:
+        """Everything excluding these ids excludes: themselves and all that belong to them by `relations`.
 
         It never climbs: excluding `cherry_tomato` does not exclude `tomato`. Only a
         `same` link is followed both ways, because it is one food under two ids.
         """
-        down = self.children()
+        down = self.children(relations)
         seen: set[str] = set()
         stack = list(excluded)
         while stack:
@@ -342,6 +344,13 @@ def runtime() -> Hierarchy:
 def expand_exclusions(excluded: Iterable[str]) -> list[str]:
     """A household's exclusions with everything that belongs to them, for the planner to match exactly."""
     return sorted(runtime().expand(excluded))
+
+
+def same_food(ingredient_id: str) -> set[str]:
+    """What an ingredient the shop does not have takes with it: the same food under another id and every kind of
+    it ("tofu": the release's `tofu` and the curated `firm_tofu`). Not what is made from it or may contain it,
+    which is another product on the shelf: ketchup is there when the tomatoes are not."""
+    return runtime().expand([ingredient_id], ("same", "variety"))
 
 
 if __name__ == "__main__":
