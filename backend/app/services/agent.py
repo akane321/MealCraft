@@ -90,7 +90,9 @@ from app.services.ingredient_substitutions import (
 )
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.replanning import (
+    MealPlanReplanConflictError,
     MealPlanReplanningService,
+    MealPlanReplanNotFoundError,
     MealPlanReplanValidationError,
 )
 
@@ -135,6 +137,52 @@ def keep_shape_answer(message: str) -> bool | None:
     said = [part for part in parts if part not in KEEP_BARE] or parts
     answers = {True if part in KEEP_YES else False if part in KEEP_NO else None for part in said}
     return answers.pop() if len(answers) == 1 else None
+
+
+def _confirmation_words(message: str) -> str:
+    """A message as the clear-confirmation set is matched: lower case, without spaces and common punctuation."""
+    return re.sub(r"[\s,.;:!~，。；：！、～]+", "", message.lower())
+
+
+# The clear confirmations (ADR-0098): typed in the chat while a plan or a change to the week waits for confirmation,
+# one of these whole statements does what that preview's confirm button does, through the same checks (ADR-0016).
+# Matched after case, spaces and the common punctuation `_confirmation_words` removes (commas, full stops, colons,
+# semicolons, exclamation marks, tildes), so "confirm!" and "确认继续" count. Other marks (dashes, ellipses, quotes)
+# stay, so such a message is ordinary chat, as is anything else, and any of these when nothing waits: vague
+# agreement ("ok", "sure", "yes", "好", "嗯", "可以"), any question, and a confirmation that adds a change ("yes but
+# swap Tuesday", "确认，但是换掉周二"). Kept small on purpose; the user guide lists the same statements.
+CLEAR_CONFIRMATIONS = frozenset(
+    _confirmation_words(statement)
+    for statement in (
+        # The evaluation adapter's fixed confirmation (ADR-0092 item 2, ADR-0098 item 4): if those bytes change, this
+        # set changes with them; tests/test_agent_chat_confirmation.py checks the adapter's message is in it.
+        "I confirm. Please proceed.",
+        *("I confirm", "Confirm", "Yes, apply it", "Apply the changes", "Please proceed"),
+        *("确认", "我确认", "确认，继续", "确认应用"),
+    )
+)
+
+
+def clear_confirmation(message: str) -> bool:
+    """Whether the whole message is one of CLEAR_CONFIRMATIONS; a question never is."""
+    return not re.search(r"[?？]", message) and _confirmation_words(message) in CLEAR_CONFIRMATIONS
+
+
+def _change_waits(snapshot: AgentSessionResponse) -> bool:
+    """Whether a change to the week waits for confirmation: the session links a preview not yet applied."""
+    return snapshot.pending_replan is not None and snapshot.pending_replan.status == "previewed"
+
+
+def _chat_confirmation(message: str, intent: str, *, applied: bool) -> ScopeDecision:
+    """The scope of a clear confirmation typed in the chat: an action that was applied, or one turned down."""
+    return ScopeDecision(
+        scope_class=ScopeClass.DOMAIN_ACTION,
+        detected_intents=[intent],
+        supported_segments=[message],
+        should_mutate_state=applied,
+        should_call_tools=True,
+        reason_code="CHAT_CONFIRMATION" if applied else "CHAT_CONFIRMATION_NOT_APPLIED",
+    )
 
 
 class AgentSessionNotFoundError(LookupError):
@@ -576,6 +624,9 @@ class AgentSessionService:
         if plan_id is not None and agent_session.plan_id != plan_id:
             agent_session = self._take_plan(agent_session, plan_id)
         snapshot = self._to_response(agent_session)
+        if (snapshot.can_confirm or _change_waits(snapshot)) and clear_confirmation(message):
+            self.repository.end_read_transaction()
+            return self._confirm_in_chat(snapshot, message, idempotency_key=idempotency_key)
         started = self._start_run(
             agent_session_id=session_id,
             intent="replan_meal" if snapshot.plan_id is not None else "create_plan",
@@ -1377,12 +1428,66 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
 
+    def _confirm_in_chat(
+        self, snapshot: AgentSessionResponse, message: str, *, idempotency_key: str | None
+    ) -> AgentSessionResponse:
+        """A clear confirmation typed while a preview waits (ADR-0098): that preview's confirm button, `confirm` or
+        `confirm_replan` with every check of theirs (ADR-0016), with the household's words before the reply. One the
+        checks turn down saves nothing and says why in the chat."""
+        replan = _change_waits(snapshot)
+        try:
+            if replan:
+                return self.confirm_replan(snapshot.id, idempotency_key=idempotency_key, said=message).session
+            return self.confirm(snapshot.id, idempotency_key=idempotency_key, said=message).session
+        except WeeklyPlanSelectionError:
+            # No week was planned, and `confirm` already said why in the conversation, after the message.
+            explained = self.get(snapshot.id)
+            if explained is None:
+                raise AgentSessionNotFoundError from None
+            return explained
+        except (AgentSessionNotReadyError, MealPlanReplanConflictError, MealPlanReplanNotFoundError) as error:
+            lang = language(message, snapshot.messages)
+            reason = str(error) if language(str(error)) == lang else planner_message(str(error), lang)
+            reply = say("not_confirmed", lang, reason=reason)
+            decision = _chat_confirmation(message, "confirm_replan" if replan else "confirm_plan", applied=False)
+            self.repository.end_read_transaction()  # read the session as it is now, not as this request loaded it
+            current = self.get(snapshot.id)
+            attempted = snapshot.pending_replan.id if replan and snapshot.pending_replan is not None else None
+            if (
+                replan
+                and not isinstance(error, AgentSessionNotReadyError)
+                and current is not None
+                and current.pending_replan is not None
+                and current.pending_replan.id == attempted
+            ):
+                # The preview this tried, stale or gone, can never be confirmed: its card goes, as after a refused
+                # button. One the session moved on from meanwhile (a confirmation that got there first left its
+                # question, or a new preview) is kept. ponytail: read then write, not one guarded update; a turn
+                # landing in between could still be cleared.
+                updated = self.repository.finish_replan(
+                    snapshot.id, assistant_message=reply, user_message=message, scope_decision=decision
+                )
+            else:
+                updated = self.repository.append_bounded_exchange(
+                    snapshot.id,
+                    user_message=message,
+                    assistant_message=reply,
+                    scope_decision=decision,
+                    pending_interaction=current.pending_interaction if current is not None else None,
+                )
+            if updated is None:
+                raise AgentSessionNotFoundError from error
+            return self._to_response(updated)
+
     def confirm(
         self,
         session_id: int,
         *,
         idempotency_key: str | None = None,
+        said: str | None = None,
     ) -> AgentConfirmationResponse:
+        """Plan and save the week the session is ready for. `said`: the clear confirmation typed in the chat that
+        asked for it (ADR-0098), recorded before the reply; the checks are the button's own."""
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
@@ -1394,7 +1499,13 @@ class AgentSessionService:
         started = self._start_run(
             agent_session_id=session_id,
             intent="create_plan",
-            input_payload={"operation": "confirm_plan", "context_version": snapshot.context_version},
+            # A typed confirmation's run reads as its message's does (`reply`), so resending it with the same key
+            # replays this run once nothing waits any more, instead of reading as another request.
+            input_payload=(
+                {"message": said}
+                if said is not None
+                else {"operation": "confirm_plan", "context_version": snapshot.context_version}
+            ),
             context_version=snapshot.context_version,
             idempotency_key=idempotency_key,
         )
@@ -1416,7 +1527,7 @@ class AgentSessionService:
             raise AgentSessionNotReadyError("Resolve the outstanding clarification before generating a plan.")
 
         constraints = snapshot.constraints
-        lang = language("", snapshot.messages)
+        lang = language(said or "", snapshot.messages)
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
         self._require_context_version(session_id, snapshot.context_version, run)
         request = self._plan_request(constraints)
@@ -1437,7 +1548,7 @@ class AgentSessionService:
                 )
             self._fail_run(run, error)
             if isinstance(error, WeeklyPlanSelectionError):
-                raise WeeklyPlanSelectionError(self._explain_unplanned(snapshot, error, lang)) from error
+                raise WeeklyPlanSelectionError(self._explain_unplanned(snapshot, error, lang, said=said)) from error
             raise
         run = self.run_lifecycle.record_tool(
             run,
@@ -1449,7 +1560,13 @@ class AgentSessionService:
             provider_mode=constraints.pricing_mode,
             check_deadline=False,
         )
-        updated = self.repository.mark_planned(session_id, plan_id=plan.id, assistant_message=say("planned", lang))
+        updated = self.repository.mark_planned(
+            session_id,
+            plan_id=plan.id,
+            assistant_message=say("planned", lang),
+            user_message=said,
+            scope_decision=_chat_confirmation(said, "confirm_plan", applied=True) if said is not None else None,
+        )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
             raise AgentSessionNotFoundError
@@ -1481,7 +1598,9 @@ class AgentSessionService:
         session_id: int,
         *,
         idempotency_key: str | None = None,
+        said: str | None = None,
     ) -> AgentReplanConfirmationResponse:
+        """Apply the change the session previews. `said`: as for `confirm`."""
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
@@ -1499,7 +1618,11 @@ class AgentSessionService:
         started = self._start_run(
             agent_session_id=session_id,
             intent="replan_meal",
-            input_payload={"operation": "confirm_replan", "plan_id": plan_id, "event_id": event_id},
+            input_payload=(
+                {"message": said}  # as in `confirm`
+                if said is not None
+                else {"operation": "confirm_replan", "plan_id": plan_id, "event_id": event_id}
+            ),
             context_version=snapshot.context_version,
             plan_revision=base_revision,
             idempotency_key=idempotency_key,
@@ -1543,7 +1666,7 @@ class AgentSessionService:
             and result.event.shape_change.scope == "week"
             and self.keep_plan_shape is not None
         )
-        lang = language("", snapshot.messages)
+        lang = language(said or "", snapshot.messages)
         question = say("ask_keep", lang)
         done = say("replanned", lang)
         updated = self.repository.finish_replan(
@@ -1564,6 +1687,8 @@ class AgentSessionService:
                 if ask_keep
                 else None
             ),
+            user_message=said,
+            scope_decision=_chat_confirmation(said, "confirm_replan", applied=True) if said is not None else None,
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
@@ -1629,7 +1754,9 @@ class AgentSessionService:
         self.run_lifecycle.transition(run, AgentRunStatus.COMMITTED, termination_reason_code="REPLAN_DISCARDED")
         return self.get(session_id) or self._to_response(updated)
 
-    def _explain_unplanned(self, snapshot: AgentSessionResponse, error: Exception, lang: str) -> str:
+    def _explain_unplanned(
+        self, snapshot: AgentSessionResponse, error: Exception, lang: str, *, said: str | None = None
+    ) -> str:
         """Say in the conversation why no week was planned, from the planner's trace, with what to change.
 
         The Plan card gives way to the explanation (the session collects again), unless the same request
@@ -1653,6 +1780,8 @@ class AgentSessionService:
                 context_version=context_version,
                 lang=lang,
             ),
+            user_message=said,
+            scope_decision=_chat_confirmation(said, "confirm_plan", applied=False) if said is not None else None,
         )
         return explained.text
 

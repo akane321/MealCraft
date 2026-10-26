@@ -186,7 +186,15 @@ class AgentSessionRepository:
         self.session.commit()
         return self.get(session_id)
 
-    def mark_planned(self, session_id: int, *, plan_id: int, assistant_message: str) -> AgentSession | None:
+    def mark_planned(
+        self,
+        session_id: int,
+        *,
+        plan_id: int,
+        assistant_message: str,
+        user_message: str | None = None,
+        scope_decision: ScopeDecision | None = None,
+    ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
             return None
@@ -195,7 +203,7 @@ class AgentSessionRepository:
         agent_session.clarification_questions = []
         agent_session.missing_fields = []
         agent_session.pending_interaction = None
-        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
+        self._reply(agent_session, assistant_message, user_message, scope_decision)
         self.session.commit()
         return self.get(session_id)
 
@@ -208,6 +216,8 @@ class AgentSessionRepository:
         missing_fields: list[str],
         clarification_questions: list[str],
         pending_interaction: InteractionRequest | None,
+        user_message: str | None = None,
+        scope_decision: ScopeDecision | None = None,
     ) -> AgentSession | None:
         """A week the planner could not plan: why, in the conversation, and the session collecting again."""
         agent_session = self.get(session_id)
@@ -217,7 +227,7 @@ class AgentSessionRepository:
         agent_session.missing_fields = missing_fields
         agent_session.clarification_questions = clarification_questions
         agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
-        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
+        self._reply(agent_session, assistant_message, user_message, scope_decision)
         self.session.commit()
         return self.get(session_id)
 
@@ -280,7 +290,13 @@ class AgentSessionRepository:
         return self.get(session_id)
 
     def finish_replan(
-        self, session_id: int, *, assistant_message: str, pending_interaction: dict | None = None
+        self,
+        session_id: int,
+        *,
+        assistant_message: str,
+        pending_interaction: dict | None = None,
+        user_message: str | None = None,
+        scope_decision: ScopeDecision | None = None,
     ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
@@ -290,9 +306,23 @@ class AgentSessionRepository:
         agent_session.missing_fields = []
         agent_session.clarification_questions = []
         agent_session.pending_interaction = pending_interaction
-        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
+        self._reply(agent_session, assistant_message, user_message, scope_decision)
         self.session.commit()
         return self.get(session_id)
+
+    @staticmethod
+    def _reply(
+        agent_session: AgentSession,
+        assistant_message: str,
+        user_message: str | None,
+        scope_decision: ScopeDecision | None,
+    ) -> None:
+        """The reply to a button, or to the household's words when they were typed (a confirmation, ADR-0098)."""
+        if user_message is not None:
+            agent_session.messages.append(AgentMessage(role="user", content=user_message))
+        if scope_decision is not None:
+            agent_session.last_scope_decision = scope_decision.model_dump(mode="json")
+        agent_session.messages.append(AgentMessage(role="assistant", content=assistant_message))
 
     def end_read_transaction(self) -> None:
         self.session.rollback()
