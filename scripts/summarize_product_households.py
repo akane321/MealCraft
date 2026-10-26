@@ -9,14 +9,18 @@ def summarize(folder):
     parts = [json.loads((folder / f"steps-{n}.json").read_text(encoding="utf-8")) for n in (0, 50)]
     if parts[0]["commit"] != parts[1]["commit"]:
         raise ValueError("Comparison needs the same source commit")
+    if parts[0].get("profiling_enabled", False) != parts[1].get("profiling_enabled", False):
+        raise ValueError("Comparison needs the same profiling setting")
     lines = [
         "# Product improvement: full-default household comparison",
         "",
-        "Five developer households, fixture prices, one run per condition. No held-out data or model calls.",
+        f"{len(parts[0]['report']['cases'])} developer households, fixture prices, one run per condition. "
+        "No held-out data or model calls.",
         "Each condition uses the same product defaults; the only change is enabling 50 annealing proposals.",
         "Distinct dishes below count recipe IDs excluding staples, not near-duplicate or member-mean groups.",
         "Timing covers plan generation and persistence, not HTTP, language-model parsing or live retailer calls.",
         "These single measurements are diagnostic; there is no optimality or statistically significant speed claim.",
+        "If profiling is enabled in the raw records, it adds overhead; stage times overlap and cannot be summed.",
         "",
         "| Household | SA steps | Planned | Checks pass | Distinct dishes | Worst repeat | Checkout S$ | Seconds |",
         "| --- | --- | --- | --- | --- | --- | --- | --- |",
