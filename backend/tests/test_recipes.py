@@ -1333,8 +1333,15 @@ def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
     )
 
     class FakeExtractor:
-        def __init__(self, **_kwargs):
-            pass
+        def __init__(self, **kwargs):
+            assert kwargs["max_output_tokens"] == 3000
+            self.last_usage = {
+                "model": "test",
+                "input_tokens": 120,
+                "output_tokens": 45,
+                "total_tokens": 165,
+                "web_search_calls": 1,
+            }
 
         def search_and_extract(self, query):
             assert query == "ginger tofu dinner"
@@ -1390,6 +1397,13 @@ def test_external_recipe_search_route_reviews_and_persists_candidate_privately(
             "household_admission_review",
             "private_persistence",
         ]
+        assert detail.trace["stages"][0]["api_usage"] == {
+            "model": "test",
+            "input_tokens": 120,
+            "output_tokens": 45,
+            "total_tokens": 165,
+            "web_search_calls": 1,
+        }
         assert detail.validation["admitted"] is True
     finally:
         database_generator.close()
@@ -1480,6 +1494,84 @@ def test_external_recipe_search_failure_is_saved_as_an_operations_trace(
         assert detail is not None
         assert detail.trace["stages"][0]["stage"] == "search_and_extract"
         assert detail.trace["stages"][0]["status"] == "failed"
+    finally:
+        database_generator.close()
+
+
+@pytest.mark.parametrize(
+    ("provider_error", "expected_status", "expected_reason", "expected_type", "expected_code"),
+    [
+        (TimeoutError("provider timed out"), 504, "provider_timeout", "TimeoutError", None),
+        (None, 502, "provider_rejected_request", "APIStatusError", "invalid_api_key"),
+    ],
+)
+def test_external_recipe_provider_errors_are_logged_and_saved_with_diagnostics(
+    recipe_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    provider_error,
+    expected_status,
+    expected_reason,
+    expected_type,
+    expected_code,
+) -> None:
+    import logging
+
+    import httpx
+    from openai import APIStatusError
+
+    from app.api.routes import external_recipes
+    from app.models.platform import OperationRun
+
+    if provider_error is None:
+        request = httpx.Request("POST", "https://api.openai.com/v1/responses")
+        response = httpx.Response(401, request=request, headers={"x-request-id": "req-test-diagnostic"})
+        provider_error = APIStatusError(
+            "invalid_api_key: test diagnostic",
+            response=response,
+            body={"error": {"code": expected_code}},
+        )
+
+    class FailingExtractor:
+        last_usage = None
+
+        def __init__(self, **kwargs):
+            pass
+
+        def search_and_extract(self, query):
+            raise provider_error
+
+    monkeypatch.setattr(external_recipes, "OpenAIRecipeSearchExtractor", FailingExtractor)
+    monkeypatch.setitem(
+        app.dependency_overrides,
+        get_settings,
+        lambda: config.Settings(
+            agent_parser_provider="openai",
+            openai_api_key=SecretStr("test-key"),
+            openai_model="test-model",
+        ),
+    )
+    with caplog.at_level(logging.WARNING, logger=external_recipes.__name__):
+        response = recipe_client.post(
+            "/api/external-recipes/search-and-intake", json={"query": "ginger tofu", "requires_halal": False}
+        )
+
+    assert response.status_code == expected_status
+    assert response.json()["detail"]["reason"] == expected_reason
+    diagnostic_log = next(record.provider_error for record in caplog.records if hasattr(record, "provider_error"))
+    assert diagnostic_log["exception_type"] == expected_type
+    assert diagnostic_log["error_code"] == expected_code
+    if expected_type == "APIStatusError":
+        assert diagnostic_log["status_code"] == 401
+        assert diagnostic_log["request_id"] == "req-test-diagnostic"
+
+    database_generator = app.dependency_overrides[get_db_session]()
+    database = next(database_generator)
+    try:
+        run = database.scalars(select(OperationRun).where(OperationRun.run_type == "external_recipe_intake")).one()
+        assert run.error_code == expected_reason
+        provider_details = run.artifact_references[0]["data"]["stages"][0]["provider_error"]
+        assert provider_details == diagnostic_log
     finally:
         database_generator.close()
 
