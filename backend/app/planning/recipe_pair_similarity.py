@@ -4,6 +4,7 @@ Keep the three signals separate until a developer-calibrated policy defines near
 duplicates. The request-to-recipe matcher serves a different purpose.
 """
 
+import re
 from dataclasses import dataclass
 from math import sqrt
 
@@ -18,6 +19,7 @@ class RecipePairSignals:
     ingredient_overlap: float | None
     vector_cosine: float | None
     vector_status: str
+    shared_preparation: str | None = None
 
 
 @dataclass(frozen=True)
@@ -25,6 +27,23 @@ class _Features:
     title_words: frozenset[str]
     ingredients: frozenset[str]
     vector: tuple[float, ...] | None
+    preparation: str | None
+
+
+def _preparation(title: str) -> str | None:
+    words = re.sub(r"[^a-z]+", " ", title.lower()).split()
+    # A named fried-rice preparation, not a soup/cake containing fried rice.
+    if "fried rice" in " ".join(words) and not set(words) & {
+        "soup",
+        "salad",
+        "cake",
+        "cakes",
+        "balls",
+        "parcels",
+        "stuffed",
+    }:
+        return "fried_rice"
+    return None
 
 
 def _overlap(left: frozenset[str], right: frozenset[str]) -> float | None:
@@ -78,6 +97,7 @@ class RecipePairIndex:
                     if line.ingredient.normalized_name
                 ),
                 vector,
+                _preparation(recipe.title),
             )
 
     def compare(self, left_key: str, right_key: str) -> RecipePairSignals:
@@ -94,4 +114,5 @@ class RecipePairIndex:
             _overlap(left.ingredients, right.ingredients),
             cosine,
             status,
+            left.preparation if left.preparation == right.preparation else None,
         )
