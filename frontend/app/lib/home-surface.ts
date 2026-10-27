@@ -99,16 +99,38 @@ function priceKind(line: GroceryLineEstimate): PriceKind {
 
 const priced = (estimate: WeeklyGroceryEstimate) => estimate.items.filter(line => line.product && line.packages_required > 0);
 
+/** How many lines to buy have a live, saved and sample price, by priceKind: the one count every price note uses. */
+export function priceCounts(estimate: WeeklyGroceryEstimate): Record<PriceKind, number> {
+  const counts: Record<PriceKind, number> = { live: 0, saved: 0, sample: 0 };
+  for (const line of priced(estimate)) counts[priceKind(line)] += 1;
+  return counts;
+}
+
+/** A saved (not freshly checked) FairPrice price: the lines labelled "Saved FairPrice price", which the list shows in amber. */
+export function isSavedPrice(line: GroceryLineEstimate): boolean {
+  return Boolean(line.product) && priceKind(line) === "saved";
+}
+
+/**
+ * The price note's dot: green when every price is FairPrice's (live or saved), amber when some are samples or when a live
+ * check got no live price at all (the note then says "Live prices not available"), grey when every price is a sample.
+ */
+export function priceTone(estimate: WeeklyGroceryEstimate): "ok" | "warn" | "" {
+  const { live, saved, sample } = priceCounts(estimate);
+  if (!(live + saved)) return "";
+  const checked = priced(estimate).some(line => line.evidence?.checked_at);
+  return sample || (checked && !live) ? "warn" : "ok";
+}
+
 /** "Prices checked at 15:40 · 15 live · 19 saved · 3 sample", from the evidence of the lines to buy; null if no live check ran. */
 function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
-  const lines = priced(estimate);
-  const checked = lines.map(line => line.evidence?.checked_at).filter((value): value is string => !!value).sort().at(-1);
+  const checked = priced(estimate).map(line => line.evidence?.checked_at).filter((value): value is string => !!value).sort().at(-1);
   if (!checked) return null;
-  const count = (kind: PriceKind) => lines.filter(line => priceKind(line) === kind).length;
+  const count = priceCounts(estimate);
   const time = new Date(checked).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Singapore" });
-  const mix = ([[count("live"), "live"], [count("saved"), "saved"], [count("sample"), "sample"]] as const)
+  const mix = ([[count.live, "live"], [count.saved, "saved"], [count.sample, "sample"]] as const)
     .filter(([n]) => n > 0).map(([n, word]) => `${n} ${word}`).join(" · ");
-  return `${count("live") ? `Prices checked at ${time}` : `Live prices not available at ${time}`} · ${mix}`;
+  return `${count.live ? `Prices checked at ${time}` : `Live prices not available at ${time}`} · ${mix}`;
 }
 
 /**
@@ -125,7 +147,7 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const checked = priceCheckLine(estimate);
   if (checked) return checked;
   const lines = priced(estimate);
-  const samples = lines.filter(line => priceKind(line) === "sample").length;
+  const samples = priceCounts(estimate).sample;
   if (!lines.length || samples === lines.length) return "Sample prices";
   if (samples) return "FairPrice and sample prices — source shown on each item";
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
