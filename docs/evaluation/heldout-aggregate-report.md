@@ -21,9 +21,16 @@ and rates for the whole set, each category, each language, each source and each 
   and remaining counts are the same in every run by construction.
 - **Output.** Sorted-key JSON with an LF ending, byte-identical for the same records in any order.
 
-Not covered: a cell with very few cases can identify a single question; whether to suppress small cells is not
-decided here. The report does not choose failure cases for analysis, load the sealed file, run any system or
-decide which cases are void.
+- **Small cells (proposed, `ADR-0100` item 5).** `aggregate(records, min_cell_n=5)` withholds what could identify a
+  question. A cell with fewer than `min_cell_n` remaining cases (voided cases do not count) hides the cell breakdown of
+  its whole category, because the other cells of that category would let a reader subtract the small cell from the
+  category total; the category is listed under `withheld_categories`. A category, language or source total below the
+  minimum shows `withheld` instead of figures. The default is no withholding. The threshold of 5 is a proposal the owner
+  can change, and this lowers the risk of identifying a question without proving it away; a disclosure review of the
+  actual cell sizes is still needed before a formal report leaves the sealed side.
+
+Not covered: the report does not choose failure cases for analysis, load the sealed file, run any system or decide
+which cases are void.
 
 By default the coverage checks are relative to the supplied records. `aggregate(records, expected)` also takes an
 `ExpectedManifest` from the sealed side, made of aggregate counts only: the expected systems, the number of runs per
@@ -31,8 +38,7 @@ system, the declared number of cases in each category-language-source cell (void
 number of voided cases. A different system set, a missing run, a different cell count, an unexpected cell or a
 different void count raises an error, so an omission shared by every system and run is caught. The manifest holds no
 case reference or text. A wholly failed run must still supply one `missing`, `timeout` or `error` outcome for every
-expected case. Without a manifest this module is not a completeness gate, and it is still not a disclosure gate:
-small-cell policy remains a prerequisite for formal use.
+expected case. Without a manifest this module is not a completeness gate.
 
 ```text
 PYTHONPATH=backend python -m pytest backend/tests/test_heldout_report.py -p no:cacheprovider --basetemp <new-temporary-directory>
