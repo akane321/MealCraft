@@ -238,6 +238,7 @@ def score(rows: list[dict], sample: dict) -> dict:
 def markdown(result: dict, sample: dict, digest: str) -> str:
     rate = result["rate"]
     met = "n/a" if rate is None else ("met" if rate >= result["target"] else "not met")
+    marks = sum(counts["recipes"] for counts in result["errors_by_check"].values())
     lines = [
         f"# Manual check of {sample['size']} recipes of release {sample['release']}",
         "",
@@ -252,9 +253,10 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         "",
         "## Errors by check",
         "",
-        "A recipe that fails two checks counts under both.",
+        f"A recipe that fails two checks counts under both, so the shares are of the {marks} 错 marks on "
+        f"{len(result['problems'])} wrong recipes, not of the recipes.",
         "",
-        "| Check | Recipes | Share of errors |",
+        f"| Check | Recipes | Share of the {marks} 错 marks |",
         "| --- | ---: | ---: |",
     ]
     for name, counts in result["errors_by_check"].items():
@@ -288,7 +290,9 @@ def main() -> None:
     if args.command == "draw":
         version, recipes = release_recipes()
         sample = draw(version, recipes)
-        (OUT / "sample.json").write_text(json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        (OUT / "sample.json").write_text(
+            json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+        )
         workbook(sample, {recipe["recipe_id"]: recipe for recipe in recipes}).save(OUT / "check.xlsx")
         print(json.dumps(sample["by_course"], ensure_ascii=False))
         return

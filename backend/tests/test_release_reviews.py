@@ -101,6 +101,30 @@ def test_allergen_agreement_weights_strata_and_classifies_errors() -> None:
     assert "| `milk` | 90 | 2 | 1 | 50.0% |" in text
 
 
+def test_an_either_or_allergen_the_reviewer_drops_is_a_rule_disagreement_not_a_catalog_error() -> None:
+    recipe = {
+        "ingredients": [
+            {"original_text": "1 tsp fish sauce or 1 tsp soy sauce", "allergens": ["fish"]},
+            {"original_text": "2 cups flour", "allergens": ["gluten"]},
+            {"original_text": "1 cup milk", "allergens": ["milk"]},
+            {"original_text": "butter or margarine", "allergens": ["milk"]},
+        ]
+    }
+    assert allergens.either_or(recipe) == ["fish"]
+    sample, ai = _allergen_sample()
+    sample["recipes"][0]["allergens"] = ["fish", "milk"]
+    rows = [_row("A", "milk"), _row("B", "[]"), _row("C", "[]"), _row("D", "[]")]
+    result = allergens.score(rows, sample, ai, {"A": ["fish"], "B": ["fish"]})
+    assert (result["checked"], result["agree"]) == (4, 2)
+    assert [row["id"] for row in result["either_or_disagreements"]] == ["A"]
+    # B dropped milk, which is not either-or: a catalog error.
+    assert [row["id"] for row in result["corrections"]] == ["B"]
+    assert result["extra_in_catalog"] == {"milk": 1}
+    assert [row["number"] for row in result["ai_candidates"]["differs"]] == [2, 3, 4]
+    text = allergens.markdown(result, sample, "h")
+    assert "## Either-or disagreements (1)" in text and "differ only on rows 2 (B), 3 (C), 4 (D)" in text
+
+
 def test_only_checked_readable_allergen_rows_count() -> None:
     sample, ai = _allergen_sample()
     rows = [_row("A", "milk", checked=False), _row("B", None), _row("C", "nuts"), _row("D", "null")]

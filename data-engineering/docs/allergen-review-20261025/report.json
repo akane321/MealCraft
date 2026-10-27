@@ -151,7 +151,6 @@
   "gluten": 1
  },
  "extra_in_catalog": {
-  "fish": 2,
   "gluten_candidate": 1
  },
  "corrections": [
@@ -171,7 +170,9 @@
     "gluten_candidate"
    ],
    "note": "用户确认1A：flour tortillas确定gluten；步骤中sour cream作为上桌建议，若实际使用另含milk。"
-  },
+  }
+ ],
+ "either_or_disagreements": [
   {
    "id": "RCP2_926AF43F7266",
    "title": "Crock Pot Thai Beef",
@@ -182,8 +183,7 @@
    "confirmed": [
     "gluten"
    ],
-   "missed": [],
-   "extra": [
+   "either_or": [
     "fish"
    ],
    "note": "用户确认：普通面粉确定含gluten；鱼露或酱油二选一，不把fish和soy同时作为确定标签。"
@@ -198,8 +198,7 @@
    "confirmed": [
     "molluscs"
    ],
-   "missed": [],
-   "extra": [
+   "either_or": [
     "fish"
    ],
    "note": "用户确认：贻贝确定含molluscs；鱼露或酱油二选一，其他过敏原按实际调料判定。"
@@ -211,6 +210,18 @@
   "wilson95": [
    0.865,
    0.989
+  ],
+  "differs": [
+   {
+    "number": 34,
+    "id": "RCP2_926AF43F7266",
+    "title": "Crock Pot Thai Beef"
+   },
+   {
+    "number": 41,
+    "id": "RCP2_C5720A5B4A5A",
+    "title": "Steamed Thai Mussels"
+   }
   ]
  }
 }

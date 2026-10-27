@@ -9,8 +9,9 @@ seen at least MINIMUM times and the misses on "no allergen" recipes are measured
 是 count. A recipe agrees when the confirmed set equals the catalog's; each stratum carries a Wilson 95% interval and
 the overall agreement weights each stratum by its share of the release, since rare allergens are over-sampled.
 `ai_candidates.json` holds Claude's candidates, read from the ingredient text and steps only; they are scored against
-the reviewer the same way and never stand in for the reviewer. Offline, with a Python that has openpyxl, from the
-repository root.
+the reviewer the same way and never stand in for the reviewer. A recipe where the reviewer only dropped allergens that
+come from "A or B" ingredient lines (the catalog takes the first of the two) is a disagreement on the rule, not a
+catalog error, and is listed apart from the errors. Offline, with a Python that has openpyxl, from the repository root.
 """
 
 from __future__ import annotations
@@ -43,6 +44,7 @@ SIZE = 50
 MINIMUM = 3
 SHEET = "复核"
 CONFIRMED = "你确认的过敏原"
+EITHER_OR = re.compile(r"\bor\b", re.IGNORECASE)
 CODES = (
     "gluten",
     "gluten_candidate",
@@ -101,6 +103,15 @@ def draw(version: str, recipes: list[dict]) -> dict:
         "strata": {name: {"recipes": len(strata[name]), "drawn": plan[name]} for name in sorted(plan)},
         "recipes": sorted(picked, key=lambda r: r["id"]),
     }
+
+
+def either_or(recipe: dict) -> list[str]:
+    """The recipe's allergens that come only from "A or B" ingredient lines."""
+    sources = defaultdict(list)
+    for line in recipe["ingredients"]:
+        for allergen in line["allergens"]:
+            sources[allergen].append(bool(EITHER_OR.search(line["original_text"])))
+    return sorted(allergen for allergen, lines in sources.items() if all(lines))
 
 
 def shown(values) -> str:
@@ -216,14 +227,17 @@ def read_filled(path: Path) -> list[dict]:
     ]
 
 
-def score(rows: list[dict], sample: dict, ai: dict) -> dict:
+def score(rows: list[dict], sample: dict, ai: dict, either: dict[str, list[str]] | None = None) -> dict:
+    """`either` gives each recipe's allergens that come only from "A or B" lines (`either_or`)."""
     drawn = {recipe["id"]: recipe for recipe in sample["recipes"]}
+    number = {recipe["id"]: index for index, recipe in enumerate(sample["recipes"], start=1)}
+    either = either or {}
     if sorted(row["id"] for row in rows) != sorted(drawn):
         raise SystemExit(
             f"the filled sheet's rows are not the sample's: {sorted({r['id'] for r in rows} ^ set(drawn))}"
         )
     strata = {name: {"checked": 0, "agree": 0} for name in sample["strata"]}
-    missed, extra, corrections, refill = Counter(), Counter(), [], []
+    missed, extra, corrections, policy, ai_differs, refill = Counter(), Counter(), [], [], [], []
     unchecked = cannot_tell = ai_agree = 0
     for row in rows:
         if not row["checked"]:
@@ -241,10 +255,26 @@ def score(rows: list[dict], sample: dict, ai: dict) -> dict:
         counts = strata[recipe["stratum"]]
         counts["checked"] += 1
         counts["agree"] += confirmed == catalog
-        ai_agree += confirmed == set(ai[row["id"]]["allergens"])
-        missed.update(confirmed - catalog)
-        extra.update(catalog - confirmed)
-        if confirmed != catalog:
+        if confirmed == set(ai[row["id"]]["allergens"]):
+            ai_agree += 1
+        else:
+            ai_differs.append({"number": number[row["id"]], "id": row["id"], "title": row["title"]})
+        if confirmed == catalog:
+            continue
+        if not confirmed - catalog and catalog - confirmed <= set(either.get(row["id"], ())):
+            policy.append(
+                {
+                    "id": row["id"],
+                    "title": row["title"],
+                    "catalog": sorted(catalog),
+                    "confirmed": sorted(confirmed),
+                    "either_or": sorted(catalog - confirmed),
+                    "note": row["note"],
+                }
+            )
+        else:
+            missed.update(confirmed - catalog)
+            extra.update(catalog - confirmed)
             corrections.append(
                 {
                     "id": row["id"],
@@ -281,12 +311,20 @@ def score(rows: list[dict], sample: dict, ai: dict) -> dict:
         "missed_by_catalog": dict(sorted(missed.items(), key=lambda item: (-item[1], item[0]))),
         "extra_in_catalog": dict(sorted(extra.items(), key=lambda item: (-item[1], item[0]))),
         "corrections": corrections,
-        "ai_candidates": {"agree": ai_agree, "checked": total_checked, "wilson95": wilson(ai_agree, total_checked)},
+        "either_or_disagreements": policy,
+        "ai_candidates": {
+            "agree": ai_agree,
+            "checked": total_checked,
+            "wilson95": wilson(ai_agree, total_checked),
+            "differs": ai_differs,
+        },
     }
 
 
 def markdown(result: dict, sample: dict, digest: str) -> str:
     cover = result["weighted_cover"]
+    ai = result["ai_candidates"]
+    differs = ", ".join(f"{row['number']} ({row['title']})" for row in ai["differs"]) or "none"
     lines = [
         f"# Allergen review of release {sample['release']}",
         "",
@@ -294,12 +332,17 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         f"Filled sheet SHA-256 `{digest}`; sample `sample.json` ({sample['size']} recipes, seed {sample['seed']}, "
         "stratified by the rarest catalog allergen of each recipe). Only rows the reviewer marked 是 count.",
         "",
+        f"> The reviewer's allergens equal Claude's candidates, which the sheet showed beside the catalog's, on "
+        f"{ai['agree']} of {ai['checked']} checked recipes; they differ only on rows {differs}. The agreement below is "
+        "therefore mostly the AI candidates' agreement with the catalog, plus the reviewer's changes to them.",
+        "",
         f"- Sampled {result['sampled']}, marked 是 (checked) {result['checked']}, unchecked {result['unchecked']}, "
         f"marked null (cannot tell) {result['cannot_tell']}, to refill {len(result['refill'])}.",
         f"- Recipes whose catalog allergens equal the reviewer's: {result['agree']} of {result['checked']} "
         f"({percent(result['agreement_unweighted'])}, Wilson 95% {interval(result['wilson95_unweighted'])}).",
         f"- Weighted by each stratum's share of the release: **{percent(result['agreement_weighted'])}** "
-        f"(strata covering {cover['recipes']} of {cover['of']} release recipes).",
+        f"(strata covering {cover['recipes']} of {cover['of']} release recipes). A point estimate only: each stratum "
+        "holds a few sampled recipes, so only the unweighted agreement above carries an interval.",
         "",
         "| Stratum | Recipes in release | Checked | Agree | Agreement | Wilson 95% |",
         "| --- | ---: | ---: | ---: | ---: | --- |",
@@ -314,7 +357,7 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         "## Errors by kind",
         "",
         "Missed: the reviewer found the allergen, the catalog did not. Extra: the catalog has it, the reviewer "
-        "did not.",
+        "did not. The either-or disagreements below are not counted here.",
         "",
         "| Allergen | Missed by the catalog | Extra in the catalog |",
         "| --- | ---: | ---: |",
@@ -329,10 +372,24 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         + (f" ({row['note']})" if row["note"] else "")
         for row in result["corrections"]
     ]
+    if result["either_or_disagreements"]:
+        lines += [
+            "",
+            f"## Either-or disagreements ({len(result['either_or_disagreements'])})",
+            "",
+            'The reviewer dropped allergens that come only from an "A or B" ingredient line, holding that either-or '
+            "is not a certain allergen. The catalog takes the first of the two. These recipes count as disagreeing "
+            "above, but they are a question for the owner about the rule, not catalog errors.",
+            "",
+        ]
+        lines += [
+            f"- {row['id']} {row['title']}: catalog `{shown(row['catalog'])}`, reviewer `{shown(row['confirmed'])}`, "
+            f"either-or `{shown(row['either_or'])}`" + (f" ({row['note']})" if row["note"] else "")
+            for row in result["either_or_disagreements"]
+        ]
     if result["refill"]:
         lines += ["", "## To refill", ""]
         lines += [f"- {row['id']} {row['title']}: {row['why']}" for row in result["refill"]]
-    ai = result["ai_candidates"]
     lines += [
         "",
         "## AI candidates",
@@ -354,7 +411,9 @@ def main() -> None:
     if args.command == "draw":
         version, recipes = release_recipes()
         sample = draw(version, recipes)
-        (OUT / "sample.json").write_text(json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        (OUT / "sample.json").write_text(
+            json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+        )
         ai = json.loads((OUT / "ai_candidates.json").read_text(encoding="utf-8"))
         by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
         workbook(sample, ai, by_id).save(OUT / "review.xlsx")
@@ -362,7 +421,10 @@ def main() -> None:
         return
     sample = json.loads((OUT / "sample.json").read_text(encoding="utf-8"))
     ai = json.loads((OUT / "ai_candidates.json").read_text(encoding="utf-8"))
-    result = score(read_filled(args.filled), sample, ai)
+    _, recipes = release_recipes()
+    by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
+    either = {drawn["id"]: either_or(by_id[drawn["id"]]) for drawn in sample["recipes"]}
+    result = score(read_filled(args.filled), sample, ai, either)
     report = markdown(result, sample, hashlib.sha256(args.filled.read_bytes()).hexdigest())
     (OUT / "report.md").write_text(report, encoding="utf-8", newline="\n")
     (OUT / "report.json").write_text(
