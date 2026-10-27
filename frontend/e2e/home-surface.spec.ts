@@ -1927,6 +1927,12 @@ test("grocery items and their printed list distinguish missing products from a t
     await expect(panel.getByText(noProduct, { exact: true })).toBeVisible();
     await expect(panel.getByText(timedOut, { exact: true })).toBeVisible();
     await expect(panel.getByText(checkedLine, { exact: true })).toBeVisible();
+    // The mix is stated once, and the dot and the amber line read the same counts: no second count such as "1 live · 2 saved".
+    await expect(panel.locator(".groceries .source")).toHaveText(checkedLine);
+    await expect(panel.getByText(checkedLine, { exact: true })).toHaveAttribute("title", checkedLine);
+    await expect(panel.locator(".groceries .source i")).toHaveClass("warn");
+    await expect(panel.locator(".groceries .s.stale")).toHaveCount(1);
+    await expect(panel.locator(".groceries .s.stale")).toContainText(timedOut);
     await expect(panel).not.toContainText("FairPrice didn't respond");
     await expect(panel).not.toContainText("Water");
     const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
