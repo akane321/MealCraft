@@ -25,11 +25,14 @@ Not covered: a cell with very few cases can identify a single question; whether 
 decided here. The report does not choose failure cases for analysis, load the sealed file, run any system or
 decide which cases are void.
 
-Coverage checks are relative to the supplied records, not to an expected manifest. The sealed-side caller must
-check the expected cases, systems and runs before export. If every supplied run omits the same case, or an
-entire system or run is absent, this generator cannot discover the omission. A wholly failed run must therefore
-still supply one `missing`, `timeout` or `error` outcome for every expected case. This module alone is not a
-completeness or disclosure gate; small-cell policy and manifest validation remain prerequisites for formal use.
+By default the coverage checks are relative to the supplied records. `aggregate(records, expected)` also takes an
+`ExpectedManifest` from the sealed side, made of aggregate counts only: the expected systems, the number of runs per
+system, the declared number of cases in each category-language-source cell (voided ones included) and the declared
+number of voided cases. A different system set, a missing run, a different cell count, an unexpected cell or a
+different void count raises an error, so an omission shared by every system and run is caught. The manifest holds no
+case reference or text. A wholly failed run must still supply one `missing`, `timeout` or `error` outcome for every
+expected case. Without a manifest this module is not a completeness gate, and it is still not a disclosure gate:
+small-cell policy remains a prerequisite for formal use.
 
 ```text
 PYTHONPATH=backend python -m pytest backend/tests/test_heldout_report.py -p no:cacheprovider --basetemp <new-temporary-directory>
