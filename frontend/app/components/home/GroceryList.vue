@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -13,17 +13,12 @@ const trips = computed(() => groceryTrips(props.estimate.items).map(trip => ({
   sum: sumOf(trip.groups.flatMap(group => group.lines)),
 })));
 const groups = computed(() => trips.value.flatMap(trip => trip.groups));
-const lines = computed(() => groups.value.flatMap(group => group.lines));
 // A line of the second trip is its own purchase, even of an ingredient the first trip also buys.
 const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${line.ingredient_name}`;
+// The note counts live, saved and sample prices; its dot and the amber "Saved FairPrice price" lines read them the same way.
 const source = computed(() => priceSourceLabel(props.estimate));
 const basics = computed(() => basicsNote(props.estimate));
-// Green when every price is FairPrice's, amber when some are samples, grey when all are.
-const sourceTone = computed(() => (source.value.startsWith("FairPrice prices") ? "ok" : source.value.startsWith("FairPrice") ? "warn" : ""));
-const priceSource = (line: GroceryLineEstimate) => line.evidence?.price_source ?? line.evidence?.mode;
-const live = computed(() => lines.value.filter(line => priceSource(line) === "live").length);
-// A saved (not freshly checked) FairPrice price reads amber.
-const stale = (line: GroceryLineEstimate) => Boolean(line.product && line.product.source === "fairprice" && priceSource(line) !== "live");
+const sourceTone = computed(() => priceTone(props.estimate));
 // Ticked items only matter while shopping; they are not saved.
 const got = ref(new Set<string>());
 
@@ -38,8 +33,7 @@ function toggle(name: string) {
   <div class="groceries">
     <p class="source">
       <i :class="sourceTone" aria-hidden="true" />
-      <b>{{ source }}</b>
-      <span class="count">{{ live ? `${live} live · ${lines.length - live} saved` : `${lines.length} items` }}</span>
+      <b :title="source">{{ source }}</b>
     </p>
     <div class="list">
       <template v-for="trip in trips" :key="trip.trip ?? 0">
@@ -53,7 +47,7 @@ function toggle(name: string) {
                 <span class="p">{{ line.ingredient_display_name }}</span>
                 <span v-if="line.perishable" class="fresh" title="Fresh: cooked within 3 days of this shop">Use within 3 days</span>
               </span>
-              <span class="s" :class="{ stale: stale(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
+              <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
             </span>
             <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
           </label>
@@ -75,7 +69,6 @@ function toggle(name: string) {
 .source i.ok { background: var(--c-green); }
 .source i.warn { background: var(--c-amber); }
 .source b { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.count { margin-left: auto; flex: none; color: var(--c-muted); }
 .list { padding: 4px 16px 12px; }
 .aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }

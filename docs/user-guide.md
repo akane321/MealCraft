@@ -378,6 +378,8 @@ is labelled unavailable; an ingredient without a priced product remains not
 priced; water and ice are not bought and are not listed. A saved price that could not be checked live in time is
 labelled "Saved FairPrice price ... not checked live in time", never as a sample. Above the list a line gives the time of
 the last live check and how many items are live, saved or sample ("Prices checked at 15:40 · 15 live · 19 saved · 3 sample").
+Saved prices are shown in amber. The dot before that line is green when every price is FairPrice's, amber when some
+are samples or no live price came back, and grey when all are samples.
 **Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
 
