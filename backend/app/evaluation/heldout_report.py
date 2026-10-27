@@ -132,7 +132,30 @@ def _check_manifest(records: list[CaseOutcome], expected: ExpectedManifest) -> N
         raise ValueError("the number of voided cases differs from the expected number")
 
 
-def aggregate(records: Iterable[CaseOutcome], expected: ExpectedManifest | None = None) -> dict:
+def _withhold_small(system: dict, minimum: int) -> None:
+    """Withhold what could identify a question (ADR-0100 item 5, proposed).
+
+    A cell with fewer than `minimum` remaining cases hides its whole category's cell breakdown: the other cells of that
+    category would otherwise let a reader subtract the small cell from the category total. A total under the minimum
+    shows no figures. This lowers the risk of identifying a question; it is not a proof that none is possible.
+    """
+    withheld = {}
+    for key, summary in system["cells"].items():
+        if summary["remaining_n"] < minimum:
+            withheld[key.split("|")[0]] = f"a cell has fewer than {minimum} remaining cases"
+    system["cells"] = {key: value for key, value in system["cells"].items() if key.split("|")[0] not in withheld}
+    for part in ("by_category", "by_language", "by_source"):
+        for name, summary in system[part].items():
+            if summary["remaining_n"] < minimum:
+                system[part][name] = {"withheld": f"fewer than {minimum} remaining cases"}
+    system["withheld_categories"] = dict(sorted(withheld.items()))
+
+
+def aggregate(
+    records: Iterable[CaseOutcome], expected: ExpectedManifest | None = None, *, min_cell_n: int | None = None
+) -> dict:
+    if min_cell_n is not None and (isinstance(min_cell_n, bool) or not isinstance(min_cell_n, int) or min_cell_n < 1):
+        raise ValueError("the minimum cell size is a positive whole number")
     records = list(records)
     if not records:
         raise ValueError("no outcomes")
@@ -159,6 +182,8 @@ def aggregate(records: Iterable[CaseOutcome], expected: ExpectedManifest | None 
             "by_source": group(runs, lambda r: r.source),
             "cells": group(runs, lambda r: f"{r.category}|{r.language}|{r.source}"),
         }
+        if min_cell_n is not None:
+            _withhold_small(systems[system_id], min_cell_n)
     return {
         "note": "Counts only. Timeouts, errors and missing outputs stay in the denominator and are never successes.",
         "systems": systems,

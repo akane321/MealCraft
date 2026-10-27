@@ -199,3 +199,73 @@ def test_the_manifest_cannot_carry_case_identifiers_or_bad_labels():
         manifest(case_refs=["c1"])
     with pytest.raises(ValidationError):
         manifest(runs=0)
+
+
+# --- small cells: withheld when too few cases remain (ADR-0100 item 5, proposed) ---------------------------------
+
+
+def cells_of(spec):
+    """spec: {(category, language, source): [statuses...]} -> one outcome per entry, all voided=False."""
+    records = []
+    for (category, language, source), statuses in spec.items():
+        for i, status in enumerate(statuses):
+            records.append(
+                outcome(
+                    f"{category}-{language}-{source}-{i}",
+                    category=category,
+                    language=language,
+                    source=source,
+                    status=status,
+                )
+            )
+    return records
+
+
+BIG = ["success"] * 4 + ["failure"] * 2
+
+
+def test_without_a_minimum_nothing_is_withheld():
+    report = aggregate(cells_of({("planning", "en", "authored"): ["success"], ("intent", "zh", "forum"): BIG}))
+    assert "planning|en|authored" in report["systems"]["s1"]["cells"]
+
+
+def test_a_small_cell_withholds_the_whole_category_breakdown_not_only_itself():
+    records = cells_of(
+        {
+            ("planning", "en", "authored"): ["success", "failure"],  # 2 remaining: below 5
+            ("planning", "zh", "authored"): BIG,
+            ("intent", "en", "authored"): BIG,
+        }
+    )
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    # Showing the other planning cells beside the planning total would let a reader subtract the small cell out.
+    assert not any(key.startswith("planning|") for key in system["cells"])
+    assert "intent|en|authored" in system["cells"]
+    assert system["withheld_categories"] == {"planning": "a cell has fewer than 5 remaining cases"}
+    assert system["by_category"]["planning"]["remaining_n"] == 8
+
+
+def test_voided_cases_do_not_count_towards_the_minimum():
+    records = [outcome(f"c{i}", voided=i < 3) for i in range(6)]  # 6 declared, 3 voided, 3 remaining
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    assert system["cells"] == {}
+
+
+def test_a_small_total_is_withheld_too():
+    records = cells_of({("planning", "en", "authored"): ["success"] * 3, ("intent", "zh", "forum"): BIG})
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    assert system["by_category"]["planning"] == {"withheld": "fewer than 5 remaining cases"}
+    assert system["by_category"]["intent"]["remaining_n"] == 6
+    assert "success_rate" in system["overall"]
+
+
+def test_withheld_output_carries_no_counts_of_the_small_cell():
+    records = cells_of({("planning", "en", "authored"): ["success", "success"], ("intent", "zh", "forum"): BIG})
+    text = render(aggregate(records, min_cell_n=5))
+    assert "planning|en|authored" not in text
+
+
+def test_the_minimum_must_be_a_positive_whole_number():
+    for bad in (0, -1):
+        with pytest.raises(ValueError, match="minimum"):
+            aggregate(cells_of({("planning", "en", "authored"): BIG}), min_cell_n=bad)
