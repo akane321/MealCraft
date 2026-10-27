@@ -135,3 +135,67 @@ def test_render_is_byte_stable_and_lf_terminated():
     assert first == second
     assert first.endswith("\n") and "\r" not in first
     assert list(json.loads(first)["systems"]) == ["s1", "s2"]
+
+
+# --- the expected manifest: aggregate counts supplied by the sealed side -------------------------------------------
+
+
+def manifest(**changes):
+    from app.evaluation.heldout_report import ExpectedManifest
+
+    values = {"systems": ["s1", "s2"], "runs": 2, "cells": {"planning|en|authored": 2}, "voided": 0}
+    values.update(changes)
+    return ExpectedManifest(**values)
+
+
+def full_records(systems=("s1", "s2"), runs=(1, 2), cases=("c1", "c2")):
+    return [outcome(c, system_id=s, run=r) for s in systems for r in runs for c in cases]
+
+
+def test_a_complete_set_passes_the_manifest():
+    report = aggregate(full_records(), manifest())
+    assert sorted(report["systems"]) == ["s1", "s2"]
+
+
+def test_a_case_missing_from_every_run_and_system_is_caught():
+    # Without the manifest this is invisible: every system and run omits the same case.
+    records = full_records(cases=("c1",))
+    aggregate(records)
+    with pytest.raises(ValueError, match="cells"):
+        aggregate(records, manifest())
+
+
+def test_a_missing_system_or_run_is_caught():
+    with pytest.raises(ValueError, match="systems"):
+        aggregate(full_records(systems=("s1",)), manifest())
+    with pytest.raises(ValueError, match="runs"):
+        aggregate(full_records(runs=(1,)), manifest())
+    with pytest.raises(ValueError, match="systems"):
+        aggregate(full_records(systems=("s1", "s2", "s3")), manifest())
+
+
+def test_an_unexpected_cell_or_wrong_void_count_is_caught():
+    extra = full_records() + [
+        outcome("c9", system_id=s, run=r, category="intent") for s in ("s1", "s2") for r in (1, 2)
+    ]
+    with pytest.raises(ValueError, match="cells"):
+        aggregate(extra, manifest())
+    voided = [
+        outcome(c, system_id=s, run=r, voided=c == "c2") for s in ("s1", "s2") for r in (1, 2) for c in ("c1", "c2")
+    ]
+    with pytest.raises(ValueError, match="voided"):
+        aggregate(voided, manifest(voided=0))
+    assert aggregate(voided, manifest(voided=1))
+
+
+def test_the_manifest_cannot_carry_case_identifiers_or_bad_labels():
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        manifest(cells={"cooking|en|authored": 1})
+    with pytest.raises(ValidationError):
+        manifest(cells={"planning|en|authored": 0})
+    with pytest.raises(ValidationError):
+        manifest(case_refs=["c1"])
+    with pytest.raises(ValidationError):
+        manifest(runs=0)
