@@ -18,7 +18,9 @@ AI 预填、在聊天里按"菜品类型"确认的，没有人逐行看过食材
   它是表导入值的唯一来源：一个值从这里去掉，重新生成后那个字段就回到未标注。
 - `sample.json`：抽样记录（种子、每道菜属于哪一层、哪个子层和角色格、要核对的值）。
 - `sample.xlsx`：给复核人亲自核对用的表（见下文"抽样核对"）。
-- 核对后由 `review_table_accuracy.py` 生成的 `accuracy.md` 和 `accuracy.json`（尚未生成）。
+- `sample-filled.xlsx`：复核人 2026-10-27 交回的表（92 行都填了"是"）。表里的值先由 AI 辅助起草，复核人在聊天里确认了规则，
+  之后说明已本人逐行核对；过程见知识库的任务记录。表里保留的"一致性复查"页是起草时的 AI 记录，有几句和现在的表对不上，按原样保留。
+- `accuracy.md`、`accuracy.json`：由 `review_table_accuracy.py` 从 `sample-filled.xlsx` 生成。
 
 ## 来源
 

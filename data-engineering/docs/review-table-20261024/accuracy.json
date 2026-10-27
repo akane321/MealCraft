@@ -1,0 +1,211 @@
+{
+  "groups": {
+    "table": {
+      "rows": 60,
+      "checked": 60,
+      "agree": 48,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.8
+    },
+    "rule_decided": {
+      "rows": 32,
+      "checked": 32,
+      "agree": 28,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.875
+    },
+    "rule_equals_model": {
+      "rows": 17,
+      "checked": 17,
+      "agree": 17,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 1.0
+    },
+    "rule_differs_from_model": {
+      "rows": 15,
+      "checked": 15,
+      "agree": 11,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.733
+    },
+    "all": {
+      "rows": 92,
+      "checked": 92,
+      "agree": 76,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.826
+    }
+  },
+  "fields": {
+    "meal_role": {
+      "rows": 41,
+      "checked": 41,
+      "agree": 30,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.732
+    },
+    "contains_staple": {
+      "rows": 41,
+      "checked": 41,
+      "agree": 37,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.902
+    },
+    "protein_sources": {
+      "rows": 10,
+      "checked": 10,
+      "agree": 9,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.9
+    }
+  },
+  "differ": [
+    {
+      "id": "RCP2_1729D7258E04",
+      "title": "Egg Filling For Sushi",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_1729D7258E04",
+      "title": "Egg Filling For Sushi",
+      "field": "protein_sources",
+      "value": [
+        "egg"
+      ],
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_290971CF4730",
+      "title": "Mexican Wedding Rings",
+      "field": "meal_role",
+      "value": "dessert",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_49CA27EAC641",
+      "title": "Alfajores De Maizena",
+      "field": "meal_role",
+      "value": "dessert",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_75BFE1C39E34",
+      "title": "Taco Casserole",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_75BFE1C39E34",
+      "title": "Taco Casserole",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_8F83C05E5E00",
+      "title": "Siopao (Filipino Steamed Buns)",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_8F83C05E5E00",
+      "title": "Siopao (Filipino Steamed Buns)",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_A887D44E2FC0",
+      "title": "Sauerkraut pierogii",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_A887D44E2FC0",
+      "title": "Sauerkraut pierogii",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_BBA025B49BA6",
+      "title": "Pierogi",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "one_bowl"
+    },
+    {
+      "id": "RCP2_C81AEF8EF1AC",
+      "title": "Onion Creme Brulee",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "vegetable"
+    },
+    {
+      "id": "RCP2_E8D667BA918A",
+      "title": "Fake Feta",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_ED8C37EACE4D",
+      "title": "Mock Feta Cheese ( Vegan Substitute )",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_F9AC64939A2C",
+      "title": "Welsh Rarebit",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    }
+  ],
+  "unrecognized": []
+}
