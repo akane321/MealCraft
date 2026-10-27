@@ -13,11 +13,11 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from app.core.paths import repository_root
 from app.schemas.recommendation import NO_COOKING_TIME_LIMIT
 
 # The dictionary fields this mapping can produce.
@@ -59,7 +59,7 @@ class FieldMapping(BaseModel):
 
 
 def _public_dictionary() -> dict:
-    path = Path(__file__).resolve().parents[3] / "scripts" / "sprint2-heldout-fields.json"
+    path = repository_root() / "scripts" / "sprint2-heldout-fields.json"
     return json.loads(path.read_text(encoding="utf-8"))["fields"]
 
 

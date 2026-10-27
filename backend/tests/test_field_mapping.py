@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
+from app.core.paths import repository_root
 from app.evaluation.field_mapping import MAPPED_FIELDS, NO_COOKING_TIME_LIMIT, map_request_fields
 
-DICTIONARY = json.loads(
-    (Path(__file__).resolve().parents[2] / "scripts" / "sprint2-heldout-fields.json").read_text(encoding="utf-8")
-)["fields"]
+DICTIONARY = json.loads((repository_root() / "scripts" / "sprint2-heldout-fields.json").read_text(encoding="utf-8"))[
+    "fields"
+]
 
 
 def native(**changes):
