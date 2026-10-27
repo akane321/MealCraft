@@ -102,3 +102,19 @@ def test_a_second_first_turn_on_the_same_responder_is_rejected(recipe_client):  
     responder(REQUEST, (), "instructions")
     with pytest.raises(ProductTransportError, match="one case"):
         responder(REQUEST, (), "instructions")
+
+
+def test_a_change_to_a_saved_week_is_confirmed_by_the_same_message(recipe_client):  # noqa: F811
+    client = RecordingClient(recipe_client)
+    harness = ConversationHarness(CONFIG)
+    result = harness.run(
+        "mealcraft", [REQUEST, "Replace day 3 with a different meal."], ProductTransport(client).responder()
+    )
+
+    # One automatic confirmation for the plan card and one for the change preview, both the same bytes.
+    assert result.confirmation_count == 2
+    sent = [body["message"] for method, url, body in client.calls if method == "POST"]
+    assert sent.count(CONFIRMATION_MESSAGE) == 2
+    plan_id = result.final.plan and recipe_client.get("/api/plans").json()["items"][0]["id"]
+    assert recipe_client.get(f"/api/plans/{plan_id}").json()["revision"] == 2
+    assert not any(url.endswith("/confirm") or url.endswith("/replan/confirm") for _, url, _ in client.calls)

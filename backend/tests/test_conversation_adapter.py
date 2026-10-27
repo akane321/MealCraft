@@ -388,3 +388,26 @@ def test_the_normalizer_does_not_change_what_it_reads():
     before = (read.model_dump_json(), saved.model_dump_json())
     normalize_product(read, saved)
     assert (read.model_dump_json(), saved.model_dump_json()) == before
+
+
+def waiting_replan(status="previewed"):
+    from app.schemas.meal_plan import MealPlanReplanEventResponse
+
+    return MealPlanReplanEventResponse.model_construct(id=1, plan_id=1, base_revision=1, status=status)
+
+
+def test_a_waiting_change_preview_is_an_invitation_to_confirm():
+    output = normalize_product(session(can_confirm=False, plan_id=None, pending_replan=waiting_replan()))
+    assert output.awaiting_confirmation is True
+
+
+def test_an_applied_change_or_an_unrelated_turn_is_not_an_invitation():
+    applied = session(can_confirm=False, pending_replan=waiting_replan("applied"))
+    assert normalize_product(applied).awaiting_confirmation is False
+    # a question answered while an old preview is still linked is not a fresh invitation to confirm
+    question = session(
+        can_confirm=False,
+        pending_replan=waiting_replan(),
+        last_scope_decision={"scope_class": "domain_question", "should_mutate_state": False, "reason_code": "x"},
+    )
+    assert normalize_product(question).awaiting_confirmation is False
