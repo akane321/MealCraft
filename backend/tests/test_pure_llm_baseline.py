@@ -5,6 +5,7 @@ from app.evaluation.baseline_recomputation import IngredientEvaluationFacts
 from app.evaluation.pure_llm_baseline import (
     SYSTEM_ID,
     BaselineResources,
+    create_model,
     generate,
     household_task_input,
     render_prompt,
@@ -117,6 +118,38 @@ def test_prompt_exposes_only_household_and_task_input():
     assert "secret-product" not in prompt
     assert '"gold"' not in prompt
     assert "recipe database" in prompt
+
+
+def test_model_uses_shared_live_evaluation_timeout(monkeypatch):
+    import app.evaluation.pure_llm_baseline as baseline
+
+    captured = {}
+
+    class Secret:
+        def get_secret_value(self):
+            return "test-key"
+
+    class FakeModel:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+        def with_structured_output(self, *args, **kwargs):
+            return self
+
+    settings = SimpleNamespace(
+        openai_api_key=Secret(),
+        openai_model="same-mini-model",
+        openai_evaluation_timeout_seconds=90,
+    )
+    monkeypatch.setattr(baseline, "get_settings", lambda: settings)
+    monkeypatch.setattr(baseline, "ChatOpenAI", FakeModel)
+    monkeypatch.setattr(baseline.model_client, "http_client", lambda: "shared-client")
+
+    create_model()
+
+    assert captured["model"] == "same-mini-model"
+    assert captured["timeout"] == 90
+    assert captured["max_retries"] == 0
 
 
 def test_valid_structured_response_records_usage_without_retry():

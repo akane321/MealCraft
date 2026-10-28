@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-5.4-mini"
     # A slow model must not hang the chat: past this the turn is read with the rule parser instead.
     openai_timeout_seconds: float = Field(default=15.0, gt=0, le=300)
+    # Structured live-evaluation prompts can be substantially larger than interactive parser turns.
+    openai_evaluation_timeout_seconds: float = Field(default=120.0, gt=0, le=300)
     # The oldest recipes the planner plans from; the API loads them again in the background at half this age.
     # 0 loads them for every plan (tests).
     planning_pool_cache_seconds: int = 300

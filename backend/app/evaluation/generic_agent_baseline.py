@@ -131,7 +131,7 @@ def create_agent() -> GenericAgent:
         api_key=settings.openai_api_key.get_secret_value(),
         model=settings.openai_model,
         temperature=0,
-        timeout=settings.openai_timeout_seconds,
+        timeout=settings.openai_evaluation_timeout_seconds,
         max_retries=0,
         http_client=model_client.http_client(),
         use_responses_api=True,

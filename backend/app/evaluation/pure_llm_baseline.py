@@ -134,7 +134,7 @@ def create_model() -> StructuredModel:
         api_key=settings.openai_api_key.get_secret_value(),
         model=settings.openai_model,
         temperature=0,
-        timeout=settings.openai_timeout_seconds,
+        timeout=settings.openai_evaluation_timeout_seconds,
         max_retries=0,
         http_client=model_client.http_client(),
     ).with_structured_output(BaselineResponse, method="json_schema", include_raw=True)

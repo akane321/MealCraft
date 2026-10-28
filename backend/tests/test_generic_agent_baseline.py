@@ -155,7 +155,7 @@ def test_agent_uses_configured_baseline_model_and_only_generic_tools(monkeypatch
     settings = SimpleNamespace(
         openai_api_key=Secret(),
         openai_model="same-mini-model",
-        openai_timeout_seconds=30,
+        openai_evaluation_timeout_seconds=90,
     )
     monkeypatch.setattr(baseline, "get_settings", lambda: settings)
     monkeypatch.setattr(baseline, "ChatOpenAI", FakeModel)
@@ -166,6 +166,7 @@ def test_agent_uses_configured_baseline_model_and_only_generic_tools(monkeypatch
 
     assert isinstance(agent, LangGraphGenericAgent)
     assert captured["model_kwargs"]["model"] == "same-mini-model"
+    assert captured["model_kwargs"]["timeout"] == 90
     assert captured["model_kwargs"]["http_client"] == "shared-client"
     assert captured["tools"][0] == {"type": "web_search"}
     assert captured["tools"][1].name == "calculator"
