@@ -209,9 +209,14 @@ def normalize_product(session: AgentSessionResponse, plan: WeeklyMealPlanRespons
         answer=answer,
         request_fields=session.constraints.model_dump(mode="json"),
         # can_confirm alone is saved session state: an unrelated/QA turn can leave
-        # it true. It is not a fresh confirmation invitation from that turn.
+        # it true. It is not a fresh confirmation invitation from that turn. A change
+        # preview the session links and has not applied waits the same way (ADR-0098);
+        # a preview that is applied, or left over from an earlier turn, does not invite.
         awaiting_confirmation=(
-            session.can_confirm
+            (
+                session.can_confirm
+                or (session.pending_replan is not None and session.pending_replan.status == "previewed")
+            )
             and decision is not None
             and decision.scope_class == ScopeClass.DOMAIN_ACTION
             and decision.should_mutate_state

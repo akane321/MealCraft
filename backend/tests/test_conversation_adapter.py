@@ -326,6 +326,93 @@ def test_demo_report_is_byte_stable_and_lf_encoded(tmp_path, monkeypatch):
     assert b"\r\n" not in files[0].read_bytes()
 
 
+def plan_with_dishes(*dishes):
+    """The invented plan with extra copies of its one dish: (planned_date, meal_type, changes)."""
+    plan = product_plan().model_copy(deep=True)
+    base = plan.days[0]
+    plan.days = [
+        base.model_copy(update={"entry_id": 10 + i, "planned_date": day, "meal_type": meal, **changes}, deep=True)
+        for i, (day, meal, changes) in enumerate(dishes)
+    ]
+    return plan
+
+
+def test_servings_fall_back_to_household_size_times_portion_share_only_when_not_recorded():
+    plan = plan_with_dishes(
+        (date(2031, 2, 4), "dinner", {"servings": None, "portion_share": 0.5}),
+        (date(2031, 2, 4), "lunch", {"servings": 3.0, "portion_share": 0.5}),
+    )
+    meals = {m.meal_type: m for m in normalize_product(session(plan_id=7, can_confirm=False), plan).plan.meals}
+    assert meals["dinner"].dishes[0].servings == 1.0  # household of 2 at a share of 0.5
+    assert meals["lunch"].dishes[0].servings == 3.0  # the recorded value is never recomputed
+
+
+def test_dishes_are_grouped_into_meals_in_date_then_meal_type_order():
+    plan = plan_with_dishes(
+        (date(2031, 2, 5), "breakfast", {}),
+        (date(2031, 2, 4), "dinner", {}),
+        (date(2031, 2, 4), "dinner", {}),
+        (date(2031, 2, 4), "lunch", {}),
+    )
+    meals = normalize_product(session(plan_id=7, can_confirm=False), plan).plan.meals
+    assert [(m.date.isoformat(), m.meal_type, len(m.dishes)) for m in meals] == [
+        ("2031-02-04", "dinner", 2),
+        ("2031-02-04", "lunch", 1),
+        ("2031-02-05", "breakfast", 1),
+    ]
+
+
+def test_the_answer_is_the_last_assistant_message_never_a_user_message():
+    messages = [
+        {"id": 1, "role": "assistant", "content": "First.", "created_at": "2031-02-03T12:00:00+08:00"},
+        {"id": 2, "role": "assistant", "content": "Latest reply.", "created_at": "2031-02-03T12:01:00+08:00"},
+        {"id": 3, "role": "user", "content": "A user line.", "created_at": "2031-02-03T12:02:00+08:00"},
+    ]
+    assert normalize_product(session(messages=messages)).answer == "Latest reply."
+
+
+@pytest.mark.parametrize("scope", [ScopeClass.DOMAIN_ACTION, ScopeClass.DOMAIN_QUESTION, ScopeClass.SOCIAL])
+def test_scopes_that_are_not_refusals_never_produce_a_refusal(scope):
+    decision = ScopeDecision(scope_class=scope, reason_code="synthetic")
+    assert normalize_product(session(last_scope_decision=decision)).refusal is None
+
+
+def test_a_refusal_and_a_saved_plan_can_be_observed_together():
+    decision = ScopeDecision(scope_class=ScopeClass.OUT_OF_SCOPE, reason_code="synthetic")
+    output = normalize_product(session(plan_id=7, can_confirm=False, last_scope_decision=decision), product_plan())
+    assert output.refusal == "Ready." and output.plan is not None
+
+
+def test_the_normalizer_does_not_change_what_it_reads():
+    read, saved = session(plan_id=7, can_confirm=False), product_plan()
+    before = (read.model_dump_json(), saved.model_dump_json())
+    normalize_product(read, saved)
+    assert (read.model_dump_json(), saved.model_dump_json()) == before
+
+
+def waiting_replan(status="previewed"):
+    from app.schemas.meal_plan import MealPlanReplanEventResponse
+
+    return MealPlanReplanEventResponse.model_construct(id=1, plan_id=1, base_revision=1, status=status)
+
+
+def test_a_waiting_change_preview_is_an_invitation_to_confirm():
+    output = normalize_product(session(can_confirm=False, plan_id=None, pending_replan=waiting_replan()))
+    assert output.awaiting_confirmation is True
+
+
+def test_an_applied_change_or_an_unrelated_turn_is_not_an_invitation():
+    applied = session(can_confirm=False, pending_replan=waiting_replan("applied"))
+    assert normalize_product(applied).awaiting_confirmation is False
+    # a question answered while an old preview is still linked is not a fresh invitation to confirm
+    question = session(
+        can_confirm=False,
+        pending_replan=waiting_replan(),
+        last_scope_decision={"scope_class": "domain_question", "should_mutate_state": False, "reason_code": "x"},
+    )
+    assert normalize_product(question).awaiting_confirmation is False
+
+
 # --- the revised shared instructions (ADR-0100 items 3 and 4, proposed) -----------------------------------------
 
 
