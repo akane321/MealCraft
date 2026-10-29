@@ -186,21 +186,21 @@ test("addToCart without a token does nothing", async () => {
 
 test("addToCart never POSTs when the cart cannot be read", async () => {
   const cases = [
-    [{ status: 403, text: async () => "" }, "request_refused"],
-    [{ status: 200, text: async () => "<html>challenge</html>" }, "request_refused"],
-    [{ status: 200, text: async () => "{broken" }, "unexpected_response"],
-    [jsonResponse({ data: { nothing: true } }), "cart_unreadable"],
+    [{ status: 403, text: async () => "" }, "request_refused", "HTTP 403"],
+    [{ status: 200, text: async () => "<html>challenge</html>" }, "request_refused", "HTTP 200"],
+    [{ status: 200, text: async () => "{broken" }, "unexpected_response", "HTTP 200"],
+    [jsonResponse({ data: { nothing: true } }), "cart_unreadable", undefined],
   ];
-  for (const [response, error] of cases) {
+  for (const [response, error, detail] of cases) {
     const fetch = mockFetch([response]);
     const result = await core.addToCart([line("1")], { fetch, cookie: "auth_token=t" });
-    assert.deepEqual(result, { ok: false, error });
+    assert.deepEqual(result, detail ? { ok: false, error, detail } : { ok: false, error });
     assert.deepEqual(fetch.calls.map((c) => c.init.method), ["GET"]);
   }
   const throwing = async () => {
     throw new Error("network");
   };
-  assert.deepEqual(await core.addToCart([line("1")], { fetch: throwing, cookie: "auth_token=t" }), { ok: false, error: "unexpected_response" });
+  assert.deepEqual(await core.addToCart([line("1")], { fetch: throwing, cookie: "auth_token=t" }), { ok: false, error: "unexpected_response", detail: "network" });
 });
 
 test("addToCart dry run returns the body and sends no POST", async () => {
@@ -249,7 +249,25 @@ test("addToCart writes nothing when an item quantity is not a whole number", asy
 
 test("addToCart reports a refused or unreadable write", async () => {
   const refused = mockFetch([jsonResponse(CART), { status: 403, text: async () => "" }]);
-  assert.deepEqual(await core.addToCart([line("9")], { fetch: refused, cookie: "auth_token=t" }), { ok: false, error: "request_refused" });
+  assert.deepEqual(await core.addToCart([line("9")], { fetch: refused, cookie: "auth_token=t" }), { ok: false, error: "request_refused", detail: "HTTP 403" });
   const odd = mockFetch([jsonResponse(CART), jsonResponse({ ok: true })]);
   assert.deepEqual(await core.addToCart([line("9")], { fetch: odd, cookie: "auth_token=t" }), { ok: false, error: "unexpected_response" });
+});
+
+test("cart requests carry the bearer token only, never cookies, and failures say why", async () => {
+  const calls = [];
+  const fetch = async (url, init) => {
+    calls.push(init);
+    if (init.method === "GET") return { status: 200, text: async () => JSON.stringify({ data: { cart: { items: [], storeId: 165 } } }) };
+    throw new TypeError("Failed to fetch");
+  };
+  const result = await core.addToCart([{ line_key: "a", cart_item_id: "185350", quantity: 1 }], { fetch, cookie: "auth_token=abc", now: 1 });
+  assert.deepEqual(result, { ok: false, error: "unexpected_response", detail: "Failed to fetch" });
+  assert.equal(calls.length, 2);
+  for (const init of calls) assert.equal(init.credentials, undefined);
+  const refused = await core.addToCart([{ line_key: "a", cart_item_id: "185350", quantity: 1 }], {
+    fetch: async () => ({ status: 403, text: async () => "" }), cookie: "auth_token=abc",
+  });
+  assert.deepEqual(refused, { ok: false, error: "request_refused", detail: "HTTP 403" });
+  assert.deepEqual(core.checkInjected({ ok: false, error: "request_refused", detail: "HTTP 403" }, [], false), { ok: false, error: "request_refused", detail: "HTTP 403" });
 });

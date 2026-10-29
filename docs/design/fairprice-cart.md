@@ -32,7 +32,9 @@ MealCraft page ──(1) POST /api/plans/{id}/fairprice-cart/prepare──▶ Me
 
 - The cart is `https://website-api.omni.fairprice.com.sg/api/cart`: `GET` reads it, `POST` writes the whole cart.
   Requests carry `Authorization: Bearer <token>`, where the token is the `auth_token` cookie of
-  `www.fairprice.com.sg`. Without that cookie the person is not logged in.
+  `www.fairprice.com.sg`. Without that cookie the person is not logged in. The API answers CORS with
+  `Access-Control-Allow-Origin: *` and no credentials, so the request sends the bearer token only and never cookies;
+  a credentialed request is blocked by the browser (first live dry run, 2026-10-29).
 - A cart item is `{id, q, isChecked, t, ...}`: `id` is FairPrice's internal product id (the listing's `id`, for
   example `172993`), **not** the number at the end of a product URL (`clientItemId`, for example `13097675`, which
   MealCraft keeps as `external_id`). `q` is the quantity as a string.
@@ -171,6 +173,7 @@ Body: `{"shopping_trip": ...}`. The person says they checked out. It sets that t
   so the page asks the person to look at their FairPrice cart.
 - An item in the current cart without an id or a whole-number quantity makes the cart `cart_unreadable`, because
   sending it back could change it.
+- An error may carry `detail`: the HTTP status or the browser's error message, never the token or a cart value.
 - The page adds two errors of its own: `no_extension` and `timeout`.
 - Tests: `node --test browser-extension/fairprice-cart/cart-core.test.js`.
 

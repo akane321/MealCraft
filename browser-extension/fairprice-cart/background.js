@@ -75,7 +75,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
   }
   adding = true;
   addToCart(message)
-    .catch(() => ({ ok: false, error: "unexpected_response" }))
+    .catch((e) => ({ ok: false, error: "unexpected_response", detail: String((e && e.message) || e).slice(0, 200) }))
     .then((answer) => {
       adding = false;
       sendResponse(answer);

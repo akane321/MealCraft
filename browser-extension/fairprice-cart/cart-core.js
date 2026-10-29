@@ -201,7 +201,11 @@
   function checkInjected(result, lines, dryRun) {
     const bad = { ok: false, error: "unexpected_response" };
     if (!result || typeof result.ok !== "boolean") return bad;
-    if (!result.ok) return { ok: false, error: ERRORS.includes(result.error) ? result.error : "unexpected_response" };
+    if (!result.ok) {
+      const answer = { ok: false, error: ERRORS.includes(result.error) ? result.error : "unexpected_response" };
+      if (typeof result.detail === "string") answer.detail = result.detail.slice(0, 200);
+      return answer;
+    }
     const allowed = dryRun ? ["would_add"] : STATUSES;
     const fine =
       Array.isArray(result.results) &&
@@ -215,17 +219,18 @@
 
   // 401/403 or a non-JSON page (a bot-check challenge) is a refusal and is never worked around.
   async function readJson(response) {
-    if (response.status === 401 || response.status === 403) return { error: "request_refused" };
+    const status = response.status;
+    if (status === 401 || status === 403) return { error: "request_refused", status };
     let text;
     try {
       text = await response.text();
     } catch {
-      return { error: "unexpected_response" };
+      return { error: "unexpected_response", status };
     }
     try {
       return { json: JSON.parse(text) };
     } catch {
-      return { error: /^\s*</.test(text) ? "request_refused" : "unexpected_response" };
+      return { error: /^\s*</.test(text) ? "request_refused" : "unexpected_response", status };
     }
   }
 
@@ -235,16 +240,20 @@
     const doFetch = o.fetch || globalThis.fetch;
     const token = authToken(o.cookie !== undefined ? o.cookie : globalThis.document && globalThis.document.cookie);
     if (!token) return { ok: false, error: "not_logged_in" };
+    // The cart API answers any origin with "*" and no credentials, so the request carries the bearer token
+    // only, never cookies: a credentialed request is blocked by the browser (live test, 2026-10-29).
     const headers = { Authorization: "Bearer " + token, Accept: "application/json", "Accept-Language": "en" };
     const fail = (error) => ({ ok: false, error });
+    // What went wrong, for the person and the developer; never the token or a cart value.
+    const failWith = (error, e) => ({ ok: false, error, detail: String((e && e.message) || e).slice(0, 200) });
 
     let read;
     try {
-      read = await readJson(await doFetch(GET_URL, { method: "GET", headers, credentials: "include" }));
-    } catch {
-      return fail("unexpected_response");
+      read = await readJson(await doFetch(GET_URL, { method: "GET", headers }));
+    } catch (e) {
+      return failWith("unexpected_response", e);
     }
-    if (read.error) return fail(read.error);
+    if (read.error) return failWith(read.error, "HTTP " + read.status);
     const cart = extractCart(read.json);
     if (!cart) return fail("cart_unreadable");
 
@@ -270,14 +279,13 @@
         await doFetch(API, {
           method: "POST",
           headers: { ...headers, "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify(body),
         }),
       );
-    } catch {
-      return fail("unexpected_response");
+    } catch (e) {
+      return failWith("unexpected_response", e);
     }
-    if (written.error) return fail(written.error);
+    if (written.error) return failWith(written.error, "HTTP " + written.status);
     const after = extractCart(written.json);
     if (!after) return fail("unexpected_response");
     const out = { ok: true, results: resultsFor(lines, after.items, cart.items) };
