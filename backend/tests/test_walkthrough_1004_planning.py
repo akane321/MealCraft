@@ -353,7 +353,7 @@ def test_a_swap_preview_says_what_it_does_to_the_groceries_and_the_budget():
         purchase_total_delta_sgd=2.9,
         over_budget_sgd=0.16,
     )
-    plan = SimpleNamespace(grocery_estimate=SimpleNamespace(weekly_budget_sgd=100.0))
+    plan = SimpleNamespace(day_count=7, grocery_estimate=SimpleNamespace(weekly_budget_sgd=100.0))
     describe = AgentSessionService.__new__(AgentSessionService)._describe_dish_preview
     assert describe(preview, plan, "en") == (
         "How about Kimchi Chahan (Fried Rice) instead of Teriyaki Fried Rice? Groceries +S$2.90. "

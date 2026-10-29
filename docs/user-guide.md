@@ -286,6 +286,29 @@ seafood (including shellfish, squid, octopus and seafood mixes) are cooked withi
 are excluded from this short-lived class. The shopping list marks the fresh items
 "Use within 3 days".
 
+A plan can also be shorter than a week. Say which days and meals you want in the
+conversation: "one dinner for 1 person tomorrow", "dinner tonight", "today",
+"this weekend", "the next 3 days", 明天晚餐, 今晚, 今天, 周末两天 or 接下来三天
+("dinners only" and 只要晚餐 keep the days and plan just that meal). A meal you
+name anywhere in the message counts ("Dinner for 2 tomorrow"), and one you rule
+out is left out ("no breakfast tomorrow"). "Today and tomorrow" is two days. If
+a sentence could mean something else, such as "I'm away this weekend", "no soup
+on the weekend" or "the chicken I bought today", the assistant does not turn it
+into a short plan on its own. Only those
+days and meals are planned, and the shopping list and the budget cover only
+them. Say an amount for it ("S$15 for tomorrow's dinner") and that is the plan's
+budget; "S$10 a day for the next 3 days" is S$30, and an amount you say per week
+("S$140 a week") is shared out by the plan's meals. If you say none, your saved
+weekly budget is shared out by the meals the plan holds, and the assistant
+tells you how much ("S$6.67 of your S$140 weekly budget"); change the days or
+meals and it is shared out again from the saved week's budget. Say "the whole
+week" or "plan a week of dinners" and the plan goes back to your week, with your
+household's meals and your weekly budget. If today's meals are already over, the
+plan starts tomorrow and says so. A short plan sits beside your week without
+replacing it: only a plan that covers all of a week's meals replaces it in your
+history. Asking to change a day the plan does not have gets "That day is not
+in this plan"; saying you can't buy an ingredient today does not.
+
 Most plans take a few seconds. A large household on a tight budget takes longer,
 a few minutes, while the planner searches for a week that fits the
 budget; the button says "Planning…" until the plan is ready. Most of that

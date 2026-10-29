@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { MEAL_LABEL, formatSgd } from "~/lib/home-surface";
 import type { MealType } from "~/lib/home-surface";
-import { formatPlanDate } from "~/lib/meal-plan-format";
+import { daysLabel, formatPlanDate, planRange } from "~/lib/meal-plan-format";
 import type { WeeklyMealPlan, WeeklyMealPlanCollection } from "~/types/meal-plan";
 
-useHead({ title: "Past weeks · MealCraft" });
+useHead({ title: "Past plans · MealCraft" });
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -21,14 +21,14 @@ onMounted(async () => {
     weeks.value = (await apiFetch<WeeklyMealPlanCollection>(`${config.public.apiBase}/api/plans`, { query: { limit: 30 } })).items;
   }
   catch {
-    error.value = "Your past weeks could not be loaded. Try again in a moment.";
+    error.value = "Your past plans could not be loaded. Try again in a moment.";
   }
   finally {
     loading.value = false;
   }
 });
 
-// Deleting a week (testing and demos pile them up): asked first, then gone with its days and groceries.
+// Deleting a plan (testing and demos pile them up): asked first, then gone with its days and groceries.
 const removing = ref<WeeklyMealPlanCollection["items"][number] | null>(null);
 const busy = ref(false);
 async function removeWeek() {
@@ -41,7 +41,7 @@ async function removeWeek() {
     if (open.value === week.id) open.value = null;
   }
   catch {
-    error.value = "That week could not be deleted. Try again in a moment.";
+    error.value = "That plan could not be deleted. Try again in a moment.";
   }
   finally {
     busy.value = false;
@@ -56,11 +56,11 @@ async function toggle(planId: number) {
     details.value = { ...details.value, [planId]: await apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`) };
   }
   catch {
-    error.value = "That week could not be opened.";
+    error.value = "That plan could not be opened.";
   }
 }
 
-/** A week's dishes by day, then by meal, in the order they are eaten. */
+/** A plan's dishes by day, then by meal, in the order they are eaten. */
 function byDay(plan: WeeklyMealPlan) {
   const days = new Map<string, Map<string, WeeklyMealPlan["days"]>>();
   for (const dish of plan.days) {
@@ -79,30 +79,29 @@ function cooked(plan: WeeklyMealPlan) {
   return plan.days.filter(dish => dish.status === "completed").length;
 }
 
-// Several plans can cover the same week; when each was made tells them apart.
+// Several plans can cover the same days; when each was made tells them apart.
 const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
-const range = (start: string, end: string) => `${formatPlanDate(start, { day: "numeric", month: "short" })} – ${formatPlanDate(end, { day: "numeric", month: "short" })}`;
 </script>
 
 <template>
   <main class="page-width history">
-    <p class="eyebrow">Past weeks</p>
-    <h1>Every week you planned, as it ended up.</h1>
+    <p class="eyebrow">Past plans</p>
+    <h1>Every plan you made, as it ended up.</h1>
 
-    <p v-if="loading" class="notice">Loading your weeks…</p>
+    <p v-if="loading" class="notice">Loading your plans…</p>
     <p v-if="error" class="notice" role="alert">{{ error }}</p>
-    <p v-if="!loading && !error && !weeks.length" class="notice">No weeks yet. <NuxtLink to="/">Plan your first one</NuxtLink>.</p>
+    <p v-if="!loading && !error && !weeks.length" class="notice">No plans yet. <NuxtLink to="/">Make your first one</NuxtLink>.</p>
 
     <ol class="weeks">
       <!-- Planning the same days again replaces a week (backend `current`): it stays listed, marked, under the newer one. -->
       <li v-for="week in weeks" :key="week.id" class="week" :class="{ replaced: week.current === false }">
-        <button type="button" class="remove" :aria-label="`Delete the week of ${range(week.start_date, week.end_date)}`" title="Delete this week" @click="removing = week">
+        <button type="button" class="remove" :aria-label="`Delete the plan for ${planRange(week.start_date, week.end_date)}`" title="Delete this plan" @click="removing = week">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" /></svg>
         </button>
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
-          <span class="when mc-serif">{{ range(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
+          <span class="when mc-serif">{{ planRange(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
           <span class="meta">
-            planned {{ plannedAt(week.created_at) }} ·
+            <template v-if="week.day_count">{{ daysLabel(week.day_count) }} · </template>planned {{ plannedAt(week.created_at) }} ·
             {{ week.household_size }} {{ week.household_size === 1 ? "person" : "people" }} ·
             groceries {{ formatSgd(week.purchase_total_sgd) }}
             <template v-if="week.within_weekly_budget === false"> · over budget</template>
@@ -131,9 +130,9 @@ const range = (start: string, end: string) => `${formatPlanDate(start, { day: "n
     <HomeRecipeSheet v-if="openSlug" :slug="openSlug" @close="openSlug = null" />
     <HomeConfirm
       v-if="removing"
-      title="Delete this week?"
-      :message="`The week of ${range(removing.start_date, removing.end_date)} will be deleted with its dishes, groceries and changes. A conversation that planned it stays. This cannot be undone.`"
-      action="Delete week"
+      title="Delete this plan?"
+      :message="`The plan for ${planRange(removing.start_date, removing.end_date)} will be deleted with its dishes, groceries and changes. A conversation that planned it stays. This cannot be undone.`"
+      action="Delete plan"
       :busy="busy"
       @confirm="removeWeek"
       @cancel="removing = null"

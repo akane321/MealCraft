@@ -782,12 +782,17 @@ produces no adjustment suggestions. See [conflict explanations](design/planning-
 for the declared-group minimality and resource limits.
 
 `GET /api/plans/{plan_id}` returns the persisted snapshot and a `current`
-boolean. A plan is no longer current when a newer plan in the same household
-overlaps its dates. This check covers the full plan history, independent of
-the recent-list page size; creation time and then ID determine which is newer.
+boolean. A plan is no longer current when newer plans in the same household
+together cover every one of its (date, meal) places (owner decision
+2026-10-29; a plan's places are its days times the meals it plans). A newer plan
+that overlaps only part of it leaves it current: a dinner planned again inside
+a week does not replace the week, and a week planned again over a week does.
+This check covers the full plan history, independent of the recent-list page
+size; creation time and then ID determine which is newer.
 Pending replan confirmations and interaction answers for a replaced plan are
 rejected. `GET /api/plans` returns recent plan summaries for later history and
-dashboard integration.
+dashboard integration; each item carries `day_count` (1 to 14) beside
+`start_date`, `end_date` and `current`.
 
 ## Meal Check-in and Nutrition Dashboard
 
@@ -798,6 +803,7 @@ meal record or duplicate nutrition contribution is created.
 
 `GET /api/plans/{plan_id}/dashboard` returns:
 
+- the plan's `day_count` (1 to 14) beside `start_date` and `end_date`
 - planned-meal and completed-meal nutrition totals
 - per-day planned and completed nutrition values
 - planned, completed, and skipped entry counts
@@ -909,6 +915,51 @@ ID. The response also returns `context_version`, `last_scope_decision`, and an
 optional typed `pending_interaction`. `POST
 /api/agent/sessions/{session_id}/messages` appends another turn and merges only
 explicitly extracted values into the current state.
+
+A conversation can ask for a short plan (owner decision 2026-10-29): "one dinner
+for 1 person tomorrow", "dinner tonight", "today", "this weekend", "the next 3
+days", 明天晚餐, 今晚, 今天, 周末两天, 接下来三天. The state's `constraints`
+carry `day_count` (1 to 14, default 7; left out of the dump while it is 7, so a
+week's constraints are unchanged) and the plan is made for those days and meals
+only, with its shopping list and budget. Rules read the span first
+(`agent/plan_dates.py`); the model parser fills `plan_day_count` and
+`plan_meals` only when the rules find none. The rules are high-precision: a
+day word next to a negation or an absence ("no soup on the weekend", "I'm away
+this weekend", 周末不做饭, 今天不用做饭), in a clause about food at home ("chicken
+I bought today"), a duration ("expires in 2 days", "leftovers last 3 days", 放了三天,
+每周五天), two kinds of day in one message, or "the day after tomorrow" reads as
+no span, and the model's `plan_day_count` and `plan_meals` decide. "N days"
+needs a plan word with it ("for 3 days", "the next 3 days", "5 days of dinners",
+接下来三天, 三天的饭). Today is the household's meals
+not yet past (breakfast 10:00, lunch 15:00, dinner 21:00, Singapore time),
+tonight is today's dinner, and with every such meal past the plan starts
+tomorrow and says so; "today and tomorrow" is two days from today; this weekend
+is the coming Saturday and Sunday (today and tomorrow on a Saturday, today on a
+Sunday); "the next N days" (N up to 14) start at the default start; "dinners
+only" or 只要晚餐 narrows the meals and leaves the days. A meal named anywhere in
+the message narrows a day span ("Dinner for 2 tomorrow", "lunch and dinner for
+the weekend", 晚餐两个人，明天), and one said no is left out ("no breakfast
+tomorrow" is tomorrow without breakfast). The meals are a subset of the
+household's shape, each keeping its dish composition (the household's whole shape
+is kept in `usual_plan_shape` while fewer meals are planned). A week phrase with
+no days ("a week", "this week", "the whole week", "next week", "plan a week of
+dinners", 一周, 这周, 下周) puts the conversation back to 7 days, the household's
+shape and its weekly budget; an amount said per week ("S$100 a week") is not one.
+The reply says "The plan runs ..." or "The plan is for
+..." and speaks of the plan, not the week, below seven days. An amount stated for
+the plan ("S$15 for tomorrow's dinner", "$20 for the weekend", "the plan budget
+S$20") is that plan's budget; an amount said per week ("S$140 a week") is the
+week's and is pro-rated; an amount per day with the days stated ("S$10 a day for
+the next 3 days") is that times the days; an amount "each" is per person. The
+unprorated weekly budget (saved, or stated per week) is kept as
+`base_weekly_budget_sgd`, left out of the dump while empty. Every change of days
+or meals pro-rates from it by planned meals over 7 times the household's meals
+a day, rounded to cents, a week restores it, and the reply says so ("S$6.67 of
+your S$140 weekly budget"). The request's `weekly_budget_sgd` means this plan's
+budget. A new plan of a saved short plan keeps its days and
+meals. A change that names a day outside the plan is answered "That day is not
+in this plan" and changes nothing; a message about an ingredient that cannot be
+bought "today", or how the user is today, names no day.
 
 `PUT /api/agent/sessions/{session_id}/preferences` replaces the confirmation
 card's soft `planning_preferences` with a typed object, without a model call.

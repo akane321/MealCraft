@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI
 
 from app.agent import model_client, replies
 from app.agent.ingredient_matcher import IngredientMatcher
+from app.agent.plan_dates import SpanSaid, read_span
+from app.core import clock
 from app.data import ingredient_hierarchy
 from app.data.allergens import checked_allergens
 from app.schemas.agent import (
@@ -101,9 +103,28 @@ EATERS = re.compile(
 # An amount for each person ("S$3 per person per meal", 每人每餐3块, 人均15): times the people eating.
 PER_PERSON_AFTER = re.compile(
     r"^[^\d]{0,6}?\b(?:per|each|a|every)\s+(?:person|head|adult)\b|^\s*/\s*(?:person|head)\b"
-    r"|^[^\d]{0,4}(?:每人|每个人|一个人|人均)"
+    r"|^[^\d]{0,4}(?:每人|每个人|一个人|人均)|^\s*each\b(?!\s+(?:meal|dinner|lunch|breakfast|day|week))"
 )
 PER_PERSON_BEFORE = re.compile(r"(?:\b(?:per|each|every)\s+(?:person|head|adult)|每人|每个人|一个人|人均)[^\d]{0,10}$")
+# A sum for the plan a message asks for ("S$15 for tomorrow's dinner", "$20 for the weekend", "S$30 for the next 3
+# days", 明天晚餐15块, 周末一共40) is that plan's budget, as a week's total is the week's.
+PLAN_SPAN = (
+    r"(?:(?:breakfast|lunch|dinner)s?\s+)?"
+    rf"(?:tomorrow|today|tonight|(?:this\s+)?weekend|(?:next\s+)?(?:\d+|{'|'.join(NUMBER_WORDS)})\s+days?)\b"
+)
+PLAN_ZH = r"(?:明天|今天|今晚|周末|接下来[\d一二两三四五六七八九十]+天|[\d一二两三四五六七八九十]+天|这次计划|本次计划)"
+# "S$20 for the plan", "the plan budget S$20": what the short-plan budget choices say (agent/replies.py).
+PLAN_AFTER = re.compile(
+    rf"^[^\d]{{0,16}}?\b(?:for|on|over|during)\s+(?:the\s+|my\s+|our\s+)?{PLAN_SPAN}|^[^\d]{{0,6}}{PLAN_ZH}"
+    r"|^[^\d]{0,6}?\bfor\s+(?:the|this|my|our)\s+plan\b"
+)
+PLAN_BEFORE = re.compile(rf"\b{PLAN_SPAN}[^\d]{{0,24}}$|{PLAN_ZH}[^\d]{{0,10}}$|\bplan\s+budget\b[^\d]{{0,10}}$")
+# An amount for each day of the days a message gives ("S$10 a day for the next 3 days", 每天10块): times the days.
+PER_DAY_AFTER = re.compile(r"^[^\d]{0,6}?(?:\b(?:a|per|each|every)\s+day\b|/\s*day\b|每天|每日)")
+PER_DAY_BEFORE = re.compile(r"(?:\b(?:per|each|every)\s+day\b|\bdaily\b|每天|每日)[^\d]{0,10}$")
+# An amount said per week ("S$100 a week", "weekly budget 100", 每周预算100): the week's, whatever the plan's days.
+PER_WEEK_AFTER = re.compile(r"^[^\d]{0,16}?(?:\b(?:week|weekly|wk)\b|/\s*w(?:ee)?k\b|每周|一周|这周|本周|整周)")
+PER_WEEK_BEFORE = re.compile(r"(?:\b(?:week|weekly)\b|每周|一周|这周|本周|整周|周预算)[^\d]{0,48}$")
 CLAUSE_END = re.compile(r"[,，;；。!！?？]|\.(?:\s|$)")
 # 一百块, 五十新币, 八十五元: Chinese numerals before a currency word, read as digits.
 CHINESE_SUM = re.compile(r"([零一二两三四五六七八九十百千]+)(?=\s*(?:块|元|新币|新元))")
@@ -126,13 +147,20 @@ def with_digits(text: str) -> str:
     return CHINESE_SUM.sub(lambda match: str(chinese_number(match.group(1))), text)
 
 
-def budgets(text: str, people: int | None = None) -> tuple[float | None, float | None]:
-    """(per-meal, weekly) budgets a lower-cased message states; an amount that says neither is left out.
+def read_budgets(
+    text: str, people: int | None = None, days: int | None = None
+) -> tuple[float | None, float | None, bool]:
+    """(per-meal, weekly, said per week) budgets a lower-cased message states; an amount that says none is left out.
+
+    "Weekly" is the budget of the plan: an amount for tomorrow's dinner or the weekend is that plan's. An amount said
+    per week ("S$100 a week") is the week's whatever the plan's days: the third value says so, and the workflow
+    pro-rates it. An amount for each day is that times the `days` the message gives, and left out with none.
 
     An amount for each person is one for the household of `people`; with no household size it is left out.
     """
     text = with_digits(text)
     per_meal = weekly = None
+    per_week = False
     for match in AMOUNT.finditer(text):
         group = next(index for index, value in enumerate(match.groups(), start=1) if value)
         value = float(match.group(group))
@@ -153,9 +181,25 @@ def budgets(text: str, people: int | None = None) -> tuple[float | None, float |
         after, before = EATERS.sub(" ", after), EATERS.sub(" ", before)
         if PER_MEAL_AFTER.search(after) or PER_MEAL_BEFORE.search(before):
             per_meal = per_meal if per_meal is not None else value
-        elif WEEKLY_AFTER.search(after) or WEEKLY_BEFORE.search(before):
+        elif PER_DAY_AFTER.search(after) or PER_DAY_BEFORE.search(before):
+            if days is not None and weekly is None:
+                weekly = value * days
+        elif PER_WEEK_AFTER.search(after) or PER_WEEK_BEFORE.search(before):
+            if weekly is None:
+                weekly, per_week = value, True
+        elif (
+            WEEKLY_AFTER.search(after)
+            or WEEKLY_BEFORE.search(before)
+            or PLAN_AFTER.search(after)
+            or PLAN_BEFORE.search(before)
+        ):
             weekly = weekly if weekly is not None else value
-    return per_meal, weekly
+    return per_meal, weekly, per_week
+
+
+def budgets(text: str, people: int | None = None, days: int | None = None) -> tuple[float | None, float | None]:
+    """(per-meal, weekly) budgets a lower-cased message states (`read_budgets`)."""
+    return read_budgets(text, people, days)[:2]
 
 
 def says_no_repeats(text: str) -> bool:
@@ -177,6 +221,17 @@ def bare_amount(message: str) -> float | None:
         return None
     value = float(next(value for value in match.groups() if value))
     return value if value > 0 else None
+
+
+def apply_rule_span(extraction: AgentConstraintExtraction, message: str, span: SpanSaid | None = None) -> None:
+    """The days and meals a message states, read by rules (agent/plan_dates.py): they win over what a model read."""
+    span = span or read_span(message, clock.now())
+    if span is None:
+        return
+    if span.day_count is not None:
+        extraction.plan_day_count = span.day_count
+    if span.meals:
+        extraction.plan_meals = list(span.meals)  # type: ignore[assignment]
 
 
 class AgentConfigurationError(RuntimeError):
@@ -329,7 +384,10 @@ class RuleBasedConstraintParser:
         extraction.household_size = int(people) if people is not None else None
 
         eaters = extraction.household_size or current.household_size
-        extraction.budget_per_meal_sgd, extraction.weekly_budget_sgd = budgets(lower, eaters)
+        span = read_span(message, clock.now())
+        extraction.budget_per_meal_sgd, extraction.weekly_budget_sgd, per_week = read_budgets(
+            lower, eaters, span.day_count if span else None
+        )
         cooking_time = self._first_number(
             lower,
             [
@@ -557,7 +615,8 @@ class RuleBasedConstraintParser:
         extraction.medical_request_detected = any(
             token in lower for token in ("diabetes", "diabetic", "gout", "kidney disease", "糖尿病", "痛风", "肾病")
         )
-        extraction.assistant_summary = self._summary(extraction, replies.language(message, history))
+        apply_rule_span(extraction, message, span)
+        extraction.assistant_summary = self._summary(extraction, replies.language(message, history), week=per_week)
         return extraction
 
     @staticmethod
@@ -581,8 +640,8 @@ class RuleBasedConstraintParser:
         return {"克": "g", "千克": "kg", "毫升": "ml", "升": "l"}.get(unit, unit)
 
     @staticmethod
-    def _summary(extraction: AgentConstraintExtraction, lang: str = "en") -> str:
-        details = replies.details(extraction, lang)
+    def _summary(extraction: AgentConstraintExtraction, lang: str = "en", *, week: bool = False) -> str:
+        details = replies.details(extraction, lang, week=week)
         if details:
             return replies.say("got_it", lang, details=("，" if lang == "zh" else ", ").join(details))
         return replies.say("noted", lang)
@@ -704,7 +763,12 @@ household_size is how many people eat: "dinners for two" or "for 2" means 2. A d
 the week ("this week, around S$90", "S$10 total") is weekly_budget_sgd. An amount for each person
 ("S$3 per person per meal", 每人每餐3块) is for the whole household: multiply it by household_size from
 the message or the current state, and leave it null when the household size is unknown. A bare amount
-("S$50", 50新币) answering the assistant's question about a budget is that budget.
+("S$50", 50新币) answering the assistant's question about a budget is that budget. An amount for the plan
+the message asks for ("S$15 for tomorrow's dinner", "$20 for the weekend") is weekly_budget_sgd as well: the
+budget of that plan; an amount said per week ("S$100 a week") is weekly_budget_sgd even for a shorter plan (the
+server pro-rates it), and an amount per day is that times the days. Set plan_day_count and plan_meals only
+when the message limits this plan to some days or meals ("dinner tonight", "the next 3 days", "dinners
+only"); leave them null for a whole week.
 General preferences such as low sodium or low sugar are allowed. Disease-specific requests must set
 medical_request_detected=true and must never be translated into medical treatment constraints.
 Extract soft planning preferences separately: repeat_allowed_meals only when the user allows a meal type
@@ -730,6 +794,7 @@ Latest user message: {message}
         if not isinstance(result, AgentConstraintExtraction):
             result = AgentConstraintExtraction.model_validate(result)
         aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
+        apply_rule_span(aligned, message)
 
         # With a saved household size, bare "two of us" describes part of the
         # household rather than replacing its total size.
@@ -746,7 +811,12 @@ Latest user message: {message}
             aligned.household_size = None
 
         # The reply is a template over what was understood, never the model's own sentence.
-        aligned.assistant_summary = RuleBasedConstraintParser._summary(aligned, replies.language(message, history))
+        _, weekly, per_week = read_budgets(lower_message, aligned.household_size or current.household_size)
+        aligned.assistant_summary = RuleBasedConstraintParser._summary(
+            aligned,
+            replies.language(message, history),
+            week=per_week and weekly is not None and weekly == aligned.weekly_budget_sgd,
+        )
         return aligned
 
 
