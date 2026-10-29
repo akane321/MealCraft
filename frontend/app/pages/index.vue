@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetGap, budgetLine, changedMealWhen, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange } from "~/lib/home-surface";
+import { cartStateLabels } from "~/lib/fairprice-cart";
+import { budgetGap, budgetLine, changedMealWhen, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange, shoppingTrips } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
-import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
+import type { FairPriceCartState, MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
 
 useHead({ title: "MealCraft" });
 
@@ -44,6 +45,7 @@ const lastPlanId = ref<number | null>(null);
 const panelOpen = ref(true);
 const tab = ref<Tab>("dinners");
 const previewOpen = ref(false);
+const cartOpen = ref(false);
 const nutritionOpen = ref(false);
 const recipeSlug = ref<string | null>(null);
 const log = ref<HTMLElement | null>(null);
@@ -125,6 +127,8 @@ const rangeLabel = computed(() => {
 const days = computed(() => nutrition.dashboard.value?.days ?? []);
 const groceryCount = computed(() => groceryGroups(plan.value?.grocery_estimate.items ?? []).reduce((n, g) => n + g.lines.length, 0));
 const estimate = computed(() => plan.value?.grocery_estimate ?? null);
+// Where the FairPrice cart stands for each shopping trip: in the cart, ordered, or the list changed after it was sent.
+const cartStates = computed(() => cartStateLabels(plan.value?.fairprice_cart));
 // Budget bar: within (green), near at 95% or more (amber), over (red, the overage segment marked).
 const budgetBar = computed(() => {
   const budget = estimate.value?.weekly_budget_sgd;
@@ -450,6 +454,17 @@ function swap(day: NutritionDashboardDay) {
 
 function exportPdf() {
   window.print();
+}
+
+function cartSent(state: FairPriceCartState) {
+  if (plan.value) plan.value.fairprice_cart = state;
+}
+
+// A swap from the cart dialog: the dialog closes first, so the focus it gives back does not land after the composer's.
+async function cartAsk(text: string) {
+  cartOpen.value = false;
+  await nextTick();
+  suggest(text);
 }
 
 function toggleFilm() {
@@ -875,7 +890,19 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <i class="fill" :style="{ width: `${budgetBar.spent}%` }" />
               <i v-if="budgetBar.over" class="overage" :style="{ width: `${budgetBar.over}%` }" />
             </div>
+            <p v-if="tab === 'groceries' && cartStates.length" class="cart-states">
+              <span v-for="state in cartStates" :key="state.key" class="mc-chip" :class="state.tone">{{ state.label }}</span>
+            </p>
             <div v-if="tab === 'groceries'" class="foot-acts">
+              <button
+                type="button"
+                class="mc-btn strong cart-btn"
+                :disabled="readOnly"
+                :title="readOnly ? 'This week was replaced. Open the current week to shop for it.' : undefined"
+                @click="cartOpen = true"
+              >
+                Add to FairPrice cart
+              </button>
               <button type="button" class="mc-btn secondary" @click="previewOpen = true">Preview list</button>
               <button type="button" class="mc-btn quiet" @click="exportPdf">Export PDF</button>
             </div>
@@ -902,6 +929,16 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       @set-status="setStatus"
     />
     <HomeRecipeSheet v-if="recipeSlug" :slug="recipeSlug" @close="recipeSlug = null" />
+    <HomeFairPriceCart
+      v-if="cartOpen && plan && estimate"
+      :plan-id="plan.id"
+      :pricing-mode="estimate.pricing_mode"
+      :trips="shoppingTrips(estimate)"
+      :cart-state="plan.fairprice_cart"
+      @close="cartOpen = false"
+      @state="cartSent"
+      @ask="cartAsk"
+    />
 
     <div v-if="plan" v-show="previewOpen" ref="preview" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview">
       <div class="sheet-frame">
@@ -1075,8 +1112,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .meter.near .fill { background: var(--c-amber); }
 .meter.over .fill { border-radius: 999px 0 0 999px; background: var(--c-amber); border-right: 2px solid #fff; }
 .meter .overage { background: repeating-linear-gradient(135deg, var(--c-amber-text) 0 4px, #b86b00 4px 8px); }
-.foot-acts { display: flex; gap: 8px; margin-top: 2px; }
+.foot-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .foot-acts button { flex: 1; }
+.foot-acts .cart-btn { flex-basis: 100%; }
+.cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 
 /* Shopping list preview */
 .mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; background: rgba(42, 42, 72, 0.45); animation: mc-rise 420ms var(--ease) both; }

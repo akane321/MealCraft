@@ -86,6 +86,9 @@ Available endpoints:
 - POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
+- POST /api/plans/{plan_id}/fairprice-cart/prepare
+- POST /api/plans/{plan_id}/fairprice-cart/report
+- POST /api/plans/{plan_id}/fairprice-cart/ordered
 - GET /api/feedback/recipes?kind={kind}
 - PUT /api/feedback/recipes/{recipe_id}
 - DELETE /api/feedback/recipes/{recipe_id}
@@ -788,6 +791,12 @@ the recent-list page size; creation time and then ID determine which is newer.
 Pending replan confirmations and interaction answers for a replaced plan are
 rejected. `GET /api/plans` returns recent plan summaries for later history and
 dashboard integration.
+
+The plan snapshot also carries `fairprice_cart`: per shopping trip, whether the list was put into the household's
+FairPrice cart or ordered, with a `stale` flag when the list changed after it was sent. The three
+`/fairprice-cart/` routes re-check the trip's FairPrice lines live, record what the browser extension put into the
+person's own cart, and record that the person checked out; MealCraft never calls FairPrice's cart itself. Shapes and
+rules are in [FairPrice cart](design/fairprice-cart.md).
 
 ## Meal Check-in and Nutrition Dashboard
 

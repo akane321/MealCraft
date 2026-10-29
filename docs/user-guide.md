@@ -383,6 +383,15 @@ are samples or no live price came back, and grey when all are samples.
 **Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
 
+**Add to FairPrice cart** puts the list into your own FairPrice cart, in a browser where you are logged in to
+FairPrice and have the MealCraft FairPrice cart extension installed (load `browser-extension/fairprice-cart/` as an
+unpacked extension in Chrome or Edge; see its README). MealCraft first re-checks every item at FairPrice and shows
+what is ready, which prices changed and whether the week still fits the budget, and lists the items that cannot be
+added, each with **Swap** (it puts a can't-buy request in the message box) or a product link. Nothing in your cart
+is removed, and nothing is bought: you check out and pay on FairPrice. After sending, the list shows **In your
+FairPrice cart**; press **I've checked out** once you have ordered. If the plan changes afterwards, the list says so.
+It needs live FairPrice prices; a plan on sample prices explains that.
+
 The **Nutrition** tab leads with what has been eaten: only meals marked cooked
 count as actuals. Choose a day, and a meal when that day has several, to compare
 all six nutrients in **Actual** and **Current plan**. Skipped dishes count in

@@ -160,7 +160,7 @@ def test_deadline_returns_snapshot_and_late_results_never_mutate_or_cache(monkey
 
 def test_fresh_cache_retains_observation_time_without_network():
     original = line()
-    cached = observed(original)
+    cached = observed(original, cart_item_id="9001")
     provider = Provider(lambda query: pytest.fail("fresh selected SKU should not use network"))
     result = service(provider, Repository({"food0": [cached]})).refresh_selected([original])[0]
     assert result.evidence.price_source == "cache"
@@ -168,6 +168,14 @@ def test_fresh_cache_retains_observation_time_without_network():
     assert result.evidence.checked_at >= cached.fetched_at
     assert result.product.price_sgd == 3
     assert not provider.calls
+
+
+def test_cached_row_without_cart_id_is_a_miss_and_the_live_fetch_fills_it():
+    original = line()
+    provider = Provider(lambda query: [observed(original, price_sgd=4, cart_item_id="9001")])
+    result = service(provider, Repository({"food0": [observed(original)]})).refresh_selected([original])[0]
+    assert result.evidence.price_source == "live" and provider.calls
+    assert (result.product.price_sgd, result.product.cart_item_id) == (4, "9001")
 
 
 @pytest.mark.parametrize("response", [[], [observed(line(), external_id="another-sku")]])

@@ -61,6 +61,7 @@ class ProductSnapshotRepository:
                 "image_url": product.image_url,
                 "in_stock": product.in_stock,
                 "fetched_at": product.fetched_at,
+                "cart_item_id": product.cart_item_id,
                 "raw_data": {},
             }
             for rank, product in enumerate(products)
@@ -102,4 +103,5 @@ class ProductSnapshotRepository:
             in_stock=snapshot.in_stock,
             source=snapshot.source,
             fetched_at=snapshot.fetched_at,
+            cart_item_id=snapshot.cart_item_id,
         )

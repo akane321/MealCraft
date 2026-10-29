@@ -1961,3 +1961,121 @@ test("grocery items and their printed list distinguish missing products from a t
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByText("Grocery changes are estimates. Selected product prices are checked again when you confirm.", { exact: true })).toBeVisible();
 });
+
+const CART_CHANGED = "Other items already in your FairPrice cart changed. Check your cart.";
+
+test("the FairPrice cart dialog reviews the list, sends it through the extension and records the cart at 1280x720", async ({ page }) => {
+  await stubApi(page);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const trip2 = plan.grocery_estimate.items.map((item, index) => (index === 0 ? { ...item, shopping_trip: 2 } : item));
+  const livePlan = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", items: trip2 }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill({ json: livePlan }));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill({ json: { session: session(true), plan: livePlan } }));
+  const fingerprint = "a".repeat(64);
+  const line = (key: string, name: string, cartId: string, quantity: number, planned: number, live: number | null, status: string) => ({
+    line_key: key, ingredient_name: key.split("|")[1], ingredient_display_name: name, product_name: `FairPrice ${name}`,
+    client_item_id: `13${cartId}`, cart_item_id: status === "ready" ? cartId : null, quantity,
+    planned_price_sgd: planned, live_price_sgd: live, product_url: `https://www.fairprice.com.sg/product/${cartId}`, status,
+  });
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill({ json: {
+    plan_id: 9001, shopping_trip: null, fingerprint,
+    lines: [
+      line("1|chicken_breast|g", "chicken breast", "172993", 1, 10.15, 10.95, "ready"),
+      line("1|broccoli|g", "broccoli", "160001", 2, 2.9, 2.9, "ready"),
+      line("1|salmon_fillet|g", "salmon fillet", "150002", 1, 10.9, null, "out_of_stock"),
+    ],
+    ready_total_sgd: 16.75, planned_total_sgd: 82.6, projected_total_sgd: 83.4, budget_sgd: 90, over_budget: false,
+  } }));
+  const reports: Array<Record<string, unknown>> = [];
+  const state = (status: string) => ({ "1": {
+    status, sent_at: "2026-10-29T09:00:00Z", ordered_at: status === "ordered" ? "2026-10-29T10:00:00Z" : null, fingerprint, stale: false,
+    results: [{ line_key: "1|chicken_breast|g", cart_item_id: "172993", status: "added", quantity: 1, cart_price_sgd: 10.95 },
+      { line_key: "1|broccoli|g", cart_item_id: "160001", status: "added", quantity: 2, cart_price_sgd: 2.9 }],
+  } });
+  await page.route("**/api/plans/9001/fairprice-cart/report", async (route) => {
+    reports.push(route.request().postDataJSON());
+    // The first save fails after the extension has added: the dialog offers to save again, not to send again.
+    if (reports.length === 1) return route.fulfill({ status: 500, json: { detail: "down" } });
+    await route.fulfill({ json: state("in_cart") });
+  });
+  await page.route("**/api/plans/9001/fairprice-cart/ordered", route => route.fulfill({ json: state("ordered") }));
+  // The extension, as the page sees it through externally_connectable.
+  await page.addInitScript(() => {
+    const sent: unknown[] = [];
+    (window as unknown as { __sent: unknown[] }).__sent = sent;
+    (window as unknown as { chrome: unknown }).chrome = { runtime: { sendMessage(_id: string, message: { type: string; lines?: Array<{ line_key: string; cart_item_id: string; quantity: number }> }, reply: (r: unknown) => void) {
+      sent.push(message);
+      if (message.type === "ping") return setTimeout(() => reply({ ok: true, version: "0.1.0" }), 10);
+      // The first add is slow enough to try to close the dialog while it runs; the second sees other cart items change.
+      const first = sent.filter(m => (m as { type: string }).type === "add_to_cart").length === 1;
+      setTimeout(() => reply({ ok: true, ...(first ? {} : { cart_changed: ["999"] }), results: message.lines!.map(l => ({ ...l, status: "added", cart_price_sgd: null })) }), first ? 400 : 50);
+    } } };
+  });
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+  await page.getByRole("tab", { name: /Groceries/ }).click();
+  await page.getByRole("button", { name: "Add to FairPrice cart", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Add to FairPrice cart" });
+  await expect(dialog.getByRole("region", { name: "Price changes" })).toContainText("chicken breast");
+  await expect(dialog.getByRole("region", { name: "Lines that can't be added" })).toContainText("salmon fillet");
+  if (SHOTS) {
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/fairprice-cart-review.png` });
+  }
+
+  await expect(dialog.getByText("Already added on", { exact: false })).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Add 2 items to FairPrice cart", exact: true }).click();
+  // While the extension is adding, Escape, the backdrop and the X leave the dialog open.
+  await expect(dialog.getByRole("button", { name: "Sending to your cart…" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.mouse.click(4, 4);
+  await expect(dialog.getByRole("button", { name: "Close", exact: true })).toBeDisabled();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Save to plan again", exact: true })).toBeVisible();
+  await expect(dialog.getByRole("tab")).toHaveCount(0);
+  await expect(dialog.getByText(CART_CHANGED, { exact: true })).toHaveCount(0);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/fairprice-cart-report.png` });
+  const sent = await page.evaluate(() => (window as unknown as { __sent: Array<{ type: string; lines?: unknown[] }> }).__sent);
+  expect(sent.find(m => m.type === "add_to_cart")!.lines).toEqual([
+    { line_key: "1|chicken_breast|g", cart_item_id: "172993", quantity: 1 },
+    { line_key: "1|broccoli|g", cart_item_id: "160001", quantity: 2 },
+  ]);
+  expect(reports).toHaveLength(1);
+  expect(reports[0]).toMatchObject({ fingerprint, results: [{ line_key: "1|chicken_breast|g", status: "added" }, { line_key: "1|broccoli|g", status: "added" }] });
+  await dialog.getByRole("button", { name: "Save to plan again", exact: true }).click();
+  await expect(dialog.getByRole("button", { name: "I've checked out", exact: true })).toBeVisible();
+  expect(reports).toHaveLength(2);
+  expect(reports[1]).toEqual(reports[0]);
+  expect(await page.evaluate(() => (window as unknown as { __sent: Array<{ type: string }> }).__sent.filter(m => m.type === "add_to_cart").length)).toBe(1);
+
+  await dialog.getByRole("button", { name: "I've checked out", exact: true }).click();
+  await expect(dialog.getByText("Marked as ordered", { exact: false })).toBeVisible();
+  await expect(page.getByText(/^Ordered on /)).toBeVisible();
+
+  // The trip was sent, so opening it again warns and needs a second confirm before the same quantities go in again.
+  const adds = () => page.evaluate(() => (window as unknown as { __sent: Array<{ type: string }> }).__sent.filter(m => m.type === "add_to_cart").length);
+  await dialog.getByRole("button", { name: "Close", exact: true }).first().click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole("button", { name: "Add to FairPrice cart", exact: true }).click();
+  await expect(dialog.getByText("Already added on 29 Oct. Adding again adds these quantities a second time.", { exact: true })).toBeVisible();
+  await dialog.getByRole("button", { name: "Add 2 items to FairPrice cart", exact: true }).click();
+  expect(await adds()).toBe(1);
+  // Another trip has not been sent: choosing it clears the warning and the armed confirm.
+  await dialog.getByRole("tab", { name: "Trip 2" }).click();
+  await expect(dialog.getByText("Already added on", { exact: false })).toHaveCount(0);
+  await expect(dialog.getByRole("button", { name: "Add 2 items to FairPrice cart", exact: true })).toBeVisible();
+  await dialog.getByRole("tab", { name: "Trip 1" }).click();
+  await expect(dialog.getByText("Already added on", { exact: false })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Add again" })).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Add 2 items to FairPrice cart", exact: true }).click();
+  await dialog.getByRole("button", { name: "Add again", exact: true }).click();
+  await expect(dialog.getByText(CART_CHANGED, { exact: true })).toBeVisible();
+  expect(await adds()).toBe(2);
+  expect(reports).toHaveLength(3);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
