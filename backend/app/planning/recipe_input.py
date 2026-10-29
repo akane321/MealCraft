@@ -67,6 +67,8 @@ def recipe_input(
         # not cooking time, so the split carries none.
         data.update(prep_minutes=source.prep_time_minutes, cook_minutes=source.cook_time_minutes, passive_minutes=0)
     blank = []
+    if not source.ingredients:
+        blank.append("no_ingredients")
     if not source.slug.strip():
         blank.append("blank_recipe_id")
     for index, item in enumerate(source.ingredients):

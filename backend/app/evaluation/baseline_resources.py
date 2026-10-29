@@ -7,8 +7,9 @@
 - Allergen vocabulary: `checked_allergens()` (`data/ingredients/allergen-vocabulary.json`). An allergen outside
   it is unverifiable for every ingredient (`app.data.allergens`).
 - Prices: the frozen FairPrice v2 snapshot through `load_release_catalog`, whole packages only.
-- Not bought: water and ice always; the basic seasonings (`data/ingredients/basic-seasonings-v1.json`) unless
-  the household lists them as missing or excludes them. They still count for every safety check.
+- Not bought: water and ice always; the basics assumed at home (`data/ingredients/basic-seasonings-v2.json`: seasonings,
+  rice, vinegars, small-amount sauces, dried herbs, flours and the like) unless the household lists them as missing
+  or excludes them. They still count for every safety check. The file's digest is recorded with the others.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ from app.schemas.planning_v2 import PlanningNutrients, PlanningProductOption
 RELEASE = Path("data-engineering/data/release/v2.2")
 RELEASE_INGREDIENTS = RELEASE / "ingredients.jsonl"
 RELEASE_MANIFEST = RELEASE / "release_manifest.json"
+BASICS = Path("data/ingredients/basic-seasonings-v2.json")
 
 
 @dataclass(frozen=True)
@@ -88,7 +90,7 @@ def load_resources(root: Path | None = None) -> BaselineResources:
         release_version=manifest.get("release_version"),
         data_digests=tuple(
             (str(path), hashlib.sha256((root / path).read_bytes()).hexdigest())
-            for path in (RELEASE_INGREDIENTS, RELEASE_MANIFEST, SNAPSHOT, CURATED)
+            for path in (RELEASE_INGREDIENTS, RELEASE_MANIFEST, SNAPSHOT, CURATED, BASICS)
         ),
     )
 

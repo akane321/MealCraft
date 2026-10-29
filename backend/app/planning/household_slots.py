@@ -1,14 +1,15 @@
 """The one place a household's rules are read for planning (layer 08): who eats each meal, its time limit,
-which basic seasonings are at home, and the nutrition limits it switched on.
+which basics (seasonings, rice, flours and the like) are at home, and the nutrition limits it switched on.
 
 Every function takes `household=None` as "no household block": the request plans exactly as before.
 """
 
+from collections import Counter
 from datetime import date
 from fractions import Fraction
 from functools import lru_cache
 
-from app.data.household_reference import basic_seasonings, hpb, meal_shares
+from app.data.household_reference import basic_seasonings, basic_short_labels, hpb, meal_shares
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.schemas.household_rules import WEEKDAYS, HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
@@ -117,12 +118,14 @@ def assumed_basics(household: HouseholdPlanning | None, excluded: list[str]) -> 
 
 
 def basics_note(names) -> str | None:
-    """The grocery list's note for the basics a week uses and does not buy."""
-    shown = sorted(basic_seasonings()[name]["display_name"].lower() for name in names if name in basic_seasonings())
-    if not shown:
+    """The grocery list's note for what a week uses and does not buy: categories and counts, not every name."""
+    table = basic_seasonings()
+    counts = Counter(table[name]["category"] for name in names if name in table)
+    if not counts:
         return None
+    shown = ", ".join(f"{noun} ({counts[key]})" for key, noun in basic_short_labels().items() if key in counts)
     return (
-        f"Basic seasonings are assumed at home and left off this list: {', '.join(shown)}. "
+        f"Pantry basics are assumed at home and left off this list: {shown}. "
         "Mark one as run out on your profile to buy it."
     )
 
