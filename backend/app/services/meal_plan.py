@@ -31,7 +31,7 @@ from app.planning.replan_pantry import remaining_stock
 from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
-from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
+from app.repositories.meal_plan import MealPlanRepository, ScheduledDish, replaced_by
 from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
 from app.schemas.meal_plan import (
@@ -746,6 +746,7 @@ class WeeklyMealPlanService:
                     replaces_plan_id=plan.replaces_plan_id,
                     start_date=plan.start_date,
                     end_date=plan.end_date,
+                    day_count=plan.day_count,
                     household_size=plan.household_size,
                     purchase_total_sgd=float(plan.purchase_total_sgd),
                     consumed_total_sgd=(
@@ -753,10 +754,7 @@ class WeeklyMealPlanService:
                     ),
                     within_weekly_budget=plan.within_weekly_budget,
                     created_at=plan.created_at,
-                    current=not any(
-                        newer.start_date <= plan.end_date and newer.end_date >= plan.start_date
-                        for newer in plans[:index]
-                    ),
+                    current=not replaced_by(plan, plans[:index]),
                 )
                 for index, plan in enumerate(plans)
             ]
@@ -844,6 +842,7 @@ class WeeklyMealPlanService:
             revision=plan.revision,
             start_date=plan.start_date,
             end_date=plan.end_date,
+            day_count=plan.day_count,
             household_size=plan.household_size,
             completion_rate=round(completed_count / max(len(plan.entries), 1) * 100, 1),
             status_counts=MealPlanStatusCounts(**counts),

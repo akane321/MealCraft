@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -223,6 +223,44 @@ describe("meals by day", () => {
     const days = [dish(1, "lunch", "main", 300, "completed"), dish(1, "dinner", "main", 400), dish(1, "dinner", "vegetable", 100)];
     expect(nextMeal(days, "2026-09-21")).toMatchObject({ isToday: true, meal: { mealType: "dinner" } });
     expect(perMealAndDay(days)).toMatchObject({ meal: { calories_kcal: 400 }, day: { calories_kcal: 800 }, mealsPerDay: 2 });
+  });
+});
+
+describe("follow-up chips", () => {
+  // 2026-09-21 is a Monday.
+  const dish = (index: number, status: NutritionDashboardDay["status"] = "planned", meal: "lunch" | "dinner" = "dinner") =>
+    ({ entry_id: index, day_index: index, planned_date: `2026-09-${20 + index}`, meal_type: meal, role_id: "main", status }) as unknown as NutritionDashboardDay;
+
+  it("names the next planned meal and a real day, not a fixed Friday and Sunday", () => {
+    const week = [1, 2, 3, 4, 5, 6, 7].map(index => dish(index));
+    expect(followUpChips(week, "2026-09-21")).toEqual(["Swap Monday's dinner", "Skip Tuesday", "Don't change Sunday"]);
+  });
+
+  it("starts at the next meal still to cook and skips days already done", () => {
+    const days = [dish(1, "completed"), dish(2, "skipped"), dish(3), dish(4), dish(5)];
+    expect(followUpChips(days, "2026-09-21")).toEqual(["Swap Wednesday's dinner", "Skip Thursday", "Don't change Friday"]);
+  });
+
+  it("offers only a swap for a one-dinner plan, and a skip for a two-day plan", () => {
+    expect(followUpChips([dish(2)], "2026-09-22")).toEqual(["Swap Tuesday's dinner"]);
+    expect(followUpChips([dish(1), dish(2)], "2026-09-21")).toEqual(["Swap Monday's dinner", "Skip Tuesday"]);
+  });
+
+  it("names the date in a plan past seven days, where a weekday repeats and the assistant takes the first", () => {
+    // 14 days from Mon 2026-09-21: the next open meal is day 11 (a Thursday, 1 Oct); day 4 is also a Thursday.
+    const fortnight = Array.from({ length: 14 }, (_, index) => ({
+      ...dish(index + 1, index < 10 ? "completed" : "planned"),
+      planned_date: new Date(Date.UTC(2026, 8, 21 + index)).toISOString().slice(0, 10),
+    }));
+    const chips = followUpChips(fortnight, "2026-10-01");
+    expect(chips).toEqual(["Swap Thursday 1 Oct's dinner", "Skip Friday 2 Oct", "Don't change Sunday 4 Oct"]);
+    expect(chips.every(chip => /\d{1,2} Oct/.test(chip))).toBe(true);
+  });
+
+  it("names the meal of a lunch-only plan and gives no chips when nothing is left", () => {
+    expect(followUpChips([dish(1, "planned", "lunch")], "2026-09-21")).toEqual(["Swap Monday's lunch"]);
+    expect(followUpChips([dish(1, "completed")], "2026-09-21")).toEqual([]);
+    expect(followUpChips([], "2026-09-21")).toEqual([]);
   });
 });
 

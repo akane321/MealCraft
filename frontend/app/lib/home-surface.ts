@@ -1,7 +1,7 @@
 import type { FeedbackKind, MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
-import { formatPlanDate } from "./meal-plan-format";
+import { formatPlanDate, sentenceDay } from "./meal-plan-format";
 import { planDayLabel } from "./plan-shape";
 
 /** Today's dinner if the plan covers today, otherwise the next one still planned. */
@@ -66,8 +66,11 @@ export interface GroceryTrip {
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
 }
 
+/** Days one shopping trip covers: the backend's meal_structure trip_days (a plan of up to 7 days is one trip). */
+export const TRIP_DAYS = 7;
+
 /** A plan longer than a week shops twice (ADR-0072): its lines by trip, each grouped as groceryGroups; one trip otherwise. */
-export function groceryTrips(items: GroceryLineEstimate[], tripDays = 7): GroceryTrip[] {
+export function groceryTrips(items: GroceryLineEstimate[], tripDays = TRIP_DAYS): GroceryTrip[] {
   if (!items.some(line => line.shopping_trip)) return [{ trip: null, label: null, groups: groceryGroups(items) }];
   const trips = [...new Set(items.map(line => line.shopping_trip ?? 1))].sort((a, b) => a - b);
   return trips
@@ -292,6 +295,27 @@ export function nextMeal(days: NutritionDashboardDay[], today: string): { meal: 
   if (todays) return { meal: todays, isToday: true };
   const next = meals.find(meal => meal.date >= today && open(meal)) ?? meals.find(open);
   return next ? { meal: next, isToday: false } : null;
+}
+
+/**
+ * Follow-up chips from the plan's own days and meals: swap the next meal still to cook, skip the day after its day,
+ * keep the last day. A chip whose day the plan does not have is left out, so a one-day plan offers a swap only.
+ * Past seven days a weekday repeats, so a chip names the date the assistant reads.
+ */
+export function followUpChips(days: NutritionDashboardDay[], today: string): string[] {
+  const next = nextMeal(days, today);
+  if (!next) return [];
+  const weekday = (date: string) => sentenceDay(date, new Set(days.map(item => item.planned_date)).size > 7);
+  const open = mealsByDay(days).filter(day => day.meals.some(meal => meal.status === "planned" || meal.status === "partial"));
+  const first = open.findIndex(day => day.dayIndex === next.meal.dayIndex);
+  const later = open.slice(first + 1);
+  const skip = later[0];
+  const keep = later.length > 1 ? later.at(-1) : undefined;
+  return [
+    `Swap ${weekday(next.meal.date)}'s ${next.meal.mealType}`,
+    ...(skip ? [`Skip ${weekday(skip.date)}`] : []),
+    ...(keep ? [`Don't change ${weekday(keep.date)}`] : []),
+  ];
 }
 
 /** Per-person nutrition of an average meal and an average day, over what still counts (skipped dishes don't). */

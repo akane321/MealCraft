@@ -67,6 +67,8 @@ export interface AgentConstraintState {
   };
   // The week's first day, YYYY-MM-DD (backend agent/plan_dates.py); absent on older conversations.
   start_date?: string | null;
+  // Days the conversation will plan (1 to 14); absent means a week.
+  day_count?: number | null;
 }
 
 export interface AgentReplanDraft {

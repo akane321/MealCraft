@@ -78,6 +78,8 @@ export interface WeeklyMealPlanListItem {
   replaces_plan_id: number | null;
   start_date: string;
   end_date: string;
+  /** Days the plan covers (1 to 14); the backend list item carries it. */
+  day_count: number;
   household_size: number;
   purchase_total_sgd: number;
   consumed_total_sgd: number | null;
@@ -141,6 +143,8 @@ export interface WeeklyNutritionDashboard {
   revision: number;
   start_date: string;
   end_date: string;
+  /** Days the plan covers (1 to 14). */
+  day_count: number;
   household_size: number;
   completion_rate: number;
   status_counts: MealPlanStatusCounts;

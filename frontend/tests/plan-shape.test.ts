@@ -132,7 +132,7 @@ describe("shapeChangeSummary", () => {
   const start = "2026-09-28";
 
   it("says what changes and where", () => {
-    expect(shapeChangeSummary(change({ meal_type: "lunch", scope: "week", roles: [], removed: [] }), start)).toBe("Lunch added for the rest of the week");
+    expect(shapeChangeSummary(change({ meal_type: "lunch", scope: "week", roles: [], removed: [] }), start)).toBe("Lunch added for the rest of the plan");
     expect(shapeChangeSummary(change({ roles: null }), start)).toBe("No dinner on Fri");
     const roles = [{ role_id: "main", courses: ["main"] }, { role_id: "soup", courses: ["soup"] }, { role_id: "main-2", courses: ["main"] }] as MealRole[];
     const removed = [{ entry_id: 1 }] as MealPlanShapeChange["removed"];
