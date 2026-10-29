@@ -70,31 +70,41 @@ test("extractCart finds the cart in plausible shapes", () => {
   for (const q of [0, 3, "0", "12"]) assert.notEqual(core.extractCart({ cart: { items: [{ id: 1, q }] } }), null, JSON.stringify(q));
 });
 
-test("mergeItems keeps existing items, adds quantity and types ids like the cart", () => {
-  const current = [{ id: 5, q: "1", isChecked: false, t: 1, extra: "keep" }, { id: 6, q: "3" }];
+test("mergeItems sends every item the way FairPrice's site does and adds the quantity", () => {
+  const current = [
+    { id: 5, q: "1", isChecked: false, t: 1, adIds: ["ad"], reason: "BackInStock", product: { name: "x" } },
+    { id: 6, q: "3" },
+    { id: 7, q: "1", isFree: true },
+    { id: 8, q: "1", product: { storeSpecificData: { mrp: 0 } } },
+  ];
   const merged = core.mergeItems(current, [line("5", 2), line("77", 4)], 1000);
-  assert.deepEqual(merged[0], { id: 5, q: "3", isChecked: false, t: 1, extra: "keep" });
-  assert.deepEqual(merged[1], { id: 6, q: "3" });
-  assert.deepEqual(merged[2], { id: 77, q: "4", isChecked: true, t: 1000, adIds: [], reason: "InStock" });
+  assert.deepEqual(merged, [
+    { id: "5", isChecked: false, q: "3", t: 1, adIds: ["ad"], reason: "BackInStock" },
+    { id: "6", isChecked: true, q: "3", t: 1000, adIds: [], reason: "InStock" },
+    { id: "77", isChecked: true, q: "4", t: 1000, adIds: [], reason: "InStock" },
+  ]);
   assert.equal(current[0].q, "1", "input is not mutated");
-  assert.equal(core.mergeItems([{ id: "5", q: "1" }], [line("8")], 1)[1].id, "8");
-  assert.equal(core.mergeItems([], [line("8")], 1)[0].id, 8);
 });
 
-test("buildBody carries store, address and the FairPrice flags", () => {
-  const body = core.buildBody({ storeId: 165, addressId: 9, orderType: "PICKUP" }, [{ id: 1 }]);
+test("buildBody is the body FairPrice's own site sends", () => {
+  const body = core.buildBody({ storeId: 165, addressId: "9", orderType: "PICKUP" }, [{ id: "1" }], 4242);
   assert.deepEqual(body, {
-    cart: { items: [{ id: 1 }] },
-    storeId: 165,
-    addressId: 9,
+    customerId: 4242,
+    storeId: "165",
+    addressId: "9",
+    cart: { items: [{ id: "1" }], isOutOfStockEnabled: true, dropUnavailableItems: [] },
     orderType: "PICKUP",
     isOutOfStockEnabled: true,
     isCheckerEnabled: true,
     isSellerCheckerEnabled: true,
+    isSellerTimeSlotEnabled: true,
+    isDirectFulfilmentEnabled: true,
+    poaItemDropOff: false,
   });
   const bare = core.buildBody({}, []);
   assert.equal(bare.orderType, "DELIVERY");
   assert.equal("addressId" in bare, false);
+  assert.equal("customerId" in bare, false);
 });
 
 test("resultsFor reports added, reduced, out_of_stock and failed", () => {
@@ -140,7 +150,7 @@ test("ids match as numbers, so 5 and the string 5 are one cart item", () => {
   assert.equal(core.resultsFor([line("5", 2)], [{ id: "5", q: "3" }], [{ id: 5, q: "1" }])[0].status, "added");
   // Two lines for one new id add up in the body instead of creating two items.
   const merged = core.mergeItems([], [line("8", 1, "a"), line("8", 2, "b")], 1);
-  assert.deepEqual(merged.map((i) => [i.id, i.q]), [[8, "3"]]);
+  assert.deepEqual(merged.map((i) => [i.id, i.q]), [["8", "3"]]);
 });
 
 test("pickTab takes a loaded, non-discarded FairPrice tab that is not on checkout or payment", () => {
@@ -209,8 +219,8 @@ test("addToCart dry run returns the body and sends no POST", async () => {
   assert.equal(result.ok, true);
   assert.equal(result.dry_run, true);
   assert.deepEqual(result.results.map((r) => r.status), ["would_add", "would_add"]);
-  assert.deepEqual(result.body.cart.items.map((i) => [i.id, i.q]), [[5, "3"], [9, "1"]]);
-  assert.equal(result.body.storeId, 165);
+  assert.deepEqual(result.body.cart.items.map((i) => [i.id, i.q, i.t]), [["5", "3", 1], ["9", "1", 42]]);
+  assert.equal(result.body.storeId, "165");
   assert.deepEqual(fetch.calls.map((c) => c.init.method), ["GET"]);
   assert.equal(JSON.stringify(result).includes("secret"), false);
 });
@@ -276,4 +286,18 @@ test("describeAnswer names FairPrice's status, message and keys but no cart valu
   const said = JSON.parse(core.describeAnswer({ code: 400, status: "ERROR", message: "storeId is required", data: { cart: { items: [{ id: 1 }], addressId: "secret" } } }));
   assert.deepEqual(said, { code: "400", status: "ERROR", message: "storeId is required", keys: "code,status,message,data", dataKeys: "cart", cartKeys: "items,addressId" });
   assert.ok(!core.describeAnswer({ data: { cart: { addressId: "secret" } } }).includes("secret"));
+});
+
+test("addToCart sends the account id from the FairPrice page data, when the page has it", async () => {
+  globalThis.__NEXT_DATA__ = { props: { account: { id: 777 } } };
+  try {
+    const fetch = mockFetch([jsonResponse(CART)]);
+    const result = await core.addToCart([line("5", 1)], { fetch, cookie: "auth_token=t", dryRun: true, now: 9 });
+    assert.equal(result.body.customerId, 777);
+  } finally {
+    delete globalThis.__NEXT_DATA__;
+  }
+  const fetch = mockFetch([jsonResponse(CART)]);
+  const without = await core.addToCart([line("5", 1)], { fetch, cookie: "auth_token=t", dryRun: true, now: 9 });
+  assert.equal("customerId" in without.body, false);
 });

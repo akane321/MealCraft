@@ -35,6 +35,13 @@ MealCraft page ──(1) POST /api/plans/{id}/fairprice-cart/prepare──▶ Me
   `www.fairprice.com.sg`. Without that cookie the person is not logged in. The API answers CORS with
   `Access-Control-Allow-Origin: *` and no credentials, so the request sends the bearer token only and never cookies;
   a credentialed request is blocked by the browser (first live dry run, 2026-10-29).
+- The write body follows the site's own `getCartRequestBody` (read from its public bundle on 2026-10-29): the
+  account's `customerId` (the page data's `account.id`), `storeId` as a string, `addressId`, `cart.items`,
+  `cart.isOutOfStockEnabled`, `cart.dropUnavailableItems: []`, `orderType`, and the flags `isOutOfStockEnabled`,
+  `isCheckerEnabled`, `isSellerCheckerEnabled`, `isSellerTimeSlotEnabled`, `isDirectFulfilmentEnabled` and
+  `poaItemDropOff: false`. Items are `{id: string, isChecked, q: string, t: epoch seconds, adIds, reason}`; free
+  items the server adds are left out; a removal is the item with `q: "0"`. The first write, with numeric ids and
+  `t` in milliseconds, added nothing.
 - A cart item is `{id, q, isChecked, t, ...}`: `id` is FairPrice's internal product id (the listing's `id`, for
   example `172993`), **not** the number at the end of a product URL (`clientItemId`, for example `13097675`, which
   MealCraft keeps as `external_id`). `q` is the quantity as a string.

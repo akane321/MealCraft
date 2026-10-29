@@ -86,38 +86,64 @@
 
   // Every existing item stays as it is, except that a matching id gets the quantity added.
   // New lines are appended in the shape of FairPrice's own cart items.
-  function mergeItems(currentItems, lines, now) {
-    const stringIds = currentItems.length > 0 && currentItems.every((item) => typeof item.id === "string");
-    const merged = currentItems.map((item) => ({ ...item }));
+  // Free items the server adds itself (a gift with purchase) are never sent back, as the site does.
+  function isFreeItem(item) {
+    const product = item.product || {};
+    const store = Array.isArray(product.storeSpecificData) ? product.storeSpecificData[0] : product.storeSpecificData;
+    return item.isFree === true || item.mrp === 0 || (store !== undefined && store !== null && store.mrp === 0);
+  }
+
+  // An item the way FairPrice's own site sends it (its getCartRequestBody): the id and q as strings,
+  // t in epoch seconds, adIds and reason kept.
+  function requestItem(item, nowSec) {
+    return {
+      id: String(item.id),
+      isChecked: item.isChecked === undefined ? true : item.isChecked,
+      q: String(item.q),
+      t: item.t !== undefined && item.t !== null ? item.t : nowSec,
+      adIds: Array.isArray(item.adIds) ? item.adIds : [],
+      reason: item.reason || "InStock",
+    };
+  }
+
+  // Every existing item goes back unchanged, except that a matching id gets the quantity added.
+  // The site sends the whole cart on every write, so leaving an item out could remove it.
+  function mergeItems(currentItems, lines, nowSec) {
+    const merged = currentItems.filter((item) => !isFreeItem(item)).map((item) => requestItem(item, nowSec));
     for (const line of lines) {
       const existing = merged.find((item) => sameId(item.id, line.cart_item_id));
       if (existing) {
         existing.q = String(Number(existing.q) + line.quantity);
       } else {
-        merged.push({
-          id: stringIds ? line.cart_item_id : Number(line.cart_item_id),
-          q: String(line.quantity),
-          isChecked: true,
-          t: now,
-          adIds: [],
-          reason: "InStock",
-        });
+        merged.push({ id: String(Number(line.cart_item_id)), isChecked: true, q: String(line.quantity), t: nowSec, adIds: [], reason: "InStock" });
       }
     }
     return merged;
   }
 
-  // The store/address fields and the response shape are confirmed in the owner's live test
-  // (docs/design/fairprice-cart.md "Live test"); until then these follow the cart read back.
-  function buildBody(cart, merged) {
-    const body = { cart: { items: merged } };
-    if (cart.storeId !== undefined) body.storeId = cart.storeId;
-    if (cart.addressId !== undefined) body.addressId = cart.addressId;
+  // The body FairPrice's own site sends (getCartRequestBody in its public bundle): the account id when
+  // known, the store as a string and the address from the cart read back, and the site's flags.
+  function buildBody(cart, merged, customerId) {
+    const body = {};
+    if (customerId !== undefined && customerId !== null) body.customerId = customerId;
+    if (cart.storeId !== undefined && cart.storeId !== null) body.storeId = String(cart.storeId);
+    if (cart.addressId !== undefined && cart.addressId !== null) body.addressId = cart.addressId;
+    body.cart = { items: merged, isOutOfStockEnabled: true, dropUnavailableItems: [] };
     body.orderType = cart.orderType || "DELIVERY";
     body.isOutOfStockEnabled = true;
     body.isCheckerEnabled = true;
     body.isSellerCheckerEnabled = true;
+    body.isSellerTimeSlotEnabled = true;
+    body.isDirectFulfilmentEnabled = true;
+    body.poaItemDropOff = false;
     return body;
+  }
+
+  // The logged-in account's id as the site's own page data carries it; undefined outside a FairPrice page.
+  function accountId() {
+    const data = globalThis.__NEXT_DATA__;
+    const account = data && data.props && data.props.account;
+    return account && account.id !== undefined ? account.id : undefined;
   }
 
   function isUnavailable(item) {
@@ -230,6 +256,11 @@
       keys: Object.keys(json).join(","),
       dataKeys: Object.keys(data).join(","),
       cartKeys: data.cart && typeof data.cart === "object" ? Object.keys(data.cart).join(",") : undefined,
+      // Product ids and reason codes only.
+      unavailable: data.cart && Array.isArray(data.cart.unavailableItems) ? data.cart.unavailableItems.map((i) => String(i && i.id)).join(",") : undefined,
+      changes: data.cart && Array.isArray(data.cart.changes)
+        ? data.cart.changes.map((c) => String(c && c.id) + ":" + (c && typeof c.reason === "string" ? c.reason : c && c.reason && c.reason.dropOff ? "dropOff" : "?")).join(",")
+        : undefined,
     };
     return JSON.stringify(said).slice(0, 300);
   }
@@ -274,7 +305,9 @@
     const cart = extractCart(read.json);
     if (!cart) return failWith("cart_unreadable", describeAnswer(read.json));
 
-    const body = buildBody(cart, mergeItems(cart.items, lines, o.now !== undefined ? o.now : Date.now()));
+    const nowSec = o.now !== undefined ? o.now : Math.floor(Date.now() / 1000);
+    const customerId = o.customerId !== undefined ? o.customerId : accountId();
+    const body = buildBody(cart, mergeItems(cart.items, lines, nowSec), customerId);
     if (o.dryRun) {
       return {
         ok: true,
