@@ -189,7 +189,7 @@ test("addToCart never POSTs when the cart cannot be read", async () => {
     [{ status: 403, text: async () => "" }, "request_refused", "HTTP 403"],
     [{ status: 200, text: async () => "<html>challenge</html>" }, "request_refused", "HTTP 200"],
     [{ status: 200, text: async () => "{broken" }, "unexpected_response", "HTTP 200"],
-    [jsonResponse({ data: { nothing: true } }), "cart_unreadable", undefined],
+    [jsonResponse({ data: { nothing: true } }), "cart_unreadable", '{"keys":"data","dataKeys":"nothing"}'],
   ];
   for (const [response, error, detail] of cases) {
     const fetch = mockFetch([response]);
@@ -243,7 +243,7 @@ test("addToCart reports cart items that changed or went missing, not our own", a
 
 test("addToCart writes nothing when an item quantity is not a whole number", async () => {
   const fetch = mockFetch([jsonResponse({ data: { cart: { items: [{ id: 5, q: "1.5" }] } } })]);
-  assert.deepEqual(await core.addToCart([line("9")], { fetch, cookie: "auth_token=t" }), { ok: false, error: "cart_unreadable" });
+  assert.deepEqual(await core.addToCart([line("9")], { fetch, cookie: "auth_token=t" }), { ok: false, error: "cart_unreadable", detail: '{"keys":"data","dataKeys":"cart","cartKeys":"items"}' });
   assert.deepEqual(fetch.calls.map((c) => c.init.method), ["GET"]);
 });
 
@@ -251,7 +251,7 @@ test("addToCart reports a refused or unreadable write", async () => {
   const refused = mockFetch([jsonResponse(CART), { status: 403, text: async () => "" }]);
   assert.deepEqual(await core.addToCart([line("9")], { fetch: refused, cookie: "auth_token=t" }), { ok: false, error: "request_refused", detail: "HTTP 403" });
   const odd = mockFetch([jsonResponse(CART), jsonResponse({ ok: true })]);
-  assert.deepEqual(await core.addToCart([line("9")], { fetch: odd, cookie: "auth_token=t" }), { ok: false, error: "unexpected_response" });
+  assert.deepEqual(await core.addToCart([line("9")], { fetch: odd, cookie: "auth_token=t" }), { ok: false, error: "unexpected_response", detail: '{"keys":"ok","dataKeys":""}' });
 });
 
 test("cart requests carry the bearer token only, never cookies, and failures say why", async () => {
@@ -270,4 +270,10 @@ test("cart requests carry the bearer token only, never cookies, and failures say
   });
   assert.deepEqual(refused, { ok: false, error: "request_refused", detail: "HTTP 403" });
   assert.deepEqual(core.checkInjected({ ok: false, error: "request_refused", detail: "HTTP 403" }, [], false), { ok: false, error: "request_refused", detail: "HTTP 403" });
+});
+
+test("describeAnswer names FairPrice's status, message and keys but no cart values", () => {
+  const said = JSON.parse(core.describeAnswer({ code: 400, status: "ERROR", message: "storeId is required", data: { cart: { items: [{ id: 1 }], addressId: "secret" } } }));
+  assert.deepEqual(said, { code: "400", status: "ERROR", message: "storeId is required", keys: "code,status,message,data", dataKeys: "cart", cartKeys: "items,addressId" });
+  assert.ok(!core.describeAnswer({ data: { cart: { addressId: "secret" } } }).includes("secret"));
 });

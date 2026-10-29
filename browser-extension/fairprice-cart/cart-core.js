@@ -217,6 +217,23 @@
     return fine ? result : bad;
   }
 
+  // What FairPrice said when its answer had no cart: its status fields and messages and the names of
+  // its keys, never a cart value, address or token.
+  function describeAnswer(json) {
+    if (!json || typeof json !== "object") return String(typeof json);
+    const data = json.data && typeof json.data === "object" ? json.data : {};
+    const text = (v) => (typeof v === "string" || typeof v === "number" ? String(v) : undefined);
+    const said = {
+      code: text(json.code),
+      status: text(json.status),
+      message: text(json.message) || text(json.error) || text(data.message) || text(data.error),
+      keys: Object.keys(json).join(","),
+      dataKeys: Object.keys(data).join(","),
+      cartKeys: data.cart && typeof data.cart === "object" ? Object.keys(data.cart).join(",") : undefined,
+    };
+    return JSON.stringify(said).slice(0, 300);
+  }
+
   // 401/403 or a non-JSON page (a bot-check challenge) is a refusal and is never worked around.
   async function readJson(response) {
     const status = response.status;
@@ -255,7 +272,7 @@
     }
     if (read.error) return failWith(read.error, "HTTP " + read.status);
     const cart = extractCart(read.json);
-    if (!cart) return fail("cart_unreadable");
+    if (!cart) return failWith("cart_unreadable", describeAnswer(read.json));
 
     const body = buildBody(cart, mergeItems(cart.items, lines, o.now !== undefined ? o.now : Date.now()));
     if (o.dryRun) {
@@ -287,14 +304,14 @@
     }
     if (written.error) return failWith(written.error, "HTTP " + written.status);
     const after = extractCart(written.json);
-    if (!after) return fail("unexpected_response");
+    if (!after) return failWith("unexpected_response", describeAnswer(written.json));
     const out = { ok: true, results: resultsFor(lines, after.items, cart.items) };
     const changed = changedItems(cart.items, lines, after.items);
     if (changed.length > 0) out.cart_changed = changed;
     return out;
   }
 
-  const api = { authToken, validateLines, validateRequest, extractCart, mergeItems, buildBody, resultsFor, changedItems, pickTab, checkInjected, addToCart };
+  const api = { describeAnswer, authToken, validateLines, validateRequest, extractCart, mergeItems, buildBody, resultsFor, changedItems, pickTab, checkInjected, addToCart };
   root.__mealcraftFairPriceCart = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(globalThis);
