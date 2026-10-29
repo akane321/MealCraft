@@ -383,14 +383,20 @@ are samples or no live price came back, and grey when all are samples.
 **Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
 
-**Add to FairPrice cart** puts the list into your own FairPrice cart, in a browser where you are logged in to
-FairPrice and have the MealCraft FairPrice cart extension installed (load `browser-extension/fairprice-cart/` as an
-unpacked extension in Chrome or Edge; see its README). MealCraft first re-checks every item at FairPrice and shows
-what is ready, which prices changed and whether the week still fits the budget, and lists the items that cannot be
-added, each with **Swap** (it puts a can't-buy request in the message box) or a product link. Nothing in your cart
-is removed, and nothing is bought: you check out and pay on FairPrice. After sending, the list shows **In your
-FairPrice cart**; press **I've checked out** once you have ordered. If the plan changes afterwards, the list says so.
-It needs live FairPrice prices; a plan on sample prices explains that.
+**FairPrice cart** opens your real FairPrice cart inside MealCraft. It needs the MealCraft FairPrice cart extension
+(load `browser-extension/fairprice-cart/` as an unpacked extension in Chrome or Edge once; see its README) and a
+FairPrice login in the same browser (**Log in to FairPrice** opens FairPrice's own login; MealCraft never sees the
+password). The panel:
+- re-checks this week's FairPrice items, and shows what is ready, which prices changed and whether the week still fits
+  the budget;
+- lists the items that cannot be added, each with **Swap** (it puts a can't-buy request in the message box);
+- has **Add all to cart**, which adds the ready items that are not in the cart yet;
+- lists every cart item with its picture, pack size and unit price, a − / + quantity, **Remove** and the line total;
+- totals the cart with FairPrice's own savings, delivery and service fees.
+
+**Checkout on FairPrice** opens FairPrice's checkout, the only step that leaves MealCraft, because payment always
+happens on FairPrice. Press **I've checked out** once you have ordered. Nothing in the panel changes your plan. It
+needs live FairPrice prices; a plan on sample prices explains that.
 
 The **Nutrition** tab leads with what has been eaten: only meals marked cooked
 count as actuals. Choose a day, and a meal when that day has several, to compare

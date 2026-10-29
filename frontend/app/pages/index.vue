@@ -460,7 +460,7 @@ function cartSent(state: FairPriceCartState) {
   if (plan.value) plan.value.fairprice_cart = state;
 }
 
-// A swap from the cart dialog: the dialog closes first, so the focus it gives back does not land after the composer's.
+// A swap from the cart panel: the panel closes first, so the focus it gives back does not land after the composer's.
 async function cartAsk(text: string) {
   cartOpen.value = false;
   await nextTick();
@@ -896,12 +896,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <div v-if="tab === 'groceries'" class="foot-acts">
               <button
                 type="button"
-                class="mc-btn strong cart-btn"
+                class="mc-btn strong"
                 :disabled="readOnly"
                 :title="readOnly ? 'This week was replaced. Open the current week to shop for it.' : undefined"
                 @click="cartOpen = true"
               >
-                Add to FairPrice cart
+                FairPrice cart
               </button>
               <button type="button" class="mc-btn secondary" @click="previewOpen = true">Preview list</button>
               <button type="button" class="mc-btn quiet" @click="exportPdf">Export PDF</button>
@@ -1114,7 +1114,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .meter .overage { background: repeating-linear-gradient(135deg, var(--c-amber-text) 0 4px, #b86b00 4px 8px); }
 .foot-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .foot-acts button { flex: 1; }
-.foot-acts .cart-btn { flex-basis: 100%; }
 .cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 
 /* Shopping list preview */

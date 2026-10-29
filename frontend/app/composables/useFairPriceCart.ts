@@ -1,4 +1,4 @@
-import { reportableReply } from "~/lib/fairprice-cart";
+import { reportableReply, runtimeErrorCode } from "~/lib/fairprice-cart";
 import type {
   FairPriceCartAddLine,
   FairPriceCartPrepare,
@@ -15,9 +15,10 @@ interface ChromeRuntime {
 }
 
 const PING_TIMEOUT_MS = 1500;
-// The extension may open a FairPrice tab, wait for it to load (up to 30 s) and then read and write the cart.
-const ADD_TIMEOUT_MS = 90_000;
-const ERRORS: FairPriceExtensionError[] = ["not_logged_in", "cart_unreadable", "request_refused", "unexpected_response", "invalid_request", "busy"];
+// The extension reads the cart, then writes it (no tab is opened); a read or a one-item change is quicker.
+const READ_TIMEOUT_MS = 20_000;
+const WRITE_TIMEOUT_MS = 45_000;
+const ERRORS: FairPriceExtensionError[] = ["not_logged_in", "cart_unreadable", "request_refused", "unexpected_response", "invalid_request", "busy", "not_in_cart"];
 
 export function useFairPriceCart() {
   const config = useRuntimeConfig();
@@ -46,8 +47,9 @@ export function useFairPriceCart() {
       };
       try {
         runtime.sendMessage!(extensionId, message, (reply) => {
-          // Read at once: Chrome clears it after the callback. "Receiving end does not exist" is an extension that isn't there.
-          if (runtime.lastError) return done({ ok: false, error: "no_extension" });
+          // Read at once: Chrome clears it after the callback. Only "Receiving end does not exist" / "Could not establish
+          // connection" mean no extension; any other error (a closed port, a restarted worker) may come after the write.
+          if (runtime.lastError) return done({ ok: false, error: runtimeErrorCode(runtime.lastError.message) });
           const given = reply as FairPriceExtensionReply | undefined;
           if (!given || typeof given !== "object" || typeof given.ok !== "boolean") return done({ ok: false, error: "unexpected_response" });
           done(given.ok ? given : { ok: false, error: given.error && ERRORS.includes(given.error) ? given.error : "unexpected_response" });
@@ -64,10 +66,24 @@ export function useFairPriceCart() {
     return (await send({ type: "ping" }, PING_TIMEOUT_MS)).ok;
   }
 
-  async function addToCart(lines: FairPriceCartAddLine[]): Promise<FairPriceExtensionReply> {
-    const reply = await send({ type: "add_to_cart", lines }, ADD_TIMEOUT_MS);
-    return reportableReply(reply);
+  /** A reply that is ok must carry the cart to be of any use to the panel. */
+  const withCart = (reply: FairPriceExtensionReply): FairPriceExtensionReply =>
+    reply.ok && !reply.cart ? { ok: false, error: "unexpected_response" } : reply;
+
+  /** The person's real FairPrice cart. */
+  async function getCart(): Promise<FairPriceExtensionReply> {
+    return withCart(await send({ type: "get_cart" }, READ_TIMEOUT_MS));
   }
 
-  return { prepare, report, markOrdered, detectExtension, addToCart };
+  /** Adds lines (the extension sends every existing item back as it was) and returns the cart as it is after. */
+  async function addToCart(lines: FairPriceCartAddLine[]): Promise<FairPriceExtensionReply> {
+    return withCart(reportableReply(await send({ type: "add_to_cart", lines }, WRITE_TIMEOUT_MS)));
+  }
+
+  /** Sets one cart item's quantity; 0 removes it. */
+  async function setQuantity(cartItemId: string, quantity: number): Promise<FairPriceExtensionReply> {
+    return withCart(await send({ type: "set_quantity", cart_item_id: cartItemId, quantity }, WRITE_TIMEOUT_MS));
+  }
+
+  return { prepare, report, markOrdered, detectExtension, getCart, addToCart, setQuantity };
 }

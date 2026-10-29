@@ -307,8 +307,10 @@ export type FairPriceCartState = Record<string, FairPriceCartTrip>;
 /** What the extension sends back: `error` is set when `ok` is false. Whether the cart was written depends on the error (see cartErrorMessage). */
 export type FairPriceExtensionError =
   | "not_logged_in" | "cart_unreadable" | "request_refused" | "unexpected_response" | "invalid_request" | "busy"
-  // Said by the page itself, not the extension:
-  | "no_extension" | "timeout";
+  // A row write for an item that is no longer in the cart; nothing was written:
+  | "not_in_cart"
+  // Said by the page itself, not the extension ("interrupted": the extension stopped before it answered, so a write may have happened):
+  | "no_extension" | "timeout" | "interrupted";
 
 export interface FairPriceExtensionReply {
   ok: boolean;
@@ -319,6 +321,57 @@ export interface FairPriceExtensionReply {
   cart_changed?: string[];
   /** A dry run wrote nothing and is never reported. */
   dry_run?: boolean;
+  /** The person's FairPrice cart as it is now (get_cart, set_quantity, and add_to_cart after its write). */
+  cart?: FairPriceLiveCart;
+}
+
+// The person's real FairPrice cart, as the extension normalizes it (no address, account or token).
+export interface FairPriceCartItem {
+  cart_item_id: string;
+  name: string;
+  brand: string | null;
+  display_unit: string | null;
+  image_url: string | null;
+  product_url: string | null;
+  quantity: number;
+  /** The three money fields are null when FairPrice's reply gave no price. */
+  unit_price_sgd: number | null;
+  /** The price before any discount; above `unit_price_sgd` when discounted. */
+  unit_mrp_sgd: number | null;
+  line_total_sgd: number | null;
+  line_saving_sgd: number | null;
+  max_quantity: number;
+  is_checked: boolean;
+  /** The site's own row notice: "Only 2 left", "Back in stock". */
+  note: string | null;
+  /** A free item the server added: shown, never changed. */
+  is_free?: boolean;
+}
+
+export interface FairPriceUnavailableItem {
+  cart_item_id: string;
+  name: string;
+  image_url: string | null;
+  want_quantity: number;
+}
+
+export interface FairPriceCartTotals {
+  /** Null when FairPrice's reply gave no subtotal. */
+  subtotal_sgd: number | null;
+  savings_sgd: number;
+  delivery_sgd: number;
+  delivery_standard_sgd: number;
+  service_fee_sgd: number;
+  service_fee_standard_sgd: number;
+  /** Null when FairPrice's reply gave no total ("you pay"). */
+  total_sgd: number | null;
+}
+
+export interface FairPriceLiveCart {
+  store: { id: string; name: string } | null;
+  items: FairPriceCartItem[];
+  unavailable: FairPriceUnavailableItem[];
+  totals: FairPriceCartTotals;
 }
 
 export interface FairPriceCartAddLine {

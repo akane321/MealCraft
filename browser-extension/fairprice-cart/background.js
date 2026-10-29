@@ -1,14 +1,22 @@
 // Service worker of the MealCraft FairPrice cart extension (docs/design/fairprice-cart.md).
-// Takes messages from the MealCraft page only, then runs cart-core.js inside a logged-in
-// www.fairprice.com.sg tab. The FairPrice session never leaves that tab.
+// Takes messages from the MealCraft page only. It opens no FairPrice tab: it reads the person's
+// auth_token cookie and calls FairPrice's cart API itself (cart-core.js). The token, the address
+// and the account id never leave this worker.
 importScripts("cart-core.js");
 
+const core = globalThis.__mealcraftFairPriceCart;
 const ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"];
-const FAIRPRICE_HOME = "https://www.fairprice.com.sg/";
-const TAB_LOAD_TIMEOUT_MS = 30000;
+const FAIRPRICE = "https://www.fairprice.com.sg";
+const CUSTOMER_KEY = "fairprice_customer";
 
-// One add at a time: a second message while one runs gets "busy".
-let adding = false;
+// One write at a time: a second write message while one runs gets "busy". get_cart may run alongside.
+let writing = false;
+
+// The account id is kept for the browser session only; cart-core ties it to the current login.
+const cache = {
+  get: async () => (await chrome.storage.session.get(CUSTOMER_KEY))[CUSTOMER_KEY],
+  set: (value) => chrome.storage.session.set({ [CUSTOMER_KEY]: value }),
+};
 
 function senderAllowed(sender) {
   try {
@@ -18,44 +26,20 @@ function senderAllowed(sender) {
   }
 }
 
-function waitForLoad(tabId) {
-  return new Promise((resolve, reject) => {
-    const done = (fn, arg) => {
-      clearTimeout(timer);
-      chrome.tabs.onUpdated.removeListener(onUpdated);
-      fn(arg);
-    };
-    const onUpdated = (id, info) => {
-      if (id === tabId && info.status === "complete") done(resolve);
-    };
-    const timer = setTimeout(() => done(reject, new Error("tab load timeout")), TAB_LOAD_TIMEOUT_MS);
-    chrome.tabs.onUpdated.addListener(onUpdated);
-    // The tab may have finished loading before the listener was added.
-    chrome.tabs.get(tabId).then((tab) => {
-      if (tab.status === "complete") done(resolve);
-    }, (err) => done(reject, err));
-  });
+async function readToken() {
+  try {
+    const cookie = await chrome.cookies.get({ url: FAIRPRICE, name: "auth_token" });
+    return cookie ? cookie.value : null;
+  } catch {
+    return null;
+  }
 }
 
-async function fairpriceTab() {
-  const open = globalThis.__mealcraftFairPriceCart.pickTab(await chrome.tabs.query({ url: "https://www.fairprice.com.sg/*" }));
-  if (open) return open.id;
-  const created = await chrome.tabs.create({ url: FAIRPRICE_HOME, active: false });
-  await waitForLoad(created.id);
-  return created.id;
-}
-
-async function addToCart(message) {
-  const tabId = await fairpriceTab();
-  const target = { tabId };
-  await chrome.scripting.executeScript({ target, world: "MAIN", files: ["cart-core.js"] });
-  const [injection] = await chrome.scripting.executeScript({
-    target,
-    world: "MAIN",
-    func: (lines, dryRun) => globalThis.__mealcraftFairPriceCart.addToCart(lines, { dryRun }),
-    args: [message.lines, message.dry_run === true],
-  });
-  return globalThis.__mealcraftFairPriceCart.checkInjected(injection && injection.result, message.lines, message.dry_run === true);
+async function handle(message) {
+  const opts = { token: await readToken(), cache };
+  if (message.type === "get_cart") return core.getCart(opts);
+  if (message.type === "set_quantity") return core.setQuantity(message.cart_item_id, message.quantity, opts);
+  return core.addToCart(message.lines, { ...opts, dryRun: message.dry_run === true });
 }
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
@@ -64,21 +48,22 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
     sendResponse({ ok: true, version: chrome.runtime.getManifest().version });
     return false;
   }
-  if (message.type !== "add_to_cart") return false;
-  if (!globalThis.__mealcraftFairPriceCart.validateRequest(message)) {
+  if (message.type !== "get_cart" && message.type !== "add_to_cart" && message.type !== "set_quantity") return false;
+  if (!core.validateMessage(message)) {
     sendResponse({ ok: false, error: "invalid_request" });
     return false;
   }
-  if (adding) {
+  const isWrite = message.type !== "get_cart";
+  if (isWrite && writing) {
     sendResponse({ ok: false, error: "busy" });
     return false;
   }
-  adding = true;
-  addToCart(message)
+  if (isWrite) writing = true;
+  handle(message)
     .catch((e) => ({ ok: false, error: "unexpected_response", detail: String((e && e.message) || e).slice(0, 200) }))
     .then((answer) => {
-      adding = false;
-      sendResponse(answer);
+      if (isWrite) writing = false;
+      sendResponse(core.checkAnswer(message, answer));
     });
   return true;
 });
