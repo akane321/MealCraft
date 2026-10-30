@@ -23,7 +23,7 @@ async function loadList() {
   if (filters.q.trim()) query.q = filters.q.trim();
   if (filters.status) query.status = filters.status;
   try {
-    page.value = await apiFetch(api("/mappings"), { query });
+    page.value = await apiFetch<NonNullable<typeof page.value>>(api("/mappings"), { query });
   }
   catch {
     listFailed.value = true;

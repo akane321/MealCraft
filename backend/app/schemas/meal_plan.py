@@ -8,6 +8,7 @@ from app.core.clock import today as local_today
 from app.data import meal_structure
 from app.schemas.catalog_tags import FeedbackKind
 from app.schemas.display import ShownTitle
+from app.schemas.fairprice_cart import FairPriceCartState
 from app.schemas.household_rules import HouseholdPlanning, PlanningPreferences
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition, real_meal_roles
@@ -221,6 +222,8 @@ class WeeklyMealPlanResponse(BaseModel):
     created_at: datetime
     # The meals and dishes this week plans, including changes made in the conversation (ADR-0046).
     plan_shape: MealPlanShape | None = None
+    # What was put in the household's FairPrice cart, by shopping trip; None before anything was sent.
+    fairprice_cart: FairPriceCartState | None = None
 
 
 class WeeklyMealPlanListItem(BaseModel):

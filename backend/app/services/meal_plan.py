@@ -34,6 +34,7 @@ from app.planning.weekly_planner import WeeklyPlanSelector
 from app.repositories.meal_plan import MealPlanRepository, ScheduledDish, replaced_by
 from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
+from app.schemas.fairprice_cart import cart_state
 from app.schemas.meal_plan import (
     MEAL_ORDER,
     MealPlanEntryStatus,
@@ -952,6 +953,7 @@ class WeeklyMealPlanService:
             warnings=plan.warnings,
             created_at=plan.created_at,
             plan_shape=week_shape(plan.constraints),
+            fairprice_cart=cart_state(plan.fairprice_cart, grocery_lines),
         )
 
     @staticmethod

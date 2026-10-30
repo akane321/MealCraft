@@ -189,6 +189,10 @@ class MealPlanRepository:
         )
         return self.session.scalars(statement).unique().one_or_none()
 
+    def save_fairprice_cart(self, plan: MealPlan, cart: dict) -> None:
+        plan.fairprice_cart = cart  # a new dict, so the JSON column notices the change
+        self.session.commit()
+
     def delete(self, plan_id: int) -> bool:
         """Delete a week of this household; a conversation that planned it stays, without a week."""
         plan = self.session.scalar(

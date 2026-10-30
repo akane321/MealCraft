@@ -1979,6 +1979,331 @@ test("grocery items and their printed list distinguish missing products from a t
   await expect(page.getByText("Grocery changes are estimates. Selected product prices are checked again when you confirm.", { exact: true })).toBeVisible();
 });
 
+interface CartStubOptions {
+  /** The first `times` get_cart calls fail with `error`. */
+  failGetCart?: { error: string; times: number };
+  /** Milliseconds the stub extension takes to answer a set_quantity. */
+  writeDelay?: number;
+  /** A cart item the stub answers "not_in_cart" for, without changing the cart. */
+  ghost?: string;
+  /** Adds an unpriced, unticked item, and a cart without a total. */
+  odd?: boolean;
+}
+
+/** The plan, the FairPrice routes and a stub extension that answers like the real one. */
+async function stubFairPriceCart(page: Page, options: CartStubOptions = {}) {
+  await stubApi(page);
+  const trip2 = plan.grocery_estimate.items.map((item, index) => (index === 0 ? { ...item, shopping_trip: 2 } : item));
+  const livePlan = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", items: trip2 }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill({ json: livePlan }));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill({ json: { session: session(true), plan: livePlan } }));
+  const fingerprint = "a".repeat(64);
+  const line = (key: string, name: string, cartId: string, quantity: number, planned: number, live: number | null, status: string) => ({
+    line_key: key, ingredient_name: key.split("|")[1], ingredient_display_name: name, product_name: `FairPrice ${name}`,
+    client_item_id: `13${cartId}`, cart_item_id: status === "ready" ? cartId : null, quantity,
+    planned_price_sgd: planned, live_price_sgd: live, product_url: `https://www.fairprice.com.sg/product/${cartId}`, status,
+  });
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill({ json: {
+    plan_id: 9001, shopping_trip: null, fingerprint,
+    lines: [
+      line("1|chicken_breast|g", "chicken breast", "172993", 1, 10.15, 10.95, "ready"),
+      line("1|broccoli|g", "broccoli", "160001", 2, 2.9, 2.9, "ready"),
+      line("1|carrot|g", "carrot", "170003", 3, 1.5, 1.5, "ready"),
+      line("1|salmon_fillet|g", "salmon fillet", "150002", 1, 10.9, null, "out_of_stock"),
+    ],
+    ready_total_sgd: 21.25, planned_total_sgd: 82.6, projected_total_sgd: 83.4, budget_sgd: 90, over_budget: false,
+  } }));
+  const reports: Array<Record<string, unknown>> = [];
+  const state = (status: string) => ({ "1": {
+    status, sent_at: "2026-10-29T09:00:00Z", ordered_at: status === "ordered" ? "2026-10-29T10:00:00Z" : null, fingerprint, stale: false,
+    results: [{ line_key: "1|carrot|g", cart_item_id: "170003", status: "added", quantity: 3, cart_price_sgd: 1.5 }],
+  } });
+  await page.route("**/api/plans/9001/fairprice-cart/report", async (route) => {
+    reports.push(route.request().postDataJSON());
+    await route.fulfill({ json: state("in_cart") });
+  });
+  let orderedCalls = 0;
+  await page.route("**/api/plans/9001/fairprice-cart/ordered", (route) => {
+    orderedCalls += 1;
+    return route.fulfill({ json: state("ordered") });
+  });
+  // The extension, as the page sees it through externally_connectable: a small FairPrice cart that answers like the real one.
+  await page.addInitScript((opts: CartStubOptions) => {
+    const sent: Array<{ type: string; lines?: unknown[]; cart_item_id?: string; quantity?: number }> = [];
+    (window as unknown as { __sent: unknown[] }).__sent = sent;
+    const thumb = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' fill='%23f4a259'/></svg>";
+    type Item = { cart_item_id: string; name: string; display_unit: string; image_url: string | null; quantity: number; unit_price_sgd: number; unit_mrp_sgd: number };
+    const catalog: Record<string, Item> = {
+      "172993": { cart_item_id: "172993", name: "Kee Song Fresh Chicken - Boneless Breast", display_unit: "500g", image_url: thumb, quantity: 1, unit_price_sgd: 10.95, unit_mrp_sgd: 12.95 },
+      "160001": { cart_item_id: "160001", name: "FairPrice Broccoli", display_unit: "300g", image_url: null, quantity: 2, unit_price_sgd: 2.9, unit_mrp_sgd: 2.9 },
+      "170003": { cart_item_id: "170003", name: "FairPrice Carrot", display_unit: "500g", image_url: thumb, quantity: 3, unit_price_sgd: 1.5, unit_mrp_sgd: 1.5 },
+    };
+    const cart: Item[] = [{ ...catalog["172993"]! }, { ...catalog["160001"]! }];
+    let unavailable = [{ cart_item_id: "150002", name: "FairPrice Salmon Fillet", image_url: null, want_quantity: 1 }];
+    const round = (n: number) => Math.round(n * 100) / 100;
+    const snapshot = () => {
+      const items = cart.map(item => ({
+        ...item, brand: "FairPrice", product_url: null, line_total_sgd: round(item.unit_price_sgd * item.quantity),
+        line_saving_sgd: round((item.unit_mrp_sgd - item.unit_price_sgd) * item.quantity), max_quantity: 99, is_checked: true, note: null,
+      }));
+      const subtotal = round(items.reduce((sum, item) => sum + item.line_total_sgd, 0));
+      const savings = round(items.reduce((sum, item) => sum + item.line_saving_sgd, 0));
+      const shown: Array<Record<string, unknown>> = [...items];
+      if (opts.odd) {
+        shown.push({
+          cart_item_id: "990001", name: "Mystery Item", brand: null, display_unit: "1 pack", image_url: null, product_url: null, quantity: 1,
+          unit_price_sgd: null, unit_mrp_sgd: null, line_total_sgd: null, line_saving_sgd: 0, max_quantity: 99, is_checked: false, note: null,
+        });
+      }
+      return {
+        store: { id: "165", name: "FairPrice PFC" }, items: shown, unavailable,
+        totals: { subtotal_sgd: subtotal, savings_sgd: savings, delivery_sgd: 0, delivery_standard_sgd: 7.99, service_fee_sgd: 0.99, service_fee_standard_sgd: 0.99, total_sgd: opts.odd ? null : round(subtotal + 0.99) },
+      };
+    };
+    let failures = opts.failGetCart?.times ?? 0;
+    (window as unknown as { chrome: unknown }).chrome = { runtime: { sendMessage(_id: string, message: (typeof sent)[number], reply: (r: unknown) => void) {
+      sent.push(message);
+      const answer = (body: unknown, delay = 10) => setTimeout(() => reply(body), delay);
+      if (message.type === "ping") return answer({ ok: true, version: "0.1.0" });
+      if (message.type === "get_cart") {
+        if (failures > 0) {
+          failures -= 1;
+          return answer({ ok: false, error: opts.failGetCart!.error });
+        }
+        return answer({ ok: true, cart: snapshot() });
+      }
+      if (message.type === "add_to_cart") {
+        const lines = message.lines as Array<{ line_key: string; cart_item_id: string; quantity: number }>;
+        for (const l of lines) cart.push({ ...catalog[l.cart_item_id]!, quantity: l.quantity });
+        return answer({ ok: true, results: lines.map(l => ({ ...l, status: "added", cart_price_sgd: null })), cart: snapshot() });
+      }
+      if (message.type === "set_quantity") {
+        if (message.cart_item_id === opts.ghost) return answer({ ok: false, error: "not_in_cart" }, opts.writeDelay);
+        const index = cart.findIndex(item => item.cart_item_id === message.cart_item_id);
+        if (index >= 0 && message.quantity === 0) cart.splice(index, 1);
+        else if (index >= 0) cart[index]!.quantity = message.quantity!;
+        else unavailable = unavailable.filter(item => item.cart_item_id !== message.cart_item_id);
+        return answer({ ok: true, cart: snapshot() }, opts.writeDelay);
+      }
+      return answer({ ok: false, error: "unexpected_response" });
+    } } };
+  }, options);
+  return { reports, fingerprint, orderedCalls: () => orderedCalls };
+}
+
+/** Plans a week and opens the panel from the groceries tab. */
+async function openFairPriceCart(page: Page) {
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+  await page.getByRole("tab", { name: /Groceries/ }).click();
+  // The footer button sits with Preview list and Export PDF.
+  const footer = page.locator(".foot-acts");
+  await expect(footer.getByRole("button")).toHaveText(["FairPrice cart", "Preview list", "Export PDF"]);
+  await footer.getByRole("button", { name: "FairPrice cart", exact: true }).click();
+  const panel = page.getByRole("dialog", { name: "FairPrice cart" });
+  return {
+    footer,
+    panel,
+    summary: panel.getByLabel("Cart summary"),
+    rowOf: (name: string) => panel.getByRole("listitem").filter({ hasText: name }),
+    sentOf: (type: string) => page.evaluate(t => (window as unknown as { __sent: Array<{ type: string }> }).__sent.filter(m => m.type === t), type),
+  };
+}
+
+test("the FairPrice cart panel shows the real cart, adds only what is missing, changes quantities and ends at checkout at 1280x720", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const { reports, fingerprint, orderedCalls } = await stubFairPriceCart(page);
+  const { panel, summary, rowOf, sentOf } = await openFairPriceCart(page);
+
+  // The real cart: a discounted item with a thumbnail, one without (placeholder), an unavailable one, the store.
+  await expect(panel.getByText("FairPrice PFC", { exact: false })).toBeVisible();
+  const chicken = rowOf("Kee Song Fresh Chicken");
+  await expect(chicken.locator("img")).toHaveAttribute("src", /^data:image\/svg/);
+  await expect(chicken.locator("img")).toHaveJSProperty("width", 64);
+  await expect(chicken.getByText("500g", { exact: true })).toBeVisible();
+  await expect(chicken.locator(".unit b")).toHaveText("S$10.95");
+  await expect(chicken.locator("s")).toHaveText("S$12.95");
+  await expect(chicken.getByText("From this plan", { exact: true })).toBeVisible();
+  await expect(rowOf("FairPrice Broccoli").locator("img")).toHaveCount(0);
+  await expect(rowOf("FairPrice Broccoli").locator("s")).toHaveCount(0);
+  await expect(panel.getByRole("group", { name: "Unavailable items" })).toContainText("FairPrice Salmon Fillet");
+  await expect(panel.getByRole("group", { name: "Price changes" })).toContainText("chicken breast");
+  await expect(panel.getByRole("group", { name: "Lines that can't be added" })).toContainText("salmon fillet");
+  await expect(summary).toContainText("Subtotal");
+  await expect(summary.getByText("S$16.75", { exact: true })).toBeVisible();
+  await expect(summary.getByText("Savings", { exact: true })).toBeVisible();
+  await expect(summary.getByText("−S$2.00", { exact: true })).toBeVisible();
+  await expect(summary.locator("s")).toHaveText("S$7.99");
+  await expect(summary.getByText("Free", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$0.99", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$17.74", { exact: true })).toBeVisible();
+  await expect(panel.getByText("2 already in your cart", { exact: true })).toBeVisible();
+  if (SHOTS) {
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/fairprice-cart-panel.png` });
+  }
+
+  // Add all sends only the ready line that is not in the cart yet, then reports it to the plan.
+  await panel.getByRole("button", { name: "Add all to cart", exact: true }).click();
+  await expect(rowOf("FairPrice Carrot")).toBeVisible();
+  const adds = await sentOf("add_to_cart") as unknown as Array<{ lines: unknown[] }>;
+  expect(adds).toHaveLength(1);
+  expect(adds[0]!.lines).toEqual([{ line_key: "1|carrot|g", cart_item_id: "170003", quantity: 3 }]);
+  await expect.poll(() => reports.length).toBe(1);
+  expect(reports[0]).toMatchObject({ fingerprint, results: [{ line_key: "1|carrot|g", status: "added" }] });
+  await expect(panel.getByText("Everything ready is already in your cart.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("1 added", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^In your FairPrice cart on /)).toBeVisible();
+
+  // A second add needs an explicit confirmation, and nothing was sent yet.
+  await panel.getByRole("button", { name: "Add again…", exact: true }).click();
+  await expect(panel.getByText("Adding again adds these quantities a second time.", { exact: false })).toBeVisible();
+  expect(await sentOf("add_to_cart")).toHaveLength(1);
+  await panel.getByRole("button", { name: "Cancel", exact: true }).click();
+
+  // The stepper shows the new quantity at once and tells FairPrice once, after the 500 ms debounce.
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(broccoli.locator("output")).toHaveText("4");
+  await expect(broccoli.getByText("Saving…", { exact: true })).toBeVisible();
+  expect(await sentOf("set_quantity")).toHaveLength(0);
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 4 });
+  await expect(broccoli.getByText("S$11.60", { exact: true })).toBeVisible();
+  await expect(broccoli.getByText("Saving…", { exact: true })).toHaveCount(0);
+
+  // Remove sets the quantity to 0, for a cart row and for an unavailable item.
+  await rowOf("FairPrice Carrot").getByRole("button", { name: "Remove FairPrice Carrot" }).click();
+  await expect(rowOf("FairPrice Carrot")).toHaveCount(0);
+  await panel.getByRole("button", { name: "Remove FairPrice Salmon Fillet" }).click();
+  await expect(panel.getByRole("group", { name: "Unavailable items" })).toHaveCount(0);
+  expect((await sentOf("set_quantity")).map(m => [(m as { cart_item_id?: string }).cart_item_id, (m as { quantity?: number }).quantity])).toEqual([
+    ["160001", 4], ["170003", 0], ["150002", 0],
+  ]);
+  await expect(summary.getByText("S$22.55", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$23.54", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Everything ready is already in your cart.", { exact: true })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "Add all to cart", exact: true })).toBeVisible();
+  if (SHOTS) {
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/fairprice-cart-panel-edited.png` });
+  }
+
+  // Checkout is a link out to FairPrice's own page; "I've checked out" marks the trip ordered.
+  const checkout = panel.getByRole("link", { name: "Checkout on FairPrice", exact: true });
+  await expect(checkout).toHaveAttribute("href", "https://www.fairprice.com.sg/checkout");
+  await expect(checkout).toHaveAttribute("target", "_blank");
+  await panel.getByRole("button", { name: "I've checked out", exact: true }).click();
+  await expect(panel.getByText("Marked as ordered", { exact: false })).toBeVisible();
+  expect(orderedCalls()).toBe(1);
+  await expect(page.getByText(/^Ordered on /)).toBeVisible();
+
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("the FairPrice cart panel adds nothing until the cart has been read, and Try again lets it", async ({ page }) => {
+  await stubFairPriceCart(page, { failGetCart: { error: "cart_unreadable", times: 1 } });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  await expect(panel.getByRole("alert").filter({ hasText: "couldn't read your current FairPrice cart" })).toBeVisible();
+  const addAll = panel.getByRole("button", { name: "Add all to cart", exact: true });
+  await expect(addAll).toBeDisabled();
+  await expect(panel.getByLabel("Your cart")).toHaveCount(0);
+  expect(await sentOf("add_to_cart")).toHaveLength(0);
+
+  await panel.getByRole("alert").getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(rowOf("FairPrice Broccoli")).toBeVisible();
+  await expect(addAll).toBeEnabled();
+  await addAll.click();
+  await expect(rowOf("FairPrice Carrot")).toBeVisible();
+  // Only what the cart lacked: the chicken and broccoli were there.
+  const adds = await sentOf("add_to_cart") as unknown as Array<{ lines: Array<{ cart_item_id: string }> }>;
+  expect(adds.map(add => add.lines.map(l => l.cart_item_id))).toEqual([["170003"]]);
+});
+
+test("the FairPrice cart panel says a row's item is gone, puts the quantity back and reads the cart again, also when the window comes back", async ({ page }) => {
+  await stubFairPriceCart(page, { ghost: "160001" });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await expect(broccoli).toBeVisible();
+  const before = (await sentOf("get_cart")).length;
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(broccoli.getByText("That item is no longer in your FairPrice cart", { exact: true })).toBeVisible();
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 3 });
+  await expect.poll(async () => (await sentOf("get_cart")).length).toBeGreaterThan(before);
+  await expect(broccoli.locator("output")).toHaveText("2");
+  await expect(panel.getByRole("button", { name: "Add all to cart", exact: true })).toBeEnabled();
+
+  const afterFailure = (await sentOf("get_cart")).length;
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect.poll(async () => (await sentOf("get_cart")).length).toBeGreaterThan(afterFailure);
+});
+
+test("the FairPrice cart panel sends a pending quantity before it lets the person close, and keeps Refresh off meanwhile", async ({ page }) => {
+  await stubFairPriceCart(page, { writeDelay: 400 });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  const refresh = panel.getByRole("button", { name: "Refresh", exact: true });
+  await expect(refresh).toBeDisabled();
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel.getByText("Saving your changes…", { exact: true })).toBeVisible();
+  await expect(panel).toBeVisible();
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 3 });
+  await expect(broccoli.locator("output")).toHaveText("3");
+  await expect(panel.getByText("Saving your changes…", { exact: true })).toHaveCount(0);
+  await expect(refresh).toBeEnabled();
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+});
+
+test("the FairPrice cart panel still sends a change back made while the first write is running", async ({ page }) => {
+  await stubFairPriceCart(page, { writeDelay: 1200 });
+  const { rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  // The first write has not answered yet, so the panel still holds the old quantity of 2.
+  await broccoli.getByRole("button", { name: "Decrease quantity" }).click();
+  await expect.poll(async () => (await sentOf("set_quantity")).length, { timeout: 8000 }).toBe(2);
+  expect((await sentOf("set_quantity")).map(m => (m as { quantity?: number }).quantity)).toEqual([3, 2]);
+  await expect(broccoli.locator("output")).toHaveText("2", { timeout: 8000 });
+});
+
+test("the FairPrice cart panel tells a blocked login window and a login not yet done apart", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.open = () => null;
+  });
+  await stubFairPriceCart(page, { failGetCart: { error: "not_logged_in", times: 99 } });
+  const { panel } = await openFairPriceCart(page);
+  await expect(panel.getByRole("button", { name: "Log in to FairPrice", exact: true })).toBeVisible();
+  await panel.getByRole("button", { name: "Log in to FairPrice", exact: true }).click();
+  await expect(panel.getByText(/^Allow pop-ups for .+, then try again$/)).toBeVisible();
+  await panel.getByRole("button", { name: "I've logged in", exact: true }).click();
+  await expect(panel.getByText("Still not logged in to FairPrice", { exact: true })).toBeVisible();
+  await expect(panel.getByLabel("Your cart")).toHaveCount(0);
+});
+
+test("the FairPrice cart panel shows a missing price as a dash and an unticked item as not selected, with the totals still showing", async ({ page }) => {
+  await stubFairPriceCart(page, { odd: true });
+  const { panel, summary, rowOf } = await openFairPriceCart(page);
+  const mystery = rowOf("Mystery Item");
+  await expect(mystery.getByText("Not selected for checkout", { exact: true })).toBeVisible();
+  await expect(mystery.locator(".unit b")).toHaveText("—");
+  await expect(mystery.locator(".total")).toHaveText("—");
+  await expect(mystery.locator(".total")).toHaveClass(/muted/);
+  await expect(summary.getByText("S$16.75", { exact: true })).toBeVisible();
+  await expect(summary.locator(".grand dd")).toHaveText("—");
+  await expect(panel.getByText("2 already in your cart", { exact: true })).toBeVisible();
+});
+
 test("a one-dinner plan reads as one dinner, one date and a plan budget, with chips from its own day", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await stubApi(page);
