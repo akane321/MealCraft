@@ -181,7 +181,7 @@ def _next_id(roles: list[dict], base: str) -> str:
 def _when(plan: WeeklyMealPlanResponse, days: list[int] | None, lang: str = "en") -> str:
     """ "on Friday", "on Saturday and Sunday", "on weekdays"; the rest of the week when no day is named."""
     if days is None:
-        return say("when_rest", lang)
+        return say("when_rest", lang, short=getattr(plan, "day_count", 7) < 7)
     dates = sorted({day.planned_date for day in plan.days if day.day_index in days}, key=lambda day: day.weekday())
     if not dates:
         return say("when_day" if len(days) == 1 else "when_days", lang)

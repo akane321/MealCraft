@@ -298,6 +298,29 @@ seafood (including shellfish, squid, octopus and seafood mixes) are cooked withi
 are excluded from this short-lived class. The shopping list marks the fresh items
 "Use within 3 days".
 
+A plan can also be shorter than a week. Say which days and meals you want in the
+conversation: "one dinner for 1 person tomorrow", "dinner tonight", "today",
+"this weekend", "the next 3 days", 明天晚餐, 今晚, 今天, 周末两天 or 接下来三天
+("dinners only" and 只要晚餐 keep the days and plan just that meal). A meal you
+name anywhere in the message counts ("Dinner for 2 tomorrow"), and one you rule
+out is left out ("no breakfast tomorrow"). "Today and tomorrow" is two days. If
+a sentence could mean something else, such as "I'm away this weekend", "no soup
+on the weekend" or "the chicken I bought today", the assistant does not turn it
+into a short plan on its own. Only those
+days and meals are planned, and the shopping list and the budget cover only
+them. Say an amount for it ("S$15 for tomorrow's dinner") and that is the plan's
+budget; "S$10 a day for the next 3 days" is S$30, and an amount you say per week
+("S$140 a week") is shared out by the plan's meals. If you say none, your saved
+weekly budget is shared out by the meals the plan holds, and the assistant
+tells you how much ("S$6.67 of your S$140 weekly budget"); change the days or
+meals and it is shared out again from the saved week's budget. Say "the whole
+week" or "plan a week of dinners" and the plan goes back to your week, with your
+household's meals and your weekly budget. If today's meals are already over, the
+plan starts tomorrow and says so. A short plan sits beside your week without
+replacing it: only a plan that covers all of a week's meals replaces it in your
+history. Asking to change a day the plan does not have gets "That day is not
+in this plan"; saying you can't buy an ingredient today does not.
+
 Most plans take a few seconds. A large household on a tight budget takes longer,
 a few minutes, while the planner searches for a week that fits the
 budget; the button says "Planning…" until the plan is ready. Most of that
@@ -394,6 +417,21 @@ Saved prices are shown in amber. The dot before that line is green when every pr
 are samples or no live price came back, and grey when all are samples.
 **Preview list** includes these source notes on the
 sheet as it will print; **Export PDF** opens the browser's print dialog.
+
+**FairPrice cart** opens your real FairPrice cart inside MealCraft. It needs the MealCraft FairPrice cart extension
+(load `browser-extension/fairprice-cart/` as an unpacked extension in Chrome or Edge once; see its README) and a
+FairPrice login in the same browser (**Log in to FairPrice** opens FairPrice's own login; MealCraft never sees the
+password). The panel:
+- re-checks this week's FairPrice items, and shows what is ready, which prices changed and whether the week still fits
+  the budget;
+- lists the items that cannot be added, each with **Swap** (it puts a can't-buy request in the message box);
+- has **Add all to cart**, which adds the ready items that are not in the cart yet;
+- lists every cart item with its picture, pack size and unit price, a − / + quantity, **Remove** and the line total;
+- totals the cart with FairPrice's own savings, delivery and service fees.
+
+**Checkout on FairPrice** opens FairPrice's checkout, the only step that leaves MealCraft, because payment always
+happens on FairPrice. Press **I've checked out** once you have ordered. Nothing in the panel changes your plan. It
+needs live FairPrice prices; a plan on sample prices explains that.
 
 The **Nutrition** tab leads with what has been eaten: only meals marked cooked
 count as actuals. Choose a day, and a meal when that day has several, to compare

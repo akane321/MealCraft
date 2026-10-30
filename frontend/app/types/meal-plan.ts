@@ -68,6 +68,8 @@ export interface WeeklyMealPlan {
   warnings: string[];
   created_at: string;
   plan_shape?: PlanShape | null;
+  /** Where each shopping trip's FairPrice cart stands, keyed "1", "2"; null before anything was sent. */
+  fairprice_cart?: FairPriceCartState | null;
 }
 
 export interface WeeklyMealPlanListItem {
@@ -78,6 +80,8 @@ export interface WeeklyMealPlanListItem {
   replaces_plan_id: number | null;
   start_date: string;
   end_date: string;
+  /** Days the plan covers (1 to 14); the backend list item carries it. */
+  day_count: number;
   household_size: number;
   purchase_total_sgd: number;
   consumed_total_sgd: number | null;
@@ -141,6 +145,8 @@ export interface WeeklyNutritionDashboard {
   revision: number;
   start_date: string;
   end_date: string;
+  /** Days the plan covers (1 to 14). */
+  day_count: number;
   household_size: number;
   completion_rate: number;
   status_counts: MealPlanStatusCounts;
@@ -239,4 +245,141 @@ export interface MealPlanReplanEventCollection {
 export interface MealPlanReplanConfirmation {
   event: MealPlanReplanEvent;
   plan: WeeklyMealPlan;
+}
+
+// FairPrice cart (docs/design/fairprice-cart.md): the list is checked live, sent to the person's own cart by the
+// browser extension, and what the extension did is reported back.
+export type FairPriceLineStatus = "ready" | "out_of_stock" | "not_found" | "no_product" | "not_bought";
+
+export interface FairPriceCartLine {
+  /** "{trip or 1}|{ingredient_name}|{unit or ''}", the line's identity in a plan. */
+  line_key: string;
+  ingredient_name: string;
+  ingredient_display_name: string;
+  product_name: string | null;
+  client_item_id: string | null;
+  /** FairPrice's internal product id, the one its cart takes; null when the live listing gave none (a ready line always has one). */
+  cart_item_id: string | null;
+  quantity: number;
+  planned_price_sgd: number | null;
+  live_price_sgd: number | null;
+  product_url: string | null;
+  status: FairPriceLineStatus;
+}
+
+export interface FairPriceCartPrepare {
+  plan_id: number;
+  shopping_trip: number | null;
+  fingerprint: string;
+  lines: FairPriceCartLine[];
+  ready_total_sgd: number;
+  planned_total_sgd: number;
+  projected_total_sgd: number;
+  budget_sgd: number | null;
+  over_budget: boolean;
+}
+
+export type FairPriceResultStatus = "added" | "reduced" | "out_of_stock" | "failed";
+
+export interface FairPriceCartResult {
+  line_key: string;
+  cart_item_id: string | null;
+  status: FairPriceResultStatus;
+  /** What this add put in the cart: the asked quantity when added, less when reduced, 0 otherwise. */
+  quantity: number;
+  cart_price_sgd: number | null;
+}
+
+export interface FairPriceCartReportBody {
+  shopping_trip: number | null;
+  fingerprint: string;
+  results: FairPriceCartResult[];
+}
+
+export interface FairPriceCartTrip {
+  status: "in_cart" | "ordered";
+  sent_at: string;
+  ordered_at?: string | null;
+  fingerprint: string;
+  results: FairPriceCartResult[];
+  /** True when the plan's list changed after it was sent. */
+  stale?: boolean;
+}
+
+export type FairPriceCartState = Record<string, FairPriceCartTrip>;
+
+/** What the extension sends back: `error` is set when `ok` is false. Whether the cart was written depends on the error (see cartErrorMessage). */
+export type FairPriceExtensionError =
+  | "not_logged_in" | "cart_unreadable" | "request_refused" | "unexpected_response" | "invalid_request" | "busy"
+  // A row write for an item that is no longer in the cart; nothing was written:
+  | "not_in_cart"
+  // Said by the page itself, not the extension ("interrupted": the extension stopped before it answered, so a write may have happened):
+  | "no_extension" | "timeout" | "interrupted";
+
+export interface FairPriceExtensionReply {
+  ok: boolean;
+  error?: FairPriceExtensionError;
+  version?: string;
+  results?: FairPriceCartResult[];
+  /** Ids of other items in the cart whose quantity differed after the write. */
+  cart_changed?: string[];
+  /** A dry run wrote nothing and is never reported. */
+  dry_run?: boolean;
+  /** The person's FairPrice cart as it is now (get_cart, set_quantity, and add_to_cart after its write). */
+  cart?: FairPriceLiveCart;
+}
+
+// The person's real FairPrice cart, as the extension normalizes it (no address, account or token).
+export interface FairPriceCartItem {
+  cart_item_id: string;
+  name: string;
+  brand: string | null;
+  display_unit: string | null;
+  image_url: string | null;
+  product_url: string | null;
+  quantity: number;
+  /** The three money fields are null when FairPrice's reply gave no price. */
+  unit_price_sgd: number | null;
+  /** The price before any discount; above `unit_price_sgd` when discounted. */
+  unit_mrp_sgd: number | null;
+  line_total_sgd: number | null;
+  line_saving_sgd: number | null;
+  max_quantity: number;
+  is_checked: boolean;
+  /** The site's own row notice: "Only 2 left", "Back in stock". */
+  note: string | null;
+  /** A free item the server added: shown, never changed. */
+  is_free?: boolean;
+}
+
+export interface FairPriceUnavailableItem {
+  cart_item_id: string;
+  name: string;
+  image_url: string | null;
+  want_quantity: number;
+}
+
+export interface FairPriceCartTotals {
+  /** Null when FairPrice's reply gave no subtotal. */
+  subtotal_sgd: number | null;
+  savings_sgd: number;
+  delivery_sgd: number;
+  delivery_standard_sgd: number;
+  service_fee_sgd: number;
+  service_fee_standard_sgd: number;
+  /** Null when FairPrice's reply gave no total ("you pay"). */
+  total_sgd: number | null;
+}
+
+export interface FairPriceLiveCart {
+  store: { id: string; name: string } | null;
+  items: FairPriceCartItem[];
+  unavailable: FairPriceUnavailableItem[];
+  totals: FairPriceCartTotals;
+}
+
+export interface FairPriceCartAddLine {
+  line_key: string;
+  cart_item_id: string;
+  quantity: number;
 }

@@ -17,6 +17,8 @@ export interface Product {
   in_stock: boolean;
   source: "fairprice" | "fixture";
   fetched_at: string;
+  /** FairPrice's internal product id for its cart (not the number at the end of the product URL). */
+  cart_item_id?: string | null;
 }
 
 export interface ProductSearchResponse {

@@ -19,7 +19,7 @@ async function loadList() {
   const query: Record<string, string | number> = { offset: offset.value, limit: PAGE };
   if (search.value.trim()) query.q = search.value.trim();
   try {
-    page.value = await apiFetch(api("/users"), { query });
+    page.value = await apiFetch<NonNullable<typeof page.value>>(api("/users"), { query });
   }
   catch {
     listFailed.value = true;
@@ -112,7 +112,7 @@ async function confirmSingle() {
   removing.value = true;
   failure.value = "";
   try {
-    await apiFetch(api(`/users/${id}/${kind}/${itemId}`), { method: "DELETE" });
+    await apiFetch<unknown>(api(`/users/${id}/${kind}/${itemId}`), { method: "DELETE" });
     single.value = null;
     await loadList();
     await loadDetail(id);

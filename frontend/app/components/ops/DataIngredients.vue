@@ -17,7 +17,7 @@ async function loadList() {
   const query: Record<string, string | number> = { offset: offset.value, limit: PAGE };
   if (search.value.trim()) query.q = search.value.trim();
   try {
-    page.value = await apiFetch(api("/ingredients"), { query });
+    page.value = await apiFetch<NonNullable<typeof page.value>>(api("/ingredients"), { query });
   }
   catch {
     listFailed.value = true;

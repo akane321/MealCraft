@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
-import { budgetGap, budgetLine, changedMealWhen, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange } from "~/lib/home-surface";
+import { cartStateLabels } from "~/lib/fairprice-cart";
+import { budgetGap, budgetLine, changedMealWhen, followUpChips, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange, shoppingTrips } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
-import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { formatPlanDate, planLabels, planRange, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import type { AgentMessage, AgentSession } from "~/types/agent";
-import type { MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
+import type { FairPriceCartState, MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
 
 useHead({ title: "MealCraft" });
 
 type Tab = "dinners" | "groceries" | "nutrition";
 
 const DRAFT_KEY = "mealcraft-draft";
-const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60"];
-const followUps = ["Swap tomorrow's dinner", "Skip Friday", "Don't change Sunday"];
+const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60", "Dinner tonight for two", "Three days, S$30"];
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -44,6 +44,7 @@ const lastPlanId = ref<number | null>(null);
 const panelOpen = ref(true);
 const tab = ref<Tab>("dinners");
 const previewOpen = ref(false);
+const cartOpen = ref(false);
 const nutritionOpen = ref(false);
 const recipeSlug = ref<string | null>(null);
 const log = ref<HTMLElement | null>(null);
@@ -103,28 +104,30 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
 });
 // The household's own name for the conversation, else its first message.
 const title = computed(() => session.value?.title || messages.value.find(m => m.role === "user")?.content || "New plan");
-// The week the conversation will plan, shown before planning with a way to move its first day.
+// The days the conversation will plan (a week unless it was asked for fewer or more), shown before planning with a way to move its first day.
 const weekStart = computed(() => constraints.value?.start_date ?? null);
+const planDays = computed(() => plan.value?.day_count ?? constraints.value?.day_count ?? 7);
+// The words that depend on the plan's length: "a week" only for seven days.
+const labels = computed(() => planLabels(planDays.value));
 const weekStartLabel = computed(() => {
   if (!weekStart.value) return "";
   const fmt = (d: string) => formatPlanDate(d, { weekday: "short", day: "numeric", month: "short" });
+  const days = constraints.value?.day_count ?? 7;
   const end = new Date(`${weekStart.value}T00:00:00Z`);
-  end.setUTCDate(end.getUTCDate() + 6);
-  return `${fmt(weekStart.value)} – ${fmt(end.toISOString().slice(0, 10))}`;
+  end.setUTCDate(end.getUTCDate() + days - 1);
+  return days === 1 ? fmt(weekStart.value) : `${fmt(weekStart.value)} – ${fmt(end.toISOString().slice(0, 10))}`;
 });
 // Moving the start is said, like any change, so the assistant reads it and the conversation records it.
 function moveStart(event: Event) {
   const value = (event.target as HTMLInputElement).value;
-  if (value && value !== weekStart.value) void send(`Start the week on ${value}`);
+  if (value && value !== weekStart.value) void send(`Start the ${labels.value.noun} on ${value}`);
 }
-const rangeLabel = computed(() => {
-  if (!plan.value) return "";
-  const fmt = (d: string) => formatPlanDate(d, { day: "numeric", month: "short" });
-  return `${fmt(plan.value.start_date)} – ${fmt(plan.value.end_date)}`;
-});
+const rangeLabel = computed(() => (plan.value ? planRange(plan.value.start_date, plan.value.end_date) : ""));
 const days = computed(() => nutrition.dashboard.value?.days ?? []);
 const groceryCount = computed(() => groceryGroups(plan.value?.grocery_estimate.items ?? []).reduce((n, g) => n + g.lines.length, 0));
 const estimate = computed(() => plan.value?.grocery_estimate ?? null);
+// Where the FairPrice cart stands for each shopping trip: in the cart, ordered, or the list changed after it was sent.
+const cartStates = computed(() => cartStateLabels(plan.value?.fairprice_cart));
 // Budget bar: within (green), near at 95% or more (amber), over (red, the overage segment marked).
 const budgetBar = computed(() => {
   const budget = estimate.value?.weekly_budget_sgd;
@@ -163,6 +166,7 @@ const canGiveFeedback = computed(() => Boolean(actor.value?.household_role && ac
 // The preview's buttons say what each does to this kind of change (a lock is kept, not "changed").
 const choices = computed(() => previewChoices(session.value?.pending_replan?.event_type ?? "REPLACE_MEAL"));
 // How far the suggested change takes the week over its budget, said before the household confirms it.
+const followUps = computed(() => followUpChips(days.value, todayIsoDate()));
 const swapOverBudget = computed(() => {
   const over = session.value?.pending_replan?.over_budget_sgd;
   return over && estimate.value?.weekly_budget_sgd ? formatSgd(over) : null;
@@ -200,10 +204,16 @@ const home = computed(() => {
   const p = household.current.value?.current;
   const c = constraints.value;
   const size = p?.planning_household_size ?? c?.household_size ?? null;
-  const budget = p?.weekly_budget_sgd ?? c?.weekly_budget_sgd ?? null;
+  // The saved profile's budget is a week's; the conversation's is the plan's, said apart when it is another figure or a shorter plan.
+  const saved = p?.weekly_budget_sgd ?? null;
+  const planned = c?.weekly_budget_sgd ?? null;
+  const budgets = [
+    saved ? `S$${saved} ${planLabels(7).budgetSuffix}` : null,
+    planned && (planned !== saved || !labels.value.isWeek) ? `S$${planned} ${labels.value.budgetSuffix}` : null,
+  ];
   return {
     name: household.current.value?.name ?? actor.value?.user.display_name ?? "Your household",
-    line: [size ? `${size} ${size === 1 ? "person" : "people"}` : null, budget ? `S$${budget} a week` : null].filter(Boolean).join(" · ") || "Tell me who's eating",
+    line: [size ? `${size} ${size === 1 ? "person" : "people"}` : null, ...budgets].filter(Boolean).join(" · ") || "Tell me who's eating",
     chips: [
       ...(p?.dietary_preferences ?? c?.dietary_preferences ?? []).map(value => ({ label: value.replaceAll("_", " "), alert: false })),
       ...(p?.excluded_ingredients ?? c?.excluded_ingredients ?? []).map(value => ({ label: `No ${value.replaceAll("_", " ")}`, alert: false })),
@@ -445,11 +455,22 @@ function suggest(text: string) {
 }
 
 function swap(day: NutritionDashboardDay) {
-  suggest(`Swap ${formatPlanDate(day.planned_date, { weekday: "long" })}'s ${day.recipe.title} for something else`);
+  suggest(`Swap ${sentenceDay(day.planned_date, planDays.value > 7)}'s ${day.recipe.title} for something else`);
 }
 
 function exportPdf() {
   window.print();
+}
+
+function cartSent(state: FairPriceCartState) {
+  if (plan.value) plan.value.fairprice_cart = state;
+}
+
+// A swap from the cart panel: the panel closes first, so the focus it gives back does not land after the composer's.
+async function cartAsk(text: string) {
+  cartOpen.value = false;
+  await nextTick();
+  suggest(text);
 }
 
 function toggleFilm() {
@@ -584,7 +605,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <p class="lede">Tell us who’s eating and what you can spend. We plan the meals and price the groceries at FairPrice.</p>
           <form class="ask" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
-            <input id="mc-ask" v-model="draft" type="text" autocomplete="off" placeholder="What should this week look like…  e.g. dinners for two, no seafood">
+            <input id="mc-ask" v-model="draft" type="text" autocomplete="off" placeholder="What should we plan…  e.g. dinner tonight for two, no seafood">
             <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
@@ -624,7 +645,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h10" /></svg>Recipes &amp; groceries<span class="go" aria-hidden="true">›</span>
           </NuxtLink>
           <NuxtLink to="/history" class="page-link">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>Past weeks<span class="go" aria-hidden="true">›</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>Past plans<span class="go" aria-hidden="true">›</span>
           </NuxtLink>
         </nav>
         <div class="home-card">
@@ -654,7 +675,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <section ref="log" class="thread" aria-label="Conversation" aria-live="polite">
           <div class="col">
             <div v-if="!messages.length && !isLoading" class="bot mc-rise">
-              <p>Tell me who's eating, what you can spend and anything to avoid. I'll plan the week's meals and one shopping list.</p>
+              <p>Tell me who's eating, what you can spend and anything to avoid. I'll plan the meals and one shopping list.</p>
               <div class="options">
                 <button v-for="starter in starters" :key="starter" type="button" class="mc-suggest" @click="send(starter)">{{ starter }}</button>
               </div>
@@ -677,12 +698,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   <span v-for="item in heard" :key="item.text + item.value" class="mc-chip" :class="{ alert: item.alert }">{{ item.text }} <b>{{ item.value }}</b></span>
                 </div>
                 <div v-if="weekStart" class="week-start">
-                  <span class="mc-chip">Week <b>{{ weekStartLabel }}</b></span>
+                  <span class="mc-chip">{{ labels.Noun }} <b>{{ weekStartLabel }}</b></span>
                   <label class="mc-small">Start on
                     <input id="week-start" type="date" :value="weekStart" :min="todayIsoDate()" :disabled="isLoading" @change="moveStart">
                   </label>
                 </div>
-                <p>Ready to plan your week with these details.</p>
+                <p>{{ labels.isWeek ? "Ready to plan your week with these details." : "Ready to plan with these details." }}</p>
                 <div v-if="!editingPreferences" class="options">
                   <button type="button" class="mc-btn secondary sm" :disabled="isLoading || readOnly || !canGiveFeedback" @click="editPreferences">Edit preferences</button>
                   <button v-if="canUndoPreferences" type="button" class="mc-btn secondary sm" :disabled="isLoading || readOnly || !canGiveFeedback" @click="undoPreferences">Undo last preference change</button>
@@ -691,16 +712,16 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading || editingPreferences || !canGiveFeedback" @click="agent.confirm()">
-                  {{ isLoading ? "Planning your week…" : "Plan my week" }}
+                  {{ labels.isWeek ? (isLoading ? "Planning your week…" : "Plan my week") : (isLoading ? "Making your plan…" : "Make this plan") }}
                 </button>
                 <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 
-            <div v-if="takeOn" class="card mc-card mc-rise" aria-label="Change the current week here?">
-              <div class="card-body"><p>This conversation is {{ readyToPlan ? "ready to plan" : "still setting up" }} a new week. Changing the current week here sets that aside.</p></div>
+            <div v-if="takeOn" class="card mc-card mc-rise" :aria-label="`Change the current ${labels.noun} here?`">
+              <div class="card-body"><p>This conversation is {{ readyToPlan ? "ready to plan" : "still setting up" }} a new {{ labels.noun }}. Changing the current {{ labels.noun }} here sets that aside.</p></div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading" @click="changeWeek(takeOn.message, takeOn.week)">Change the current week</button>
+                <button type="button" class="mc-btn primary" :disabled="isLoading" @click="changeWeek(takeOn.message, takeOn.week)">Change the current {{ labels.noun }}</button>
                 <button type="button" class="mc-btn secondary" :disabled="isLoading" @click="keepPlanning">Keep planning</button>
               </div>
             </div>
@@ -716,15 +737,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               @open-recipe="recipeSlug = $event"
             />
 
-            <div v-if="readOnly" class="card mc-card mc-rise" aria-label="A replaced week">
-              <div class="card-body"><p>You planned these days again, so this week was replaced. It stays here to read; changes go to your current week.</p></div>
+            <div v-if="readOnly" class="card mc-card mc-rise" :aria-label="`A replaced ${labels.noun}`">
+              <div class="card-body"><p>You planned these days again, so this plan was replaced. It stays here to read; changes go to your current plan.</p></div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" @click="openCurrentWeek">Open the current week</button>
+                <button type="button" class="mc-btn primary" @click="openCurrentWeek">Open the current {{ labels.noun }}</button>
               </div>
             </div>
 
             <div v-else-if="weekEnded && plan && !isLoading" class="card mc-card mc-rise">
-              <div class="card-body"><p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me about this week and I'll plan a new one.</p></div>
+              <div class="card-body"><p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me what you'd like next and I'll plan a new one.</p></div>
             </div>
 
             <article v-if="session?.pending_replan && shapePreview" class="swap-card mc-card mc-rise" aria-label="Proposed change to your meals">
@@ -745,7 +766,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   <template v-if="shapePreview.removed">{{ shapePreview.removed }} {{ shapePreview.removed === 1 ? "dish comes" : "dishes come" }} off ·</template>
                   {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} · the other meals stay the same
                 </span>
-                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
+                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the ${labels.noun} ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
@@ -775,9 +796,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <div class="delta">
                 <span>
                   {{ session.pending_replan.nutrition_delta.calories_kcal >= 0 ? "+" : "" }}{{ Math.round(session.pending_replan.nutrition_delta.calories_kcal) }} kcal ·
-                  {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} · the rest of the week stays the same
+                  {{ groceriesChange(session.pending_replan.purchase_total_delta_sgd) }} · the rest of the plan stays the same
                 </span>
-                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the week ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
+                <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the ${labels.noun} ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
@@ -789,7 +810,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <div v-if="stamp" class="stamp" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>Change made</div>
             <div v-if="pending" class="me mc-rise">{{ pending }}</div>
             <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
-            <p v-if="pending" class="mc-small wait" role="status">Checking your limits and this week's prices. A large household on a tight budget can take a few minutes to plan.</p>
+            <p v-if="pending" class="mc-small wait" role="status">Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
             <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
           </div>
         </section>
@@ -811,7 +832,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               type="text"
               autocomplete="off"
               :readonly="readOnly"
-              :placeholder="readOnly ? 'This week was replaced. Open the current week to make changes.' : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
+              :placeholder="readOnly ? `This ${labels.noun} was replaced. Open the current ${labels.noun} to make changes.` : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
             <button type="submit" class="send" aria-label="Send" :disabled="isLoading || entering || readOnly || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -820,11 +841,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         </div>
       </main>
 
-      <aside v-if="panelOpen" class="panel" aria-label="This week">
+      <aside v-if="panelOpen" class="panel" aria-label="This plan">
         <template v-if="planState === 'ready' && plan && days.length">
           <div class="panel-head">
             <div class="tabs mc-segmented" role="tablist" aria-label="Plan details">
-              <button id="tab-dinners" type="button" role="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Week</button>
+              <button id="tab-dinners" type="button" role="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Plan</button>
               <button id="tab-groceries" type="button" role="tab" :aria-selected="tab === 'groceries'" aria-controls="panel-body" @click="tab = 'groceries'">
                 Groceries <span class="c">{{ groceryCount }}</span>
               </button>
@@ -871,11 +892,23 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               <span class="of">{{ estimate.weekly_budget_sgd ? `of ${formatSgd(estimate.weekly_budget_sgd)} · ` : "" }}{{ groceryCount }} items</span>
               <span v-if="budgetGapLabel" class="left" :class="budgetBar?.state" :title="budgetLine(estimate) ?? undefined">{{ budgetGapLabel }}</span>
             </div>
-            <div v-if="budgetBar" class="meter" :class="budgetBar.state" role="img" :aria-label="`${budgetBar.percent} percent of the weekly budget${budgetBar.state === 'over' ? ', over budget' : ''}`">
+            <div v-if="budgetBar" class="meter" :class="budgetBar.state" role="img" :aria-label="`${budgetBar.percent} percent of the ${labels.budgetName}${budgetBar.state === 'over' ? ', over budget' : ''}`">
               <i class="fill" :style="{ width: `${budgetBar.spent}%` }" />
               <i v-if="budgetBar.over" class="overage" :style="{ width: `${budgetBar.over}%` }" />
             </div>
+            <p v-if="tab === 'groceries' && cartStates.length" class="cart-states">
+              <span v-for="state in cartStates" :key="state.key" class="mc-chip" :class="state.tone">{{ state.label }}</span>
+            </p>
             <div v-if="tab === 'groceries'" class="foot-acts">
+              <button
+                type="button"
+                class="mc-btn strong"
+                :disabled="readOnly"
+                :title="readOnly ? 'This week was replaced. Open the current week to shop for it.' : undefined"
+                @click="cartOpen = true"
+              >
+                FairPrice cart
+              </button>
               <button type="button" class="mc-btn secondary" @click="previewOpen = true">Preview list</button>
               <button type="button" class="mc-btn quiet" @click="exportPdf">Export PDF</button>
             </div>
@@ -884,9 +917,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <HomePanelState
           v-else
           :state="planState === 'ready' ? 'empty' : planState"
-          :title="planState === 'empty' ? 'No plan yet' : 'This week'"
-          empty-text="Your week shows up here once it's planned: your next meal, the shopping list and nutrition."
-          error-text="Your week couldn't be loaded."
+          :title="planState === 'empty' ? 'No plan yet' : 'This plan'"
+          empty-text="Your plan shows up here once it's planned: your next meal, the shopping list and nutrition."
+          error-text="Your plan couldn't be loaded."
           :rows="6"
           @retry="retryPlan"
         />
@@ -902,6 +935,16 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       @set-status="setStatus"
     />
     <HomeRecipeSheet v-if="recipeSlug" :slug="recipeSlug" @close="recipeSlug = null" />
+    <HomeFairPriceCart
+      v-if="cartOpen && plan && estimate"
+      :plan-id="plan.id"
+      :pricing-mode="estimate.pricing_mode"
+      :trips="shoppingTrips(estimate)"
+      :cart-state="plan.fairprice_cart"
+      @close="cartOpen = false"
+      @state="cartSent"
+      @ask="cartAsk"
+    />
 
     <div v-if="plan" v-show="previewOpen" ref="preview" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview">
       <div class="sheet-frame">
@@ -1075,8 +1118,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .meter.near .fill { background: var(--c-amber); }
 .meter.over .fill { border-radius: 999px 0 0 999px; background: var(--c-amber); border-right: 2px solid #fff; }
 .meter .overage { background: repeating-linear-gradient(135deg, var(--c-amber-text) 0 4px, #b86b00 4px 8px); }
-.foot-acts { display: flex; gap: 8px; margin-top: 2px; }
+.foot-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .foot-acts button { flex: 1; }
+.cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 
 /* Shopping list preview */
 .mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; background: rgba(42, 42, 72, 0.45); animation: mc-rise 420ms var(--ease) both; }

@@ -12,6 +12,8 @@ export default defineNuxtConfig({
     apiBase: "http://backend:8000",
     public: {
       apiBase: "http://localhost:8000",
+      // The MealCraft FairPrice cart extension (browser-extension/fairprice-cart); its manifest key fixes this id.
+      fairpriceCartExtensionId: "iogncfhaaajiccdgdnncocllpojhdepm",
     },
   },
   typescript: {

@@ -57,7 +57,7 @@ async function confirmChange() {
   if (!pending.value) return;
   saving.value = true;
   try {
-    await apiFetch(api(`/config/${pending.value.setting.key}`), { method: "PUT", body: { value: pending.value.value } });
+    await apiFetch<unknown>(api(`/config/${pending.value.setting.key}`), { method: "PUT", body: { value: pending.value.value } });
     pending.value = null;
     await loadSettings();
   }
