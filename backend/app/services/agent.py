@@ -819,7 +819,7 @@ class AgentSessionService:
             start = default_start(clock_now(), list((constraints.plan_shape or default_plan_shape()).meals))
         return WeeklyMealPlanRequest(
             start_date=start,
-            day_count=7,
+            day_count=constraints.day_count,
             household_size=constraints.household_size,
             max_cooking_time_minutes=constraints.max_cooking_time_minutes,
             budget_per_meal_sgd=constraints.budget_per_meal_sgd,
@@ -1076,10 +1076,14 @@ class AgentSessionService:
         lang = language(message, snapshot.messages)
         avoid_recipe_ids = sorted(set(snapshot.constraints.avoid_recipe_ids) | {dish.recipe.id for dish in plan.days})
 
-        changes = {
+        # The new plan covers the same days and meals as the one it replaces.
+        changes: dict = {
             "start_date": plan.start_date,
+            "day_count": plan.day_count,
             "avoid_recipe_ids": avoid_recipe_ids,
         }
+        if plan.plan_shape is not None:
+            changes["plan_shape"] = plan.plan_shape
 
         lowered = message.lower()
         if (
@@ -1104,7 +1108,7 @@ class AgentSessionService:
         updated = self.repository.append_replan_exchange(
             session_id,
             user_message=message,
-            assistant_message=say("planned", lang),
+            assistant_message=say("planned", lang, short=replacement.day_count < 7),
             draft=AgentReplanDraft(),
             clarification_questions=[],
             pending_event_id=None,
@@ -1245,6 +1249,20 @@ class AgentSessionService:
             should_mutate_state=True,
             reason_code="PLAN_SHAPE_CHANGE",
         )
+        if days == []:
+            # It names days this plan does not have (a short plan has no Friday): the whole plan is not changed.
+            updated = self.repository.append_replan_exchange(
+                session_id,
+                user_message=message,
+                assistant_message=say("not_in_plan", lang),
+                draft=AgentReplanDraft(),
+                clarification_questions=[],
+                pending_event_id=None,
+                scope_decision=_refused(decision),
+            )
+            if updated is None:
+                raise AgentSessionNotFoundError
+            return self._to_response(updated)
         if intent.ask is not None:
             # "Add a soup to Friday dinner" when it has one: a second soup, or that one swapped?
             updated = self.repository.append_replan_exchange(
@@ -1289,7 +1307,11 @@ class AgentSessionService:
     def _over_budget(preview: MealPlanReplanEventResponse, plan: WeeklyMealPlanResponse, lang: str = "en") -> str:
         """How far a change takes the week over its budget, as the preview card says it; empty within it."""
         over, budget = preview.over_budget_sgd, plan.grocery_estimate.weekly_budget_sgd
-        return say("shape_over", lang, total=budget + over, over=over, budget=budget) if over and budget else ""
+        return (
+            say("shape_over", lang, short=plan.day_count < 7, total=budget + over, over=over, budget=budget)
+            if over and budget
+            else ""
+        )
 
     @staticmethod
     def _describe_shape_preview(
@@ -1315,7 +1337,7 @@ class AgentSessionService:
         budget = plan.grocery_estimate.weekly_budget_sgd
         total = round(plan.grocery_estimate.purchase_total_sgd + delta, 2)
         over = (
-            say("shape_over", lang, total=total, over=total - budget, budget=budget)
+            say("shape_over", lang, short=plan.day_count < 7, total=total, over=total - budget, budget=budget)
             if preview.over_budget_sgd is not None and budget is not None
             else ""
         )
@@ -1563,7 +1585,7 @@ class AgentSessionService:
         updated = self.repository.mark_planned(
             session_id,
             plan_id=plan.id,
-            assistant_message=say("planned", lang),
+            assistant_message=say("planned", lang, short=plan.day_count < 7),
             user_message=said,
             scope_decision=_chat_confirmation(said, "confirm_plan", applied=True) if said is not None else None,
         )

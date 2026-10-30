@@ -20,9 +20,9 @@ const removing = ref<AgentSession | null>(null);
 
 const titleOf = (item: AgentSession) => item.title || item.messages.find(m => m.role === "user")?.content || "New plan";
 function statusOf(item: AgentSession): { label: string; tone: string } {
-  if (item.plan_id && item.plan_id === props.weekId) return { label: "This week", tone: "week" };
+  if (item.plan_id && item.plan_id === props.weekId) return { label: "Current plan", tone: "week" };
   if (item.plan_id) return { label: "Planned", tone: "planned" };
-  if (item.status === "planned") return { label: "Week deleted", tone: "gone" };
+  if (item.status === "planned") return { label: "Plan deleted", tone: "gone" };
   return { label: "Setting up", tone: "setup" };
 }
 
@@ -77,8 +77,8 @@ const removeMessage = computed(() => {
   const item = removing.value;
   if (!item) return "";
   const base = `“${titleOf(item)}” and its messages will be deleted. This cannot be undone.`;
-  if (item.plan_id === props.weekId && item.plan_id) return `${base} This week's plan stays: it is still on this page and in Past weeks.`;
-  return item.plan_id ? `${base} The week it planned stays in Past weeks.` : base;
+  if (item.plan_id === props.weekId && item.plan_id) return `${base} This plan stays: it is still on this page and in Past plans.`;
+  return item.plan_id ? `${base} The plan it made stays in Past plans.` : base;
 });
 
 // A click anywhere else closes an open menu.
