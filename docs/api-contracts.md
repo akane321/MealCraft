@@ -400,11 +400,19 @@ each empty by default (stored as NULL):
 - `cooking_time_rules`: `CookingTimeRule` objects (the same text, weekday and
   meal fields, and `max_minutes` 5 to 240). A meal's time limit is the tightest
   rule naming it, else `max_cooking_time_minutes`; 240 is no limit.
-- `missing_basics`: basic seasonings (`data/ingredients/basic-seasonings-v1.json`)
-  the household has run out of. Every other basic is assumed at home: left off
-  the shopping list, unpriced and outside the budget, with a note on the list.
-  A basic stays a recipe ingredient for allergens, exclusions and diets, and a
-  basic the household excludes is never assumed.
+- `missing_basics`: ingredients of the at-home list
+  (`data/ingredients/basic-seasonings-v2.json`, 164 of them since the owner's
+  decision of 2026-10-29) the household has run out of, up to 200. The list is
+  the 13 basic seasonings, rice, vinegars, small-amount sauces and condiments,
+  spices and blends, dried herbs, stock cubes, starches and flours; cooking
+  sauces and pastes that are a dish's base, tomato products, coconut milk,
+  fresh herbs, liquid broths, baking items, pasta and noodles are bought. Every
+  other item of the list is assumed at home: left off the shopping list, unpriced
+  and outside the budget, with a note on the list that gives counts by category,
+  not names ("Pantry basics are assumed at home and left off this list: basics
+  (2), rice (1)."). A dish made only of at-home items buys nothing. An item
+  stays a recipe ingredient for allergens, exclusions and diets, and one the
+  household excludes is never assumed.
 - `nutrition_limits`: at most one `NutritionLimit`, and only `sodium_mg`
   (`scope: "per_day"`). A `max_value` of null is the tightest HPB limit of the
   usually-home members (2,000 mg for adults and seniors); a household whose
@@ -418,7 +426,8 @@ The server writes each rule's `restatement` itself, from a fixed template.
 `GET /api/household-profiles/reference` is read-only:
 `default_servings[age_band][female|male|any][low|moderate|high][none|fat_loss|muscle_gain]`,
 `sodium_limit_mg[age_band]` (null where HPB gives none), `basics`
-(`normalized_name`, `display_name`, `allergens`), `meal_shares` and the
+(`normalized_name`, `display_name`, `category`, `allergens`), `basic_categories`
+(`id`, `label`, in the order the page lists them), `meal_shares` and the
 `sources` (title, URL, retrieved date). The profile page looks values up here
 and never repeats the formula. It also returns `meal_structure` (ADR-0070):
 `presets` (meal -> preset name -> roles of `meal_roles`; the first preset of each

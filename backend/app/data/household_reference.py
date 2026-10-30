@@ -1,7 +1,8 @@
-"""The household reference tables: HPB energy and sodium by age band and sex, and the basic seasonings.
+"""The household reference tables: HPB energy and sodium by age band and sex, and the basics assumed at home.
 
 Both are small committed data files: `data/nutrition/hpb-reference-v1.json` (values transcribed from HealthHub,
-with a check per value) and `data/ingredients/basic-seasonings-v1.json` (ADR-0068, ADR-0072 section 2).
+with a check per value) and `data/ingredients/basic-seasonings-v2.json` (ADR-0068, ADR-0072 section 2, widened on
+2026-10-29).
 """
 
 import json
@@ -12,7 +13,7 @@ from typing import get_args
 from app.core.paths import data_root
 
 HPB_FILE = "nutrition/hpb-reference-v1.json"
-BASICS_FILE = "ingredients/basic-seasonings-v1.json"
+BASICS_FILE = "ingredients/basic-seasonings-v2.json"
 AGE_BANDS = ("toddler", "child", "teen", "adult", "senior")
 ACTIVITIES = ("low", "moderate", "high")
 SERVINGS_RANGE = (Fraction(1, 4), Fraction(3))
@@ -24,10 +25,26 @@ def hpb() -> dict:
 
 
 @lru_cache
+def _basics_file() -> dict:
+    return json.loads((data_root() / BASICS_FILE).read_text(encoding="utf-8"))
+
+
+@lru_cache
 def basic_seasonings() -> dict[str, dict]:
-    """normalized_name -> {normalized_name, display_name, allergens}."""
-    items = json.loads((data_root() / BASICS_FILE).read_text(encoding="utf-8"))["items"]
-    return {item["normalized_name"]: item for item in items}
+    """normalized_name -> {normalized_name, display_name, category, allergens}: everything assumed at home."""
+    return {item["normalized_name"]: item for item in _basics_file()["items"]}
+
+
+@lru_cache
+def basic_categories() -> dict[str, str]:
+    """category id -> label, in the order the profile page groups them."""
+    return {category["id"]: category["label"] for category in _basics_file()["categories"]}
+
+
+@lru_cache
+def basic_short_labels() -> dict[str, str]:
+    """category id -> the plural noun the grocery note counts in, in the same order."""
+    return {category["id"]: category["short"] for category in _basics_file()["categories"]}
 
 
 def _rows(age_band: str | None, sex: str | None) -> list[dict]:
@@ -113,6 +130,7 @@ def reference_table() -> dict:
         },
         "sodium_limit_mg": {band: sodium_limit(band) for band in AGE_BANDS},
         "basics": list(basic_seasonings().values()),
+        "basic_categories": [{"id": key, "label": label} for key, label in basic_categories().items()],
         "meal_shares": meal_shares(),
         "sources": [
             {key: table[part][key] for key in ("title", "url", "retrieved_on")} for part in ("source", "sodium_source")

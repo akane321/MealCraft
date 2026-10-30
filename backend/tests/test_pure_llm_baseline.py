@@ -242,9 +242,14 @@ def test_load_resources_reads_the_frozen_data():
     }  # fmt: skip
     # Snapshot products whose ingredient the release names nothing for: priced, never reachable by a line.
     assert loaded.unnamed_product_ingredients == ("laksa_leaf", "pork_bones", "pork_trotter", "suet", "tripe")
-    assert "salt" in loaded.basic_seasonings
+    assert {"salt", "rice", "ketchup", "cumin", "flour"} <= loaded.basic_seasonings
+    assert not {"curry_paste", "basil", "olive_oil"} & loaded.basic_seasonings
+    assert "data/ingredients/basic-seasonings-v2.json" in {
+        str(path).replace("\\", "/") for path, _ in loaded.data_digests
+    }
     assert loaded.not_bought({"missing_basics": ["salt"]}) >= {"water", "ice"}
     assert "salt" not in loaded.not_bought({"missing_basics": ["salt"]})
+    assert {"rice", "flour"} <= loaded.not_bought({}) and "rice" not in loaded.not_bought({"missing_basics": ["rice"]})
     assert loaded.ingredient_facts["soy_sauce"].allergens == ("gluten", "soy")
 
 

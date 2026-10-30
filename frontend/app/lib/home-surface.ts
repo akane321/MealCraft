@@ -141,9 +141,10 @@ function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
  * actually used rather than the mode that was asked for: a live request that
  * fell back to sample data must not be labelled as FairPrice prices.
  */
-/** The backend's note that basic seasonings are assumed at home (layer 08), or null when the week assumes none. */
+/** The backend's note that pantry basics (seasonings, rice, flours and the like) are assumed at home (layer 08),
+ *  or null when the week assumes none. */
 export function basicsNote(estimate: WeeklyGroceryEstimate): string | null {
-  return estimate.warnings?.find(warning => warning.startsWith("Basic seasonings are assumed at home")) ?? null;
+  return estimate.warnings?.find(warning => warning.startsWith("Pantry basics are assumed at home")) ?? null;
 }
 
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {

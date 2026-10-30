@@ -67,7 +67,7 @@ from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
-from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
+from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
@@ -634,12 +634,15 @@ class ProductPlanningEngine:
             # Basic seasonings at home are not shopping (ADR-0068): the lines go only after the candidate's
             # allergens were read from every line, and an excluded basic is never assumed (`assumed_basics`).
             bought = [item for item in candidate.ingredients if item.ingredient_id not in assumed]
-            if bought and len(bought) < len(candidate.ingredients):
+            if len(bought) < len(candidate.ingredients):
                 basics_used[candidate.recipe_id] = {item.ingredient_id for item in candidate.ingredients} - {
                     item.ingredient_id for item in bought
                 }
-                candidate = candidate.model_copy(update={"ingredients": bought})
-            # ponytail: a recipe of basics alone is bought as listed; none is in the catalog's meal courses.
+                candidate = candidate.model_copy(
+                    update={"ingredients": bought, "vegetable_led": candidate_vegetable_led(candidate)}
+                )
+            # A dish of basics alone (plain rice with salt and oil) buys nothing, as the estimator and the weekly
+            # list read it: its candidate keeps no ingredient line.
             if composition is not None and candidate.course is None:
                 # The curated catalog predates course labels and holds only dinner mains.
                 candidate = candidate.model_copy(update={"course": "main"})

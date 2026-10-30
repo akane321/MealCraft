@@ -80,10 +80,17 @@ export interface RuleParseResult {
   fell_back: boolean;
 }
 
+/** One ingredient assumed at home (seasonings, rice, flours and the like) and the category it is grouped in. */
 export interface BasicSeasoning {
   normalized_name: string;
   display_name: string;
+  category: string;
   allergens: string[];
+}
+
+export interface BasicCategory {
+  id: string;
+  label: string;
 }
 
 /** GET /api/household-profiles/reference: looked up, never recomputed, on the page. */
@@ -93,6 +100,8 @@ export interface HouseholdReference {
   default_servings: Record<string, Record<string, Record<string, Record<string, number>>>>;
   sodium_limit_mg: Record<string, number | null>;
   basics: BasicSeasoning[];
+  /** The categories the basics are grouped in, in the order to list them. */
+  basic_categories: BasicCategory[];
   meal_shares: Record<string, number>;
   sources: { title: string; url: string; retrieved_on: string }[];
   /** The full meal structure (ADR-0070); older servers send none. */

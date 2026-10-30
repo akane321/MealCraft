@@ -86,6 +86,18 @@ def test_whole_portions_still_work_and_decimals_are_bounded(recipe_client):
     assert response.json()["current"]["planning_household_size"] == 1
 
 
+def test_a_household_can_mark_every_basic_as_run_out(recipe_client):
+    from app.data.household_reference import basic_seasonings
+
+    everything = sorted(basic_seasonings())
+    created = recipe_client.post("/api/household-profiles", json=payload(missing_basics=everything))
+    assert created.status_code == 201, created.text
+    assert created.json()["current"]["missing_basics"] == everything
+    reference = recipe_client.get("/api/household-profiles/reference").json()
+    assert len(reference["basics"]) == len(everything) > 20
+    assert {item["category"] for item in reference["basics"]} == {item["id"] for item in reference["basic_categories"]}
+
+
 def test_profile_rules_are_checked_on_save(recipe_client):
     bad = [
         payload(presence_rules=[{**RULE, "member_name": "Tom"}]),

@@ -1,0 +1,1127 @@
+{
+  "version": "basic-seasonings-v2",
+  "source": "Owner decision of 2026-10-29 (widens basic-seasonings-v1, which was operations/sprint2-plan/08-household.md section 3.2; ADR-0068; ADR-0072 section 2): the thirteen basics plus rice, vinegars, small-amount sauces and condiments, spices, dried herbs, stock cubes, starches and flours. Every id is a normalized name in data-engineering/data/release/v2.2/ingredients.jsonl.",
+  "rule": "An ingredient listed here is assumed at home only for shopping, pricing and the budget: it is left off the list and unpriced unless the household lists it in missing_basics. It stays a recipe ingredient for every safety check (allergens, exclusions, diets), and one the household excludes is never assumed. Cooking sauces and pastes that are a dish's base (marinara, curry paste, pesto, salsa), tomato products, coconut milk, honey, peanut butter, jam, olive oil, butter, liquid broths, baking items, breadcrumbs, pasta, noodles and fresh herbs are bought. Allergens are the runtime vocabulary's, mapped from the release's (release molluscs read as shellfish, gluten_candidate as gluten, sulfites unchecked).",
+  "categories": [
+    {
+      "id": "basic",
+      "label": "Basics: salt, sugar, oil, garlic and the like",
+      "short": "basics"
+    },
+    {
+      "id": "rice",
+      "label": "Rice",
+      "short": "rice"
+    },
+    {
+      "id": "vinegar",
+      "label": "Vinegars",
+      "short": "vinegars"
+    },
+    {
+      "id": "sauce",
+      "label": "Sauces and condiments",
+      "short": "sauces"
+    },
+    {
+      "id": "spice",
+      "label": "Spices and seasoning blends",
+      "short": "spices"
+    },
+    {
+      "id": "dried_herb",
+      "label": "Dried herbs",
+      "short": "dried herbs"
+    },
+    {
+      "id": "stock",
+      "label": "Stock cubes and powders",
+      "short": "stock cubes"
+    },
+    {
+      "id": "starch",
+      "label": "Starches",
+      "short": "starches"
+    },
+    {
+      "id": "flour",
+      "label": "Flours",
+      "short": "flours"
+    }
+  ],
+  "items": [
+    {
+      "normalized_name": "salt",
+      "display_name": "Salt",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "black_pepper",
+      "display_name": "Black pepper",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sugar",
+      "display_name": "Sugar",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "brown_sugar",
+      "display_name": "Brown sugar",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "vegetable_oil",
+      "display_name": "Vegetable oil",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sunflower_oil",
+      "display_name": "Sunflower oil",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "vinegar",
+      "display_name": "Vinegar",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "rice_vinegar",
+      "display_name": "Rice vinegar",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "garlic",
+      "display_name": "Garlic",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "ginger",
+      "display_name": "Ginger",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "green_onion",
+      "display_name": "Spring onion",
+      "category": "basic",
+      "allergens": []
+    },
+    {
+      "normalized_name": "soy_sauce",
+      "display_name": "Soy sauce",
+      "category": "basic",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "oyster_sauce",
+      "display_name": "Oyster sauce",
+      "category": "basic",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    {
+      "normalized_name": "rice",
+      "display_name": "Rice",
+      "category": "rice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "brown_rice",
+      "display_name": "Brown rice",
+      "category": "rice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "glutinous_rice",
+      "display_name": "Glutinous rice",
+      "category": "rice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "wild_rice",
+      "display_name": "Wild rice",
+      "category": "rice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "black_vinegar",
+      "display_name": "Chinese black vinegar",
+      "category": "vinegar",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "cider_vinegar",
+      "display_name": "Apple cider vinegar",
+      "category": "vinegar",
+      "allergens": []
+    },
+    {
+      "normalized_name": "red_wine_vinegar",
+      "display_name": "Red wine vinegar",
+      "category": "vinegar",
+      "allergens": []
+    },
+    {
+      "normalized_name": "white_wine_vinegar",
+      "display_name": "White wine vinegar",
+      "category": "vinegar",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sherry_vinegar",
+      "display_name": "Sherry vinegar",
+      "category": "vinegar",
+      "allergens": []
+    },
+    {
+      "normalized_name": "balsamic",
+      "display_name": "Balsamic vinegar",
+      "category": "vinegar",
+      "allergens": []
+    },
+    {
+      "normalized_name": "banana_ketchup",
+      "display_name": "Banana ketchup",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "ketchup",
+      "display_name": "Ketchup",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "mustard",
+      "display_name": "Prepared mustard",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "dijon",
+      "display_name": "Dijon mustard",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "bbq_sauce",
+      "display_name": "Barbecue sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "bean_sauce",
+      "display_name": "Bean sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "chili_garlic_sauce",
+      "display_name": "Chili garlic sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chili_oil",
+      "display_name": "Chili oil",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chili_paste",
+      "display_name": "Chili paste",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chili_sauce",
+      "display_name": "Chili sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chipotle_in_adobo",
+      "display_name": "Chipotle in adobo",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "gochujang",
+      "display_name": "Gochujang",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "gochujang_sauce",
+      "display_name": "Gochujang sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "harissa",
+      "display_name": "Harissa",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "hot_sauce",
+      "display_name": "Hot sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sambal_oelek",
+      "display_name": "Sambal oelek",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sriracha",
+      "display_name": "Sriracha",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sweet_chili_sauce",
+      "display_name": "Sweet chili sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "fish_sauce",
+      "display_name": "Fish sauce",
+      "category": "sauce",
+      "allergens": [
+        "fish"
+      ]
+    },
+    {
+      "normalized_name": "hoisin",
+      "display_name": "Hoisin sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "kecap_manis",
+      "display_name": "Kecap manis",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "tamari",
+      "display_name": "Tamari",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "teriyaki",
+      "display_name": "Teriyaki sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "worcestershire",
+      "display_name": "Worcestershire sauce",
+      "category": "sauce",
+      "allergens": [
+        "fish"
+      ]
+    },
+    {
+      "normalized_name": "sesame_oil",
+      "display_name": "Sesame oil",
+      "category": "sauce",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    {
+      "normalized_name": "mayo",
+      "display_name": "Mayonnaise",
+      "category": "sauce",
+      "allergens": [
+        "egg"
+      ]
+    },
+    {
+      "normalized_name": "vegan_mayonnaise",
+      "display_name": "Vegan mayonnaise",
+      "category": "sauce",
+      "allergens": [
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "mayo_or_dressing",
+      "display_name": "Mayonnaise or salad dressing",
+      "category": "sauce",
+      "allergens": [
+        "egg"
+      ]
+    },
+    {
+      "normalized_name": "salad_dressing",
+      "display_name": "Salad dressing",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "italian_dressing",
+      "display_name": "Italian dressing",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "ranch_dressing",
+      "display_name": "Ranch dressing",
+      "category": "sauce",
+      "allergens": [
+        "dairy",
+        "egg"
+      ]
+    },
+    {
+      "normalized_name": "miso",
+      "display_name": "Miso",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "doenjang",
+      "display_name": "Doenjang",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "mirin",
+      "display_name": "Mirin",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sesame_tahini",
+      "display_name": "Tahini",
+      "category": "sauce",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    {
+      "normalized_name": "wasabi",
+      "display_name": "Wasabi",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "horseradish",
+      "display_name": "Horseradish",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "steak_sauce",
+      "display_name": "Steak sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "plum_sauce",
+      "display_name": "Plum sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "sweet_sour_sauce",
+      "display_name": "Sweet and sour sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "nuoc_cham",
+      "display_name": "Nuoc cham",
+      "category": "sauce",
+      "allergens": [
+        "fish"
+      ]
+    },
+    {
+      "normalized_name": "stir_fry_sauce",
+      "display_name": "Stir-fry sauce",
+      "category": "sauce",
+      "allergens": [
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "taco_sauce",
+      "display_name": "Taco sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "relish",
+      "display_name": "Pickle relish",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chutney",
+      "display_name": "Chutney",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "capers",
+      "display_name": "Capers",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "shrimp_paste",
+      "display_name": "Shrimp paste",
+      "category": "sauce",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    {
+      "normalized_name": "pickled_ginger",
+      "display_name": "Pickled ginger",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "ginger_garlic",
+      "display_name": "Ginger garlic paste",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "pomegranate_molasses",
+      "display_name": "Pomegranate molasses",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "liquid_smoke",
+      "display_name": "Liquid smoke",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "kitchen_bouquet",
+      "display_name": "Kitchen Bouquet browning sauce",
+      "category": "sauce",
+      "allergens": []
+    },
+    {
+      "normalized_name": "adobo_seasoning",
+      "display_name": "Adobo seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "allspice",
+      "display_name": "Allspice",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "anise",
+      "display_name": "Anise",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "annatto",
+      "display_name": "Annatto",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "apple_pie_spice",
+      "display_name": "Apple pie spice",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "asian_seasoning",
+      "display_name": "Asian seasoning",
+      "category": "spice",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "berbere",
+      "display_name": "Berbere",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cajun_seasoning",
+      "display_name": "Cajun seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "caraway",
+      "display_name": "Caraway seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cardamom",
+      "display_name": "Cardamom",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cayenne",
+      "display_name": "Cayenne pepper",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "celery_salt",
+      "display_name": "Celery salt",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "celery_seed",
+      "display_name": "Celery seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chili_powder",
+      "display_name": "Chili powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chinese_five_spice",
+      "display_name": "Five spice powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cinnamon",
+      "display_name": "Cinnamon",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cloves_spice",
+      "display_name": "Cloves",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "coriander",
+      "display_name": "Coriander",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "cumin",
+      "display_name": "Cumin",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "curry_powder",
+      "display_name": "Curry powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "dill_seed",
+      "display_name": "Dill seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "dry_mustard",
+      "display_name": "Mustard powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "fennel_seed",
+      "display_name": "Fennel seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "fenugreek",
+      "display_name": "Fenugreek",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "galangal",
+      "display_name": "Galangal",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "garam_masala",
+      "display_name": "Garam masala",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "garlic_powder",
+      "display_name": "Garlic powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "garlic_salt",
+      "display_name": "Garlic salt",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "gochugaru",
+      "display_name": "Gochugaru",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "herbes_de_provence",
+      "display_name": "Herbes de provence",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "italian_seasoning",
+      "display_name": "Italian seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "jerk_seasoning",
+      "display_name": "Jerk seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "lemon_pepper",
+      "display_name": "Lemon pepper seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "mace",
+      "display_name": "Mace",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "meat_tenderizer",
+      "display_name": "Meat tenderizer",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "msg",
+      "display_name": "MSG",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "mustard_seed",
+      "display_name": "Mustard seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "nasi_goreng_spice_mix",
+      "display_name": "Nasi goreng spice mix",
+      "category": "spice",
+      "allergens": [
+        "shellfish"
+      ]
+    },
+    {
+      "normalized_name": "nutmeg",
+      "display_name": "Nutmeg",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "old_bay",
+      "display_name": "Old bay seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "onion_powder",
+      "display_name": "Onion powder",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "onion_salt",
+      "display_name": "Onion salt",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "paprika",
+      "display_name": "Paprika",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "peppercorn",
+      "display_name": "Peppercorn",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "pho_spice",
+      "display_name": "Pho spice",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "pickling_spice",
+      "display_name": "Pickling spice",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "poppy_seed",
+      "display_name": "Poppy seed",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "poultry_seasoning",
+      "display_name": "Poultry seasoning",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "pumpkin_pie_spice",
+      "display_name": "Pumpkin pie spice",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "saffron",
+      "display_name": "Saffron",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "salt_and_pepper",
+      "display_name": "Salt and pepper",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "seasoned_salt",
+      "display_name": "Seasoned salt",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sesame_seed",
+      "display_name": "Sesame seed",
+      "category": "spice",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    {
+      "normalized_name": "sumac",
+      "display_name": "Sumac",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "szechwan_pepper",
+      "display_name": "Szechwan pepper",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "taco_seasoning",
+      "display_name": "Taco seasoning mix",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "turmeric",
+      "display_name": "Turmeric",
+      "category": "spice",
+      "allergens": []
+    },
+    {
+      "normalized_name": "zaatar",
+      "display_name": "Za'atar",
+      "category": "spice",
+      "allergens": [
+        "sesame"
+      ]
+    },
+    {
+      "normalized_name": "bay_leaf",
+      "display_name": "Bay leaf",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "oregano",
+      "display_name": "Oregano",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "thyme",
+      "display_name": "Thyme",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "rosemary",
+      "display_name": "Rosemary",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "marjoram",
+      "display_name": "Marjoram",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "sage",
+      "display_name": "Sage",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "tarragon",
+      "display_name": "Tarragon",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "mixed_herbs",
+      "display_name": "Mixed herbs",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "fenugreek_leaf",
+      "display_name": "Fenugreek leaf",
+      "category": "dried_herb",
+      "allergens": []
+    },
+    {
+      "normalized_name": "bouillon",
+      "display_name": "Bouillon cube",
+      "category": "stock",
+      "allergens": []
+    },
+    {
+      "normalized_name": "dashida",
+      "display_name": "Dashida",
+      "category": "stock",
+      "allergens": [
+        "dairy",
+        "gluten",
+        "soy"
+      ]
+    },
+    {
+      "normalized_name": "cornstarch",
+      "display_name": "Cornstarch",
+      "category": "starch",
+      "allergens": []
+    },
+    {
+      "normalized_name": "potato_starch",
+      "display_name": "Potato starch",
+      "category": "starch",
+      "allergens": []
+    },
+    {
+      "normalized_name": "arrowroot",
+      "display_name": "Arrowroot",
+      "category": "starch",
+      "allergens": []
+    },
+    {
+      "normalized_name": "mung_bean_starch",
+      "display_name": "Mung bean starch",
+      "category": "starch",
+      "allergens": []
+    },
+    {
+      "normalized_name": "tapioca_flour",
+      "display_name": "Tapioca flour",
+      "category": "starch",
+      "allergens": []
+    },
+    {
+      "normalized_name": "flour",
+      "display_name": "All-purpose flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "bread_flour",
+      "display_name": "Bread flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "cake_flour",
+      "display_name": "Cake flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "self_rising_flour",
+      "display_name": "Self-rising flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "whole_wheat_flour",
+      "display_name": "Whole wheat flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "rice_flour",
+      "display_name": "Rice flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "semolina_flour",
+      "display_name": "Semolina",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "almond_flour",
+      "display_name": "Almond flour",
+      "category": "flour",
+      "allergens": [
+        "tree_nut"
+      ]
+    },
+    {
+      "normalized_name": "brown_rice_flour",
+      "display_name": "Brown rice flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "chickpea_flour",
+      "display_name": "Chickpea flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "coconut_flour",
+      "display_name": "Coconut flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "millet_flour",
+      "display_name": "Millet flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "rye_flour",
+      "display_name": "Rye flour",
+      "category": "flour",
+      "allergens": [
+        "gluten"
+      ]
+    },
+    {
+      "normalized_name": "sorghum_flour",
+      "display_name": "Sorghum flour",
+      "category": "flour",
+      "allergens": []
+    },
+    {
+      "normalized_name": "teff_flour",
+      "display_name": "Teff flour",
+      "category": "flour",
+      "allergens": []
+    }
+  ]
+}

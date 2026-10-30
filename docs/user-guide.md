@@ -155,10 +155,22 @@ allergens, diets and foods they will not eat become the whole household's.
 
 #### Basics, limits, meals and kitchen
 
-Under **Basics at home**, salt, sugar, cooking oil, soy sauce, garlic, ginger
-and the other listed basics are assumed to be in your kitchen. They are left off
-the shopping list unless you tick one as run out. Allergen checks still apply to
-them: a dish with soy sauce is never planned for a soy allergy.
+Under **At home**, MealCraft assumes your kitchen already has salt, sugar,
+cooking oil, garlic, ginger, soy sauce and the like, plus rice, vinegars,
+small-amount sauces and condiments (ketchup, fish sauce, miso, sesame oil),
+spices and seasoning blends, dried herbs, stock cubes, starches and flours.
+These are left off the shopping list and are not priced, so a dish made only of
+them, such as plain rice, adds nothing to it; the list says how many of each kind
+it left off. Cooking sauces and pastes that make up a dish (marinara, curry
+paste, pesto, salsa), tomato products, coconut milk, honey, peanut butter, olive
+oil, butter, fresh herbs, liquid broths, baking items, pasta and noodles are
+still bought.
+
+To buy something on that list again, open its group under **At home**, which is
+closed until you open it, and tick it under **Run out of**. The heading shows
+how many items you have marked; type in the box to find an item across all the
+groups. Allergen checks still apply to everything on the list: a dish with soy
+sauce is never planned for a soy allergy.
 
 **Keep sodium within a daily limit** turns on a hard daily cap for each person.
 It defaults to HPB's 2,000 mg for adults. The meals you plan keep within their

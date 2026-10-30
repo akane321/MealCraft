@@ -86,7 +86,7 @@ class FinalPlanningValidator:
             )
         )
         checks.extend(self._nutrition_checks(problem, meals))
-        checks.extend(self._shopping_checks(problem, shopping))
+        checks.extend(self._shopping_checks(problem, meals, shopping))
         demand_checks = self._demand_checks(problem, meals, shopping)
         checks.extend(demand_checks)
         product_checks, purchase_total, cost_complete = self._product_checks(problem, shopping)
@@ -763,6 +763,7 @@ class FinalPlanningValidator:
     @staticmethod
     def _shopping_checks(
         problem: FinalPlanningProblem,
+        meals: dict[str, list[PlanningAssignment]],
         shopping: list[PlanningShoppingSelection],
     ) -> list[PlanningConstraintCheck]:
         checks: list[PlanningConstraintCheck] = []
@@ -793,7 +794,10 @@ class FinalPlanningValidator:
                         line.ingredient_id,
                     )
                 )
-        if not shopping and any(slot.required for slot in problem.slots):
+        # A plan of dishes made only of basics at home has nothing to buy (a candidate keeps no line for them).
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        buys = any(recipes[dish.recipe_id].ingredients for dishes in meals.values() for dish in dishes)
+        if not shopping and buys and any(slot.required for slot in problem.slots):
             checks.append(
                 PlanningConstraintCheck(
                     code="shopping_list",
