@@ -8,6 +8,7 @@ from app.data import halal_labels as generator
 from app.data.halal import (
     CERTIFICATION_FILE,
     LABELS_FILE,
+    OVERRIDES_FILE,
     halal_labels,
     needs_certification,
     recipe_halal_status,
@@ -92,6 +93,44 @@ def test_the_review_queue_lists_every_doubt_and_a_fixed_sample(generated: list[d
     assert len(queued["sample"]) == generator.SAMPLE_SIZE
     assert {"cheese", "red_wine_vinegar"} <= queued["check"] and not queued["check"] & queued["sample"]
     assert all(not row["verdict"] for row in rows)
+
+
+def _csv(name: str) -> list[dict]:
+    with (data_root() / name).open(encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def test_every_verdict_short_of_ok_is_an_override_and_nothing_else_is(generated: list[dict]) -> None:
+    """The person's verdicts (10-31) are on the queue the generator writes, and the overrides carry exactly them."""
+    verdicts = _csv(generator.VERDICTS_FILE)
+    assert [(r["queue"], r["normalized_name"]) for r in verdicts] == [
+        (r["queue"], r["normalized_name"]) for r in generator.review_rows(generated)
+    ]
+    changed = {r["normalized_name"]: r["verdict"] for r in verdicts if r["verdict"] != "ok"}
+    overrides = json.loads((data_root() / OVERRIDES_FILE).read_text(encoding="utf-8"))["items"]
+    assert {i["normalized_name"]: i["status"] for i in overrides} == changed
+    labels = halal_labels()
+    assert all((labels[n]["status"], labels[n]["source"]) == (verdict, "human") for n, verdict in changed.items())
+    assert labels["cheese"]["status"] == "uncertain" and labels["broccoli"]["status"] == "halal"
+
+
+def test_the_second_round_holds_the_other_condiments_and_prepared_foods(generated: list[dict]) -> None:
+    names = generator.catalog()
+    rows = _csv(generator.REVIEW_V2_FILE)
+    assert rows == [{k: str(v) for k, v in row.items()} for row in generator.second_round_rows(generated, names)]
+    second = {r["normalized_name"] for r in rows}
+    assert {"soy_sauce", "vinegar", "mayo"} <= second
+    assert not second & {r["normalized_name"] for r in generator.review_rows(generated)}
+    assert all(names[name][0] in generator.SECOND_ROUND_GROUPS for name in second)
+
+
+def test_the_pool_report_counts_each_queue_by_outcome() -> None:
+    from app.data.halal_pool import review_summary
+
+    review = review_summary()
+    assert review[generator.VERDICTS_FILE]["sample"] == {"kept": 40, "corrected": 0, "undetermined": 20, "pending": 0}
+    assert review[generator.VERDICTS_FILE]["check"]["undetermined"] == 13
+    assert review[generator.REVIEW_V2_FILE]["second_round"]["pending"] == len(_csv(generator.REVIEW_V2_FILE))
 
 
 def test_certification_facts_are_true_or_unknown_never_false() -> None:

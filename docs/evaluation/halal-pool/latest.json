@@ -5,10 +5,10 @@
  },
  "by_status": {
   "release": {
-   "halal": 3432,
-   "needs_certification": 3074,
+   "halal": 2944,
+   "needs_certification": 2519,
    "not_halal": 1609,
-   "uncertain": 852
+   "uncertain": 1895
   },
   "curated": {
    "halal": 26,
@@ -19,9 +19,9 @@
  },
  "plannable": {
   "release": {
-   "halal": 3432,
-   "needs_certification, all lines certified": 2763,
-   "total": 6195
+   "halal": 2944,
+   "needs_certification, all lines certified": 2281,
+   "total": 5225
   },
   "curated": {
    "halal": 26,
@@ -32,43 +32,43 @@
  "blocked_by": [
   {
    "ingredient": "beef_broth",
-   "recipes": 109
+   "recipes": 83
   },
   {
    "ingredient": "turkey",
-   "recipes": 70
+   "recipes": 55
   },
   {
    "ingredient": "meat",
-   "recipes": 47
+   "recipes": 32
   },
   {
    "ingredient": "ramen",
-   "recipes": 29
+   "recipes": 25
   },
   {
    "ingredient": "cornish_hen",
-   "recipes": 14
-  },
-  {
-   "ingredient": "cooked_chicken",
-   "recipes": 10
+   "recipes": 12
   },
   {
    "ingredient": "broth",
-   "recipes": 7
+   "recipes": 5
   },
   {
    "ingredient": "onion_soup_mix",
-   "recipes": 6
+   "recipes": 5
   },
   {
    "ingredient": "chicken_or_veg_broth",
-   "recipes": 5
+   "recipes": 4
+  },
+  {
+   "ingredient": "cooked_chicken",
+   "recipes": 4
   },
   {
    "ingredient": "lamb_chop",
-   "recipes": 5
+   "recipes": 4
   },
   {
    "ingredient": "stuffing_mix",
@@ -79,15 +79,11 @@
    "recipes": 2
   },
   {
-   "ingredient": "duck",
-   "recipes": 2
-  },
-  {
-   "ingredient": "venison",
-   "recipes": 2
-  },
-  {
    "ingredient": "beef_heart",
+   "recipes": 1
+  },
+  {
+   "ingredient": "duck",
    "recipes": 1
   },
   {
@@ -107,11 +103,11 @@
    "recipes": 1
   },
   {
-   "ingredient": "soup",
+   "ingredient": "turkey_bacon",
    "recipes": 1
   },
   {
-   "ingredient": "turkey_bacon",
+   "ingredient": "venison",
    "recipes": 1
   }
  ],
@@ -269,9 +265,46 @@
    "certified": 0
   }
  },
+ "review": {
+  "ingredients/halal-review-v1-verdicts.csv": {
+   "uncertain": {
+    "kept": 28,
+    "corrected": 0,
+    "undetermined": 0,
+    "pending": 0
+   },
+   "needs_certification": {
+    "kept": 38,
+    "corrected": 0,
+    "undetermined": 0,
+    "pending": 0
+   },
+   "check": {
+    "kept": 0,
+    "corrected": 0,
+    "undetermined": 13,
+    "pending": 0
+   },
+   "sample": {
+    "kept": 40,
+    "corrected": 0,
+    "undetermined": 20,
+    "pending": 0
+   }
+  },
+  "ingredients/halal-review-v2.csv": {
+   "second_round": {
+    "kept": 0,
+    "corrected": 0,
+    "undetermined": 0,
+    "pending": 75
+   }
+  }
+ },
  "sources": {
-  "ingredients/halal-labels-v1.json": "3ccd3be34b0d44ac",
-  "ingredients/halal-overrides-v1.json": "bcedc7da27dca581",
+  "ingredients/halal-labels-v1.json": "590b41c1af1cea12",
+  "ingredients/halal-overrides-v1.json": "90b3fc4ee40dc5cf",
+  "ingredients/halal-review-v1-verdicts.csv": "579ec2b3ee728228",
   "ingredients/fairprice-halal-v1.json": "da2fd16052f97676",
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
   "observed_at": "2026-10-30T17:51:23+00:00"

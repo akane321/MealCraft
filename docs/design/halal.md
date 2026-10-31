@@ -32,7 +32,7 @@ One entry per catalog ingredient (the release v2.2 ingredients plus the curated 
   - `rule:alcohol`: `group:alcohol` of the hierarchy, including cooking wine and mirin;
   - `rule:may_contain`: a hierarchy `may_contain` link to pork or alcohol, which makes the item `uncertain`;
   - `rule:doubtful`: gelatin of unstated source, emulsifiers, stock cubes or powder of unstated source,
-    alcohol-based extracts;
+    extracts and flavourings whose ethanol source and amount are unstated;
   - `rule:meat`: halal with `needs_certification`; also an item with a `may_contain` link to meat (ramen,
     stuffing mix: flavour packets), checked after the pork, alcohol, doubtful and `may_contain` rules above;
   - `rule:food_group`: plant foods, fish and seafood, eggs, dairy, grains, legumes, nuts, seeds, fruit,
@@ -42,9 +42,24 @@ One entry per catalog ingredient (the release v2.2 ingredients plus the curated 
   lists in that module, and then reviewed. It is deterministic; a person's correction is kept in
   `data/ingredients/halal-overrides-v1.json` and applied last.
 - Review queue: the generator also writes `data/ingredients/halal-review-v1.csv`. It lists every `uncertain`
-  entry, every `needs_certification` entry and a fixed-seed sample of 60 `halal` entries, each with a blank
-  verdict for a person. AI suggestions may be added to the queue, but take effect only after a person confirms them
-  (ADR-0076 section 2).
+  entry, every `needs_certification` entry, the `check` entries (cheeses, wine and sherry vinegars) and a
+  fixed-seed sample of 60 other `halal` entries, each with a blank verdict for a person. AI suggestions may be added
+  to the queue, but take effect only after a person confirms them (ADR-0076 section 2).
+- **First review, 2026-10-31.** A person reviewed all 139 rows (`halal-review-v1-verdicts.csv`, notes in Chinese):
+  - kept: the 28 `uncertain`, the 38 `needs_certification` (the threshold only: a certified product of that very
+    ingredient) and 40 of the 60 sampled;
+  - undetermined, so now `uncertain` through the 33 overrides: the 13 `check` entries and 20 sampled, mostly
+    condiments and prepared foods whose formula or certification is unknown (fish sauce, Worcestershire sauce,
+    kecap manis, BBQ sauce and others). Undetermined is not a label shown wrong;
+  - no label was raised to `halal` or set to `not_halal`.
+
+  The reasons of extracts, vanilla, crickets and tapai were corrected after that review (MUIS: ethanol from a
+  non-khamr source is allowed in flavourings within limits; qualifying insect foods are allowed). Their status did
+  not change.
+- **Second round.** The sample showed most condiments and prepared foods undetermined, so the other 75 `halal`
+  labels of those groups are in `data/ingredients/halal-review-v2.csv` (soy sauce, vinegars, mayonnaise, ketchup,
+  curry paste and others). Their labels stand until a person decides.
+- The pool report (`docs/evaluation/halal-pool/latest.md`) counts each queue's outcomes.
 
 ## Code interface: `backend/app/data/halal.py`
 

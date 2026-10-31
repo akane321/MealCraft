@@ -10,6 +10,7 @@ certified, in-stock product in the release snapshot (docs/design/halal.md, "Plan
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 from collections import Counter
@@ -26,12 +27,14 @@ from app.data.halal import (
     needs_certification,
     release_halal_certification,
 )
+from app.data.halal_labels import REVIEW_V2_FILE, VERDICTS_FILE
 from app.data.planning_pool import load, table
 from app.db.base import Base
 from app.models.recipe import Recipe
 from app.planning.grocery_estimator import release_snapshot
 
 REPORT_DIRECTORY = "docs/evaluation/halal-pool"
+REVIEW_OUTCOMES = ("kept", "corrected", "undetermined", "pending")
 STATUSES = ("halal", "needs_certification", "not_halal", "uncertain")
 UNLISTED = 15
 
@@ -95,6 +98,29 @@ def report(recipes: list[Recipe], ingredients: dict[str, dict]) -> dict:
     }
 
 
+def review_summary() -> dict:
+    """The person's verdicts per queue: kept, corrected to another settled status, or undetermined (now uncertain)."""
+    rounds = {}
+    for name in (VERDICTS_FILE, REVIEW_V2_FILE):
+        path = data_root() / name
+        rows = list(csv.DictReader(path.open(encoding="utf-8", newline=""))) if path.exists() else []
+        queues: dict[str, Counter] = {}
+        for row in rows:
+            verdict = row["verdict"].strip()
+            outcome = (
+                "pending"
+                if not verdict
+                else "kept"
+                if verdict in ("ok", row["status"])
+                else "undetermined"
+                if verdict == "uncertain"
+                else "corrected"
+            )
+            queues.setdefault(row["queue"], Counter())[outcome] += 1
+        rounds[name] = {queue: {key: counter[key] for key in REVIEW_OUTCOMES} for queue, counter in queues.items()}
+    return rounds
+
+
 def sha256(relative: str) -> str | None:
     path = data_root() / relative
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16] if path.exists() else None
@@ -156,6 +182,21 @@ def markdown(result: dict) -> str:
         "A recipe is counted under every ingredient that blocks it.",
         "",
         *table([(b["ingredient"], b["recipes"]) for b in result["blocked_by"][:UNLISTED]], ("ingredient", "recipes")),
+        "",
+        "## Label review",
+        "",
+        "A person's verdicts per queue (`halal-review-v1-verdicts.csv`, then the second round `halal-review-v2.csv`). "
+        "`undetermined` means the evidence could not settle the label, which is now `uncertain`; it is not a label "
+        "shown wrong. The sample covers only the plain `halal` labels, so it is not the accuracy of every label.",
+        "",
+        *table(
+            [
+                (name.removeprefix("ingredients/"), queue, *counts.values())
+                for name, queues in result["review"].items()
+                for queue, counts in queues.items()
+            ],
+            ("file", "queue", *REVIEW_OUTCOMES),
+        ),
     ]
     return "\n".join(lines) + "\n"
 
@@ -166,10 +207,17 @@ def main() -> None:
     with Session(engine) as session:
         recipes, _ = load(session)
         result = report(recipes, certified_ingredients())
+    result["review"] = review_summary()
     observed = json.loads((data_root() / CERTIFICATION_FILE).read_text(encoding="utf-8")).get("observed_at")
     result["sources"] = {
         name: sha256(name)
-        for name in (LABELS_FILE, OVERRIDES_FILE, CERTIFICATION_FILE, "products/fairprice-v2-snapshot.json")
+        for name in (
+            LABELS_FILE,
+            OVERRIDES_FILE,
+            VERDICTS_FILE,
+            CERTIFICATION_FILE,
+            "products/fairprice-v2-snapshot.json",
+        )
     } | {"observed_at": observed}
     directory = repository_root() / REPORT_DIRECTORY
     directory.mkdir(parents=True, exist_ok=True)

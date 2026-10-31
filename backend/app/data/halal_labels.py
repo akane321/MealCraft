@@ -7,7 +7,7 @@ decides, so a reviewer can audit by `source`:
 
 1. `rule:pork`: the pork family of the ingredient hierarchy (pork and all that is a variety of, or made from, it).
 2. `rule:alcohol`: `group:alcohol` of the hierarchy, and what is made from it.
-3. `rule:doubtful`: sources a label cannot settle (`DOUBTFUL`, alcohol-based extracts and flavourings).
+3. `rule:doubtful`: sources a label cannot settle (`DOUBTFUL`, extracts and flavourings of unstated ethanol).
 4. `rule:may_contain`: a `may_contain` link to pork, alcohol or something already uncertain; `uncertain`.
 5. `rule:meat`: meat, poultry and what is made from them, or any other flesh that is not fish or seafood;
    `halal` with `needs_certification`. Also an item with a `may_contain` link to meat (ramen, stuffing mix: flavour
@@ -16,7 +16,9 @@ decides, so a reviewer can audit by `source`:
 
 A person's corrections live in `halal-overrides-v1.json` and are applied when the labels are read, not here.
 The review queue lists every `uncertain` and `needs_certification` label, the `halal` labels a person should check
-(`CHECK_TOKENS`) and a fixed-seed sample of the other `halal` ones.
+(`CHECK_TOKENS`) and a fixed-seed sample of the other `halal` ones; its reviewed copy (2026-10-31) is
+`halal-review-v1-verdicts.csv`. The second-round queue `halal-review-v2.csv` lists the other `halal` labels of
+`SECOND_ROUND_GROUPS`.
 """
 
 from __future__ import annotations
@@ -32,6 +34,7 @@ from app.data.ingredient_hierarchy import GROUP_PREFIX, Hierarchy, read_links
 from app.data.release_v2 import normalized_name, release_dir
 
 REVIEW_FILE = "ingredients/halal-review-v1.csv"
+VERDICTS_FILE = "ingredients/halal-review-v1-verdicts.csv"  # the first queue as the person returned it, 2026-10-31
 SAMPLE_SIZE = 60
 SAMPLE_SEED = 20261029
 
@@ -51,20 +54,26 @@ SEAFOOD = frozenset(
 DOUBTFUL = {
     "gelatin": "gelatin of unstated source (pork, beef or fish)",
     "bouillon": "stock cube or powder of unstated source",
-    "crickets": "edible insects: scholars differ",
+    "crickets": "edible insects: species, processing and other ingredients unverified (MUIS allows qualifying ones)",
     "mincemeat": "fruit mince made with suet and often brandy",
-    "tapai": "fermented rice: contains alcohol",
+    "tapai": "fermented rice: the product and its ruling unverified (fermentation alone is not the doubt)",
     "shortening": "shortening may be made with lard",
     "shortening_or_oil": "shortening may be made with lard",
+    "vanilla": "the bare name does not say vanilla bean, extract or flavouring",
+    "pandan_extract": "water extract or compound flavouring not told apart",
 }
-DOUBTFUL_TOKENS = ("extract", "flavoring")  # alcohol-based unless stated otherwise
-DOUBTFUL_NAMES = frozenset({"vanilla"})  # vanilla extract is alcohol-based; the bare id covers it
+# Ethanol as a solvent: MUIS allows a non-khamr source within limits, and the catalog states neither (review 10-31).
+DOUBTFUL_TOKENS = ("extract", "flavoring")
 # Labelled halal, but schools or products differ: listed for a person in the review queue's `check` rows.
 CHECK_TOKENS = {
     "cheese": "cheese may be made with animal rennet",
     "wine": "wine vinegar: schools differ",
     "sherry": "sherry vinegar: schools differ",
 }
+# The first review (10-31) found most sampled condiments and prepared foods undetermined without a formula, so every
+# other `halal` label of these food groups goes to a second round (`REVIEW_V2_FILE`); the labels stand until then.
+SECOND_ROUND_GROUPS = ("condiment", "prepared")
+REVIEW_V2_FILE = "ingredients/halal-review-v2.csv"
 
 FIELDS = ("normalized_name", "status", "needs_certification", "source", "reason")
 
@@ -94,8 +103,8 @@ def catalog() -> dict[str, tuple[str | None, str | None]]:
 def _doubtful(name: str) -> str | None:
     if name in DOUBTFUL:
         return DOUBTFUL[name]
-    if name in DOUBTFUL_NAMES or any(token in name.split("_") for token in DOUBTFUL_TOKENS):
-        return "extract or flavouring: usually alcohol-based"
+    if any(token in name.split("_") for token in DOUBTFUL_TOKENS):
+        return "extract or flavouring: the ethanol's source and amount unstated"
     return None
 
 
@@ -159,25 +168,39 @@ def review_rows(items: list[dict]) -> list[dict]:
     return [{"queue": q, **i, "verdict": "", "note": note} for q, i, note in queue]
 
 
+def second_round_rows(items: list[dict], names: dict[str, tuple[str | None, str | None]]) -> list[dict]:
+    """The `halal` labels of `SECOND_ROUND_GROUPS` that the first queue did not hold."""
+    first = {row["normalized_name"] for row in review_rows(items)}
+    return [
+        {"queue": "second_round", **i, "verdict": "", "note": ""}
+        for i in items
+        if i["source"] == "rule:food_group"
+        and names[i["normalized_name"]][0] in SECOND_ROUND_GROUPS
+        and i["normalized_name"] not in first
+    ]
+
+
 def _name(item: dict) -> str:
     return item["normalized_name"]
 
 
-def write(items: list[dict]) -> None:
+def write(items: list[dict], names: dict[str, tuple[str | None, str | None]]) -> None:
     root = data_root()
     lines = ",\n".join("  " + json.dumps(item, ensure_ascii=False) for item in items)
     (root / LABELS_FILE).write_text(
         '{\n "schema_version": "halal-labels-v1",\n "items": [\n' + lines + "\n ]\n}\n", encoding="utf-8"
     )
-    with (root / REVIEW_FILE).open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, ["queue", *FIELDS, "verdict", "note"], lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(review_rows(items))
+    for name, rows in ((REVIEW_FILE, review_rows(items)), (REVIEW_V2_FILE, second_round_rows(items, names))):
+        with (root / name).open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, ["queue", *FIELDS, "verdict", "note"], lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
 
 
 def main() -> None:
-    items = labels(catalog(), read_links())
-    write(items)
+    names = catalog()
+    items = labels(names, read_links())
+    write(items, names)
     by_status = Counter((i["status"] + (" +cert" if i["needs_certification"] else "")) for i in items)
     print(f"{len(items)} labels")
     for title, counter in (("status", by_status), ("source", Counter(i["source"] for i in items))):
