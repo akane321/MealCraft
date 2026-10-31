@@ -333,7 +333,7 @@ export interface OpsMappedProduct {
 }
 
 export interface OpsProductMapping {
-  retailer: "fairprice" | "cold_storage";
+  retailer: "fairprice" | "cold_storage" | "redmart";
   ingredient: string;
   display_name: string | null;
   status: "mapped" | "not_purchased" | "removed";

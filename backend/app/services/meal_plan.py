@@ -975,6 +975,8 @@ class WeeklyMealPlanService:
                 in_stock=not (item.price_evidence and item.price_evidence.get("lookup_status") == "out_of_stock"),
                 source=item.product_source,
                 halal_certified=item.product_halal_certified,
+                # A hand-recorded product keeps its platform on the line.
+                retailer=item.retailer if item.product_source == "manual" else None,
                 fetched_at=(
                     item.product_fetched_at.replace(tzinfo=UTC)
                     if item.product_fetched_at.tzinfo is None

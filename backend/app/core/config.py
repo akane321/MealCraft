@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     coldstorage_base_url: str = "https://coldstorage.com.sg"
     coldstorage_timeout_seconds: float = 12.0
     coldstorage_cache_ttl_minutes: int = 15
+    redmart_base_url: str = "https://www.lazada.sg"
+    redmart_timeout_seconds: float = 12.0
+    redmart_cache_ttl_minutes: int = 15
     product_fixture_path: str = "data/fixtures/fairprice-products.json"
     youtube_timeout_seconds: float = 12.0
     youtube_fixture_path: str = "data/fixtures/youtube-tutorials.json"

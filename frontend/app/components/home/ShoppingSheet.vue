@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { basicsNote, formatSgd, groceryPriceLabel, groceryTrips, hasColdStorage, lineRetailer, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryPriceLabel, groceryTrips, hasOtherStore, lineRetailer, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -10,8 +10,8 @@ const props = defineProps<{
 }>();
 
 const trips = computed(() => groceryTrips(props.estimate.items));
-// Store sections (FairPrice, then Cold Storage) only once some line is bought at Cold Storage.
-const byStore = computed(() => hasColdStorage(props.estimate.items));
+// Store sections (FairPrice, Cold Storage, RedMart) only once some line is bought away from FairPrice.
+const byStore = computed(() => hasOtherStore(props.estimate.items));
 const storeSum = (lines: GroceryLineEstimate[]) => lines.reduce((total, line) => total + line.purchase_cost_sgd, 0);
 const basics = computed(() => basicsNote(props.estimate));
 </script>
@@ -39,7 +39,7 @@ const basics = computed(() => basicsNote(props.estimate));
                 <small v-if="line.perishable">Use within 3 days of this shop</small>
                 <small v-if="line.product?.halal_certified">Halal-certified</small>
                 <small>{{ groceryPriceLabel(line) }}</small>
-                <small v-if="store.retailer === 'cold_storage' && line.product?.product_url"><a :href="line.product.product_url">{{ line.product.product_url }}</a></small>
+                <small v-if="store.retailer !== 'fairprice' && line.product?.product_url"><a :href="line.product.product_url">{{ line.product.product_url }}</a></small>
               </span>
               <span class="pack">{{ packageLabel(line) }}</span>
               <span class="price">{{ formatSgd(line.purchase_cost_sgd) }}</span>

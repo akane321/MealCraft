@@ -59,6 +59,7 @@ from app.schemas.operations import (
     TaskKind,
 )
 from app.schemas.platform import OperationStatus
+from app.schemas.product import Retailer
 from app.services.operation_jobs import (
     JobIdempotencyConflictError,
     OperationJobNotCancellableError,
@@ -583,8 +584,8 @@ def update_ingredient(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found") from error
 
 
-# The store a mapping edit is for (docs/design/cold-storage.md).
-MappingRetailer = Annotated[Literal["fairprice", "cold_storage"], Query()]
+# The store a mapping edit is for (docs/design/cold-storage.md, docs/design/redmart.md).
+MappingRetailer = Annotated[Retailer, Query()]
 
 
 @router.get("/data/mappings", response_model=OpsProductMappingCollection)

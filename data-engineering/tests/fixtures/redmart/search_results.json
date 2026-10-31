@@ -1,0 +1,101 @@
+{
+ "mods": {
+  "listItems": [
+   {
+    "name": "Third-party Allspice Berries 50g",
+    "itemId": "111",
+    "icons": [],
+    "image": "https://example.test/x.jpg",
+    "sellerName": "Spice Shop",
+    "sellerId": "42",
+    "brandName": "Spice",
+    "skuId": "1",
+    "price": "3.2",
+    "inStock": true,
+    "itemUrl": "//www.lazada.sg/products/pdp-i111.html"
+   },
+   {
+    "name": "Harras Turkish Allspice Pimento",
+    "itemId": "3124212075",
+    "icons": [
+     {
+      "domClass": "76348",
+      "type": "img",
+      "group": "3",
+      "showType": "0",
+      "bizType": "Redmart"
+     }
+    ],
+    "image": "https://sg-test-11.slatic.net/p/f9d7d835417eec7238081102e3bfe310.jpg",
+    "sellerName": "RedMart",
+    "sellerId": "1000008313",
+    "brandName": "Harras",
+    "skuId": "21260436730",
+    "price": "12.5",
+    "inStock": true,
+    "itemUrl": "//www.lazada.sg/products/pdp-i3124212075.html"
+   },
+   {
+    "name": "Gourmet Organic All spice",
+    "itemId": "2932350459",
+    "icons": [
+     {
+      "domClass": "76348",
+      "type": "img",
+      "group": "3",
+      "showType": "0",
+      "bizType": "Redmart"
+     }
+    ],
+    "image": "https://sg-test-11.slatic.net/p/85de1d6fdb7a81b2a2a7b973821744d6.jpg",
+    "sellerName": "RedMart",
+    "sellerId": "1000008313",
+    "brandName": "Gourmet Organic",
+    "skuId": "20171886776",
+    "price": "6.99",
+    "inStock": true,
+    "itemUrl": "//www.lazada.sg/products/pdp-i2932350459.html"
+   },
+   {
+    "name": "Feral No 2 - Organic White Beet Ginger Allspice 0.0",
+    "itemId": "3434791625",
+    "icons": [
+     {
+      "domClass": "76348",
+      "type": "img",
+      "group": "3",
+      "showType": "0",
+      "bizType": "Redmart"
+     }
+    ],
+    "image": "https://sg-test-11.slatic.net/p/a05ff048de3e06da943b7acd3f4bfee4.jpg",
+    "sellerName": "RedMart",
+    "sellerId": "1000008313",
+    "brandName": "Feral",
+    "skuId": "22850306877",
+    "price": "26.92",
+    "originalPrice": "35.9",
+    "inStock": true,
+    "itemUrl": "//www.lazada.sg/products/pdp-i3434791625.html"
+   },
+   {
+    "name": "Seller-id-only Allspice 30g",
+    "itemId": "222",
+    "icons": [],
+    "image": "https://example.test/y.jpg",
+    "sellerName": "",
+    "sellerId": "1000008313",
+    "brandName": "X",
+    "skuId": "2",
+    "price": "4",
+    "inStock": false,
+    "itemUrl": "//www.lazada.sg/products/pdp-i222.html"
+   }
+  ]
+ },
+ "mainInfo": {
+  "totalResults": "1966",
+  "pageSize": "40",
+  "page": "1"
+ }
+}

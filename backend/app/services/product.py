@@ -12,6 +12,8 @@ from app.products.provider import (
     ProductProviderError,
     normalize_search_text,
 )
+from app.products.redmart import PARSER_VERSION as REDMART_PARSER_VERSION
+from app.products.redmart import RedMartProductProvider
 from app.repositories.product import ProductSnapshotRepository
 from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductSearchResponse, Retailer
 from app.schemas.retrieval import RetrievalTrace
@@ -34,10 +36,15 @@ def create_product_search_service(repository: ProductSnapshotRepository) -> "Pro
             timeout_seconds=settings.coldstorage_timeout_seconds,
         ),
         cold_storage_cache_ttl_minutes=settings.coldstorage_cache_ttl_minutes,
+        redmart_provider=RedMartProductProvider(
+            base_url=settings.redmart_base_url,
+            timeout_seconds=settings.redmart_timeout_seconds,
+        ),
+        redmart_cache_ttl_minutes=settings.redmart_cache_ttl_minutes,
     )
 
 
-# One planning request can price hundreds of ingredients. Each live retailer (FairPrice, Cold Storage) gets
+# One planning request can price hundreds of ingredients. Each live retailer (FairPrice, Cold Storage, RedMart) gets
 # at most this many lookups per request, and none after this many failures in a row: the rest use the cache
 # or sample prices, and say so. These two limit the requests sent to the retailer's site, not the wait, and stay.
 LIVE_LOOKUP_BUDGET = 60
@@ -54,7 +61,7 @@ _price_workers = ThreadPoolExecutor(max_workers=FINAL_PRICE_CONCURRENCY, thread_
 class _LiveStore:
     """One retailer's live lookups: its provider, the cache it writes under, and its own budget and failures."""
 
-    provider: FairPriceProductProvider | ColdStorageProductProvider | None
+    provider: FairPriceProductProvider | ColdStorageProductProvider | RedMartProductProvider | None
     source: Retailer
     label: str
     cache_ttl_minutes: int
@@ -73,6 +80,8 @@ class ProductSearchService:
         cache_ttl_minutes: int,
         cold_storage_provider: ColdStorageProductProvider | None = None,
         cold_storage_cache_ttl_minutes: int | None = None,
+        redmart_provider: RedMartProductProvider | None = None,
+        redmart_cache_ttl_minutes: int | None = None,
     ) -> None:
         self.fixture_provider = fixture_provider
         self.live_provider = live_provider
@@ -89,6 +98,13 @@ class ProductSearchService:
                 cache_ttl_minutes if cold_storage_cache_ttl_minutes is None else cold_storage_cache_ttl_minutes,
                 COLD_STORAGE_PARSER_VERSION,
             ),
+            "redmart": _LiveStore(
+                redmart_provider,
+                "redmart",
+                "RedMart",
+                cache_ttl_minutes if redmart_cache_ttl_minutes is None else redmart_cache_ttl_minutes,
+                REDMART_PARSER_VERSION,
+            ),
         }
 
     def refresh_selected(self, lines: list[GroceryLineEstimate]) -> list[GroceryLineEstimate]:
@@ -103,8 +119,8 @@ class ProductSearchService:
         queries: dict[str, list[int]] = {}
         for index, line in enumerate(refreshed):
             product = line.product
-            if product is None or line.packages_required == 0 or product.source == "cold_storage":
-                continue  # Cold Storage has no price check: its lines are links, not a cart
+            if product is None or line.packages_required == 0 or product.source in {"cold_storage", "redmart"}:
+                continue  # the second stores have no price check: their lines are links, not a cart
             query = normalize_search_text(
                 (line.evidence.query if line.evidence else None) or line.ingredient_display_name
             )
@@ -272,8 +288,8 @@ class ProductSearchService:
         limit: int = 10,
         retailer: Retailer = "fairprice",
     ) -> ProductSearchResponse:
-        """Products for a query. Cold Storage has no fixtures: live, then the cache, then nothing (offline, its
-        products come from the reviewed snapshot instead)."""
+        """Products for a query. Cold Storage and RedMart have no fixtures: live, then the cache, then nothing
+        (offline, their products come from the reviewed snapshots instead)."""
         normalized_query = normalize_search_text(query)
         store = self._stores[retailer]
         has_fixtures = retailer == "fairprice"

@@ -1,7 +1,7 @@
 import json
 import math
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 from functools import lru_cache
 
@@ -11,7 +11,7 @@ from app.data.overrides import overrides
 from app.data.units import UNIT_BASE, in_grams
 from app.models.recipe import Recipe
 from app.planning.household_slots import assumed_basics
-from app.planning.retailers import cold_storage_products, retailer_of
+from app.planning.retailers import SECOND_STORES, retailer_of, store_products
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
@@ -73,6 +73,9 @@ def release_snapshot() -> dict[str, dict]:
     return ingredients
 
 
+SINGAPORE = timezone(timedelta(hours=8))
+
+
 @lru_cache
 def release_products() -> dict[str, dict]:
     """The mapping in use: the file with the operations console's changes; a removed entry is left out."""
@@ -81,9 +84,11 @@ def release_products() -> dict[str, dict]:
 
 
 def priceable_ingredients() -> frozenset[str]:
-    """Ingredients the estimator can price at all, decided without a search: at FairPrice or at Cold Storage."""
-    cold_storage = frozenset(name for name, entry in cold_storage_products().items() if entry["status"] == "mapped")
-    return matchable_ingredients() | frozenset(release_products()) | cold_storage
+    """Ingredients the estimator can price at all, decided without a search: at FairPrice or at a second store."""
+    second_stores = frozenset(
+        name for store in SECOND_STORES for name, entry in store_products(store).items() if entry["status"] == "mapped"
+    )
+    return matchable_ingredients() | frozenset(release_products()) | second_stores
 
 
 def not_purchased(ingredient_name: str) -> bool:
@@ -125,7 +130,8 @@ def choose_product(
     """The one place both estimators pick a product for an ingredient line.
 
     FairPrice first, whatever it costs. Only when it ends with no product (no mapping, a mapping that is not
-    `mapped`, or nothing in stock) is Cold Storage tried (docs/design/cold-storage.md).
+    `mapped`, or nothing in stock) is a second store tried, in order: Cold Storage, then RedMart, the first with an
+    in-stock reviewed product winning, never by price (docs/design/cold-storage.md, redmart.md).
     """
     choice = _fairprice_choice(
         product_service,
@@ -139,17 +145,24 @@ def choose_product(
     )
     if choice.product is not None:
         return choice
-    return _cold_storage_choice(
-        choice,
-        product_service,
-        ingredient_name,
-        ingredient_display_name,
-        unit,
-        live=live,
-        quantity=quantity,
-        # Cold Storage has no halal fact (isHalal was false on every product), so it never serves a line that needs one.
-        certified_only=requires_halal and halal_data.needs_certification(ingredient_name),
-    )
+    # The second stores have no halal fact (Cold Storage's isHalal was false on every product, RedMart has none), so
+    # they never serve a line that needs one.
+    certified_only = requires_halal and halal_data.needs_certification(ingredient_name)
+    for store in SECOND_STORES:
+        choice = _second_store_choice(
+            store,
+            choice,
+            product_service,
+            ingredient_name,
+            ingredient_display_name,
+            unit,
+            live=live,
+            quantity=quantity,
+            certified_only=certified_only,
+        )
+        if choice.product is not None:
+            break
+    return choice
 
 
 def _fairprice_choice(
@@ -246,9 +259,19 @@ def _cheapest_in_stock(products: list[ProductResponse], grams: float | None) -> 
 
 COLD_STORAGE_PARSER_VERSION = "cold-storage-capture-v1"
 COLD_STORAGE_NOTE = "FairPrice has no product for this; bought at Cold Storage."
+REDMART_NOTE = "FairPrice and Cold Storage have no product for this; bought at RedMart."
+# Per second store: its name, the live search's limit (RedMart's search covers all of Lazada, so a wider page), the
+# capture parser version, and the note a line bought there carries.
+SECOND_STORE_FACTS = {
+    "cold_storage": ("Cold Storage", 30, COLD_STORAGE_PARSER_VERSION, COLD_STORAGE_NOTE),
+    "redmart": ("RedMart", 40, "redmart-capture-v1", REDMART_NOTE),
+    # Recorded by hand: never searched live (the limit is unused), and its note carries the date (see below).
+    "manual": ("a hand-recorded price", 0, "manual-v1", None),
+}
 
 
-def _cold_storage_choice(
+def _second_store_choice(
+    store: str,
     choice: ProductChoice,
     product_service: ProductSearchService,
     ingredient_name: str,
@@ -259,8 +282,10 @@ def _cold_storage_choice(
     quantity: float | None,
     certified_only: bool,
 ) -> ProductChoice:
-    """Fill a line FairPrice left without a product from the reviewed Cold Storage mapping, if it has one."""
-    entry = cold_storage_products().get(ingredient_name)
+    """Fill a line the earlier stores left without a product from `store`'s reviewed mapping, if it has one."""
+    label, live_limit, parser_version, _ = SECOND_STORE_FACTS[store]
+    live = live and store != "manual"  # a hand-recorded price is always a saved price of its date
+    entry = store_products(store).get(ingredient_name)
     if (
         certified_only
         or entry is None
@@ -269,10 +294,10 @@ def _cold_storage_choice(
         or convert_quantity(1.0, unit, "g") is None
     ):
         return choice
-    products = [_release_product(item, source="cold_storage") for item in entry["products"]]
-    query, trace = entry["products"][0]["query"], None
+    products = [_release_product(item, source=store) for item in entry["products"]]
+    query, trace = entry["products"][0].get("query"), None
     if live:
-        search = product_service.search(query, live=True, limit=30, retailer="cold_storage")
+        search = product_service.search(query, live=True, limit=live_limit, retailer=store)
         trace = search.retrieval
         if search.warning:
             choice.warnings.append(search.warning)
@@ -289,7 +314,7 @@ def _cold_storage_choice(
         ]
         if not products:
             choice.warnings.append(
-                f"Live Cold Storage search did not return a reviewed product for {ingredient_display_name}."
+                f"Live {label} search did not return a reviewed product for {ingredient_display_name}."
             )
     grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
     choice.product = _cheapest_in_stock(products, grams)
@@ -298,26 +323,29 @@ def _cold_storage_choice(
             price_evidence(choice.product, mode=trace.mode, query=trace.query, parser_version=trace.parser_version)
             if trace is not None
             # The reviewed mapping's stored prices: observed on the snapshot date, not now.
-            else price_evidence(
-                choice.product, mode="snapshot", query=query, parser_version=COLD_STORAGE_PARSER_VERSION
-            )
+            else price_evidence(choice.product, mode="snapshot", query=query, parser_version=parser_version)
         )
     return choice
 
 
 def with_store_note(product: ProductResponse | None, note: str | None) -> str | None:
-    """A line bought at Cold Storage says so, after any note it already has."""
-    if product is None or retailer_of(product) != "cold_storage":
+    """A line bought at a second store says so, after any note it already has."""
+    if product is None or product.source not in SECOND_STORE_FACTS:
         return note
-    return " ".join(part for part in (note, COLD_STORAGE_NOTE) if part)
+    if product.source == "manual":
+        day = product.fetched_at.astimezone(SINGAPORE).date()
+        store_note = f"No store we read sells this; price recorded by hand on {day.isoformat()}."
+    else:
+        store_note = SECOND_STORE_FACTS[product.source][3]
+    return " ".join(part for part in (note, store_note) if part)
 
 
 def _release_product(item: dict, *, source: str = "fixture") -> ProductResponse:
     return ProductResponse(
         external_id=item["external_id"],
         name=item["name"],
-        brand=item["brand"],
-        category=item["category"],
+        brand=item.get("brand"),
+        category=item.get("category"),
         package_size=item["package_grams"],
         package_unit="g",
         price_sgd=item["price_sgd"],
@@ -327,6 +355,7 @@ def _release_product(item: dict, *, source: str = "fixture") -> ProductResponse:
         source=source,
         fetched_at=datetime.fromisoformat(item["fetched_at"]),
         halal_certified=halal_data.release_halal_certification().get(item["external_id"]),
+        retailer=item.get("retailer"),
     )
 
 

@@ -3,7 +3,7 @@ import type { RecipeListItem } from "~/types/recipe";
 export type DietaryPreference = "vegetarian" | "vegan" | "gluten-free" | "dairy-free";
 export type HealthPreference = "low-sodium" | "low-sugar" | "lower-calorie";
 export type PricingMode = "fixture" | "live";
-export type Retailer = "fairprice" | "cold_storage";
+export type Retailer = "fairprice" | "cold_storage" | "redmart" | "shopee" | "lazada" | "amazon" | "other";
 
 export interface Product {
   external_id: string;
@@ -16,7 +16,8 @@ export interface Product {
   product_url: string;
   image_url: string | null;
   in_stock: boolean;
-  source: "fairprice" | "cold_storage" | "fixture";
+  /** "manual" is a price a person recorded by hand; its platform is the line's `retailer`. */
+  source: "fairprice" | "cold_storage" | "redmart" | "manual" | "fixture";
   fetched_at: string;
   /** FairPrice's internal product id for its cart (not the number at the end of the product URL). */
   cart_item_id?: string | null;
@@ -35,7 +36,7 @@ export interface ProductSearchResponse {
 
 export interface PriceEvidence {
   fact_id?: string;
-  source: "fairprice" | "cold_storage" | "fixture" | "release_snapshot";
+  source: "fairprice" | "cold_storage" | "redmart" | "manual" | "fixture" | "release_snapshot";
   mode: "live" | "cache" | "snapshot" | "fixture";
   query?: string | null;
   parser_version?: string | null;

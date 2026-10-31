@@ -9,7 +9,8 @@ import type {
   FairPriceLiveCart,
   FairPriceResultStatus,
 } from "~/types/meal-plan";
-import { formatSgd } from "./home-surface";
+import type { Retailer } from "~/types/recommendation";
+import { RETAILER_SHORT, STORE_ORDER, andList, formatSgd } from "./home-surface";
 
 export const FAIRPRICE_LOGIN_URL = "https://www.fairprice.com.sg/login";
 export const FAIRPRICE_CHECKOUT_URL = "https://www.fairprice.com.sg/checkout";
@@ -72,8 +73,21 @@ export function priceChanges(lines: FairPriceCartLine[]): PriceChange[] {
   return changes;
 }
 
-/** Cold Storage lines are links, not cart items; the panel says so when the trip has any. */
+/** Lines at other stores are links, not cart items; the panel says so when the trip has any. */
 export const COLD_STORAGE_NOTE = "Cold Storage items stay on your list with links; buy them on coldstorage.com.sg.";
+
+const STORE_SITE: Partial<Record<Retailer, string>> = { cold_storage: "coldstorage.com.sg", redmart: "RedMart (lazada.sg)" };
+
+/** The trip's other stores in fill order, with what each costs. */
+const otherStores = (prepare: FairPriceCartPrepare) =>
+  [...(prepare.other_stores ?? [])].sort((a, b) => STORE_ORDER.indexOf(a.retailer) - STORE_ORDER.indexOf(b.retailer));
+
+/** The cart panel's note: names every other store present ("Cold Storage and RedMart items stay on your list with links; ..."). */
+export function otherStoresNote(prepare: FairPriceCartPrepare): string {
+  const stores = otherStores(prepare);
+  const site = (stores.length === 1 && STORE_SITE[stores[0]!.retailer]) || "their sites";
+  return `${andList(stores.map(store => RETAILER_SHORT[store.retailer]))} items stay on your list with links; buy them on ${site}.`;
+}
 
 /** What the trip's lines at other stores cost: they count toward the budget though the cart does not take them. */
 export const otherStoresTotal = (prepare: FairPriceCartPrepare): number =>
@@ -85,7 +99,8 @@ export function budgetWarning(prepare: FairPriceCartPrepare): string | null {
   const other = otherStoresTotal(prepare);
   const total = Math.round((prepare.projected_total_sgd + other) * 100) / 100;
   const over = formatSgd(Math.round((total - prepare.budget_sgd) * 100) / 100);
-  const prices = other > 0 ? `At today's FairPrice prices, plus ${formatSgd(other)} from Cold Storage,` : "At today's FairPrice prices";
+  const from = otherStores(prepare).filter(store => store.purchase_total_sgd > 0).map(store => `${formatSgd(store.purchase_total_sgd)} from ${RETAILER_SHORT[store.retailer]}`);
+  const prices = other > 0 ? `At today's FairPrice prices, plus ${andList(from)},` : "At today's FairPrice prices";
   return `${prices} this trip comes to ${formatSgd(total)}, ${over} over your ${formatSgd(prepare.budget_sgd)} budget. Your plan is not changed.`;
 }
 

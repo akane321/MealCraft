@@ -2,9 +2,9 @@
  "ingredients": {
   "total": 699,
   "fairprice": 519,
-  "combined": 562,
+  "combined": 567,
   "fairprice_share": 0.7425,
-  "combined_share": 0.804,
+  "combined_share": 0.8112,
   "released": 701,
   "not_purchased": [
    "ice",
@@ -12,31 +12,29 @@
   ],
   "cold_storage_only": 43,
   "cold_storage_only_share": 0.0615,
+  "redmart_only": 5,
+  "redmart_only_share": 0.0072,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 8967,
   "fairprice": 7185,
-  "combined": 7764,
+  "combined": 7894,
   "fairprice_share": 0.8013,
-  "combined_share": 0.8658
+  "combined_share": 0.8803
  },
  "lines": {
   "total": 75661,
   "fairprice": 73642,
-  "combined": 74350,
+  "combined": 74498,
   "fairprice_share": 0.9733,
-  "combined_share": 0.9827
+  "combined_share": 0.9846
  },
  "unpriced": [
   {
    "ingredient": "allspice",
    "recipes": 118
-  },
-  {
-   "ingredient": "dill",
-   "recipes": 87
   },
   {
    "ingredient": "turkey",
@@ -99,20 +97,25 @@
    "recipes": 22
   },
   {
-   "ingredient": "gochugaru",
-   "recipes": 20
-  },
-  {
    "ingredient": "lard",
    "recipes": 20
   },
   {
    "ingredient": "orange_juice_conc",
    "recipes": 19
+  },
+  {
+   "ingredient": "pistachio",
+   "recipes": 17
+  },
+  {
+   "ingredient": "phyllo",
+   "recipes": 15
   }
  ],
  "sources": {
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
-  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358"
+  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358",
+  "products/redmart-v1-snapshot.json": "a63f7c3ba676f967"
  }
 }

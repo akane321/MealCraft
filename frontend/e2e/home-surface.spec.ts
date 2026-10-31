@@ -2498,3 +2498,99 @@ test("a list with a Cold Storage line groups by store, links the product, and th
   await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Cold Storage\s*S\$8\.50$/]);
   await expect(sheet.locator("li")).toHaveCount(2);
 });
+
+test("a list with FairPrice, Cold Storage and RedMart lines shows three store sections, notes both stores, and counts both in the budget at 1280x720", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await stubFairPriceCart(page);
+  const chicken = grocery("Chicken breast", "Meat & Seafood", 10.15, 800);
+  const kale = grocery("Curly kale", "Fruit & Vegetables", 8.5, 200);
+  const tofu = grocery("Silken tofu", "Chilled", 3.2, 300);
+  const evidence = (source: string) => ({ source, mode: "snapshot", price_source: "snapshot", fetched_at: "2026-09-14T08:00:00Z" });
+  const items = [
+    { ...chicken, retailer: "fairprice", product: { ...chicken.product, source: "fairprice" } },
+    { ...kale, retailer: "cold_storage", product: { ...kale.product, source: "cold_storage", product_url: "https://coldstorage.com.sg/product/curly-kale-200g" }, evidence: evidence("cold_storage") },
+    { ...tofu, retailer: "redmart", product: { ...tofu.product, source: "redmart", product_url: "https://www.lazada.sg/products/pdp-i3124212075.html" }, evidence: evidence("redmart") },
+  ];
+  const mixed = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", purchase_total_sgd: 21.85, weekly_budget_sgd: 90, items }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(mixed)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: mixed })));
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill(json({
+    plan_id: 9001, shopping_trip: null, fingerprint: "a".repeat(64),
+    lines: [{
+      line_key: "1|chicken_breast|g", ingredient_name: "chicken_breast", ingredient_display_name: "chicken breast", product_name: "FairPrice Chicken",
+      client_item_id: "13172993", cart_item_id: "172993", quantity: 1, planned_price_sgd: 10.15, live_price_sgd: 10.15,
+      product_url: "https://www.fairprice.com.sg/product/172993", status: "ready",
+    }],
+    ready_total_sgd: 10.15, planned_total_sgd: 10.15, projected_total_sgd: 80.4, budget_sgd: 90, over_budget: true,
+    other_stores: [{ retailer: "cold_storage", lines: 1, purchase_total_sgd: 8.5 }, { retailer: "redmart", lines: 1, purchase_total_sgd: 3.2 }],
+  })));
+
+  const { panel } = await openFairPriceCart(page);
+  await expect(panel.getByText("Cold Storage and RedMart items stay on your list with links; buy them on their sites.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Won't be added")).toHaveCount(0);
+  await expect(panel.getByText("At today's FairPrice prices, plus S$8.50 from Cold Storage and S$3.20 from RedMart, this trip comes to S$92.10, S$2.10 over your S$90.00 budget.")).toBeVisible();
+  await panel.getByRole("button", { name: "Close" }).click();
+
+  const groceries = page.locator(".groceries");
+  await expect(groceries.locator("h3.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Cold Storage\s*S\$8\.50$/, /^RedMart \(Lazada\)\s*S\$3\.20$/]);
+  const row = groceries.locator(".item", { hasText: "Silken tofu" });
+  await expect(row.getByText(/RedMart price from 14 Sep/)).toBeVisible();
+  const link = row.getByRole("link", { name: "View at RedMart" });
+  await expect(link).toHaveAttribute("href", "https://www.lazada.sg/products/pdp-i3124212075.html");
+  await link.evaluate(el => el.addEventListener("click", event => event.preventDefault())); // stay on the page
+  await link.click();
+  await expect(row.getByRole("checkbox")).not.toBeChecked();
+  await expect(groceries.locator(".source")).toContainText("FairPrice, Cold Storage and RedMart prices from");
+
+  await page.getByRole("button", { name: "Preview list" }).click();
+  const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
+  await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Cold Storage\s*S\$8\.50$/, /^RedMart \(Lazada\)\s*S\$3\.20$/]);
+  await expect(sheet.locator("li")).toHaveCount(3);
+});
+
+test("a list with a Shopee line recorded by hand shows its own store section, link, date and budget note at 1280x720", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await stubFairPriceCart(page);
+  const chicken = grocery("Chicken breast", "Meat & Seafood", 10.15, 800);
+  const saffron = grocery("Saffron", "Pantry", 12.9, 1);
+  const url = "https://shopee.sg/saffron-1g-i.123.456";
+  const items = [
+    { ...chicken, retailer: "fairprice", product: { ...chicken.product, source: "fairprice" } },
+    {
+      ...saffron, retailer: "shopee", product: { ...saffron.product, source: "manual", product_url: url, fetched_at: "2026-10-31T16:00:00Z" },
+      evidence: { source: "manual", mode: "snapshot", price_source: "snapshot", fetched_at: "2026-10-31T16:00:00Z" },
+    },
+  ];
+  const mixed = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", purchase_total_sgd: 23.05, weekly_budget_sgd: 30, items }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(mixed)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: mixed })));
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill(json({
+    plan_id: 9001, shopping_trip: null, fingerprint: "a".repeat(64),
+    lines: [{
+      line_key: "1|chicken_breast|g", ingredient_name: "chicken_breast", ingredient_display_name: "chicken breast", product_name: "FairPrice Chicken",
+      client_item_id: "13172993", cart_item_id: "172993", quantity: 1, planned_price_sgd: 10.15, live_price_sgd: 10.15,
+      product_url: "https://www.fairprice.com.sg/product/172993", status: "ready",
+    }],
+    ready_total_sgd: 10.15, planned_total_sgd: 10.15, projected_total_sgd: 20.15, budget_sgd: 30, over_budget: true,
+    other_stores: [{ retailer: "shopee", lines: 1, purchase_total_sgd: 12.9 }],
+  })));
+
+  const { panel } = await openFairPriceCart(page);
+  await expect(panel.getByText("Shopee items stay on your list with links; buy them on their sites.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("At today's FairPrice prices, plus S$12.90 from Shopee, this trip comes to S$33.05, S$3.05 over your S$30.00 budget.")).toBeVisible();
+  await panel.getByRole("button", { name: "Close" }).click();
+
+  const groceries = page.locator(".groceries");
+  await expect(groceries.locator("h3.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
+  const row = groceries.locator(".item", { hasText: "Saffron" });
+  await expect(row.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
+  await expect(row.getByRole("link", { name: "View at Shopee" })).toHaveAttribute("href", url);
+
+  await page.getByRole("button", { name: "Preview list" }).click();
+  const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
+  await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
+  await expect(sheet.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
+  await expect(sheet.getByRole("link", { name: url })).toBeVisible();
+});
