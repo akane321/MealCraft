@@ -69,6 +69,8 @@ export interface AgentConstraintState {
   start_date?: string | null;
   // Days the conversation will plan (1 to 14); absent means a week.
   day_count?: number | null;
+  // Only halal dishes, meat only from products FairPrice marks Halal (ADR-0104); absent means not asked.
+  requires_halal?: boolean;
 }
 
 export interface AgentReplanDraft {

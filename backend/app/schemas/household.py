@@ -140,6 +140,10 @@ class HouseholdProfileWrite(BaseModel):
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
     # Equipment the kitchen lacks (section 4.3); a recipe that needs it is never planned. Empty: all at home.
     missing_equipment: list[Equipment] = Field(default_factory=list, max_length=5)
+    # The whole household eats halal (docs/design/halal.md): one switch, never per member. Required, like every HTTP
+    # interface that takes the flag (ADR-0091 item 2): an omitted one must not save a non-halal profile. Stored
+    # versions keep their default for old records.
+    requires_halal: bool
 
     @field_validator("missing_equipment")
     @classmethod
@@ -245,6 +249,7 @@ class HouseholdProfileVersionResponse(BaseModel):
     missing_basics: list[str] = Field(default_factory=list)
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list)
     missing_equipment: list[Equipment] = Field(default_factory=list)
+    requires_halal: bool = False
     created_at: datetime
 
 

@@ -31,6 +31,8 @@ class ProductResponse(BaseModel):
     # FairPrice's internal product id (the listing's `id`), which its cart takes; external_id is the product
     # URL's clientItemId. None for fixture products and for rows saved before it was kept.
     cart_item_id: str | None = None
+    # True when the listing's "Dietary Attributes" carry "Halal"; None is unknown, never False (docs/design/halal.md).
+    halal_certified: bool | None = None
 
 
 class ProductSearchResponse(BaseModel):

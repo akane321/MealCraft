@@ -6,6 +6,7 @@ from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.dietary_tags import expand_tags
+from app.planning.halal import halal_ok
 from app.planning.member_coverage import MemberLimits, member_limits, title_mentions, unknown_safety_for
 from app.planning.vegetable_led import vegetable_share, weighed
 from app.schemas.recipe import RecipeListItemResponse
@@ -104,7 +105,7 @@ class RecipeRecommendationEngine:
             reasons.append("allergen_status_unknown")
         if constraints.dietary_preferences and "diet" in (recipe.unknown_safety or []):
             reasons.append("dietary_status_unknown")
-        if constraints.requires_halal and recipe.halal_status != "halal":
+        if not halal_ok(recipe, constraints):
             reasons.append("halal_requirement")
 
         excluded_matches = sorted(ingredient_names.intersection(excluded_ingredients))

@@ -46,6 +46,7 @@ function toggle(name: string) {
               <span class="p-line">
                 <span class="p">{{ line.ingredient_display_name }}</span>
                 <span v-if="line.perishable" class="fresh" title="Fresh: cooked within 3 days of this shop">Use within 3 days</span>
+                <span v-if="line.product?.halal_certified" class="fresh" title="FairPrice lists this product as Halal">Halal-certified</span>
               </span>
               <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
             </span>

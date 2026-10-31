@@ -8,7 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.data.allergens import checked_allergens
-from app.data.tag_files import apply_ingredient_tags, apply_recipe_tags
+from app.data.halal import recipe_halal_status
+from app.data.tag_files import apply_ingredient_halal, apply_ingredient_tags, apply_recipe_tags
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
 SUPPORTED_UNITS = {"g", "kg", "ml", "l", "tbsp", "tsp", "whole", "pc", "pcs"}
@@ -112,6 +113,7 @@ def import_catalog(session: Session, catalog: Catalog) -> tuple[int, int]:
         ingredient.allergens = record.allergens
         # A food group the release import wrote stays when the tag files have no entry for the ingredient.
         apply_ingredient_tags(ingredient, ingredient.food_group)
+        apply_ingredient_halal(ingredient)
         ingredients_by_name[record.normalized_name] = ingredient
     session.flush()
 
@@ -129,6 +131,7 @@ def import_catalog(session: Session, catalog: Catalog) -> tuple[int, int]:
         recipe.cook_time_minutes = record.cook_time_minutes
         recipe.dietary_tags = record.dietary_tags
         apply_recipe_tags(recipe, record.slug)
+        recipe.halal_status = recipe_halal_status(item.ingredient for item in record.ingredients)
 
         if recipe.nutrition is None:
             recipe.nutrition = RecipeNutrition()

@@ -220,6 +220,8 @@ class MealPlanGroceryItem(Base):
     product_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     product_source: Mapped[str | None] = mapped_column(String(20), nullable=True)
     product_fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # FairPrice's Halal mark on the product; NULL is unknown, never read as halal (docs/design/halal.md).
+    product_halal_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     match_score: Mapped[Decimal | None] = mapped_column(Numeric(5, 3), nullable=True)
     packages_required: Mapped[int] = mapped_column(Integer)
     purchase_cost_sgd: Mapped[Decimal] = mapped_column(Numeric(10, 2))

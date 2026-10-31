@@ -1,0 +1,279 @@
+{
+ "recipes": {
+  "release": 8967,
+  "curated": 30
+ },
+ "by_status": {
+  "release": {
+   "halal": 3432,
+   "needs_certification": 3074,
+   "not_halal": 1609,
+   "uncertain": 852
+  },
+  "curated": {
+   "halal": 26,
+   "needs_certification": 4,
+   "not_halal": 0,
+   "uncertain": 0
+  }
+ },
+ "plannable": {
+  "release": {
+   "halal": 3432,
+   "needs_certification, all lines certified": 2763,
+   "total": 6195
+  },
+  "curated": {
+   "halal": 26,
+   "needs_certification, all lines certified": 4,
+   "total": 30
+  }
+ },
+ "blocked_by": [
+  {
+   "ingredient": "beef_broth",
+   "recipes": 109
+  },
+  {
+   "ingredient": "turkey",
+   "recipes": 70
+  },
+  {
+   "ingredient": "meat",
+   "recipes": 47
+  },
+  {
+   "ingredient": "ramen",
+   "recipes": 29
+  },
+  {
+   "ingredient": "cornish_hen",
+   "recipes": 14
+  },
+  {
+   "ingredient": "cooked_chicken",
+   "recipes": 10
+  },
+  {
+   "ingredient": "broth",
+   "recipes": 7
+  },
+  {
+   "ingredient": "onion_soup_mix",
+   "recipes": 6
+  },
+  {
+   "ingredient": "chicken_or_veg_broth",
+   "recipes": 5
+  },
+  {
+   "ingredient": "lamb_chop",
+   "recipes": 5
+  },
+  {
+   "ingredient": "stuffing_mix",
+   "recipes": 4
+  },
+  {
+   "ingredient": "chipped_beef",
+   "recipes": 2
+  },
+  {
+   "ingredient": "duck",
+   "recipes": 2
+  },
+  {
+   "ingredient": "venison",
+   "recipes": 2
+  },
+  {
+   "ingredient": "beef_heart",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gravy",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gravy_mix",
+   "recipes": 1
+  },
+  {
+   "ingredient": "pastrami",
+   "recipes": 1
+  },
+  {
+   "ingredient": "rabbit",
+   "recipes": 1
+  },
+  {
+   "ingredient": "soup",
+   "recipes": 1
+  },
+  {
+   "ingredient": "turkey_bacon",
+   "recipes": 1
+  }
+ ],
+ "ingredients": {
+  "au_jus_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "beef": {
+   "products": 4,
+   "certified": 1
+  },
+  "beef_broth": {
+   "products": 3,
+   "certified": 0
+  },
+  "beef_heart": {
+   "products": 0,
+   "certified": 0
+  },
+  "beef_or_turkey": {
+   "products": 4,
+   "certified": 3
+  },
+  "beef_steak": {
+   "products": 4,
+   "certified": 1
+  },
+  "broth": {
+   "products": 4,
+   "certified": 0
+  },
+  "chicken": {
+   "products": 3,
+   "certified": 3
+  },
+  "chicken_breast": {
+   "products": 4,
+   "certified": 2
+  },
+  "chicken_broth": {
+   "products": 4,
+   "certified": 1
+  },
+  "chicken_or_turkey": {
+   "products": 4,
+   "certified": 2
+  },
+  "chicken_or_veg_broth": {
+   "products": 4,
+   "certified": 0
+  },
+  "chicken_soup": {
+   "products": 1,
+   "certified": 1
+  },
+  "chicken_thigh": {
+   "products": 4,
+   "certified": 3
+  },
+  "chicken_wings": {
+   "products": 4,
+   "certified": 2
+  },
+  "chipped_beef": {
+   "products": 0,
+   "certified": 0
+  },
+  "cooked_chicken": {
+   "products": 0,
+   "certified": 0
+  },
+  "corned_beef": {
+   "products": 3,
+   "certified": 2
+  },
+  "cornish_hen": {
+   "products": 1,
+   "certified": 0
+  },
+  "dashida": {
+   "products": 0,
+   "certified": 0
+  },
+  "duck": {
+   "products": 4,
+   "certified": 0
+  },
+  "goat": {
+   "products": 3,
+   "certified": 2
+  },
+  "gravy": {
+   "products": 0,
+   "certified": 0
+  },
+  "gravy_mix": {
+   "products": 2,
+   "certified": 0
+  },
+  "ground_beef": {
+   "products": 4,
+   "certified": 2
+  },
+  "lamb": {
+   "products": 4,
+   "certified": 1
+  },
+  "lamb_chop": {
+   "products": 4,
+   "certified": 0
+  },
+  "liver": {
+   "products": 4,
+   "certified": 1
+  },
+  "meat": {
+   "products": 0,
+   "certified": 0
+  },
+  "onion_soup_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "pastrami": {
+   "products": 0,
+   "certified": 0
+  },
+  "rabbit": {
+   "products": 0,
+   "certified": 0
+  },
+  "ramen": {
+   "products": 3,
+   "certified": 0
+  },
+  "soup": {
+   "products": 0,
+   "certified": 0
+  },
+  "stuffing_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "turkey": {
+   "products": 0,
+   "certified": 0
+  },
+  "turkey_bacon": {
+   "products": 0,
+   "certified": 0
+  },
+  "venison": {
+   "products": 0,
+   "certified": 0
+  }
+ },
+ "sources": {
+  "ingredients/halal-labels-v1.json": "3ccd3be34b0d44ac",
+  "ingredients/halal-overrides-v1.json": "bcedc7da27dca581",
+  "ingredients/fairprice-halal-v1.json": "da2fd16052f97676",
+  "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
+  "observed_at": "2026-10-30T17:51:23+00:00"
+ }
+}

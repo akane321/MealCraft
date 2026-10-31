@@ -573,9 +573,8 @@ accuracy remains unverified. The decision boundary is ADR-0096.
 - an explicit `requires_halal` boolean (required at this HTTP boundary, and at
   `/api/plans/generate`; omitted or null returns 422, never implicit false).
   The internal/stored request model retains its legacy default only for reading
-  old records; that default does not satisfy a new HTTP declaration. Until the
-  halal source is decided, conversation requests for halal are declined as not
-  yet supported (ADR-0091).
+  old records; that default does not satisfy a new HTTP declaration. A halal
+  household's plan is described in `docs/design/halal.md` (ADR-0104).
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
 - available ingredients with optional quantities and units
@@ -1036,11 +1035,12 @@ tell by (a number, "ok"), of their last one that had some
 change to a saved week gives for turning a request down; one with no Chinese
 wording yet is said in general terms rather than in English.
 
-Under ADR-0091, an explicit halal request is declined as not yet supported,
-without invoking the parser or planner. The requirement is retained with
-`HALAL_NOT_SUPPORTED`, invalidating any prior ready card. Stored ready states
-and replan previews cannot bypass this guard through confirmation. This is an
-unsupported capability, not a claim that an ordinary menu satisfies halal.
+Under ADR-0104 (superseding ADR-0091's decline), an explicit halal request
+("halal", "清真", not negated) sets `requires_halal` for that plan, and the reply
+offers to save it to the household profile; it is saved only on a yes. A halal
+plan uses only halal dishes, and buys a meat line only as a product certified
+halal (`docs/design/halal.md`). Swaps, can't-buy replans and shape changes keep
+the flag from the stored plan constraints.
 
 Counted create/reply turns have the existing four-request allowance enforced
 before each external request, including retries. Accounting records sent

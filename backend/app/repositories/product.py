@@ -62,6 +62,7 @@ class ProductSnapshotRepository:
                 "in_stock": product.in_stock,
                 "fetched_at": product.fetched_at,
                 "cart_item_id": product.cart_item_id,
+                "halal_certified": product.halal_certified,
                 "raw_data": {},
             }
             for rank, product in enumerate(products)
@@ -104,4 +105,5 @@ class ProductSnapshotRepository:
             source=snapshot.source,
             fetched_at=snapshot.fetched_at,
             cart_item_id=snapshot.cart_item_id,
+            halal_certified=snapshot.halal_certified,
         )

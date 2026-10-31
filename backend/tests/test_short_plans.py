@@ -315,7 +315,8 @@ def monday_noon(monkeypatch):
 
 def test_a_chat_plans_one_dinner_for_tomorrow_and_prorates_the_saved_budget(recipe_client, monday_noon):
     created = recipe_client.post(
-        "/api/household-profiles", json={"name": "Ann", "members": [member()], "weekly_budget_sgd": 140}
+        "/api/household-profiles",
+        json={"name": "Ann", "members": [member()], "weekly_budget_sgd": 140, "requires_halal": False},
     )
     assert created.status_code == 201, created.text
 

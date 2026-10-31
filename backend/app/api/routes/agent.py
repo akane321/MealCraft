@@ -141,6 +141,7 @@ def get_agent_service(
             profile_constraints(HouseholdProfileRepository.current_version(profile)) if profile else None
         ),
         keep_plan_shape=(lambda shape: profiles.keep_plan_shape(shape.model_dump(mode="json"))) if profile else None,
+        keep_requires_halal=profiles.keep_requires_halal if profile else None,
         substitute_generator=(
             OpenAISubstituteGenerator(
                 api_key=settings.openai_api_key.get_secret_value(),

@@ -1,5 +1,6 @@
 from collections import Counter
 
+from app.data.halal import needs_certification
 from app.models.recipe import Recipe
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.meal_composition import meal_role_of
@@ -7,11 +8,24 @@ from app.planning.product_path import meals_of_the_day
 from app.planning.recommendation_engine import CANDIDATE_LIMIT, RecipeRecommendationEngine
 from app.repositories.recipe import RecipeRepository
 from app.schemas.planning_v2 import structured
+from app.schemas.product import GroceryEstimateResponse
 from app.schemas.recommendation import (
     ExcludedRecipeResponse,
     RecipeRecommendationCollectionResponse,
     RecipeRecommendationRequest,
 )
+
+
+def _meat_without_certified_product(estimate: GroceryEstimateResponse) -> bool:
+    """Whether a line that needs a certified product is to be bought and has none (at home or in the pantry: no)."""
+    unmapped = set(estimate.unmapped_ingredients)
+    return any(
+        needs_certification(item.ingredient_name)
+        and (
+            item.ingredient_name in unmapped or (item.product is not None and item.product.halal_certified is not True)
+        )
+        for item in estimate.items
+    )
 
 
 class RecipeRecommendationService:
@@ -66,6 +80,13 @@ class RecipeRecommendationService:
             )
             estimate = self.grocery_estimator.estimate(recipe, estimation_constraints)
             if priced_release_only and recipe.release_version is not None and not estimate.complete:
+                continue
+            if constraints.requires_halal and _meat_without_certified_product(estimate):
+                excluded.append(
+                    ExcludedRecipeResponse(
+                        id=recipe.id, slug=recipe.slug, title=recipe.title, reasons=["halal_requirement"]
+                    )
+                )
                 continue
             for warning in estimate.warnings:
                 if warning not in warnings:

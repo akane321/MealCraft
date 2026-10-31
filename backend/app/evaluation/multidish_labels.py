@@ -62,6 +62,7 @@ from itertools import product
 from pathlib import Path
 
 from app.core.paths import repository_root
+from app.data.halal import needs_certification, product_certified, recipe_halal_status
 from app.evaluation.release_catalog import fixture_products, load_release_catalog
 from app.evaluation.strict_success import dish_shares, load_tag_implications, meal_minutes, satisfied_tags
 from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
@@ -99,10 +100,13 @@ def _context(episode: dict, *, product_rules: bool = False):
     allowed = set(episode["scenario"]["fairprice_product_ids"])
     per_gram: dict[str, float] = {}
     packages: dict[str, list[tuple[float, float]]] = {}
+    halal = bool(gold.get("halal_required"))
     for product_row in [*catalog.products, *fixture_products()]:
         if product_row["external_id"] not in allowed:
             continue
         name = product_row["ingredient_id"]
+        if halal and needs_certification(name) and not product_certified(product_row["external_id"]):
+            continue  # a halal household buys a meat line only as a certified product
         per_gram[name] = min(per_gram.get(name, math.inf), product_row["price_sgd"] / product_row["package_size"])
         packages.setdefault(name, []).append((product_row["package_size"], product_row["price_sgd"]))
 
@@ -114,6 +118,15 @@ def _context(episode: dict, *, product_rules: bool = False):
         if planned is not None and (recipe["slug"] not in planned or title_mentions(recipe["title"], avoided)):
             return False
         names = {line["ingredient"] for line in recipe["ingredients"]}
+        if halal and (
+            recipe_halal_status(names) not in {"halal", "needs_certification"}
+            or any(
+                needs_certification(line["ingredient"]) and line["ingredient"] not in per_gram
+                for line in recipe["ingredients"]
+                if line["quantity"] > 0
+            )
+        ):
+            return False
         if any(set(gold["allergens_absent"]) & allergens.get(name, {"unchecked"}) for name in names):
             return False
         if names & set(gold["excluded_ingredients_absent"]):

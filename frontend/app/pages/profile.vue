@@ -141,6 +141,8 @@ const saveNotice = ref<string | null>(null);
 const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
 // Equipment the kitchen lacks (layer 08): a dish that needs it is never planned. Empty: all at home.
 const missingEquipment = ref<Equipment[]>([]);
+// The whole household eats halal (ADR-0104): one switch, never per member.
+const requiresHalal = ref(false);
 // Days a plan covers (1 to 14); longer than a week shops twice, before day 1 and day 8 (ADR-0072).
 const dayCount = ref(7);
 const DAY_OPTIONS = Array.from({ length: 14 }, (_, index) => index + 1);
@@ -268,6 +270,7 @@ function hydrateFromCurrent() {
   timeRules.value = (version.cooking_time_rules ?? []).map(rule => ({ ...rule }));
   missingBasics.value = [...(version.missing_basics ?? [])];
   missingEquipment.value = [...(version.missing_equipment ?? [])];
+  requiresHalal.value = version.requires_halal ?? false;
   const sodium = (version.nutrition_limits ?? []).find(limit => limit.nutrient === "sodium_mg");
   sodiumLimitOn.value = Boolean(sodium);
   sodiumLimitMg.value = sodium?.max_value ?? null;
@@ -336,6 +339,7 @@ function buildPayload(): HouseholdProfileInput {
     cooking_time_rules: timeRules.value,
     missing_basics: missingBasics.value,
     missing_equipment: missingEquipment.value,
+    requires_halal: requiresHalal.value,
     nutrition_limits: sodiumLimitOn.value
       ? [{ nutrient: "sodium_mg", scope: "per_day", max_value: toOptionalNumber(sodiumLimitMg.value) }]
       : [],
@@ -399,6 +403,11 @@ onMounted(async () => {
           <span>Household name</span>
           <input v-model="form.name" type="text" maxlength="120" required>
         </label>
+
+        <div class="halal-switch">
+          <label class="choice-card plain"><input v-model="requiresHalal" type="checkbox" role="switch"><span>Halal household</span></label>
+          <p class="field-help">Only halal dishes; meat only from products FairPrice marks Halal.</p>
+        </div>
 
         <div class="profile-section-heading member-heading">
           <div>
@@ -648,6 +657,7 @@ onMounted(async () => {
         <section class="profile-summary-card">
           <p class="form-kicker">At the table</p>
           <h2>{{ formatPortions(homePortions) }} {{ homePortions === 1 ? "portion" : "portions" }} a meal</h2>
+          <span v-if="current?.current.requires_halal" class="version-badge halal-chip">Halal</span>
           <p>An allergen is left out for everyone, unless someone marks it "only I avoid it". A diet and the foods someone won't eat are that person's own: every meal still gives each person a main dish, a staple and a vegetable they can eat. Meals with someone away or a guest over are cooked for who's home.</p>
           <dl v-if="current" class="profile-summary-list">
             <div><dt>Whole household avoids</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
@@ -705,6 +715,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.halal-switch { display: grid; justify-items: start; gap: 6px; margin-top: 16px; }
+.halal-chip { display: inline-block; margin-bottom: 8px; }
 .never-list { margin: 14px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
 .never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 650; }
 .never-list span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

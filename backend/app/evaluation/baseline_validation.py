@@ -13,7 +13,11 @@ What the validator cannot see is added as its own check, never guessed:
 - `unmapped_lines`: lines the validator never saw, so exclusions and the budget cannot be confirmed; a budget
   the validator passed becomes indeterminate;
 - `dietary_requirement`: a baseline dish carries no dietary tags, so a failed diet check means "not shown",
-  and is indeterminate.
+  and is indeterminate;
+- `halal_requirement` (a halal episode, docs/evaluation/halal.md): a hard failure when a dish has a `not_halal` or
+  `uncertain` line, an unmapped line, or a meat line (`needs_certification`) with no certified product in the
+  snapshot. It is the baseline's own check, so the validator's halal rule is switched off for the baseline
+  (`episode_problem`): a baseline dish has no recipe status for it to read.
 
 The two bases (ADR-0074 section 2) read the one report:
 
@@ -26,9 +30,10 @@ unknown is given zeros only where no band could read them; `validate_baseline_pl
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
+from app.data.halal import product_certified
 from app.evaluation.baseline_mapping import DishCoverage, PlanCoverage
 from app.evaluation.baseline_recomputation import (
     NUTRIENT_FIELDS,
@@ -37,6 +42,7 @@ from app.evaluation.baseline_recomputation import (
     line_allergens,
 )
 from app.evaluation.baseline_verification import DEFAULT_COVERAGE_THRESHOLD, dish_verifiable
+from app.evaluation.halal_scoring import line_problem, required
 from app.evaluation.multidish_runner import build_problem, gold_constraints
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.schemas.planning_v2 import (
@@ -59,9 +65,19 @@ class BaselineValidation:
     unverified: tuple[tuple[str, str | None], ...]
 
 
+def snapshot_certified(products: Iterable[PlanningProductOption]) -> frozenset[str]:
+    """Ingredients with an available certified product in the snapshot.
+
+    The product's own flag counts, and so do the offline facts of the release snapshot."""
+    return frozenset(
+        p.ingredient_id for p in products if p.available and (p.halal_certified or product_certified(p.product_id))
+    )
+
+
 def episode_problem(episode: dict, products: list[PlanningProductOption]) -> FinalPlanningProblem:
     """The episode's gold problem, priced on the whole frozen snapshot: a baseline never saw the episode's pool."""
-    return build_problem(episode, gold_constraints(episode)).model_copy(update={"products": products})
+    problem = build_problem(episode, gold_constraints(episode))
+    return problem.model_copy(update={"products": products, "requires_halal": False})  # halal: see the module doc
 
 
 def _candidate(
@@ -113,6 +129,7 @@ def validate_baseline_plan(
     if problem.nutrition_bands:
         raise ValueError("baseline validation does not model nutrition bands yet")
     slots = {slot.slot_id: slot for slot in problem.slots}
+    halal, certified = required(episode), snapshot_certified(frozen_products)
     recipes: list[PlanningRecipeCandidate] = []
     assignments: list[PlanningAssignment] = []
     extra: list[PlanningConstraintCheck] = []
@@ -127,6 +144,12 @@ def validate_baseline_plan(
             extra.append(_check("dish_coverage", f"{dish.name}: {dish.coverage:.0%} of its grams map.", scope))
         if any(not item.mapped for item in dish.mappings):
             extra.append(_check("unmapped_lines", f"{dish.name}: unmapped lines were not validated.", scope))
+        if halal:
+            failing = [
+                f"{m.original_name} ({why})" for m in dish.mappings if (why := line_problem(m.ingredient_id, certified))
+            ]
+            if failing:
+                extra.append(_check("halal_requirement", f"{dish.name}: {'; '.join(failing)}.", scope, "failed"))
         if candidate is None:
             extra.append(_check("dish_unreadable", f"{dish.name}: no line mapped.", scope, "failed"))
             continue

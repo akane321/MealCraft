@@ -182,6 +182,7 @@ class WeeklyGroceryAggregator:
                 ingredient.unit,
                 live=constraints.pricing_mode == "live",
                 quantity=remaining,
+                requires_halal=constraints.requires_halal,
             )
             warnings.extend(warning for warning in choice.warnings if warning not in warnings)
             product, match_score = choice.product, choice.match_score

@@ -404,6 +404,7 @@ def test_a_conversation_from_a_profile_carries_the_household_until_it_states_a_s
         cooking_time_rules=None,
         missing_basics=["salt"],
         nutrition_limits=[{"nutrient": "sodium_mg"}],
+        requires_halal=False,
     )
     state = profile_constraints(version)
     assert [m.servings for m in state.household.members] == [1, 0.73]

@@ -6,6 +6,7 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 
 from app.core.paths import data_root
+from app.data import halal as halal_data
 from app.data.overrides import overrides
 from app.data.units import UNIT_BASE, in_grams
 from app.models.recipe import Recipe
@@ -117,6 +118,7 @@ def choose_product(
     *,
     live: bool,
     quantity: float | None = None,
+    requires_halal: bool = False,
 ) -> ProductChoice:
     """The one place both estimators pick a product for an ingredient line.
 
@@ -124,15 +126,18 @@ def choose_product(
     finds nothing, or a package the line's unit cannot convert to, a reviewed
     release mapping is used instead. Unmatchable, unmapped ingredients are never
     searched: in live mode each search is a request.
+
+    For a halal household a line that needs a certified product (meat) only takes
+    certified products, whatever they cost; with none, the line has no product.
     """
     choice = ProductChoice()
+    certified_only = requires_halal and halal_data.needs_certification(ingredient_name)
     if ingredient_name in matchable_ingredients():
         search = product_service.search(ingredient_display_name, live=live, limit=8)
         if search.warning:
             choice.warnings.append(search.warning)
-        choice.product, choice.match_score = matcher.choose(
-            ingredient_name, ingredient_display_name, unit, search.items
-        )
+        items = [item for item in search.items if item.halal_certified] if certified_only else search.items
+        choice.product, choice.match_score = matcher.choose(ingredient_name, ingredient_display_name, unit, items)
         if choice.product is not None:
             trace = search.retrieval
             choice.evidence = price_evidence(
@@ -156,7 +161,7 @@ def choose_product(
             product.model_copy(
                 update={
                     key: getattr(current[product.external_id], key)
-                    for key in ("price_sgd", "in_stock", "source", "fetched_at")
+                    for key in ("price_sgd", "in_stock", "source", "fetched_at", "halal_certified")
                 }
             )
             for product in products
@@ -166,6 +171,10 @@ def choose_product(
             choice.warnings.append(
                 f"Live FairPrice search did not return a reviewed product for {ingredient_display_name}."
             )
+    if certified_only:
+        products = [product for product in products if product.halal_certified]
+        if not products:
+            choice.warnings.append(f"No halal-certified product was found for {ingredient_display_name}.")
     grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
 
     def cost(item: ProductResponse) -> tuple[float, float, str]:
@@ -203,6 +212,7 @@ def _release_product(item: dict) -> ProductResponse:
         in_stock=item["in_stock"],
         source="fixture",
         fetched_at=datetime.fromisoformat(item["fetched_at"]),
+        halal_certified=halal_data.release_halal_certification().get(item["external_id"]),
     )
 
 
@@ -351,6 +361,7 @@ class GroceryEstimator:
                 recipe_item.unit,
                 live=constraints.pricing_mode == "live",
                 quantity=remaining,
+                requires_halal=constraints.requires_halal,
             )
             warnings.extend(warning for warning in choice.warnings if warning not in warnings)
             product, match_score = choice.product, choice.match_score

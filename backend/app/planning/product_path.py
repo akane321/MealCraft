@@ -15,6 +15,7 @@ from typing import get_args
 
 from app.data import meal_structure
 from app.data.allergens import checked_allergens
+from app.data.halal import needs_certification
 from app.data.household_reference import hpb
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE, in_grams, weighed
@@ -658,6 +659,12 @@ class ProductPlanningEngine:
                 _, unit = normalized(line.required_quantity, line.unit)
                 if not unit:
                     continue
+                if (
+                    constraints.requires_halal
+                    and needs_certification(line.ingredient_name)
+                    and not product.halal_certified
+                ):
+                    continue  # a halal household's meat is only ever a certified product (docs/design/halal.md)
                 if line.ingredient_name in weigh:
                     if product.package_unit == "ml":
                         continue
