@@ -6,6 +6,7 @@ from collections import defaultdict
 from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.halal import halal_ok, product_allowed
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import dish_servings, require_one_dish_slots
 from app.planning.member_coverage import servable
@@ -116,7 +117,7 @@ class FinalScopeReferencePlanner:
                 continue
             if problem.dietary_requirements and "diet" in recipe.unknown_safety:
                 continue
-            if problem.requires_halal and recipe.halal_status != "halal":
+            if not halal_ok(recipe, problem):
                 continue
             eligible.append(recipe)
         return eligible
@@ -150,7 +151,7 @@ class FinalScopeReferencePlanner:
         pantry = {item.ingredient_id: item for item in problem.pantry}
         products_by_ingredient: dict[str, list[PlanningProductOption]] = defaultdict(list)
         for product in problem.products:
-            if product.available:
+            if product.available and product_allowed(problem, product):
                 products_by_ingredient[product.ingredient_id].append(product)
 
         shopping: list[PlanningShoppingSelection] = []

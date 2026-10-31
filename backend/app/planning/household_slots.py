@@ -9,6 +9,7 @@ from datetime import date
 from fractions import Fraction
 from functools import lru_cache
 
+from app.data.halal import needs_certification
 from app.data.household_reference import basic_seasonings, basic_short_labels, hpb, meal_shares
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.schemas.household_rules import WEEKDAYS, HouseholdPlanning
@@ -99,35 +100,41 @@ def widest_time_limit(household: HouseholdPlanning | None, default: int) -> int:
 
 
 @lru_cache(maxsize=256)
-def _assumed(missing: tuple[str, ...], excluded: tuple[str, ...]) -> frozenset[str]:
-    return frozenset(basic_seasonings()) - set(missing) - set(expand_exclusions(excluded))
+def _assumed(missing: tuple[str, ...], excluded: tuple[str, ...], requires_halal: bool) -> frozenset[str]:
+    names = frozenset(basic_seasonings()) - set(missing) - set(expand_exclusions(excluded))
+    return frozenset(name for name in names if not needs_certification(name)) if requires_halal else names
 
 
-def assumed_basics(household: HouseholdPlanning | None, excluded: list[str]) -> frozenset[str]:
+def assumed_basics(
+    household: HouseholdPlanning | None, excluded: list[str], requires_halal: bool = False
+) -> frozenset[str]:
     """The basic seasonings taken as at home: off the list, unpriced, outside the budget.
 
     Shopping only. A basic stays a recipe ingredient for allergens, exclusions and diets, and one the household
     excludes is never assumed, so its exclusion is still matched against the recipe's lines. A basic any single
     member excludes is not assumed either: the household buys it knowingly rather than cooking with a jar of it
     nobody meant to use (ADR-0071 section 1 moves the limits to members, it does not move this assumption).
+    A halal household does not assume a basic that needs a certified product (soy sauce, mayo): an unknown jar at
+    home is never halal, so it is bought as a Halal-marked product (docs/design/halal.md).
     """
     if household is None:
         return frozenset()
     stated = {*excluded, *(item for member in household.members or [] for item in member.excluded_ingredients)}
-    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(stated)))
+    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(stated)), requires_halal)
 
 
-def basics_note(names) -> str | None:
+def basics_note(names, requires_halal: bool = False) -> str | None:
     """The grocery list's note for what a week uses and does not buy: categories and counts, not every name."""
     table = basic_seasonings()
     counts = Counter(table[name]["category"] for name in names if name in table)
     if not counts:
         return None
     shown = ", ".join(f"{noun} ({counts[key]})" for key, noun in basic_short_labels().items() if key in counts)
-    return (
+    note = (
         f"Pantry basics are assumed at home and left off this list: {shown}. "
         "Mark one as run out on your profile to buy it."
     )
+    return f"{note} Basics that need a Halal-marked product are bought." if requires_halal else note
 
 
 def limit_targets(household: HouseholdPlanning | None, planned_meals) -> list[ProductNutritionTarget]:

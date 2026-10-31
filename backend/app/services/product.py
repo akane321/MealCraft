@@ -140,6 +140,7 @@ class ProductSearchService:
                             "source",
                             "fetched_at",
                             "cart_item_id",
+                            "halal_certified",
                         )
                     }
                 )

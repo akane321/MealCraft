@@ -19,6 +19,8 @@ export interface Product {
   fetched_at: string;
   /** FairPrice's internal product id for its cart (not the number at the end of the product URL). */
   cart_item_id?: string | null;
+  /** FairPrice lists the product as Halal; null is unknown, never "not halal". */
+  halal_certified?: boolean | null;
 }
 
 export interface ProductSearchResponse {

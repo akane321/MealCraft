@@ -194,6 +194,7 @@ class AgentSessionRepository:
         assistant_message: str,
         user_message: str | None = None,
         scope_decision: ScopeDecision | None = None,
+        pending_interaction: InteractionRequest | None = None,
     ) -> AgentSession | None:
         agent_session = self.get(session_id)
         if agent_session is None:
@@ -202,7 +203,7 @@ class AgentSessionRepository:
         agent_session.plan_id = plan_id
         agent_session.clarification_questions = []
         agent_session.missing_fields = []
-        agent_session.pending_interaction = None
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
         self._reply(agent_session, assistant_message, user_message, scope_decision)
         self.session.commit()
         return self.get(session_id)
@@ -240,9 +241,17 @@ class AgentSessionRepository:
         self.session.flush()
         return self.attach_plan(agent_session.id, plan_id=plan_id) or agent_session
 
-    def attach_plan(self, session_id: int, *, plan_id: int) -> AgentSession | None:
+    def attach_plan(
+        self,
+        session_id: int,
+        *,
+        plan_id: int,
+        constraints: AgentConstraintState | None = None,
+        pending_interaction: InteractionRequest | None = None,
+    ) -> AgentSession | None:
         """The conversation becomes the one that changes `plan_id`, as if it had planned it; whatever it
-        was still asking to plan a week of its own is dropped."""
+        was still asking to plan a week of its own is dropped. `constraints`: the conversation's own, when the
+        week was planned under changed ones (a halal week asked for in the chat)."""
         agent_session = self.get(session_id)
         if agent_session is None:
             return None
@@ -250,7 +259,9 @@ class AgentSessionRepository:
         agent_session.plan_id = plan_id
         agent_session.missing_fields = []
         agent_session.clarification_questions = []
-        agent_session.pending_interaction = None
+        agent_session.pending_interaction = pending_interaction.model_dump(mode="json") if pending_interaction else None
+        if constraints is not None:
+            agent_session.constraints = constraints.model_dump(mode="json")
         agent_session.replan_draft = {}
         agent_session.pending_event_id = None
         self.session.commit()

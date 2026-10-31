@@ -36,11 +36,18 @@ NUMBER_WORDS = {
 }
 
 
+# "not halal", "non-halal", "no need for halal", "doesn't need to be halal", "does not have to be halal",
+# "we don't need halal", "no halal needed"; 不用/不必/无需/不需要/不要求/不一定要/不要 before 清真.
+NOT_HALAL = re.compile(
+    r"\b(?:not|no need(?: for)?|(?:don't|do not|doesn't|does not|isn't|is not)\s+(?:need|have to be))"
+    r"\s+(?:to be\s+)?halal\b|\bnon-?\s?halal\b|\bno halal (?:is |are )?(?:needed|required)\b"
+    r"|(?:不用|不必|无需|不需要|不要求|不一定要|不要)清真"
+)
+
+
 def requests_halal(message: str) -> bool:
-    text = message.lower()
-    return bool(re.search(r"\bhalal\b|清真", text)) and not bool(
-        re.search(r"\b(?:not|no need for|don't need|do not need)\s+(?:to be\s+)?halal\b|(?:不用|不需要|无需)清真", text)
-    )
+    text = message.lower().replace("’", "'")
+    return bool(re.search(r"\bhalal\b|清真", text)) and not NOT_HALAL.search(text)
 
 
 CHINESE_NUMBERS = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
@@ -795,6 +802,9 @@ Latest user message: {message}
             result = AgentConstraintExtraction.model_validate(result)
         aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
         apply_rule_span(aligned, message)
+        if requests_halal(message):
+            # A clear halal request is never dropped because the model left the flag out (ADR-0104).
+            aligned.requires_halal = True
 
         # With a saved household size, bare "two of us" describes part of the
         # household rather than replacing its total size.

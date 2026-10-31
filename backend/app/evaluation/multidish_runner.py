@@ -34,6 +34,7 @@ from pathlib import Path
 from app.agent.parser import RuleBasedConstraintParser
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
+from app.data.halal import product_certified, recipe_halal_status
 from app.evaluation.common_output import CommonEpisodeResponse
 from app.evaluation.multidish_live import LiveModel, dishes_in_problem, plan_directly, understand
 from app.evaluation.release_catalog import load_release_catalog
@@ -67,6 +68,7 @@ class Constraints:
     budget_sgd: float | None
     clarify: list[str]
     repetition: dict | None = None
+    requires_halal: bool = False
 
 
 def gold_constraints(episode: dict) -> Constraints:
@@ -81,6 +83,7 @@ def gold_constraints(episode: dict) -> Constraints:
         budget_sgd=hard["budget_sgd"],
         clarify=list(gold["required_clarification_fields"]) if gold["class"] == "needs_clarification" else [],
         repetition=hard.get("repetition_requirements"),
+        requires_halal=bool(hard.get("halal_required")),
     )
 
 
@@ -100,6 +103,7 @@ def rule_constraints(episode: dict) -> Constraints:
         max_minutes=parsed.max_cooking_time_minutes,
         budget_sgd=parsed.weekly_budget_sgd,
         clarify=[] if size else ["household_size"],
+        requires_halal=bool(profile.get("requires_halal") or parsed.requires_halal),
     )
 
 
@@ -148,6 +152,7 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
                     # Release nutrition is not computed; no episode states a target (protocol section 2).
                     "nutrients_per_serving": dict.fromkeys(NUTRIENTS, 0),
                     "cuisine": r["cuisine"],
+                    "halal_status": recipe_halal_status([line["ingredient"] for line in r["ingredients"]]),
                 }
                 for r in pool
             ],
@@ -163,6 +168,7 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
                     "package_unit": p["package_unit"],
                     "price_sgd": p["price_sgd"],
                     "available": p["in_stock"],
+                    "halal_certified": product_certified(p["external_id"]),
                 }
                 for p in catalog.products
                 if p["external_id"] in allowed
@@ -171,6 +177,7 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
             "allergen_vocabulary": sorted(checked_allergens()),
             "excluded_ingredients": understood.excluded_ingredients,
             "dietary_requirements": understood.dietary_tags,
+            "requires_halal": understood.requires_halal,
             "purchase_budget_sgd": understood.budget_sgd,
             "repetition_rules": understood.repetition,
             "catalog_version": "release-v2.1",
@@ -451,6 +458,7 @@ def live_constraints(answer, episode: dict) -> Constraints:
         budget_sgd=answer.budget_sgd,
         clarify=list(answer.clarification_fields),
         repetition=repetition,
+        requires_halal=bool(profile.get("requires_halal") or answer.requires_halal),
     )
 
 
@@ -646,6 +654,16 @@ def markdown(report: dict, inputs: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def load_episodes(path: Path) -> tuple[list[Path], list[dict]]:
+    """A directory of one-episode files, or one file holding a list of episodes (dev/halal-v1.json)."""
+    files = sorted(path.glob("*.json")) if path.is_dir() else [path]
+    episodes: list[dict] = []
+    for file in files:
+        loaded = json.loads(file.read_text(encoding="utf-8"))
+        episodes += loaded if isinstance(loaded, list) else [loaded]
+    return files, episodes
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--episodes", type=Path, required=True)
@@ -660,8 +678,7 @@ def main() -> int:
     parser.add_argument("--markdown-report", type=Path, required=True)
     args = parser.parse_args()
     root = repository_root()
-    files = sorted(args.episodes.glob("*.json"))
-    episodes = [json.loads(path.read_text(encoding="utf-8")) for path in files]
+    files, episodes = load_episodes(args.episodes)
     arms = tuple(args.arms.split(","))
     live = LiveModel.from_environment(args.max_live_tokens) if set(arms) & set(LIVE_ARMS) else None
     report = evaluate(episodes, arms, live)

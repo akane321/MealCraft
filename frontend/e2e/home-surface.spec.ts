@@ -1979,6 +1979,36 @@ test("grocery items and their printed list distinguish missing products from a t
   await expect(page.getByText("Grocery changes are estimates. Selected product prices are checked again when you confirm.", { exact: true })).toBeVisible();
 });
 
+test("a grocery line whose product FairPrice marks Halal says so, in the list and in the preview", async ({ page }) => {
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/**", route => route.fulfill(json({ items: [] })));
+  await stubApi(page);
+  const chicken = grocery("Chicken breast", "Meat & Seafood", 6.5, 500);
+  const halalPlan = {
+    ...plan,
+    grocery_estimate: {
+      ...plan.grocery_estimate,
+      items: [grocery("Garlic", "Fruit & Vegetables", 2, 100), { ...chicken, product: { ...chicken.product, source: "fairprice", halal_certified: true } }],
+    },
+  };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(halalPlan)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: halalPlan })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Halal dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+  const panel = page.getByRole("complementary", { name: "This plan" });
+  await panel.getByRole("tab", { name: /Groceries/ }).click();
+  await expect(panel.getByText("Halal-certified", { exact: true })).toHaveCount(1);
+  await expect(panel.locator(".groceries .item", { hasText: "Chicken breast" }).getByText("Halal-certified")).toBeVisible();
+  await expect(panel.locator(".groceries .item", { hasText: "Garlic" }).getByText("Halal-certified")).toHaveCount(0);
+
+  await panel.getByRole("button", { name: "Preview list" }).click();
+  const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
+  await expect(sheet.getByText("Halal-certified", { exact: true })).toHaveCount(1);
+});
+
 interface CartStubOptions {
   /** The first `times` get_cart calls fail with `error`. */
   failGetCart?: { error: string; times: number };

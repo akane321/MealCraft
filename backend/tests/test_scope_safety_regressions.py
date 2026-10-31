@@ -1,46 +1,63 @@
 import pytest
+from sqlalchemy import update
 
 from app.agent.parser import RuleBasedConstraintParser
 from app.db.session import get_db_session
 from app.main import app
 from app.models.agent import AgentSession
+from app.models.meal_plan import MealPlan
+from app.models.recipe import Recipe
 from app.orchestration.contracts import ScopeClass
 from app.orchestration.runtime import BoundedAgentOrchestrator
 from app.orchestration.scope_classifier import OpenAIScopeClassifier, ScopePrediction
 from app.orchestration.scope_policy import ReferenceScopePolicy
 from app.schemas.agent import AgentConstraintState
+from tests.test_planning_product_path import database
 from tests.test_recipes import recipe_client as recipe_client
 
 
+def label_recipes_halal() -> None:
+    with database() as session:
+        session.execute(update(Recipe).values(halal_status="halal"))
+        session.commit()
+
+
 @pytest.mark.parametrize("message", ["Plan halal dinners for two.", "两个人这周吃清真晚餐。"])
-def test_halal_request_is_explicitly_declined_before_parser_or_planner(recipe_client, message):
+def test_halal_request_is_planned_as_halal_not_declined(recipe_client, message):
+    label_recipes_halal()
     response = recipe_client.post("/api/agent/sessions", json={"message": message})
     assert response.status_code == 201, response.text
     value = response.json()
     assert value["constraints"]["requires_halal"] is True
-    assert not value["can_confirm"] and value["plan_id"] is None
-    assert value["last_scope_decision"]["reason_code"] == "HALAL_NOT_SUPPORTED"
-    assert "not supported" in value["messages"][-1]["content"] or "暂不支持" in value["messages"][-1]["content"]
-    assert recipe_client.post(f"/api/agent/sessions/{value['id']}/confirm").status_code == 409
+    assert value["can_confirm"] and value["plan_id"] is None
+    assert value["last_scope_decision"]["reason_code"] != "HALAL_NOT_SUPPORTED"
+    assert (
+        "not supported" not in value["messages"][-1]["content"] and "暂不支持" not in value["messages"][-1]["content"]
+    )
+    confirmed = recipe_client.post(f"/api/agent/sessions/{value['id']}/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+    with database() as session:
+        assert session.get(MealPlan, confirmed.json()["plan"]["id"]).constraints["requires_halal"] is True
 
 
-def test_old_ready_halal_state_cannot_bypass_confirmation_gate(recipe_client):
+def test_a_halal_state_never_plans_dishes_that_are_not_labelled_halal(recipe_client):
     value = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two"}).json()
     database_generator = app.dependency_overrides[get_db_session]()
-    database = next(database_generator)
+    database_ = next(database_generator)
     try:
-        saved = database.get(AgentSession, value["id"])
+        saved = database_.get(AgentSession, value["id"])
         saved.constraints = {**saved.constraints, "requires_halal": True}
         saved.status = "ready"
-        database.commit()
+        database_.commit()
     finally:
         database_generator.close()
-    assert not recipe_client.get(f"/api/agent/sessions/{value['id']}").json()["can_confirm"]
-    assert recipe_client.post(f"/api/agent/sessions/{value['id']}/confirm").status_code == 409
+    assert recipe_client.get(f"/api/agent/sessions/{value['id']}").json()["can_confirm"]
+    # The catalog has no halal label yet: unknown is never halal, so no week is planned.
+    assert recipe_client.post(f"/api/agent/sessions/{value['id']}/confirm").status_code in {409, 422}
     assert recipe_client.get("/api/plans").json()["items"] == []
 
 
-def test_halal_followup_on_an_existing_week_cannot_create_or_confirm_a_replan(recipe_client):
+def test_halal_followup_on_an_existing_week_keeps_the_week_when_no_halal_week_can_be_planned(recipe_client):
     value = recipe_client.post("/api/agent/sessions", json={"message": "Dinners for two"}).json()
     confirmed = recipe_client.post(f"/api/agent/sessions/{value['id']}/confirm")
     assert confirmed.status_code == 200, confirmed.text
@@ -50,9 +67,11 @@ def test_halal_followup_on_an_existing_week_cannot_create_or_confirm_a_replan(re
         json={"message": "Replan this week with halal dinners"},
     )
     assert response.status_code == 200, response.text
-    assert response.json()["constraints"]["requires_halal"]
-    assert recipe_client.post(f"/api/agent/sessions/{value['id']}/replan/confirm").status_code == 409
+    # No recipe is labelled halal: the week stays as it was, and nothing is planned as if it were halal.
+    assert response.json()["plan_id"] == plan["id"]
+    assert not response.json()["constraints"].get("requires_halal")
     assert recipe_client.get(f"/api/plans/{plan['id']}").json()["revision"] == plan["revision"]
+    assert [item["id"] for item in recipe_client.get("/api/plans").json()["items"]] == [plan["id"]]
 
 
 @pytest.mark.parametrize(
