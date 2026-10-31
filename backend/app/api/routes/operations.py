@@ -59,7 +59,7 @@ from app.schemas.operations import (
     TaskKind,
 )
 from app.schemas.platform import OperationStatus
-from app.schemas.product import Retailer
+from app.schemas.product import ReadStore
 from app.services.operation_jobs import (
     JobIdempotencyConflictError,
     OperationJobNotCancellableError,
@@ -585,7 +585,7 @@ def update_ingredient(
 
 
 # The store a mapping edit is for (docs/design/cold-storage.md, docs/design/redmart.md).
-MappingRetailer = Annotated[Retailer, Query()]
+MappingRetailer = Annotated[ReadStore, Query()]
 
 
 @router.get("/data/mappings", response_model=OpsProductMappingCollection)

@@ -29,13 +29,16 @@ target.
   - the fields are present and well formed;
   - the price is positive with whole cents;
   - the size is positive;
+  - a comma is read only as a thousands separator in a price (`1,234.50`). A decimal comma such as `4,5` is
+    refused, never read as 45, and a size may not contain a comma at all;
   - the unit is known;
-  - the URL's host belongs to the stated platform (`shopee.sg`, `lazada.sg`, `amazon.sg`, `redmart.lazada.sg`, any
-    host for `other`);
+  - the URL's host belongs to the stated platform, as the domain or one of its subdomains: `shopee.sg`,
+    `lazada.sg`, `amazon.sg`; `redmart.lazada.sg` or `lazada.sg` for `redmart`, since RedMart's own product pages
+    are on `www.lazada.sg`; any host for `other`;
   - the date is not in the future.
 
   It names every problem by rank.
-- **`export <sheet>`** writes `data/products/manual-v1-snapshot.json` (`snapshot_version: "manual-v1"`,
+- **`export <sheet>`** writes `manual-v1-snapshot.json` into `data/products/` (`snapshot_version: "manual-v1"`,
   `source: "manual"`), with entries keyed like the other snapshots. Each product carries:
   - `external_id: "mn-<rank>-<n>"`;
   - `name`, `product_url`, `price_sgd`, `in_stock`;

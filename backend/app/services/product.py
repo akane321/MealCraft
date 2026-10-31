@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from time import monotonic
 
+from app.planning.retailers import SECOND_STORES
 from app.products.cold_storage import PARSER_VERSION as COLD_STORAGE_PARSER_VERSION
 from app.products.cold_storage import ColdStorageProductProvider
 from app.products.provider import (
@@ -119,7 +120,7 @@ class ProductSearchService:
         queries: dict[str, list[int]] = {}
         for index, line in enumerate(refreshed):
             product = line.product
-            if product is None or line.packages_required == 0 or product.source in {"cold_storage", "redmart"}:
+            if product is None or line.packages_required == 0 or product.source in SECOND_STORES:
                 continue  # the second stores have no price check: their lines are links, not a cart
             query = normalize_search_text(
                 (line.evidence.query if line.evidence else None) or line.ingredient_display_name

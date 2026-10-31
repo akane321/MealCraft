@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db_session
 from app.repositories.product import ProductSnapshotRepository
-from app.schemas.product import ProductSearchResponse, Retailer
+from app.schemas.product import ProductSearchResponse, ReadStore
 from app.services.product import ProductSearchService, create_product_search_service
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -30,6 +30,6 @@ def search_products(
     live: bool = False,
     refresh: bool = False,
     limit: Annotated[int, Query(ge=1, le=20)] = 10,
-    retailer: Retailer = "fairprice",
+    retailer: ReadStore = "fairprice",
 ) -> ProductSearchResponse:
     return service.search(q, live=live, refresh=refresh, limit=limit, retailer=retailer)

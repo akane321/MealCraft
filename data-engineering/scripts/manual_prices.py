@@ -45,11 +45,18 @@ UNITS = {"g", "kg", "ml", "l", "count"}
 STOCK = {"y": True, "yes": True, "n": False, "no": False}
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 MONEY = re.compile(r"^(?:s?\$|sgd)?\s*([\d,]*\.?\d+)$", re.IGNORECASE)
+THOUSANDS = re.compile(r"\d{1,3}(,\d{3})+(\.\d+)?")
 
 
-def _decimal(text: str) -> Decimal | None:
+def _decimal(text: str, *, thousands: bool = True) -> Decimal | None:
+    """A number; a comma only as a thousands separator ("1,234.50"), never a decimal comma ("4,5" is refused)."""
+    text = text.strip()
+    if "," in text:
+        if not thousands or not THOUSANDS.fullmatch(text):
+            return None
+        text = text.replace(",", "")
     try:
-        return Decimal(text.replace(",", ""))
+        return Decimal(text)
     except InvalidOperation:
         return None
 
@@ -127,7 +134,7 @@ def check_row(row: dict, grams: dict[str, dict], today: date) -> tuple[list[str]
             issues.append(f"price_sgd {row['price_sgd']!r} is not a positive price in whole cents")
             price = None
 
-    size = _decimal(row["package_size"]) if row["package_size"] else None
+    size = _decimal(row["package_size"], thousands=False) if row["package_size"] else None
     if row["package_size"] and (size is None or not size.is_finite() or size <= 0):
         issues.append(f"package_size {row['package_size']!r} is not a positive number")
         size = None

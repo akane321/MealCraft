@@ -7,6 +7,8 @@ from app.schemas.retrieval import RetrievalTrace
 
 # The last four are platforms a person recorded a price from by hand (docs/design/manual-prices.md).
 Retailer = Literal["fairprice", "cold_storage", "redmart", "shopee", "lazada", "amazon", "other"]
+# A store MealCraft reads itself (live search, the console's mapping queue); hand-recorded platforms are not.
+ReadStore = Literal["fairprice", "cold_storage", "redmart"]
 ProductSource = Literal["fairprice", "cold_storage", "redmart", "manual", "fixture"]
 PricingMode = Literal["fixture", "live"]
 

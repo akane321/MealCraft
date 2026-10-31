@@ -160,6 +160,8 @@ def test_the_product_search_route_passes_redmart(monkeypatch):
         client = TestClient(app)
         assert client.get("/api/products/search", params={"q": "agar", "retailer": "redmart"}).status_code == 200
         assert client.get("/api/products/search", params={"q": "agar", "retailer": "giant"}).status_code == 422
+        # A platform priced only by hand has no search to call (docs/design/manual-prices.md): refused, not a 500.
+        assert client.get("/api/products/search", params={"q": "agar", "retailer": "shopee"}).status_code == 422
     finally:
         app.dependency_overrides.pop(get_product_search_service)
     assert [options["retailer"] for options in asked] == ["redmart"]

@@ -192,3 +192,19 @@ def test_the_coverage_counts_what_only_the_hand_recorded_prices_price() -> None:
     assert ingredients["manual_only_share"] == 0.25
     # A call without a manual mapping still works.
     assert report([], names, {"a": mapped}, {}, {})["ingredients"]["manual_only"] == 0
+
+
+def test_the_final_price_check_leaves_a_hand_recorded_line_alone(stores, manual) -> None:  # noqa: F811
+    """The check before the cart re-prices FairPrice lines only; a hand-recorded price keeps its date and evidence."""
+    from tests.test_redmart_planning import live_service
+
+    manual["flour"] = manual_entry("mn-1-1", 4.0)
+    service, providers, _ = live_service()
+    product = choose().product
+    assert product.source == "manual"
+    recorded = GroceryEstimator.price_line("flour", "flour", 300, "g", 0.0, 300, product, None)
+
+    (checked,) = service.refresh_selected([recorded])
+
+    assert all(provider.calls == [] for provider in providers.values())
+    assert checked.product == recorded.product and checked.evidence == recorded.evidence

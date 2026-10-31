@@ -6,7 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.platform import OperationStatus
-from app.schemas.product import Retailer
+from app.schemas.product import ReadStore
 
 
 class OperationsRunSummary(BaseModel):
@@ -469,7 +469,7 @@ class OpsMappedProduct(BaseModel):
 
 class OpsProductMapping(BaseModel):
     # The store the mapping is for; a second store's is confirmed as FairPrice's is.
-    retailer: Retailer = "fairprice"
+    retailer: ReadStore = "fairprice"
     ingredient: str
     display_name: str | None
     status: Literal["mapped", "not_purchased", "removed"]

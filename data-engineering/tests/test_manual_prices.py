@@ -78,6 +78,18 @@ class ManualPricesTest(unittest.TestCase):
             self.assertEqual((problems, len(products)), ([], 1), price)
         self.assertEqual(products[0][1]["price_sgd"], 1234.0)
 
+    def test_a_decimal_comma_is_refused_not_read_as_thousands(self):
+        for fields in (
+            {"price_sgd": "4,5"},
+            {"price_sgd": "S$12,50"},
+            {"price_sgd": "1,23,456"},
+            {"package_size": "1,5"},
+            {"package_size": "1,000"},
+        ):
+            problems, products = self.check([good(**fields)])
+            self.assertEqual(products, [], fields)
+            self.assertTrue(problems and "is not a positive" in problems[0], (fields, problems))
+
     def test_bom_and_lf_or_crlf_both_read(self):
         for newline in ("\r\n", "\n"):
             problems, products = self.check([good()], newline)
