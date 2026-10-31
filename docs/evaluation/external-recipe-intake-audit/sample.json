@@ -1,0 +1,248 @@
+{
+  "seed": 20261025,
+  "rule": "Group candidate URLs by the four predeclared strata; sort each stratum by source_url; sample without replacement using Python random.Random(seed), counts local_en=8, local_zh=8, general_en=7, general_zh=7; selected URLs are targets for exact-source recipe queries. Convenience search frame, not a probability sample of all public recipes.",
+  "frame_count": 53,
+  "selected_count": 30,
+  "items": [
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.bbcgoodfood.com/recipes/5612/lemon-and-pea-risotto",
+      "title": "Lemon and pea risotto",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-01"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-sweet-potato-pea-curry",
+      "title": "Chicken, sweet potato and pea curry",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-02"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.bbcgoodfood.com/recipes/chicken-vegetable-curry",
+      "title": "Chicken and vegetable curry",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-03"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.bbcgoodfood.com/recipes/easy-one-pot-chicken-casserole",
+      "title": "Easy one-pot chicken casserole",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-04"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.bbcgoodfood.com/recipes/kadala-curry",
+      "title": "Chickpea curry",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-05"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.taste.com.au/recipes/chicken-soup/aec9c819-3b0d-49d1-bda3-a5ffdf7eca7c",
+      "title": "Warming chicken soup",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-06"
+    },
+    {
+      "stratum": "general_en",
+      "source_url": "https://www.taste.com.au/recipes/chicken-sweet-corn-soup-2/960da5d9-22ec-4441-9743-15b99bae644a",
+      "title": "Chicken and sweet corn soup",
+      "language": "en",
+      "locality": "general",
+      "sample_id": "ER-07"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/1000430/",
+      "title": "宫保鸡丁",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-08"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/100453110/",
+      "title": "鲜香番茄蒸鸡蛋羹",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-09"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/100464831/",
+      "title": "红烧牛肉土豆",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-10"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/1015542/",
+      "title": "蒸鸡蛋羹",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-11"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/104484038/",
+      "title": "黄焖鸡",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-12"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/104610496/",
+      "title": "红烧牛肉土豆",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-13"
+    },
+    {
+      "stratum": "general_zh",
+      "source_url": "https://m.xiachufang.com/recipe/106133194/",
+      "title": "宫保鸡丁小美家常菜",
+      "language": "zh",
+      "locality": "general",
+      "sample_id": "ER-14"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://rasamalaysia.com/crab-bee-hoon/",
+      "title": "Crab Bee Hoon",
+      "language": "en",
+      "locality": "Singapore",
+      "sample_id": "ER-15"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://rasamalaysia.com/ngoh-hiang-recipe/",
+      "title": "Ngoh Hiang",
+      "language": "en",
+      "locality": "Singapore",
+      "sample_id": "ER-16"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://rasamalaysia.com/singapore-hokkien-mee-recipe/",
+      "title": "Singapore Hokkien Mee",
+      "language": "en",
+      "locality": "Singapore",
+      "sample_id": "ER-17"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://www.singaporeanmalaysianrecipes.com/hainanese-chicken-rice-recipe/",
+      "title": "Hainanese Chicken Rice",
+      "language": "en",
+      "locality": "Singapore/Malaysia",
+      "sample_id": "ER-18"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://www.singaporeanmalaysianrecipes.com/mee-siam-kuah/",
+      "title": "Mee Siam Kuah",
+      "language": "en",
+      "locality": "Singapore",
+      "sample_id": "ER-19"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://www.singaporeanmalaysianrecipes.com/roti-sardin-goreng/",
+      "title": "Roti Sardin Goreng",
+      "language": "en",
+      "locality": "Malaysia",
+      "sample_id": "ER-20"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://www.singaporeanmalaysianrecipes.com/singapore-beef-hor-fun/",
+      "title": "Singapore Beef and Seafood Hor Fun",
+      "language": "en",
+      "locality": "Singapore",
+      "sample_id": "ER-21"
+    },
+    {
+      "stratum": "local_en",
+      "source_url": "https://www.singaporeanmalaysianrecipes.com/teh-tarik-frothy-milky-tea/",
+      "title": "Teh Tarik",
+      "language": "en",
+      "locality": "Malaysia",
+      "sample_id": "ER-22"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/100128173/",
+      "title": "马来西亚椰浆饭",
+      "language": "zh",
+      "locality": "Malaysia",
+      "sample_id": "ER-23"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/100586251/",
+      "title": "仁当牛肉配椰浆饭",
+      "language": "zh",
+      "locality": "Malaysia",
+      "sample_id": "ER-24"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/101888336/",
+      "title": "超详版海南鸡饭",
+      "language": "zh",
+      "locality": "Singapore/Malaysia",
+      "sample_id": "ER-25"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/102870872/",
+      "title": "海南鸡饭（去骨鸡腿版）",
+      "language": "zh",
+      "locality": "Singapore",
+      "sample_id": "ER-26"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/104035497/",
+      "title": "海鲜炒粿条",
+      "language": "zh",
+      "locality": "Malaysia",
+      "sample_id": "ER-27"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/104345482/",
+      "title": "马来西亚肉骨茶",
+      "language": "zh",
+      "locality": "Malaysia",
+      "sample_id": "ER-28"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/104715509/",
+      "title": "海南鸡饭家常版",
+      "language": "zh",
+      "locality": "Singapore",
+      "sample_id": "ER-29"
+    },
+    {
+      "stratum": "local_zh",
+      "source_url": "https://m.xiachufang.com/recipe/106850600/",
+      "title": "马来西亚椰浆饭 Nasi Lemak",
+      "language": "zh",
+      "locality": "Malaysia",
+      "sample_id": "ER-30"
+    }
+  ]
+}

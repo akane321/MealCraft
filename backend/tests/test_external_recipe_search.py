@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.services import external_recipe_search
 from app.services.external_recipe_search import OpenAIRecipeSearchExtractor, RecipeSearchError
 
 
@@ -27,8 +28,13 @@ def response(*, url="https://www.wikibooks.org/wiki/Tofu_Bowl", citation=True):
     annotations = [{"type": "url_citation", "url": url, "title": "Tofu Bowl"}] if citation else []
     return SimpleNamespace(
         output_text=json.dumps(extracted),
+        model="test-model",
+        usage={"input_tokens": 120, "output_tokens": 45, "total_tokens": 165},
         model_dump=lambda: {
-            "output": [{"type": "message", "content": [{"type": "output_text", "annotations": annotations}]}]
+            "output": [
+                {"type": "web_search_call"},
+                {"type": "message", "content": [{"type": "output_text", "annotations": annotations}]},
+            ]
         },
     )
 
@@ -53,7 +59,33 @@ def test_recipe_search_uses_required_web_search_and_keeps_cited_source() -> None
 
     assert responses.kwargs["tools"] == [{"type": "web_search", "search_context_size": "medium"}]
     assert responses.kwargs["tool_choice"] == "required"
+    assert responses.kwargs["max_output_tokens"] == 3000
+    format_config = responses.kwargs["text"]["format"]
+    assert format_config["type"] == "json_schema"
+    assert format_config["name"] == "extracted_recipe"
+    assert format_config["strict"] is True
+    schema = format_config["schema"]
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    assert schema["properties"]["servings_basis"]["anyOf"][0]["enum"] == ["stated", "estimated"]
+    assert schema["properties"]["time_basis"]["anyOf"][0]["enum"] == ["stated", "estimated"]
+    assert "enum" in schema["properties"]["course"]["anyOf"][0]
+    assert "items" in schema["properties"]["meal_types"]["anyOf"][0]
+    assert "additionalProperties" not in schema["properties"]["nutrition_per_serving"]
+    assert "format" not in schema["properties"]["source_url"]
+    assert "exclusiveMinimum" not in json.dumps(schema)
+    instructions = responses.kwargs["instructions"]
+    assert "servings_basis is 'stated', 'estimated', or null" in instructions
+    assert "cuisine is any short source-supported label as one string or null" in instructions
+    assert "never an array" in instructions
     assert responses.kwargs["input"] == "ginger tofu dinner"
+    assert extractor.last_usage == {
+        "model": "test-model",
+        "input_tokens": 120,
+        "output_tokens": 45,
+        "total_tokens": 165,
+        "web_search_calls": 1,
+    }
     assert str(draft.source_url) == "https://www.wikibooks.org/wiki/Tofu_Bowl"
     assert draft.source_tier == 2
     assert draft.license == "Unverified; structured facts only; source steps paraphrased"
@@ -61,6 +93,19 @@ def test_recipe_search_uses_required_web_search_and_keeps_cited_source() -> None
     assert draft.ingredients[0].canonical_id is None
     assert draft.ingredients[0].allergens is None
     assert draft.retrieved_at.tzinfo is not None
+
+
+def test_openai_client_disables_sdk_retries(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured = {}
+
+    class FakeOpenAI:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr(external_recipe_search, "OpenAI", FakeOpenAI)
+    OpenAIRecipeSearchExtractor(api_key="unused", model="test-model")
+
+    assert captured["max_retries"] == 0
 
 
 def test_uncited_or_malformed_search_results_are_not_admitted_as_drafts() -> None:

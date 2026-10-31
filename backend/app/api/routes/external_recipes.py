@@ -1,11 +1,12 @@
 import hashlib
+import logging
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from openai import APIError
+from openai import APIError, APITimeoutError
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -35,6 +36,7 @@ from app.services.external_recipe_intake import (
 from app.services.external_recipe_search import OpenAIRecipeSearchExtractor, RecipeSearchError
 
 router = APIRouter(prefix="/external-recipes", tags=["external recipe intake"])
+logger = logging.getLogger(__name__)
 
 
 class ExternalRecipeIntakeRequest(BaseModel):
@@ -120,12 +122,14 @@ def search_and_intake_external_recipe(
             },
         )
     search_started = time.perf_counter()
+    extractor = OpenAIRecipeSearchExtractor(
+        api_key=settings.openai_api_key.get_secret_value(),
+        model=settings.openai_model,
+        timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
+        max_output_tokens=3000,
+    )
     try:
-        draft = OpenAIRecipeSearchExtractor(
-            api_key=settings.openai_api_key.get_secret_value(),
-            model=settings.openai_model,
-            timeout_seconds=runtime_value("openai_timeout_seconds", settings, database),
-        ).search_and_extract(payload.query)
+        draft = extractor.search_and_extract(payload.query)
     except RecipeSearchError as error:
         suggestions = _similar_household_recipes(
             database,
@@ -134,7 +138,15 @@ def search_and_intake_external_recipe(
             target=payload.query,
             requires_halal=payload.requires_halal,
         )
-        stages.append(_stage("search_and_extract", search_started, "failed", error="unusable_search_result"))
+        stages.append(
+            _stage(
+                "search_and_extract",
+                search_started,
+                "failed",
+                error="unusable_search_result",
+                api_usage=extractor.last_usage,
+            )
+        )
         _record_intake_run(
             database,
             current,
@@ -154,34 +166,32 @@ def search_and_intake_external_recipe(
                 "suggestions": [item.model_dump() for item in suggestions],
             },
         ) from error
-    except (APIError, TimeoutError, ConnectionError) as error:
-        suggestions = _similar_household_recipes(
-            database,
-            household_id=current.active_membership.household_id,
-            version=_current_profile_version(database, current.active_membership.household_id),
-            target=payload.query,
-            requires_halal=payload.requires_halal,
-        )
-        stages.append(_stage("search_and_extract", search_started, "failed", error="provider_unavailable"))
-        _record_intake_run(
-            database,
-            current,
-            "web_search",
-            stages,
-            status="failed",
-            error="provider_unavailable",
+    except (APITimeoutError, TimeoutError) as error:
+        _raise_provider_failure(
+            error,
+            database=database,
+            current=current,
+            payload=payload,
+            extractor=extractor,
             started=started,
-            input_digest=hashlib.sha256(" ".join(payload.query.split()).casefold().encode()).hexdigest(),
+            search_started=search_started,
+            http_status=status.HTTP_504_GATEWAY_TIMEOUT,
+            failure_code="provider_timeout",
         )
-        database.commit()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "reason": "provider_unavailable",
-                "message": "联网搜索暂时不可用。",
-                "suggestions": [item.model_dump() for item in suggestions],
-            },
-        ) from error
+    except (APIError, ConnectionError) as error:
+        upstream_status = getattr(error, "status_code", None)
+        client_error = isinstance(upstream_status, int) and 400 <= upstream_status < 500
+        _raise_provider_failure(
+            error,
+            database=database,
+            current=current,
+            payload=payload,
+            extractor=extractor,
+            started=started,
+            search_started=search_started,
+            http_status=(status.HTTP_502_BAD_GATEWAY if client_error else status.HTTP_503_SERVICE_UNAVAILABLE),
+            failure_code=("provider_rejected_request" if client_error else "provider_unavailable"),
+        )
     return _review_and_persist(
         draft,
         requires_halal=payload.requires_halal,
@@ -190,7 +200,15 @@ def search_and_intake_external_recipe(
         provider_mode="web_search",
         acquisition_method="web_search",
         started=started,
-        stages=[_stage("search_and_extract", search_started, "succeeded", source_url=str(draft.source_url))],
+        stages=[
+            _stage(
+                "search_and_extract",
+                search_started,
+                "succeeded",
+                source_url=str(draft.source_url),
+                api_usage=extractor.last_usage,
+            )
+        ],
         input_digest=hashlib.sha256(" ".join(payload.query.split()).casefold().encode()).hexdigest(),
     )
 
@@ -312,6 +330,82 @@ def _review_and_persist(
 def _current_profile_version(database: Session, household_id: int):
     profile = HouseholdProfileRepository(database, household_id=household_id).get_current()
     return HouseholdProfileRepository.current_version(profile) if profile else None
+
+
+def _raise_provider_failure(
+    error: Exception,
+    *,
+    database: Session,
+    current,
+    payload: ExternalRecipeSearchRequest,
+    extractor: OpenAIRecipeSearchExtractor,
+    started: float,
+    search_started: float,
+    http_status: int,
+    failure_code: str,
+) -> None:
+    details = _provider_error_details(error)
+    logger.warning("External recipe provider request failed", extra={"provider_error": details})
+    suggestions = _similar_household_recipes(
+        database,
+        household_id=current.active_membership.household_id,
+        version=_current_profile_version(database, current.active_membership.household_id),
+        target=payload.query,
+        requires_halal=payload.requires_halal,
+    )
+    stages = [
+        _stage(
+            "search_and_extract",
+            search_started,
+            "failed",
+            error=failure_code,
+            api_usage=extractor.last_usage,
+            provider_error=details,
+        )
+    ]
+    _record_intake_run(
+        database,
+        current,
+        "web_search",
+        stages,
+        status="failed",
+        error=failure_code,
+        started=started,
+        input_digest=hashlib.sha256(" ".join(payload.query.split()).casefold().encode()).hexdigest(),
+    )
+    database.commit()
+    raise HTTPException(
+        status_code=http_status,
+        detail={
+            "reason": failure_code,
+            "message": "联网搜索请求超时。"
+            if http_status == status.HTTP_504_GATEWAY_TIMEOUT
+            else "联网搜索暂时不可用。",
+            "suggestions": [item.model_dump() for item in suggestions],
+        },
+    ) from error
+
+
+def _provider_error_details(error: Exception) -> dict[str, str | int | None]:
+    status_code = getattr(error, "status_code", None)
+    code = getattr(error, "code", None)
+    body = getattr(error, "body", None)
+    if code is None and isinstance(body, dict):
+        provider_body = body.get("error", body)
+        if isinstance(provider_body, dict):
+            code = provider_body.get("code") or provider_body.get("type")
+    request_id = getattr(error, "request_id", None)
+    response = getattr(error, "response", None)
+    headers = getattr(response, "headers", None)
+    if not request_id and headers is not None:
+        request_id = headers.get("x-request-id")
+    return {
+        "exception_type": type(error).__name__,
+        "status_code": status_code if isinstance(status_code, int) else None,
+        "error_code": str(code)[:200] if code is not None else None,
+        "message": str(error)[:1000],
+        "request_id": str(request_id)[:200] if request_id is not None else None,
+    }
 
 
 def _similar_household_recipes(database: Session, *, household_id: int, version, target: str, requires_halal: bool):
