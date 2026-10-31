@@ -123,8 +123,9 @@ def review_summary() -> dict:
 
 
 def sha256(relative: str) -> str | None:
+    """Of the committed text: a Windows checkout's CRLF is hashed as the repository's LF."""
     path = data_root() / relative
-    return hashlib.sha256(path.read_bytes()).hexdigest()[:16] if path.exists() else None
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16] if path.exists() else None
 
 
 def markdown(result: dict) -> str:
