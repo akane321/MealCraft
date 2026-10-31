@@ -278,3 +278,14 @@ the workspace, like the list preview, and shows the person's real FairPrice cart
   items. The cart is checked by eye, and the owner decides whether to remove them.
 - What the live test confirms is written back into this document: the response shape, and where the store and
   address come from.
+
+**Result (owner's account, 2026-10-29 to 10-30).**
+- **Read:** works. The cart is `data.cart` with `items`, `storeId` (a string), `addressId` (a string), `orderType`
+  and FairPrice's totals.
+- **First write: blocked.** A credentialed fetch is blocked, because the API answers CORS with `*`. The request now
+  sends the bearer token only.
+- **Next write: added nothing.** Its ids were numbers and `t` was in milliseconds.
+- **Third write: refused** with "Invalid Cart - error when unmarshalling request cart", because `addressId` was a
+  string. It is now sent as the account's numeric address id, with `customerId` from `/user-profile`.
+- **Corrected write: confirmed.** The owner checked the cart on FairPrice: the items were added and nothing else
+  changed.

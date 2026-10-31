@@ -216,6 +216,7 @@ class FairPriceProductProvider:
             regular_price = float(regular) if regular is not None and float(regular) > price else None
         except (TypeError, ValueError):
             regular_price = None
+        dietary = metadata.get("Dietary Attributes") or []
         brand_record = record.get("brand") or {}
         category_record = record.get("primaryCategory") or {}
         images = record.get("images") or []
@@ -238,6 +239,7 @@ class FairPriceProductProvider:
             fetched_at=fetched_at,
             package_text=package_text,
             cart_item_id=str(record["id"]) if record.get("id") is not None else None,
+            halal_certified=True if isinstance(dietary, list) and "Halal" in dietary else None,
             regular_price_sgd=regular_price,
             package_warning=(
                 "unknown_package" if package_size is None else "count_package" if package_unit == "whole" else None

@@ -474,6 +474,7 @@ class MealPlanRepository:
                     product_image_url=product.image_url if product else None,
                     product_source=product.source if product else None,
                     product_fetched_at=product.fetched_at if product else None,
+                    product_halal_certified=product.halal_certified if product else None,
                     match_score=line.match_score,
                     packages_required=line.packages_required,
                     purchase_cost_sgd=line.purchase_cost_sgd,

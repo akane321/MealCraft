@@ -237,6 +237,7 @@ class HouseholdProfileService:
             missing_basics=version.missing_basics or [],
             nutrition_limits=version.nutrition_limits or [],
             missing_equipment=version.missing_equipment or [],
+            requires_halal=version.requires_halal,
             created_at=version.created_at,
         )
 
@@ -260,6 +261,8 @@ class HouseholdProfileService:
             "allergens": version.allergens,
             "excluded_ingredients": [],
             "dietary_preferences": [],
+            # The household's own switch; a request body cannot turn it off (the overrides have no halal field).
+            "requires_halal": version.requires_halal,
             "health_preferences": version.health_preferences,
             "nutrition_targets": NutritionTargets.model_validate(version.nutrition_targets),
             "max_sodium_mg_per_meal": (
@@ -288,6 +291,7 @@ class HouseholdProfileService:
             "allergens": "Allergens",
             "excluded_ingredients": "Excluded ingredients",
             "dietary_preferences": "Dietary requirements",
+            "requires_halal": "Halal household",
             "health_preferences": "Health preferences",
             "nutrition_targets": "Nutrition targets",
             "max_sodium_mg_per_meal": "Sodium target",

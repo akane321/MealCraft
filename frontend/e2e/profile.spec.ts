@@ -144,10 +144,12 @@ test("a new household is saved with no limit or goal it did not enter", async ({
   await expect(page.getByLabel("Longest cooking time (min)")).toHaveValue("");
   await expect(page.getByLabel("Calories per meal")).toHaveValue("");
   await expect(page.getByRole("checkbox", { name: "Lower sodium" })).not.toBeChecked();
+  await expect(page.getByRole("switch", { name: "Halal household" })).not.toBeChecked();
 
   await page.getByRole("button", { name: "Save household" }).click();
   await expect.poll(() => saved).not.toBeNull();
   expect(saved).toMatchObject({
+    requires_halal: false, // the household did not ask for it
     max_cooking_time_minutes: 240, // no limit
     budget_per_meal_sgd: null,
     weekly_budget_sgd: null,
@@ -155,6 +157,46 @@ test("a new household is saved with no limit or goal it did not enter", async ({
     nutrition_targets: { calories_kcal: null, protein_g: null, carbohydrate_g: null, fat_g: null },
     max_sodium_mg_per_meal: null,
   });
+});
+
+test("a halal household is one switch on the whole household, saved with it and shown on its card", async ({ page }) => {
+  const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/auth/me", route => route.fulfill(json(ME)));
+  const member = { name: "Tan", servings_per_meal: null, resolved_servings_per_meal: 1, servings_source: "hpb_default", age_band: null, sex: null, activity: null, goal: null, default_present: true, allergens: [], excluded_ingredients: [], dietary_preferences: [] };
+  const saved = {
+    id: 1,
+    name: "Tan home",
+    current_version: 2,
+    latest_plan_id: null,
+    created_at: "2026-10-01T00:00:00Z",
+    updated_at: "2026-10-01T00:00:00Z",
+    current: {
+      version: 2, members: [member], planning_household_size: 1, max_cooking_time_minutes: 240, budget_per_meal_sgd: null, weekly_budget_sgd: null,
+      allergens: [], excluded_ingredients: [], dietary_preferences: [], health_preferences: [],
+      nutrition_targets: { calories_kcal: null, protein_g: null, carbohydrate_g: null, fat_g: null }, max_sodium_mg_per_meal: null,
+      available_ingredients: [], pricing_mode: "fixture", meal_composition: null, plan_shape: null,
+      presence_rules: [], cooking_time_rules: [], missing_basics: [], nutrition_limits: [], missing_equipment: [], requires_halal: true, created_at: "2026-10-01T00:00:00Z",
+    },
+  };
+  await page.route("**/api/household-profiles/current", route => route.fulfill(json(saved)));
+  let sent: Record<string, unknown> | null = null;
+  await page.route("**/api/household-profiles/1", async (route) => {
+    sent = route.request().postDataJSON();
+    await route.fulfill(json({ detail: "stop here" }, 422));
+  });
+
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/profile");
+  await page.waitForLoadState("networkidle"); // clicks before hydration are lost
+  const halal = page.getByRole("switch", { name: "Halal household" });
+  await expect(halal).toBeChecked();
+  await expect(page.getByText("Only halal dishes; meat only from products FairPrice marks Halal.")).toBeVisible();
+  await expect(page.locator(".profile-summary-card").getByText("Halal", { exact: true })).toBeVisible();
+
+  await halal.uncheck();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect.poll(() => sent).not.toBeNull();
+  expect(sent).toMatchObject({ requires_halal: false, expected_version: 2 });
 });
 
 test("a household sentence is read, confirmed and saved with portions, basics and the sodium limit", async ({ page }) => {

@@ -972,6 +972,7 @@ class WeeklyMealPlanService:
                 image_url=item.product_image_url,
                 in_stock=not (item.price_evidence and item.price_evidence.get("lookup_status") == "out_of_stock"),
                 source=item.product_source,
+                halal_certified=item.product_halal_certified,
                 fetched_at=(
                     item.product_fetched_at.replace(tzinfo=UTC)
                     if item.product_fetched_at.tzinfo is None

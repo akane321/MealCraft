@@ -1,0 +1,234 @@
+"""The halal recipe pool: recipes by `halal_status` and how many a halal household can be planned from (ADR-0104).
+
+    uv run --project backend python -m app.data.halal_pool      # from the repository root, offline, deterministic
+
+Loads the committed catalog and release into an in-memory database as the product import does. A recipe is
+plannable for a halal household when its status is `halal`, or `needs_certification` and every such line has a
+certified, in-stock product in the release snapshot (docs/design/halal.md, "Planning"). Writes
+`docs/evaluation/halal-pool/latest.md` and `latest.json`; both are generated, do not edit them.
+"""
+
+from __future__ import annotations
+
+import csv
+import hashlib
+import json
+from collections import Counter
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+from app.core.paths import data_root, repository_root
+from app.data.halal import (
+    CERTIFICATION_FILE,
+    LABELS_FILE,
+    OVERRIDES_FILE,
+    halal_labels,
+    needs_certification,
+    release_halal_certification,
+)
+from app.data.halal_labels import VERDICTS_FILES
+from app.data.planning_pool import load, table
+from app.db.base import Base
+from app.models.recipe import Recipe
+from app.planning.grocery_estimator import release_snapshot
+
+REPORT_DIRECTORY = "docs/evaluation/halal-pool"
+REVIEW_OUTCOMES = ("kept", "corrected", "undetermined", "pending")
+STATUSES = ("halal", "needs_certification", "not_halal", "uncertain")
+UNLISTED = 15
+
+
+def certified_ingredients() -> dict[str, dict]:
+    """Per `needs_certification` ingredient: its snapshot products and how many are certified and in stock."""
+    certified = release_halal_certification()
+    snapshot = release_snapshot()
+    rows = {}
+    for name in sorted(halal_labels()):
+        if needs_certification(name):
+            products = snapshot.get(name, {}).get("products", [])
+            rows[name] = {
+                "products": len(products),
+                "certified": sum(1 for p in products if certified.get(p["external_id"]) and p["in_stock"]),
+            }
+    return rows
+
+
+def report(recipes: list[Recipe], ingredients: dict[str, dict]) -> dict:
+    shared = [recipe for recipe in recipes if recipe.owner_household_id is None]
+    by_status = {part: Counter() for part in ("release", "curated")}
+    plannable = {part: Counter() for part in ("release", "curated")}
+    blockers: Counter[str] = Counter()
+    for recipe in shared:
+        part = "curated" if recipe.release_version is None else "release"
+        by_status[part][recipe.halal_status] += 1
+        if recipe.halal_status == "halal":
+            plannable[part]["halal"] += 1
+        elif recipe.halal_status == "needs_certification":
+            lacking = sorted(
+                {
+                    line.ingredient.normalized_name
+                    for line in recipe.recipe_ingredients
+                    if needs_certification(line.ingredient.normalized_name)
+                    and not ingredients[line.ingredient.normalized_name]["certified"]
+                }
+            )
+            plannable[part]["needs_certification, all lines certified" if not lacking else "blocked"] += 1
+            blockers.update(lacking)
+
+    def counts(counter: Counter) -> dict[str, int]:
+        return {status: counter[status] for status in STATUSES}
+
+    return {
+        "recipes": {part: sum(by_status[part].values()) for part in by_status},
+        "by_status": {part: counts(by_status[part]) for part in by_status},
+        "plannable": {
+            part: {
+                "halal": plannable[part]["halal"],
+                "needs_certification, all lines certified": plannable[part]["needs_certification, all lines certified"],
+                "total": plannable[part]["halal"] + plannable[part]["needs_certification, all lines certified"],
+            }
+            for part in plannable
+        },
+        "blocked_by": [
+            {"ingredient": name, "recipes": count}
+            for name, count in sorted(blockers.items(), key=lambda i: (-i[1], i[0]))
+        ],
+        "ingredients": ingredients,
+    }
+
+
+def review_summary() -> dict:
+    """The person's verdicts per queue: kept, corrected to another settled status, or undetermined (now a label
+    that needs a certified product)."""
+    rounds = {}
+    for name in VERDICTS_FILES:
+        path = data_root() / name
+        rows = list(csv.DictReader(path.open(encoding="utf-8", newline=""))) if path.exists() else []
+        queues: dict[str, Counter] = {}
+        for row in rows:
+            verdict = row["verdict"].strip()
+            outcome = (
+                "pending"
+                if not verdict
+                else "kept"
+                if verdict in ("ok", row["status"])
+                else "undetermined"
+                if verdict == "uncertain"
+                else "corrected"
+            )
+            queues.setdefault(row["queue"], Counter())[outcome] += 1
+        rounds[name] = {queue: {key: counter[key] for key in REVIEW_OUTCOMES} for queue, counter in queues.items()}
+    return rounds
+
+
+def sha256(relative: str) -> str | None:
+    """Of the committed text: a Windows checkout's CRLF is hashed as the repository's LF."""
+    path = data_root() / relative
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16] if path.exists() else None
+
+
+def markdown(result: dict) -> str:
+    total = {part: result["recipes"][part] for part in result["recipes"]}
+    everything = sum(total.values())
+    usable = sum(result["plannable"][part]["total"] for part in result["plannable"])
+    certified = [name for name, row in result["ingredients"].items() if row["certified"]]
+    lines = [
+        "# Halal recipe pool",
+        "",
+        "Generated by `python -m app.data.halal_pool` (`backend/app/data/halal_pool.py`); do not edit.",
+        "Labels, overrides and certification facts: "
+        + ", ".join(f"`{name}` `{result['sources'][name]}`" for name in result["sources"] if name != "observed_at")
+        + f". FairPrice attribute observed {result['sources']['observed_at']}.",
+        "",
+        "A recipe is plannable for a halal household when it is `halal`, or `needs_certification` and every such line "
+        "has "
+        "a certified, in-stock product in the release snapshot. An `uncertain` or `not_halal` recipe never is. "
+        "Curated recipes are judged on the release snapshot too (the live search may find more certified products).",
+        "",
+        f"**{usable} of {everything} shared recipes are plannable for a halal household.**",
+        "",
+        "## Recipes by halal status",
+        "",
+        *table(
+            [
+                (status, result["by_status"]["release"][status], result["by_status"]["curated"][status])
+                for status in STATUSES
+            ],
+            ("status", "release", "curated"),
+        ),
+        "",
+        "## Plannable for a halal household",
+        "",
+        *table(
+            [
+                (
+                    key,
+                    result["plannable"]["release"][key],
+                    result["plannable"]["curated"][key],
+                )
+                for key in ("halal", "needs_certification, all lines certified", "total")
+            ],
+            ("recipes", "release", "curated"),
+        ),
+        "",
+        f"## Ingredients that need a certified product, with one ({len(certified)} of {len(result['ingredients'])})",
+        "",
+        *table(
+            [(name, row["products"], row["certified"]) for name, row in result["ingredients"].items()],
+            ("ingredient", "snapshot products", "certified, in stock"),
+        ),
+        "",
+        "## Recipes blocked by an ingredient with no certified product",
+        "",
+        "A recipe is counted under every ingredient that blocks it.",
+        "",
+        *table([(b["ingredient"], b["recipes"]) for b in result["blocked_by"][:UNLISTED]], ("ingredient", "recipes")),
+        "",
+        "## Label review",
+        "",
+        "A person's verdicts per queue, in the reviewed copies of the queues. `undetermined` means the evidence "
+        "could not settle the label without the product's formula or certification, so it now needs a product "
+        "FairPrice marks Halal, as meat does; it is not a label shown wrong. The sample covers only the plain "
+        "`halal` labels, so it is not the accuracy of every label.",
+        "",
+        *table(
+            [
+                (name.removeprefix("ingredients/"), queue, *counts.values())
+                for name, queues in result["review"].items()
+                for queue, counts in queues.items()
+            ],
+            ("file", "queue", *REVIEW_OUTCOMES),
+        ),
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def main() -> None:
+    engine = create_engine("sqlite+pysqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        recipes, _ = load(session)
+        result = report(recipes, certified_ingredients())
+    result["review"] = review_summary()
+    observed = json.loads((data_root() / CERTIFICATION_FILE).read_text(encoding="utf-8")).get("observed_at")
+    result["sources"] = {
+        name: sha256(name)
+        for name in (
+            LABELS_FILE,
+            OVERRIDES_FILE,
+            *VERDICTS_FILES,
+            CERTIFICATION_FILE,
+            "products/fairprice-v2-snapshot.json",
+        )
+    } | {"observed_at": observed}
+    directory = repository_root() / REPORT_DIRECTORY
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "latest.md").write_text(markdown(result), encoding="utf-8")
+    (directory / "latest.json").write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    usable = sum(part["total"] for part in result["plannable"].values())
+    print(f"{directory}: {usable} of {sum(result['recipes'].values())} shared recipes plannable for a halal household")
+
+
+if __name__ == "__main__":
+    main()

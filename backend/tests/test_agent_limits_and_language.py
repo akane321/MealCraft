@@ -527,6 +527,7 @@ def profile_of_four(client, **profile) -> None:
             "members": [{"name": f"Member {n}", **member} for n in range(4)],
             "max_cooking_time_minutes": 90,
             "pricing_mode": "fixture",
+            "requires_halal": False,
             **profile,
         },
     )
@@ -692,6 +693,7 @@ def test_a_meal_of_four_dishes_is_refused_in_the_reply_as_any_other(packaged, me
         "members": [{**member, "name": f"Cook {n}"} for n in range(4)],
         "max_cooking_time_minutes": 90,
         "plan_shape": {"meals": {"dinner": dinner}},
+        "requires_halal": False,
     }
     assert packaged.post("/api/household-profiles", json=profile).status_code == 201
     session = packaged.post("/api/agent/sessions", json={"message": message}).json()

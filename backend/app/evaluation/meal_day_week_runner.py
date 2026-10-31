@@ -113,6 +113,7 @@ def plan_request(episode: dict) -> WeeklyMealPlanRequest:
             "allergens": profile["allergens"],
             "excluded_ingredients": profile["excluded_ingredients"],
             "dietary_preferences": profile["dietary_preferences"],
+            "requires_halal": bool(hard.get("halal_required") or profile.get("requires_halal")),
             "weekly_budget_sgd": hard["budget_sgd"],
             "nutrition_constraints": targets,
             "plan_shape": profile["plan_shape"],

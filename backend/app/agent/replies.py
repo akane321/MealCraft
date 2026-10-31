@@ -254,10 +254,6 @@ REPLIES: dict[str, tuple[str, str]] = {
         "dietary constraints, groceries, budgets, or an existing meal plan.",
         "这个请求不在 MealCraft 的饮食规划范围内。我可以帮你处理食谱、饮食限制、买菜、预算，或调整已有的计划。",
     ),
-    "halal_unsupported": (
-        "Halal meal planning is not supported yet. I won't plan this request as ordinary meals.",
-        "目前暂不支持清真排餐，我不会把这项要求忽略后按普通饮食排餐。",
-    ),
     "restricted": (
         "MealCraft does not create disease-treatment diets or medical prescriptions. "
         "I can apply explicit allergens, general preferences, and nutrition targets you provide.",
@@ -488,6 +484,18 @@ REPLIES: dict[str, tuple[str, str]] = {
     "keep_failed": (
         "I couldn't save that to your household, so only this week changed.",
         "没能保存到你的家庭资料，所以只改了这一周。",
+    ),
+    # A halal week asked for in the chat (docs/design/halal.md): saved to the profile only on a yes.
+    "ask_halal": ("Should new weeks be halal too?", "以后每周也按清真安排吗？"),
+    "halal_kept": (
+        "Saved. Your household is now halal: new weeks plan only halal dishes, and meat only from products "
+        "FairPrice marks Halal. You can change it any time in your profile.",
+        "已保存。你的家庭现在是清真饮食：以后每周只安排清真菜品，肉类只买 FairPrice 标有清真（Halal）的商品。"
+        "你随时可以在家庭资料里修改。",
+    ),
+    "halal_week_only": (
+        "OK, only this week is halal. Your profile stays as it is.",
+        "好的，只有这一周按清真安排。你的家庭资料保持不变。",
     ),
     "week_only": (
         "OK, only this week changes. Your usual meals stay as they are.",

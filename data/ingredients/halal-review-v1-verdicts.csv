@@ -1,0 +1,140 @@
+queue,normalized_name,status,needs_certification,source,reason,verdict,note
+uncertain,almond_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,提取溶剂、乙醇来源及浓度未知。含乙醇不等于必定不清真，需核实 MUIS 香精条件或认证。
+uncertain,baked_beans,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,存在纯植物和含猪肉或动物脂肪的配方。未提供具体配方，保留存疑，不断言一定含猪肉。
+uncertain,bouillon,uncertain,FALSE,rule:doubtful,stock cube or powder of unstated source,ok,汤块或汤粉的肉类、脂肪及调味来源未注明，需具体配方和适用的认证。
+uncertain,chorizo,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,有猪肉及其他肉类版本。泛称不能证明肉源和屠宰方式，保留存疑。
+uncertain,coconut_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,椰子原料本身可接受，但提取溶剂和乙醇来源、浓度未知，不能仅凭植物名放行。
+uncertain,coconut_flavoring,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,香料载体、添加剂及乙醇来源、浓度未提供，保留存疑。
+uncertain,crickets,uncertain,FALSE,rule:doubtful,edible insects: scholars differ,ok,暂保留存疑，需具体物种、食用安全和产品工艺证据。MUIS 已允许符合条件的昆虫来源食品，不能写成新加坡一概禁止昆虫。
+uncertain,eggnog,uncertain,FALSE,rule:may_contain,may contain or be made from group:alcohol,ok,存在无酒和加朗姆酒或白兰地的配方。当前未区分，不能直接放行或断言必定含酒。
+uncertain,gelatin,uncertain,FALSE,rule:doubtful,"gelatin of unstated source (pork, beef or fish)",ok,未说明猪、牛、鱼等来源及必要的屠宰证据。需具体来源或适用认证。
+uncertain,gyoza,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,饺子馅可能是猪肉、其他肉类或蔬菜。馅料及调味配方未知。
+uncertain,hot_dog,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,肉种、屠宰方式及加工辅料未知。牛肉或鸡肉字样本身也不等于已获认证。
+uncertain,jasmine_flavoring,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,茉莉植物来源不能证明香料溶剂及载体合规，需具体配方或认证。
+uncertain,lemon_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,柠檬可接受，但提取溶剂及乙醇条件未知，不一概判为不清真。
+uncertain,marshmallow,uncertain,FALSE,rule:may_contain,may contain or be made from gelatin,ok,需核实明胶、乳化剂和香料。没有明胶来源或认证，不能放行。
+uncertain,mincemeat,uncertain,FALSE,rule:doubtful,fruit mince made with suet and often brandy,ok,英式果馅可能含板油及白兰地，也有无酒植物配方。泛称不能定案。
+uncertain,mint_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,薄荷可接受，但提取溶剂及乙醇条件未知，保留存疑。
+uncertain,orange_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,橙可接受，但提取溶剂及乙醇条件未知，保留存疑。
+uncertain,pandan_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,可为水提香兰汁，也可为含其他溶剂的商品香精。未说明是哪一种，保留存疑。
+uncertain,pate,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,可能含猪肝、其他动物肝、动物脂肪及酒，也有植物版本。不能凭名称确认。
+uncertain,pepperoni,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,常见配方涉及猪肉或混合肉。当前没有确切配方和认证，保留存疑。
+uncertain,refried_beans,uncertain,FALSE,rule:may_contain,may contain or be made from lard,ok,可能用猪油，也可用植物油。实际脂肪来源未给出，不断言所有豆泥都不清真。
+uncertain,rum_extract,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,需核实是否来自真实朗姆酒、溶剂及最终乙醇条件。朗姆风味名称不能证明合规。
+uncertain,sausage,uncertain,FALSE,rule:may_contain,may contain or be made from pork,ok,肉种和辅料未注明，可能含猪肉。保留存疑，不能用其他品种香肠的认证代替。
+uncertain,shortening,uncertain,FALSE,rule:doubtful,shortening may be made with lard,ok,可能是植物起酥油或动物油脂，来源未注明。
+uncertain,shortening_or_oil,uncertain,FALSE,rule:doubtful,shortening may be made with lard,ok,二选一中起酥油的来源不明，不能用植物油选项自动证明整个组合都适用。
+uncertain,tapai,uncertain,FALSE,rule:doubtful,fermented rice: contains alcohol,ok,发酵食品不能仅因发酵或检出乙醇一概判禁。工艺、实际酒精及适用认定未知，暂保留存疑。
+uncertain,teriyaki,uncertain,FALSE,rule:may_contain,may contain or be made from group:alcohol,ok,可能使用味醂或清酒，也有无酒认证版本。具体配方未知。
+uncertain,vanilla,uncertain,FALSE,rule:doubtful,extract or flavouring: usually alcohol-based,ok,可能是香草荚、粉或提取液。泛称混合了不同形态，不能把全部香草都当含酒提取物。
+needs_certification,au_jus_mix,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,beef,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,beef_broth,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,beef_heart,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,beef_or_turkey,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。实际选用牛肉或火鸡的对应商品均须满足该门槛，不能用一个选项的认证覆盖另一个。
+needs_certification,beef_steak,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,broth,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken_breast,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken_broth,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken_or_turkey,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。实际选用鸡肉或火鸡的对应商品均须满足该门槛。
+needs_certification,chicken_or_veg_broth,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。当前保留组合的严格认证门槛，不能用蔬菜汤选项证明鸡汤选项也合规。
+needs_certification,chicken_soup,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken_thigh,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chicken_wings,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,chipped_beef,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,cooked_chicken,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,corned_beef,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,cornish_hen,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,dashida,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。需核实对应调味粉的完整配方及认证，而非仅凭肉味名称。
+needs_certification,duck,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,goat,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,gravy,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,gravy_mix,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,ground_beef,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,lamb,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,lamb_chop,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,liver,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。还须确认肝脏来自允许的动物，不能把未注明肉种的肝默认成牛肝或鸡肝。
+needs_certification,meat,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。还须确认实际肉种，不得把不明肉种默认为牛肉或其他允许肉种。
+needs_certification,onion_soup_mix,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。该名称可能是植物或含肉配方，保留现有严格门槛不代表确认它必含肉。
+needs_certification,pastrami,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,rabbit,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,ramen,halal,TRUE,rule:meat,may contain chicken (flavour packet): halal only as a product marked Halal,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。认证必须覆盖整包面与调味料，不能只核实面条或其中鸡肉。
+needs_certification,soup,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,stuffing_mix,halal,TRUE,rule:meat,may contain chicken (flavour packet): halal only as a product marked Halal,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。认证必须覆盖整份配料包，不能只核实其中谷物。
+needs_certification,turkey,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+needs_certification,turkey_bacon,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。火鸡培根不等于猪培根，但也不能仅凭火鸡名称放行。
+needs_certification,venison,halal,TRUE,rule:meat,meat or poultry: halal only from a certified product,ok,仅同意附带认证门槛的分类，不是无条件清真。须选与该食材一致且有有效适用认证的商品。本轮未逐一核实 FairPrice 商品。
+check,american_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,凝乳酶、脂肪或其他添加物来源未核实。MUIS 要求核实酶来源或选择合适认证，不应只凭乳制品类别放行。
+check,blue_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,凝乳酶、脂肪或其他添加物来源未核实。MUIS 要求核实酶来源或选择合适认证，不应只凭乳制品类别放行。
+check,cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,凝乳酶、脂肪或其他添加物来源未核实。MUIS 要求核实酶来源或选择合适认证，不应只凭乳制品类别放行。
+check,cheese_soup,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,除奶酪的凝乳酶等来源，还须核实汤底及其他调味；没有完整配方或认证。
+check,cheese_tortellini,halal,FALSE,rule:food_group,"grain, no pork or alcohol",uncertain,需核实奶酪馅的酶、其他馅料和整份产品配方；不能仅凭面食类别放行。
+check,cottage_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,可能为酸凝，也可能涉及酶或其他添加物。未给具体工艺，不假定所有品种都无凝乳酶。
+check,cream_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,常见为酸凝，但配方也可能涉及酶、明胶或其他添加物。没有具体产品信息。
+check,goat_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,凝乳酶、脂肪或其他添加物来源未核实。MUIS 要求核实酶来源或选择合适认证，不应只凭乳制品类别放行。
+check,mac_and_cheese,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,需核实奶酪酶来源、调味粉和整份配方；不能凭乳制或谷物类别放行。
+check,red_wine_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,酒醋的转化工艺、残留及适用认定未提供。不能把酒醋直接当酒，也不能无证据认定清真。
+check,sherry_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,酒醋的转化工艺、残留及适用认定未提供。不能把酒醋直接当酒，也不能无证据认定清真。
+check,swiss_cheese,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",uncertain,凝乳酶、脂肪或其他添加物来源未核实。MUIS 要求核实酶来源或选择合适认证，不应只凭乳制品类别放行。
+check,white_wine_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,酒醋的转化工艺、残留及适用认定未提供。不能把酒醋直接当酒，也不能无证据认定清真。
+sample,apple_juice,halal,FALSE,rule:food_group,"beverage, no pork or alcohol",ok,按未发酵的普通苹果汁类别保留原标签，不等于验证了具体商品的全部添加剂。
+sample,bbq_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合酱汁。没有具体配料表，不能凭调味品分组排除酒、肉源或不明香料。
+sample,calamansi,halal,FALSE,rule:food_group,"fruit, no pork or alcohol",ok,金桔类鲜果，按未额外加工的植物食材审查。
+sample,canned_tuna,halal,FALSE,rule:food_group,"whole food, no pork or alcohol",ok,本目录明确为清水浸金枪鱼，按该食材定义保留。不是对任意调味金枪鱼罐头的认证。
+sample,celery,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,芹菜，普通植物食材。
+sample,celery_salt,halal,FALSE,rule:food_group,"seasoning, no pork or alcohol",ok,按芹菜籽与食盐的普通香辛料混合物类别保留，不含肉的名称推断。
+sample,cellophane_noodles,halal,FALSE,rule:food_group,"grain, no pork or alcohol",ok,按未调味淀粉粉丝类别保留，不包括附带不明调味包的即食产品。
+sample,chipotle_in_adobo,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合辣椒酱制品。醋、香料和其他辅料未提供，需核实具体配方。
+sample,chow_mein_noodles,halal,FALSE,rule:food_group,"grain, no pork or alcohol",uncertain,未区分普通面条、预炸脆面或已调味炒面，油脂及调味来源未知。
+sample,cilantro,halal,FALSE,rule:food_group,"herb, no pork or alcohol",ok,香菜，普通植物香草。
+sample,club_soda,halal,FALSE,rule:food_group,"beverage, no pork or alcohol",ok,按无酒精碳酸水类别保留，soda 不代表含酒。
+sample,cocoa,halal,FALSE,rule:food_group,"flavoring, no pork or alcohol",ok,按纯可可粉类别保留，不包括配方未知的可可饮料混合粉。
+sample,coleslaw_mix,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,按未拌酱的生卷心菜等切丝蔬菜混合物保留，不包括成品沙拉酱。
+sample,cucumber,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,黄瓜，普通植物食材。
+sample,dill,halal,FALSE,rule:food_group,"herb, no pork or alcohol",ok,莳萝，普通植物香草。
+sample,dried_mushroom,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,按无调味干蘑菇类别保留。
+sample,egg_yolk,halal,FALSE,rule:food_group,"protein, no pork or alcohol",ok,普通禽蛋蛋黄，不因动物来源就要求肉类屠宰认证。
+sample,english_muffin,halal,FALSE,rule:food_group,"grain, no pork or alcohol",uncertain,烘焙复合食品。未提供油脂、乳化剂及酶来源，不能仅凭谷物分组放行。
+sample,fava_bean,halal,FALSE,rule:food_group,"protein, no pork or alcohol",ok,蚕豆，普通植物豆类。
+sample,fish_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,鱼本身可接受，但鱼露是复合发酵制品。配料、添加物及工艺未核实。
+sample,garlic,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,大蒜，普通植物食材。
+sample,ginger_ale,halal,FALSE,rule:food_group,"beverage, no pork or alcohol",ok,按通常所指无酒精姜味汽水类别保留，ale 字样不等于啤酒。不涵盖酒精版本。
+sample,grapefruit_juice,halal,FALSE,rule:food_group,"beverage, no pork or alcohol",ok,按未发酵的普通葡萄柚汁类别保留，不覆盖额外加酒的饮品。
+sample,habanero_pepper,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,哈瓦那辣椒，普通植物食材。
+sample,harissa,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合辣椒膏的油脂、醋和添加剂未给出，不能用通常为植物配方代替实证。
+sample,ice,halal,FALSE,rule:food_group,"liquid, no pork or alcohol",ok,食用冰，按饮用水制冰类别保留。
+sample,jalapeno,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,墨西哥辣椒，按鲜椒类别审查，不包括未知腌制配方。
+sample,kabocha,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,日本南瓜，普通植物食材。
+sample,kecap_manis,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,甜酱油属于复合发酵调味品，具体辅料与工艺未知，需配方或适用认证。
+sample,kiwi,halal,FALSE,rule:food_group,"fruit, no pork or alcohol",ok,奇异果，普通植物鲜果。
+sample,liquid_smoke,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,烟熏液的载体、溶剂及添加剂未给出，名称不能证明没有乙醇或不明辅料。
+sample,lobster,halal,FALSE,rule:food_group,"protein, no pork or alcohol",ok,按本项目新加坡语境下的纯龙虾食材保留，不覆盖加工酱料，也不声称各教法学派意见一致。
+sample,macaroni,halal,FALSE,rule:food_group,"grain, no pork or alcohol",ok,按未调味普通干通心粉类别保留，不包括附带奶酪或肉味调料的成品。
+sample,milk_or_water,halal,FALSE,rule:food_group,"dairy, no pork or alcohol",ok,按普通牛奶或饮用水定义，两项本身均可接受。不是未知复合乳饮品。
+sample,nuoc_cham,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合蘸汁，鱼露及其他调味配方未核实。含鱼不等于整份蘸汁已清真。
+sample,orange,halal,FALSE,rule:food_group,"fruit, no pork or alcohol",ok,橙，普通植物鲜果。
+sample,pecan_or_walnut,halal,FALSE,rule:food_group,"protein, no pork or alcohol",ok,碧根果及核桃均为普通植物坚果。过敏安全仍须另行判断。
+sample,pickled_ginger,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,姜本身可接受，但腌汁可能涉及不同醋或酒类调味，具体配方未提供。
+sample,pomegranate_molasses,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",ok,按石榴汁浓缩糖浆类别保留，不把植物糖浆等同含酒饮品。
+sample,potato_chip,halal,FALSE,rule:food_group,"grain, no pork or alcohol",uncertain,未区分原味和肉味、奶酪味等调味薯片，油脂与香料来源未知。
+sample,potato_starch,halal,FALSE,rule:food_group,"grain, no pork or alcohol",ok,纯马铃薯淀粉，普通植物原料。
+sample,poultry_seasoning,halal,FALSE,rule:food_group,"seasoning, no pork or alcohol",ok,按普通干香辛料混合物类别保留，poultry 指用途，不代表含禽肉；含肉味辅料的商品须另核。
+sample,radish,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,萝卜，普通植物食材。
+sample,raisin,halal,FALSE,rule:food_group,"fruit, no pork or alcohol",ok,按普通葡萄干类别保留，不包括浸酒果干。
+sample,ranch_dressing,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合乳制沙拉酱，乳酶、香料及其他添加剂来源未核实。
+sample,raspberry,halal,FALSE,rule:food_group,"fruit, no pork or alcohol",ok,覆盆子，普通植物鲜果。
+sample,rhubarb,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,按可食用大黄茎审查，不能据此认可有毒叶片的食用安全。
+sample,rose_water,halal,FALSE,rule:food_group,"flavoring, no pork or alcohol",uncertain,需确认是纯食用玫瑰蒸馏水还是含载体的复合香料。商品配方未给出。
+sample,rotel,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",uncertain,品牌泛称不等于具体番茄辣椒罐头的完整配方证据，需明确产品版本和标签。
+sample,salmon_fillet,halal,FALSE,rule:food_group,"whole food, no pork or alcohol",ok,按原味三文鱼柳保留，不包括含酒腌料或其他复合调味。
+sample,sauerkraut,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",uncertain,发酵本身不是判禁理由，但未给出是否另加酒或其他配料的产品信息。暂不当已核实清真。
+sample,shrimp,halal,FALSE,rule:food_group,"protein, no pork or alcohol",ok,按本项目新加坡语境下纯虾食材保留，不包括带未知调味的虾制品。
+sample,sinigang_mix,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,复合酸汤调味包，可能含动物来源风味料，具体配方与认证未知。
+sample,spaghetti_squash,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,面条瓜是蔬菜，名称中的 spaghetti 不代表含未知面食或酱料。
+sample,squid_broth,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,鱿鱼本身可接受，但汤底可能混入其他高汤、酒和调料。整份配方未知。
+sample,sugar_snap_peas,halal,FALSE,rule:food_group,"vegetable, no pork or alcohol",ok,甜豆荚，普通植物蔬菜。
+sample,sweet_sour_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合糖醋酱的醋、香料和其他添加剂未提供，需核实配方。
+sample,tandoori_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,复合腌料的乳制成分、色素及香料来源未核实。
+sample,teff_flour,halal,FALSE,rule:food_group,"grain, no pork or alcohol",ok,纯苔麸粉，普通植物谷物原料。
+sample,worcestershire,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,伍斯特酱属于复合调味品。鳀鱼不是问题，但其他配料及工艺未核实。

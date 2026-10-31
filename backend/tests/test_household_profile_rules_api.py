@@ -36,6 +36,7 @@ def payload(**changes) -> dict:
         "cooking_time_rules": [TIME_RULE],
         "missing_basics": ["Soy sauce"],
         "nutrition_limits": [{"nutrient": "sodium_mg"}],
+        "requires_halal": False,
     }
     body.update(changes)
     return body
@@ -69,7 +70,11 @@ def test_a_profile_keeps_member_fields_rules_basics_and_limits(recipe_client):
 
 
 def test_whole_portions_still_work_and_decimals_are_bounded(recipe_client):
-    legacy = {"name": "Legacy", "members": [{"name": "A", "servings_per_meal": 2}, {"name": "B"}]}
+    legacy = {
+        "name": "Legacy",
+        "members": [{"name": "A", "servings_per_meal": 2}, {"name": "B"}],
+        "requires_halal": False,
+    }
     created = recipe_client.post("/api/household-profiles", json=legacy)
     assert created.status_code == 201, created.text
     assert created.json()["current"]["planning_household_size"] == 3
