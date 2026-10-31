@@ -4,6 +4,7 @@ import hashlib
 import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from functools import wraps
 from pathlib import Path
 from typing import Any, Literal
 
@@ -18,6 +19,7 @@ from app.db.base import Base
 from app.evaluation.baseline import greedy_repeat_selector, strong_rule_only_selector
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
+from app.planning.retailers import fairprice_only
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
 from app.products.provider import FixtureProductProvider
@@ -177,6 +179,19 @@ def _category_metrics(results: list[ScenarioResult]) -> dict[str, dict[str, floa
     }
 
 
+def frozen_catalog(function):
+    """Run `function` as if FairPrice were the only store: the frozen catalog, until the 11-07 freeze
+    (docs/design/cold-storage.md), so a Cold Storage snapshot cannot move a v1 report or digest."""
+
+    @wraps(function)
+    def run(*args, **kwargs):
+        with fairprice_only():
+            return function(*args, **kwargs)
+
+    return run
+
+
+@frozen_catalog
 def evaluate(
     *,
     ingredient_path: Path,

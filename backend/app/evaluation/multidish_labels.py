@@ -71,6 +71,7 @@ from app.evaluation.strict_success import dish_shares, load_tag_implications, me
 from app.planning.grocery_estimator import ProductMatcher, choose_product, convert_quantity
 from app.planning.meal_beam import MealBeamLimits
 from app.planning.recommendation_engine import title_mentions
+from app.planning.retailers import fairprice_only
 from app.planning.vegetable_led import row_vegetable_led, vegetable_role
 from app.products.provider import FixtureProductProvider
 from app.services.product import ProductSearchService
@@ -89,7 +90,12 @@ def product_candidates(pool: tuple[str, ...]) -> frozenset[str]:
     from app.repositories.recipe import RecipeRepository
 
     courses = sorted({load_release_catalog().by_slug[slug]["course"] for slug in pool})
-    with product_database({"scenario": {"recipe_candidate_slugs": list(pool)}}) as factory, factory() as session:
+    # FairPrice's catalog only, until the 11-07 freeze (docs/design/cold-storage.md).
+    with (
+        fairprice_only(),
+        product_database({"scenario": {"recipe_candidate_slugs": list(pool)}}) as factory,
+        factory() as session,
+    ):
         return frozenset(r.external_id for r in RecipeRepository(session).list_for_planning(courses=courses))
 
 
@@ -382,9 +388,17 @@ def bought(name: str, grams: float, halal: bool = False) -> float:
     A halal household buys a line that needs certification (meat, and a basic like soy sauce, which is not taken as
     at home) only as a certified product."""
     service, matcher = _pricing()
-    choice = choose_product(
-        service, matcher, name, _display_names().get(name, name), "g", live=False, quantity=grams, requires_halal=halal
-    )
+    with fairprice_only():
+        choice = choose_product(
+            service,
+            matcher,
+            name,
+            _display_names().get(name, name),
+            "g",
+            live=False,
+            quantity=grams,
+            requires_halal=halal,
+        )
     item = choice.product
     amount = convert_quantity(grams, "g", item.package_unit) if item else None
     if item is None or amount is None or not item.package_size:

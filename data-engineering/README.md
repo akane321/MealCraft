@@ -111,6 +111,25 @@ python scripts/fairprice_mapping.py export                 # 写运行时快照 
 `docs/v2-sampled-audit.json`。抽查是 `ADR-0024` 第 2 节的要求：AI 富化允许，
 条件是事后抽样审计。抽查可以在 A/B/C 没交齐时就先跑，工作表会记录当时包含了哪几份。
 
+## Cold Storage 商品映射（第二家零售商）
+
+只给 FairPrice 快照里没有的 v2.2 食材找 Cold Storage 商品（`docs/design/cold-storage.md`）：
+
+```bash
+python scripts/capture_cold_storage_snapshot.py             # 搜 search_again 文本再搜规范名，每个食材最多 3 次，写 data/enrichment/cold_storage/v1/observations.jsonl
+python scripts/capture_cold_storage_snapshot.py --follow-up --limit 400  # 第二轮：还没有 mapped 行的食材，换规范名、简化叫法、search_again 再搜，每个食材最多 3 个新查询
+python scripts/cold_storage_mapping.py packet --shards 3    # 打包候选商品（data/review/cold_storage/batch<i>.jsonl，不提交）
+python scripts/cold_storage_mapping.py validate FILE...     # 检查提议，规则同 FairPrice（没有 not_purchased）
+python scripts/cold_storage_mapping.py merge FILE...        # 合并进 data/enrichment/cold_storage/v1/mapping.jsonl
+python scripts/cold_storage_mapping.py sample --size 40     # 抽查样本，种子固定
+python scripts/cold_storage_mapping.py record VERDICTS.jsonl  # 记录 owner 的判定，写 docs/cold-storage-v1-sampled-review.json
+python scripts/cold_storage_mapping.py export               # 写运行时快照 ../data/products/cold-storage-v1-snapshot.json
+```
+
+只用标准库的公开 GET：每秒最多 1 次、单次最多 600 次，遇到第一个非 200 或不认识的页面（含验证码）就停。
+商品列表在页面的 Next.js flight 数据（`self.__next_f.push` 的字符串拼起来）里 `"initialProducts":` 之后。
+按重量卖的商品价格是每公斤价，导出的整包价是 `round(促销价 × averageWeight, 2)`。`external_id` 是 `cs-<productId>`。
+
 ## 菜谱与食材标签 v1 的抽检（Reviewing recipe and ingredient tags）
 
 ### 规则修复与原审查分开

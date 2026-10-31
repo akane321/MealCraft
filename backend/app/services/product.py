@@ -1,8 +1,11 @@
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from time import monotonic
 
+from app.products.cold_storage import PARSER_VERSION as COLD_STORAGE_PARSER_VERSION
+from app.products.cold_storage import ColdStorageProductProvider
 from app.products.provider import (
     FairPriceProductProvider,
     FixtureProductProvider,
@@ -10,7 +13,7 @@ from app.products.provider import (
     normalize_search_text,
 )
 from app.repositories.product import ProductSnapshotRepository
-from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductSearchResponse
+from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductSearchResponse, Retailer
 from app.schemas.retrieval import RetrievalTrace
 
 
@@ -26,12 +29,17 @@ def create_product_search_service(repository: ProductSnapshotRepository) -> "Pro
         ),
         repository=repository,
         cache_ttl_minutes=settings.fairprice_cache_ttl_minutes,
+        cold_storage_provider=ColdStorageProductProvider(
+            base_url=settings.coldstorage_base_url,
+            timeout_seconds=settings.coldstorage_timeout_seconds,
+        ),
+        cold_storage_cache_ttl_minutes=settings.coldstorage_cache_ttl_minutes,
     )
 
 
-# One planning request can price hundreds of ingredients. Live FairPrice gets at most this many lookups
-# per request, and none after this many failures in a row: the rest use the cache or sample prices, and
-# say so. These two limit the requests sent to the retailer's site, not the wait, and stay.
+# One planning request can price hundreds of ingredients. Each live retailer (FairPrice, Cold Storage) gets
+# at most this many lookups per request, and none after this many failures in a row: the rest use the cache
+# or sample prices, and say so. These two limit the requests sent to the retailer's site, not the wait, and stay.
 LIVE_LOOKUP_BUDGET = 60
 LIVE_FAILURE_LIMIT = 3
 # How long one basket's final price check waits for the retailer before the lines it has not heard back on keep
@@ -42,6 +50,19 @@ FINAL_PRICE_CONCURRENCY = 8
 _price_workers = ThreadPoolExecutor(max_workers=FINAL_PRICE_CONCURRENCY, thread_name_prefix="basket-price")
 
 
+@dataclass
+class _LiveStore:
+    """One retailer's live lookups: its provider, the cache it writes under, and its own budget and failures."""
+
+    provider: FairPriceProductProvider | ColdStorageProductProvider | None
+    source: Retailer
+    label: str
+    cache_ttl_minutes: int
+    parser_version: str
+    lookups: int = 0
+    failures_in_a_row: int = 0
+
+
 class ProductSearchService:
     def __init__(
         self,
@@ -50,13 +71,25 @@ class ProductSearchService:
         live_provider: FairPriceProductProvider,
         repository: ProductSnapshotRepository,
         cache_ttl_minutes: int,
+        cold_storage_provider: ColdStorageProductProvider | None = None,
+        cold_storage_cache_ttl_minutes: int | None = None,
     ) -> None:
         self.fixture_provider = fixture_provider
         self.live_provider = live_provider
         self.repository = repository
         self.cache_ttl_minutes = cache_ttl_minutes
-        self.live_lookups = 0
-        self.live_failures_in_a_row = 0
+        self._stores: dict[Retailer, _LiveStore] = {
+            "fairprice": _LiveStore(
+                live_provider, "fairprice", "FairPrice", cache_ttl_minutes, "fairprice-next-data-v1"
+            ),
+            "cold_storage": _LiveStore(
+                cold_storage_provider,
+                "cold_storage",
+                "Cold Storage",
+                cache_ttl_minutes if cold_storage_cache_ttl_minutes is None else cold_storage_cache_ttl_minutes,
+                COLD_STORAGE_PARSER_VERSION,
+            ),
+        }
 
     def refresh_selected(self, lines: list[GroceryLineEstimate]) -> list[GroceryLineEstimate]:
         """Only observe the already chosen SKUs; worker threads never access the database.
@@ -70,8 +103,8 @@ class ProductSearchService:
         queries: dict[str, list[int]] = {}
         for index, line in enumerate(refreshed):
             product = line.product
-            if product is None or line.packages_required == 0:
-                continue
+            if product is None or line.packages_required == 0 or product.source == "cold_storage":
+                continue  # Cold Storage has no price check: its lines are links, not a cart
             query = normalize_search_text(
                 (line.evidence.query if line.evidence else None) or line.ingredient_display_name
             )
@@ -237,31 +270,37 @@ class ProductSearchService:
         live: bool,
         refresh: bool = False,
         limit: int = 10,
+        retailer: Retailer = "fairprice",
     ) -> ProductSearchResponse:
+        """Products for a query. Cold Storage has no fixtures: live, then the cache, then nothing (offline, its
+        products come from the reviewed snapshot instead)."""
         normalized_query = normalize_search_text(query)
+        store = self._stores[retailer]
+        has_fixtures = retailer == "fairprice"
         if not live:
-            items = self.fixture_provider.search(normalized_query, limit=limit)
+            items = self.fixture_provider.search(normalized_query, limit=limit) if has_fixtures else []
             return ProductSearchResponse(
                 query=normalized_query,
-                provider_used="fixture",
+                provider_used="fixture" if has_fixtures else store.source,
                 fallback_used=False,
                 cached=False,
                 warning=None,
                 items=items,
                 retrieval=self._trace(
                     query=normalized_query,
-                    provider_used="fixture",
+                    provider_used="fixture" if has_fixtures else store.source,
                     mode="fixture",
-                    status="success",
+                    status="success" if has_fixtures else "no_match",
                     items=items,
-                    parser_version="fairprice-fixture-v1",
+                    parser_version="fairprice-fixture-v1" if has_fixtures else store.parser_version,
+                    requested_source=store.source,
                 ),
             )
 
         if not refresh:
-            fetched_after = datetime.now(UTC) - timedelta(minutes=self.cache_ttl_minutes)
+            fetched_after = datetime.now(UTC) - timedelta(minutes=store.cache_ttl_minutes)
             cached = self.repository.get_fresh(
-                source="fairprice",
+                source=store.source,
                 search_query=normalized_query,
                 fetched_after=fetched_after,
                 limit=limit,
@@ -269,80 +308,85 @@ class ProductSearchService:
             if cached:
                 return ProductSearchResponse(
                     query=normalized_query,
-                    provider_used="fairprice",
+                    provider_used=store.source,
                     fallback_used=False,
                     cached=True,
                     warning=None,
                     items=cached,
                     retrieval=self._trace(
                         query=normalized_query,
-                        provider_used="fairprice",
+                        provider_used=store.source,
                         mode="cache",
                         status="success",
                         items=cached,
-                        parser_version="fairprice-next-data-v1",
+                        parser_version=store.parser_version,
+                        requested_source=store.source,
                     ),
                 )
 
         try:
-            if self.live_failures_in_a_row >= LIVE_FAILURE_LIMIT:
+            if store.provider is None:
+                raise ProductProviderError(f"{store.label} is not set up for live lookups")
+            if store.failures_in_a_row >= LIVE_FAILURE_LIMIT:
                 raise ProductProviderError(
-                    f"FairPrice failed {self.live_failures_in_a_row} times in a row; not asked again this time"
+                    f"{store.label} failed {store.failures_in_a_row} times in a row; not asked again this time"
                 )
-            if self.live_lookups >= LIVE_LOOKUP_BUDGET:
+            if store.lookups >= LIVE_LOOKUP_BUDGET:
                 raise ProductProviderError(f"more than {LIVE_LOOKUP_BUDGET} live lookups in one request")
-            self.live_lookups += 1
+            store.lookups += 1
             try:
-                items = self.live_provider.search(normalized_query, limit=limit)
+                items = store.provider.search(normalized_query, limit=limit)
             except ProductProviderError:
-                self.live_failures_in_a_row += 1
+                store.failures_in_a_row += 1
                 raise
-            self.live_failures_in_a_row = 0
+            store.failures_in_a_row = 0
             if not items:
-                # FairPrice answered and stocks nothing for this: a data gap, so the
+                # The retailer answered and stocks nothing for this: a data gap, so the
                 # line stays unpriced rather than borrowing sample prices.
                 return ProductSearchResponse(
                     query=normalized_query,
-                    provider_used="fairprice",
+                    provider_used=store.source,
                     fallback_used=False,
                     cached=False,
-                    warning=f"FairPrice has no product for '{normalized_query}'.",
+                    warning=f"{store.label} has no product for '{normalized_query}'.",
                     items=[],
                     retrieval=self._trace(
                         query=normalized_query,
-                        provider_used="fairprice",
+                        provider_used=store.source,
                         mode="live",
                         status="no_match",
                         items=[],
-                        parser_version="fairprice-next-data-v1",
+                        parser_version=store.parser_version,
+                        requested_source=store.source,
                     ),
                 )
             self.repository.replace_query_results(
-                source="fairprice",
+                source=store.source,
                 search_query=normalized_query,
                 products=items,
             )
             return ProductSearchResponse(
                 query=normalized_query,
-                provider_used="fairprice",
+                provider_used=store.source,
                 fallback_used=False,
                 cached=False,
                 warning=None,
                 items=items,
                 retrieval=self._trace(
                     query=normalized_query,
-                    provider_used="fairprice",
+                    provider_used=store.source,
                     mode="live",
                     status="success",
                     items=items,
-                    parser_version="fairprice-next-data-v1",
+                    parser_version=store.parser_version,
+                    requested_source=store.source,
                 ),
             )
         except ProductProviderError as error:
             # Live, then cache, then fixture (ADR-0022 section 2): an expired
             # snapshot of real prices is still better than sample prices.
             stale = self.repository.get_fresh(
-                source="fairprice",
+                source=store.source,
                 search_query=normalized_query,
                 fetched_after=datetime.min.replace(tzinfo=UTC),
                 limit=limit,
@@ -351,19 +395,39 @@ class ProductSearchService:
                 saved = min(item.fetched_at for item in stale).strftime("%d %b %Y %H:%M UTC")
                 return ProductSearchResponse(
                     query=normalized_query,
-                    provider_used="fairprice",
+                    provider_used=store.source,
                     fallback_used=True,
                     cached=True,
-                    warning=f"Live FairPrice lookup was unavailable; prices saved on {saved} were used. ({error})",
+                    warning=f"Live {store.label} lookup was unavailable; prices saved on {saved} were used. ({error})",
                     items=stale,
                     retrieval=self._trace(
                         query=normalized_query,
-                        provider_used="fairprice",
+                        provider_used=store.source,
                         mode="cache",
                         status="degraded",
                         items=stale,
-                        parser_version="fairprice-next-data-v1",
+                        parser_version=store.parser_version,
                         warning=f"{error.kind}: {error}",
+                        requested_source=store.source,
+                    ),
+                )
+            if not has_fixtures:
+                return ProductSearchResponse(
+                    query=normalized_query,
+                    provider_used=store.source,
+                    fallback_used=True,
+                    cached=False,
+                    warning=f"Live {store.label} lookup was unavailable. ({error})",
+                    items=[],
+                    retrieval=self._trace(
+                        query=normalized_query,
+                        provider_used=store.source,
+                        mode="live",
+                        status="unavailable",
+                        items=[],
+                        parser_version=store.parser_version,
+                        warning=f"{error.kind}: {error}",
+                        requested_source=store.source,
                     ),
                 )
             fallback_items = self.fixture_provider.search(normalized_query, limit=limit)
@@ -395,10 +459,11 @@ class ProductSearchService:
         items: list,
         parser_version: str,
         warning: str | None = None,
+        requested_source: str = "fairprice",
     ) -> RetrievalTrace:
         fetched_at = max((item.fetched_at for item in items), default=datetime.now(UTC))
         return RetrievalTrace(
-            requested_source="fairprice",
+            requested_source=requested_source,
             provider_used=provider_used,
             mode=mode,
             status=status,

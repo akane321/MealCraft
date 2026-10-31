@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   CART_CHANGED_NOTE,
+  COLD_STORAGE_NOTE,
   FAIRPRICE_CHECKOUT_URL,
   FAIRPRICE_LOGIN_URL,
   LOGIN_WINDOW_FEATURES,
@@ -457,6 +458,7 @@ const refreshAll = () => {
                 <span class="mc-num">{{ formatSgd(prepared.ready_total_sgd) }}</span> at today's prices</span>
               <span v-if="already.length" class="mc-chip ok">{{ already.length }} already in your cart</span>
             </p>
+            <p v-if="prepared.other_stores?.length" class="note" role="status">{{ COLD_STORAGE_NOTE }}</p>
             <p v-if="warning" class="msg warn" role="alert">{{ warning }}</p>
 
             <div v-if="changes.length" role="group" aria-label="Price changes">

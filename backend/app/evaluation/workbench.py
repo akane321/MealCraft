@@ -10,6 +10,7 @@ from typing import Any
 from app.evaluation.agent_benchmark import evaluate_agent
 from app.evaluation.orchestration_benchmark import evaluate_grounding, evaluate_scope_policy
 from app.evaluation.runner import evaluate
+from app.planning.retailers import fairprice_only
 
 
 def _delta(full: dict[str, Any], baseline: dict[str, Any], metric: str) -> float:
@@ -71,48 +72,50 @@ def build_workbench(
             for split in record["sets"].values()
             for scenario_id, entry in split["eligibility"].items()
         }
-    developer = evaluate(
-        ingredient_path=ingredient_path,
-        recipe_path=recipe_path,
-        scenario_path=developer_path,
-        fixture_path=fixture_path,
-        release_path=release_path,
-        protocol=protocol,
-        forced_repetitions=forced,
-    )
-    baseline = evaluate(
-        ingredient_path=ingredient_path,
-        recipe_path=recipe_path,
-        scenario_path=heldout_path,
-        fixture_path=fixture_path,
-        release_path=release_path,
-        protocol=protocol,
-        forced_repetitions=forced,
-        system="greedy-baseline",
-        enforce_gates=False,
-    )
-    rule_only = evaluate(
-        ingredient_path=ingredient_path,
-        recipe_path=recipe_path,
-        scenario_path=heldout_path,
-        fixture_path=fixture_path,
-        release_path=release_path,
-        protocol=protocol,
-        forced_repetitions=forced,
-        system="rule-only-baseline",
-        enforce_gates=False,
-    )
-    planner = evaluate(
-        ingredient_path=ingredient_path,
-        recipe_path=recipe_path,
-        scenario_path=heldout_path,
-        fixture_path=fixture_path,
-        release_path=release_path,
-        protocol=protocol,
-        forced_repetitions=forced,
-        system="mealcraft-planner",
-        enforce_gates=False,
-    )
+    # The frozen catalog is FairPrice's until the 11-07 freeze (docs/design/cold-storage.md).
+    with fairprice_only():
+        developer = evaluate(
+            ingredient_path=ingredient_path,
+            recipe_path=recipe_path,
+            scenario_path=developer_path,
+            fixture_path=fixture_path,
+            release_path=release_path,
+            protocol=protocol,
+            forced_repetitions=forced,
+        )
+        baseline = evaluate(
+            ingredient_path=ingredient_path,
+            recipe_path=recipe_path,
+            scenario_path=heldout_path,
+            fixture_path=fixture_path,
+            release_path=release_path,
+            protocol=protocol,
+            forced_repetitions=forced,
+            system="greedy-baseline",
+            enforce_gates=False,
+        )
+        rule_only = evaluate(
+            ingredient_path=ingredient_path,
+            recipe_path=recipe_path,
+            scenario_path=heldout_path,
+            fixture_path=fixture_path,
+            release_path=release_path,
+            protocol=protocol,
+            forced_repetitions=forced,
+            system="rule-only-baseline",
+            enforce_gates=False,
+        )
+        planner = evaluate(
+            ingredient_path=ingredient_path,
+            recipe_path=recipe_path,
+            scenario_path=heldout_path,
+            fixture_path=fixture_path,
+            release_path=release_path,
+            protocol=protocol,
+            forced_repetitions=forced,
+            system="mealcraft-planner",
+            enforce_gates=False,
+        )
     agent = evaluate_agent(
         dataset_path=agent_path,
         provider=agent_provider,

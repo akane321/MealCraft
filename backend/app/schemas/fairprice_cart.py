@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.catalog_tags import Retailer
 from app.schemas.product import GroceryLineEstimate
 
 LineStatus = Literal["ready", "out_of_stock", "not_found", "no_product", "not_bought"]
@@ -33,6 +34,15 @@ class FairPriceCartLine(BaseModel):
     status: LineStatus
 
 
+class OtherStoreTrip(BaseModel):
+    """The bought lines of one trip that another store sells; they stay on the list with links
+    (docs/design/cold-storage.md)."""
+
+    retailer: Retailer
+    lines: int
+    purchase_total_sgd: float
+
+
 class FairPriceCartPrepareResponse(BaseModel):
     plan_id: int
     shopping_trip: TripNumber | None
@@ -43,6 +53,8 @@ class FairPriceCartPrepareResponse(BaseModel):
     projected_total_sgd: float
     budget_sgd: float | None
     over_budget: bool
+    # The panel's budget figure is projected_total_sgd (FairPrice only) plus these totals.
+    other_stores: list[OtherStoreTrip] = []
 
 
 class FairPriceCartResult(BaseModel):

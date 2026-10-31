@@ -25,7 +25,7 @@ from app.planning.capability import PlanningCapabilityError, require_composition
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
-from app.planning.grocery_estimator import convert_quantity, not_purchased
+from app.planning.grocery_estimator import convert_quantity, not_purchased, with_store_note
 from app.planning.household_slots import (
     assumed_basics,
     basics_note,
@@ -68,6 +68,7 @@ from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
+from app.planning.retailers import retailer_of
 from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
@@ -281,6 +282,20 @@ def dish_cost(recommendation) -> float:
     return estimate.purchase_total_sgd
 
 
+def cheap_first(recommendation) -> tuple[bool, float]:
+    """The budget half's order: dishes FairPrice alone supplies first (FairPrice stays the main store), then cost.
+
+    A dish that buys a line at Cold Storage is often cheap as used and dear in whole packages; ranked by use alone,
+    the few such soups pushed the cheap FairPrice soups out of the packet and every week came dearer
+    (docs/design/cold-storage.md). Without a Cold Storage line the order is `dish_cost`'s.
+    """
+    estimate = recommendation.grocery_estimate
+    second_store = estimate is not None and any(
+        getattr(item, "retailer", None) == "cold_storage" for item in getattr(estimate, "items", ())
+    )
+    return second_store, dish_cost(recommendation)
+
+
 class ProductPlanningError(WeeklyPlanSelectionError):
     def __init__(self, status, message, trace, *, problem=None):
         super().__init__(message)
@@ -384,7 +399,7 @@ def composed_packet(
             ranked = families_first(ranked)
             best = ranked[: limits[key] // 2]
             kept = {dish_family(r.recipe.title) for r in best}
-            best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
+            best += families_first(sorted(ranked[len(best) :], key=cheap_first), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
         chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id, limits[key], cooked)}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
@@ -574,7 +589,7 @@ class ProductPlanningEngine:
                 # The best-ranked dishes are rarely the cheap ones; with a budget, half
                 # the packet is the cheapest of the rest so a week within it can exist.
                 best = ranked[: limit // 2]
-                cheap_candidates = sorted(ranked[limit // 2 :], key=dish_cost)[: limit - len(best)]
+                cheap_candidates = sorted(ranked[limit // 2 :], key=cheap_first)[: limit - len(best)]
                 trace["budget_packet"] = {"ranked": len(best), "cheapest": len(cheap_candidates)}
                 ranked = best + cheap_candidates
             recommendations = ranked[:limit]
@@ -1274,8 +1289,9 @@ class ProductPlanningEngine:
                     purchase_cost_sgd=row.purchase_cost_sgd,
                     consumed_cost_sgd=round(consumed, 2),
                     excess_quantity=row.surplus_quantity,
-                    note=row.note,
+                    note=with_store_note(product, row.note),
                     evidence=provenance.get(row.selected_product_id),
+                    retailer=retailer_of(product) if product is not None else None,
                     shopping_trip=row.trip,
                     perishable=True if row.ingredient_id in perishables else None,
                 )

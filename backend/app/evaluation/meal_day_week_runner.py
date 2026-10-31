@@ -45,6 +45,7 @@ from app.evaluation.multidish_labels import DAYS, meal_nutrients, slot_roles
 from app.evaluation.release_catalog import fixture_products, load_release_catalog
 from app.evaluation.strict_success import Catalogs, Check, Tolerances, dish_shares, load_tag_implications, score_episode
 from app.planning.recipe_quality import dish_kind
+from app.planning.retailers import fairprice_only
 from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.recipe import clear_planning_pool
 from app.schemas.meal_plan import WeeklyMealPlanRequest, WeeklyMealPlanResponse
@@ -210,7 +211,8 @@ def _why(error: Exception) -> dict:
 def run_episode(episode: dict) -> tuple[dict, dict]:
     """The product's answer, and what happened on the way (the initial week, the change it read)."""
     extra: dict = {}
-    with product_database(episode) as factory, factory() as session:
+    # The frozen catalog is FairPrice's until the 11-07 freeze (docs/design/cold-storage.md).
+    with fairprice_only(), product_database(episode) as factory, factory() as session:
         plans = build_meal_plan_service(session, HOUSEHOLD)
         try:
             plan = plans.generate(plan_request(episode))

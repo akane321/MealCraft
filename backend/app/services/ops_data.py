@@ -18,6 +18,7 @@ from app.agent.ingredient_matcher import ALIASES, ZH_ALIASES, alias_file
 from app.data import overrides as catalog_overrides
 from app.models.platform import AuditEvent, CatalogOverride
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient
+from app.planning import retailers
 from app.planning.grocery_estimator import release_products, release_snapshot
 from app.repositories import recipe as recipe_repo
 from app.repositories.recipe import withdrawn_reasons, withdrawn_slugs
@@ -46,6 +47,11 @@ class OpsDataConflictError(ValueError):
 def _planning_changed() -> None:
     # The planner keeps its candidates; an edit must reach the next plan, so they are loaded again now.
     recipe_repo.clear_planning_pool(reload=True)
+
+
+def _mapping_kind(retailer: str) -> str:
+    # FairPrice keeps the plain kind it always had; another store's overrides are kept apart under its own.
+    return "product_mapping" if retailer == "fairprice" else f"product_mapping:{retailer}"
 
 
 def _names(values: list[str]) -> list[str]:
@@ -259,11 +265,12 @@ class DataService:
     # --- product mappings ---
 
     def mappings(
-        self, *, query: str | None, status: str | None, offset: int, limit: int
+        self, *, query: str | None, status: str | None, offset: int, limit: int, retailer: str = "fairprice"
     ) -> OpsProductMappingCollection:
-        entries = {**release_snapshot(), **catalog_overrides.overrides("product_mapping")}
+        snapshot = release_snapshot() if retailer == "fairprice" else retailers.cold_storage_snapshot()
+        entries = {**snapshot, **catalog_overrides.overrides(_mapping_kind(retailer))}
         names = dict(self.database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples().all())
-        items = [self._mapping_view(key, entry, names.get(key)) for key, entry in sorted(entries.items())]
+        items = [self._mapping_view(key, entry, names.get(key), retailer) for key, entry in sorted(entries.items())]
         if status:
             items = [item for item in items if item.status == status or item.source == status]
         if query and query.strip():
@@ -277,38 +284,43 @@ class DataService:
             ]
         return OpsProductMappingCollection(items=items[offset : offset + limit], total=len(items))
 
-    def change_mapping(self, ingredient: str, product: OpsMappedProduct) -> OpsProductMapping:
+    def change_mapping(
+        self, ingredient: str, product: OpsMappedProduct, retailer: str = "fairprice"
+    ) -> OpsProductMapping:
         if self.database.scalar(select(Ingredient.id).where(Ingredient.normalized_name == ingredient)) is None:
             raise OpsDataNotFoundError
         value = {"status": "mapped", "review_status": "console", "products": [product.model_dump(mode="json")]}
-        return self._set_mapping("mapping.changed", ingredient, value)
+        return self._set_mapping("mapping.changed", ingredient, value, retailer)
 
-    def remove_mapping(self, ingredient: str) -> OpsProductMapping:
-        if ingredient not in release_products():
+    def remove_mapping(self, ingredient: str, retailer: str = "fairprice") -> OpsProductMapping:
+        if ingredient not in self._products(retailer):
             raise OpsDataNotFoundError
-        return self._set_mapping("mapping.removed", ingredient, {"status": "removed"})
+        return self._set_mapping("mapping.removed", ingredient, {"status": "removed"}, retailer)
 
     # --- helpers ---
 
-    def _set_mapping(self, action: str, ingredient: str, value: dict[str, Any]) -> OpsProductMapping:
-        before = release_products().get(ingredient)
-        row = self.database.get(CatalogOverride, ("product_mapping", ingredient))
+    @staticmethod
+    def _products(retailer: str) -> dict[str, Any]:
+        return release_products() if retailer == "fairprice" else retailers.cold_storage_products()
+
+    def _set_mapping(self, action: str, ingredient: str, value: dict[str, Any], retailer: str) -> OpsProductMapping:
+        kind = _mapping_kind(retailer)
+        before = self._products(retailer).get(ingredient)
+        row = self.database.get(CatalogOverride, (kind, ingredient))
         if row is None:
             self.database.add(
-                CatalogOverride(
-                    kind="product_mapping", key=ingredient, value=value, updated_by_user_id=self.actor_user_id
-                )
+                CatalogOverride(kind=kind, key=ingredient, value=value, updated_by_user_id=self.actor_user_id)
             )
         else:
             row.value = value
             row.updated_by_user_id = self.actor_user_id
             row.updated_at = datetime.now(UTC)
-        self._audit(action, "product_mapping", ingredient, {"before": before, "after": value})
+        self._audit(action, kind, ingredient, {"before": before, "after": value})
         self.database.commit()
         catalog_overrides.reload(self.database)
         _planning_changed()
         name = self.database.scalar(select(Ingredient.display_name).where(Ingredient.normalized_name == ingredient))
-        return self._mapping_view(ingredient, value, name)
+        return self._mapping_view(ingredient, value, name, retailer)
 
     @staticmethod
     def _ingredient_view(ingredient: Ingredient, recipes: int) -> OpsIngredient:
@@ -324,14 +336,15 @@ class DataService:
         )
 
     @staticmethod
-    def _mapping_view(key: str, entry: dict[str, Any], display_name: str | None) -> OpsProductMapping:
+    def _mapping_view(key: str, entry: dict[str, Any], display_name: str | None, retailer: str) -> OpsProductMapping:
         return OpsProductMapping(
+            retailer=retailer,
             ingredient=key,
             display_name=display_name,
             status=entry["status"],
             review_status=entry.get("review_status"),
             products=entry.get("products", []),
-            source="console" if key in catalog_overrides.overrides("product_mapping") else "file",
+            source="console" if key in catalog_overrides.overrides(_mapping_kind(retailer)) else "file",
         )
 
     def _recipe(self, recipe_id: int) -> Recipe:

@@ -1,5 +1,5 @@
 import type { FeedbackKind, MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
-import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
+import type { GroceryLineEstimate, ProductSearchResponse, Retailer } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
 import { formatPlanDate, sentenceDay } from "./meal-plan-format";
 import { planDayLabel } from "./plan-shape";
@@ -58,12 +58,37 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** The store a line is bought at: its own `retailer`, else its product's source (FairPrice unless it says Cold Storage). */
+export function lineRetailer(line: GroceryLineEstimate): Retailer {
+  return (line.retailer ?? (line.product?.source === "cold_storage" ? "cold_storage" : "fairprice"));
+}
+
+export const RETAILER_NAME: Record<Retailer, string> = { fairprice: "FairPrice", cold_storage: "Cold Storage" };
+
+/** True when some line is bought at Cold Storage: only then does a list show its stores apart. */
+export const hasColdStorage = (items: GroceryLineEstimate[]): boolean => items.some(line => lineRetailer(line) === "cold_storage");
+
+export interface GroceryStore {
+  retailer: Retailer;
+  name: string;
+  groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
+}
+
+/** A trip's lines by store, FairPrice first and then Cold Storage, each as groceryGroups; a store with nothing to buy is left out. */
+export function groceryStores(items: GroceryLineEstimate[]): GroceryStore[] {
+  return (["fairprice", "cold_storage"] as const)
+    .map(retailer => ({ retailer, name: RETAILER_NAME[retailer], groups: groceryGroups(items.filter(line => lineRetailer(line) === retailer)) }))
+    .filter(store => store.groups.length);
+}
+
 export interface GroceryTrip {
   /** 1 before day 1, 2 before day 8; null for a plan's only trip. */
   trip: number | null;
   /** "Shop before day 8"; null for a plan's only trip. */
   label: string | null;
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
+  /** The same lines by store; one FairPrice entry when no line is Cold Storage's. */
+  stores: GroceryStore[];
 }
 
 /** Days one shopping trip covers: the backend's meal_structure trip_days (a plan of up to 7 days is one trip). */
@@ -71,10 +96,11 @@ export const TRIP_DAYS = 7;
 
 /** A plan longer than a week shops twice (ADR-0072): its lines by trip, each grouped as groceryGroups; one trip otherwise. */
 export function groceryTrips(items: GroceryLineEstimate[], tripDays = TRIP_DAYS): GroceryTrip[] {
-  if (!items.some(line => line.shopping_trip)) return [{ trip: null, label: null, groups: groceryGroups(items) }];
+  const make = (trip: number | null, label: string | null, lines: GroceryLineEstimate[]): GroceryTrip => ({ trip, label, groups: groceryGroups(lines), stores: groceryStores(lines) });
+  if (!items.some(line => line.shopping_trip)) return [make(null, null, items)];
   const trips = [...new Set(items.map(line => line.shopping_trip ?? 1))].sort((a, b) => a - b);
   return trips
-    .map(trip => ({ trip, label: `Shop before day ${1 + (trip - 1) * tripDays}`, groups: groceryGroups(items.filter(line => (line.shopping_trip ?? 1) === trip)) }))
+    .map(trip => make(trip, `Shop before day ${1 + (trip - 1) * tripDays}`, items.filter(line => (line.shopping_trip ?? 1) === trip)))
     .filter(trip => trip.groups.length);
 }
 
@@ -147,16 +173,22 @@ export function basicsNote(estimate: WeeklyGroceryEstimate): string | null {
   return estimate.warnings?.find(warning => warning.startsWith("Pantry basics are assumed at home")) ?? null;
 }
 
+/** "A", "A and B", "A, B and C". */
+const andList = (words: string[]): string => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
+
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const checked = priceCheckLine(estimate);
   if (checked) return checked;
   const lines = priced(estimate);
   const samples = priceCounts(estimate).sample;
   if (!lines.length || samples === lines.length) return "Sample prices";
-  if (samples) return "FairPrice and sample prices — source shown on each item";
+  // The stores whose prices are shown (FairPrice alone unless a line is Cold Storage's).
+  const stores = (["fairprice", "cold_storage"] as const).filter(store => lines.some(line => lineRetailer(line) === store && priceKind(line) !== "sample"));
+  const names = stores.length ? stores.map(store => RETAILER_NAME[store]) : [RETAILER_NAME.fairprice];
+  if (samples) return `${andList([...names, "sample"])} prices — source shown on each item`;
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `FairPrice prices from ${date}`;
+  return `${andList(names)} prices from ${date}`;
 }
 
 /** An observation's date is never replaced by the time a later price check was attempted. */
@@ -167,7 +199,9 @@ export function groceryPriceLabel(line: GroceryLineEstimate): string {
   if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
   const kind = priceKind(line);
   const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  const base = kind === "sample" ? "Sample price" : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
+  const base = kind === "sample"
+    ? "Sample price"
+    : lineRetailer(line) === "cold_storage" ? `${RETAILER_NAME.cold_storage} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
   switch (evidence?.lookup_status) {
     case "timeout": return `${base} · not checked live in time`;
     case "selected_product_not_returned": return `${base} · selected product not found`;

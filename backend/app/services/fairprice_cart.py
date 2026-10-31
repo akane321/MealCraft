@@ -8,6 +8,7 @@ from app.schemas.fairprice_cart import (
     FairPriceCartReport,
     FairPriceCartState,
     LineStatus,
+    OtherStoreTrip,
     TripNumber,
     cart_state,
     fingerprint,
@@ -41,7 +42,17 @@ class FairPriceCartService:
 
     def prepare(self, plan_id: int, shopping_trip: TripNumber | None) -> FairPriceCartPrepareResponse:
         plan = self._plan(plan_id)
-        lines = trip_lines(self._lines(plan), shopping_trip)
+        trip = trip_lines(self._lines(plan), shopping_trip)
+        # Only FairPrice lines are rechecked and put in the cart; another store's lines are totalled apart.
+        lines = [line for line in trip if line.retailer in {"fairprice", None}]
+        other_cents: dict[str, list[int]] = {}
+        for line in trip:
+            if line.retailer not in {"fairprice", None} and line.packages_required > 0:
+                other_cents.setdefault(line.retailer, []).append(_cents(line.purchase_cost_sgd))
+        other_stores = [
+            OtherStoreTrip(retailer=retailer, lines=len(cents), purchase_total_sgd=sum(cents) / 100)
+            for retailer, cents in other_cents.items()
+        ]
         # A fixture plan has no FairPrice products to check, and asks FairPrice nothing.
         live = plan.pricing_mode != "fixture"
         checkable = [
@@ -96,7 +107,9 @@ class FairPriceCartService:
             planned_total_sgd=planned_cents / 100,
             projected_total_sgd=projected_cents / 100,
             budget_sgd=budget,
-            over_budget=budget is not None and projected_cents > _cents(budget),
+            over_budget=budget is not None
+            and projected_cents + sum(_cents(store.purchase_total_sgd) for store in other_stores) > _cents(budget),
+            other_stores=other_stores,
         )
 
     def report(self, plan_id: int, body: FairPriceCartReport) -> FairPriceCartState:
