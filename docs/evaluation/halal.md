@@ -25,7 +25,8 @@ baseline, strict and label code alike. `multidish_labels.check` proves the four 
 
 For a halal household the product does not take a pantry basic that needs certification (soy sauce, vinegar,
 mayonnaise, ketchup ...) as at home (`household_slots.assumed_basics`): it is bought, as a Halal-marked product.
-The evaluation follows, for halal cases only; the other cases and their digests are unchanged:
+The evaluation follows, for halal cases only; the other cases are scored as before (the baseline runner's own
+fingerprint, `runner_sha256`, changed with this code, so an older partial run is not resumed into):
 
 - **Baselines** (`BaselineResources.not_bought(household, halal=True)`): the basics a baseline may leave unbought
   leave out the names that need certification, so they are priced. A halal episode is one whose gold states
@@ -43,9 +44,11 @@ A halal episode states `halal_required: true` in `gold.applicable_hard_constrain
 `requires_halal` (the switch); without it the request must carry the requirement, as in the Chinese case.
 
 `data/evaluation/dev/halal-v1.json` holds four developer cases (protocol v2-multidish, one file with a list of
-episodes; `multidish_runner --episodes` takes a directory or such a file): `halal-dev-001` pork-free but uncertified
-meat, `-002` an ingredient of unknown status, `-003` a halal household of five for a week, `-004` the request in
-Chinese. Pools are drawn by `multidish_pool` and every label is proven by `multidish_labels`. Developer cases only.
+episodes; `multidish_runner --episodes` takes a directory or such a file):
+- `halal-dev-001`: pork-free but uncertified meat;
+- `-002`: a sauce or pantry basic that needs a Halal-marked product the pool lacks (rice vinegar, marinara ...);
+- `-003`: a halal household of five for a week;
+- `-004`: the request in Chinese. Pools are drawn by `multidish_pool` and every label is proven by `multidish_labels`. Developer cases only.
 
 ## Agent benchmark
 

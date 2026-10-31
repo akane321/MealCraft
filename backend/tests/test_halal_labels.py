@@ -66,16 +66,18 @@ def test_every_catalog_ingredient_has_a_consistent_label(generated: list[dict]) 
         ("firm_tofu", "halal", False, "rule:food_group"),
     ],
 )
-def test_rules_decide_the_known_cases(name: str, status: str, certification: bool, source: str) -> None:
-    label = halal_labels()[name]
+def test_rules_decide_the_known_cases(
+    name: str, status: str, certification: bool, source: str, generated: list[dict]
+) -> None:
+    """What the rules decide, before a person's overrides."""
+    label = next(item for item in generated if item["normalized_name"] == name)
     assert (label["status"], label["needs_certification"], label["source"]) == (status, certification, source)
-    assert needs_certification(name) is certification
 
 
 def test_recipe_status_follows_the_table() -> None:
     assert recipe_halal_status(["broccoli", "milk"]) == "halal"
     assert recipe_halal_status(["broccoli", "chicken_breast"]) == "needs_certification"
-    assert recipe_halal_status(["chicken_breast", "sausage"]) == "uncertain"
+    assert recipe_halal_status(["chicken_breast", "sausage"]) == "needs_certification"  # owner 10-31: a marked product
     assert recipe_halal_status(["chicken_breast", "sausage", "mirin"]) == "not_halal"
     assert recipe_halal_status(["broccoli", "not_in_the_catalog"]) == "uncertain"
 
@@ -116,6 +118,8 @@ def test_every_verdict_short_of_ok_is_an_override_and_nothing_else_is(generated:
     assert all(by_name[r["normalized_name"]]["status"] == r["status"] for r in extra)
     changed = {r["normalized_name"] for r in (*first, *second, *extra) if r["verdict"] != "ok"}
     assert {r["verdict"] for r in (*first, *second, *extra) if r["verdict"] != "ok"} == {"uncertain"}
+    # The owner's second decision (10-31): what the rules left `uncertain` also needs a marked product.
+    changed |= {i["normalized_name"] for i in generated if i["status"] == "uncertain"}
     overrides = json.loads((data_root() / OVERRIDES_FILE).read_text(encoding="utf-8"))["items"]
     assert {i["normalized_name"] for i in overrides} == changed
     labels = halal_labels()

@@ -77,6 +77,11 @@ def _certified(product: PlanningProductOption) -> bool:
     return bool(product.halal_certified or product_certified(product.product_id))
 
 
+def halal_purchasable(products: Iterable[PlanningProductOption]) -> list[PlanningProductOption]:
+    """What a halal household may buy: a line that needs certification only as a certified product."""
+    return [p for p in products if not needs_certification(p.ingredient_id) or _certified(p)]
+
+
 def episode_problem(episode: dict, products: list[PlanningProductOption]) -> FinalPlanningProblem:
     """The episode's gold problem, priced on the whole frozen snapshot: a baseline never saw the episode's pool."""
     problem = build_problem(episode, gold_constraints(episode))
@@ -134,8 +139,7 @@ def validate_baseline_plan(
     slots = {slot.slot_id: slot for slot in problem.slots}
     halal, certified = required(episode), snapshot_certified(frozen_products)
     if halal:  # a line that needs certification is bought, and only as a certified product
-        kept = [p for p in problem.products if not needs_certification(p.ingredient_id) or _certified(p)]
-        problem = problem.model_copy(update={"products": kept})
+        problem = problem.model_copy(update={"products": halal_purchasable(problem.products)})
     recipes: list[PlanningRecipeCandidate] = []
     assignments: list[PlanningAssignment] = []
     extra: list[PlanningConstraintCheck] = []

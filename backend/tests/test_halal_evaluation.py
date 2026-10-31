@@ -27,7 +27,7 @@ CERTIFIED_CHICKEN = frozenset({"chicken_breast"})
 def test_each_line_is_judged_by_its_label_and_unknown_is_never_halal():
     assert line_problem("rice", ()) is None
     assert line_problem("pork_belly", ()) == "not_halal"
-    assert line_problem("sausage", ()) == "uncertain"
+    assert line_problem("sausage", ()) == "no certified product"  # owner 10-31: only as a marked product
     assert line_problem("not_in_any_catalog", ()) == "uncertain"  # no label: unknown
     assert line_problem(None, ()) == "unmapped"
 
@@ -107,7 +107,7 @@ def test_a_meat_line_without_a_certified_product_in_the_snapshot_fails_both_base
     ("extra", "why"),
     [
         (line("bacon bits", 30, "bacon"), "not_halal"),
-        (line("pork sausage", 100, "sausage"), "uncertain"),
+        (line("pork sausage", 100, "sausage"), "no certified product"),
         (line("mystery sauce", 20, None), "unmapped"),
     ],
 )
@@ -280,7 +280,7 @@ def test_the_pools_are_the_drawn_ones_and_every_label_is_proven(episodes):
 
 
 def test_each_pool_holds_the_dish_that_case_is_about(episodes):
-    from app.data.halal import recipe_halal_status
+    from app.data.halal import halal_labels, needs_certification, product_certified, recipe_halal_status
 
     by_slug = load_release_catalog().by_slug
     status = {
@@ -291,7 +291,23 @@ def test_each_pool_holds_the_dish_that_case_is_about(episodes):
         for e in episodes
     }
     assert {"needs_certification", "not_halal"} <= status["halal-dev-001"]  # pork-free meat, and pork
-    assert "uncertain" in status["halal-dev-002"]  # a line of unknown status
+    # A line of unknown status: since 10-31 one that needs a marked product the pool's snapshot does not have.
+    certified = {
+        row["ingredient_id"]
+        for row in load_release_catalog().products
+        if row["external_id"]
+        in set(next(e for e in episodes if e["episode_id"] == "halal-dev-002")["scenario"]["fairprice_product_ids"])
+        and product_certified(row["external_id"])
+    }
+    dev_002 = next(e for e in episodes if e["episode_id"] == "halal-dev-002")
+    labels = halal_labels()
+    assert any(
+        needs_certification(line["ingredient"])
+        and labels[line["ingredient"]]["source"] == "human"  # a sauce or basic, not meat
+        and line["ingredient"] not in certified
+        for slug in dev_002["scenario"]["recipe_candidate_slugs"]
+        for line in by_slug[slug]["ingredients"]
+    )
 
 
 def test_the_chinese_request_alone_carries_the_halal_requirement(episodes):
@@ -313,3 +329,18 @@ def test_the_rule_arms_plan_every_halal_case_and_the_scorer_accepts_the_plans(ep
     assert all(row["strict_success"] for row in report["episodes"]), [
         (r["episode_id"], r["arm"], r["failed"]) for r in report["episodes"] if not r["strict_success"]
     ]
+
+
+def test_a_halal_case_recomputes_a_baseline_only_on_what_it_may_buy(monkeypatch):
+    """The recomputed baseline price of a halal case uses the same certified-only products as its validation."""
+    from app.evaluation.baseline_validation import halal_purchasable
+
+    monkeypatch.setattr(halal_data, "release_halal_certification", lambda: {})
+    products = [
+        p.model_copy(update={"halal_certified": True if p.product_id == "114695" else None})
+        for p in resources().frozen_products
+        if p.ingredient_id in {"soy_sauce", "rice"}
+    ]
+    kept = {p.product_id for p in halal_purchasable(products)}
+    assert {p.product_id for p in products if p.ingredient_id == "soy_sauce"} & kept == {"114695"}
+    assert {p.product_id for p in products if p.ingredient_id == "rice"} <= kept

@@ -981,7 +981,7 @@
       "allowed_relaxations": [],
       "required_disclosures": [],
       "replan_invariants": null,
-      "author_rationale": "a dish with a line of unstated source (a stock cube, a sausage, gelatin) is of unknown status, and unknown is never halal"
+      "author_rationale": "a dish with a line whose source only a Halal-marked product settles (a sauce or pantry basic such as rice vinegar or marinara, ADR-0108) is not usable when the snapshot has no such product, and unknown is never halal"
     }
   },
   {

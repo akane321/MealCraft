@@ -1,7 +1,8 @@
 # Halal
 
-A household that eats halal gets only halal dishes, and its meat comes only from products certified halal (Knowledge
-ADR-0104, owner 2026-10-29; it supersedes ADR-0091's "not supported yet"). Unknown is never halal (ADR-0068,
+A household that eats halal gets only halal dishes, and its meat, like every other line that needs certification,
+comes only from products certified halal (Knowledge ADR-0104, owner 2026-10-29, which supersedes ADR-0091's "not
+supported yet"; ADR-0108). Unknown is never halal (ADR-0068,
 ADR-0073 section 5, ADR-0076 section 2).
 
 ## Where it comes from
@@ -23,10 +24,12 @@ One entry per catalog ingredient (the release v2.2 ingredients plus the curated 
  "source": "rule:meat", "reason": "poultry: halal only from a certified product"}
 ```
 
-- `status` is `halal`, `not_halal` or `uncertain`. `uncertain` counts as not halal everywhere.
+- `status` is `halal`, `not_halal` or `uncertain`. `uncertain` counts as not halal everywhere. Since the owner's
+  decision of 2026-10-31 (below), every generated `uncertain` label is overridden to need a certified product, so
+  only an ingredient with no label is still `uncertain`.
 - `needs_certification` is `true` for meat and poultry and for products made from them whose slaughter is not
-  stated (beef broth, meatballs). It is never `true` on a `not_halal` entry. Sausage is `uncertain`, not
-  `needs_certification`: the hierarchy says it may contain pork.
+  stated (beef broth, meatballs). It is never `true` on a `not_halal` entry. The rules make sausage `uncertain`, because the hierarchy
+  says it may contain pork; after the 2026-10-31 override it needs a Halal-marked product.
 - `source` names the rule that decided it, so a reviewer can audit by rule:
   - `rule:pork`: the pork family of the ingredient hierarchy, including lard, bacon, ham, gelatin of pork;
   - `rule:alcohol`: `group:alcohol` of the hierarchy, including cooking wine and mirin;
@@ -61,6 +64,10 @@ One entry per catalog ingredient (the release v2.2 ingredients plus the curated 
 - **Undetermined needs a certified product (owner, 2026-10-31).** The 141 undetermined labels are overridden to
   `halal` with `needs_certification` true, as meat is. A halal household uses such a line only as a product
   FairPrice marks Halal. The reviewer's notes say this settles it: "verify the specific product's certification".
+- **What the rules left uncertain, too (owner, 2026-10-31).** The 28 rule-`uncertain` labels are overridden the
+  same way. Examples are gelatin, sausage, marshmallow, extracts and bouillon. A Halal-marked product settles
+  their source, and without one the line is not used. Only an ingredient with no label is still `uncertain`, which
+  is not halal, so 169 overrides in all.
 - **Reasons corrected.** After the review, the reasons of extracts, vanilla, pandan extract, crickets and tapai were
   corrected. MUIS allows ethanol from a non-khamr source in flavourings within limits, and allows qualifying insect
   foods. Their status did not change.
@@ -129,7 +136,8 @@ for ingredients into `ingredients.halal_status`:
 
 - The ingredient-level baseline scorer maps a baseline's dish lines to catalog ingredients and applies the same
   labels. An unmapped or `uncertain` line fails a halal case.
-- Developer cases include halal households: pork-free but uncertified meat, unknown-status ingredients, and a
+- Developer cases include halal households: pork-free but uncertified meat, a sauce or pantry basic that needs a
+  Halal-marked product the pool lacks, and a
   5-person halal week.
 - The halal pool is reported: recipes by status, and how many are plannable for a halal household.
 
