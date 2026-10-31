@@ -63,11 +63,25 @@ The data-engineering side mirrors `capture_fairprice_snapshot.py` and `fairprice
 - **Review (owner, 2026-10-31: as FairPrice).** The proposals are used as they are. A person reviews a fixed-seed
   sample of 40 (`data-engineering/docs/cold-storage-v1-review-sample.csv`). Their verdicts are recorded by
   `cold_storage_mapping.py record` into the sampled-review JSON beside it, and corrections are made in the console.
+- **The human review (2026-10-31).** A person reviewed the sample, and the results are in
+  `data-engineering/docs/cold-storage-v1-sampled-review.json`.
+
+  | Rows | Accepted | Corrected | Uncertain |
+  |---|---:|---:|---:|
+  | 27 "Cold Storage has none" | 27 | 0 | 0 |
+  | 13 mapped | 6 | 3 | 4 |
+
+  - **The 3 corrected** were substitutes the reviewer would not let pass: bresaola for chipped beef, chilli padi for
+    habanero, and sugar-free wafer biscuits for vanilla wafers. They leave the snapshot (`owner_corrected`).
+  - **The 4 uncertain** were narrowed to what the reviewer confirmed: only the liver pâté, and only the single Asian
+    pear. The two zest rows stay on their yield estimates, as FairPrice's do, and the lime one is below the floor
+    anyway.
+  - **The 0.60 floor.** Both corrected rows that were in use sat at exactly 0.60.
 - **Coverage after two capture passes.**
   - The first pass searched the `search_again` texts. The follow-up searched the canonical name and a simpler
     shopper's form.
   - Together they made 669 requests at one a second.
-  - Cold Storage prices 45 of the 180 ingredients FairPrice lacks. 49 of them had no candidate at Cold Storage at
+  - Cold Storage prices 43 of the 180 ingredients FairPrice lacks, after the review below took out two. 49 of them had no candidate at Cold Storage at
     all.
   - The coverage report (`docs/evaluation/price-coverage/latest.md`) has the shares.
 - **`fairprice-v2-snapshot.json` and FairPrice's `mapping.jsonl` are never edited.** The frozen evaluation reads

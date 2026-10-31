@@ -1529,22 +1529,23 @@
       "failures": {},
       "metrics": {
         "meals": 30,
-        "dishes": 75,
-        "distinct_dishes_excluding_staples": 59,
+        "dishes": 76,
+        "distinct_dishes_excluding_staples": 56,
         "most_uses_of_one_dish": 2,
         "staples": [
           "Assyrian Rice",
+          "Indian Restaurant Style Basmati Rice",
           "Super Easy Naan Bread"
         ],
-        "cuisine_groups_per_meal": 1.2,
+        "cuisine_groups_per_meal": 1.25,
         "meals_with_two_deep_fried": 0,
         "energy_floor_pass_rate": 1.0,
         "moves": [],
         "grocery_lines_by_trip": {
-          "1": 68,
-          "2": 40
+          "1": 66,
+          "2": 36
         },
-        "purchase_total_sgd": 509.61
+        "purchase_total_sgd": 495.43
       },
       "meals": [
         {
@@ -1704,7 +1705,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Chinese Salt And Pepper Tofu",
+          "recipe": "Coriander, Curry & Yogurt-Crusted Tofu",
           "servings": 1.5
         },
         {
@@ -1712,7 +1713,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Kale And Ginger Stir Fry",
+          "recipe": "Jim's Raita",
           "servings": 1.0
         },
         {
@@ -1720,7 +1721,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Chinese Egg Drop Soup",
+          "recipe": "Iranian Yogurt Soup",
           "servings": 1.0
         },
         {
@@ -1728,7 +1729,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "staple",
-          "recipe": "Assyrian Rice",
+          "recipe": "Indian Restaurant Style Basmati Rice",
           "servings": 2.0
         },
         {
@@ -1920,16 +1921,24 @@
           "weekday": "Sat",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Greek Grilled Cheese",
-          "servings": 2.0
+          "recipe": "Microwaved Parmesan Chicken",
+          "servings": 1.5
         },
         {
           "day": 7,
           "weekday": "Sat",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Curry Coleslaw",
+          "recipe": "Easy, Dynamite Cauliflower Curry",
           "servings": 1.0
+        },
+        {
+          "day": 7,
+          "weekday": "Sat",
+          "meal": "lunch",
+          "role": "staple",
+          "recipe": "Assyrian Rice",
+          "servings": 2.0
         },
         {
           "day": 7,
@@ -2032,7 +2041,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "main",
-          "recipe": "Vietnamese Omelette",
+          "recipe": "Thai-Style Omelet (Khai Jiao)",
           "servings": 1.5
         },
         {
@@ -2040,7 +2049,7 @@
           "weekday": "Mon",
           "meal": "lunch",
           "role": "vegetable",
-          "recipe": "Carrot Raita",
+          "recipe": "Jim's Raita",
           "servings": 1.0
         },
         {
@@ -2120,7 +2129,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "main",
-          "recipe": "Microwaved Parmesan Chicken",
+          "recipe": "Hoisin Eggplant Chicken",
           "servings": 1.5
         },
         {
@@ -2128,7 +2137,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "vegetable",
-          "recipe": "Jim's Raita",
+          "recipe": "Japanese Sesame Spinach",
           "servings": 1.0
         },
         {
@@ -2136,7 +2145,7 @@
           "weekday": "Tue",
           "meal": "dinner",
           "role": "soup",
-          "recipe": "Chickpea, chorizo & spinach stew",
+          "recipe": "Chinese Egg Drop Soup",
           "servings": 1.0
         },
         {

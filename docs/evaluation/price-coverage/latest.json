@@ -2,30 +2,30 @@
  "ingredients": {
   "total": 699,
   "fairprice": 519,
-  "combined": 564,
+  "combined": 562,
   "fairprice_share": 0.7425,
-  "combined_share": 0.8069,
+  "combined_share": 0.804,
   "released": 701,
   "not_purchased": [
    "ice",
    "water"
   ],
-  "cold_storage_only": 45,
-  "cold_storage_only_share": 0.0644,
+  "cold_storage_only": 43,
+  "cold_storage_only_share": 0.0615,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 8967,
   "fairprice": 7185,
-  "combined": 7766,
+  "combined": 7764,
   "fairprice_share": 0.8013,
-  "combined_share": 0.8661
+  "combined_share": 0.8658
  },
  "lines": {
   "total": 75661,
   "fairprice": 73642,
-  "combined": 74353,
+  "combined": 74350,
   "fairprice_share": 0.9733,
   "combined_share": 0.9827
  },
@@ -113,6 +113,6 @@
  ],
  "sources": {
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
-  "products/cold-storage-v1-snapshot.json": "ed97fb7f29e660fa"
+  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358"
  }
 }

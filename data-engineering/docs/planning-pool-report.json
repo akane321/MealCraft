@@ -6,7 +6,7 @@
  "excluded": {
   "release": {
    "course is not a dish course": 408,
-   "an ingredient has no price": 1138,
+   "an ingredient has no price": 1140,
    "withdrawn": 2,
    "incomplete recipe": 183
   },
@@ -24,11 +24,11 @@
   "ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork": 1
  },
  "pool": {
-  "release": 7236,
+  "release": 7234,
   "curated": 30
  },
  "usable_roles": {
-  "protein_main": 3031,
+  "protein_main": 3029,
   "one_bowl": 1291,
   "staple": 514,
   "vegetable": 493,
@@ -44,9 +44,9 @@
   "not a breakfast, lunch or dinner role (sauce)": 30,
   "no meal-role tag": 24
  },
- "usable": 6243,
+ "usable": 6241,
  "usable_by_meal": {
-  "lunch or dinner": 5887,
+  "lunch or dinner": 5885,
   "breakfast": 356
  },
  "local": {
@@ -55,10 +55,10 @@
   "usable": 72
  },
  "unpriced": {
-  "ingredients": 133,
+  "ingredients": 135,
   "per_recipe": {
-   "1": 1045,
-   "2": 90,
+   "1": 1046,
+   "2": 91,
    "3": 3
   },
   "top": [
@@ -167,7 +167,7 @@
    "10": 568,
    "20": 784,
    "40": 961,
-   "all": 1138
+   "all": 1140
   }
  },
  "import_skipped": [
@@ -177,6 +177,6 @@
   "release_version": "v2.2",
   "release_digest": "745ac5676ea3014f91b880569dad19447478b8fb3608113dc4d4eb0edea5571d",
   "recipe_tags_sha256": "d003b6bf0013d12d7ca1c167b625662e5821051948a2f928f153517b0cab426e",
-  "priceable_sha256": "c2d07cdfdf5926ce1ffdea12a541685c541a1c11edb33d20240b07a4efda13da"
+  "priceable_sha256": "e14c4e1de27064bf51f7f83f534ef6d0fc2adda15f72806252535ec5d79aad47"
  }
 }

@@ -49,7 +49,9 @@ RUNTIME = ROOT.parent / "data" / "products" / "cold-storage-v1-snapshot.json"
 SAMPLE = PACKETS / "review-sample.json"  # redrawable from the seed, so not committed
 REVIEW = ROOT / "docs" / "cold-storage-v1-sampled-review.json"  # the owner's judgement, committed
 DEFAULT_SEED = 20261031
-VERDICTS = {"accepted", "corrected"}
+# "uncertain": the person could not confirm it from the product page. Such a row stays in use (as proposed, ADR-0109)
+# unless its notes narrow it; only "corrected" leaves the snapshot.
+VERDICTS = {"accepted", "corrected", "uncertain"}
 # Below this a mapping is a substitute or a rough yield estimate; the runtime leaves it unpriced.
 MIN_CONFIDENCE = 0.6
 STATUSES = {"mapped", "unavailable"}
@@ -252,7 +254,7 @@ def draw_sample(size: int, seed: int) -> None:
 
 
 def record(path: Path) -> None:
-    """Record verdicts ({"ingredient_id", "verdict": accepted|corrected, "note"}) on the drawn sample."""
+    """Record verdicts ({"ingredient_id", "verdict": accepted|corrected|uncertain, "note"}) on the drawn sample."""
     sheet = json.loads(SAMPLE.read_text(encoding="utf-8"))
     sampled = {item["ingredient_id"] for item in sheet["items"]}
     verdicts = _jsonl(path)
