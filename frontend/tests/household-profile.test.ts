@@ -32,7 +32,8 @@ const reference: HouseholdReference = {
     },
   },
   sodium_limit_mg: { toddler: null, child: null, teen: null, adult: 2000, senior: 2000 },
-  basics: [{ normalized_name: "soy_sauce", display_name: "Soy sauce", allergens: ["soy", "gluten"] }],
+  basics: [{ normalized_name: "soy_sauce", display_name: "Soy sauce", category: "basic", allergens: ["soy", "gluten"] }],
+  basic_categories: [{ id: "basic", label: "Basics" }],
   meal_shares: { breakfast: 0.25, lunch: 0.35, dinner: 0.35 },
   sources: [],
 };
@@ -129,7 +130,7 @@ describe("API errors", () => {
 
 describe("the grocery list's basics note", () => {
   it("shows the backend's note only when the week assumes basics at home", () => {
-    const note = "Basic seasonings are assumed at home and left off this list: garlic, salt. Mark one as run out on your profile to buy it.";
+    const note = "Pantry basics are assumed at home and left off this list: basics (2), spices (1). Mark one as run out on your profile to buy it.";
     const estimate = { warnings: ["Some prices are samples.", note] } as WeeklyGroceryEstimate;
     expect(basicsNote(estimate)).toBe(note);
     expect(basicsNote({ warnings: [] } as unknown as WeeklyGroceryEstimate)).toBeNull();

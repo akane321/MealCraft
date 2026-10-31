@@ -19,6 +19,12 @@ from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.repositories.meal_plan import MealPlanRepository
 from app.repositories.product import ProductSnapshotRepository
 from app.repositories.recipe import RecipeRepository
+from app.schemas.fairprice_cart import (
+    FairPriceCartPrepareResponse,
+    FairPriceCartReport,
+    FairPriceCartState,
+    FairPriceCartTripRequest,
+)
 from app.schemas.meal_plan import (
     MealPlanEntryStatusUpdate,
     MealPlanReplanConfirmationResponse,
@@ -30,6 +36,11 @@ from app.schemas.meal_plan import (
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
     WeeklyNutritionDashboardResponse,
+)
+from app.services.fairprice_cart import (
+    FairPriceCartConflictError,
+    FairPriceCartNotFoundError,
+    FairPriceCartService,
 )
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.product import create_product_search_service
@@ -209,6 +220,63 @@ def list_meal_plan_events(
         return service.list_events(plan_id=plan_id, limit=limit)
     except MealPlanReplanNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+
+
+def get_fairprice_cart_service(
+    database: DatabaseDependency,
+    current: CurrentHouseholdViewDependency,
+) -> FairPriceCartService:
+    return FairPriceCartService(
+        repository=MealPlanRepository(database, household_id=current.active_membership.household_id),
+        product_service=create_product_search_service(ProductSnapshotRepository(database)),
+    )
+
+
+FairPriceCartServiceDependency = Annotated[FairPriceCartService, Depends(get_fairprice_cart_service)]
+
+
+@router.post("/{plan_id}/fairprice-cart/prepare", response_model=FairPriceCartPrepareResponse)
+def prepare_fairprice_cart(
+    plan_id: int,
+    request: FairPriceCartTripRequest,
+    service: FairPriceCartServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> FairPriceCartPrepareResponse:
+    """The shopping list of one trip, its FairPrice products checked live, for the cart extension to add."""
+    try:
+        return service.prepare(plan_id, request.shopping_trip)
+    except FairPriceCartNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+
+
+@router.post("/{plan_id}/fairprice-cart/report", response_model=FairPriceCartState)
+def report_fairprice_cart(
+    plan_id: int,
+    report: FairPriceCartReport,
+    service: FairPriceCartServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> FairPriceCartState:
+    """What the extension put in the person's FairPrice cart."""
+    try:
+        return service.report(plan_id, report)
+    except FairPriceCartNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+
+
+@router.post("/{plan_id}/fairprice-cart/ordered", response_model=FairPriceCartState)
+def mark_fairprice_cart_ordered(
+    plan_id: int,
+    request: FairPriceCartTripRequest,
+    service: FairPriceCartServiceDependency,
+    _current: CurrentHouseholdCreatePlanCsrfDependency,
+) -> FairPriceCartState:
+    """The person says they checked out the trip on FairPrice."""
+    try:
+        return service.mark_ordered(plan_id, request.shopping_trip)
+    except FairPriceCartNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except FairPriceCartConflictError as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
 
 
 @router.get("/{plan_id}", response_model=WeeklyMealPlanResponse)

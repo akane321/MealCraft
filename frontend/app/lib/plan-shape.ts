@@ -198,11 +198,11 @@ export function planDayLabel(startDate: string | null | undefined, dayIndex: num
   return formatPlanDate(date.toISOString().slice(0, 10), { weekday: "short" });
 }
 
-/** What a shape change does, in plain words: "Lunch added for the rest of the week", "Dinner on Fri: main, vegetable if it fits, soup". */
+/** What a shape change does, in plain words: "Lunch added for the rest of the plan", "Dinner on Fri: main, vegetable if it fits, soup". */
 export function shapeChangeSummary(change: MealPlanShapeChange, startDate: string | null | undefined): string {
   const meal = `${change.meal_type[0]!.toUpperCase()}${change.meal_type.slice(1)}`;
   const where = change.scope === "week"
-    ? "for the rest of the week"
+    ? "for the rest of the plan"
     : `on ${change.day_indexes.map(day => planDayLabel(startDate, day)).join(", ")}`;
   if (change.roles === null) return `No ${change.meal_type} ${where}`;
   if (!change.removed.length && !change.kept) return `${meal} added ${where}`;

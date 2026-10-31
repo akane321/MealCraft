@@ -234,7 +234,9 @@ class PlanningRecipeCandidate(BaseModel):
     unknown_safety: list[str] = Field(default_factory=list)
     halal_status: Literal["halal", "needs_certification", "not_halal", "uncertain"] | None = None
     allergens: list[str] = Field(default_factory=list)
-    ingredients: list[PlanningIngredientRequirement] = Field(min_length=1)
+    # Empty only for a dish of at-home basics alone: it buys nothing (`product_path`); `recipe_input` still rejects
+    # a recipe written with no ingredient line.
+    ingredients: list[PlanningIngredientRequirement]
     nutrients_per_serving: PlanningNutrients
     cuisine: str | None = Field(default=None, max_length=120)
     course: DishCourse | Literal["sauce_condiment", "drink"] | None = None
@@ -254,6 +256,8 @@ class PlanningRecipeCandidate(BaseModel):
     perishable: bool | None = Field(default=None, **LEAN)
     flavor_tags: list[FlavorTag] | None = Field(default=None, max_length=4)
     vegetable_share: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
+    # Set only when at-home basics were stripped from `ingredients`: the vegetable rule read on the dish's full lines.
+    vegetable_led: bool | None = Field(default=None, **LEAN)
 
     @model_validator(mode="after")
     def validate_time_split(self) -> "PlanningRecipeCandidate":

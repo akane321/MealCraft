@@ -2,12 +2,15 @@
 at home and the sodium limit, on the repository catalog. Without the block a request plans exactly as before."""
 
 import json
+from collections import Counter
 from datetime import date, timedelta
 
 import pytest
 
 from app.core.paths import repository_root
 from app.data.catalog import import_catalog, load_catalog
+from app.data.household_reference import basic_seasonings, basic_short_labels
+from app.models.recipe import Recipe
 from app.planning.household_slots import assumed_basics, limit_targets, slot_servings, slot_time_limit
 from app.schemas.household_rules import CookingTimeRule, HouseholdPlanning, PresenceRule
 from app.schemas.meal_plan import WeeklyMealPlanRequest
@@ -18,7 +21,8 @@ START = "2027-01-03"  # a Sunday
 ONE_MAIN = [{"role_id": "main", "courses": ["main"]}]
 LUNCH_AND_DINNER = {"meals": {"lunch": ONE_MAIN, "dinner": ONE_MAIN}}
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"]
-BASICS_IN_CATALOG = {"garlic", "ginger", "soy_sauce"}
+# The curated catalog's own ingredients that the owner's list (2026-10-29) assumes at home.
+BASICS_IN_CATALOG = {"garlic", "ginger", "soy_sauce", "sesame_oil", "brown_rice"}
 
 
 def catalog_recipes() -> dict[str, dict]:
@@ -139,18 +143,141 @@ def test_basics_leave_the_list_unless_the_household_has_run_out(catalog_client):
     used = basics_of(catalog_client, week["days"])
     assert used, "the week should use a basic seasoning"
     assert not listed & BASICS_IN_CATALOG
-    note = next(w for w in week["warnings"] if w.startswith("Basic seasonings are assumed at home"))
-    assert all(name.replace("_", " ") in note for name in used)
+    note = next(w for w in week["warnings"] if w.startswith("Pantry basics are assumed at home"))
+    # Categories and counts, not every name.
+    counts = Counter(basic_seasonings()[name]["category"] for name in used)
+    assert note == (
+        "Pantry basics are assumed at home and left off this list: "
+        + ", ".join(f"{noun} ({counts[key]})" for key, noun in basic_short_labels().items() if key in counts)
+        + ". Mark one as run out on your profile to buy it."
+    )
+    assert not any(name.replace("_", " ") in note for name in used)
 
     bought = plan(catalog_client, household={**household, "missing_basics": sorted(BASICS_IN_CATALOG)})
     listed = {item["ingredient_name"] for item in bought["grocery_estimate"]["items"]}
     assert basics_of(catalog_client, bought["days"]) <= listed
-    assert not any(w.startswith("Basic seasonings are assumed") for w in bought["warnings"])
+    assert not any(w.startswith("Pantry basics are assumed") for w in bought["warnings"])
 
     plain = plan(catalog_client)
     assert basics_of(catalog_client, plain["days"]) <= {
         item["ingredient_name"] for item in plain["grocery_estimate"]["items"]
     }
+
+
+def test_rice_and_ketchup_are_at_home_until_the_household_marks_them_run_out():
+    planning = HouseholdPlanning(members=[{"name": "Ann", "servings": 1}])
+    out = HouseholdPlanning(members=[{"name": "Ann", "servings": 1}], missing_basics=["rice", "ketchup"])
+    at_home = {"rice", "brown_rice", "ketchup", "mustard", "cumin", "flour", "rice_vinegar", "thyme", "bouillon"}
+    assert at_home <= assumed_basics(planning, [])
+    assert {"rice", "ketchup"}.isdisjoint(assumed_basics(out, []))
+    assert {"brown_rice", "mustard", "cumin", "flour"} <= assumed_basics(out, [])
+    # A member who excludes one still buys it knowingly, and cooking sauces, tomato products and fresh herbs
+    # are shopping as before.
+    assert "ketchup" not in assumed_basics(planning, ["ketchup"])
+    assert {"curry_paste", "marinara", "tomato_paste", "coconut_milk", "basil", "olive_oil"}.isdisjoint(
+        assumed_basics(planning, [])
+    )
+
+
+def test_rice_leaves_the_list_and_comes_back_when_marked_run_out(catalog_client):
+    household = {"members": [{"name": "Ann", "servings": 1}, {"name": "Ben", "servings": 1}]}
+    week = plan(catalog_client, household=household)
+    assert "brown_rice" in {name for d in week["days"] for name in ingredients_of(catalog_client, d["recipe"]["slug"])}
+    assert "brown_rice" not in {item["ingredient_name"] for item in week["grocery_estimate"]["items"]}
+    bought = plan(catalog_client, household={**household, "missing_basics": ["rice", "brown_rice"]})
+    assert "brown_rice" in {item["ingredient_name"] for item in bought["grocery_estimate"]["items"]}
+
+
+@pytest.fixture
+def plain_rice_client(recipe_client):
+    """A catalog of one dish, plain brown rice, which the owner's list makes a dish of at-home items alone."""
+    root = repository_root()
+    catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+    rice = next(r for r in catalog.recipes if r.slug == "vegetable-rice-skillet").model_copy(
+        update={"slug": "plain-brown-rice", "title": "Plain Brown Rice"}
+    )
+    rice.ingredients = [i for i in rice.ingredients if i.ingredient == "brown_rice"]
+    with database() as session:
+        for seeded in session.query(Recipe).all():
+            session.delete(seeded)
+        session.flush()
+        import_catalog(session, catalog.model_copy(update={"recipes": [rice]}))
+    return recipe_client
+
+
+def test_a_plain_rice_staple_buys_nothing_unless_rice_has_run_out(plain_rice_client):
+    shape = {"meals": {"dinner": ONE_MAIN}}
+    household = {"members": [{"name": "Ann", "servings": 1}]}
+    week = plan(plain_rice_client, plan_shape=shape, day_count=1, household=household)
+    assert [d["recipe"]["slug"] for d in week["days"]] == ["plain-brown-rice"]
+    assert week["grocery_estimate"]["items"] == [] and week["grocery_estimate"]["complete"]
+    assert any(w.startswith("Pantry basics are assumed at home") and "rice (1)" in w for w in week["warnings"])
+    assert week["grocery_estimate"]["purchase_total_sgd"] == 0
+    assert week["days"][0]["purchase_cost_sgd"] == 0
+    bought = plan(
+        plain_rice_client, plan_shape=shape, day_count=1, household={**household, "missing_basics": ["brown_rice"]}
+    )
+    assert {item["ingredient_name"] for item in bought["grocery_estimate"]["items"]} == {"brown_rice"}
+    assert bought["grocery_estimate"]["purchase_total_sgd"] > 0
+
+
+@pytest.fixture
+def rice_heavy_client(recipe_client):
+    """A catalog of two dishes: a curry, and brown rice (300 g, an at-home item) with 480 g of vegetables, which is
+    half vegetables only once the rice line is left out."""
+    root = repository_root()
+    catalog = load_catalog(root / "data/ingredients/ingredients.json", root / "data/recipes/recipes.json")
+    by_slug = {r.slug: r for r in catalog.recipes}
+    dish = by_slug["vegetable-rice-skillet"].model_copy(
+        update={"slug": "rice-with-vegetables", "title": "Rice With Vegetables"}
+    )
+    grams = {"brown_rice": 300, "zucchini": 200, "mushroom": 180, "baby_spinach": 100}
+    dish.ingredients = [
+        i.model_copy(update={"quantity": grams[i.ingredient], "unit": "g"})
+        for i in dish.ingredients
+        if i.ingredient in grams
+    ]
+    with database() as session:
+        for seeded in session.query(Recipe).all():
+            session.delete(seeded)
+        session.flush()
+        import_catalog(session, catalog.model_copy(update={"recipes": [by_slug["chickpea-sweet-potato-curry"], dish]}))
+    return recipe_client
+
+
+def test_a_rice_dish_does_not_become_vegetable_led_when_rice_is_assumed_at_home(rice_heavy_client):
+    """Review of the pantry change: the vegetable role reads the dish's real lines, not those left after the at-home
+    items were stripped, so rice no longer drops out of the denominator."""
+    two = [{"role_id": "main", "courses": ["main"]}, {"role_id": "vegetable", "courses": ["main"]}]
+    household = {"members": [{"name": "Ann", "servings": 1}]}
+
+    def generate(**extra):
+        body = {"start_date": START, "household_size": 1, "pricing_mode": "fixture", "day_count": 1}
+        body["plan_shape"] = {"meals": {"dinner": two}}
+        return rice_heavy_client.post("/api/plans/generate", json={"requires_halal": False, **body, **extra})
+
+    # Neither dish is a vegetable dish on its full lines, so no meal fills the vegetable role.
+    assert generate().status_code == 422
+    assert generate(household=household).status_code == 422
+    assert generate(household={**household, "missing_basics": ["brown_rice"]}).status_code == 422
+
+
+def test_a_dish_of_basics_keeps_its_vegetable_flag_from_the_full_lines():
+    from app.planning.vegetable_led import candidate_vegetable_led
+    from app.schemas.planning_v2 import PlanningRecipeCandidate
+
+    lines = [("brown_rice", 300), ("zucchini", 200), ("mushroom", 180), ("baby_spinach", 100)]
+    candidate = PlanningRecipeCandidate(
+        recipe_id="x",
+        title="X",
+        servings=1,
+        allowed_meal_types=["dinner"],
+        total_time_minutes=10,
+        ingredients=[dict(ingredient_id=n, quantity=g, unit="g") for n, g in lines[1:]],
+        nutrients_per_serving=dict(calories_kcal=1, protein_g=1, carbohydrate_g=1, fat_g=1, sodium_mg=1, sugar_g=1),
+    )
+    assert candidate_vegetable_led(candidate)  # the stripped lines alone read as vegetable-led
+    assert not candidate_vegetable_led(candidate.model_copy(update={"vegetable_led": False}))
 
 
 def test_basics_stay_ingredients_for_every_safety_check(catalog_client):

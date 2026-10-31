@@ -9,6 +9,7 @@ from app.data.allergens import checked_allergens
 from app.data.household_reference import basic_seasonings, default_servings, sodium_limit
 from app.schemas.catalog_tags import Equipment
 from app.schemas.household_rules import (
+    MAX_MISSING_BASICS,
     ActivityLevel,
     AgeBand,
     CookingTimeRule,
@@ -135,7 +136,7 @@ class HouseholdProfileWrite(BaseModel):
     # Layer 08: confirmed sentences as rules, the basics run out, and the limits switched on.
     presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)
-    missing_basics: list[str] = Field(default_factory=list, max_length=20)
+    missing_basics: list[str] = Field(default_factory=list, max_length=MAX_MISSING_BASICS)
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
     # Equipment the kitchen lacks (section 4.3); a recipe that needs it is never planned. Empty: all at home.
     missing_equipment: list[Equipment] = Field(default_factory=list, max_length=5)
@@ -156,7 +157,7 @@ class HouseholdProfileWrite(BaseModel):
         names = sorted({value.strip().lower().replace(" ", "_") for value in values if value.strip()})
         unknown = [name for name in names if name not in basic_seasonings()]
         if unknown:
-            raise ValueError(f"not a basic seasoning: {', '.join(unknown)}")
+            raise ValueError(f"not an at-home basic: {', '.join(unknown)}")
         return names
 
     @field_validator("nutrition_limits")
@@ -321,9 +322,17 @@ class RuleParseResponse(BaseModel):
 
 
 class BasicSeasoning(BaseModel):
+    """One ingredient assumed at home (seasonings, rice, flours and the like) and the category it is grouped in."""
+
     normalized_name: str
     display_name: str
+    category: str
     allergens: list[str]
+
+
+class BasicCategory(BaseModel):
+    id: str
+    label: str
 
 
 class ReferenceSource(BaseModel):
@@ -341,6 +350,8 @@ class HouseholdReferenceResponse(BaseModel):
     # age band -> HPB daily sodium limit in mg; None where HPB gives none.
     sodium_limit_mg: dict[str, float | None]
     basics: list[BasicSeasoning]
+    # The categories the basics are grouped in, in the order the profile page lists them.
+    basic_categories: list[BasicCategory]
     meal_shares: dict[str, float]
     sources: list[ReferenceSource]
     # The full meal structure (ADR-0070) the profile editor offers and explains.

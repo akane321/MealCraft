@@ -6,8 +6,10 @@ from app.api.routes.meal_plans import build_meal_plan_service
 from app.planning.algorithm_cp_sat import SharedScoreCpSat
 from app.planning.algorithm_reference import AnnealingPlanner, EnumeratedReference
 from app.planning.meal_beam import MealBeamPlanner
+from app.planning.native_algorithm_cp_sat import NativeSharedScoreCpSat
 from app.planning.product_path import product_validation
 from app.schemas.meal_plan import WeeklyMealPlanRequest
+from app.schemas.planning_v2 import PlanningAssignment
 from tests.test_diversity_greedy import setup_problem
 from tests.test_planning_capability import COMPOSITION, _catalog_session, composed_client  # noqa: F401
 
@@ -31,8 +33,13 @@ def test_exact_reference_preserves_date_sensitive_product_callback():
     assert len({a["recipe_id"] for a in exact["assignments"]}) == 2
 
 
-@pytest.mark.parametrize("days", [2, 3])
-def test_product_checked_price_matches_small_exact_reference(composed_client, monkeypatch, days):  # noqa: F811
+@pytest.mark.parametrize("days,people", [(2, 1), (2, 4), (2, 6), (3, 4), (4, 4), (7, 4), (7, 6), (14, 4), (14, 6)])
+def test_product_price_within_five_percent(
+    composed_client,  # noqa: F811
+    monkeypatch,
+    days,
+    people,
+):
     captured = []
     original = AnnealingPlanner.solve
 
@@ -45,7 +52,7 @@ def test_product_checked_price_matches_small_exact_reference(composed_client, mo
     request = WeeklyMealPlanRequest(
         start_date=date(2026, 10, 26),
         day_count=days,
-        household_size=4,
+        household_size=people,
         pricing_mode="fixture",
         max_cooking_time_minutes=90,
         meal_composition=COMPOSITION[:2],
@@ -56,9 +63,28 @@ def test_product_checked_price_matches_small_exact_reference(composed_client, mo
     problem, objective, candidates, validate = captured[-1]
     assert objective.priority == "price"
     assert validate is not None
-    brute = EnumeratedReference(objective, candidates).solve_reference(problem, validate=validate)
-    exact = SharedScoreCpSat(objective, candidates).solve_exact(problem, validate=validate)
-    assert exact["status"] == brute["status"] == "optimal_for_generated_options"
-    assert exact["score"] == brute["score"]
+    assert len(problem.slots) == days
+    if days == 14:
+        assert {s.trip for s in problem.slots} == {1, 2}
+    # This synthetic catalog has one recipe per title group and no exempt
+    # roles, so four groups expresses the product's four-recipe requirement.
+    assert all(len(group) == 1 for group in objective.groups.groups)
+    exact = NativeSharedScoreCpSat(objective, candidates).solve_exact(problem, min_dish_kinds=4)
+    assert exact["status"] == "optimal_for_native_model", exact
+    assignments = [PlanningAssignment.model_validate(a) for a in exact["assignments"]]
+    shopping = candidates._build_shopping(problem, assignments)
+    checked = validate(problem, assignments, shopping)
+    assert checked.status == "passed"
+    assert checked.purchase_total_sgd == exact["minimum_checkout_sgd"]
+    if days <= 4:
+        brute = EnumeratedReference(objective, candidates).solve_reference(problem, validate=validate)
+        table = SharedScoreCpSat(objective, candidates).solve_exact(problem, validate=validate)
+        assert table["status"] == brute["status"] == "optimal_for_generated_options"
+        assert exact["score"] == table["score"] == brute["score"]
     assert len({a["recipe_id"] for a in exact["assignments"]}) >= 4
-    assert price == pytest.approx(exact["minimum_checkout_sgd"], abs=0.005)
+    minimum = exact["minimum_checkout_sgd"]
+    # Issue 310 asks for a five-percent gap, not exact optimality from the
+    # heuristic. The reference covers generated options and fixture packages.
+    assert minimum - 0.005 <= price <= minimum * 1.05 + 0.005
+    if days <= 4:
+        assert price == pytest.approx(minimum, abs=0.005)

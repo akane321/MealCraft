@@ -237,6 +237,7 @@ class FairPriceProductProvider:
             source="fairprice",
             fetched_at=fetched_at,
             package_text=package_text,
+            cart_item_id=str(record["id"]) if record.get("id") is not None else None,
             regular_price_sgd=regular_price,
             package_warning=(
                 "unknown_package" if package_size is None else "count_package" if package_unit == "whole" else None

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceSourceLabel, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -99,6 +99,47 @@ describe("grocery helpers", () => {
     expect(priceSourceLabel({ ...estimate, items: [line("Salmon", 10.9, "Seafood", 1, "fixture")] })).toBe("Sample prices");
   });
 
+  it("counts a price one way for the note, its dot and the amber lines", () => {
+    const evidence = (price_source: string, lookup_status: string) =>
+      ({ source: "fairprice", mode: price_source, fetched_at: "2026-10-02T08:00:00Z", price_source, lookup_status, checked_at: "2026-10-08T07:40:00Z" }) as GroceryLineEstimate["evidence"];
+    const make = (name: string, source: "fairprice" | "fixture", ev: GroceryLineEstimate["evidence"]) => ({ ...line(name, 1, "Veg", 1, source), evidence: ev });
+    // A live demo week: most prices come from the lookup cache minutes after a live fetch; the reviewed snapshot is a fixture product.
+    const items = [
+      make("Cached", "fairprice", evidence("cache", "success")),
+      make("Cached, gone", "fairprice", evidence("cache", "out_of_stock")),
+      make("Live", "fairprice", evidence("live", "success")),
+      make("Snapshot", "fixture", evidence("snapshot", "selected_product_not_returned")),
+      make("Sample", "fixture", evidence("no_external_product", "no_external_id")),
+    ];
+    const week = (lines: GroceryLineEstimate[]) => ({ weekly_budget_sgd: 90, purchase_total_sgd: 5, pricing_mode: "live", items: lines }) as unknown as WeeklyGroceryEstimate;
+    const estimate = week(items);
+    expect(priceCounts(estimate)).toEqual({ live: 3, saved: 1, sample: 1 });
+    expect(priceSourceLabel(estimate)).toBe("Prices checked at 15:40 · 3 live · 1 saved · 1 sample");
+    // Amber marks exactly the lines labelled "Saved FairPrice price": a cached price is live, a snapshot price is saved.
+    expect(items.map(isSavedPrice)).toEqual(items.map(item => groceryPriceLabel(item).startsWith("Saved FairPrice price")));
+    expect(items.map(isSavedPrice)).toEqual([false, false, false, true, false]);
+    expect(isSavedPrice({ ...line("Water", 0, "Veg", 1), product: null })).toBe(false);
+    // All live (cache included): green, nothing amber.
+    const allLive = week(items.slice(0, 3));
+    expect(priceSourceLabel(allLive)).toBe("Prices checked at 15:40 · 3 live");
+    expect(priceTone(allLive)).toBe("ok");
+    expect(allLive.items.some(isSavedPrice)).toBe(false);
+    // Partly fallen back to the saved price: green, the saved line amber; with a sample as well: amber.
+    expect(priceTone(week(items.slice(0, 4)))).toBe("ok");
+    expect(priceTone(estimate)).toBe("warn");
+    // All fallen back: the note says no live price, so the dot is amber too; every line is amber.
+    const allSaved = week([items[3]!, { ...items[3]!, ingredient_display_name: "Snapshot 2" }]);
+    expect(priceSourceLabel(allSaved)).toBe("Live prices not available at 15:40 · 2 saved");
+    expect(priceTone(allSaved)).toBe("warn");
+    expect(allSaved.items.every(isSavedPrice)).toBe(true);
+    // Every price a sample, or nothing priced: grey.
+    expect(priceTone(week(items.slice(4)))).toBe("");
+    expect(priceTone(week([]))).toBe("");
+    // Without a live check the dot follows the note as before: green for FairPrice prices from a date, amber with samples.
+    expect(priceTone(week([line("Salmon", 10.9, "Seafood")]))).toBe("ok");
+    expect(priceTone(week([line("Salmon", 10.9, "Seafood"), line("Leek", 2, "Veg", 1, "fixture")]))).toBe("warn");
+  });
+
   it("says where /browse prices came from in plain words", () => {
     const result = (provider_used: "fairprice" | "fixture", cached: boolean, fallback_used = false) => ({
       query: "chicken", provider_used, cached, fallback_used, warning: "Live FairPrice lookup was unavailable (timeout)",
@@ -182,6 +223,44 @@ describe("meals by day", () => {
     const days = [dish(1, "lunch", "main", 300, "completed"), dish(1, "dinner", "main", 400), dish(1, "dinner", "vegetable", 100)];
     expect(nextMeal(days, "2026-09-21")).toMatchObject({ isToday: true, meal: { mealType: "dinner" } });
     expect(perMealAndDay(days)).toMatchObject({ meal: { calories_kcal: 400 }, day: { calories_kcal: 800 }, mealsPerDay: 2 });
+  });
+});
+
+describe("follow-up chips", () => {
+  // 2026-09-21 is a Monday.
+  const dish = (index: number, status: NutritionDashboardDay["status"] = "planned", meal: "lunch" | "dinner" = "dinner") =>
+    ({ entry_id: index, day_index: index, planned_date: `2026-09-${20 + index}`, meal_type: meal, role_id: "main", status }) as unknown as NutritionDashboardDay;
+
+  it("names the next planned meal and a real day, not a fixed Friday and Sunday", () => {
+    const week = [1, 2, 3, 4, 5, 6, 7].map(index => dish(index));
+    expect(followUpChips(week, "2026-09-21")).toEqual(["Swap Monday's dinner", "Skip Tuesday", "Don't change Sunday"]);
+  });
+
+  it("starts at the next meal still to cook and skips days already done", () => {
+    const days = [dish(1, "completed"), dish(2, "skipped"), dish(3), dish(4), dish(5)];
+    expect(followUpChips(days, "2026-09-21")).toEqual(["Swap Wednesday's dinner", "Skip Thursday", "Don't change Friday"]);
+  });
+
+  it("offers only a swap for a one-dinner plan, and a skip for a two-day plan", () => {
+    expect(followUpChips([dish(2)], "2026-09-22")).toEqual(["Swap Tuesday's dinner"]);
+    expect(followUpChips([dish(1), dish(2)], "2026-09-21")).toEqual(["Swap Monday's dinner", "Skip Tuesday"]);
+  });
+
+  it("names the date in a plan past seven days, where a weekday repeats and the assistant takes the first", () => {
+    // 14 days from Mon 2026-09-21: the next open meal is day 11 (a Thursday, 1 Oct); day 4 is also a Thursday.
+    const fortnight = Array.from({ length: 14 }, (_, index) => ({
+      ...dish(index + 1, index < 10 ? "completed" : "planned"),
+      planned_date: new Date(Date.UTC(2026, 8, 21 + index)).toISOString().slice(0, 10),
+    }));
+    const chips = followUpChips(fortnight, "2026-10-01");
+    expect(chips).toEqual(["Swap Thursday 1 Oct's dinner", "Skip Friday 2 Oct", "Don't change Sunday 4 Oct"]);
+    expect(chips.every(chip => /\d{1,2} Oct/.test(chip))).toBe(true);
+  });
+
+  it("names the meal of a lunch-only plan and gives no chips when nothing is left", () => {
+    expect(followUpChips([dish(1, "planned", "lunch")], "2026-09-21")).toEqual(["Swap Monday's lunch"]);
+    expect(followUpChips([dish(1, "completed")], "2026-09-21")).toEqual([]);
+    expect(followUpChips([], "2026-09-21")).toEqual([]);
   });
 });
 
