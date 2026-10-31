@@ -45,7 +45,8 @@ def _statuses(session: Session) -> dict[str, str | None]:
 def test_curated_recipes_and_ingredients_get_a_status(session: Session) -> None:
     statuses = _statuses(session)
     assert statuses["lemon-herb-chicken-rice-bowl"] == "needs_certification"
-    assert statuses["tofu-vegetable-soba"] == statuses["salmon-quinoa-bowl"] == "halal"
+    assert statuses["salmon-quinoa-bowl"] == "halal"
+    assert statuses["tofu-vegetable-soba"] == "needs_certification"  # soy sauce needs a Halal-marked product (10-31)
     assert set(statuses.values()) <= {"halal", "needs_certification"}  # the curated catalog has no pork or alcohol
     ingredients = {row.normalized_name: row.halal_status for row in session.scalars(select(Ingredient))}
     assert ingredients["chicken_breast"] == "halal" and ingredients["broccoli"] == "halal"

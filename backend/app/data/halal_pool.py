@@ -27,7 +27,7 @@ from app.data.halal import (
     needs_certification,
     release_halal_certification,
 )
-from app.data.halal_labels import REVIEW_V2_FILE, VERDICTS_FILE
+from app.data.halal_labels import VERDICTS_FILES
 from app.data.planning_pool import load, table
 from app.db.base import Base
 from app.models.recipe import Recipe
@@ -99,9 +99,10 @@ def report(recipes: list[Recipe], ingredients: dict[str, dict]) -> dict:
 
 
 def review_summary() -> dict:
-    """The person's verdicts per queue: kept, corrected to another settled status, or undetermined (now uncertain)."""
+    """The person's verdicts per queue: kept, corrected to another settled status, or undetermined (now a label
+    that needs a certified product)."""
     rounds = {}
-    for name in (VERDICTS_FILE, REVIEW_V2_FILE):
+    for name in VERDICTS_FILES:
         path = data_root() / name
         rows = list(csv.DictReader(path.open(encoding="utf-8", newline=""))) if path.exists() else []
         queues: dict[str, Counter] = {}
@@ -170,7 +171,7 @@ def markdown(result: dict) -> str:
             ("recipes", "release", "curated"),
         ),
         "",
-        f"## Meat ingredients with a certified product ({len(certified)} of {len(result['ingredients'])})",
+        f"## Ingredients that need a certified product, with one ({len(certified)} of {len(result['ingredients'])})",
         "",
         *table(
             [(name, row["products"], row["certified"]) for name, row in result["ingredients"].items()],
@@ -185,9 +186,10 @@ def markdown(result: dict) -> str:
         "",
         "## Label review",
         "",
-        "A person's verdicts per queue (`halal-review-v1-verdicts.csv`, then the second round `halal-review-v2.csv`). "
-        "`undetermined` means the evidence could not settle the label, which is now `uncertain`; it is not a label "
-        "shown wrong. The sample covers only the plain `halal` labels, so it is not the accuracy of every label.",
+        "A person's verdicts per queue, in the reviewed copies of the queues. `undetermined` means the evidence "
+        "could not settle the label without the product's formula or certification, so it now needs a product "
+        "FairPrice marks Halal, as meat does; it is not a label shown wrong. The sample covers only the plain "
+        "`halal` labels, so it is not the accuracy of every label.",
         "",
         *table(
             [
@@ -214,7 +216,7 @@ def main() -> None:
         for name in (
             LABELS_FILE,
             OVERRIDES_FILE,
-            VERDICTS_FILE,
+            *VERDICTS_FILES,
             CERTIFICATION_FILE,
             "products/fairprice-v2-snapshot.json",
         )

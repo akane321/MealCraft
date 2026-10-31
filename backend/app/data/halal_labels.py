@@ -16,9 +16,10 @@ decides, so a reviewer can audit by `source`:
 
 A person's corrections live in `halal-overrides-v1.json` and are applied when the labels are read, not here.
 The review queue lists every `uncertain` and `needs_certification` label, the `halal` labels a person should check
-(`CHECK_TOKENS`) and a fixed-seed sample of the other `halal` ones; its reviewed copy (2026-10-31) is
-`halal-review-v1-verdicts.csv`. The second-round queue `halal-review-v2.csv` lists the other `halal` labels of
-`SECOND_ROUND_GROUPS`.
+(`CHECK_TOKENS`) and a fixed-seed sample of the other `halal` ones. The second-round queue `halal-review-v2.csv`
+lists the other `halal` labels of `SECOND_ROUND_GROUPS`. Their reviewed copies are `VERDICTS_FILES`: a label the
+person could not settle without the product's formula or certification is overridden to need a certified product
+(owner, 2026-10-31), as meat does.
 """
 
 from __future__ import annotations
@@ -34,7 +35,14 @@ from app.data.ingredient_hierarchy import GROUP_PREFIX, Hierarchy, read_links
 from app.data.release_v2 import normalized_name, release_dir
 
 REVIEW_FILE = "ingredients/halal-review-v1.csv"
-VERDICTS_FILE = "ingredients/halal-review-v1-verdicts.csv"  # the first queue as the person returned it, 2026-10-31
+# The queues as the person returned them (2026-10-31): the first, the second round, and the processed grains and
+# flavourings the reviewer screened besides. Every verdict short of `ok` is an override that needs a certified product.
+VERDICTS_FILE = "ingredients/halal-review-v1-verdicts.csv"
+VERDICTS_FILES = (
+    VERDICTS_FILE,
+    "ingredients/halal-review-v2-verdicts.csv",
+    "ingredients/halal-review-additional-verdicts.csv",
+)
 SAMPLE_SIZE = 60
 SAMPLE_SEED = 20261029
 

@@ -42,6 +42,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.core.paths import repository_root
 from app.data.recipe_tags import INPUT_USD_PER_M, OUTPUT_USD_PER_M
+from app.evaluation import halal_scoring
 from app.evaluation.baseline_mapping import map_response_ingredients
 from app.evaluation.baseline_output import BaselineAnswer, BaselineResponse
 from app.evaluation.baseline_recomputation import allergen_safety, recompute_ingredient_baseline
@@ -309,7 +310,7 @@ def score(episode: dict[str, Any], response: BaselineResponse, resources: Baseli
         coverage,
         ingredient_facts=resources.ingredient_facts,
         frozen_products=resources.frozen_products,
-        not_purchased=resources.not_bought(household),
+        not_purchased=resources.not_bought(household, halal=halal_scoring.required(episode)),
     )
     requested = (episode.get("gold") or {}).get("applicable_hard_constraints", {}).get("allergens_absent")
     safe, reasons = allergen_safety(

@@ -125,10 +125,12 @@ class WeeklyGroceryAggregator:
         purchase_total = 0.0
         consumed_total = 0.0
         consumed_total_known = True
-        assumed = assumed_basics(getattr(constraints, "household", None), constraints.excluded_ingredients)
+        assumed = assumed_basics(
+            getattr(constraints, "household", None), constraints.excluded_ingredients, constraints.requires_halal
+        )
         at_home = {ingredient.name for ingredient in ingredients if ingredient.name in assumed}
         if at_home:
-            warnings.append(basics_note(at_home))
+            warnings.append(basics_note(at_home, constraints.requires_halal))
 
         for ingredient in ingredients:
             if ingredient.name in at_home:

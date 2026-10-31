@@ -45,20 +45,25 @@ One entry per catalog ingredient (the release v2.2 ingredients plus the curated 
   entry, every `needs_certification` entry, the `check` entries (cheeses, wine and sherry vinegars) and a
   fixed-seed sample of 60 other `halal` entries, each with a blank verdict for a person. AI suggestions may be added
   to the queue, but take effect only after a person confirms them (ADR-0076 section 2).
-- **First review, 2026-10-31.** A person reviewed all 139 rows (`halal-review-v1-verdicts.csv`, notes in Chinese):
-  - kept: the 28 `uncertain`, the 38 `needs_certification` (the threshold only: a certified product of that very
-    ingredient) and 40 of the 60 sampled;
-  - undetermined, so now `uncertain` through the 33 overrides: the 13 `check` entries and 20 sampled, mostly
-    condiments and prepared foods whose formula or certification is unknown (fish sauce, Worcestershire sauce,
-    kecap manis, BBQ sauce and others). Undetermined is not a label shown wrong;
-  - no label was raised to `halal` or set to `not_halal`.
+- **Human review, 2026-10-31.** A person reviewed three queues; the reviewed copies keep their notes in Chinese:
 
-  The reasons of extracts, vanilla, crickets and tapai were corrected after that review (MUIS: ethanol from a
-  non-khamr source is allowed in flavourings within limits; qualifying insect foods are allowed). Their status did
-  not change.
-- **Second round.** The sample showed most condiments and prepared foods undetermined, so the other 75 `halal`
-  labels of those groups are in `data/ingredients/halal-review-v2.csv` (soy sauce, vinegars, mayonnaise, ketchup,
-  curry paste and others). Their labels stand until a person decides.
+  | Reviewed copy | Rows | Kept | Undetermined |
+  |---|---:|---:|---:|
+  | `halal-review-v1-verdicts.csv` (the queue above) | 139 | 106 | 33 |
+  | `halal-review-v2-verdicts.csv` (second round: the other condiments and prepared foods) | 75 | 5 | 70 |
+  | `halal-review-additional-verdicts.csv` (processed grains and flavourings the reviewer added) | 41 | 3 | 38 |
+
+  - In the first queue, the reviewer kept the 28 `uncertain` and the 38 `needs_certification` labels. For the
+    latter, only the threshold was kept: a certified product of that very ingredient.
+  - "Undetermined" means the label cannot be settled without the product's formula or certification. Examples
+    are cheese (rennet), wine vinegars, soy sauce, vinegar, mayonnaise, fish sauce, bread and tortillas.
+  - Undetermined is not a label shown wrong. No label was set to `not_halal`, and none was raised to plain `halal`.
+- **Undetermined needs a certified product (owner, 2026-10-31).** The 141 undetermined labels are overridden to
+  `halal` with `needs_certification` true, as meat is. A halal household uses such a line only as a product
+  FairPrice marks Halal. The reviewer's notes say this settles it: "verify the specific product's certification".
+- **Reasons corrected.** After the review, the reasons of extracts, vanilla, pandan extract, crickets and tapai were
+  corrected. MUIS allows ethanol from a non-khamr source in flavourings within limits, and allows qualifying insect
+  foods. Their status did not change.
 - The pool report (`docs/evaluation/halal-pool/latest.md`) counts each queue's outcomes.
 
 ## Code interface: `backend/app/data/halal.py`
@@ -85,6 +90,11 @@ for ingredients into `ingredients.halal_status`:
 | else | `halal` |
 
 - An at-home item (ADR-0107) is still a line of the recipe, so mirin at home still makes a recipe not halal.
+- **Basics that need a certified product are bought (owner, 2026-10-31).** For a halal household, a pantry basic
+  that needs certification is not assumed at home (`household_slots.assumed_basics(..., requires_halal=True)`).
+  Examples are soy sauce, vinegar, mayonnaise and ketchup. Such a basic goes on the list, and only a product
+  FairPrice marks Halal is bought, because an unknown jar at home is never halal. Households that are not halal
+  are unchanged.
 - ADR-0104 item 5 allows a halal composite substitute for an alcohol ingredient (for example for mirin). This
   version does not build it, so such a recipe stays `not_halal`.
 

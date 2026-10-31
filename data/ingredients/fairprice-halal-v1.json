@@ -1,253 +1,1213 @@
 {
  "schema_version": "fairprice-halal-v1",
  "source": "FairPrice public product listing, metaData['Dietary Attributes'] contains 'Halal'",
- "observed_at": "2026-10-30T17:51:23+00:00",
- "requests": 30,
+ "observed_at": "2026-10-31T05:05:49+00:00",
+ "requests": 140,
  "products": {
+  "10099606": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10335293": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10366882": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10384415": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10522988": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10544212": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10621863": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
   "10690439": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10709179": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "10766982": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "10782843": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10784427": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "10784582": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "10785956": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10789607": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "10834359": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11027049": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11042329": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11063904": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11140279": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11161117": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11205976": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11219606": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11219622": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "11222952": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11229054": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "113027": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "113192": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "113316": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "11396362": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11457743": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11461603": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "114695": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11485859": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11642156": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "11857923": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11890846": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "11943282": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12056466": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12109441": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "12154357": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "12174032": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12206874": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12229785": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12285314": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12374819": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12422163": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12434471": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12529032": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "12571150": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "12571193": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12600150": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "12602826": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "12604127": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13005800": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13015792": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13018832": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13024540": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13024711": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13025201": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13033320": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13034962": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13034963": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13042048": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13042327": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13045385": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13046007": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13046008": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13049102": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13052671": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13060180": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13060181": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13062292": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13065885": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13084421": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13094778": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13096865": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13097420": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13097672": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13097673": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13097675": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13100253": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13102174": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13104103": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13126457": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13129627": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13129724": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13137167": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13142271": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13144635": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13146147": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13146210": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13146211": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13151027": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13151030": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13157227": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13157251": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13160243": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13163545": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13172826": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13174421": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13176928": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13180512": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13184021": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13185534": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13187911": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13187917": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13188776": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13195541": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13200181": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13202140": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13206006": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13206007": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13207660": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13214740": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13218718": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13227092": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13229362": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13230620": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13241988": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13241991": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13242834": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13252670": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13253843": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13255564": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13257237": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13257333": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13261310": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13263736": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13265360": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13266454": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13266569": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13271035": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13271381": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13273776": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13280398": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13280399": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13281090": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13282980": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "13282982": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13288610": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13290161": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "13290790": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "144212": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "186115": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "195231": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "256596": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "274655": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "274663": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "275439": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "299439": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "334061": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "334079": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "356833": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "395302": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "425753": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "430819": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "487513": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "494617": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "49553": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "49561": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "49579": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "496811": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "50617": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "51053": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "51061": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "53520": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "53554": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "60608": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "77554": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90002308": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90010029": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90010859": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90014916": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90014927": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90015065": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90016146": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90016467": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90016683": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90016684": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90016685": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90017163": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90018323": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90018553": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90018559": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90020491": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90020492": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90021288": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90021289": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90021555": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021714": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021715": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021717": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021718": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021964": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021976": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90021977": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90024606": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90028947": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90031271": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90035786": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90039853": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90042624": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90043381": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90043491": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90046411": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90046419": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90047091": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90047112": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90048447": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90051088": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90053904": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90054286": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90056306": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90056517": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90056682": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90058226": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90067605": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90076133": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90076875": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90084457": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90088000": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90089523": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90092517": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90101877": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90109374": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90127941": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90134675": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90138242": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90141682": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90142116": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90142209": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90143674": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90143755": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90145999": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90146361": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90155071": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90159223": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90164214": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90167075": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90167084": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90167620": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90168712": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90175312": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90175314": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90175356": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90182169": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90189095": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199090": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199885": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199886": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199903": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199906": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199913": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90199914": {
    "halal_certified": null,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90202091": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90202202": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90202805": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90202836": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90204682": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90211363": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90216422": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90216675": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90217578": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90217595": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90217627": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90218066": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90219015": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90221331": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90221340": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90223285": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90223564": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90223608": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90223674": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90223705": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90224387": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90224980": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90225025": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90225201": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90228197": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90230364": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90232999": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90234515": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90234529": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90235354": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90236398": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90243313": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90243314": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90248909": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90248940": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90251285": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90251410": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   },
   "90251823": {
    "halal_certified": true,
-   "observed_at": "2026-10-30T17:51:23+00:00"
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90252195": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90252205": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90252418": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90253337": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "90253817": {
+   "halal_certified": null,
+   "observed_at": "2026-10-31T05:05:49+00:00"
+  },
+  "93964": {
+   "halal_certified": true,
+   "observed_at": "2026-10-31T05:05:49+00:00"
   }
  },
  "not_found": [
   "10767010",
   "13225117",
-  "90114441"
+  "90114441",
+  "90115520",
+  "90218364",
+  "90225483",
+  "90252633"
  ]
 }

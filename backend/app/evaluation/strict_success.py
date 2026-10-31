@@ -558,10 +558,11 @@ def _check_hard_constraints(
 
 
 def _check_halal(recipes: list[dict], response: CommonEpisodeResponse) -> Check:
-    """A halal household's plan: every dish halal, and each meat line bought as a certified product.
+    """A halal household's plan: every dish halal, and each line that needs certification bought as a certified product.
 
     A recipe's status takes all its lines (as the planner does); a purchase is needed only for a line with a
-    quantity. Only the Shopping List shows what was bought, so an uncertified or unlisted meat line fails."""
+    quantity. Only the Shopping List shows what was bought, so an uncertified or unlisted line fails, a pantry
+    basic that needs certification (soy sauce, vinegar) included: a halal household has no such basic at home."""
     assert response.plan is not None
     certified = bought_certified((line.ingredient_id, line.product_id) for line in response.plan.shopping)
     hits = []
@@ -578,7 +579,9 @@ def _check_halal(recipes: list[dict], response: CommonEpisodeResponse) -> Check:
     return Check(
         "halal_respected",
         "failed" if hits else "passed",
-        "; ".join(sorted(set(hits))) if hits else "every dish is halal and every meat line is a certified product",
+        "; ".join(sorted(set(hits)))
+        if hits
+        else "every dish is halal and every line that needs certification is a certified product",
     )
 
 

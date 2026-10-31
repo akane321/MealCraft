@@ -27,6 +27,9 @@ product's own rules, so a label never needs a week the product cannot plan:
   are as many as the planner keeps per role (`MealBeamLimits.candidates_per_role`);
 - each ingredient is bought as the product buys it in fixture mode
   (`app.planning.grocery_estimator.choose_product`): one product, whole packages;
+- (2026-10-31) a halal case buys a line that needs certification only as a certified product, a pantry basic like
+  soy sauce or vinegar included: the product does not take it as at home for a halal household
+  (`household_slots.assumed_basics`), and these proofs never took a basic as at home;
 - (2026-10-01) the time limit is the one the runner sends: a household that states
   none gets `meal_day_week_runner.NO_TIME_LIMIT` (240 minutes). As the product
   does (`meal_beam.dish_eligible`, `meal_permitted`), every dish is within it on
@@ -373,10 +376,15 @@ def _pricing() -> tuple[ProductSearchService, ProductMatcher]:
     return service, ProductMatcher()
 
 
-def bought(name: str, grams: float) -> float:
-    """What the product pays for a week's `grams` of an ingredient: its one product, in whole packages."""
+def bought(name: str, grams: float, halal: bool = False) -> float:
+    """What the product pays for a week's `grams` of an ingredient: its one product, in whole packages.
+
+    A halal household buys a line that needs certification (meat, and a basic like soy sauce, which is not taken as
+    at home) only as a certified product."""
     service, matcher = _pricing()
-    choice = choose_product(service, matcher, name, _display_names().get(name, name), "g", live=False, quantity=grams)
+    choice = choose_product(
+        service, matcher, name, _display_names().get(name, name), "g", live=False, quantity=grams, requires_halal=halal
+    )
     item = choice.product
     amount = convert_quantity(grams, "g", item.package_unit) if item else None
     if item is None or amount is None or not item.package_size:
@@ -389,6 +397,7 @@ _bought = lru_cache(maxsize=None)(bought)
 
 def _week_witness(episode: dict, *, after_change: bool) -> dict:
     gold, _, _, per_gram, _ = _context(episode, product_rules=True)
+    halal = bool(gold.get("halal_required"))
     size = episode["scenario"]["household_profile"]["household_size"] or 1
     if episode["scenario"]["pantry"]:
         return {"verdict": "unproven", "why": "v3 labels do not deduct a pantry"}
@@ -441,10 +450,10 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
         for name, grams in need.items():
             if not grams:
                 continue
-            after = _bought(name, held.get(name, 0.0) + grams)
+            after = _bought(name, held.get(name, 0.0) + grams, halal)
             if math.isinf(after):
                 return math.inf
-            extra += after - (_bought(name, held[name]) if held.get(name) else 0.0)
+            extra += after - (_bought(name, held[name], halal) if held.get(name) else 0.0)
         return extra
 
     def day_ok(combo, uses: dict[str, int]) -> bool:
@@ -520,7 +529,7 @@ def _week_witness(episode: dict, *, after_change: bool) -> dict:
         if isinstance(built, str):
             failures.append(built)
         elif valid_week(built):
-            cost = round(sum(bought(n, g) for n, g in merged(built).items() if g), 2)
+            cost = round(sum(bought(n, g, halal) for n, g in merged(built).items() if g), 2)
             weeks.append((cost, built))
     if not weeks:
         return {"verdict": "unproven", "why": failures[0] if failures else "no witness week passes the checks"}

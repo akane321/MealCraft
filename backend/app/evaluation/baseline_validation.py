@@ -15,9 +15,10 @@ What the validator cannot see is added as its own check, never guessed:
 - `dietary_requirement`: a baseline dish carries no dietary tags, so a failed diet check means "not shown",
   and is indeterminate;
 - `halal_requirement` (a halal episode, docs/evaluation/halal.md): a hard failure when a dish has a `not_halal` or
-  `uncertain` line, an unmapped line, or a meat line (`needs_certification`) with no certified product in the
-  snapshot. It is the baseline's own check, so the validator's halal rule is switched off for the baseline
-  (`episode_problem`): a baseline dish has no recipe status for it to read.
+  `uncertain` line, an unmapped line, or a line that needs certification (meat, and a pantry basic such as soy
+  sauce, which a halal household does not take as at home) with no certified product in the snapshot; the shopping
+  is then priced from certified products only. It is the baseline's own check, so the validator's halal rule is
+  switched off for the baseline (`episode_problem`): a baseline dish has no recipe status for it to read.
 
 The two bases (ADR-0074 section 2) read the one report:
 
@@ -33,7 +34,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
-from app.data.halal import product_certified
+from app.data.halal import needs_certification, product_certified
 from app.evaluation.baseline_mapping import DishCoverage, PlanCoverage
 from app.evaluation.baseline_recomputation import (
     NUTRIENT_FIELDS,
@@ -69,9 +70,11 @@ def snapshot_certified(products: Iterable[PlanningProductOption]) -> frozenset[s
     """Ingredients with an available certified product in the snapshot.
 
     The product's own flag counts, and so do the offline facts of the release snapshot."""
-    return frozenset(
-        p.ingredient_id for p in products if p.available and (p.halal_certified or product_certified(p.product_id))
-    )
+    return frozenset(p.ingredient_id for p in products if p.available and _certified(p))
+
+
+def _certified(product: PlanningProductOption) -> bool:
+    return bool(product.halal_certified or product_certified(product.product_id))
 
 
 def episode_problem(episode: dict, products: list[PlanningProductOption]) -> FinalPlanningProblem:
@@ -130,6 +133,9 @@ def validate_baseline_plan(
         raise ValueError("baseline validation does not model nutrition bands yet")
     slots = {slot.slot_id: slot for slot in problem.slots}
     halal, certified = required(episode), snapshot_certified(frozen_products)
+    if halal:  # a line that needs certification is bought, and only as a certified product
+        kept = [p for p in problem.products if not needs_certification(p.ingredient_id) or _certified(p)]
+        problem = problem.model_copy(update={"products": kept})
     recipes: list[PlanningRecipeCandidate] = []
     assignments: list[PlanningAssignment] = []
     extra: list[PlanningConstraintCheck] = []

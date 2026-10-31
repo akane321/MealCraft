@@ -596,7 +596,7 @@ class ProductPlanningEngine:
                 "candidate_rejected", "No candidate plan was found; try a different recipe selection.", trace
             )
         by_id = {r.id: r for r in recipes}
-        assumed = assumed_basics(household, constraints.excluded_ingredients)
+        assumed = assumed_basics(household, constraints.excluded_ingredients, constraints.requires_halal)
         basics_used: dict[str, set[str]] = {}  # recipe -> the basics it uses and the week does not buy
         candidates, options, observations, display_names = [], {}, {}, {}
         provenance = {}  # product id -> the PriceEvidence of the observation the planner prices with
@@ -1301,7 +1301,13 @@ class ProductPlanningEngine:
                             for warning in r.grocery_estimate.warnings
                         ),
                         *filter(
-                            None, [basics_note({b for a in assignments for b in basics_used.get(a.recipe_id, ())})]
+                            None,
+                            [
+                                basics_note(
+                                    {b for a in assignments for b in basics_used.get(a.recipe_id, ())},
+                                    constraints.requires_halal,
+                                )
+                            ],
                         ),
                         *unattended,
                     ]

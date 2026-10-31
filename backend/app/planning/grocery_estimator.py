@@ -306,7 +306,9 @@ class GroceryEstimator:
         purchase_total = 0.0
         consumed_total = 0.0
         consumed_total_known = True
-        assumed = assumed_basics(getattr(constraints, "household", None), constraints.excluded_ingredients)
+        assumed = assumed_basics(
+            getattr(constraints, "household", None), constraints.excluded_ingredients, constraints.requires_halal
+        )
 
         from app.planning import alternatives  # alternatives imports this module
 

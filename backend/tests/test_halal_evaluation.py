@@ -7,7 +7,7 @@ import pytest
 
 from app.core.paths import repository_root
 from app.data import halal as halal_data
-from app.evaluation import baseline_validation
+from app.evaluation import baseline_validation, multidish_labels
 from app.evaluation.common_output import CommonEpisodeResponse
 from app.evaluation.halal_scoring import bought_certified, line_problem
 from app.evaluation.multidish_labels import check as proven_label
@@ -68,12 +68,13 @@ def test_the_snapshot_certifies_a_shared_product_by_its_raw_fairprice_id():
 
 
 def baseline(coverage, *, halal=True, certified=(), monkeypatch=None):
-    """The week through the baseline validator; `certified` names the ingredients the snapshot certifies."""
+    """The week through the baseline validator; `certified` names the ingredients (or single products) the snapshot
+    certifies."""
     monkeypatch.setattr(halal_data, "release_halal_certification", lambda: {})
     episode = copy.deepcopy(json.loads(EPISODE.read_text(encoding="utf-8")))
     episode["gold"]["applicable_hard_constraints"]["halal_required"] = halal
     products = [
-        p.model_copy(update={"halal_certified": True if p.ingredient_id in certified else None})
+        p.model_copy(update={"halal_certified": True if {p.ingredient_id, p.product_id} & set(certified) else None})
         for p in resources().frozen_products
     ]
     return baseline_validation.validate_baseline_plan(
@@ -162,6 +163,96 @@ def test_a_zero_gram_meat_line_needs_no_purchase_but_a_zero_gram_pork_line_still
     nothing = answer()
     assert _check_halal([recipe("trace", "rice", "chicken_breast", quantity=0)], nothing).outcome == "passed"
     assert _check_halal([recipe("pork", "rice", "pork_belly", quantity=0)], nothing).outcome == "failed"
+
+
+# --- a pantry basic that needs certification (owner, 2026-10-31) ----------------------------------------------
+
+
+def needing_certification(names):
+    return {name for name in names if halal_data.needs_certification(name)}
+
+
+def test_a_halal_baseline_does_not_take_a_basic_that_needs_certification_as_at_home():
+    loaded = resources()
+    plain, halal = loaded.not_bought({}), loaded.not_bought({}, halal=True)
+    assert {"soy_sauce", "vinegar", "mayo", "ketchup"} <= plain
+    assert not {"soy_sauce", "vinegar", "mayo", "ketchup"} & halal  # bought, as a certified product
+    assert {"rice", "flour", "water", "ice"} <= halal  # the other basics stay at home
+    assert plain - halal == needing_certification(loaded.basic_seasonings)
+    assert loaded.not_bought({"requires_halal": True}) == halal
+    assert loaded.not_bought({"missing_basics": ["rice"]}, halal=True) == halal - {"rice"}
+
+
+def soy_week():
+    return chicken_week(line("soy sauce", 30, "soy_sauce"))
+
+
+def test_a_basic_that_needs_certification_fails_a_halal_baseline_without_a_certified_product(monkeypatch):
+    result = baseline(soy_week(), certified={"chicken_breast"}, monkeypatch=monkeypatch)
+    failed = halal_failures(result)
+    assert failed and "soy sauce (no certified product)" in failed[0].detail
+    assert result.strict_passed is False and result.adjusted_passed is False
+
+
+def test_a_basic_that_needs_certification_passes_with_a_certified_product_and_is_priced_from_it(monkeypatch):
+    result = baseline(soy_week(), certified={"chicken_breast", "soy_sauce"}, monkeypatch=monkeypatch)
+    assert halal_failures(result) == []
+    assert result.strict_passed and result.adjusted_passed
+    # Only the dearest soy sauce (114695, S$6.31) certified: the week is priced from it, not from a cheaper one.
+    dearest = baseline(soy_week(), certified={"chicken_breast", "114695"}, monkeypatch=monkeypatch)
+    assert halal_failures(dearest) == []
+    assert dearest.report.purchase_total_sgd > result.report.purchase_total_sgd
+
+
+def test_the_same_basic_is_not_judged_for_halal_in_a_household_that_does_not_need_it(monkeypatch):
+    result = baseline(soy_week(), halal=False, monkeypatch=monkeypatch)
+    assert halal_failures(result) == []
+
+
+def test_the_strict_scorer_fails_a_basic_that_needs_certification_unless_it_is_bought_certified(monkeypatch):
+    monkeypatch.setattr(halal_data, "release_halal_certification", lambda: {"p-ok": True})
+    dish = [recipe("stir-fry", "rice", "soy_sauce")]
+    assumed_at_home = _check_halal(dish, answer(("rice", None)))
+    assert assumed_at_home.outcome == "failed" and "soy_sauce" in assumed_at_home.detail
+    assert _check_halal(dish, answer(("soy_sauce", "p-other"))).outcome == "failed"  # not a certified product
+    assert _check_halal(dish, answer(("soy_sauce", "p-ok"))).outcome == "passed"
+    assert _check_halal([recipe("plain", "rice", "soy_sauce", quantity=0)], answer()).outcome == "passed"
+
+
+def soy_episode(episode, *, halal):
+    soy = [p["external_id"] for p in load_release_catalog().products if p["ingredient_id"] == "soy_sauce"]
+    gold = {**episode["gold"]["applicable_hard_constraints"], "halal_required": halal}
+    gold |= {"allergens_absent": [], "excluded_ingredients_absent": [], "dietary_tags_required": []}
+    return {
+        **episode,
+        "gold": {**episode["gold"], "applicable_hard_constraints": gold},
+        "scenario": {**episode["scenario"], "fairprice_product_ids": soy},
+    }
+
+
+def test_the_label_proofs_let_a_halal_case_use_a_basic_that_needs_certification_only_with_a_certified_product(
+    monkeypatch, episodes
+):
+    stir_fry = {
+        "slug": "s",
+        "title": "s",
+        "dietary_tags": [],
+        "ingredients": [{"ingredient": "soy_sauce", "quantity": 10}],
+    }
+    certified = {"12602826"}  # a FairPrice soy sauce marked Halal
+    monkeypatch.setattr(multidish_labels, "product_certified", lambda product_id: product_id in certified)
+    assert multidish_labels._context(soy_episode(episodes[0], halal=True))[2](stir_fry)
+    certified.clear()
+    assert not multidish_labels._context(soy_episode(episodes[0], halal=True))[2](stir_fry)
+    assert multidish_labels._context(soy_episode(episodes[0], halal=False))[2](stir_fry)  # not halal: unchanged
+
+
+def test_the_week_proofs_price_a_basic_that_needs_certification_from_certified_products_only(monkeypatch):
+    plain = multidish_labels.bought("soy_sauce", 100)
+    assert multidish_labels.bought("soy_sauce", 100, halal=True) < float("inf")  # a certified product exists
+    monkeypatch.setattr(halal_data, "release_halal_certification", lambda: {})
+    assert multidish_labels.bought("soy_sauce", 100) == plain
+    assert multidish_labels.bought("soy_sauce", 100, halal=True) == float("inf")
 
 
 # --- the developer cases ----------------------------------------------------------------------------------------

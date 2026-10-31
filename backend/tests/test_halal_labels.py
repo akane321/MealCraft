@@ -59,7 +59,7 @@ def test_every_catalog_ingredient_has_a_consistent_label(generated: list[dict]) 
         ("ramen", "halal", True, "rule:meat"),  # may_contain chicken (flavour packet)
         ("stuffing_mix", "halal", True, "rule:meat"),
         ("salmon", "halal", False, "rule:food_group"),
-        ("shrimp_paste", "halal", False, "rule:food_group"),
+        ("anchovy", "halal", False, "rule:food_group"),
         ("milk", "halal", False, "rule:food_group"),
         ("broccoli", "halal", False, "rule:food_group"),
         ("vegetarian_ham", "halal", False, "rule:food_group"),
@@ -101,17 +101,29 @@ def _csv(name: str) -> list[dict]:
 
 
 def test_every_verdict_short_of_ok_is_an_override_and_nothing_else_is(generated: list[dict]) -> None:
-    """The person's verdicts (10-31) are on the queue the generator writes, and the overrides carry exactly them."""
-    verdicts = _csv(generator.VERDICTS_FILE)
-    assert [(r["queue"], r["normalized_name"]) for r in verdicts] == [
+    """The person's verdicts (10-31) are on the queues the generator writes, each name reviewed once, and the
+    overrides carry exactly the undetermined ones: a label that needs a product FairPrice marks Halal."""
+    first, second, extra = (_csv(name) for name in generator.VERDICTS_FILES)
+    assert [(r["queue"], r["normalized_name"]) for r in first] == [
         (r["queue"], r["normalized_name"]) for r in generator.review_rows(generated)
     ]
-    changed = {r["normalized_name"]: r["verdict"] for r in verdicts if r["verdict"] != "ok"}
+    assert [r["normalized_name"] for r in second] == [
+        r["normalized_name"] for r in generator.second_round_rows(generated, generator.catalog())
+    ]
+    reviewed = [r["normalized_name"] for r in (*first, *second, *extra)]
+    assert len(reviewed) == len(set(reviewed))
+    by_name = {i["normalized_name"]: i for i in generated}
+    assert all(by_name[r["normalized_name"]]["status"] == r["status"] for r in extra)
+    changed = {r["normalized_name"] for r in (*first, *second, *extra) if r["verdict"] != "ok"}
+    assert {r["verdict"] for r in (*first, *second, *extra) if r["verdict"] != "ok"} == {"uncertain"}
     overrides = json.loads((data_root() / OVERRIDES_FILE).read_text(encoding="utf-8"))["items"]
-    assert {i["normalized_name"]: i["status"] for i in overrides} == changed
+    assert {i["normalized_name"] for i in overrides} == changed
     labels = halal_labels()
-    assert all((labels[n]["status"], labels[n]["source"]) == (verdict, "human") for n, verdict in changed.items())
-    assert labels["cheese"]["status"] == "uncertain" and labels["broccoli"]["status"] == "halal"
+    assert all(
+        (labels[n]["status"], labels[n]["needs_certification"], labels[n]["source"]) == ("halal", True, "human")
+        for n in changed
+    )
+    assert needs_certification("soy_sauce") and needs_certification("cheese") and not needs_certification("broccoli")
 
 
 def test_the_second_round_holds_the_other_condiments_and_prepared_foods(generated: list[dict]) -> None:
@@ -128,14 +140,16 @@ def test_the_pool_report_counts_each_queue_by_outcome() -> None:
     from app.data.halal_pool import review_summary
 
     review = review_summary()
-    assert review[generator.VERDICTS_FILE]["sample"] == {"kept": 40, "corrected": 0, "undetermined": 20, "pending": 0}
-    assert review[generator.VERDICTS_FILE]["check"]["undetermined"] == 13
-    assert review[generator.REVIEW_V2_FILE]["second_round"]["pending"] == len(_csv(generator.REVIEW_V2_FILE))
+    first, second, extra = generator.VERDICTS_FILES
+    assert review[first]["sample"] == {"kept": 40, "corrected": 0, "undetermined": 20, "pending": 0}
+    assert review[first]["check"]["undetermined"] == 13
+    assert review[second]["second_round"] == {"kept": 5, "corrected": 0, "undetermined": 70, "pending": 0}
+    assert review[extra]["additional_screening"] == {"kept": 3, "corrected": 0, "undetermined": 38, "pending": 0}
 
 
 def test_certification_facts_are_true_or_unknown_never_false() -> None:
     document = json.loads((data_root() / CERTIFICATION_FILE).read_text(encoding="utf-8"))
-    assert document["observed_at"] and document["requests"] <= 150
+    assert document["observed_at"] and document["requests"] <= 400
     facts = release_halal_certification()
     assert set(facts) == set(document["products"]) and set(facts.values()) <= {True, None}
     assert any(facts.values())

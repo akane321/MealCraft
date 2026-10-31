@@ -1,8 +1,9 @@
 """The halal rules of the scorers, from the one set of labels (`app.data.halal`; docs/evaluation/halal.md).
 
 Unknown is never halal (ADR-0104): a line with no label, an `uncertain` label or no catalog ingredient at all fails
-a halal household, as does a `not_halal` one. A meat line (`needs_certification`) fails unless a certified product
-is bought, or, for a baseline that buys nothing, unless the snapshot holds a certified product for it.
+a halal household, as does a `not_halal` one. A line that needs certification (`needs_certification`:
+meat, and a pantry basic such as soy sauce, which a halal household does not take as at home) fails unless a
+certified product is bought, or, for a baseline that buys nothing, unless the snapshot holds one for it.
 """
 
 from __future__ import annotations
@@ -13,8 +14,8 @@ from app.data.halal import halal_labels, needs_certification, product_certified
 
 
 def required(episode: dict) -> bool:
-    """Whether the episode's gold says the household needs halal food."""
-    return bool(episode["gold"]["applicable_hard_constraints"].get("halal_required"))
+    """Whether the episode's gold says the household needs halal food; an episode with no gold does not."""
+    return bool(((episode.get("gold") or {}).get("applicable_hard_constraints") or {}).get("halal_required"))
 
 
 def line_problem(ingredient_id: str | None, certified: Iterable[str]) -> str | None:

@@ -28,7 +28,7 @@ from app.planning.grocery_estimator import release_snapshot
 from app.products.provider import NEXT_DATA_PATTERN, normalize_search_text
 
 BASE_URL = "https://www.fairprice.com.sg"
-MAX_REQUESTS = 150
+MAX_REQUESTS = 400
 SECONDS_BETWEEN_REQUESTS = 1.0
 TIMEOUT_SECONDS = 20
 
