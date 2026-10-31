@@ -95,6 +95,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...(c.household_size ? [{ text: "For", value: String(c.household_size) }] : []),
     ...(c.weekly_budget_sgd ? [{ text: "Budget", value: `S$${c.weekly_budget_sgd}` }] : []),
     ...(statedTimeLimit(c.max_cooking_time_minutes) ? [{ text: "Up to", value: `${c.max_cooking_time_minutes} min` }] : []),
+    ...(c.requires_halal ? [{ text: "", value: "Halal" }] : []),
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
@@ -215,6 +216,7 @@ const home = computed(() => {
     name: household.current.value?.name ?? actor.value?.user.display_name ?? "Your household",
     line: [size ? `${size} ${size === 1 ? "person" : "people"}` : null, ...budgets].filter(Boolean).join(" · ") || "Tell me who's eating",
     chips: [
+      ...(p?.requires_halal || c?.requires_halal ? [{ label: "Halal", alert: false }] : []),
       ...(p?.dietary_preferences ?? c?.dietary_preferences ?? []).map(value => ({ label: value.replaceAll("_", " "), alert: false })),
       ...(p?.excluded_ingredients ?? c?.excluded_ingredients ?? []).map(value => ({ label: `No ${value.replaceAll("_", " ")}`, alert: false })),
       ...(p?.allergens ?? c?.allergens ?? []).map(value => ({ label: `${allergenLabel(value)} allergy`, alert: true })),

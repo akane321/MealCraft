@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -12,6 +13,7 @@ from sqlalchemy import (
     Numeric,
     String,
     UniqueConstraint,
+    false,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -112,6 +114,9 @@ class HouseholdProfileVersion(Base):
     missing_equipment: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     missing_basics: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     nutrition_limits: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
+    # The whole household eats halal (docs/design/halal.md; ADR-0104): only halal dishes, and meat only from
+    # products FairPrice marks Halal. One switch on the household, never per member.
+    requires_halal: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     profile: Mapped[HouseholdProfile] = relationship(back_populates="versions")

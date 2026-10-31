@@ -1187,6 +1187,7 @@ def _household_profile_payload() -> dict:
         "max_sodium_mg_per_meal": None,
         "available_ingredients": [{"normalized_name": "lemon", "quantity": None, "unit": None}],
         "pricing_mode": "fixture",
+        "requires_halal": False,
     }
 
 
@@ -1864,6 +1865,7 @@ def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestC
             "max_cooking_time_minutes": 45,
             "weekly_budget_sgd": 90,
             "pricing_mode": "fixture",
+            "requires_halal": False,
         },
     )
     assert saved.status_code == 201, saved.text
@@ -1889,7 +1891,9 @@ def test_a_new_conversation_starts_from_the_saved_household(recipe_client: TestC
 def test_a_household_that_enters_no_limits_is_saved_and_planned_with_none(recipe_client: TestClient) -> None:
     """Only what the household enters is a constraint: a profile with just who is eating saves, and it
     and the conversations started from it carry no time limit, budget, target or health preference."""
-    saved = recipe_client.post("/api/household-profiles", json={"name": "New household", "members": [{"name": "A"}]})
+    saved = recipe_client.post(
+        "/api/household-profiles", json={"name": "New household", "members": [{"name": "A"}], "requires_halal": False}
+    )
     assert saved.status_code == 201, saved.text
     current = saved.json()["current"]
     assert current["max_cooking_time_minutes"] == NO_COOKING_TIME_LIMIT

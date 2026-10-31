@@ -1,0 +1,1470 @@
+{
+ "recipes": {
+  "release": 8967,
+  "curated": 30
+ },
+ "by_status": {
+  "release": {
+   "halal": 1816,
+   "needs_certification": 5542,
+   "not_halal": 1609,
+   "uncertain": 0
+  },
+  "curated": {
+   "halal": 23,
+   "needs_certification": 7,
+   "not_halal": 0,
+   "uncertain": 0
+  }
+ },
+ "plannable": {
+  "release": {
+   "halal": 1816,
+   "needs_certification, all lines certified": 2946,
+   "total": 4762
+  },
+  "curated": {
+   "halal": 23,
+   "needs_certification, all lines certified": 7,
+   "total": 30
+  }
+ },
+ "blocked_by": [
+  {
+   "ingredient": "vanilla",
+   "recipes": 271
+  },
+  {
+   "ingredient": "rice_vinegar",
+   "recipes": 238
+  },
+  {
+   "ingredient": "mayo",
+   "recipes": 211
+  },
+  {
+   "ingredient": "worcestershire",
+   "recipes": 205
+  },
+  {
+   "ingredient": "ketchup",
+   "recipes": 184
+  },
+  {
+   "ingredient": "sausage",
+   "recipes": 159
+  },
+  {
+   "ingredient": "mustard",
+   "recipes": 119
+  },
+  {
+   "ingredient": "beef_broth",
+   "recipes": 114
+  },
+  {
+   "ingredient": "shortening",
+   "recipes": 113
+  },
+  {
+   "ingredient": "hot_sauce",
+   "recipes": 105
+  },
+  {
+   "ingredient": "salsa",
+   "recipes": 104
+  },
+  {
+   "ingredient": "dijon",
+   "recipes": 86
+  },
+  {
+   "ingredient": "red_wine_vinegar",
+   "recipes": 83
+  },
+  {
+   "ingredient": "marinara",
+   "recipes": 75
+  },
+  {
+   "ingredient": "turkey",
+   "recipes": 72
+  },
+  {
+   "ingredient": "vegetable_broth",
+   "recipes": 72
+  },
+  {
+   "ingredient": "hoisin",
+   "recipes": 66
+  },
+  {
+   "ingredient": "cottage_cheese",
+   "recipes": 54
+  },
+  {
+   "ingredient": "meat",
+   "recipes": 52
+  },
+  {
+   "ingredient": "american_cheese",
+   "recipes": 50
+  },
+  {
+   "ingredient": "swiss_cheese",
+   "recipes": 46
+  },
+  {
+   "ingredient": "chili_sauce",
+   "recipes": 45
+  },
+  {
+   "ingredient": "balsamic",
+   "recipes": 43
+  },
+  {
+   "ingredient": "biscuit_mix",
+   "recipes": 43
+  },
+  {
+   "ingredient": "pie_crust",
+   "recipes": 40
+  },
+  {
+   "ingredient": "white_wine_vinegar",
+   "recipes": 38
+  },
+  {
+   "ingredient": "italian_dressing",
+   "recipes": 36
+  },
+  {
+   "ingredient": "sauerkraut",
+   "recipes": 33
+  },
+  {
+   "ingredient": "hamburger_bun",
+   "recipes": 31
+  },
+  {
+   "ingredient": "ramen",
+   "recipes": 29
+  },
+  {
+   "ingredient": "almond_extract",
+   "recipes": 26
+  },
+  {
+   "ingredient": "sambal_oelek",
+   "recipes": 23
+  },
+  {
+   "ingredient": "baguette",
+   "recipes": 21
+  },
+  {
+   "ingredient": "chow_mein_noodles",
+   "recipes": 21
+  },
+  {
+   "ingredient": "capers",
+   "recipes": 18
+  },
+  {
+   "ingredient": "hot_dog",
+   "recipes": 18
+  },
+  {
+   "ingredient": "chorizo",
+   "recipes": 16
+  },
+  {
+   "ingredient": "cornish_hen",
+   "recipes": 15
+  },
+  {
+   "ingredient": "pepperoni",
+   "recipes": 15
+  },
+  {
+   "ingredient": "enchilada_sauce",
+   "recipes": 14
+  },
+  {
+   "ingredient": "phyllo",
+   "recipes": 14
+  },
+  {
+   "ingredient": "salad_dressing",
+   "recipes": 14
+  },
+  {
+   "ingredient": "tomato_soup",
+   "recipes": 14
+  },
+  {
+   "ingredient": "croutons",
+   "recipes": 13
+  },
+  {
+   "ingredient": "goat_cheese",
+   "recipes": 13
+  },
+  {
+   "ingredient": "dinner_roll",
+   "recipes": 11
+  },
+  {
+   "ingredient": "horseradish",
+   "recipes": 11
+  },
+  {
+   "ingredient": "rose_water",
+   "recipes": 11
+  },
+  {
+   "ingredient": "cooked_chicken",
+   "recipes": 10
+  },
+  {
+   "ingredient": "refried_beans",
+   "recipes": 10
+  },
+  {
+   "ingredient": "tortilla_chips",
+   "recipes": 10
+  },
+  {
+   "ingredient": "chutney",
+   "recipes": 9
+  },
+  {
+   "ingredient": "wonton_wrapper",
+   "recipes": 9
+  },
+  {
+   "ingredient": "blue_cheese",
+   "recipes": 8
+  },
+  {
+   "ingredient": "broth",
+   "recipes": 8
+  },
+  {
+   "ingredient": "miso",
+   "recipes": 8
+  },
+  {
+   "ingredient": "pesto",
+   "recipes": 8
+  },
+  {
+   "ingredient": "wasabi",
+   "recipes": 8
+  },
+  {
+   "ingredient": "harissa",
+   "recipes": 7
+  },
+  {
+   "ingredient": "lemon_extract",
+   "recipes": 7
+  },
+  {
+   "ingredient": "puff_pastry",
+   "recipes": 7
+  },
+  {
+   "ingredient": "taco_sauce",
+   "recipes": 7
+  },
+  {
+   "ingredient": "chili_oil",
+   "recipes": 6
+  },
+  {
+   "ingredient": "ginger_garlic",
+   "recipes": 6
+  },
+  {
+   "ingredient": "marshmallow",
+   "recipes": 6
+  },
+  {
+   "ingredient": "onion_soup_mix",
+   "recipes": 6
+  },
+  {
+   "ingredient": "buttered_breadcrumbs",
+   "recipes": 5
+  },
+  {
+   "ingredient": "butterscotch_chips",
+   "recipes": 5
+  },
+  {
+   "ingredient": "chicken_or_veg_broth",
+   "recipes": 5
+  },
+  {
+   "ingredient": "lamb_chop",
+   "recipes": 5
+  },
+  {
+   "ingredient": "relish",
+   "recipes": 5
+  },
+  {
+   "ingredient": "sherry_vinegar",
+   "recipes": 5
+  },
+  {
+   "ingredient": "steak_sauce",
+   "recipes": 5
+  },
+  {
+   "ingredient": "fish_broth",
+   "recipes": 4
+  },
+  {
+   "ingredient": "frozen_bread_dough",
+   "recipes": 4
+  },
+  {
+   "ingredient": "hot_dog_bun",
+   "recipes": 4
+  },
+  {
+   "ingredient": "orange_extract",
+   "recipes": 4
+  },
+  {
+   "ingredient": "rotel",
+   "recipes": 4
+  },
+  {
+   "ingredient": "stuffing_mix",
+   "recipes": 4
+  },
+  {
+   "ingredient": "bean_sauce",
+   "recipes": 3
+  },
+  {
+   "ingredient": "celery_soup",
+   "recipes": 3
+  },
+  {
+   "ingredient": "cereal_rice",
+   "recipes": 3
+  },
+  {
+   "ingredient": "chipotle_in_adobo",
+   "recipes": 3
+  },
+  {
+   "ingredient": "dark_chocolate",
+   "recipes": 3
+  },
+  {
+   "ingredient": "gnocchi",
+   "recipes": 3
+  },
+  {
+   "ingredient": "kitchen_bouquet",
+   "recipes": 3
+  },
+  {
+   "ingredient": "liquid_smoke",
+   "recipes": 3
+  },
+  {
+   "ingredient": "mayo_or_dressing",
+   "recipes": 3
+  },
+  {
+   "ingredient": "ranch_dressing",
+   "recipes": 3
+  },
+  {
+   "ingredient": "shortening_or_oil",
+   "recipes": 3
+  },
+  {
+   "ingredient": "biscuit_dough",
+   "recipes": 2
+  },
+  {
+   "ingredient": "black_vinegar",
+   "recipes": 2
+  },
+  {
+   "ingredient": "cheese_soup",
+   "recipes": 2
+  },
+  {
+   "ingredient": "chipped_beef",
+   "recipes": 2
+  },
+  {
+   "ingredient": "coconut_extract",
+   "recipes": 2
+  },
+  {
+   "ingredient": "crepe",
+   "recipes": 2
+  },
+  {
+   "ingredient": "dashi",
+   "recipes": 2
+  },
+  {
+   "ingredient": "doenjang",
+   "recipes": 2
+  },
+  {
+   "ingredient": "duck",
+   "recipes": 2
+  },
+  {
+   "ingredient": "tamarind_soup_base",
+   "recipes": 2
+  },
+  {
+   "ingredient": "venison",
+   "recipes": 2
+  },
+  {
+   "ingredient": "white_chocolate",
+   "recipes": 2
+  },
+  {
+   "ingredient": "almond_paste",
+   "recipes": 1
+  },
+  {
+   "ingredient": "apple_butter",
+   "recipes": 1
+  },
+  {
+   "ingredient": "beef_heart",
+   "recipes": 1
+  },
+  {
+   "ingredient": "cheese_tortellini",
+   "recipes": 1
+  },
+  {
+   "ingredient": "clam_juice",
+   "recipes": 1
+  },
+  {
+   "ingredient": "crickets",
+   "recipes": 1
+  },
+  {
+   "ingredient": "eggnog",
+   "recipes": 1
+  },
+  {
+   "ingredient": "falafel",
+   "recipes": 1
+  },
+  {
+   "ingredient": "fruit_pie_filling",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gochujang_sauce",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gravy",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gravy_mix",
+   "recipes": 1
+  },
+  {
+   "ingredient": "gyoza",
+   "recipes": 1
+  },
+  {
+   "ingredient": "jasmine_flavoring",
+   "recipes": 1
+  },
+  {
+   "ingredient": "long_grain_wild_rice_mix",
+   "recipes": 1
+  },
+  {
+   "ingredient": "mac_and_cheese",
+   "recipes": 1
+  },
+  {
+   "ingredient": "mincemeat",
+   "recipes": 1
+  },
+  {
+   "ingredient": "mint_extract",
+   "recipes": 1
+  },
+  {
+   "ingredient": "nuoc_cham",
+   "recipes": 1
+  },
+  {
+   "ingredient": "pancit_canton",
+   "recipes": 1
+  },
+  {
+   "ingredient": "pastrami",
+   "recipes": 1
+  },
+  {
+   "ingredient": "pate",
+   "recipes": 1
+  },
+  {
+   "ingredient": "plum_sauce",
+   "recipes": 1
+  },
+  {
+   "ingredient": "poppadam",
+   "recipes": 1
+  },
+  {
+   "ingredient": "rabbit",
+   "recipes": 1
+  },
+  {
+   "ingredient": "ranch_mix",
+   "recipes": 1
+  },
+  {
+   "ingredient": "rum_extract",
+   "recipes": 1
+  },
+  {
+   "ingredient": "sinigang_mix",
+   "recipes": 1
+  },
+  {
+   "ingredient": "soup",
+   "recipes": 1
+  },
+  {
+   "ingredient": "squid_broth",
+   "recipes": 1
+  },
+  {
+   "ingredient": "taco_shell",
+   "recipes": 1
+  },
+  {
+   "ingredient": "tapai",
+   "recipes": 1
+  },
+  {
+   "ingredient": "tempeh_starter",
+   "recipes": 1
+  },
+  {
+   "ingredient": "turkey_bacon",
+   "recipes": 1
+  },
+  {
+   "ingredient": "vanilla_wafer",
+   "recipes": 1
+  },
+  {
+   "ingredient": "vegan_mayonnaise",
+   "recipes": 1
+  }
+ ],
+ "ingredients": {
+  "almond_extract": {
+   "products": 2,
+   "certified": 0
+  },
+  "almond_paste": {
+   "products": 0,
+   "certified": 0
+  },
+  "american_cheese": {
+   "products": 1,
+   "certified": 0
+  },
+  "apple_butter": {
+   "products": 0,
+   "certified": 0
+  },
+  "au_jus_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "baguette": {
+   "products": 0,
+   "certified": 0
+  },
+  "baked_beans": {
+   "products": 4,
+   "certified": 2
+  },
+  "baking_chocolate": {
+   "products": 4,
+   "certified": 1
+  },
+  "balsamic": {
+   "products": 4,
+   "certified": 0
+  },
+  "banana_ketchup": {
+   "products": 0,
+   "certified": 0
+  },
+  "bbq_sauce": {
+   "products": 4,
+   "certified": 1
+  },
+  "bean_sauce": {
+   "products": 3,
+   "certified": 0
+  },
+  "beef": {
+   "products": 4,
+   "certified": 1
+  },
+  "beef_broth": {
+   "products": 3,
+   "certified": 0
+  },
+  "beef_heart": {
+   "products": 0,
+   "certified": 0
+  },
+  "beef_or_turkey": {
+   "products": 4,
+   "certified": 3
+  },
+  "beef_steak": {
+   "products": 4,
+   "certified": 1
+  },
+  "biscuit_dough": {
+   "products": 0,
+   "certified": 0
+  },
+  "biscuit_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "black_vinegar": {
+   "products": 4,
+   "certified": 0
+  },
+  "blue_cheese": {
+   "products": 3,
+   "certified": 0
+  },
+  "bouillon": {
+   "products": 4,
+   "certified": 3
+  },
+  "bread": {
+   "products": 3,
+   "certified": 3
+  },
+  "bread_mix": {
+   "products": 2,
+   "certified": 0
+  },
+  "breadcrumbs": {
+   "products": 4,
+   "certified": 2
+  },
+  "broth": {
+   "products": 4,
+   "certified": 0
+  },
+  "buttered_breadcrumbs": {
+   "products": 0,
+   "certified": 0
+  },
+  "butterscotch_chips": {
+   "products": 0,
+   "certified": 0
+  },
+  "capers": {
+   "products": 4,
+   "certified": 0
+  },
+  "celery_soup": {
+   "products": 0,
+   "certified": 0
+  },
+  "cereal_cornflake": {
+   "products": 4,
+   "certified": 2
+  },
+  "cereal_rice": {
+   "products": 1,
+   "certified": 0
+  },
+  "cheese": {
+   "products": 3,
+   "certified": 1
+  },
+  "cheese_soup": {
+   "products": 0,
+   "certified": 0
+  },
+  "cheese_tortellini": {
+   "products": 1,
+   "certified": 0
+  },
+  "chicken": {
+   "products": 3,
+   "certified": 3
+  },
+  "chicken_breast": {
+   "products": 4,
+   "certified": 2
+  },
+  "chicken_broth": {
+   "products": 4,
+   "certified": 1
+  },
+  "chicken_or_turkey": {
+   "products": 4,
+   "certified": 2
+  },
+  "chicken_or_veg_broth": {
+   "products": 4,
+   "certified": 0
+  },
+  "chicken_soup": {
+   "products": 1,
+   "certified": 1
+  },
+  "chicken_thigh": {
+   "products": 4,
+   "certified": 3
+  },
+  "chicken_wings": {
+   "products": 4,
+   "certified": 2
+  },
+  "chili_garlic_sauce": {
+   "products": 3,
+   "certified": 3
+  },
+  "chili_oil": {
+   "products": 4,
+   "certified": 0
+  },
+  "chili_paste": {
+   "products": 2,
+   "certified": 2
+  },
+  "chili_sauce": {
+   "products": 4,
+   "certified": 0
+  },
+  "chipotle_in_adobo": {
+   "products": 0,
+   "certified": 0
+  },
+  "chipped_beef": {
+   "products": 0,
+   "certified": 0
+  },
+  "chocolate_chips": {
+   "products": 3,
+   "certified": 2
+  },
+  "chorizo": {
+   "products": 0,
+   "certified": 0
+  },
+  "chow_mein_noodles": {
+   "products": 0,
+   "certified": 0
+  },
+  "chutney": {
+   "products": 2,
+   "certified": 0
+  },
+  "clam_juice": {
+   "products": 0,
+   "certified": 0
+  },
+  "coconut_extract": {
+   "products": 0,
+   "certified": 0
+  },
+  "coconut_flavoring": {
+   "products": 0,
+   "certified": 0
+  },
+  "cooked_chicken": {
+   "products": 0,
+   "certified": 0
+  },
+  "corned_beef": {
+   "products": 3,
+   "certified": 2
+  },
+  "cornish_hen": {
+   "products": 1,
+   "certified": 0
+  },
+  "cottage_cheese": {
+   "products": 4,
+   "certified": 0
+  },
+  "cracker_crumbs": {
+   "products": 4,
+   "certified": 1
+  },
+  "cream_cheese": {
+   "products": 1,
+   "certified": 1
+  },
+  "crepe": {
+   "products": 0,
+   "certified": 0
+  },
+  "crickets": {
+   "products": 0,
+   "certified": 0
+  },
+  "croutons": {
+   "products": 2,
+   "certified": 0
+  },
+  "curry_paste": {
+   "products": 1,
+   "certified": 1
+  },
+  "curry_sauce": {
+   "products": 2,
+   "certified": 1
+  },
+  "dark_chocolate": {
+   "products": 0,
+   "certified": 0
+  },
+  "dashi": {
+   "products": 0,
+   "certified": 0
+  },
+  "dashida": {
+   "products": 0,
+   "certified": 0
+  },
+  "dijon": {
+   "products": 4,
+   "certified": 0
+  },
+  "dinner_roll": {
+   "products": 0,
+   "certified": 0
+  },
+  "doenjang": {
+   "products": 0,
+   "certified": 0
+  },
+  "duck": {
+   "products": 4,
+   "certified": 0
+  },
+  "eggnog": {
+   "products": 0,
+   "certified": 0
+  },
+  "enchilada_sauce": {
+   "products": 1,
+   "certified": 0
+  },
+  "english_muffin": {
+   "products": 0,
+   "certified": 0
+  },
+  "falafel": {
+   "products": 1,
+   "certified": 0
+  },
+  "fish_broth": {
+   "products": 2,
+   "certified": 0
+  },
+  "fish_sauce": {
+   "products": 4,
+   "certified": 4
+  },
+  "food_coloring": {
+   "products": 3,
+   "certified": 3
+  },
+  "french_fries": {
+   "products": 3,
+   "certified": 1
+  },
+  "frozen_bread_dough": {
+   "products": 0,
+   "certified": 0
+  },
+  "fruit_pie_filling": {
+   "products": 3,
+   "certified": 0
+  },
+  "gelatin": {
+   "products": 2,
+   "certified": 1
+  },
+  "ginger_garlic": {
+   "products": 1,
+   "certified": 0
+  },
+  "gnocchi": {
+   "products": 4,
+   "certified": 0
+  },
+  "goat": {
+   "products": 3,
+   "certified": 2
+  },
+  "goat_cheese": {
+   "products": 0,
+   "certified": 0
+  },
+  "gochujang": {
+   "products": 3,
+   "certified": 1
+  },
+  "gochujang_sauce": {
+   "products": 0,
+   "certified": 0
+  },
+  "gravy": {
+   "products": 0,
+   "certified": 0
+  },
+  "gravy_mix": {
+   "products": 2,
+   "certified": 0
+  },
+  "ground_beef": {
+   "products": 4,
+   "certified": 2
+  },
+  "gyoza": {
+   "products": 4,
+   "certified": 0
+  },
+  "hamburger_bun": {
+   "products": 0,
+   "certified": 0
+  },
+  "harissa": {
+   "products": 0,
+   "certified": 0
+  },
+  "hoisin": {
+   "products": 1,
+   "certified": 0
+  },
+  "horseradish": {
+   "products": 0,
+   "certified": 0
+  },
+  "hot_dog": {
+   "products": 1,
+   "certified": 0
+  },
+  "hot_dog_bun": {
+   "products": 0,
+   "certified": 0
+  },
+  "hot_sauce": {
+   "products": 3,
+   "certified": 0
+  },
+  "italian_dressing": {
+   "products": 0,
+   "certified": 0
+  },
+  "jam": {
+   "products": 4,
+   "certified": 2
+  },
+  "jasmine_flavoring": {
+   "products": 0,
+   "certified": 0
+  },
+  "kecap_manis": {
+   "products": 3,
+   "certified": 3
+  },
+  "ketchup": {
+   "products": 4,
+   "certified": 0
+  },
+  "kitchen_bouquet": {
+   "products": 0,
+   "certified": 0
+  },
+  "laksa_paste": {
+   "products": 4,
+   "certified": 3
+  },
+  "lamb": {
+   "products": 4,
+   "certified": 1
+  },
+  "lamb_chop": {
+   "products": 4,
+   "certified": 0
+  },
+  "lemon_extract": {
+   "products": 2,
+   "certified": 0
+  },
+  "liquid_smoke": {
+   "products": 0,
+   "certified": 0
+  },
+  "liver": {
+   "products": 4,
+   "certified": 1
+  },
+  "long_grain_wild_rice_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "mac_and_cheese": {
+   "products": 1,
+   "certified": 0
+  },
+  "marinara": {
+   "products": 2,
+   "certified": 0
+  },
+  "marshmallow": {
+   "products": 4,
+   "certified": 0
+  },
+  "mayo": {
+   "products": 4,
+   "certified": 0
+  },
+  "mayo_or_dressing": {
+   "products": 0,
+   "certified": 0
+  },
+  "meat": {
+   "products": 0,
+   "certified": 0
+  },
+  "milk_chocolate": {
+   "products": 1,
+   "certified": 1
+  },
+  "mincemeat": {
+   "products": 0,
+   "certified": 0
+  },
+  "mint_extract": {
+   "products": 3,
+   "certified": 0
+  },
+  "miso": {
+   "products": 4,
+   "certified": 0
+  },
+  "mushroom_soup": {
+   "products": 1,
+   "certified": 1
+  },
+  "mustard": {
+   "products": 1,
+   "certified": 0
+  },
+  "nuoc_cham": {
+   "products": 0,
+   "certified": 0
+  },
+  "nutella": {
+   "products": 4,
+   "certified": 4
+  },
+  "onion_soup_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "orange_extract": {
+   "products": 1,
+   "certified": 0
+  },
+  "oyster_sauce": {
+   "products": 4,
+   "certified": 1
+  },
+  "pancake_mix": {
+   "products": 3,
+   "certified": 3
+  },
+  "pancit_canton": {
+   "products": 0,
+   "certified": 0
+  },
+  "pandan_extract": {
+   "products": 4,
+   "certified": 2
+  },
+  "pandan_paste": {
+   "products": 2,
+   "certified": 1
+  },
+  "pastrami": {
+   "products": 0,
+   "certified": 0
+  },
+  "pate": {
+   "products": 0,
+   "certified": 0
+  },
+  "peanut_sauce": {
+   "products": 2,
+   "certified": 2
+  },
+  "pepperoni": {
+   "products": 1,
+   "certified": 0
+  },
+  "pesto": {
+   "products": 4,
+   "certified": 0
+  },
+  "phyllo": {
+   "products": 0,
+   "certified": 0
+  },
+  "pickled_ginger": {
+   "products": 1,
+   "certified": 0
+  },
+  "pie_crust": {
+   "products": 0,
+   "certified": 0
+  },
+  "pita_bread": {
+   "products": 2,
+   "certified": 1
+  },
+  "pizza_crust": {
+   "products": 1,
+   "certified": 1
+  },
+  "pizza_sauce": {
+   "products": 4,
+   "certified": 1
+  },
+  "plum_sauce": {
+   "products": 2,
+   "certified": 0
+  },
+  "poppadam": {
+   "products": 1,
+   "certified": 0
+  },
+  "potato_chip": {
+   "products": 4,
+   "certified": 2
+  },
+  "puff_pastry": {
+   "products": 0,
+   "certified": 0
+  },
+  "rabbit": {
+   "products": 0,
+   "certified": 0
+  },
+  "ramen": {
+   "products": 3,
+   "certified": 0
+  },
+  "ranch_dressing": {
+   "products": 0,
+   "certified": 0
+  },
+  "ranch_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "red_wine_vinegar": {
+   "products": 4,
+   "certified": 0
+  },
+  "refried_beans": {
+   "products": 0,
+   "certified": 0
+  },
+  "relish": {
+   "products": 0,
+   "certified": 0
+  },
+  "rice_vinegar": {
+   "products": 4,
+   "certified": 0
+  },
+  "rose_water": {
+   "products": 2,
+   "certified": 0
+  },
+  "rotel": {
+   "products": 0,
+   "certified": 0
+  },
+  "rum_extract": {
+   "products": 0,
+   "certified": 0
+  },
+  "salad_dressing": {
+   "products": 0,
+   "certified": 0
+  },
+  "salsa": {
+   "products": 4,
+   "certified": 0
+  },
+  "sambal_oelek": {
+   "products": 1,
+   "certified": 0
+  },
+  "sauerkraut": {
+   "products": 2,
+   "certified": 0
+  },
+  "sausage": {
+   "products": 3,
+   "certified": 0
+  },
+  "sherry_vinegar": {
+   "products": 1,
+   "certified": 0
+  },
+  "shortening": {
+   "products": 4,
+   "certified": 0
+  },
+  "shortening_or_oil": {
+   "products": 4,
+   "certified": 0
+  },
+  "shrimp_paste": {
+   "products": 4,
+   "certified": 2
+  },
+  "sinigang_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "soup": {
+   "products": 0,
+   "certified": 0
+  },
+  "soy_sauce": {
+   "products": 3,
+   "certified": 1
+  },
+  "squid_broth": {
+   "products": 0,
+   "certified": 0
+  },
+  "sriracha": {
+   "products": 4,
+   "certified": 1
+  },
+  "steak_sauce": {
+   "products": 1,
+   "certified": 0
+  },
+  "stir_fry_sauce": {
+   "products": 0,
+   "certified": 0
+  },
+  "stuffing_mix": {
+   "products": 0,
+   "certified": 0
+  },
+  "sweet_chili_sauce": {
+   "products": 4,
+   "certified": 1
+  },
+  "sweet_sour_sauce": {
+   "products": 4,
+   "certified": 1
+  },
+  "swiss_cheese": {
+   "products": 2,
+   "certified": 0
+  },
+  "taco_sauce": {
+   "products": 2,
+   "certified": 0
+  },
+  "taco_shell": {
+   "products": 1,
+   "certified": 0
+  },
+  "tamari": {
+   "products": 3,
+   "certified": 0
+  },
+  "tamarind_soup_base": {
+   "products": 0,
+   "certified": 0
+  },
+  "tandoori_paste": {
+   "products": 2,
+   "certified": 1
+  },
+  "tapai": {
+   "products": 0,
+   "certified": 0
+  },
+  "tempeh_starter": {
+   "products": 0,
+   "certified": 0
+  },
+  "teriyaki": {
+   "products": 4,
+   "certified": 1
+  },
+  "tom_yum_paste": {
+   "products": 4,
+   "certified": 1
+  },
+  "tomato_soup": {
+   "products": 0,
+   "certified": 0
+  },
+  "tortilla": {
+   "products": 3,
+   "certified": 3
+  },
+  "tortilla_chips": {
+   "products": 1,
+   "certified": 0
+  },
+  "turkey": {
+   "products": 0,
+   "certified": 0
+  },
+  "turkey_bacon": {
+   "products": 0,
+   "certified": 0
+  },
+  "vanilla": {
+   "products": 4,
+   "certified": 0
+  },
+  "vanilla_wafer": {
+   "products": 0,
+   "certified": 0
+  },
+  "vegan_mayonnaise": {
+   "products": 0,
+   "certified": 0
+  },
+  "vegetable_broth": {
+   "products": 0,
+   "certified": 0
+  },
+  "venison": {
+   "products": 0,
+   "certified": 0
+  },
+  "vinegar": {
+   "products": 4,
+   "certified": 1
+  },
+  "wasabi": {
+   "products": 3,
+   "certified": 0
+  },
+  "white_chocolate": {
+   "products": 1,
+   "certified": 0
+  },
+  "white_wine_vinegar": {
+   "products": 4,
+   "certified": 0
+  },
+  "wonton_wrapper": {
+   "products": 2,
+   "certified": 0
+  },
+  "worcestershire": {
+   "products": 1,
+   "certified": 0
+  }
+ },
+ "review": {
+  "ingredients/halal-review-v1-verdicts.csv": {
+   "uncertain": {
+    "kept": 28,
+    "corrected": 0,
+    "undetermined": 0,
+    "pending": 0
+   },
+   "needs_certification": {
+    "kept": 38,
+    "corrected": 0,
+    "undetermined": 0,
+    "pending": 0
+   },
+   "check": {
+    "kept": 0,
+    "corrected": 0,
+    "undetermined": 13,
+    "pending": 0
+   },
+   "sample": {
+    "kept": 40,
+    "corrected": 0,
+    "undetermined": 20,
+    "pending": 0
+   }
+  },
+  "ingredients/halal-review-v2-verdicts.csv": {
+   "second_round": {
+    "kept": 5,
+    "corrected": 0,
+    "undetermined": 70,
+    "pending": 0
+   }
+  },
+  "ingredients/halal-review-additional-verdicts.csv": {
+   "additional_screening": {
+    "kept": 3,
+    "corrected": 0,
+    "undetermined": 38,
+    "pending": 0
+   }
+  }
+ },
+ "sources": {
+  "ingredients/halal-labels-v1.json": "a88aa6c950a705f0",
+  "ingredients/halal-overrides-v1.json": "30575910af4a5f7e",
+  "ingredients/halal-review-v1-verdicts.csv": "579ec2b3ee728228",
+  "ingredients/halal-review-v2-verdicts.csv": "1b447cae02b07650",
+  "ingredients/halal-review-additional-verdicts.csv": "ca5e6057c24152db",
+  "ingredients/fairprice-halal-v1.json": "f9f0a465fd214b41",
+  "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
+  "observed_at": "2026-10-31T06:12:25+00:00"
+ }
+}

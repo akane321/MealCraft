@@ -290,6 +290,8 @@ class PlanningProductOption(BaseModel):
     package_unit: str = Field(min_length=1, max_length=40)
     price_sgd: float = Field(ge=0)
     available: bool = True
+    # FairPrice's "Halal" dietary attribute; None is unknown and never counts as certified (docs/design/halal.md).
+    halal_certified: bool | None = None
 
 
 class PlanningNutritionBand(BaseModel):

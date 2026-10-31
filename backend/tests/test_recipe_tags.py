@@ -620,7 +620,7 @@ def test_the_importers_copy_the_tag_files_onto_the_rows(session: Session, releas
         for field in tag_files.RECIPE_TAG_FIELDS:
             assert getattr(recipe, field) == entry[field], (recipe.slug, field)
         assert recipe.estimated == entry["estimated"]
-        assert recipe.halal_status is None and recipe.unknown_safety is None
+        assert recipe.unknown_safety is None  # halal_status is set by the halal labels (docs/design/halal.md)
     ingredients = committed(tag_files.INGREDIENT_TAGS, "ingredients")
     rows = session.scalars(select(Ingredient)).all()
     assert rows

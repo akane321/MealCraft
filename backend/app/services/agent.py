@@ -97,6 +97,8 @@ from app.services.replanning import (
 )
 
 KEEP_SHAPE_FIELD = "plan_shape.keep"
+# The same question for a halal week asked for in the chat: "Should new weeks be halal too?"
+KEEP_HALAL_FIELD = "requires_halal.keep"
 # Whole replies to "Should new weeks plan meals this way too?" (a tap sends "Keep it as our usual" or "Just this
 # week"). Anything else is a new instruction, not an answer: "no lunch on weekdays" starts with "no", "noodles"
 # with "no", and "keep Monday's dinner as it is" with "keep".
@@ -369,6 +371,7 @@ def profile_constraints(version) -> AgentConstraintState:
             "allergens": version.allergens,
             "excluded_ingredients": [],
             "dietary_preferences": [],
+            "requires_halal": version.requires_halal,
             "health_preferences": version.health_preferences,
             "nutrition_targets": version.nutrition_targets,
             "max_sodium_mg_per_meal": version.max_sodium_mg_per_meal,
@@ -432,6 +435,7 @@ class AgentSessionService:
         max_history_messages: int = 20,
         starting_constraints: AgentConstraintState | None = None,
         keep_plan_shape: Callable[[MealPlanShape], None] | None = None,
+        keep_requires_halal: Callable[[], None] | None = None,
         substitute_generator: OpenAISubstituteGenerator | None = None,
         web_food_question_answerer: OpenAIWebFoodQuestionAnswerer | None = None,
     ) -> None:
@@ -470,6 +474,8 @@ class AgentSessionService:
         self.max_history_messages = max_history_messages
         # Saves a shape changed in the conversation as the household's usual one, on a yes (ADR-0046).
         self.keep_plan_shape = keep_plan_shape
+        # Saves a halal week asked for in the conversation as the household's usual one, on a yes (ADR-0104).
+        self.keep_requires_halal = keep_requires_halal
 
     def _answer_food_question(self, message: str, lang: str) -> str | None:
         catalog_answer = self.food_question_answerer.answer(message, lang=lang)
@@ -640,11 +646,13 @@ class AgentSessionService:
             return self.get(session_id) or snapshot
         run = self.run_lifecycle.transition(started.run, AgentRunStatus.RUNNING)
         self._require_context_version(session_id, snapshot.context_version, run)
-        if snapshot.plan_id is not None and not (snapshot.constraints.requires_halal or requests_halal(message)):
+        if snapshot.plan_id is not None:
             self.repository.end_read_transaction()
             try:
                 response = (
-                    self._new_week(session_id, snapshot, message, run)
+                    self._new_week(session_id, snapshot, message, run, halal=True)
+                    if self._asks_halal_week(snapshot, message)
+                    else self._new_week(session_id, snapshot, message, run)
                     if NEW_WEEK.search(message.lower())
                     else self._plan_again(session_id, snapshot, message, run)
                     if VARIED_WEEK.search(message.lower())
@@ -794,7 +802,7 @@ class AgentSessionService:
         """What the household's choice says, in the conversation's language, so the reply stays in it."""
         if request.field_path == SAY_FIELD:
             return str(value).strip()
-        if request.field_path == KEEP_SHAPE_FIELD:
+        if request.field_path in {KEEP_SHAPE_FIELD, KEEP_HALAL_FIELD}:
             return say("keep_usual_say" if value == "keep" else "just_this_week", lang)
         if request.field_path == "household_size":
             if isinstance(value, bool) or not isinstance(value, (int, float, str)):
@@ -904,7 +912,12 @@ class AgentSessionService:
             raise AgentSessionNotReadyError("Generate a plan before requesting a replanning event.")
         lang = language(message, snapshot.messages)
         interaction = snapshot.pending_interaction
-        if interaction is not None and interaction.field_path == KEEP_SHAPE_FIELD:
+        if interaction is not None and interaction.field_path == KEEP_HALAL_FIELD:
+            keep = keep_shape_answer(message)
+            if keep is not None:
+                return self._answer_keep_halal(session_id, snapshot, message, keep=keep, lang=lang)
+            snapshot = snapshot.model_copy(update={"pending_interaction": None})  # a new instruction: as for the shape
+        elif interaction is not None and interaction.field_path == KEEP_SHAPE_FIELD:
             keep = keep_shape_answer(message)
             if keep is not None:
                 return self._answer_keep_shape(session_id, snapshot, message, keep=keep, lang=lang)
@@ -1063,10 +1076,38 @@ class AgentSessionService:
             seen.add(dish.recipe.id)
         return say("swap_other", "en"), say("swap_say", lang)
 
+    def _asks_halal_week(self, snapshot: AgentSessionResponse, message: str) -> bool:
+        """A planned week whose household now asks for halal ("make this week halal"): an action, never a
+        question about a dish ("is this halal?"), and only while the week is not halal already."""
+        if snapshot.constraints.requires_halal or not requests_halal(message):
+            return False
+        return self.orchestrator.classify(message, history=snapshot.messages).scope_class is ScopeClass.DOMAIN_ACTION
+
+    def _offers_halal_keep(self, constraints: AgentConstraintState) -> bool:
+        """Ask whether to save halal to the profile: a halal week the conversation asked for, in a household
+        whose profile is not halal yet (a profile that is halal has nothing to save)."""
+        profile_halal = self.starting_constraints is not None and self.starting_constraints.requires_halal
+        return constraints.requires_halal and not profile_halal and self.keep_requires_halal is not None
+
+    @staticmethod
+    def _keep_halal_choices(snapshot: AgentSessionResponse, lang: str) -> InteractionRequest:
+        return InteractionRequest(
+            type=InteractionType.QUICK_REPLY,
+            prompt=short_prompt(True, lang),
+            field_path=KEEP_HALAL_FIELD,
+            question_id=f"keep-halal-{snapshot.id}-{len(snapshot.messages)}",
+            options=[
+                InteractionOption(id="keep", label=say("keep_usual", "en"), value="keep"),
+                InteractionOption(id="week", label=say("just_this_week", "en"), value="week"),
+            ],
+            context_version=max(snapshot.context_version, 1),
+        )
+
     def _new_week(
-        self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, run: AgentRun, *, halal: bool = False
     ) -> AgentSessionResponse:
-        """Generate a replacement whole week with different dishes from the current one."""
+        """Generate a replacement whole week with different dishes from the current one. `halal`: the household
+        asked for halal, so the replacement is halal (and may repeat a dish the week had)."""
         plan = self.meal_plan_service.get(snapshot.plan_id)
         if plan is None:
             raise AgentSessionNotFoundError
@@ -1074,7 +1115,9 @@ class AgentSessionService:
             raise AgentSessionNotReadyError("This week was replaced. Open the current week to make changes.")
 
         lang = language(message, snapshot.messages)
-        avoid_recipe_ids = sorted(set(snapshot.constraints.avoid_recipe_ids) | {dish.recipe.id for dish in plan.days})
+        avoid_recipe_ids = snapshot.constraints.avoid_recipe_ids
+        if not halal:
+            avoid_recipe_ids = sorted(set(avoid_recipe_ids) | {dish.recipe.id for dish in plan.days})
 
         # The new plan covers the same days and meals as the one it replaces.
         changes: dict = {
@@ -1094,7 +1137,15 @@ class AgentSessionService:
         ):
             changes["max_uses_per_recipe"] = 1
 
-        request = self._plan_request(snapshot.constraints).model_copy(update=changes)
+        # A halal week stays halal in its replacement, whatever this conversation's own constraints say: the chat
+        # may belong to a non-halal profile (a week made halal in another chat, or by the profile before it changed).
+        stored = self.meal_plan_service.repository.get(plan.id)
+        stored_constraints = stored.constraints if stored is not None and isinstance(stored.constraints, dict) else {}
+        make_halal = halal or bool(stored_constraints.get("requires_halal"))
+        constraints = (
+            snapshot.constraints.model_copy(update={"requires_halal": True}) if make_halal else snapshot.constraints
+        )
+        request = self._plan_request(constraints).model_copy(update=changes)
 
         try:
             replacement = self.meal_plan_service.generate(
@@ -1105,10 +1156,12 @@ class AgentSessionService:
             reply = say("change_failed", lang, error=planner_message(str(error), lang))
             return self._keep_week(session_id, snapshot, plan, message, reply, lang, refused=True)
 
+        offer_halal = halal and self._offers_halal_keep(constraints)
         updated = self.repository.append_replan_exchange(
             session_id,
             user_message=message,
-            assistant_message=say("planned", lang, short=replacement.day_count < 7),
+            assistant_message=say("planned", lang, short=replacement.day_count < 7)
+            + (("" if lang == "zh" else " ") + say("ask_halal", lang) if offer_halal else ""),
             draft=AgentReplanDraft(),
             clarification_questions=[],
             pending_event_id=None,
@@ -1123,7 +1176,12 @@ class AgentSessionService:
         if updated is None:
             raise AgentSessionNotFoundError
 
-        attached = self.repository.attach_plan(session_id, plan_id=replacement.id)
+        attached = self.repository.attach_plan(
+            session_id,
+            plan_id=replacement.id,
+            constraints=constraints if make_halal else None,
+            pending_interaction=self._keep_halal_choices(snapshot, lang) if offer_halal else None,
+        )
         if attached is None:
             raise AgentSessionNotFoundError
 
@@ -1450,6 +1508,36 @@ class AgentSessionService:
             raise AgentSessionNotFoundError
         return self._to_response(updated)
 
+    def _answer_keep_halal(
+        self, session_id: int, snapshot: AgentSessionResponse, message: str, *, keep: bool, lang: str = "en"
+    ) -> AgentSessionResponse:
+        """After a halal week asked for in the chat: save halal to the household only on a yes."""
+        if keep and self.keep_requires_halal is not None:
+            self.keep_requires_halal()
+            reply = say("halal_kept", lang)
+        elif keep:
+            reply = say("keep_failed", lang)
+        else:
+            reply = say("halal_week_only", lang)
+        updated = self.repository.append_replan_exchange(
+            session_id,
+            user_message=message,
+            assistant_message=reply,
+            draft=AgentReplanDraft(),
+            clarification_questions=[],
+            pending_event_id=None,
+            scope_decision=ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["keep_requires_halal"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="KEEP_HALAL_ANSWER",
+            ),
+        )
+        if updated is None:
+            raise AgentSessionNotFoundError
+        return self._to_response(updated)
+
     def _confirm_in_chat(
         self, snapshot: AgentSessionResponse, message: str, *, idempotency_key: str | None
     ) -> AgentSessionResponse:
@@ -1513,9 +1601,6 @@ class AgentSessionService:
         agent_session = self.repository.get(session_id)
         if agent_session is None:
             raise AgentSessionNotFoundError
-        if AgentConstraintState.model_validate(agent_session.constraints).requires_halal:
-            self.repository.end_read_transaction()
-            raise AgentSessionNotReadyError(say("halal_unsupported", language("", agent_session.messages)))
         snapshot = self._to_response(agent_session)
         self.repository.end_read_transaction()
         started = self._start_run(
@@ -1582,12 +1667,15 @@ class AgentSessionService:
             provider_mode=constraints.pricing_mode,
             check_deadline=False,
         )
+        offer_halal = self._offers_halal_keep(constraints)
         updated = self.repository.mark_planned(
             session_id,
             plan_id=plan.id,
-            assistant_message=say("planned", lang, short=plan.day_count < 7),
+            assistant_message=say("planned", lang, short=plan.day_count < 7)
+            + (("" if lang == "zh" else " ") + say("ask_halal", lang) if offer_halal else ""),
             user_message=said,
             scope_decision=_chat_confirmation(said, "confirm_plan", applied=True) if said is not None else None,
+            pending_interaction=self._keep_halal_choices(snapshot, lang) if offer_halal else None,
         )
         if updated is None:
             self._fail_run(run, AgentSessionNotFoundError())
@@ -1627,9 +1715,6 @@ class AgentSessionService:
         if agent_session is None:
             raise AgentSessionNotFoundError
         snapshot = self._to_response(agent_session)
-        if snapshot.constraints.requires_halal:
-            self.repository.end_read_transaction()
-            raise AgentSessionNotReadyError(say("halal_unsupported", language("", snapshot.messages)))
         if snapshot.plan_id is None or snapshot.pending_replan is None:
             self.repository.end_read_transaction()
             raise AgentSessionNotReadyError("There is no replanning preview to confirm.")
@@ -2065,11 +2150,7 @@ class AgentSessionService:
                 else None
             ),
             latest_run=AgentRunResponse.model_validate(latest_run) if latest_run is not None else None,
-            can_confirm=(
-                agent_session.status == "ready"
-                and agent_session.plan_id is None
-                and not AgentConstraintState.model_validate(agent_session.constraints).requires_halal
-            ),
+            can_confirm=agent_session.status == "ready" and agent_session.plan_id is None,
             title=agent_session.title,
             pinned_at=agent_session.pinned_at,
             created_at=agent_session.created_at,

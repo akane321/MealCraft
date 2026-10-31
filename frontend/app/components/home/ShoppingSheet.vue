@@ -31,6 +31,7 @@ const basics = computed(() => basicsNote(props.estimate));
               <small v-if="line.pantry_deduction > 0">uses {{ line.pantry_deduction }}{{ line.unit ? ` ${line.unit}` : "" }} from home</small>
               <small v-if="line.note">{{ line.note }}</small>
               <small v-if="line.perishable">Use within 3 days of this shop</small>
+              <small v-if="line.product?.halal_certified">Halal-certified</small>
               <small>{{ groceryPriceLabel(line) }}</small>
             </span>
             <span class="pack">{{ packageLabel(line) }}</span>

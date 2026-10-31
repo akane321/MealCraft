@@ -16,6 +16,7 @@ from app.planning.dietary_tags import satisfies
 from app.planning.diversity import diversity_loss
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_scoring import local_recipe_loss, meal_affinity_loss, planning_preference_loss
+from app.planning.halal import halal_ok
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import (
     MAIN_ROLE,
@@ -693,7 +694,7 @@ def dish_eligible(problem: FinalPlanningProblem, slot: PlanningSlot, recipe: Pla
         return False
     if problem.dietary_requirements and "diet" in recipe.unknown_safety:
         return False
-    if problem.requires_halal and recipe.halal_status != "halal":
+    if not halal_ok(recipe, problem):
         return False
     if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
         return False

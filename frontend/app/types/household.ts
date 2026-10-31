@@ -165,6 +165,8 @@ export interface HouseholdProfileInput {
   nutrition_limits: NutritionLimit[];
   /** Equipment the kitchen lacks; a recipe that needs it is never planned. Empty: all at home. */
   missing_equipment?: Equipment[];
+  /** The whole household eats halal: only halal dishes, and meat only from products FairPrice marks Halal. */
+  requires_halal: boolean;
 }
 
 export interface HouseholdProfileUpdate extends HouseholdProfileInput {

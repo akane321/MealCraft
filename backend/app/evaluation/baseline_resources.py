@@ -10,6 +10,8 @@
 - Not bought: water and ice always; the basics assumed at home (`data/ingredients/basic-seasonings-v2.json`: seasonings,
   rice, vinegars, small-amount sauces, dried herbs, flours and the like) unless the household lists them as missing
   or excludes them. They still count for every safety check. The file's digest is recorded with the others.
+  A halal episode leaves out of that the basics that need a certified product (soy sauce, vinegar, mayonnaise): an
+  unknown jar at home is never halal, so they are bought (docs/evaluation/halal.md).
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from pathlib import Path
 from app.agent.ingredient_matcher import IngredientMatcher, catalog_aliases
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
+from app.data.halal import needs_certification
 from app.data.household_reference import basic_seasonings
 from app.data.ingredient_hierarchy import read_links
 from app.data.release_v2 import map_allergens
@@ -53,9 +56,14 @@ class BaselineResources:
     release_version: str | None = None
     data_digests: tuple[tuple[str, str], ...] = ()
 
-    def not_bought(self, household: dict) -> frozenset[str]:
-        """Water, ice and the basics this household is taken to have (`app.planning.household_slots`)."""
+    def not_bought(self, household: dict, halal: bool = False) -> frozenset[str]:
+        """Water, ice and the basics this household is taken to have (`app.planning.household_slots`).
+
+        A halal household (`halal`, or its profile's `requires_halal`) is not taken to have a basic that needs a
+        certified product: it is bought, as a product FairPrice marks Halal."""
         keep = {*(household.get("missing_basics") or []), *(household.get("excluded_ingredients") or [])}
+        if halal or household.get("requires_halal"):
+            keep |= {name for name in self.basic_seasonings if needs_certification(name)}
         return self.not_purchased | (self.basic_seasonings - keep)
 
 

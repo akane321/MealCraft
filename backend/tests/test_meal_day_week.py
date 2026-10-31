@@ -305,3 +305,17 @@ def test_the_label_tool_weighs_a_whole_head_by_its_wording_as_the_product_does()
     roles = [{"role_id": "vegetable", "courses": ["side", "salad"], "required": True}]
     assert SWEET_AND_SOUR_CABBAGE in {r["slug"] for meal in valid_meals(episode, roles, "dinner") for _, r in meal}
     assert _led(scorer_catalogs(episode).recipes[SWEET_AND_SOUR_CABBAGE])
+
+
+def test_a_halal_case_plans_for_a_halal_household():
+    """The gold's `halal_required`, or the profile's switch, reaches the product's plan request (ADR-0104)."""
+    from app.evaluation.meal_day_week_runner import plan_request
+
+    episode = load(sorted(EPISODES.glob("*.json"))[0].stem)
+    assert plan_request(episode).requires_halal is False
+    halal = copy.deepcopy(episode)
+    halal["gold"]["applicable_hard_constraints"]["halal_required"] = True
+    assert plan_request(halal).requires_halal is True
+    halal = copy.deepcopy(episode)
+    halal["scenario"]["household_profile"]["requires_halal"] = True
+    assert plan_request(halal).requires_halal is True

@@ -7,6 +7,7 @@ independent validation. This compiler does not infer missing source facts.
 from dataclasses import dataclass
 
 from app.planning.dietary_tags import satisfies
+from app.planning.halal import halal_ok
 from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import equipment_met
 from app.planning.member_coverage import servable
@@ -104,7 +105,7 @@ def compile_constraints(problem: FinalPlanningProblem) -> tuple[CandidateEligibi
                 reasons.add("not_servable")
             if problem.dietary_requirements and "diet" in recipe.unknown_safety:
                 reasons.add("dietary_status_unknown")
-            if problem.requires_halal and recipe.halal_status != "halal":
+            if not halal_ok(recipe, problem):
                 reasons.add("halal_requirement")
             if problem.missing_equipment and not equipment_met(recipe.equipment, problem.missing_equipment):
                 reasons.add("equipment")

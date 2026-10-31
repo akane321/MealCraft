@@ -52,7 +52,14 @@ from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
 from app.data.alternatives import options as alternative_options
 from app.data.catalog import mark_catalog_changed
-from app.data.tag_files import apply_ingredient_tags, apply_recipe_tags, tag_file_bytes
+from app.data.halal import recipe_halal_status
+from app.data.tag_files import (
+    apply_ingredient_halal,
+    apply_ingredient_tags,
+    apply_recipe_tags,
+    halal_file_bytes,
+    tag_file_bytes,
+)
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
@@ -98,6 +105,8 @@ def release_digest(directory: Path) -> str:
     digest.update((repository_root() / LINE_CORRECTIONS).read_bytes())
     # The tag columns are copied from the tag files, so a re-tagged catalog re-imports too.
     digest.update(tag_file_bytes())
+    # halal_status is copied from the halal label files, so a relabelled catalog re-imports too.
+    digest.update(halal_file_bytes())
     return digest.hexdigest()
 
 
@@ -212,6 +221,7 @@ def _import_ingredients(session: Session, directory: Path, recipes: list[dict], 
             row.allergens = sorted(set(row.allergens or []).union(allergens))
             report.ingredients_reused += 1
         apply_ingredient_tags(row, record["food_group"])
+        apply_ingredient_halal(row)
         rows[release_id] = row
 
     missing = sorted(set(line_allergens).difference(rows))
@@ -276,6 +286,7 @@ def _line_corrections(session: Session, recipes: list[dict]) -> dict[tuple[str, 
                 allergens=map_allergens(target["allergens"]),
             )
             apply_ingredient_tags(row)
+            apply_ingredient_halal(row)
             session.add(row)
             session.flush()
         corrected[(correction["recipe_id"], correction["original_text"])] = row.id
@@ -298,6 +309,7 @@ def _import_recipes(
     corrected: dict[tuple[str, str], int] | None = None,
 ) -> None:
     corrected = corrected or {}
+    names = dict(session.execute(select(Ingredient.id, Ingredient.normalized_name)).all())
     kept_ids: set[str] = set()
     existing_ids = dict(
         # Rows of any earlier release are upgraded in place: a recipe keeps its
@@ -320,11 +332,16 @@ def _import_recipes(
                 recipe = Recipe(external_id=record["recipe_id"], release_version=RELEASE_VERSION)
                 session.add(recipe)
             _fill_recipe(recipe, record)
+            line_ids = [
+                corrected.get(
+                    (record["recipe_id"], line["original_text"]), ingredient_ids[line["canonical_ingredient_id"]]
+                )
+                for line in record["ingredients"]
+            ]
+            recipe.halal_status = recipe_halal_status(names[ingredient_id] for ingredient_id in line_ids)
             recipe.recipe_ingredients = [
                 RecipeIngredient(
-                    ingredient_id=corrected.get(
-                        (record["recipe_id"], line["original_text"]), ingredient_ids[line["canonical_ingredient_id"]]
-                    ),
+                    ingredient_id=line_ids[index - 1],
                     quantity=_grams(line),
                     unit="g" if _grams(line) else None,
                     grams=_grams(line),
