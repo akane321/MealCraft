@@ -45,6 +45,12 @@ bytes are **drafts**. Their exact bytes must be registered and reviewed for
 neutrality by someone who did not write them before formal use. Neither the
 synthetic example date nor a readiness attestation is run admission.
 
+The shared instructions were revised after an AI-executed neutrality review (`ADR-0100` items 3 and 4, still
+proposed): `awaiting_confirmation` is defined with an example, the `Initial state` line is replaced by a plain
+statement that nothing is saved at the start, relative dates are tied to the given date, `plan` is for plan requests
+only, and the sources line refers to each system's registered configuration. The revised bytes have not been
+reviewed again and are not registered; the earlier review no longer applies to them.
+
 This phase does not implement a product transport, model arm, one-shot arm
 presentation, field-dictionary mapping, catalog ID matching, scoring, sealed file loading, freeze or admission. A change
 preview that is linked and not yet applied counts as waiting for confirmation in `normalize_product`, like a
