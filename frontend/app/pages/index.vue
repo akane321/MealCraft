@@ -604,7 +604,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         </header>
         <div class="hero-block">
           <h1 class="hero mc-serif">Plan the week.<br>Shop it once.<br><em>Eat well.</em></h1>
-          <p class="lede">Tell us who’s eating and what you can spend. We plan the meals and price the groceries at FairPrice.</p>
+          <p class="lede">Tell us who’s eating and what you can spend. We plan the meals and price the groceries at FairPrice, and at Cold Storage for what FairPrice lacks.</p>
           <form class="ask" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
             <input id="mc-ask" v-model="draft" type="text" autocomplete="off" placeholder="What should we plan…  e.g. dinner tonight for two, no seafood">
@@ -616,7 +616,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <button v-for="starter in starters" :key="starter" type="button" class="mc-pill" @click="send(starter)">{{ starter }}</button>
           </div>
         </div>
-        <p class="trust"><span>Allergies and dislikes respected</span><span>Prices from FairPrice</span><span>Nutrition counted as you cook</span></p>
+        <p class="trust"><span>Allergies and dislikes respected</span><span>Prices from FairPrice and Cold Storage</span><span>Nutrition counted as you cook</span></p>
         <button type="button" class="film-toggle mc-pill" :aria-label="filmPlaying ? 'Pause background video' : 'Play background video'" @click="toggleFilm">
           <svg v-if="filmPlaying" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12" /></svg>
           <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>

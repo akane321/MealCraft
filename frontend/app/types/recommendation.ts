@@ -3,6 +3,7 @@ import type { RecipeListItem } from "~/types/recipe";
 export type DietaryPreference = "vegetarian" | "vegan" | "gluten-free" | "dairy-free";
 export type HealthPreference = "low-sodium" | "low-sugar" | "lower-calorie";
 export type PricingMode = "fixture" | "live";
+export type Retailer = "fairprice" | "cold_storage";
 
 export interface Product {
   external_id: string;
@@ -15,7 +16,7 @@ export interface Product {
   product_url: string;
   image_url: string | null;
   in_stock: boolean;
-  source: "fairprice" | "fixture";
+  source: "fairprice" | "cold_storage" | "fixture";
   fetched_at: string;
   /** FairPrice's internal product id for its cart (not the number at the end of the product URL). */
   cart_item_id?: string | null;
@@ -34,7 +35,7 @@ export interface ProductSearchResponse {
 
 export interface PriceEvidence {
   fact_id?: string;
-  source: "fairprice" | "fixture" | "release_snapshot";
+  source: "fairprice" | "cold_storage" | "fixture" | "release_snapshot";
   mode: "live" | "cache" | "snapshot" | "fixture";
   query?: string | null;
   parser_version?: string | null;
@@ -59,6 +60,8 @@ export interface GroceryLineEstimate {
   consumed_cost_sgd: number | null;
   excess_quantity: number | null;
   note: string | null;
+  /** The store the line is bought at; null when it has no product. */
+  retailer?: Retailer | null;
   /** The shopping trip of a plan longer than a week: 1 before day 1, 2 before day 8; null is its only trip. */
   shopping_trip?: number | null;
   /** Perishable: used within 3 days of its trip. */

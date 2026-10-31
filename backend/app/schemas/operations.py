@@ -467,6 +467,8 @@ class OpsMappedProduct(BaseModel):
 
 
 class OpsProductMapping(BaseModel):
+    # The store the mapping is for; Cold Storage's is confirmed as FairPrice's is.
+    retailer: Literal["fairprice", "cold_storage"] = "fairprice"
     ingredient: str
     display_name: str | None
     status: Literal["mapped", "not_purchased", "removed"]

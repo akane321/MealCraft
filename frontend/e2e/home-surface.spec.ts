@@ -2436,3 +2436,65 @@ test("a one-dinner plan reads as one dinner, one date and a plan budget, with ch
   await page.waitForTimeout(600);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/21-short-plan-nutrition.png` });
 });
+
+test("a list with a Cold Storage line groups by store, links the product, and the cart panel counts it in the budget at 1280x720", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await stubFairPriceCart(page);
+  const chicken = grocery("Chicken breast", "Meat & Seafood", 10.15, 800);
+  const kale = grocery("Curly kale", "Fruit & Vegetables", 8.5, 200);
+  const items = [
+    { ...chicken, retailer: "fairprice", product: { ...chicken.product, source: "fairprice" } },
+    {
+      ...kale,
+      retailer: "cold_storage",
+      note: "FairPrice has no product for this; bought at Cold Storage.",
+      product: { ...kale.product, source: "cold_storage", product_url: "https://coldstorage.com.sg/product/curly-kale-200g" },
+      evidence: { source: "cold_storage", mode: "snapshot", price_source: "snapshot", fetched_at: "2026-09-14T08:00:00Z" },
+    },
+  ];
+  const mixed = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", purchase_total_sgd: 18.65, weekly_budget_sgd: 90, items }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill(json(mixed)));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: session(true), plan: mixed })));
+  const fingerprint = "a".repeat(64);
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill(json({
+    plan_id: 9001, shopping_trip: null, fingerprint,
+    lines: [{
+      line_key: "1|chicken_breast|g", ingredient_name: "chicken_breast", ingredient_display_name: "chicken breast", product_name: "FairPrice Chicken",
+      client_item_id: "13172993", cart_item_id: "172993", quantity: 1, planned_price_sgd: 10.15, live_price_sgd: 10.15,
+      product_url: "https://www.fairprice.com.sg/product/172993", status: "ready",
+    }],
+    ready_total_sgd: 10.15, planned_total_sgd: 10.15, projected_total_sgd: 83.4, budget_sgd: 90, over_budget: true,
+    other_stores: [{ retailer: "cold_storage", lines: 1, purchase_total_sgd: 8.5 }],
+  })));
+
+  // The cart panel: the Cold Storage line is neither in it nor a problem, the note says so, and the budget counts it.
+  const { panel } = await openFairPriceCart(page);
+  await expect(panel.getByText("Cold Storage items stay on your list with links; buy them on coldstorage.com.sg.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("1 of 1 item ready")).toBeVisible();
+  await expect(panel.getByText("Won't be added")).toHaveCount(0);
+  await expect(panel.getByText("At today's FairPrice prices, plus S$8.50 from Cold Storage, this trip comes to S$91.90, S$1.90 over your S$90.00 budget.")).toBeVisible();
+  await panel.getByRole("button", { name: "Close" }).click();
+
+  // The list: FairPrice first, then Cold Storage, each with its subtotal; the product link does not tick the line.
+  const groceries = page.locator(".groceries");
+  await expect(groceries.locator("h3.store")).toHaveCount(2);
+  await expect(groceries.locator("h3.store").first()).toHaveText(/^FairPrice\s*S\$10\.15$/);
+  await expect(groceries.locator("h3.store").last()).toHaveText(/^Cold Storage\s*S\$8\.50$/);
+  const row = groceries.locator(".item", { hasText: "Curly kale" });
+  await expect(row.getByText(/Cold Storage price from 14 Sep/)).toBeVisible();
+  const link = row.getByRole("link", { name: "View at Cold Storage" });
+  await expect(link).toHaveAttribute("href", "https://coldstorage.com.sg/product/curly-kale-200g");
+  await link.evaluate(el => el.addEventListener("click", event => event.preventDefault())); // stay on the page
+  await link.click();
+  await expect(row.getByRole("checkbox")).not.toBeChecked();
+  await row.getByText("Curly kale").click();
+  await expect(row.getByRole("checkbox")).toBeChecked();
+  await expect(groceries.locator(".source")).toContainText("FairPrice and Cold Storage prices from");
+
+  // The printed list has the same store sections, and no extra rows.
+  await page.getByRole("button", { name: "Preview list" }).click();
+  const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
+  await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Cold Storage\s*S\$8\.50$/]);
+  await expect(sheet.locator("li")).toHaveCount(2);
+});

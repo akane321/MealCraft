@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 
 from app.schemas.retrieval import RetrievalTrace
 
-ProductSource = Literal["fairprice", "fixture"]
+Retailer = Literal["fairprice", "cold_storage"]
+ProductSource = Literal["fairprice", "cold_storage", "fixture"]
 PricingMode = Literal["fixture", "live"]
 
 
@@ -48,13 +49,13 @@ class ProductSearchResponse(BaseModel):
 class PriceEvidence(BaseModel):
     """Where one shown price came from, so it can be traced and replayed (external-retrieval-rag.md).
 
-    `mode` is how the observation was obtained now: a live FairPrice request, the 15-minute cache, the
+    `mode` is how the observation was obtained now: a live retailer request, the 15-minute cache, the
     reviewed release snapshot, or the offline fixture. `fetched_at` is when the price was observed,
     not when it was read.
     """
 
     fact_id: str
-    source: Literal["fairprice", "fixture", "release_snapshot"]
+    source: Literal["fairprice", "cold_storage", "fixture", "release_snapshot"]
     mode: Literal["live", "cache", "snapshot", "fixture"]
     query: str | None
     parser_version: str | None
@@ -96,6 +97,9 @@ class GroceryLineEstimate(BaseModel):
     shopping_trip: int | None = Field(default=None, ge=1, le=2)
     # A perishable ingredient (layer 08): used within 3 days of its trip; None is not marked.
     perishable: bool | None = None
+    # The store the product is bought at: retailer_of(product) when the line has a product, else None
+    # (docs/design/cold-storage.md).
+    retailer: Retailer | None = None
 
 
 class GroceryEstimateResponse(BaseModel):

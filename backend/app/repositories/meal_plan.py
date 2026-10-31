@@ -484,5 +484,6 @@ class MealPlanRepository:
                     price_evidence=line.evidence.model_dump(mode="json") if line.evidence else None,
                     shopping_trip=line.shopping_trip,
                     perishable=line.perishable,
+                    retailer=line.retailer,
                 )
             )

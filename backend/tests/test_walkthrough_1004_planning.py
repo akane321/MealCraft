@@ -497,8 +497,9 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
     assert [option.label for option in refused.pending_interaction.options] == ["Use S$70 for the week"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
-    # (ADR-0067: a budget no week fits is refused as before).
-    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 40, False)]
+    # (ADR-0067: a budget no week fits is refused as before). Four's cheapest week is S$51.54 since Cold Storage priced
+    # higher-ranked salads and noodles into the ranked packet (S$52.83 before), so the budgeted check is at S$52.
+    assert planned == [(4, None, True), (4, 52, False), (2, None, True), (2, 40, False)]
 
 
 @pytest.fixture(scope="module")

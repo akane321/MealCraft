@@ -277,6 +277,8 @@ export interface FairPriceCartPrepare {
   projected_total_sgd: number;
   budget_sgd: number | null;
   over_budget: boolean;
+  /** Lines bought elsewhere (Cold Storage) that the cart does not take; their totals count toward the budget. */
+  other_stores?: Array<{ retailer: "cold_storage"; lines: number; purchase_total_sgd: number }>;
 }
 
 export type FairPriceResultStatus = "added" | "reduced" | "out_of_stock" | "failed";

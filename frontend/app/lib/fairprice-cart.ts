@@ -72,11 +72,21 @@ export function priceChanges(lines: FairPriceCartLine[]): PriceChange[] {
   return changes;
 }
 
+/** Cold Storage lines are links, not cart items; the panel says so when the trip has any. */
+export const COLD_STORAGE_NOTE = "Cold Storage items stay on your list with links; buy them on coldstorage.com.sg.";
+
+/** What the trip's lines at other stores cost: they count toward the budget though the cart does not take them. */
+export const otherStoresTotal = (prepare: FairPriceCartPrepare): number =>
+  Math.round((prepare.other_stores ?? []).reduce((sum, store) => sum + store.purchase_total_sgd, 0) * 100) / 100;
+
 /** The budget warning of a prepared trip, or null within budget (or without one). The plan is never changed. */
 export function budgetWarning(prepare: FairPriceCartPrepare): string | null {
   if (!prepare.over_budget || prepare.budget_sgd == null) return null;
-  const over = formatSgd(Math.round((prepare.projected_total_sgd - prepare.budget_sgd) * 100) / 100);
-  return `At today's FairPrice prices this trip comes to ${formatSgd(prepare.projected_total_sgd)}, ${over} over your ${formatSgd(prepare.budget_sgd)} budget. Your plan is not changed.`;
+  const other = otherStoresTotal(prepare);
+  const total = Math.round((prepare.projected_total_sgd + other) * 100) / 100;
+  const over = formatSgd(Math.round((total - prepare.budget_sgd) * 100) / 100);
+  const prices = other > 0 ? `At today's FairPrice prices, plus ${formatSgd(other)} from Cold Storage,` : "At today's FairPrice prices";
+  return `${prices} this trip comes to ${formatSgd(total)}, ${over} over your ${formatSgd(prepare.budget_sgd)} budget. Your plan is not changed.`;
 }
 
 export interface ResultCounts {

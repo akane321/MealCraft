@@ -3,7 +3,8 @@ import { humanKey, packageGrams } from "~/lib/ops";
 import type { OpsMappedProduct, OpsProductMapping } from "~/types/ops";
 import type { Product, ProductSearchResponse } from "~/types/recommendation";
 
-// The reviewed ingredient → FairPrice mapping the estimator prices release ingredients with.
+// The reviewed ingredient → FairPrice mapping the estimator prices release ingredients with; a store switch shows Cold Storage's,
+// which fills only the ingredients FairPrice lacks.
 const PAGE = 25;
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -13,13 +14,14 @@ const detailOf = (error: unknown, fallback: string) => {
   return typeof found === "string" ? found : fallback;
 };
 
-const filters = reactive({ q: "", status: "" });
+const filters = reactive({ q: "", status: "", retailer: "fairprice" as "fairprice" | "cold_storage" });
+const storeName = computed(() => (filters.retailer === "cold_storage" ? "Cold Storage" : "FairPrice"));
 const offset = ref(0);
 const page = ref<{ items: OpsProductMapping[]; total: number } | null>(null);
 const listFailed = ref(false);
 async function loadList() {
   listFailed.value = false;
-  const query: Record<string, string | number> = { offset: offset.value, limit: PAGE };
+  const query: Record<string, string | number> = { offset: offset.value, limit: PAGE, retailer: filters.retailer };
   if (filters.q.trim()) query.q = filters.q.trim();
   if (filters.status) query.status = filters.status;
   try {
@@ -30,6 +32,10 @@ async function loadList() {
   }
 }
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
+watch(() => filters.retailer, (retailer) => {
+  selected.value = null;
+  search.live = retailer === "cold_storage"; // Cold Storage has no stored fixture to search
+});
 watch(filters, () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
@@ -57,7 +63,7 @@ function onKey(event: KeyboardEvent) {
 onMounted(() => window.addEventListener("keydown", onKey));
 onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
-// Find a replacement in FairPrice (the stored fixture unless "live" is ticked).
+// Find a replacement in the chosen store (the stored fixture unless "live" is ticked).
 const search = reactive({ q: "", live: false });
 const results = ref<Product[] | null>(null);
 const searching = ref(false);
@@ -65,7 +71,7 @@ async function find() {
   searching.value = true;
   failure.value = "";
   try {
-    const found = await apiFetch<ProductSearchResponse>(`${config.public.apiBase}/api/products/search`, { query: { q: search.q.trim(), live: search.live, limit: 8 } });
+    const found = await apiFetch<ProductSearchResponse>(`${config.public.apiBase}/api/products/search`, { query: { q: search.q.trim(), live: search.live, limit: 8, retailer: filters.retailer } });
     results.value = found.items;
   }
   catch {
@@ -105,7 +111,7 @@ const pending = ref<"change" | "remove" | null>(null);
 const busy = ref(false);
 const pendingText = computed(() => {
   const name = selected.value?.display_name ?? selected.value?.ingredient;
-  if (pending.value === "remove") return `${name} loses its FairPrice product. Its cost shows as unknown and release recipes that need it are no longer planned.`;
+  if (pending.value === "remove") return `${name} loses its ${storeName.value} product. Its cost shows as unknown and release recipes that need it are no longer planned.`;
   return `${name} is bought as ${choice.value?.product.name} (${choice.value?.grams} g, S$${choice.value?.product.price_sgd.toFixed(2)}) from the next estimate.`;
 });
 async function confirmChange() {
@@ -115,9 +121,10 @@ async function confirmChange() {
   failure.value = "";
   try {
     const path = api(`/mappings/${mapping.ingredient}`);
+    const query = { retailer: filters.retailer };
     selected.value = pending.value === "remove"
-      ? await apiFetch<OpsProductMapping>(path, { method: "DELETE" })
-      : await apiFetch<OpsProductMapping>(path, { method: "PUT", body: { product: { ...choice.value!.product, package_grams: choice.value!.grams } } });
+      ? await apiFetch<OpsProductMapping>(path, { method: "DELETE", query })
+      : await apiFetch<OpsProductMapping>(path, { method: "PUT", query, body: { product: { ...choice.value!.product, package_grams: choice.value!.grams } } });
     message.value = pending.value === "remove" ? "Mapping removed." : "Mapping changed.";
     choice.value = null;
     await loadList();
@@ -138,6 +145,12 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
   <div class="ops-page">
     <div class="filters">
       <label class="grow">Search ingredient or product <input v-model="filters.q" type="search" placeholder="e.g. agar or Swallow"></label>
+      <label>Store
+        <select v-model="filters.retailer">
+          <option value="fairprice">FairPrice</option>
+          <option value="cold_storage">Cold Storage</option>
+        </select>
+      </label>
       <label>Show
         <select v-model="filters.status">
           <option value="">All</option>
@@ -210,8 +223,8 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
 
         <form class="edit" @submit.prevent="find">
           <h3>Change the product</h3>
-          <label>Search FairPrice <input v-model="search.q" required minlength="2" maxlength="100"></label>
-          <fieldset><label><input v-model="search.live" type="checkbox"> Live FairPrice (otherwise the stored fixture)</label></fieldset>
+          <label>Search {{ storeName }} <input v-model="search.q" required minlength="2" maxlength="100"></label>
+          <fieldset><label><input v-model="search.live" type="checkbox"> Live {{ storeName }} (otherwise {{ filters.retailer === "cold_storage" ? "only saved searches, often nothing" : "the stored fixture" }})</label></fieldset>
           <button type="submit" class="mc-pill" :disabled="searching || search.q.trim().length < 2">{{ searching ? "Searching…" : "Search" }}</button>
           <p v-if="results && !results.length" class="ops-muted">Nothing found.</p>
           <ul v-else-if="results" class="rows" aria-label="Search results">

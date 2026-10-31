@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { basicsNote, formatSgd, groceryPriceLabel, groceryTrips, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryPriceLabel, groceryTrips, hasColdStorage, lineRetailer, packageLabel, priceSourceLabel } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
+import type { GroceryLineEstimate } from "~/types/recommendation";
 
 const props = defineProps<{
   estimate: WeeklyGroceryEstimate;
@@ -9,6 +10,9 @@ const props = defineProps<{
 }>();
 
 const trips = computed(() => groceryTrips(props.estimate.items));
+// Store sections (FairPrice, then Cold Storage) only once some line is bought at Cold Storage.
+const byStore = computed(() => hasColdStorage(props.estimate.items));
+const storeSum = (lines: GroceryLineEstimate[]) => lines.reduce((total, line) => total + line.purchase_cost_sgd, 0);
 const basics = computed(() => basicsNote(props.estimate));
 </script>
 
@@ -21,24 +25,28 @@ const basics = computed(() => basicsNote(props.estimate));
 
     <template v-for="trip in trips" :key="trip.trip ?? 0">
       <h2 v-if="trip.label" class="trip">{{ trip.label }}</h2>
-      <section v-for="group in trip.groups" :key="group.name">
-        <h3>{{ group.name }}</h3>
-        <ul>
-          <li v-for="line in group.lines" :key="line.ingredient_name">
-            <span class="box" aria-hidden="true" />
-            <span class="name">
-              {{ line.ingredient_display_name }}
-              <small v-if="line.pantry_deduction > 0">uses {{ line.pantry_deduction }}{{ line.unit ? ` ${line.unit}` : "" }} from home</small>
-              <small v-if="line.note">{{ line.note }}</small>
-              <small v-if="line.perishable">Use within 3 days of this shop</small>
-              <small v-if="line.product?.halal_certified">Halal-certified</small>
-              <small>{{ groceryPriceLabel(line) }}</small>
-            </span>
-            <span class="pack">{{ packageLabel(line) }}</span>
-            <span class="price">{{ formatSgd(line.purchase_cost_sgd) }}</span>
-          </li>
-        </ul>
-      </section>
+      <template v-for="store in trip.stores" :key="store.retailer">
+        <h2 v-if="byStore" class="store">{{ store.name }}<span>{{ formatSgd(storeSum(store.groups.flatMap(group => group.lines))) }}</span></h2>
+        <section v-for="group in store.groups" :key="group.name">
+          <h3>{{ group.name }}</h3>
+          <ul>
+            <li v-for="line in group.lines" :key="`${lineRetailer(line)}:${line.ingredient_name}`">
+              <span class="box" aria-hidden="true" />
+              <span class="name">
+                {{ line.ingredient_display_name }}
+                <small v-if="line.pantry_deduction > 0">uses {{ line.pantry_deduction }}{{ line.unit ? ` ${line.unit}` : "" }} from home</small>
+                <small v-if="line.note">{{ line.note }}</small>
+                <small v-if="line.perishable">Use within 3 days of this shop</small>
+                <small v-if="line.product?.halal_certified">Halal-certified</small>
+                <small>{{ groceryPriceLabel(line) }}</small>
+                <small v-if="store.retailer === 'cold_storage' && line.product?.product_url"><a :href="line.product.product_url">{{ line.product.product_url }}</a></small>
+              </span>
+              <span class="pack">{{ packageLabel(line) }}</span>
+              <span class="price">{{ formatSgd(line.purchase_cost_sgd) }}</span>
+            </li>
+          </ul>
+        </section>
+      </template>
     </template>
 
     <section v-if="estimate.unmapped_ingredients.length">
@@ -59,6 +67,8 @@ const basics = computed(() => basicsNote(props.estimate));
 header p { margin: 0; font-size: 12px; color: #5e574b; }
 h2 { margin: 4px 0 20px; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 32px; font-weight: 700; }
 h2.trip { margin: 24px 0 0; font-size: 20px; }
+h2.store { margin: 18px 0 0; display: flex; justify-content: space-between; font-size: 16px; }
+.name a { color: inherit; }
 h3 { margin: 18px 0 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5e574b; }
 ul { list-style: none; margin: 0; padding: 0; }
 li { display: flex; align-items: center; gap: 12px; min-height: 34px; border-top: 1px solid #e7dfd0; font-size: 14px; break-inside: avoid; }

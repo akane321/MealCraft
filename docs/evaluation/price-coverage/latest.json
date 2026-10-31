@@ -1,0 +1,118 @@
+{
+ "ingredients": {
+  "total": 699,
+  "fairprice": 519,
+  "combined": 564,
+  "fairprice_share": 0.7425,
+  "combined_share": 0.8069,
+  "released": 701,
+  "not_purchased": [
+   "ice",
+   "water"
+  ],
+  "cold_storage_only": 45,
+  "cold_storage_only_share": 0.0644,
+  "target": 0.9,
+  "target_met": false
+ },
+ "recipes": {
+  "total": 8967,
+  "fairprice": 7185,
+  "combined": 7766,
+  "fairprice_share": 0.8013,
+  "combined_share": 0.8661
+ },
+ "lines": {
+  "total": 75661,
+  "fairprice": 73642,
+  "combined": 74353,
+  "fairprice_share": 0.9733,
+  "combined_share": 0.9827
+ },
+ "unpriced": [
+  {
+   "ingredient": "allspice",
+   "recipes": 118
+  },
+  {
+   "ingredient": "dill",
+   "recipes": 87
+  },
+  {
+   "ingredient": "turkey",
+   "recipes": 83
+  },
+  {
+   "ingredient": "pie_crust",
+   "recipes": 60
+  },
+  {
+   "ingredient": "biscuit_mix",
+   "recipes": 58
+  },
+  {
+   "ingredient": "water_chestnut",
+   "recipes": 57
+  },
+  {
+   "ingredient": "seasoned_salt",
+   "recipes": 53
+  },
+  {
+   "ingredient": "meat",
+   "recipes": 52
+  },
+  {
+   "ingredient": "mixed_nuts",
+   "recipes": 47
+  },
+  {
+   "ingredient": "celery_seed",
+   "recipes": 46
+  },
+  {
+   "ingredient": "radish",
+   "recipes": 32
+  },
+  {
+   "ingredient": "dried_onion_flakes",
+   "recipes": 27
+  },
+  {
+   "ingredient": "lime_zest",
+   "recipes": 25
+  },
+  {
+   "ingredient": "spaghetti_squash",
+   "recipes": 24
+  },
+  {
+   "ingredient": "chow_mein_noodles",
+   "recipes": 23
+  },
+  {
+   "ingredient": "mashed_potatoes",
+   "recipes": 23
+  },
+  {
+   "ingredient": "onion_salt",
+   "recipes": 22
+  },
+  {
+   "ingredient": "gochugaru",
+   "recipes": 20
+  },
+  {
+   "ingredient": "lard",
+   "recipes": 20
+  },
+  {
+   "ingredient": "orange_juice_conc",
+   "recipes": 19
+  }
+ ],
+ "sources": {
+  "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
+  "products/cold-storage-v1-snapshot.json": "ed97fb7f29e660fa"
+ }
+}

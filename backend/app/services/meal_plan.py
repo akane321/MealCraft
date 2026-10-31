@@ -28,6 +28,7 @@ from app.planning.product_path import (
     pool_for,
 )
 from app.planning.replan_pantry import remaining_stock
+from app.planning.retailers import is_fairprice_only, retailer_of
 from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
@@ -322,6 +323,7 @@ class WeeklyMealPlanService:
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
         return (
             id(self.recipe_repository.session.get_bind()),  # the database, as the pool is keyed
+            is_fairprice_only(),  # a week found with both stores is not the frozen evaluation's
             self.repository.household_id,
             repr(self.planning_engine.limits),
             profile_version,
@@ -996,6 +998,8 @@ class WeeklyMealPlanService:
             evidence=PriceEvidence.model_validate(item.price_evidence) if item.price_evidence else None,
             shopping_trip=item.shopping_trip,
             perishable=item.perishable,
+            # Lines saved before the store was kept read as the store their product came from.
+            retailer=item.retailer or (retailer_of(product) if product else None),
         )
 
     @staticmethod

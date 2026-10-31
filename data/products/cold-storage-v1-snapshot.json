@@ -1,0 +1,1358 @@
+{
+ "snapshot_version": "cold-storage-v1",
+ "source": "cold_storage",
+ "fetched_from": "2026-10-31T07:41:06+00:00",
+ "fetched_to": "2026-10-31T08:46:48+00:00",
+ "min_confidence": 0.6,
+ "ingredients": {
+  "asian_pear": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-7298505",
+     "name": "Golden Pear China 1s",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "1 piece (1s) x 250 g, the ingredient's whole-piece weight; the pack states no weight",
+     "price_sgd": 1.95,
+     "product_url": "https://coldstorage.com.sg/product/golden-pear-china_12691",
+     "in_stock": true,
+     "query": "pear",
+     "fetched_at": "2026-10-31T07:42:44+00:00"
+    },
+    {
+     "external_id": "cs-92620",
+     "name": "Fragrant Pear China 1s",
+     "brand": null,
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "1 piece (1s) x about 200 g for a fragrant (Korla-type) pear; the pack states no weight",
+     "price_sgd": 4.95,
+     "product_url": "https://coldstorage.com.sg/product/fragrant-pear-china-6s",
+     "in_stock": true,
+     "query": "pear",
+     "fetched_at": "2026-10-31T07:42:44+00:00"
+    }
+   ]
+  },
+  "baguette": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-1007546",
+     "name": "Hayley Mini Baguette 4S 240g",
+     "brand": null,
+     "category": null,
+     "package_grams": 240,
+     "package_grams_basis": "printed 4S 240G, 4 mini baguettes x 60 g per piece",
+     "price_sgd": 3.2,
+     "product_url": "https://coldstorage.com.sg/product/hayley-mini-baguette-240g",
+     "in_stock": false,
+     "query": "baguette",
+     "fetched_at": "2026-10-31T08:41:12+00:00"
+    }
+   ]
+  },
+  "buttermilk": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-78715",
+     "name": "Dairy Farmers Buttermilk 600ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 621,
+     "package_grams_basis": "printed 600 ML x 245 g per cup / 236.6 ml",
+     "price_sgd": 6.05,
+     "product_url": "https://coldstorage.com.sg/product/dairy-farmers-buttermilk-600ml",
+     "in_stock": true,
+     "query": "buttermilk",
+     "fetched_at": "2026-10-31T08:40:58+00:00"
+    }
+   ]
+  },
+  "buttermilk_or_sour_milk": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-78715",
+     "name": "Dairy Farmers Buttermilk 600ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 621,
+     "package_grams_basis": "printed 600ml x 1.035 g/ml (unit_grams 245 g/cup)",
+     "price_sgd": 6.05,
+     "product_url": "https://coldstorage.com.sg/product/dairy-farmers-buttermilk-600ml",
+     "in_stock": true,
+     "query": "buttermilk",
+     "fetched_at": "2026-10-31T08:44:47+00:00"
+    }
+   ]
+  },
+  "chipotle_in_adobo": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-125690",
+     "name": "La Costena Chipotle Peppers 199g",
+     "brand": null,
+     "category": null,
+     "package_grams": 199,
+     "package_grams_basis": "printed 199 g can of chipotle peppers (in adobo); can contents incl. sauce",
+     "price_sgd": 4.1,
+     "product_url": "https://coldstorage.com.sg/product/la-costena-chipotle-peppers-199g",
+     "in_stock": true,
+     "query": "chipotle",
+     "fetched_at": "2026-10-31T07:43:30+00:00"
+    }
+   ]
+  },
+  "chipotle_pepper": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-125690",
+     "name": "La Costena Chipotle Peppers 199g",
+     "brand": null,
+     "category": null,
+     "package_grams": 199,
+     "package_grams_basis": "printed net weight 199 g (canned chipotle peppers, with their adobo sauce)",
+     "price_sgd": 4.1,
+     "product_url": "https://coldstorage.com.sg/product/la-costena-chipotle-peppers-199g",
+     "in_stock": true,
+     "query": "chipotle pepper",
+     "fetched_at": "2026-10-31T07:46:46+00:00"
+    }
+   ]
+  },
+  "chipped_beef": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-223810",
+     "name": "Smokin Bros Sliced Bresaola 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 12.95,
+     "product_url": "https://coldstorage.com.sg/product/smokin-bros-sliced-bresaola-100g",
+     "in_stock": true,
+     "query": "bresaola",
+     "fetched_at": "2026-10-31T07:45:36+00:00"
+    }
+   ]
+  },
+  "chorizo": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-139338",
+     "name": "Fermin Iberico Chorizo Salami 200g",
+     "brand": null,
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed 200g",
+     "price_sgd": 16.75,
+     "product_url": "https://coldstorage.com.sg/product/fermin-chorizo-iberico-200g",
+     "in_stock": true,
+     "query": "chorizo",
+     "fetched_at": "2026-10-31T07:42:17+00:00"
+    },
+    {
+     "external_id": "cs-224501",
+     "name": "Pata Negra House Iberico Bellota Chorizo Salami 40g",
+     "brand": null,
+     "category": null,
+     "package_grams": 40,
+     "package_grams_basis": "printed 40g",
+     "price_sgd": 8.5,
+     "product_url": "https://coldstorage.com.sg/product/pata-negra-house-chorizo-ibeirico-bellota-40g",
+     "in_stock": true,
+     "query": "chorizo",
+     "fetched_at": "2026-10-31T07:42:17+00:00"
+    },
+    {
+     "external_id": "cs-213157",
+     "name": "Noel Sliced Chorizo Salami 80g",
+     "brand": null,
+     "category": null,
+     "package_grams": 80,
+     "package_grams_basis": "printed 80g",
+     "price_sgd": 12.5,
+     "product_url": "https://coldstorage.com.sg/product/noel-sliced-chorizo-80g",
+     "in_stock": true,
+     "query": "chorizo",
+     "fetched_at": "2026-10-31T07:42:17+00:00"
+    },
+    {
+     "external_id": "cs-158769",
+     "name": "Verkerks Sliced Chorizo Salami 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100g",
+     "price_sgd": 8.95,
+     "product_url": "https://coldstorage.com.sg/product/verkerks-chorizo-sliced-salami",
+     "in_stock": true,
+     "query": "chorizo",
+     "fetched_at": "2026-10-31T07:42:17+00:00"
+    },
+    {
+     "external_id": "cs-223909",
+     "name": "Pan Pacific Smoked Chorizo Sausage 400g",
+     "brand": null,
+     "category": null,
+     "package_grams": 400,
+     "package_grams_basis": "printed 400g",
+     "price_sgd": 14.5,
+     "product_url": "https://coldstorage.com.sg/product/pan-pacific-smoked-chorizo-sausage-400g",
+     "in_stock": false,
+     "query": "chorizo",
+     "fetched_at": "2026-10-31T07:42:17+00:00"
+    }
+   ]
+  },
+  "creme_fraiche": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-76715",
+     "name": "Bulla Creme Fraiche 200g",
+     "brand": null,
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed net weight 200 g",
+     "price_sgd": 6.9,
+     "product_url": "https://coldstorage.com.sg/product/bulla-creme-fraiche-200g",
+     "in_stock": true,
+     "query": "creme fraiche",
+     "fetched_at": "2026-10-31T07:44:54+00:00"
+    },
+    {
+     "external_id": "cs-171308",
+     "name": "Tatua Creme Fraiche 500g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500,
+     "package_grams_basis": "printed net weight 500 g",
+     "price_sgd": 10.05,
+     "product_url": "https://coldstorage.com.sg/product/tatua-creme-fraiche-500g",
+     "in_stock": false,
+     "query": "creme fraiche",
+     "fetched_at": "2026-10-31T07:44:54+00:00"
+    }
+   ]
+  },
+  "dark_chocolate": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-86786",
+     "name": "Lindt Excellence 70% Dark Chocolate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 12.1,
+     "product_url": "https://coldstorage.com.sg/product/lindt-excellence-dark-70-100g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    },
+    {
+     "external_id": "cs-86943",
+     "name": "Lindt Excellence 78% Dark Chocolate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 12.1,
+     "product_url": "https://coldstorage.com.sg/product/lindt-excellence-78-dark-chocolate-100g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    },
+    {
+     "external_id": "cs-86773",
+     "name": "Lindt Excellence 85% Cocoa Dark Chocolate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 12.1,
+     "product_url": "https://coldstorage.com.sg/product/lindt-excellence-85-cocoa-dark-chocolate-100g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    },
+    {
+     "external_id": "cs-86918",
+     "name": "Lindt Excellence 70% Mild Dark Chocolate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 12.1,
+     "product_url": "https://coldstorage.com.sg/product/lindt-excellence-70-mild-100g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    },
+    {
+     "external_id": "cs-76584",
+     "name": "Cadbury Old Gold 70% Cocoa Dark Chocolate 180g",
+     "brand": null,
+     "category": null,
+     "package_grams": 180,
+     "package_grams_basis": "printed 180G",
+     "price_sgd": 8.7,
+     "product_url": "https://coldstorage.com.sg/product/cadbury-old-gold-70-cocoa-dark-chocolate-180g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    },
+    {
+     "external_id": "cs-207176",
+     "name": "Krakakoa Arenga 85% Dark Chocolate 50g",
+     "brand": null,
+     "category": null,
+     "package_grams": 50,
+     "package_grams_basis": "printed 50G",
+     "price_sgd": 7.9,
+     "product_url": "https://coldstorage.com.sg/product/krakakoa-arenga-85-dark-chocolate-50g",
+     "in_stock": true,
+     "query": "dark chocolate",
+     "fetched_at": "2026-10-31T07:44:56+00:00"
+    }
+   ]
+  },
+  "dinner_roll": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-25709612",
+     "name": "Bonjour Burger Buns 4s 250g",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed net weight 250 g (4 buns)",
+     "price_sgd": 2.3,
+     "product_url": "https://coldstorage.com.sg/product/bonjour-burger-buns-4s-250g",
+     "in_stock": false,
+     "query": "burger buns",
+     "fetched_at": "2026-10-31T07:42:40+00:00"
+    }
+   ]
+  },
+  "doenjang": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-28712599",
+     "name": "Sing Song Soybean Paste 500g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500,
+     "package_grams_basis": "printed 500G",
+     "price_sgd": 5,
+     "product_url": "https://coldstorage.com.sg/product/sing-song-soybean-paste-500g_12856",
+     "in_stock": true,
+     "query": "soybean paste",
+     "fetched_at": "2026-10-31T08:42:30+00:00"
+    }
+   ]
+  },
+  "english_muffin": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-168171",
+     "name": "Master Baker English Muffin Sourdough, 4s",
+     "brand": null,
+     "category": null,
+     "package_grams": 228,
+     "package_grams_basis": "printed 4s x 57 g per piece",
+     "price_sgd": 6.9,
+     "product_url": "https://coldstorage.com.sg/product/master-baker-english-muffin-sourdough-4s",
+     "in_stock": false,
+     "query": "english muffin",
+     "fetched_at": "2026-10-31T07:47:08+00:00"
+    }
+   ]
+  },
+  "goat_cheese": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-89504",
+     "name": "Meredith Dairy Marinated Goat Cheese 320g",
+     "brand": null,
+     "category": null,
+     "package_grams": 320,
+     "package_grams_basis": "printed 320g; marinated in oil so drained weight is lower, estimated",
+     "price_sgd": 17.95,
+     "product_url": "https://coldstorage.com.sg/product/meredith-dairy-marinated-goat-cheese-320g",
+     "in_stock": true,
+     "query": "goat's cheese",
+     "fetched_at": "2026-10-31T07:42:42+00:00"
+    }
+   ]
+  },
+  "gochujang_sauce": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-185806",
+     "name": "CJW Gochujang Paste 500g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500,
+     "package_grams_basis": "printed 500G",
+     "price_sgd": 6.95,
+     "product_url": "https://coldstorage.com.sg/product/cjw-gochujang-paste-500g",
+     "in_stock": true,
+     "query": "gochujang sauce",
+     "fetched_at": "2026-10-31T07:43:34+00:00"
+    }
+   ]
+  },
+  "half_and_half": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-124210",
+     "name": "Organic Valley Half & Half Cream 473ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 477,
+     "package_grams_basis": "printed 473 ml x 242 g per 240 ml cup of the ingredient = 477 g",
+     "price_sgd": 11.55,
+     "product_url": "https://coldstorage.com.sg/product/organic-valley-half-half-473ml",
+     "in_stock": true,
+     "query": "cooking cream",
+     "fetched_at": "2026-10-31T07:41:22+00:00"
+    }
+   ]
+  },
+  "halloumi": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-86735",
+     "name": "Lemnos Haloumi Cheese 180g",
+     "brand": null,
+     "category": null,
+     "package_grams": 180,
+     "package_grams_basis": "printed 180G",
+     "price_sgd": 6.9,
+     "product_url": "https://coldstorage.com.sg/product/lemnos-haloumi-cheese-180g",
+     "in_stock": true,
+     "query": "grilling cheese",
+     "fetched_at": "2026-10-31T07:44:18+00:00"
+    }
+   ]
+  },
+  "hamburger_bun": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-117313",
+     "name": "Sunshine Extra Fine Wholemeal Burger Buns 4s 220g",
+     "brand": null,
+     "category": null,
+     "package_grams": 220,
+     "package_grams_basis": "printed 220g (4 buns)",
+     "price_sgd": 2.4,
+     "product_url": "https://coldstorage.com.sg/product/sunshine-wholemeal-burger-buns-extra-fine-220g",
+     "in_stock": true,
+     "query": "burger bun",
+     "fetched_at": "2026-10-31T07:41:50+00:00"
+    },
+    {
+     "external_id": "cs-25709612",
+     "name": "Bonjour Burger Buns 4s 250g",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 250g (4 buns)",
+     "price_sgd": 2.3,
+     "product_url": "https://coldstorage.com.sg/product/bonjour-burger-buns-4s-250g",
+     "in_stock": false,
+     "query": "burger bun",
+     "fetched_at": "2026-10-31T07:41:50+00:00"
+    }
+   ]
+  },
+  "horseradish": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-142447",
+     "name": "Hengstenberg Horseradish 145g",
+     "brand": null,
+     "category": null,
+     "package_grams": 145,
+     "package_grams_basis": "printed net weight 145 g (prepared horseradish)",
+     "price_sgd": 4.3,
+     "product_url": "https://coldstorage.com.sg/product/hengstenberg-horseradish-145g",
+     "in_stock": true,
+     "query": "horseradish sauce",
+     "fetched_at": "2026-10-31T07:42:38+00:00"
+    }
+   ]
+  },
+  "hot_dog_bun": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-117339",
+     "name": "Sunshine Extra Fine Wholemeal Sausage Buns 4s 220g",
+     "brand": null,
+     "category": null,
+     "package_grams": 220,
+     "package_grams_basis": "printed 220G pack of 4",
+     "price_sgd": 2.4,
+     "product_url": "https://coldstorage.com.sg/product/sunshine-wholemeal-sausage-buns-extra-fine-220g",
+     "in_stock": true,
+     "query": "hotdog bun",
+     "fetched_at": "2026-10-31T07:44:21+00:00"
+    }
+   ]
+  },
+  "italian_dressing": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-159365",
+     "name": "Waitrose Italian Olive Oil Salad Dressing 235ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 230,
+     "package_grams_basis": "printed 235 ml x ~0.98 g/ml (unit table: cup 235 g / 240 ml)",
+     "price_sgd": 12.95,
+     "product_url": "https://coldstorage.com.sg/product/wr-italian-olive-oil-dressing-235ml",
+     "in_stock": true,
+     "query": "italian salad dressing",
+     "fetched_at": "2026-10-31T07:41:48+00:00"
+    }
+   ]
+  },
+  "liquid_smoke": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-159050",
+     "name": "Wright's Hickory Flavoured BBQ Liquid Smoke 3.5oz (103ml)",
+     "brand": null,
+     "category": null,
+     "package_grams": 103,
+     "package_grams_basis": "printed 103 ml (3.5 oz) x 1 g/ml, the ingredient's cup of 236.6 g per 236.6 ml",
+     "price_sgd": 5.25,
+     "product_url": "https://coldstorage.com.sg/product/wrights-liquid-smoke-hickory-flavored-103ml",
+     "in_stock": true,
+     "query": "hickory liquid smoke",
+     "fetched_at": "2026-10-31T07:44:25+00:00"
+    }
+   ]
+  },
+  "mayo_or_dressing": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-84258",
+     "name": "Heinz Seriously Good Mayonnaise 460g",
+     "brand": null,
+     "category": null,
+     "package_grams": 460,
+     "package_grams_basis": "printed 460G",
+     "price_sgd": 7.25,
+     "product_url": "https://coldstorage.com.sg/product/heinz-seriously-good-mayonnaise-460g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-220707",
+     "name": "Kewpie Regular Mayonnaise 450g",
+     "brand": null,
+     "category": null,
+     "package_grams": 450,
+     "package_grams_basis": "printed 450G",
+     "price_sgd": 7.2,
+     "product_url": "https://coldstorage.com.sg/product/kewpie-mayonnaise-450g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-224066",
+     "name": "Hellmann's Real Mayonnaise 220ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 208,
+     "package_grams_basis": "printed 220 ML x 224 g per cup / 236.6 ml",
+     "price_sgd": 3.25,
+     "product_url": "https://coldstorage.com.sg/product/hellmanns-real-mayo-220ml",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-218107",
+     "name": "Meadows Original Mayonnaise 420g",
+     "brand": null,
+     "category": null,
+     "package_grams": 420,
+     "package_grams_basis": "printed 420G",
+     "price_sgd": 5.8,
+     "product_url": "https://coldstorage.com.sg/product/meadows-original-mayonnaise-420g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-181322",
+     "name": "Maille Fine Mayonnaise 320g",
+     "brand": null,
+     "category": null,
+     "package_grams": 320,
+     "package_grams_basis": "printed 320G",
+     "price_sgd": 6.1,
+     "product_url": "https://coldstorage.com.sg/product/maille-mayonnaise-fine-320gm",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-162742",
+     "name": "Best Foods Regular Mayonnaise 220ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 208,
+     "package_grams_basis": "printed 220 ML x 224 g per cup / 236.6 ml",
+     "price_sgd": 3.3,
+     "product_url": "https://coldstorage.com.sg/product/best-foods-mayonnaise-220ml",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-126252",
+     "name": "Kewpie Japanese Style Mayonnaise 310ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 294,
+     "package_grams_basis": "printed 310 ML x 224 g per cup / 236.6 ml",
+     "price_sgd": 5.45,
+     "product_url": "https://coldstorage.com.sg/product/kewpie-japanese-style-mayonnaise-310ml",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-115175",
+     "name": "Kewpie Mayonnaise 350g",
+     "brand": null,
+     "category": null,
+     "package_grams": 350,
+     "package_grams_basis": "printed 350G",
+     "price_sgd": 6.9,
+     "product_url": "https://coldstorage.com.sg/product/qp-mayonnaise-350g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-86532",
+     "name": "Lady's Choice Real Mayonnaise 450ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 426,
+     "package_grams_basis": "printed 450 ML x 224 g per cup / 236.6 ml",
+     "price_sgd": 4.85,
+     "product_url": "https://coldstorage.com.sg/product/ladys-choice-mayonnaise-450ml",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-86122",
+     "name": "Lady's Choice Real Mayonnaise 205ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 194,
+     "package_grams_basis": "printed 205 ML x 224 g per cup / 236.6 ml",
+     "price_sgd": 2.65,
+     "product_url": "https://coldstorage.com.sg/product/ladys-choice-real-mayonnaise-205ml",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-84227",
+     "name": "Heinz Seriously Good Mayonnaise 215g",
+     "brand": null,
+     "category": null,
+     "package_grams": 215,
+     "package_grams_basis": "printed 215G",
+     "price_sgd": 4.5,
+     "product_url": "https://coldstorage.com.sg/product/heinz-seriously-good-mayonnaise-215g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-84136",
+     "name": "Heinz Seriously Good Mayonnaise 395g",
+     "brand": null,
+     "category": null,
+     "package_grams": 395,
+     "package_grams_basis": "printed 395G",
+     "price_sgd": 8.45,
+     "product_url": "https://coldstorage.com.sg/product/heinz-seriously-good-mayonnaise-395g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-184574",
+     "name": "Ajinomoto Mayonnaise, 400g",
+     "brand": null,
+     "category": null,
+     "package_grams": 400,
+     "package_grams_basis": "printed 400G",
+     "price_sgd": 7.25,
+     "product_url": "https://coldstorage.com.sg/product/ajinomoto-mayonnaise-400g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    },
+    {
+     "external_id": "cs-114211",
+     "name": "Ottogi Gold Mayonnaise, 300g",
+     "brand": null,
+     "category": null,
+     "package_grams": 300,
+     "package_grams_basis": "printed 300G",
+     "price_sgd": 5.75,
+     "product_url": "https://coldstorage.com.sg/product/ottogi-gold-mayonnaise-300g",
+     "in_stock": true,
+     "query": "mayonnaise",
+     "fetched_at": "2026-10-31T08:42:01+00:00"
+    }
+   ]
+  },
+  "orange_zest": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-223132",
+     "name": "Sunkist Navel Orange Australia 1s",
+     "brand": null,
+     "category": null,
+     "package_grams": 6,
+     "package_grams_basis": "1 navel orange x 6 g zest per piece, estimated",
+     "price_sgd": 2.5,
+     "product_url": "https://coldstorage.com.sg/product/sunkist-navel-orange-australia-1s",
+     "in_stock": true,
+     "query": "orange",
+     "fetched_at": "2026-10-31T08:41:04+00:00"
+    },
+    {
+     "external_id": "cs-23525171",
+     "name": "High Brix Navel Orange Australia 800g",
+     "brand": null,
+     "category": null,
+     "package_grams": 24,
+     "package_grams_basis": "800 g pack ~4 oranges x 6 g zest, estimated",
+     "price_sgd": 6.95,
+     "product_url": "https://coldstorage.com.sg/product/high-brix-navel-australia-800g",
+     "in_stock": true,
+     "query": "orange",
+     "fetched_at": "2026-10-31T08:41:04+00:00"
+    }
+   ]
+  },
+  "pancetta": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-223816",
+     "name": "Smokin Bros Sliced Mild Pancetta 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 11.95,
+     "product_url": "https://coldstorage.com.sg/product/smokin-bros-sliced-mild-pancetta-100g",
+     "in_stock": true,
+     "query": "pancetta",
+     "fetched_at": "2026-10-31T08:41:44+00:00"
+    }
+   ]
+  },
+  "pastrami": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-221244",
+     "name": "Mr Butcher Wagyu Beef Pastrami 120g",
+     "brand": null,
+     "category": null,
+     "package_grams": 120,
+     "package_grams_basis": "printed net weight 120 g",
+     "price_sgd": 7.9,
+     "product_url": "https://coldstorage.com.sg/product/mr-butcher-wagyu-beef-pastrami-120g",
+     "in_stock": false,
+     "query": "beef pastrami",
+     "fetched_at": "2026-10-31T07:47:57+00:00"
+    },
+    {
+     "external_id": "cs-222818",
+     "name": "Rudis Beef Pastrami 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed net weight 100 g",
+     "price_sgd": 8.15,
+     "product_url": "https://coldstorage.com.sg/product/rudis-beef-pastrami-100g",
+     "in_stock": false,
+     "query": "beef pastrami",
+     "fetched_at": "2026-10-31T07:47:57+00:00"
+    }
+   ]
+  },
+  "pate": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-95366",
+     "name": "Foie Pate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 7.95,
+     "product_url": "https://coldstorage.com.sg/product/pate-de-foie-100g",
+     "in_stock": true,
+     "query": "pate",
+     "fetched_at": "2026-10-31T08:42:39+00:00"
+    },
+    {
+     "external_id": "cs-95365",
+     "name": "Campagne Pate 100g",
+     "brand": null,
+     "category": null,
+     "package_grams": 100,
+     "package_grams_basis": "printed 100G",
+     "price_sgd": 7.95,
+     "product_url": "https://coldstorage.com.sg/product/pate-de-campagne-100g",
+     "in_stock": true,
+     "query": "pate",
+     "fetched_at": "2026-10-31T08:42:39+00:00"
+    }
+   ]
+  },
+  "prosciutto": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-218122",
+     "name": "Fumagalli 24-Month Parma Ham 70g",
+     "brand": null,
+     "category": null,
+     "package_grams": 70,
+     "package_grams_basis": "printed 70G",
+     "price_sgd": 17.95,
+     "product_url": "https://coldstorage.com.sg/product/fumagalli-parma-ham-24month-70g",
+     "in_stock": true,
+     "query": "parma ham",
+     "fetched_at": "2026-10-31T07:43:23+00:00"
+    },
+    {
+     "external_id": "cs-139452",
+     "name": "Ferrarini Parma Ham 90g",
+     "brand": null,
+     "category": null,
+     "package_grams": 90,
+     "package_grams_basis": "printed 90G",
+     "price_sgd": 17.45,
+     "product_url": "https://coldstorage.com.sg/product/ferrarini-parma-ham-90g",
+     "in_stock": true,
+     "query": "parma ham",
+     "fetched_at": "2026-10-31T07:43:23+00:00"
+    }
+   ]
+  },
+  "queso_fresco": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-86753",
+     "name": "Lemnos Block Paneer Cheese 200g",
+     "brand": null,
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed 200G",
+     "price_sgd": 6.9,
+     "product_url": "https://coldstorage.com.sg/product/lemnos-paneer-cheese-200g",
+     "in_stock": true,
+     "query": "paneer",
+     "fetched_at": "2026-10-31T07:43:25+00:00"
+    }
+   ]
+  },
+  "ranch_dressing": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-187523",
+     "name": "Ozganics Organic Creamy Ranch Dressing 250ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 242,
+     "package_grams_basis": "printed 250 ml x ~0.97 g/ml (unit table: cup 232 g / 240 ml)",
+     "price_sgd": 9.8,
+     "product_url": "https://coldstorage.com.sg/product/ozganics-organic-creamy-ranch-dressing-250ml",
+     "in_stock": true,
+     "query": "ranch dressing",
+     "fetched_at": "2026-10-31T07:43:57+00:00"
+    },
+    {
+     "external_id": "cs-84572",
+     "name": "Hidden Valley Ranch Dressing 473ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 457,
+     "package_grams_basis": "printed 473 ml x ~0.97 g/ml (unit table: cup 232 g / 240 ml)",
+     "price_sgd": 10.7,
+     "product_url": "https://coldstorage.com.sg/product/hidden-valley-ranch-dressing-473ml",
+     "in_stock": false,
+     "query": "ranch dressing",
+     "fetched_at": "2026-10-31T07:43:57+00:00"
+    }
+   ]
+  },
+  "refried_beans": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-91636",
+     "name": "Old El Paso Fat Free Refried Beans 435g",
+     "brand": null,
+     "category": null,
+     "package_grams": 435,
+     "package_grams_basis": "printed 435G",
+     "price_sgd": 5.55,
+     "product_url": "https://coldstorage.com.sg/product/old-el-paso-refried-beans-435g",
+     "in_stock": true,
+     "query": "refried beans",
+     "fetched_at": "2026-10-31T07:42:59+00:00"
+    },
+    {
+     "external_id": "cs-152837",
+     "name": "Rosarita Vegetarian Refried Beans 16oz (454g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 454,
+     "package_grams_basis": "printed 16 OZ = 454 g",
+     "price_sgd": 6.15,
+     "product_url": "https://coldstorage.com.sg/product/rosarita-veg-refried-beans-4536g",
+     "in_stock": true,
+     "query": "refried beans",
+     "fetched_at": "2026-10-31T07:42:59+00:00"
+    },
+    {
+     "external_id": "cs-152836",
+     "name": "Rosarita Traditional Refried Beans 454g",
+     "brand": null,
+     "category": null,
+     "package_grams": 454,
+     "package_grams_basis": "printed 454G",
+     "price_sgd": 6.5,
+     "product_url": "https://coldstorage.com.sg/product/rosarita-traditional-refried-bean-454g",
+     "in_stock": true,
+     "query": "refried beans",
+     "fetched_at": "2026-10-31T07:42:59+00:00"
+    }
+   ]
+  },
+  "relish": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-119852",
+     "name": "Vlasic Dill Relish 10oz (283g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 283,
+     "package_grams_basis": "printed 10oz (283g)",
+     "price_sgd": 5,
+     "product_url": "https://coldstorage.com.sg/product/vlasic-dill-relish-10oz",
+     "in_stock": true,
+     "query": "pickle relish",
+     "fetched_at": "2026-10-31T07:43:59+00:00"
+    }
+   ]
+  },
+  "rice_cake": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-172352",
+     "name": "Jongga Stick Type Rice Cakes 500g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500,
+     "package_grams_basis": "printed 500G",
+     "price_sgd": 5.75,
+     "product_url": "https://coldstorage.com.sg/product/jongga-rice-cake-stick-500g",
+     "in_stock": true,
+     "query": "tteok",
+     "fetched_at": "2026-10-31T07:44:04+00:00"
+    },
+    {
+     "external_id": "cs-172341",
+     "name": "Jongga Sliced Type Rice Cakes 500g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500,
+     "package_grams_basis": "printed 500G",
+     "price_sgd": 5.75,
+     "product_url": "https://coldstorage.com.sg/product/jongga-rice-cake-sliced-500g",
+     "in_stock": true,
+     "query": "tteok",
+     "fetched_at": "2026-10-31T07:44:04+00:00"
+    },
+    {
+     "external_id": "cs-179930",
+     "name": "Pulmuone Rice Cakes 650g",
+     "brand": null,
+     "category": null,
+     "package_grams": 650,
+     "package_grams_basis": "printed 650G",
+     "price_sgd": 5.75,
+     "product_url": "https://coldstorage.com.sg/product/pulmuone-rice-cake-650g",
+     "in_stock": true,
+     "query": "tteok",
+     "fetched_at": "2026-10-31T07:44:04+00:00"
+    }
+   ]
+  },
+  "ricotta": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-82119",
+     "name": "Galbani Ricotta Cheese 250g",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 250g",
+     "price_sgd": 9.95,
+     "product_url": "https://coldstorage.com.sg/product/galbani-ricotta-cheese-250g",
+     "in_stock": true,
+     "query": "ricotta",
+     "fetched_at": "2026-10-31T07:41:31+00:00"
+    },
+    {
+     "external_id": "cs-124200",
+     "name": "Organic Valley Organic Ricotta Cheese Tub 425g",
+     "brand": null,
+     "category": null,
+     "package_grams": 425,
+     "package_grams_basis": "printed 425g",
+     "price_sgd": 17.65,
+     "product_url": "https://coldstorage.com.sg/product/ricotta-cheese-tub-425g",
+     "in_stock": true,
+     "query": "ricotta",
+     "fetched_at": "2026-10-31T07:41:31+00:00"
+    },
+    {
+     "external_id": "cs-156522",
+     "name": "Sterilgarda Ricotta Cheese Tub 250g",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 250g",
+     "price_sgd": 8.15,
+     "product_url": "https://coldstorage.com.sg/product/sterilgarda-cheese-bowl-ricotta-250g",
+     "in_stock": false,
+     "query": "ricotta",
+     "fetched_at": "2026-10-31T07:41:31+00:00"
+    },
+    {
+     "external_id": "cs-126636",
+     "name": "Greenfields Ricotta Cheese 250g",
+     "brand": null,
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 250g",
+     "price_sgd": 5.25,
+     "product_url": "https://coldstorage.com.sg/product/ricotta-cheese",
+     "in_stock": false,
+     "query": "ricotta",
+     "fetched_at": "2026-10-31T07:41:31+00:00"
+    }
+   ]
+  },
+  "rosemary": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-164506",
+     "name": "Genting Garden Rosemary Malaysia 20g",
+     "brand": null,
+     "category": null,
+     "package_grams": 20,
+     "package_grams_basis": "printed net weight 20 g (fresh rosemary)",
+     "price_sgd": 4.15,
+     "product_url": "https://coldstorage.com.sg/product/rosemary-malaysia-20g",
+     "in_stock": true,
+     "query": "rosemary",
+     "fetched_at": "2026-10-31T07:41:18+00:00"
+    }
+   ]
+  },
+  "salad_dressing": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-114913",
+     "name": "Praise Italian Dressing 330ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 323,
+     "package_grams_basis": "printed 330ML x 0.98 g/ml (unit_grams 235 g per 240 ml cup)",
+     "price_sgd": 6.15,
+     "product_url": "https://coldstorage.com.sg/product/praise-italian-dressing-330ml",
+     "in_stock": true,
+     "query": "italian dressing",
+     "fetched_at": "2026-10-31T07:42:27+00:00"
+    },
+    {
+     "external_id": "cs-159365",
+     "name": "Waitrose Italian Olive Oil Salad Dressing 235ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 230,
+     "package_grams_basis": "printed 235ML x 0.98 g/ml (unit_grams 235 g per 240 ml cup)",
+     "price_sgd": 12.95,
+     "product_url": "https://coldstorage.com.sg/product/wr-italian-olive-oil-dressing-235ml",
+     "in_stock": true,
+     "query": "italian dressing",
+     "fetched_at": "2026-10-31T07:42:27+00:00"
+    }
+   ]
+  },
+  "sorghum_flour": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-123908",
+     "name": "Bob's Red Mill Gluten Free White Sorghum Flour 22oz (624g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 624,
+     "package_grams_basis": "printed 22oz (624g)",
+     "price_sgd": 9.2,
+     "product_url": "https://coldstorage.com.sg/product/bobs-red-mill-gluten-free-white-sorganichum-flour-22-oz",
+     "in_stock": true,
+     "query": "sorghum flour",
+     "fetched_at": "2026-10-31T07:48:27+00:00"
+    }
+   ]
+  },
+  "soup": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-77318",
+     "name": "Campbell's Wild Mushroom Soup 295g",
+     "brand": null,
+     "category": null,
+     "package_grams": 295,
+     "package_grams_basis": "printed net weight 295 g",
+     "price_sgd": 3.45,
+     "product_url": "https://coldstorage.com.sg/product/campbells-wild-mushroom-295g",
+     "in_stock": true,
+     "query": "vegetable soup can",
+     "fetched_at": "2026-10-31T07:48:30+00:00"
+    }
+   ]
+  },
+  "sour_milk": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-78715",
+     "name": "Dairy Farmers Buttermilk 600ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 612,
+     "package_grams_basis": "printed 600ML x 1.02 g/ml (unit_grams 245 g per 240 ml cup)",
+     "price_sgd": 6.05,
+     "product_url": "https://coldstorage.com.sg/product/dairy-farmers-buttermilk-600ml",
+     "in_stock": true,
+     "query": "buttermilk",
+     "fetched_at": "2026-10-31T07:46:09+00:00"
+    }
+   ]
+  },
+  "soybean": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-224434",
+     "name": "The PanTree Soya Beans 400g",
+     "brand": null,
+     "category": null,
+     "package_grams": 400,
+     "package_grams_basis": "printed 400g",
+     "price_sgd": 1.75,
+     "product_url": "https://coldstorage.com.sg/product/pantree-soya-bean-400g",
+     "in_stock": true,
+     "query": "dried soya beans",
+     "fetched_at": "2026-10-31T07:48:32+00:00"
+    }
+   ]
+  },
+  "stir_fry_sauce": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-214708",
+     "name": "Sempio Korean Japchae Stir-Fry Sauce 60g",
+     "brand": null,
+     "category": null,
+     "package_grams": 60,
+     "package_grams_basis": "printed net weight 60 g",
+     "price_sgd": 2.2,
+     "product_url": "https://coldstorage.com.sg/product/sempio-korean-japchae-stir-fry-60g",
+     "in_stock": true,
+     "query": "stir-fry sauce",
+     "fetched_at": "2026-10-31T07:48:40+00:00"
+    }
+   ]
+  },
+  "tomato_soup": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-77390",
+     "name": "Campbell's Tomato Italia Soup 10.7oz (303g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 303,
+     "package_grams_basis": "printed 10.7oz (303g) condensed can",
+     "price_sgd": 5.6,
+     "product_url": "https://coldstorage.com.sg/product/campbells-soup-tomato-italia-107oz",
+     "in_stock": true,
+     "query": "Campbell's tomato soup",
+     "fetched_at": "2026-10-31T07:42:26+00:00"
+    }
+   ]
+  },
+  "turkey_bacon": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-151843",
+     "name": "Oscar Mayer Turkey Bacon, 340g",
+     "brand": null,
+     "category": null,
+     "package_grams": 340,
+     "package_grams_basis": "printed 340G",
+     "price_sgd": 18.25,
+     "product_url": "https://coldstorage.com.sg/product/oscar-mayer-turkey-bacon-340g",
+     "in_stock": true,
+     "query": "turkey bacon",
+     "fetched_at": "2026-10-31T08:43:50+00:00"
+    }
+   ]
+  },
+  "vanilla_wafer": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-128739",
+     "name": "Sugarless Vanilla Wafers 150g",
+     "brand": null,
+     "category": null,
+     "package_grams": 150,
+     "package_grams_basis": "printed 150G",
+     "price_sgd": 6.75,
+     "product_url": "https://coldstorage.com.sg/product/sugarless-vanilla-wafers-150g",
+     "in_stock": true,
+     "query": "vanilla wafer cookies",
+     "fetched_at": "2026-10-31T07:49:04+00:00"
+    }
+   ]
+  },
+  "vegetable_broth": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "cs-86082",
+     "name": "Knorr Vegetable Stock Cubes 60g",
+     "brand": null,
+     "category": null,
+     "package_grams": 3031,
+     "package_grams_basis": "printed 60G = 6 cubes of 10 g, 1 cube per 500 ml as made up (usual label dilution, estimated) x 239 g per cup / 236.6 ml",
+     "price_sgd": 2.15,
+     "product_url": "https://coldstorage.com.sg/product/knorr-stock-cubes-vegetable-60g",
+     "in_stock": true,
+     "query": "vegetable broth",
+     "fetched_at": "2026-10-31T08:40:57+00:00"
+    }
+   ]
+  }
+ }
+}
