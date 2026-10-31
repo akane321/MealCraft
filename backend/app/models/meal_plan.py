@@ -87,6 +87,9 @@ class MealPlan(Base):
         nullable=True,
     )
     warnings: Mapped[list[str]] = mapped_column(JSON, default=list)
+    # What was put in the household's FairPrice cart, by trip ("1", "2"); NULL before anything was sent
+    # (docs/design/fairprice-cart.md).
+    fairprice_cart: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

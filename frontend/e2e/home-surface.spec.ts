@@ -125,7 +125,7 @@ test("a sent message shows at once beside a note on the wait, and comes back to 
       : { status: 201, json: session(false) });
   });
   const thread = page.getByRole("region", { name: "Conversation" });
-  const note = page.getByRole("status").filter({ hasText: "Checking your limits and this week's prices." });
+  const note = page.getByRole("status").filter({ hasText: "Checking your limits and this plan's prices." });
 
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
@@ -369,8 +369,8 @@ test("sending from the film entry opens the workspace with the week beside the c
 
   await expect(page.getByText("Ready when you are.")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Plan the week/ })).toBeHidden();
-  const week = page.getByRole("complementary", { name: "This week" });
-  await expect(week.getByText("Your week shows up here once it's planned", { exact: false })).toBeVisible();
+  const week = page.getByRole("complementary", { name: "This plan" });
+  await expect(week.getByText("Your plan shows up here once it's planned", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
   await expect(page.getByText("Seven dinners for S$82.60")).toBeVisible();
 
@@ -380,7 +380,7 @@ test("sending from the film entry opens the workspace with the week beside the c
   const panel = await week.boundingBox();
   expect(chat!.x + chat!.width).toBeLessThanOrEqual(panel!.x + 1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await expect(page.getByRole("region", { name: "Your week" }).getByText("Seven dinners,")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Your plan", exact: true }).getByText("Seven dinners,")).toBeVisible();
   await page.waitForTimeout(1200);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-workspace.png` });
 
@@ -422,12 +422,12 @@ async function planWeek(page: Page) {
 test("Groceries and Nutrition use the plan panel while Meals keeps Today at 1280x720", async ({ page }) => {
   await planWeek(page);
   await page.setViewportSize({ width: 1280, height: 720 });
-  const panel = page.getByRole("complementary", { name: "This week" });
+  const panel = page.getByRole("complementary", { name: "This plan" });
   await expect(panel.getByRole("region", { name: "Next meal" })).toBeVisible();
   await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: /All six nutrients/ })).toBeInViewport();
-  await panel.getByRole("tab", { name: "Week", exact: true }).click();
+  await panel.getByRole("tab", { name: "Plan", exact: true }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toBeVisible();
   await panel.getByRole("tab", { name: /Groceries/ }).click();
   await expect(panel.getByRole("region", { name: "Next meal" })).toHaveCount(0);
@@ -477,7 +477,7 @@ test("a Chinese clarification keeps an English composer placeholder", async ({ p
 for (const outcome of ["success", "error"] as const) {
   test(`an incoming week's dashboard ${outcome} never displays the previous week's dishes`, async ({ page }) => {
     await planWeek(page);
-    const week = page.getByRole("complementary", { name: "This week" });
+    const week = page.getByRole("complementary", { name: "This plan" });
     await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
     let release = () => {};
     const held = new Promise<void>((resolve) => { release = resolve; });
@@ -578,7 +578,7 @@ test("Never again is pressed, undone in the week, and listed with Undo on the pr
     days: days.map(day => ({ ...day, feedback: day.recipe.id === 4 ? feedback : null })),
   })));
 
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const group = week.getByRole("group", { name: "Feedback on Tofu Brown Rice Stir-fry" });
   const never = group.getByRole("button", { name: "Never again" });
   await expect(group.getByRole("button")).toHaveCount(3);
@@ -642,7 +642,7 @@ test("a dish's reason tag opens its facts, labelled as facts, at both desktop wi
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
 
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const tag = week.getByRole("button", { name: "Fits low-sodium" });
   await expect(week.getByRole("button", { name: "One of the week's cheapest mains" })).toBeVisible();
   const facts = week.getByRole("region", { name: "Facts about Tofu Brown Rice Stir-fry" });
@@ -668,7 +668,7 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
   test(`week overview and composer have room at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
     await page.setViewportSize(viewport);
-    const overview = page.getByRole("list", { name: "Week overview" });
+    const overview = page.getByRole("list", { name: "Plan overview" });
     await expect(overview.getByRole("listitem")).toHaveCount(7);
     const body = await page.getByRole("tabpanel").boundingBox();
     const last = await overview.getByRole("listitem").last().boundingBox();
@@ -682,7 +682,7 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
   test(`dish actions stay on one row at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
     await page.setViewportSize(viewport);
-    const week = page.getByRole("complementary", { name: "This week" });
+    const week = page.getByRole("complementary", { name: "This plan" });
     const actions = week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
     await expect(actions.getByRole("button")).toHaveCount(4);
     const boxes = await actions.getByRole("button").evaluateAll(buttons => buttons.map(button => {
@@ -784,9 +784,9 @@ test("a week still loading shows a skeleton rather than the empty message", asyn
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
 
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   await expect(week.locator("[aria-busy='true']")).toBeVisible();
-  await expect(week.getByText("Your week shows up here once it's planned", { exact: false })).toBeHidden();
+  await expect(week.getByText("Your plan shows up here once it's planned", { exact: false })).toBeHidden();
   if (SHOTS) await page.waitForTimeout(700).then(() => page.screenshot({ path: `${SHOTS}/12-loading.png` }));
 
   release();
@@ -809,8 +809,8 @@ test("a week that failed to load offers a retry that works", async ({ page }) =>
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
 
-  const week = page.getByRole("complementary", { name: "This week" });
-  await expect(week.getByText("Your week couldn't be loaded.")).toBeVisible();
+  const week = page.getByRole("complementary", { name: "This plan" });
+  await expect(week.getByText("Your plan couldn't be loaded.")).toBeVisible();
   failing = false;
   await week.getByRole("button", { name: "Try again" }).click();
   await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
@@ -825,7 +825,7 @@ test("a failed current-week lookup shows an error and can be retried", async ({ 
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   await expect(week.getByRole("alert")).toBeVisible();
   await expect(week.getByRole("heading", { name: "No plan yet" })).toHaveCount(0);
   failing = false;
@@ -868,8 +868,8 @@ test("applied changes are listed in the week panel", async ({ page }) => {
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
 
-  const week = page.getByRole("complementary", { name: "This week" });
-  const summary = week.getByText("Changes this week");
+  const week = page.getByRole("complementary", { name: "This plan" });
+  const summary = week.getByText("Changes", { exact: true });
   await expect(summary).toBeVisible();
   await expect(week.getByText("Miso Tofu Bowl")).toBeHidden();
   await summary.click();
@@ -904,7 +904,7 @@ test("opening the app shows the newest plan, and says when that week has ended",
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
   await page.waitForTimeout(600);
   await expect(week.getByText("Old Tofu Brown Rice Stir-fry").first()).toBeVisible();
@@ -913,7 +913,7 @@ test("opening the app shows the newest plan, and says when that week has ended",
   // and neither its messages nor a card of the week appear inside the conversation.
   const conversation = page.getByRole("region", { name: "Conversation" });
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(conversation.getByRole("region", { name: "Your week" })).toBeHidden();
+  await expect(conversation.getByRole("region", { name: "Your plan", exact: true })).toBeHidden();
   await expect(page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ })).toBeVisible();
 });
 
@@ -948,6 +948,23 @@ test("a replaced week's clarification and composer are read-only", async ({ page
   await expect(page.getByRole("button", { name: "2 people", exact: true })).toBeDisabled();
   await expect(page.getByLabel("Message MealCraft")).toHaveAttribute("readonly", "");
   await expect(page.getByLabel("Message MealCraft")).toHaveAttribute("placeholder", "This week was replaced. Open the current week to make changes.");
+});
+
+test("a replaced one-day plan says plan, not week", async ({ page }) => {
+  await stubApi(page);
+  await page.route("**/api/plans", route => route.fulfill({ json: {
+    items: [{ ...planList.items[0], current: false, day_count: 1 }],
+  } }));
+  await page.route("**/api/plans/9001", route => route.fulfill({ json: { ...plan, day_count: 1, current: false } }));
+  await page.route("**/api/agent/sessions?limit=50", route => route.fulfill({ json: {
+    items: [{ ...session(true), pending_interaction: asking.pending_interaction }],
+  } }));
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
+  await page.getByRole("button", { name: "Let’s plan my week" }).click();
+  await expect(page.getByLabel("A replaced plan")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open the current plan" })).toBeVisible();
+  await expect(page.getByLabel("Message MealCraft")).toHaveAttribute("placeholder", "This plan was replaced. Open the current plan to make changes.");
 });
 
 test("a replaced week outside the recent list remains read-only", async ({ page }) => {
@@ -986,17 +1003,17 @@ test("reopening the app opens the conversation that planned the week, not the ne
 
   const conversation = page.getByRole("region", { name: "Conversation" });
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
-  await expect(conversation.getByRole("region", { name: "Your week" })).toBeVisible();
+  await expect(conversation.getByRole("region", { name: "Your plan", exact: true })).toBeVisible();
   await expect(conversation.getByText("something nice")).toBeHidden();
-  await expect(page.getByRole("complementary", { name: "This week" }).getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" }).getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
 
   // The off-topic conversation, opened from the list, shows only itself: no card of another week. It has
   // planned nothing, so the saved conversation retains its existing current-week lookup.
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const reloaded = page.waitForRequest("**/api/plans");
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^something nice/ }).click();
   await expect(conversation.getByText("I plan meals and shopping.")).toBeVisible();
-  await expect(conversation.getByRole("region", { name: "Your week" })).toBeHidden();
+  await expect(conversation.getByRole("region", { name: "Your plan", exact: true })).toBeHidden();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
   await reloaded;
   await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
@@ -1058,7 +1075,7 @@ test("a dish's change on a week no conversation planned takes it on once, then g
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const conversation = page.getByRole("region", { name: "Conversation" });
   const dish = week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
 
@@ -1119,7 +1136,7 @@ test("a new conversation stays empty until its previous week is explicitly reope
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const conversation = page.getByRole("region", { name: "Conversation" });
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
 
@@ -1168,7 +1185,7 @@ test("switching between two conversations that hold the same week keeps that wee
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const conversation = page.getByRole("region", { name: "Conversation" });
   const recent = page.getByRole("complementary", { name: "Navigation" });
   await expect(conversation.getByText("Done: Miso Tofu Bowl on Thursday.")).toBeVisible();
@@ -1178,8 +1195,8 @@ test("switching between two conversations that hold the same week keeps that wee
     await recent.getByRole("button", { name: title }).click();
     await expect(conversation.getByText(line)).toBeVisible();
     await expect(week.getByText("Tofu Brown Rice Stir-fry").first()).toBeVisible();
-    await expect(week.getByText("Your week shows up here", { exact: false })).toBeHidden();
-    await expect(conversation.getByRole("region", { name: "Your week" })).toBeVisible();
+    await expect(week.getByText("Your plan shows up here", { exact: false })).toBeHidden();
+    await expect(conversation.getByRole("region", { name: "Your plan", exact: true })).toBeVisible();
   }
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/19-same-week-switch.png` });
 });
@@ -1201,7 +1218,7 @@ test("a conversation ready to plan asks before a dish's change takes the current
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const dish = week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
   const question = page.getByLabel("Change the current week here?");
   await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toBeVisible();
@@ -1242,7 +1259,7 @@ test("planning the new week instead of answering the take-on question takes the 
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const dish = page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
+  const dish = page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
   const question = page.getByLabel("Change the current week here?");
   await dish.getByRole("button", { name: "Skip" }).click();
   await page.getByRole("button", { name: "Send" }).click();
@@ -1279,7 +1296,7 @@ test("a conversation still asking about a new week asks before a dish's change t
 
   // The dish's Skip asks first, and the household's own question stays.
   const question = page.getByLabel("Change the current week here?");
-  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await page.getByRole("button", { name: "Send" }).click();
   await expect(question).toContainText("still setting up a new week");
   await expect(page.getByRole("button", { name: "2 people" })).toBeVisible();
@@ -1312,7 +1329,7 @@ test("the take-on question below a long conversation scrolls into view", async (
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
   await expect(page.getByRole("button", { name: "Plan my week", exact: true })).toBeVisible();
-  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await page.getByRole("button", { name: "Send" }).click();
 
   const thread = page.getByRole("region", { name: "Conversation" });
@@ -1341,7 +1358,7 @@ test("the take-on question goes once the composer says something else", async ({
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const skip = (title: string) => week.getByRole("group", { name: `Change ${title}` }).getByRole("button", { name: "Skip" }).click();
   const composer = page.getByLabel("Message MealCraft");
   const question = page.getByLabel("Change the current week here?");
@@ -1386,7 +1403,7 @@ test("a dish's words kept over a reload still change the week", async ({ page })
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await expect(page.getByLabel("Message MealCraft")).toHaveValue(/^Skip /);
 
   await page.reload();
@@ -1415,7 +1432,7 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`a dish's w
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const composer = page.getByLabel("Message MealCraft");
   await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await expect(composer).toHaveValue(/^Skip /);
@@ -1460,7 +1477,7 @@ test("a dish's words kept over a navigation go once their week has been replanne
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const composer = page.getByLabel("Message MealCraft");
   await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await expect(composer).toHaveValue(/^Skip /);
@@ -1473,7 +1490,7 @@ test("a dish's words kept over a navigation go once their week has been replanne
   await page.goBack();
   await expect(composer).toHaveValue(/^Skip /);
   await composer.press("Enter");
-  await expect(week.getByText("Your week couldn't be loaded.")).toBeVisible();
+  await expect(week.getByText("Your plan couldn't be loaded.")).toBeVisible();
   await expect(composer).toHaveValue("");
   await page.waitForTimeout(300);
   expect(sent).toEqual([]);
@@ -1507,7 +1524,7 @@ test("a dish's words sent from the landing after a reload go to the conversation
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
   await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
-  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 
   // Enter in the landing box, which holds the dish's words: they go to conversation 51, as Open my week then Send would.
   await page.reload();
@@ -1540,7 +1557,7 @@ test("planning a new week takes away a dish's words left unsent beside the old o
   await page.goto("/");
   await expect(page.getByRole("link", { name: /Household settings/ })).toBeVisible();
   await page.getByRole("button", { name: "Let’s plan my week" }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const composer = page.getByLabel("Message MealCraft");
   await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
   await expect(composer).toHaveValue(/^Skip \w+day's Tofu Brown Rice Stir-fry$/);
@@ -1581,7 +1598,7 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing se
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
   await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
-  await page.getByRole("complementary", { name: "This week" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
+  await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 
   // After a reload the current week is slow to come back; meanwhile the words are sent again and a starter is clicked.
   let answered = false;
@@ -1686,7 +1703,7 @@ test("asking for lunch too previews the new meals, then asks whether to keep it"
   await page.getByRole("button", { name: "Send" }).click();
 
   const card = page.getByLabel("Proposed change to your meals");
-  await expect(card.getByText("Lunch added for the rest of the week")).toBeVisible();
+  await expect(card.getByText("Lunch added for the rest of the plan")).toBeVisible();
   await expect(card.getByText("Chicken Soba Salad")).toBeVisible();
   await expect(card.getByText("groceries +S$21.40")).toBeVisible();
   await expect(card.getByText("S$14.00 over your S$90.00")).toBeVisible();
@@ -1744,7 +1761,7 @@ test("a dish's own buttons put the change into words for the assistant", async (
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
 
-  const week = page.getByRole("complementary", { name: "This week" });
+  const week = page.getByRole("complementary", { name: "This plan" });
   const actions = week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" });
   await actions.getByRole("button", { name: "Keep" }).click();
   await expect(page.getByLabel("Message MealCraft")).toHaveValue(/^Lock \w+day's Tofu Brown Rice Stir-fry$/);
@@ -1784,8 +1801,8 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
   await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
   await page.getByRole("button", { name: "Send" }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
-  const week = page.getByRole("complementary", { name: "This week" });
-  await expect(week.getByText("Changes this week")).toHaveCount(0);
+  const week = page.getByRole("complementary", { name: "This plan" });
+  await expect(week.getByText("Changes", { exact: true })).toHaveCount(0);
 
   await page.getByLabel("Message MealCraft").fill("Lock Thursday's Tofu Brown Rice Stir-fry");
   await page.getByRole("button", { name: "Send" }).click();
@@ -1794,7 +1811,7 @@ test("keeping a dish previews as keeping it, and the change log shows it once co
   await expect(page.locator(".swap-card s")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Keep it locked" }).click();
-  await week.getByText("Changes this week").click();
+  await week.getByText("Changes", { exact: true }).click();
   await expect(week.locator("details").getByText("Keep Tofu Brown Rice Stir-fry as it is")).toBeVisible();
 });
 
@@ -1917,7 +1934,7 @@ test("grocery items and their printed list distinguish missing products from a t
   await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
-  const panel = page.getByRole("complementary", { name: "This week" });
+  const panel = page.getByRole("complementary", { name: "This plan" });
   const noProduct = "Sample price · no matching FairPrice product; not checked";
   const timedOut = "Saved FairPrice price · 2 Oct · not checked live in time";
   const checkedLine = "Prices checked at 16:30 · 1 live · 1 saved · 1 sample";
@@ -1927,6 +1944,12 @@ test("grocery items and their printed list distinguish missing products from a t
     await expect(panel.getByText(noProduct, { exact: true })).toBeVisible();
     await expect(panel.getByText(timedOut, { exact: true })).toBeVisible();
     await expect(panel.getByText(checkedLine, { exact: true })).toBeVisible();
+    // The mix is stated once, and the dot and the amber line read the same counts: no second count such as "1 live · 2 saved".
+    await expect(panel.locator(".groceries .source")).toHaveText(checkedLine);
+    await expect(panel.getByText(checkedLine, { exact: true })).toHaveAttribute("title", checkedLine);
+    await expect(panel.locator(".groceries .source i")).toHaveClass("warn");
+    await expect(panel.locator(".groceries .s.stale")).toHaveCount(1);
+    await expect(panel.locator(".groceries .s.stale")).toContainText(timedOut);
     await expect(panel).not.toContainText("FairPrice didn't respond");
     await expect(panel).not.toContainText("Water");
     const format = (value: string) => new Date(value).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
@@ -1954,4 +1977,432 @@ test("grocery items and their printed list distinguish missing products from a t
   await page.getByLabel("Message MealCraft").fill("Swap Friday's dinner");
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await expect(page.getByText("Grocery changes are estimates. Selected product prices are checked again when you confirm.", { exact: true })).toBeVisible();
+});
+
+interface CartStubOptions {
+  /** The first `times` get_cart calls fail with `error`. */
+  failGetCart?: { error: string; times: number };
+  /** Milliseconds the stub extension takes to answer a set_quantity. */
+  writeDelay?: number;
+  /** A cart item the stub answers "not_in_cart" for, without changing the cart. */
+  ghost?: string;
+  /** Adds an unpriced, unticked item, and a cart without a total. */
+  odd?: boolean;
+}
+
+/** The plan, the FairPrice routes and a stub extension that answers like the real one. */
+async function stubFairPriceCart(page: Page, options: CartStubOptions = {}) {
+  await stubApi(page);
+  const trip2 = plan.grocery_estimate.items.map((item, index) => (index === 0 ? { ...item, shopping_trip: 2 } : item));
+  const livePlan = { ...plan, grocery_estimate: { ...plan.grocery_estimate, pricing_mode: "live", items: trip2 }, fairprice_cart: null };
+  await page.route("**/api/plans/9001", route => route.fulfill({ json: livePlan }));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill({ json: { session: session(true), plan: livePlan } }));
+  const fingerprint = "a".repeat(64);
+  const line = (key: string, name: string, cartId: string, quantity: number, planned: number, live: number | null, status: string) => ({
+    line_key: key, ingredient_name: key.split("|")[1], ingredient_display_name: name, product_name: `FairPrice ${name}`,
+    client_item_id: `13${cartId}`, cart_item_id: status === "ready" ? cartId : null, quantity,
+    planned_price_sgd: planned, live_price_sgd: live, product_url: `https://www.fairprice.com.sg/product/${cartId}`, status,
+  });
+  await page.route("**/api/plans/9001/fairprice-cart/prepare", route => route.fulfill({ json: {
+    plan_id: 9001, shopping_trip: null, fingerprint,
+    lines: [
+      line("1|chicken_breast|g", "chicken breast", "172993", 1, 10.15, 10.95, "ready"),
+      line("1|broccoli|g", "broccoli", "160001", 2, 2.9, 2.9, "ready"),
+      line("1|carrot|g", "carrot", "170003", 3, 1.5, 1.5, "ready"),
+      line("1|salmon_fillet|g", "salmon fillet", "150002", 1, 10.9, null, "out_of_stock"),
+    ],
+    ready_total_sgd: 21.25, planned_total_sgd: 82.6, projected_total_sgd: 83.4, budget_sgd: 90, over_budget: false,
+  } }));
+  const reports: Array<Record<string, unknown>> = [];
+  const state = (status: string) => ({ "1": {
+    status, sent_at: "2026-10-29T09:00:00Z", ordered_at: status === "ordered" ? "2026-10-29T10:00:00Z" : null, fingerprint, stale: false,
+    results: [{ line_key: "1|carrot|g", cart_item_id: "170003", status: "added", quantity: 3, cart_price_sgd: 1.5 }],
+  } });
+  await page.route("**/api/plans/9001/fairprice-cart/report", async (route) => {
+    reports.push(route.request().postDataJSON());
+    await route.fulfill({ json: state("in_cart") });
+  });
+  let orderedCalls = 0;
+  await page.route("**/api/plans/9001/fairprice-cart/ordered", (route) => {
+    orderedCalls += 1;
+    return route.fulfill({ json: state("ordered") });
+  });
+  // The extension, as the page sees it through externally_connectable: a small FairPrice cart that answers like the real one.
+  await page.addInitScript((opts: CartStubOptions) => {
+    const sent: Array<{ type: string; lines?: unknown[]; cart_item_id?: string; quantity?: number }> = [];
+    (window as unknown as { __sent: unknown[] }).__sent = sent;
+    const thumb = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' fill='%23f4a259'/></svg>";
+    type Item = { cart_item_id: string; name: string; display_unit: string; image_url: string | null; quantity: number; unit_price_sgd: number; unit_mrp_sgd: number };
+    const catalog: Record<string, Item> = {
+      "172993": { cart_item_id: "172993", name: "Kee Song Fresh Chicken - Boneless Breast", display_unit: "500g", image_url: thumb, quantity: 1, unit_price_sgd: 10.95, unit_mrp_sgd: 12.95 },
+      "160001": { cart_item_id: "160001", name: "FairPrice Broccoli", display_unit: "300g", image_url: null, quantity: 2, unit_price_sgd: 2.9, unit_mrp_sgd: 2.9 },
+      "170003": { cart_item_id: "170003", name: "FairPrice Carrot", display_unit: "500g", image_url: thumb, quantity: 3, unit_price_sgd: 1.5, unit_mrp_sgd: 1.5 },
+    };
+    const cart: Item[] = [{ ...catalog["172993"]! }, { ...catalog["160001"]! }];
+    let unavailable = [{ cart_item_id: "150002", name: "FairPrice Salmon Fillet", image_url: null, want_quantity: 1 }];
+    const round = (n: number) => Math.round(n * 100) / 100;
+    const snapshot = () => {
+      const items = cart.map(item => ({
+        ...item, brand: "FairPrice", product_url: null, line_total_sgd: round(item.unit_price_sgd * item.quantity),
+        line_saving_sgd: round((item.unit_mrp_sgd - item.unit_price_sgd) * item.quantity), max_quantity: 99, is_checked: true, note: null,
+      }));
+      const subtotal = round(items.reduce((sum, item) => sum + item.line_total_sgd, 0));
+      const savings = round(items.reduce((sum, item) => sum + item.line_saving_sgd, 0));
+      const shown: Array<Record<string, unknown>> = [...items];
+      if (opts.odd) {
+        shown.push({
+          cart_item_id: "990001", name: "Mystery Item", brand: null, display_unit: "1 pack", image_url: null, product_url: null, quantity: 1,
+          unit_price_sgd: null, unit_mrp_sgd: null, line_total_sgd: null, line_saving_sgd: 0, max_quantity: 99, is_checked: false, note: null,
+        });
+      }
+      return {
+        store: { id: "165", name: "FairPrice PFC" }, items: shown, unavailable,
+        totals: { subtotal_sgd: subtotal, savings_sgd: savings, delivery_sgd: 0, delivery_standard_sgd: 7.99, service_fee_sgd: 0.99, service_fee_standard_sgd: 0.99, total_sgd: opts.odd ? null : round(subtotal + 0.99) },
+      };
+    };
+    let failures = opts.failGetCart?.times ?? 0;
+    (window as unknown as { chrome: unknown }).chrome = { runtime: { sendMessage(_id: string, message: (typeof sent)[number], reply: (r: unknown) => void) {
+      sent.push(message);
+      const answer = (body: unknown, delay = 10) => setTimeout(() => reply(body), delay);
+      if (message.type === "ping") return answer({ ok: true, version: "0.1.0" });
+      if (message.type === "get_cart") {
+        if (failures > 0) {
+          failures -= 1;
+          return answer({ ok: false, error: opts.failGetCart!.error });
+        }
+        return answer({ ok: true, cart: snapshot() });
+      }
+      if (message.type === "add_to_cart") {
+        const lines = message.lines as Array<{ line_key: string; cart_item_id: string; quantity: number }>;
+        for (const l of lines) cart.push({ ...catalog[l.cart_item_id]!, quantity: l.quantity });
+        return answer({ ok: true, results: lines.map(l => ({ ...l, status: "added", cart_price_sgd: null })), cart: snapshot() });
+      }
+      if (message.type === "set_quantity") {
+        if (message.cart_item_id === opts.ghost) return answer({ ok: false, error: "not_in_cart" }, opts.writeDelay);
+        const index = cart.findIndex(item => item.cart_item_id === message.cart_item_id);
+        if (index >= 0 && message.quantity === 0) cart.splice(index, 1);
+        else if (index >= 0) cart[index]!.quantity = message.quantity!;
+        else unavailable = unavailable.filter(item => item.cart_item_id !== message.cart_item_id);
+        return answer({ ok: true, cart: snapshot() }, opts.writeDelay);
+      }
+      return answer({ ok: false, error: "unexpected_response" });
+    } } };
+  }, options);
+  return { reports, fingerprint, orderedCalls: () => orderedCalls };
+}
+
+/** Plans a week and opens the panel from the groceries tab. */
+async function openFairPriceCart(page: Page) {
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinners for two this week, around S$90.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByRole("button", { name: "Plan my week", exact: true }).click();
+  await page.getByRole("tab", { name: /Groceries/ }).click();
+  // The footer button sits with Preview list and Export PDF.
+  const footer = page.locator(".foot-acts");
+  await expect(footer.getByRole("button")).toHaveText(["FairPrice cart", "Preview list", "Export PDF"]);
+  await footer.getByRole("button", { name: "FairPrice cart", exact: true }).click();
+  const panel = page.getByRole("dialog", { name: "FairPrice cart" });
+  return {
+    footer,
+    panel,
+    summary: panel.getByLabel("Cart summary"),
+    rowOf: (name: string) => panel.getByRole("listitem").filter({ hasText: name }),
+    sentOf: (type: string) => page.evaluate(t => (window as unknown as { __sent: Array<{ type: string }> }).__sent.filter(m => m.type === t), type),
+  };
+}
+
+test("the FairPrice cart panel shows the real cart, adds only what is missing, changes quantities and ends at checkout at 1280x720", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const { reports, fingerprint, orderedCalls } = await stubFairPriceCart(page);
+  const { panel, summary, rowOf, sentOf } = await openFairPriceCart(page);
+
+  // The real cart: a discounted item with a thumbnail, one without (placeholder), an unavailable one, the store.
+  await expect(panel.getByText("FairPrice PFC", { exact: false })).toBeVisible();
+  const chicken = rowOf("Kee Song Fresh Chicken");
+  await expect(chicken.locator("img")).toHaveAttribute("src", /^data:image\/svg/);
+  await expect(chicken.locator("img")).toHaveJSProperty("width", 64);
+  await expect(chicken.getByText("500g", { exact: true })).toBeVisible();
+  await expect(chicken.locator(".unit b")).toHaveText("S$10.95");
+  await expect(chicken.locator("s")).toHaveText("S$12.95");
+  await expect(chicken.getByText("From this plan", { exact: true })).toBeVisible();
+  await expect(rowOf("FairPrice Broccoli").locator("img")).toHaveCount(0);
+  await expect(rowOf("FairPrice Broccoli").locator("s")).toHaveCount(0);
+  await expect(panel.getByRole("group", { name: "Unavailable items" })).toContainText("FairPrice Salmon Fillet");
+  await expect(panel.getByRole("group", { name: "Price changes" })).toContainText("chicken breast");
+  await expect(panel.getByRole("group", { name: "Lines that can't be added" })).toContainText("salmon fillet");
+  await expect(summary).toContainText("Subtotal");
+  await expect(summary.getByText("S$16.75", { exact: true })).toBeVisible();
+  await expect(summary.getByText("Savings", { exact: true })).toBeVisible();
+  await expect(summary.getByText("−S$2.00", { exact: true })).toBeVisible();
+  await expect(summary.locator("s")).toHaveText("S$7.99");
+  await expect(summary.getByText("Free", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$0.99", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$17.74", { exact: true })).toBeVisible();
+  await expect(panel.getByText("2 already in your cart", { exact: true })).toBeVisible();
+  if (SHOTS) {
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/fairprice-cart-panel.png` });
+  }
+
+  // Add all sends only the ready line that is not in the cart yet, then reports it to the plan.
+  await panel.getByRole("button", { name: "Add all to cart", exact: true }).click();
+  await expect(rowOf("FairPrice Carrot")).toBeVisible();
+  const adds = await sentOf("add_to_cart") as unknown as Array<{ lines: unknown[] }>;
+  expect(adds).toHaveLength(1);
+  expect(adds[0]!.lines).toEqual([{ line_key: "1|carrot|g", cart_item_id: "170003", quantity: 3 }]);
+  await expect.poll(() => reports.length).toBe(1);
+  expect(reports[0]).toMatchObject({ fingerprint, results: [{ line_key: "1|carrot|g", status: "added" }] });
+  await expect(panel.getByText("Everything ready is already in your cart.", { exact: true })).toBeVisible();
+  await expect(panel.getByText("1 added", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^In your FairPrice cart on /)).toBeVisible();
+
+  // A second add needs an explicit confirmation, and nothing was sent yet.
+  await panel.getByRole("button", { name: "Add again…", exact: true }).click();
+  await expect(panel.getByText("Adding again adds these quantities a second time.", { exact: false })).toBeVisible();
+  expect(await sentOf("add_to_cart")).toHaveLength(1);
+  await panel.getByRole("button", { name: "Cancel", exact: true }).click();
+
+  // The stepper shows the new quantity at once and tells FairPrice once, after the 500 ms debounce.
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(broccoli.locator("output")).toHaveText("4");
+  await expect(broccoli.getByText("Saving…", { exact: true })).toBeVisible();
+  expect(await sentOf("set_quantity")).toHaveLength(0);
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 4 });
+  await expect(broccoli.getByText("S$11.60", { exact: true })).toBeVisible();
+  await expect(broccoli.getByText("Saving…", { exact: true })).toHaveCount(0);
+
+  // Remove sets the quantity to 0, for a cart row and for an unavailable item.
+  await rowOf("FairPrice Carrot").getByRole("button", { name: "Remove FairPrice Carrot" }).click();
+  await expect(rowOf("FairPrice Carrot")).toHaveCount(0);
+  await panel.getByRole("button", { name: "Remove FairPrice Salmon Fillet" }).click();
+  await expect(panel.getByRole("group", { name: "Unavailable items" })).toHaveCount(0);
+  expect((await sentOf("set_quantity")).map(m => [(m as { cart_item_id?: string }).cart_item_id, (m as { quantity?: number }).quantity])).toEqual([
+    ["160001", 4], ["170003", 0], ["150002", 0],
+  ]);
+  await expect(summary.getByText("S$22.55", { exact: true })).toBeVisible();
+  await expect(summary.getByText("S$23.54", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Everything ready is already in your cart.", { exact: true })).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "Add all to cart", exact: true })).toBeVisible();
+  if (SHOTS) {
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/fairprice-cart-panel-edited.png` });
+  }
+
+  // Checkout is a link out to FairPrice's own page; "I've checked out" marks the trip ordered.
+  const checkout = panel.getByRole("link", { name: "Checkout on FairPrice", exact: true });
+  await expect(checkout).toHaveAttribute("href", "https://www.fairprice.com.sg/checkout");
+  await expect(checkout).toHaveAttribute("target", "_blank");
+  await panel.getByRole("button", { name: "I've checked out", exact: true }).click();
+  await expect(panel.getByText("Marked as ordered", { exact: false })).toBeVisible();
+  expect(orderedCalls()).toBe(1);
+  await expect(page.getByText(/^Ordered on /)).toBeVisible();
+
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("the FairPrice cart panel adds nothing until the cart has been read, and Try again lets it", async ({ page }) => {
+  await stubFairPriceCart(page, { failGetCart: { error: "cart_unreadable", times: 1 } });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  await expect(panel.getByRole("alert").filter({ hasText: "couldn't read your current FairPrice cart" })).toBeVisible();
+  const addAll = panel.getByRole("button", { name: "Add all to cart", exact: true });
+  await expect(addAll).toBeDisabled();
+  await expect(panel.getByLabel("Your cart")).toHaveCount(0);
+  expect(await sentOf("add_to_cart")).toHaveLength(0);
+
+  await panel.getByRole("alert").getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(rowOf("FairPrice Broccoli")).toBeVisible();
+  await expect(addAll).toBeEnabled();
+  await addAll.click();
+  await expect(rowOf("FairPrice Carrot")).toBeVisible();
+  // Only what the cart lacked: the chicken and broccoli were there.
+  const adds = await sentOf("add_to_cart") as unknown as Array<{ lines: Array<{ cart_item_id: string }> }>;
+  expect(adds.map(add => add.lines.map(l => l.cart_item_id))).toEqual([["170003"]]);
+});
+
+test("the FairPrice cart panel says a row's item is gone, puts the quantity back and reads the cart again, also when the window comes back", async ({ page }) => {
+  await stubFairPriceCart(page, { ghost: "160001" });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await expect(broccoli).toBeVisible();
+  const before = (await sentOf("get_cart")).length;
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(broccoli.getByText("That item is no longer in your FairPrice cart", { exact: true })).toBeVisible();
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 3 });
+  await expect.poll(async () => (await sentOf("get_cart")).length).toBeGreaterThan(before);
+  await expect(broccoli.locator("output")).toHaveText("2");
+  await expect(panel.getByRole("button", { name: "Add all to cart", exact: true })).toBeEnabled();
+
+  const afterFailure = (await sentOf("get_cart")).length;
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect.poll(async () => (await sentOf("get_cart")).length).toBeGreaterThan(afterFailure);
+});
+
+test("the FairPrice cart panel sends a pending quantity before it lets the person close, and keeps Refresh off meanwhile", async ({ page }) => {
+  await stubFairPriceCart(page, { writeDelay: 400 });
+  const { panel, rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  const refresh = panel.getByRole("button", { name: "Refresh", exact: true });
+  await expect(refresh).toBeDisabled();
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel.getByText("Saving your changes…", { exact: true })).toBeVisible();
+  await expect(panel).toBeVisible();
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  expect((await sentOf("set_quantity"))[0]).toMatchObject({ cart_item_id: "160001", quantity: 3 });
+  await expect(broccoli.locator("output")).toHaveText("3");
+  await expect(panel.getByText("Saving your changes…", { exact: true })).toHaveCount(0);
+  await expect(refresh).toBeEnabled();
+  await panel.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+});
+
+test("the FairPrice cart panel still sends a change back made while the first write is running", async ({ page }) => {
+  await stubFairPriceCart(page, { writeDelay: 1200 });
+  const { rowOf, sentOf } = await openFairPriceCart(page);
+  const broccoli = rowOf("FairPrice Broccoli");
+  await broccoli.getByRole("button", { name: "Increase quantity" }).click();
+  await expect.poll(async () => (await sentOf("set_quantity")).length).toBe(1);
+  // The first write has not answered yet, so the panel still holds the old quantity of 2.
+  await broccoli.getByRole("button", { name: "Decrease quantity" }).click();
+  await expect.poll(async () => (await sentOf("set_quantity")).length, { timeout: 8000 }).toBe(2);
+  expect((await sentOf("set_quantity")).map(m => (m as { quantity?: number }).quantity)).toEqual([3, 2]);
+  await expect(broccoli.locator("output")).toHaveText("2", { timeout: 8000 });
+});
+
+test("the FairPrice cart panel tells a blocked login window and a login not yet done apart", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.open = () => null;
+  });
+  await stubFairPriceCart(page, { failGetCart: { error: "not_logged_in", times: 99 } });
+  const { panel } = await openFairPriceCart(page);
+  await expect(panel.getByRole("button", { name: "Log in to FairPrice", exact: true })).toBeVisible();
+  await panel.getByRole("button", { name: "Log in to FairPrice", exact: true }).click();
+  await expect(panel.getByText(/^Allow pop-ups for .+, then try again$/)).toBeVisible();
+  await panel.getByRole("button", { name: "I've logged in", exact: true }).click();
+  await expect(panel.getByText("Still not logged in to FairPrice", { exact: true })).toBeVisible();
+  await expect(panel.getByLabel("Your cart")).toHaveCount(0);
+});
+
+test("the FairPrice cart panel shows a missing price as a dash and an unticked item as not selected, with the totals still showing", async ({ page }) => {
+  await stubFairPriceCart(page, { odd: true });
+  const { panel, summary, rowOf } = await openFairPriceCart(page);
+  const mystery = rowOf("Mystery Item");
+  await expect(mystery.getByText("Not selected for checkout", { exact: true })).toBeVisible();
+  await expect(mystery.locator(".unit b")).toHaveText("—");
+  await expect(mystery.locator(".total")).toHaveText("—");
+  await expect(mystery.locator(".total")).toHaveClass(/muted/);
+  await expect(summary.getByText("S$16.75", { exact: true })).toBeVisible();
+  await expect(summary.locator(".grand dd")).toHaveText("—");
+  await expect(panel.getByText("2 already in your cart", { exact: true })).toBeVisible();
+});
+
+test("a one-dinner plan reads as one dinner, one date and a plan budget, with chips from its own day", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stubApi(page);
+  const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  const today = isoDay(0);
+  const dinner = { ...days[3]!, entry_id: 1, day_index: 1, planned_date: today, status: "planned" };
+  const short = {
+    ...plan,
+    start_date: today,
+    end_date: today,
+    day_count: 1,
+    days: [dinner],
+    nutrition_summary_per_person: dinner.nutrition_per_person,
+    grocery_estimate: {
+      ...plan.grocery_estimate,
+      purchase_total_sgd: 14.2,
+      consumed_total_sgd: 14.2,
+      weekly_budget_sgd: 30,
+      items: [grocery("Firm tofu", "Pantry", 4.2, 300), grocery("Brown rice", "Pantry", 10, 500)],
+    },
+  };
+  const shortDashboard = {
+    ...dashboard,
+    start_date: today,
+    end_date: today,
+    day_count: 1,
+    completion_rate: 0,
+    status_counts: { planned: 1, completed: 0, skipped: 0 },
+    planned_nutrition_per_person: dinner.nutrition_per_person,
+    completed_nutrition_per_person: { calories_kcal: 0, protein_g: 0, carbohydrate_g: 0, fat_g: 0, sodium_mg: 0, sugar_g: 0 },
+    days: [dinner],
+  };
+  const shortSession = (planned: boolean) => {
+    const base = session(planned);
+    return {
+      ...base,
+      constraints: { ...base.constraints, weekly_budget_sgd: 30, day_count: 1 },
+      messages: [
+        base.messages[0]!,
+        { ...base.messages[1]!, content: planned ? "One dinner for S$14.20, about 500 kcal." : "Got it: dinner tonight for 2, S$30. Ready when you are." },
+      ],
+    };
+  };
+  await page.route("**/api/agent/sessions", route => route.fulfill({ ...json(shortSession(false)), status: 201 }));
+  await page.route("**/api/agent/sessions/51/confirm", route => route.fulfill(json({ session: shortSession(true), plan: short })));
+  await page.route("**/api/plans/9001", route => route.fulfill(json(short)));
+  await page.route("**/api/plans/9001/dashboard", route => route.fulfill(json(shortDashboard)));
+
+  // A saved profile with a weekly budget of S$140: the card says it is a week's, apart from the plan's S$30.
+  const member = { name: "Tan", servings_per_meal: null, resolved_servings_per_meal: 2, servings_source: "hpb_default", age_band: null, sex: null, activity: null, goal: null, default_present: true, allergens: [], excluded_ingredients: [], dietary_preferences: [] };
+  await page.route("**/api/household-profiles/current", route => route.fulfill(json({
+    id: 1, name: "Tan home", current_version: 2, latest_plan_id: null, created_at: "2026-10-01T00:00:00Z", updated_at: "2026-10-01T00:00:00Z",
+    current: {
+      version: 2, members: [member], planning_household_size: 2, max_cooking_time_minutes: 240, budget_per_meal_sgd: null, weekly_budget_sgd: 140,
+      allergens: [], excluded_ingredients: [], dietary_preferences: [], health_preferences: [],
+      nutrition_targets: { calories_kcal: null, protein_g: null, carbohydrate_g: null, fat_g: null }, max_sodium_mg_per_meal: null,
+      available_ingredients: [], pricing_mode: "fixture", meal_composition: null, plan_shape: null,
+      presence_rules: [], cooking_time_rules: [], missing_basics: [], nutrition_limits: [], missing_equipment: [], created_at: "2026-10-01T00:00:00Z",
+    },
+  })));
+
+  await page.goto("/");
+  await page.getByLabel("Message MealCraft").fill("Dinner tonight for two, S$30");
+  await page.getByRole("button", { name: "Send" }).click();
+  // The ready card and the question it asks use plan words for a one-day plan, never "week".
+  await expect(page.getByText("Ready to plan with these details.")).toBeVisible();
+  await expect(page.getByText("Ready to plan your week")).toHaveCount(0);
+  await expect(page.getByText("2 people · S$140 a week · S$30 for this plan")).toBeVisible();
+  await page.getByRole("button", { name: "Make this plan", exact: true }).click();
+  await expect(page.getByText("One dinner for S$14.20, about 500 kcal.")).toBeVisible();
+
+  const date = new Date(`${today}T00:00:00Z`).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "UTC" });
+  const weekday = new Date(`${today}T00:00:00Z`).toLocaleDateString("en-SG", { weekday: "long", timeZone: "UTC" });
+  const card = page.getByRole("region", { name: "Your plan", exact: true });
+  await expect(card.getByText("One dinner, one shop.")).toBeVisible();
+  await expect(card).not.toContainText("–");
+  await expect(card.getByText(`${date} · dinners for 2`)).toBeVisible();
+  await expect(page.locator(".chat-head .date")).toHaveText(date);
+
+  // The budget is the plan's, not a week's; the chips come from the plan's own day (no Friday, no Sunday).
+  const panel = page.getByRole("complementary", { name: "This plan" });
+  await expect(panel.getByText("S$15.80 left")).toBeVisible();
+  await expect(panel.getByRole("img", { name: /percent of the plan budget/ })).toBeVisible();
+  await expect(page.getByText("2 people · S$140 a week · S$30 for this plan")).toBeVisible();
+  await expect(page.locator(".composer-wrap .after").getByRole("button")).toHaveText([`Swap ${weekday}'s dinner`]);
+
+  // The panel and the nutrition pages fit one day: one picker button, and a single point drawn as a dot.
+  await expect(panel.getByRole("tab", { name: "Plan", exact: true })).toBeVisible();
+  await expect(panel.getByRole("list", { name: "Plan overview" }).getByRole("listitem")).toHaveCount(1);
+  await page.waitForTimeout(600);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/20-short-plan.png` });
+  await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
+  const picker = panel.getByRole("group", { name: "Nutrition day" }).getByRole("button");
+  await expect(picker).toHaveCount(1);
+  expect((await picker.boundingBox())!.width).toBeLessThan(120);
+  await panel.getByRole("button", { name: /All six nutrients/ }).click();
+  const details = page.getByRole("dialog", { name: "Nutrition details" });
+  await expect(details.getByRole("heading", { name: "Nutrition", exact: true })).toBeVisible();
+  await expect(details.locator("circle.plan-dot")).toHaveCount(1);
+  await page.waitForTimeout(600);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/21-short-plan-nutrition.png` });
 });

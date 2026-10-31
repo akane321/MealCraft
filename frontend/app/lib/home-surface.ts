@@ -1,7 +1,7 @@
 import type { FeedbackKind, MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
-import { formatPlanDate } from "./meal-plan-format";
+import { formatPlanDate, sentenceDay } from "./meal-plan-format";
 import { planDayLabel } from "./plan-shape";
 
 /** Today's dinner if the plan covers today, otherwise the next one still planned. */
@@ -66,8 +66,11 @@ export interface GroceryTrip {
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
 }
 
+/** Days one shopping trip covers: the backend's meal_structure trip_days (a plan of up to 7 days is one trip). */
+export const TRIP_DAYS = 7;
+
 /** A plan longer than a week shops twice (ADR-0072): its lines by trip, each grouped as groceryGroups; one trip otherwise. */
-export function groceryTrips(items: GroceryLineEstimate[], tripDays = 7): GroceryTrip[] {
+export function groceryTrips(items: GroceryLineEstimate[], tripDays = TRIP_DAYS): GroceryTrip[] {
   if (!items.some(line => line.shopping_trip)) return [{ trip: null, label: null, groups: groceryGroups(items) }];
   const trips = [...new Set(items.map(line => line.shopping_trip ?? 1))].sort((a, b) => a - b);
   return trips
@@ -99,16 +102,38 @@ function priceKind(line: GroceryLineEstimate): PriceKind {
 
 const priced = (estimate: WeeklyGroceryEstimate) => estimate.items.filter(line => line.product && line.packages_required > 0);
 
+/** How many lines to buy have a live, saved and sample price, by priceKind: the one count every price note uses. */
+export function priceCounts(estimate: WeeklyGroceryEstimate): Record<PriceKind, number> {
+  const counts: Record<PriceKind, number> = { live: 0, saved: 0, sample: 0 };
+  for (const line of priced(estimate)) counts[priceKind(line)] += 1;
+  return counts;
+}
+
+/** A saved (not freshly checked) FairPrice price: the lines labelled "Saved FairPrice price", which the list shows in amber. */
+export function isSavedPrice(line: GroceryLineEstimate): boolean {
+  return Boolean(line.product) && priceKind(line) === "saved";
+}
+
+/**
+ * The price note's dot: green when every price is FairPrice's (live or saved), amber when some are samples or when a live
+ * check got no live price at all (the note then says "Live prices not available"), grey when every price is a sample.
+ */
+export function priceTone(estimate: WeeklyGroceryEstimate): "ok" | "warn" | "" {
+  const { live, saved, sample } = priceCounts(estimate);
+  if (!(live + saved)) return "";
+  const checked = priced(estimate).some(line => line.evidence?.checked_at);
+  return sample || (checked && !live) ? "warn" : "ok";
+}
+
 /** "Prices checked at 15:40 · 15 live · 19 saved · 3 sample", from the evidence of the lines to buy; null if no live check ran. */
 function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
-  const lines = priced(estimate);
-  const checked = lines.map(line => line.evidence?.checked_at).filter((value): value is string => !!value).sort().at(-1);
+  const checked = priced(estimate).map(line => line.evidence?.checked_at).filter((value): value is string => !!value).sort().at(-1);
   if (!checked) return null;
-  const count = (kind: PriceKind) => lines.filter(line => priceKind(line) === kind).length;
+  const count = priceCounts(estimate);
   const time = new Date(checked).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Singapore" });
-  const mix = ([[count("live"), "live"], [count("saved"), "saved"], [count("sample"), "sample"]] as const)
+  const mix = ([[count.live, "live"], [count.saved, "saved"], [count.sample, "sample"]] as const)
     .filter(([n]) => n > 0).map(([n, word]) => `${n} ${word}`).join(" · ");
-  return `${count("live") ? `Prices checked at ${time}` : `Live prices not available at ${time}`} · ${mix}`;
+  return `${count.live ? `Prices checked at ${time}` : `Live prices not available at ${time}`} · ${mix}`;
 }
 
 /**
@@ -116,16 +141,17 @@ function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
  * actually used rather than the mode that was asked for: a live request that
  * fell back to sample data must not be labelled as FairPrice prices.
  */
-/** The backend's note that basic seasonings are assumed at home (layer 08), or null when the week assumes none. */
+/** The backend's note that pantry basics (seasonings, rice, flours and the like) are assumed at home (layer 08),
+ *  or null when the week assumes none. */
 export function basicsNote(estimate: WeeklyGroceryEstimate): string | null {
-  return estimate.warnings?.find(warning => warning.startsWith("Basic seasonings are assumed at home")) ?? null;
+  return estimate.warnings?.find(warning => warning.startsWith("Pantry basics are assumed at home")) ?? null;
 }
 
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const checked = priceCheckLine(estimate);
   if (checked) return checked;
   const lines = priced(estimate);
-  const samples = lines.filter(line => priceKind(line) === "sample").length;
+  const samples = priceCounts(estimate).sample;
   if (!lines.length || samples === lines.length) return "Sample prices";
   if (samples) return "FairPrice and sample prices — source shown on each item";
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
@@ -270,6 +296,27 @@ export function nextMeal(days: NutritionDashboardDay[], today: string): { meal: 
   if (todays) return { meal: todays, isToday: true };
   const next = meals.find(meal => meal.date >= today && open(meal)) ?? meals.find(open);
   return next ? { meal: next, isToday: false } : null;
+}
+
+/**
+ * Follow-up chips from the plan's own days and meals: swap the next meal still to cook, skip the day after its day,
+ * keep the last day. A chip whose day the plan does not have is left out, so a one-day plan offers a swap only.
+ * Past seven days a weekday repeats, so a chip names the date the assistant reads.
+ */
+export function followUpChips(days: NutritionDashboardDay[], today: string): string[] {
+  const next = nextMeal(days, today);
+  if (!next) return [];
+  const weekday = (date: string) => sentenceDay(date, new Set(days.map(item => item.planned_date)).size > 7);
+  const open = mealsByDay(days).filter(day => day.meals.some(meal => meal.status === "planned" || meal.status === "partial"));
+  const first = open.findIndex(day => day.dayIndex === next.meal.dayIndex);
+  const later = open.slice(first + 1);
+  const skip = later[0];
+  const keep = later.length > 1 ? later.at(-1) : undefined;
+  return [
+    `Swap ${weekday(next.meal.date)}'s ${next.meal.mealType}`,
+    ...(skip ? [`Skip ${weekday(skip.date)}`] : []),
+    ...(keep ? [`Don't change ${weekday(keep.date)}`] : []),
+  ];
 }
 
 /** Per-person nutrition of an average meal and an average day, over what still counts (skipped dishes don't). */

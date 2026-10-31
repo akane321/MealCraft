@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -14,6 +15,7 @@ from app.schemas.meal_plan import (
     MealPlanEventType,
     WeeklyGroceryEstimateResponse,
     WeeklyMealPlanRequest,
+    week_shape,
 )
 from app.schemas.recommendation import RecipeRecommendationResponse
 from app.services.cleanup import delete_plans
@@ -21,6 +23,22 @@ from app.services.cleanup import delete_plans
 
 class MealPlanRevisionConflictError(RuntimeError):
     pass
+
+
+def slots_of(plan: MealPlan) -> set[tuple[date, str]]:
+    """The (date, meal) places a saved plan holds: its days, and the meals it plans."""
+    meals = week_shape(plan.constraints if isinstance(plan.constraints, dict) else {}).meals
+    days = (plan.end_date - plan.start_date).days + 1
+    return {(plan.start_date + timedelta(days=n), meal) for n in range(days) for meal in meals}
+
+
+def replaced_by(plan: MealPlan, newer: Iterable[MealPlan]) -> bool:
+    """Whether newer plans together hold every (date, meal) place of `plan` (2026-10-29, owner): a dinner planned
+    again inside a week leaves the week current, and a week planned again over it replaces it."""
+    held: set[tuple[date, str]] = set()
+    for other in newer:
+        held |= slots_of(other)
+    return slots_of(plan) <= held
 
 
 @dataclass(frozen=True)
@@ -171,6 +189,10 @@ class MealPlanRepository:
         )
         return self.session.scalars(statement).unique().one_or_none()
 
+    def save_fairprice_cart(self, plan: MealPlan, cart: dict) -> None:
+        plan.fairprice_cart = cart  # a new dict, so the JSON column notices the change
+        self.session.commit()
+
     def delete(self, plan_id: int) -> bool:
         """Delete a week of this household; a conversation that planned it stays, without a week."""
         plan = self.session.scalar(
@@ -192,8 +214,9 @@ class MealPlanRepository:
         return list(self.session.scalars(statement).all())
 
     def is_current(self, plan: MealPlan) -> bool:
-        """Check overlapping newer weeks across the household's entire history."""
-        newer = select(MealPlan.id).where(
+        """Check overlapping newer plans across the household's entire history: a plan is replaced only when they
+        together hold every (date, meal) place of it."""
+        newer = select(MealPlan).where(
             MealPlan.household_id == self.household_id,
             MealPlan.start_date <= plan.end_date,
             MealPlan.end_date >= plan.start_date,
@@ -202,7 +225,7 @@ class MealPlanRepository:
                 and_(MealPlan.created_at == plan.created_at, MealPlan.id > plan.id),
             ),
         )
-        return not self.session.scalar(select(newer.exists()))
+        return not replaced_by(plan, self.session.scalars(newer).all())
 
     def update_entry_status(
         self,

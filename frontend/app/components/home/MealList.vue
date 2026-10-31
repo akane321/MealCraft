@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { formatPlanDate, planDayName, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { FEEDBACK_BUTTONS, MEAL_LABEL, dishFacts, isStapleDish, mealsByDay, nextFeedback, nextMeal, type PlannedMeal } from "~/lib/home-surface";
 import type { FeedbackKind, NutritionDashboardDay } from "~/types/meal-plan";
 
@@ -23,6 +23,8 @@ const factsOpen = ref<number | null>(null);
 const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
 const week = computed(() => mealsByDay(props.days));
+// Past seven days a weekday repeats, so the overview names the date too.
+const numbered = computed(() => week.value.length > 7);
 const next = computed(() => nextMeal(props.days, todayIsoDate()));
 // A dinner-only week reads as before, one row a day; with several meals each day gets a heading.
 const severalMeals = computed(() => week.value.some(day => day.meals.length > 1));
@@ -57,9 +59,9 @@ const ACTIONS = [
 
 <template>
   <div>
-    <ol class="overview" aria-label="Week overview">
+    <ol class="overview" :class="{ numbered }" aria-label="Plan overview">
       <li v-for="day in week" :key="day.dayIndex">
-        <span>{{ formatPlanDate(day.date, { weekday: "short" }) }}</span>
+        <span>{{ planDayName(day.date, "short", numbered) }}</span>
         <span v-if="day.meals.length > 1" class="overview-dishes overview-mains" :title="dayText(day)">
           <span v-for="meal in day.meals" :key="meal.key">{{ meal.dishes[0]!.recipe.title }}</span>
         </span>
@@ -125,7 +127,7 @@ const ACTIONS = [
                     v-for="action in ACTIONS"
                     :key="action.label"
                     type="button"
-                    @click="emit('ask', action.text(formatPlanDate(day.date, { weekday: 'long' }), dish.recipe.title))"
+                    @click="emit('ask', action.text(sentenceDay(day.date, numbered), dish.recipe.title))"
                   >
                     {{ action.label }}
                   </button>
@@ -161,6 +163,7 @@ const ACTIONS = [
 .overview { list-style: none; margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--c-line-soft); }
 .overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12px; line-height: 22px; }
 .overview li > span:first-child { font-weight: 800; }
+.overview.numbered li { grid-template-columns: 56px minmax(0, 1fr); }
 .overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--c-muted); }
 /* Each meal's main shrinks in proportion to its length, so the last (dinner) never falls off the line. */
 .overview-mains { display: flex; min-width: 0; }

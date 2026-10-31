@@ -133,7 +133,14 @@ class ProductSearchService:
                 line.product = line.product.model_copy(
                     update={
                         key: getattr(matched, key)
-                        for key in ("price_sgd", "regular_price_sgd", "in_stock", "source", "fetched_at")
+                        for key in (
+                            "price_sgd",
+                            "regular_price_sgd",
+                            "in_stock",
+                            "source",
+                            "fetched_at",
+                            "cart_item_id",
+                        )
                     }
                 )
                 line.evidence = PriceEvidence(
@@ -164,7 +171,8 @@ class ProductSearchService:
                 fetched_after=datetime.now(UTC) - timedelta(minutes=self.cache_ttl_minutes),
                 limit=20,
             )
-            ids = {item.external_id for item in cached}
+            # A cached FairPrice row without a cart id is a miss: the live fetch fills the id.
+            ids = {item.external_id for item in cached if item.cart_item_id}
             if all(refreshed[index].product.external_id in ids for index in indices):
                 apply(query, cached, "cache")
             else:

@@ -182,6 +182,9 @@ jobs:
         working-directory: frontend
         run: pnpm test
 
+      - name: Browser extension tests
+        run: node --test browser-extension/fairprice-cart/cart-core.test.js
+
       - name: TypeScript
         working-directory: frontend
         run: pnpm typecheck

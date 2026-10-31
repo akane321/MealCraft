@@ -462,7 +462,12 @@ def test_ingredient_rules() -> None:
     assert not entries["canned_tuna"]["perishable"]
     assert not entries["chicken_breast"]["perishable"] and not entries["cabbage"]["perishable"]
     assert entries["salt"]["basic_seasoning"] and entries["soy_sauce"]["basic_seasoning"]
-    assert not entries["curry_paste"]["basic_seasoning"]
+    # The owner's list of 2026-10-29: rice, small-amount sauces, spices, dried herbs and flours are at home; a dish's
+    # own paste or sauce, tomato products and fresh herbs are bought.
+    assert all(entries[name]["basic_seasoning"] for name in ("rice", "ketchup", "cumin", "thyme", "flour", "bouillon"))
+    assert not any(
+        entries[name]["basic_seasoning"] for name in ("curry_paste", "marinara", "tomato_paste", "basil", "olive_oil")
+    )
     assert entries["baby_spinach"]["methods"]["food_group"] == "hierarchy"
 
 

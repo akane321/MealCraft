@@ -27,8 +27,9 @@ def language(message: str, history: Iterable = ()) -> str:
     return "en"
 
 
-def say(key: str, lang: str, **values) -> str:
-    english, chinese = REPLIES[key]
+def say(key: str, lang: str, *, short: bool = False, **values) -> str:
+    """The reply `key` in `lang`; `short` says plan, not week, for a plan of fewer than seven days."""
+    english, chinese = (SHORT_REPLIES.get(key) if short else None) or REPLIES[key]
     # A dish is named as the plan shows it; the catalog title stays what matching reads.
     shown = {k: shown_title(v) if k in TITLE_VALUES and isinstance(v, str) else v for k, v in values.items()}
     return (chinese if lang == "zh" else english).format(**shown)
@@ -190,17 +191,21 @@ def planner_message(message: str, lang: str) -> str:
     return "有个限制这次满足不了。"
 
 
-def details(stated, lang: str) -> list[str]:
-    """What a message (an extraction) or a conversation (its constraints) says, one short phrase each."""
+def details(stated, lang: str, *, week: bool = False) -> list[str]:
+    """What a message (an extraction) or a conversation (its constraints) says, one short phrase each.
+
+    `week`: its weekly budget is the week's, said so, whatever the days of the plan it asks for."""
 
     def words(values) -> str:
         return joined((word(value, lang) for value in values), lang)
 
     parts: list[str] = []
+    # A plan of fewer than seven days: a conversation's day_count, or the days a message states.
+    short = not week and (getattr(stated, "day_count", None) or getattr(stated, "plan_day_count", None) or 7) < 7
     if stated.household_size:
         parts.append(people(stated.household_size, lang))
     if stated.weekly_budget_sgd:
-        parts.append(say("weekly_detail", lang, amount=stated.weekly_budget_sgd))
+        parts.append(say("weekly_detail", lang, short=short, amount=stated.weekly_budget_sgd))
     if stated.budget_per_meal_sgd:
         parts.append(say("meal_detail", lang, amount=stated.budget_per_meal_sgd))
     if stated.max_cooking_time_minutes:
@@ -604,3 +609,95 @@ REPLIES: dict[str, tuple[str, str]] = {
     "nutrition_limit": ("your nutrition targets", "你的营养目标"),
     "request_limit": ("your request for a particular dish", "你点名要的菜"),
 }
+
+# The same replies for a plan of fewer than seven days (owner, 2026-10-29): `say(..., short=True)` says plan, not week.
+SHORT_REPLIES: dict[str, tuple[str, str]] = {
+    "ask_people": ("How many people should this plan serve?", "这个计划给几个人吃？"),
+    "ready": (
+        "That's everything I need. Check the details below and make the plan when you're ready.",
+        "我需要的信息都齐了。看看下面的细节，准备好了就开始规划吧。",
+    ),
+    "weekly_detail": ("S${amount:g} for the plan", "这次计划 S${amount:g}"),
+    "planned": (
+        "Here's your plan. Click a dish for the recipe, or ask me to swap anything.",
+        "这是你的安排。点一道菜看食谱，想换什么都可以告诉我。",
+    ),
+    "shape_over": (
+        " That makes the plan S${total:.2f}, S${over:.2f} over the S${budget:g} budget.",
+        "这样这次计划要 S${total:.2f}，超出 S${budget:g} 的预算 S${over:.2f}。",
+    ),
+    "when_rest": ("for the rest of this plan", "这次计划余下的几天"),
+    "no_dish": (
+        "No {role} I can plan for {meal} fits {limit}, so I can't make the plan yet.",
+        "没有一道能排进{meal}的{role}符合{limit}，所以这次计划还排不出来。",
+    ),
+    "no_role": (
+        "I have no {role} I can plan for {meal}, so I can't make the plan yet.",
+        "我这里没有能排进{meal}的{role}，所以这次计划还排不出来。",
+    ),
+    "no_cover": (
+        "I can't give {name} a main dish and a staple at every {meal} with what {name} can eat, so I can't make "
+        "the plan. I won't relax an allergy, a diet or a food you avoid to make it fit.",
+        "按 {name} 能吃的菜，我没法让每顿{meal}都给 {name} 配上主菜和主食，所以这次计划排不出来。"
+        "我不会为了排出来而放宽过敏原、饮食类型或忌口。",
+    ),
+    "too_few": (
+        "{rule} needs {needed} different {role} for {meal} in this plan, and only {count} fit your other limits, "
+        "so I can't plan it.",
+        "{rule}的话，这次计划的{meal}需要 {needed} 道不同的{role}，但符合其他限制的只有 {count} 道，所以排不出来。",
+    ),
+    "floor_week": (
+        "That budget can't cover this plan. S${budget:g} for {people} is S${each:.2f} a person a meal over "
+        "{meals} meals: what this plan's dishes use costs at least S${floor:.2f}, before buying whole packages.",
+        "这个预算排不出来。{people}共 S${budget:g}，相当于每人每餐 S${each:.2f}（共 {meals} 餐）："
+        "这次计划的菜光是用到的食材就至少要 S${floor:.2f}，还没算整包购买。",
+    ),
+    "budget_short": (
+        "That budget can't cover this plan. S${budget:g} for {people} comes to about S${each:.2f} "
+        "a person a meal ({meals} meals). The cheapest plan I could find costs S${cost:.2f}.",
+        "这个预算排不出来。{people}共 S${budget:g}，每人每餐大约只有 S${each:.2f}（共 {meals} 餐）。"
+        "我能找到的最便宜的计划要 S${cost:.2f}。",
+    ),
+    "budget_variety": (
+        "If you'd like at least {count} different dishes, a plan we checked costs S${cost:.2f}.",
+        "如果想要至少 {count} 种不同的菜，我们核对过的计划要 S${cost:.2f}。",
+    ),
+    "use_weekly": ("Use S${amount} for the plan", "这次计划用 S${amount}"),
+    "use_weekly_say": ("Make the plan budget S${amount}", "这次计划预算 {amount} 新币"),
+    "fewer_people_at": ("{people} at S${amount}", "{people}，共 S${amount}"),
+    "fewer_people_at_say": ("{people}, S${amount} for the plan", "{count}个人，一共{amount}新币"),
+    "weekly_limit": ("the S${amount:g} budget", "S${amount:g} 的预算"),
+    "search_failed": (
+        "I couldn't make this plan: the search found no plan that meets {limit}. "
+        "That is the limit it kept running into.",
+        "这次计划没排出来：搜索没有找到符合{limit}的计划。卡住它的就是这个限制。",
+    ),
+    "not_planned": ("I couldn't make this plan: {reason}", "这次计划没排出来：{reason}"),
+    "search_failed_generic": (
+        "I couldn't make this plan: the search found no plan that meets every limit together ({limits}).",
+        "这次计划没排出来：搜索没有找到同时满足所有限制的计划（{limits}）。",
+    ),
+    "exhausted": (
+        "I searched as far as the planner goes and found no plan that fits. Try relaxing one of the limits.",
+        "规划能搜索的范围我都搜索过了，没有找到符合要求的计划。放宽其中一个限制再试试。",
+    ),
+}
+
+# Said with "Got it" when the request sets the days of a plan (agent/plan_dates.py read_span, agent/workflow.py).
+PLAN_REPLIES: dict[str, tuple[str, str]] = {
+    "plan_runs": ("The plan runs {start} – {end}.", "这个计划从{start}到{end}。"),
+    "plan_runs_day": ("The plan is for {start}.", "这个计划是{start}的。"),
+    "span_passed": (
+        "Today's meals are over, so the plan starts tomorrow.",
+        "今天的饭已经过了，所以计划从明天开始。",
+    ),
+    "budget_prorated": (
+        "That is S${amount:.2f} of your S${weekly:g} weekly budget.",
+        "这是你每周 S${weekly:g} 预算中的 S${amount:.2f}。",
+    ),
+    "not_in_plan": (
+        "That day is not in this plan, so nothing changes.",
+        "那一天不在这次计划里，所以没有改动。",
+    ),
+}
+REPLIES.update(PLAN_REPLIES)

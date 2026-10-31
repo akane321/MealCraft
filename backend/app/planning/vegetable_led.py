@@ -422,7 +422,10 @@ def catalog_vegetable_led(recipe) -> bool:
 
 
 def candidate_vegetable_led(recipe) -> bool:
-    """`vegetable_led` for a planning candidate (`PlanningRecipeCandidate`)."""
+    """`vegetable_led` for a planning candidate (`PlanningRecipeCandidate`): the flag read on the dish's full lines
+    when its at-home basics were stripped (rice would otherwise drop out of the denominator), else its own lines."""
+    if recipe.vegetable_led is not None:
+        return recipe.vegetable_led
     return vegetable_led(
         weighed((line.ingredient_id, line.quantity, line.unit, line.original_text) for line in recipe.ingredients)
     )

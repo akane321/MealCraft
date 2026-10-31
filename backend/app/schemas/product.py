@@ -28,6 +28,9 @@ class ProductResponse(BaseModel):
     regular_price_sgd: float | None = Field(default=None, ge=0)
     # Typed doubt instead of a guessed quantity: sold by count, or no size could be read at all.
     package_warning: Literal["count_package", "unknown_package"] | None = None
+    # FairPrice's internal product id (the listing's `id`), which its cart takes; external_id is the product
+    # URL's clientItemId. None for fixture products and for rows saved before it was kept.
+    cart_item_id: str | None = None
 
 
 class ProductSearchResponse(BaseModel):

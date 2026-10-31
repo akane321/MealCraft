@@ -206,7 +206,7 @@ def _release_product(item: dict) -> ProductResponse:
     )
 
 
-BASIC_SEASONING_NOTE = "Basic seasoning: assumed at home, not priced."
+AT_HOME_NOTE = "At home: not bought or priced."
 
 
 def not_purchased_line(
@@ -339,7 +339,7 @@ class GroceryEstimator:
                         ingredient.display_name,
                         required,
                         recipe_item.unit,
-                        BASIC_SEASONING_NOTE,
+                        AT_HOME_NOTE,
                     )
                 )
                 continue
