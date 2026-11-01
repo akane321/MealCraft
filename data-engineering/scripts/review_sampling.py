@@ -9,6 +9,9 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 RELEASE = REPOSITORY / "data-engineering/data/release/v2.2"
+# Data release v3's added recipes are reviewed apart (issue #392), with their own seed and dated folders.
+V3 = REPOSITORY / "data-engineering/data/release/v3"
+NEW_SEED = 20261103
 CHECKED = "已亲自核对（填 是）"
 
 
@@ -42,6 +45,14 @@ def release_recipes(release: Path = RELEASE) -> tuple[str, list[dict]]:
     version = json.loads((release / "release_manifest.json").read_text(encoding="utf-8"))["release_version"]
     lines = (release / "recipes.jsonl").read_text(encoding="utf-8").splitlines()
     return version, [json.loads(line) for line in lines if line.strip()]
+
+
+def new_recipes(release: Path = V3, before: Path = RELEASE) -> tuple[str, list[dict]]:
+    """The recipes of `release` that `before` does not have, under a version label that says so."""
+    version, recipes = release_recipes(release)
+    old_version, old = release_recipes(before)
+    known = {recipe["recipe_id"] for recipe in old}
+    return f"{version} (new recipes, not in {old_version})", [r for r in recipes if r["recipe_id"] not in known]
 
 
 def checked(value) -> bool:

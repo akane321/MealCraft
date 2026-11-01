@@ -276,8 +276,14 @@ def contribution(line: dict, forms: dict[str, dict]) -> dict[str, float]:
     return {k: eaten * per_100[k] / 100 for k in NUTRIENTS}
 
 
-def correct_recipe(recipe: dict, forms: dict[str, dict], entries: dict[str, dict]) -> tuple[dict, list[dict]]:
-    """The recipe with its lines corrected and nutrition recomputed, and one record per changed line."""
+def correct_recipe(
+    recipe: dict, forms: dict[str, dict], entries: dict[str, dict], labels: tuple[str, str] = ("v2_1", "v2_2")
+) -> tuple[dict, list[dict]]:
+    """The recipe with its lines corrected and nutrition recomputed, and one record per changed line.
+
+    `forms` and `entries` are the ingredient forms and entries of the release the recipe is weighed against; `labels`
+    name the before and after values in each change record (release v3 applies this to its added recipes).
+    """
     changes, lines = [], []
     delta = dict.fromkeys(NUTRIENTS, 0.0)
     for index, line in enumerate(recipe["ingredients"], 1):
@@ -299,8 +305,8 @@ def correct_recipe(recipe: dict, forms: dict[str, dict], entries: dict[str, dict
                 "line": index,
                 "class": name,
                 "original_text": line["original_text"],
-                "v2_1": {"canonical_ingredient_id": line["canonical_ingredient_id"], "grams": line["grams"]},
-                "v2_2": {"canonical_ingredient_id": new["canonical_ingredient_id"], "grams": new["grams"]},
+                labels[0]: {"canonical_ingredient_id": line["canonical_ingredient_id"], "grams": line["grams"]},
+                labels[1]: {"canonical_ingredient_id": new["canonical_ingredient_id"], "grams": new["grams"]},
                 "source": source,
             }
         )
