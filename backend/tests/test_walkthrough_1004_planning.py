@@ -13,11 +13,13 @@
 import logging
 import math
 import re
+import tempfile
 import threading
 import time
 from collections import Counter
 from contextlib import contextmanager
 from datetime import timedelta
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -705,23 +707,32 @@ def loads(monkeypatch):
 
 @contextmanager
 def pooled():
-    """A session over a small catalog of every course a dinner role takes, its pool kept as production keeps it."""
-    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine, expire_on_commit=False)
-    with factory() as session:
-        session.add_all(
-            [
-                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
-                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
-                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
-                _dish("tomato-soup", "soup", "tomato", 500, calories=150),
-            ]
+    """A session over a small catalog of every course a dinner role takes, its pool kept as production keeps it.
+
+    A database file with a connection per thread, as PostgreSQL gives each session. On one in-memory connection
+    shared by every thread (StaticPool), the background thread's poll rolled back, as it closed its session, an
+    insert the test had sent but not yet committed, and the commit then saved nothing (flaky in CI, 2026-10-27)."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as directory:
+        engine = create_engine(
+            f"sqlite+pysqlite:///{Path(directory) / 'pool.db'}", connect_args={"check_same_thread": False}
         )
-        session.commit()
-    with kept_for(300), factory() as session:
-        yield session
-    engine.dispose()
+        try:
+            Base.metadata.create_all(engine)
+            factory = sessionmaker(bind=engine, expire_on_commit=False)
+            with factory() as session:
+                session.add_all(
+                    [
+                        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+                        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+                        _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+                        _dish("tomato-soup", "soup", "tomato", 500, calories=150),
+                    ]
+                )
+                session.commit()
+            with kept_for(300), factory() as session:
+                yield session
+        finally:
+            engine.dispose()  # before the directory goes: Windows keeps an open database file
 
 
 def joined(name: str) -> None:
