@@ -4,7 +4,9 @@ It compares one system output with the expected action and expected fields of a 
 `reference_answer`, `rubric`, `preserve` and every other key are never read. It decides only what the output slots
 and the echoed fields can show. Everything else is `not_scorable`, which is reported as such and is never a wrong
 answer: planning feasibility needs the validator and the sealed catalog adjudication, question answering needs the
-rubric, and actions such as a swap or a budget change are not visible in the slots.
+rubric, and actions such as a swap or a budget change are not visible in the slots. A limits-type refusal is not
+visible either: the product states it as a reply or a question, so an expected refusal that shows only one is
+`not_scorable` (a known gap the sealed side decides on).
 
 It loads no sealed file. The caller passes one gold mapping and one output; the scoring definitions are not
 pre-registered yet, so this is apparatus and not a result.
@@ -18,10 +20,13 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict
 
 from app.evaluation.conversation_adapter import UnifiedOutput
-from app.evaluation.field_mapping import MAPPED_FIELDS, map_request_fields
+from app.evaluation.field_mapping import MAPPED_FIELDS, NO_COOKING_TIME_LIMIT, map_request_fields
 
 OBSERVABLE_ACTIONS = ("plan", "clarify", "refuse", "food_qa")
 LIST_FIELDS = {"allergens", "excluded_ingredients", "dietary_requirements", "meal_types"}
+# The product states a limits-type refusal (budget impossible and the like) as a reply or a question, never in the
+# refusal slot, so a refusal expected of it cannot be told from a plain answer or question.
+LIMITS_REFUSAL_SHOWS_AS = ("food_qa", "clarify")
 
 
 class IntentVerdict(BaseModel):
@@ -48,21 +53,41 @@ def _normal(value: Any) -> Any:
     if isinstance(value, str):
         return value.strip().lower()
     if isinstance(value, list):
-        return sorted(_normal(item) for item in value)
+        return frozenset(repr(_normal(item)) for item in value)
     return value
 
 
+def _same(stated: Any, want: Any) -> bool:
+    # True is not 1: a boolean never matches a number.
+    return isinstance(stated, bool) == isinstance(want, bool) and _normal(stated) == _normal(want)
+
+
+def _silence_satisfies(name: str, want: Any) -> bool:
+    """An expected value of "none" cannot be told from silence in the echo, so silence satisfies it.
+
+    That is a false flag (the product drops it), an empty list or None, and the no-limit cooking time. A stated value
+    against it still fails.
+    """
+    if name == "cooking_time_minutes" and want == NO_COOKING_TIME_LIMIT:
+        return True
+    return want is None or want is False or want == "" or (isinstance(want, (list, dict)) and not want)
+
+
 def score_intent(gold: Mapping[str, Any], output: UnifiedOutput) -> IntentVerdict:
+    if gold.get("kind") != "intent":
+        return IntentVerdict(outcome="not_scorable", reasons=["only intent cases are scored here"])
     expected = gold.get("expected_fields") or {}
     if "action" not in expected:
         raise ValueError("a gold block needs expected_fields.action")
-    if gold.get("kind") != "intent":
-        return IntentVerdict(outcome="not_scorable", reasons=["only intent cases are scored here"])
     fail: list[str] = []
     unknown: list[str] = []
     action = expected["action"]
     if action not in OBSERVABLE_ACTIONS:
         unknown.append(f"action {action} cannot be seen in the output slots")
+    elif action == "refuse" and observed_action(output) in LIMITS_REFUSAL_SHOWS_AS:
+        unknown.append(
+            f"action refuse: the product states a limits refusal as a {observed_action(output)}, not a refusal"
+        )
     elif observed_action(output) != action:
         fail.append(f"action: expected {action}, observed {observed_action(output)}")
     mapped = map_request_fields(output.request_fields).fields
@@ -72,11 +97,10 @@ def score_intent(gold: Mapping[str, Any], output: UnifiedOutput) -> IntentVerdic
         if name not in MAPPED_FIELDS:
             unknown.append(f"{name} cannot be read from the echoed fields")
         elif name not in mapped:
-            # The product drops a false flag from its echo, so silence satisfies an expected false only.
-            if want is False:
+            if _silence_satisfies(name, want):
                 continue
             fail.append(f"{name}: not stated")
-        elif _normal(mapped[name]) != _normal(want):
+        elif not _same(mapped[name], want):
             fail.append(f"{name}: stated value differs from the expected one")
     if fail:
         return IntentVerdict(outcome="fail", reasons=fail)
