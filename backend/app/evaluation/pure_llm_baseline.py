@@ -42,11 +42,12 @@ from pydantic import BaseModel, ValidationError
 
 from app.core.paths import repository_root
 from app.data.recipe_tags import INPUT_USD_PER_M, OUTPUT_USD_PER_M
+from app.evaluation import halal_scoring
 from app.evaluation.baseline_mapping import map_response_ingredients
 from app.evaluation.baseline_output import BaselineAnswer, BaselineResponse
 from app.evaluation.baseline_recomputation import allergen_safety, recompute_ingredient_baseline
 from app.evaluation.baseline_resources import BaselineResources, load_resources
-from app.evaluation.baseline_validation import validate_baseline_plan
+from app.evaluation.baseline_validation import halal_purchasable, validate_baseline_plan
 from app.evaluation.baseline_verification import verify_coverage
 
 SYSTEM_ID = "pure-llm-single-turn"
@@ -305,11 +306,12 @@ def score(episode: dict[str, Any], response: BaselineResponse, resources: Baseli
     verification = verify_coverage(coverage)
     scenario = episode.get("scenario", episode)
     household = scenario.get("household_profile") or {}
+    halal = halal_scoring.required(episode)
     recomputation = recompute_ingredient_baseline(
         coverage,
         ingredient_facts=resources.ingredient_facts,
-        frozen_products=resources.frozen_products,
-        not_purchased=resources.not_bought(household),
+        frozen_products=halal_purchasable(resources.frozen_products) if halal else resources.frozen_products,
+        not_purchased=resources.not_bought(household, halal=halal),
     )
     requested = (episode.get("gold") or {}).get("applicable_hard_constraints", {}).get("allergens_absent")
     safe, reasons = allergen_safety(

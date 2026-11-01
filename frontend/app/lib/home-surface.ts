@@ -1,7 +1,7 @@
 import type { FeedbackKind, MealPlanReplanEvent, NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
-import type { GroceryLineEstimate, ProductSearchResponse } from "~/types/recommendation";
+import type { GroceryLineEstimate, ProductSearchResponse, Retailer } from "~/types/recommendation";
 import type { RecipeNutrition } from "~/types/recipe";
-import { formatPlanDate } from "./meal-plan-format";
+import { formatPlanDate, sentenceDay } from "./meal-plan-format";
 import { planDayLabel } from "./plan-shape";
 
 /** Today's dinner if the plan covers today, otherwise the next one still planned. */
@@ -58,20 +58,49 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** The store a line is bought at: its own `retailer`, else its product's source (FairPrice unless it says Cold Storage). */
+export function lineRetailer(line: GroceryLineEstimate): Retailer {
+  return (line.retailer ?? (line.product?.source === "cold_storage" ? "cold_storage" : "fairprice"));
+}
+
+export const RETAILER_NAME: Record<Retailer, string> = { fairprice: "FairPrice", cold_storage: "Cold Storage" };
+
+/** True when some line is bought at Cold Storage: only then does a list show its stores apart. */
+export const hasColdStorage = (items: GroceryLineEstimate[]): boolean => items.some(line => lineRetailer(line) === "cold_storage");
+
+export interface GroceryStore {
+  retailer: Retailer;
+  name: string;
+  groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
+}
+
+/** A trip's lines by store, FairPrice first and then Cold Storage, each as groceryGroups; a store with nothing to buy is left out. */
+export function groceryStores(items: GroceryLineEstimate[]): GroceryStore[] {
+  return (["fairprice", "cold_storage"] as const)
+    .map(retailer => ({ retailer, name: RETAILER_NAME[retailer], groups: groceryGroups(items.filter(line => lineRetailer(line) === retailer)) }))
+    .filter(store => store.groups.length);
+}
+
 export interface GroceryTrip {
   /** 1 before day 1, 2 before day 8; null for a plan's only trip. */
   trip: number | null;
   /** "Shop before day 8"; null for a plan's only trip. */
   label: string | null;
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
+  /** The same lines by store; one FairPrice entry when no line is Cold Storage's. */
+  stores: GroceryStore[];
 }
 
+/** Days one shopping trip covers: the backend's meal_structure trip_days (a plan of up to 7 days is one trip). */
+export const TRIP_DAYS = 7;
+
 /** A plan longer than a week shops twice (ADR-0072): its lines by trip, each grouped as groceryGroups; one trip otherwise. */
-export function groceryTrips(items: GroceryLineEstimate[], tripDays = 7): GroceryTrip[] {
-  if (!items.some(line => line.shopping_trip)) return [{ trip: null, label: null, groups: groceryGroups(items) }];
+export function groceryTrips(items: GroceryLineEstimate[], tripDays = TRIP_DAYS): GroceryTrip[] {
+  const make = (trip: number | null, label: string | null, lines: GroceryLineEstimate[]): GroceryTrip => ({ trip, label, groups: groceryGroups(lines), stores: groceryStores(lines) });
+  if (!items.some(line => line.shopping_trip)) return [make(null, null, items)];
   const trips = [...new Set(items.map(line => line.shopping_trip ?? 1))].sort((a, b) => a - b);
   return trips
-    .map(trip => ({ trip, label: `Shop before day ${1 + (trip - 1) * tripDays}`, groups: groceryGroups(items.filter(line => (line.shopping_trip ?? 1) === trip)) }))
+    .map(trip => make(trip, `Shop before day ${1 + (trip - 1) * tripDays}`, items.filter(line => (line.shopping_trip ?? 1) === trip)))
     .filter(trip => trip.groups.length);
 }
 
@@ -138,10 +167,14 @@ function priceCheckLine(estimate: WeeklyGroceryEstimate): string | null {
  * actually used rather than the mode that was asked for: a live request that
  * fell back to sample data must not be labelled as FairPrice prices.
  */
-/** The backend's note that basic seasonings are assumed at home (layer 08), or null when the week assumes none. */
+/** The backend's note that pantry basics (seasonings, rice, flours and the like) are assumed at home (layer 08),
+ *  or null when the week assumes none. */
 export function basicsNote(estimate: WeeklyGroceryEstimate): string | null {
-  return estimate.warnings?.find(warning => warning.startsWith("Basic seasonings are assumed at home")) ?? null;
+  return estimate.warnings?.find(warning => warning.startsWith("Pantry basics are assumed at home")) ?? null;
 }
+
+/** "A", "A and B", "A, B and C". */
+const andList = (words: string[]): string => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
 
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const checked = priceCheckLine(estimate);
@@ -149,10 +182,13 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const lines = priced(estimate);
   const samples = priceCounts(estimate).sample;
   if (!lines.length || samples === lines.length) return "Sample prices";
-  if (samples) return "FairPrice and sample prices — source shown on each item";
+  // The stores whose prices are shown (FairPrice alone unless a line is Cold Storage's).
+  const stores = (["fairprice", "cold_storage"] as const).filter(store => lines.some(line => lineRetailer(line) === store && priceKind(line) !== "sample"));
+  const names = stores.length ? stores.map(store => RETAILER_NAME[store]) : [RETAILER_NAME.fairprice];
+  if (samples) return `${andList([...names, "sample"])} prices — source shown on each item`;
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
   const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `FairPrice prices from ${date}`;
+  return `${andList(names)} prices from ${date}`;
 }
 
 /** An observation's date is never replaced by the time a later price check was attempted. */
@@ -163,7 +199,9 @@ export function groceryPriceLabel(line: GroceryLineEstimate): string {
   if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
   const kind = priceKind(line);
   const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  const base = kind === "sample" ? "Sample price" : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
+  const base = kind === "sample"
+    ? "Sample price"
+    : lineRetailer(line) === "cold_storage" ? `${RETAILER_NAME.cold_storage} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
   switch (evidence?.lookup_status) {
     case "timeout": return `${base} · not checked live in time`;
     case "selected_product_not_returned": return `${base} · selected product not found`;
@@ -292,6 +330,27 @@ export function nextMeal(days: NutritionDashboardDay[], today: string): { meal: 
   if (todays) return { meal: todays, isToday: true };
   const next = meals.find(meal => meal.date >= today && open(meal)) ?? meals.find(open);
   return next ? { meal: next, isToday: false } : null;
+}
+
+/**
+ * Follow-up chips from the plan's own days and meals: swap the next meal still to cook, skip the day after its day,
+ * keep the last day. A chip whose day the plan does not have is left out, so a one-day plan offers a swap only.
+ * Past seven days a weekday repeats, so a chip names the date the assistant reads.
+ */
+export function followUpChips(days: NutritionDashboardDay[], today: string): string[] {
+  const next = nextMeal(days, today);
+  if (!next) return [];
+  const weekday = (date: string) => sentenceDay(date, new Set(days.map(item => item.planned_date)).size > 7);
+  const open = mealsByDay(days).filter(day => day.meals.some(meal => meal.status === "planned" || meal.status === "partial"));
+  const first = open.findIndex(day => day.dayIndex === next.meal.dayIndex);
+  const later = open.slice(first + 1);
+  const skip = later[0];
+  const keep = later.length > 1 ? later.at(-1) : undefined;
+  return [
+    `Swap ${weekday(next.meal.date)}'s ${next.meal.mealType}`,
+    ...(skip ? [`Skip ${weekday(skip.date)}`] : []),
+    ...(keep ? [`Don't change ${weekday(keep.date)}`] : []),
+  ];
 }
 
 /** Per-person nutrition of an average meal and an average day, over what still counts (skipped dishes don't). */

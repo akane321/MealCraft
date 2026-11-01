@@ -66,7 +66,7 @@ for (const [width, height] of [[1280, 720], [1440, 900]]) {
     await page.getByLabel("Message MealCraft").fill("Plan lunch and dinner for two");
     await page.getByRole("button", { name: "Send", exact: true }).click();
     await page.getByRole("button", { name: "Plan my week", exact: true }).click();
-    const panel = page.getByRole("complementary", { name: "This week" });
+    const panel = page.getByRole("complementary", { name: "This plan" });
     await expect(panel.getByRole("tab", { name: "Nutrition", exact: true })).toBeVisible();
     await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
     const summary = panel.getByRole("region", { name: "Nutrition per day and meal" });

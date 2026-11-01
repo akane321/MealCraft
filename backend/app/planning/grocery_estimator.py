@@ -6,10 +6,12 @@ from difflib import SequenceMatcher
 from functools import lru_cache
 
 from app.core.paths import data_root
+from app.data import halal as halal_data
 from app.data.overrides import overrides
 from app.data.units import UNIT_BASE, in_grams
 from app.models.recipe import Recipe
 from app.planning.household_slots import assumed_basics
+from app.planning.retailers import cold_storage_products, retailer_of
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
 from app.services.product import ProductSearchService
@@ -79,8 +81,9 @@ def release_products() -> dict[str, dict]:
 
 
 def priceable_ingredients() -> frozenset[str]:
-    """Ingredients the estimator can price at all, decided without a search."""
-    return matchable_ingredients() | frozenset(release_products())
+    """Ingredients the estimator can price at all, decided without a search: at FairPrice or at Cold Storage."""
+    cold_storage = frozenset(name for name, entry in cold_storage_products().items() if entry["status"] == "mapped")
+    return matchable_ingredients() | frozenset(release_products()) | cold_storage
 
 
 def not_purchased(ingredient_name: str) -> bool:
@@ -117,22 +120,67 @@ def choose_product(
     *,
     live: bool,
     quantity: float | None = None,
+    requires_halal: bool = False,
 ) -> ProductChoice:
     """The one place both estimators pick a product for an ingredient line.
+
+    FairPrice first, whatever it costs. Only when it ends with no product (no mapping, a mapping that is not
+    `mapped`, or nothing in stock) is Cold Storage tried (docs/design/cold-storage.md).
+    """
+    choice = _fairprice_choice(
+        product_service,
+        matcher,
+        ingredient_name,
+        ingredient_display_name,
+        unit,
+        live=live,
+        quantity=quantity,
+        requires_halal=requires_halal,
+    )
+    if choice.product is not None:
+        return choice
+    return _cold_storage_choice(
+        choice,
+        product_service,
+        ingredient_name,
+        ingredient_display_name,
+        unit,
+        live=live,
+        quantity=quantity,
+        # Cold Storage has no halal fact (isHalal was false on every product), so it never serves a line that needs one.
+        certified_only=requires_halal and halal_data.needs_certification(ingredient_name),
+    )
+
+
+def _fairprice_choice(
+    product_service: ProductSearchService,
+    matcher: "ProductMatcher",
+    ingredient_name: str,
+    ingredient_display_name: str,
+    unit: str | None,
+    *,
+    live: bool,
+    quantity: float | None,
+    requires_halal: bool,
+) -> ProductChoice:
+    """The FairPrice branches of `choose_product`.
 
     Curated ingredients keep the name matcher they were tuned against. When it
     finds nothing, or a package the line's unit cannot convert to, a reviewed
     release mapping is used instead. Unmatchable, unmapped ingredients are never
     searched: in live mode each search is a request.
+
+    For a halal household a line that needs a certified product (meat) only takes
+    certified products, whatever they cost; with none, the line has no product.
     """
     choice = ProductChoice()
+    certified_only = requires_halal and halal_data.needs_certification(ingredient_name)
     if ingredient_name in matchable_ingredients():
         search = product_service.search(ingredient_display_name, live=live, limit=8)
         if search.warning:
             choice.warnings.append(search.warning)
-        choice.product, choice.match_score = matcher.choose(
-            ingredient_name, ingredient_display_name, unit, search.items
-        )
+        items = [item for item in search.items if item.halal_certified] if certified_only else search.items
+        choice.product, choice.match_score = matcher.choose(ingredient_name, ingredient_display_name, unit, items)
         if choice.product is not None:
             trace = search.retrieval
             choice.evidence = price_evidence(
@@ -156,7 +204,7 @@ def choose_product(
             product.model_copy(
                 update={
                     key: getattr(current[product.external_id], key)
-                    for key in ("price_sgd", "in_stock", "source", "fetched_at")
+                    for key in ("price_sgd", "in_stock", "source", "fetched_at", "halal_certified")
                 }
             )
             for product in products
@@ -166,16 +214,12 @@ def choose_product(
             choice.warnings.append(
                 f"Live FairPrice search did not return a reviewed product for {ingredient_display_name}."
             )
+    if certified_only:
+        products = [product for product in products if product.halal_certified]
+        if not products:
+            choice.warnings.append(f"No halal-certified product was found for {ingredient_display_name}.")
     grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
-
-    def cost(item: ProductResponse) -> tuple[float, float, str]:
-        # Cheapest to buy for this quantity, not cheapest per gram: a 25 kg sack
-        # is the best unit price and the wrong purchase for 300 g of flour.
-        packages = max(1, math.ceil(grams / item.package_size)) if grams else 1
-        return packages * item.price_sgd, item.price_sgd / item.package_size, item.external_id
-
-    in_stock = [product for product in products if product.in_stock]
-    choice.product = min(in_stock, key=cost) if in_stock else None
+    choice.product = _cheapest_in_stock(products, grams)
     choice.match_score = None
     if choice.product is not None:
         choice.evidence = (
@@ -189,7 +233,86 @@ def choose_product(
     return choice
 
 
-def _release_product(item: dict) -> ProductResponse:
+def _cheapest_in_stock(products: list[ProductResponse], grams: float | None) -> ProductResponse | None:
+    def cost(item: ProductResponse) -> tuple[float, float, str]:
+        # Cheapest to buy for this quantity, not cheapest per gram: a 25 kg sack
+        # is the best unit price and the wrong purchase for 300 g of flour.
+        packages = max(1, math.ceil(grams / item.package_size)) if grams else 1
+        return packages * item.price_sgd, item.price_sgd / item.package_size, item.external_id
+
+    in_stock = [product for product in products if product.in_stock]
+    return min(in_stock, key=cost) if in_stock else None
+
+
+COLD_STORAGE_PARSER_VERSION = "cold-storage-capture-v1"
+COLD_STORAGE_NOTE = "FairPrice has no product for this; bought at Cold Storage."
+
+
+def _cold_storage_choice(
+    choice: ProductChoice,
+    product_service: ProductSearchService,
+    ingredient_name: str,
+    ingredient_display_name: str,
+    unit: str | None,
+    *,
+    live: bool,
+    quantity: float | None,
+    certified_only: bool,
+) -> ProductChoice:
+    """Fill a line FairPrice left without a product from the reviewed Cold Storage mapping, if it has one."""
+    entry = cold_storage_products().get(ingredient_name)
+    if (
+        certified_only
+        or entry is None
+        or entry["status"] != "mapped"
+        or not entry.get("products")
+        or convert_quantity(1.0, unit, "g") is None
+    ):
+        return choice
+    products = [_release_product(item, source="cold_storage") for item in entry["products"]]
+    query, trace = entry["products"][0]["query"], None
+    if live:
+        search = product_service.search(query, live=True, limit=30, retailer="cold_storage")
+        trace = search.retrieval
+        if search.warning:
+            choice.warnings.append(search.warning)
+        current = {item.external_id: item for item in search.items}
+        products = [
+            product.model_copy(
+                update={
+                    key: getattr(current[product.external_id], key)
+                    for key in ("price_sgd", "in_stock", "source", "fetched_at", "halal_certified")
+                }
+            )
+            for product in products
+            if product.external_id in current
+        ]
+        if not products:
+            choice.warnings.append(
+                f"Live Cold Storage search did not return a reviewed product for {ingredient_display_name}."
+            )
+    grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
+    choice.product = _cheapest_in_stock(products, grams)
+    if choice.product is not None:
+        choice.evidence = (
+            price_evidence(choice.product, mode=trace.mode, query=trace.query, parser_version=trace.parser_version)
+            if trace is not None
+            # The reviewed mapping's stored prices: observed on the snapshot date, not now.
+            else price_evidence(
+                choice.product, mode="snapshot", query=query, parser_version=COLD_STORAGE_PARSER_VERSION
+            )
+        )
+    return choice
+
+
+def with_store_note(product: ProductResponse | None, note: str | None) -> str | None:
+    """A line bought at Cold Storage says so, after any note it already has."""
+    if product is None or retailer_of(product) != "cold_storage":
+        return note
+    return " ".join(part for part in (note, COLD_STORAGE_NOTE) if part)
+
+
+def _release_product(item: dict, *, source: str = "fixture") -> ProductResponse:
     return ProductResponse(
         external_id=item["external_id"],
         name=item["name"],
@@ -201,12 +324,13 @@ def _release_product(item: dict) -> ProductResponse:
         product_url=item["product_url"],
         image_url=None,
         in_stock=item["in_stock"],
-        source="fixture",
+        source=source,
         fetched_at=datetime.fromisoformat(item["fetched_at"]),
+        halal_certified=halal_data.release_halal_certification().get(item["external_id"]),
     )
 
 
-BASIC_SEASONING_NOTE = "Basic seasoning: assumed at home, not priced."
+AT_HOME_NOTE = "At home: not bought or priced."
 
 
 def not_purchased_line(
@@ -296,7 +420,9 @@ class GroceryEstimator:
         purchase_total = 0.0
         consumed_total = 0.0
         consumed_total_known = True
-        assumed = assumed_basics(getattr(constraints, "household", None), constraints.excluded_ingredients)
+        assumed = assumed_basics(
+            getattr(constraints, "household", None), constraints.excluded_ingredients, constraints.requires_halal
+        )
 
         from app.planning import alternatives  # alternatives imports this module
 
@@ -339,7 +465,7 @@ class GroceryEstimator:
                         ingredient.display_name,
                         required,
                         recipe_item.unit,
-                        BASIC_SEASONING_NOTE,
+                        AT_HOME_NOTE,
                     )
                 )
                 continue
@@ -351,6 +477,7 @@ class GroceryEstimator:
                 recipe_item.unit,
                 live=constraints.pricing_mode == "live",
                 quantity=remaining,
+                requires_halal=constraints.requires_halal,
             )
             warnings.extend(warning for warning in choice.warnings if warning not in warnings)
             product, match_score = choice.product, choice.match_score
@@ -464,6 +591,7 @@ class GroceryEstimator:
             purchase_cost_sgd=round(purchase_cost, 2),
             consumed_cost_sgd=round(consumed_cost, 2) if consumed_cost is not None else None,
             excess_quantity=round(excess, 3) if excess is not None else None,
-            note=note,
+            note=with_store_note(product, note),
             evidence=evidence,
+            retailer=retailer_of(product),
         )

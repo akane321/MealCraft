@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 
 from app.schemas.retrieval import RetrievalTrace
 
-ProductSource = Literal["fairprice", "fixture"]
+Retailer = Literal["fairprice", "cold_storage"]
+ProductSource = Literal["fairprice", "cold_storage", "fixture"]
 PricingMode = Literal["fixture", "live"]
 
 
@@ -28,6 +29,11 @@ class ProductResponse(BaseModel):
     regular_price_sgd: float | None = Field(default=None, ge=0)
     # Typed doubt instead of a guessed quantity: sold by count, or no size could be read at all.
     package_warning: Literal["count_package", "unknown_package"] | None = None
+    # FairPrice's internal product id (the listing's `id`), which its cart takes; external_id is the product
+    # URL's clientItemId. None for fixture products and for rows saved before it was kept.
+    cart_item_id: str | None = None
+    # True when the listing's "Dietary Attributes" carry "Halal"; None is unknown, never False (docs/design/halal.md).
+    halal_certified: bool | None = None
 
 
 class ProductSearchResponse(BaseModel):
@@ -43,13 +49,13 @@ class ProductSearchResponse(BaseModel):
 class PriceEvidence(BaseModel):
     """Where one shown price came from, so it can be traced and replayed (external-retrieval-rag.md).
 
-    `mode` is how the observation was obtained now: a live FairPrice request, the 15-minute cache, the
+    `mode` is how the observation was obtained now: a live retailer request, the 15-minute cache, the
     reviewed release snapshot, or the offline fixture. `fetched_at` is when the price was observed,
     not when it was read.
     """
 
     fact_id: str
-    source: Literal["fairprice", "fixture", "release_snapshot"]
+    source: Literal["fairprice", "cold_storage", "fixture", "release_snapshot"]
     mode: Literal["live", "cache", "snapshot", "fixture"]
     query: str | None
     parser_version: str | None
@@ -91,6 +97,9 @@ class GroceryLineEstimate(BaseModel):
     shopping_trip: int | None = Field(default=None, ge=1, le=2)
     # A perishable ingredient (layer 08): used within 3 days of its trip; None is not marked.
     perishable: bool | None = None
+    # The store the product is bought at: retailer_of(product) when the line has a product, else None
+    # (docs/design/cold-storage.md).
+    retailer: Retailer | None = None
 
 
 class GroceryEstimateResponse(BaseModel):

@@ -144,10 +144,12 @@ test("a new household is saved with no limit or goal it did not enter", async ({
   await expect(page.getByLabel("Longest cooking time (min)")).toHaveValue("");
   await expect(page.getByLabel("Calories per meal")).toHaveValue("");
   await expect(page.getByRole("checkbox", { name: "Lower sodium" })).not.toBeChecked();
+  await expect(page.getByRole("switch", { name: "Halal household" })).not.toBeChecked();
 
   await page.getByRole("button", { name: "Save household" }).click();
   await expect.poll(() => saved).not.toBeNull();
   expect(saved).toMatchObject({
+    requires_halal: false, // the household did not ask for it
     max_cooking_time_minutes: 240, // no limit
     budget_per_meal_sgd: null,
     weekly_budget_sgd: null,
@@ -155,6 +157,46 @@ test("a new household is saved with no limit or goal it did not enter", async ({
     nutrition_targets: { calories_kcal: null, protein_g: null, carbohydrate_g: null, fat_g: null },
     max_sodium_mg_per_meal: null,
   });
+});
+
+test("a halal household is one switch on the whole household, saved with it and shown on its card", async ({ page }) => {
+  const json = (body: unknown, status = 200) => ({ status, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/auth/me", route => route.fulfill(json(ME)));
+  const member = { name: "Tan", servings_per_meal: null, resolved_servings_per_meal: 1, servings_source: "hpb_default", age_band: null, sex: null, activity: null, goal: null, default_present: true, allergens: [], excluded_ingredients: [], dietary_preferences: [] };
+  const saved = {
+    id: 1,
+    name: "Tan home",
+    current_version: 2,
+    latest_plan_id: null,
+    created_at: "2026-10-01T00:00:00Z",
+    updated_at: "2026-10-01T00:00:00Z",
+    current: {
+      version: 2, members: [member], planning_household_size: 1, max_cooking_time_minutes: 240, budget_per_meal_sgd: null, weekly_budget_sgd: null,
+      allergens: [], excluded_ingredients: [], dietary_preferences: [], health_preferences: [],
+      nutrition_targets: { calories_kcal: null, protein_g: null, carbohydrate_g: null, fat_g: null }, max_sodium_mg_per_meal: null,
+      available_ingredients: [], pricing_mode: "fixture", meal_composition: null, plan_shape: null,
+      presence_rules: [], cooking_time_rules: [], missing_basics: [], nutrition_limits: [], missing_equipment: [], requires_halal: true, created_at: "2026-10-01T00:00:00Z",
+    },
+  };
+  await page.route("**/api/household-profiles/current", route => route.fulfill(json(saved)));
+  let sent: Record<string, unknown> | null = null;
+  await page.route("**/api/household-profiles/1", async (route) => {
+    sent = route.request().postDataJSON();
+    await route.fulfill(json({ detail: "stop here" }, 422));
+  });
+
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/profile");
+  await page.waitForLoadState("networkidle"); // clicks before hydration are lost
+  const halal = page.getByRole("switch", { name: "Halal household" });
+  await expect(halal).toBeChecked();
+  await expect(page.getByText("Only halal dishes; meat only from products FairPrice marks Halal.")).toBeVisible();
+  await expect(page.locator(".profile-summary-card").getByText("Halal", { exact: true })).toBeVisible();
+
+  await halal.uncheck();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect.poll(() => sent).not.toBeNull();
+  expect(sent).toMatchObject({ requires_halal: false, expected_version: 2 });
 });
 
 test("a household sentence is read, confirmed and saved with portions, basics and the sodium limit", async ({ page }) => {
@@ -171,7 +213,13 @@ test("a household sentence is read, confirmed and saved with portions, basics an
       child: { female: { moderate: { none: 0.7 } }, male: { moderate: { none: 0.75 } }, any: { moderate: { none: 0.73 } } },
     },
     sodium_limit_mg: { adult: 2000, child: null },
-    basics: [{ normalized_name: "salt", display_name: "Salt", allergens: [] }, { normalized_name: "soy_sauce", display_name: "Soy sauce", allergens: ["soy", "gluten"] }],
+    basics: [
+      { normalized_name: "salt", display_name: "Salt", category: "basic", allergens: [] },
+      { normalized_name: "soy_sauce", display_name: "Soy sauce", category: "basic", allergens: ["soy", "gluten"] },
+      { normalized_name: "ketchup", display_name: "Ketchup", category: "sauce", allergens: [] },
+      { normalized_name: "cumin", display_name: "Cumin", category: "spice", allergens: [] },
+    ],
+    basic_categories: [{ id: "basic", label: "Basics" }, { id: "sauce", label: "Sauces and condiments" }, { id: "spice", label: "Spices and seasoning blends" }],
     meal_shares: { breakfast: 0.25, lunch: 0.35, dinner: 0.35 },
     sources: [],
   })));
@@ -206,7 +254,20 @@ test("a household sentence is read, confirmed and saved with portions, basics an
   await expect(page.getByText("From \"孩子工作日午饭在学校吃\"")).toBeVisible();
   expect(parsed).toMatchObject({ kind: "presence", members: [{ name: "Mei", age_band: "child", default_present: true }] });
 
+  // The run-out picker starts collapsed, with a count; a filter opens the groups that match.
+  await expect(page.getByText("none marked")).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: /Soy sauce/ })).toBeHidden();
+  await page.getByLabel("Find an item at home").fill("sauce");
+  await page.getByLabel("Find an item at home").press("Enter"); // a search box, not a way to save the household
+  await page.waitForTimeout(300);
+  expect(saved).toBeNull();
+  await expect(page.getByRole("checkbox", { name: /Ketchup/ })).toBeHidden();
   await page.getByRole("checkbox", { name: /Soy sauce/ }).check();
+  await expect(page.getByText("1 marked").first()).toBeVisible();
+  await page.getByLabel("Find an item at home").fill("");
+  await page.getByText("Spices and seasoning blends").click();
+  await page.getByRole("checkbox", { name: /Cumin/ }).check();
+  await page.getByRole("checkbox", { name: /Cumin/ }).uncheck();
   await page.getByRole("checkbox", { name: "Keep sodium within a daily limit" }).check();
   await page.getByLabel("Most sodium per person a day (mg)").fill("1500");
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/15-profile-rules.png`, fullPage: true });

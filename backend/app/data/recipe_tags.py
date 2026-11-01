@@ -74,7 +74,7 @@ The rules, and why:
 - **Ingredients.** `food_group` is the release's, or for a curated id the release ingredient it is
   the same as or a variety of. `perishable` is ADR-0068's short-lived class only (leafy greens, bean
   and pea sprouts, fresh fish, fresh shellfish); every true value is confirmed by the owner.
-  `basic_seasoning` is `data/ingredients/basic-seasonings-v1.json`.
+  `basic_seasoning` is `data/ingredients/basic-seasonings-v2.json`.
 """
 
 from __future__ import annotations
@@ -132,7 +132,7 @@ OWNER_ROLES = {
 }
 SAMPLE = "data-engineering/docs/recipe-tags-v1-sample.json"
 REPORT = "data-engineering/docs/recipe-tags-v1-report.md"
-BASIC_SEASONINGS = "data/ingredients/basic-seasonings-v1.json"
+BASIC_SEASONINGS = "data/ingredients/basic-seasonings-v2.json"
 SEED = 20261018
 
 MEAL_ROLES: tuple[str, ...] = get_args(MealRole)
@@ -1039,7 +1039,7 @@ def ingredient_entry(name: str, basics: set[str]) -> dict:
         "methods": {
             "food_group": "release" if release == name and group else ("hierarchy" if group else "none"),
             "perishable": "rule",
-            "basic_seasoning": "basic-seasonings-v1",
+            "basic_seasoning": "basic-seasonings-v2",
         },
     }
 

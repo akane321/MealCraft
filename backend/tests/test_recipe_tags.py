@@ -462,7 +462,12 @@ def test_ingredient_rules() -> None:
     assert not entries["canned_tuna"]["perishable"]
     assert not entries["chicken_breast"]["perishable"] and not entries["cabbage"]["perishable"]
     assert entries["salt"]["basic_seasoning"] and entries["soy_sauce"]["basic_seasoning"]
-    assert not entries["curry_paste"]["basic_seasoning"]
+    # The owner's list of 2026-10-29: rice, small-amount sauces, spices, dried herbs and flours are at home; a dish's
+    # own paste or sauce, tomato products and fresh herbs are bought.
+    assert all(entries[name]["basic_seasoning"] for name in ("rice", "ketchup", "cumin", "thyme", "flour", "bouillon"))
+    assert not any(
+        entries[name]["basic_seasoning"] for name in ("curry_paste", "marinara", "tomato_paste", "basil", "olive_oil")
+    )
     assert entries["baby_spinach"]["methods"]["food_group"] == "hierarchy"
 
 
@@ -615,7 +620,7 @@ def test_the_importers_copy_the_tag_files_onto_the_rows(session: Session, releas
         for field in tag_files.RECIPE_TAG_FIELDS:
             assert getattr(recipe, field) == entry[field], (recipe.slug, field)
         assert recipe.estimated == entry["estimated"]
-        assert recipe.halal_status is None and recipe.unknown_safety is None
+        assert recipe.unknown_safety is None  # halal_status is set by the halal labels (docs/design/halal.md)
     ingredients = committed(tag_files.INGREDIENT_TAGS, "ingredients")
     rows = session.scalars(select(Ingredient)).all()
     assert rows

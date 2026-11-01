@@ -15,6 +15,7 @@ from typing import get_args
 
 from app.data import meal_structure
 from app.data.allergens import checked_allergens
+from app.data.halal import needs_certification
 from app.data.household_reference import hpb
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE, in_grams, weighed
@@ -24,7 +25,7 @@ from app.planning.capability import PlanningCapabilityError, require_composition
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
-from app.planning.grocery_estimator import convert_quantity, not_purchased
+from app.planning.grocery_estimator import convert_quantity, not_purchased, with_store_note
 from app.planning.household_slots import (
     assumed_basics,
     basics_note,
@@ -67,7 +68,8 @@ from app.planning.product_input import product_input
 from app.planning.recipe_input import recipe_input
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recommendation_engine import CANDIDATE_LIMIT
-from app.planning.vegetable_led import catalog_vegetable_led, vegetable_role
+from app.planning.retailers import retailer_of
+from app.planning.vegetable_led import candidate_vegetable_led, catalog_vegetable_led, vegetable_role
 from app.planning.weekly_planner import WeeklyPlanSelectionError, WeeklyPlanSelector
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.planning_v2 import (
@@ -280,6 +282,20 @@ def dish_cost(recommendation) -> float:
     return estimate.purchase_total_sgd
 
 
+def cheap_first(recommendation) -> tuple[bool, float]:
+    """The budget half's order: dishes FairPrice alone supplies first (FairPrice stays the main store), then cost.
+
+    A dish that buys a line at Cold Storage is often cheap as used and dear in whole packages; ranked by use alone,
+    the few such soups pushed the cheap FairPrice soups out of the packet and every week came dearer
+    (docs/design/cold-storage.md). Without a Cold Storage line the order is `dish_cost`'s.
+    """
+    estimate = recommendation.grocery_estimate
+    second_store = estimate is not None and any(
+        getattr(item, "retailer", None) == "cold_storage" for item in getattr(estimate, "items", ())
+    )
+    return second_store, dish_cost(recommendation)
+
+
 class ProductPlanningError(WeeklyPlanSelectionError):
     def __init__(self, status, message, trace, *, problem=None):
         super().__init__(message)
@@ -383,7 +399,7 @@ def composed_packet(
             ranked = families_first(ranked)
             best = ranked[: limits[key] // 2]
             kept = {dish_family(r.recipe.title) for r in best}
-            best += families_first(sorted(ranked[len(best) :], key=dish_cost), kept)[: limits[key] - len(best)]
+            best += families_first(sorted(ranked[len(best) :], key=cheap_first), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
         chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id, limits[key], cooked)}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits
@@ -573,7 +589,7 @@ class ProductPlanningEngine:
                 # The best-ranked dishes are rarely the cheap ones; with a budget, half
                 # the packet is the cheapest of the rest so a week within it can exist.
                 best = ranked[: limit // 2]
-                cheap_candidates = sorted(ranked[limit // 2 :], key=dish_cost)[: limit - len(best)]
+                cheap_candidates = sorted(ranked[limit // 2 :], key=cheap_first)[: limit - len(best)]
                 trace["budget_packet"] = {"ranked": len(best), "cheapest": len(cheap_candidates)}
                 ranked = best + cheap_candidates
             recommendations = ranked[:limit]
@@ -595,7 +611,7 @@ class ProductPlanningEngine:
                 "candidate_rejected", "No candidate plan was found; try a different recipe selection.", trace
             )
         by_id = {r.id: r for r in recipes}
-        assumed = assumed_basics(household, constraints.excluded_ingredients)
+        assumed = assumed_basics(household, constraints.excluded_ingredients, constraints.requires_halal)
         basics_used: dict[str, set[str]] = {}  # recipe -> the basics it uses and the week does not buy
         candidates, options, observations, display_names = [], {}, {}, {}
         provenance = {}  # product id -> the PriceEvidence of the observation the planner prices with
@@ -634,12 +650,15 @@ class ProductPlanningEngine:
             # Basic seasonings at home are not shopping (ADR-0068): the lines go only after the candidate's
             # allergens were read from every line, and an excluded basic is never assumed (`assumed_basics`).
             bought = [item for item in candidate.ingredients if item.ingredient_id not in assumed]
-            if bought and len(bought) < len(candidate.ingredients):
+            if len(bought) < len(candidate.ingredients):
                 basics_used[candidate.recipe_id] = {item.ingredient_id for item in candidate.ingredients} - {
                     item.ingredient_id for item in bought
                 }
-                candidate = candidate.model_copy(update={"ingredients": bought})
-            # ponytail: a recipe of basics alone is bought as listed; none is in the catalog's meal courses.
+                candidate = candidate.model_copy(
+                    update={"ingredients": bought, "vegetable_led": candidate_vegetable_led(candidate)}
+                )
+            # A dish of basics alone (plain rice with salt and oil) buys nothing, as the estimator and the weekly
+            # list read it: its candidate keeps no ingredient line.
             if composition is not None and candidate.course is None:
                 # The curated catalog predates course labels and holds only dinner mains.
                 candidate = candidate.model_copy(update={"course": "main"})
@@ -655,6 +674,12 @@ class ProductPlanningEngine:
                 _, unit = normalized(line.required_quantity, line.unit)
                 if not unit:
                     continue
+                if (
+                    constraints.requires_halal
+                    and needs_certification(line.ingredient_name)
+                    and not product.halal_certified
+                ):
+                    continue  # a halal household's meat is only ever a certified product (docs/design/halal.md)
                 if line.ingredient_name in weigh:
                     if product.package_unit == "ml":
                         continue
@@ -1264,8 +1289,9 @@ class ProductPlanningEngine:
                     purchase_cost_sgd=row.purchase_cost_sgd,
                     consumed_cost_sgd=round(consumed, 2),
                     excess_quantity=row.surplus_quantity,
-                    note=row.note,
+                    note=with_store_note(product, row.note),
                     evidence=provenance.get(row.selected_product_id),
+                    retailer=retailer_of(product) if product is not None else None,
                     shopping_trip=row.trip,
                     perishable=True if row.ingredient_id in perishables else None,
                 )
@@ -1291,7 +1317,13 @@ class ProductPlanningEngine:
                             for warning in r.grocery_estimate.warnings
                         ),
                         *filter(
-                            None, [basics_note({b for a in assignments for b in basics_used.get(a.recipe_id, ())})]
+                            None,
+                            [
+                                basics_note(
+                                    {b for a in assignments for b in basics_used.get(a.recipe_id, ())},
+                                    constraints.requires_halal,
+                                )
+                            ],
                         ),
                         *unattended,
                     ]

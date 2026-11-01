@@ -238,10 +238,12 @@
       }
     ],
     "basics_used": [
+      "brown_rice",
       "garlic",
       "ginger"
     ],
     "basics_on_list": [
+      "brown_rice",
       "garlic",
       "ginger"
     ],
@@ -368,15 +370,16 @@
       }
     ],
     "basics_used": [
+      "brown_rice",
       "garlic",
       "ginger"
     ],
     "basics_on_list": [],
-    "grocery_lines": 26,
-    "purchase_total_sgd": 171.75,
+    "grocery_lines": 25,
+    "purchase_total_sgd": 166.9,
     "warnings": [
       "Stable fixture prices are shown for reproducible planning; select live pricing to query FairPrice.",
-      "Basic seasonings are assumed at home and left off this list: garlic, ginger. Mark one as run out on your profile to buy it.",
+      "Pantry basics are assumed at home and left off this list: basics (2), rice (1). Mark one as run out on your profile to buy it.",
       "Sodium: at most 1400 mg per person for each day."
     ]
   }

@@ -11,6 +11,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Numeric,
+    String,
     Text,
     UniqueConstraint,
 )
@@ -66,3 +67,5 @@ class ProductSnapshot(Base):
     regular_price_sgd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     # NULL is unknown and counts as not certified.
     halal_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    # FairPrice's internal product id, which its cart takes (docs/design/fairprice-cart.md); NULL when unknown.
+    cart_item_id: Mapped[str | None] = mapped_column(String(40), nullable=True)
