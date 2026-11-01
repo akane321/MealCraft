@@ -180,7 +180,10 @@ def search_and_intake_external_recipe(
         )
     except (APIError, ConnectionError) as error:
         upstream_status = getattr(error, "status_code", None)
-        client_error = isinstance(upstream_status, int) and 400 <= upstream_status < 500
+        # Owner decision 2026-10-27: 429 (including insufficient_quota) and 408 are availability problems.
+        client_error = (
+            isinstance(upstream_status, int) and 400 <= upstream_status < 500 and upstream_status not in (408, 429)
+        )
         _raise_provider_failure(
             error,
             database=database,
@@ -345,7 +348,15 @@ def _raise_provider_failure(
     failure_code: str,
 ) -> None:
     details = _provider_error_details(error)
-    logger.warning("External recipe provider request failed", extra={"provider_error": details})
+    logger.warning(
+        "External recipe provider request failed: type=%s status=%s code=%s request_id=%s message=%s",
+        details["exception_type"],
+        details["status_code"],
+        details["error_code"],
+        details["request_id"],
+        details["message"],
+        extra={"provider_error": details},
+    )
     suggestions = _similar_household_recipes(
         database,
         household_id=current.active_membership.household_id,

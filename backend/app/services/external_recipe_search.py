@@ -133,6 +133,11 @@ class OpenAIRecipeSearchExtractor:
             input=normalized_query,
         )
         self.last_usage = _usage_summary(response)
+        if getattr(response, "status", None) == "incomplete":
+            reason = str(getattr(getattr(response, "incomplete_details", None), "reason", None) or "unknown")
+            if self.last_usage is not None:
+                self.last_usage["incomplete_reason"] = reason
+            raise RecipeSearchError(f"Search response was cut off before the recipe was complete ({reason})")
         raw = getattr(response, "output_text", "")
         if not isinstance(raw, str) or not raw.strip():
             raise RecipeSearchError("Search returned no recipe extraction")
@@ -210,7 +215,9 @@ def _strict_schema(model: type[BaseModel]) -> dict:
 
     def normalize(value):
         if isinstance(value, dict):
-            value.pop("format", None)  # Pydantic's URI format is validated after extraction; strict output omits it.
+            # Pydantic still validates these after extraction; strict output rejects or does not list them.
+            for keyword in ("format", "default", "minLength", "maxLength"):
+                value.pop(keyword, None)
             if "exclusiveMinimum" in value:
                 value["minimum"] = value.pop("exclusiveMinimum")
             properties = value.get("properties")

@@ -4,7 +4,31 @@ from types import SimpleNamespace
 import pytest
 
 from app.services import external_recipe_search
-from app.services.external_recipe_search import OpenAIRecipeSearchExtractor, RecipeSearchError
+from app.services.external_recipe_search import (
+    ExtractedRecipe,
+    OpenAIRecipeSearchExtractor,
+    RecipeSearchError,
+    _strict_schema,
+)
+
+# Keywords the Responses strict structured-output mode accepts for the types this schema uses.
+STRICT_SCHEMA_KEYWORDS = {
+    "$defs",
+    "$ref",
+    "additionalProperties",
+    "anyOf",
+    "description",
+    "enum",
+    "items",
+    "maxItems",
+    "maximum",
+    "minItems",
+    "minimum",
+    "properties",
+    "required",
+    "title",
+    "type",
+}
 
 
 def response(*, url="https://www.wikibooks.org/wiki/Tofu_Bowl", citation=True):
@@ -93,6 +117,52 @@ def test_recipe_search_uses_required_web_search_and_keeps_cited_source() -> None
     assert draft.ingredients[0].canonical_id is None
     assert draft.ingredients[0].allergens is None
     assert draft.retrieved_at.tzinfo is not None
+
+
+def test_strict_schema_uses_only_keywords_the_responses_strict_mode_accepts() -> None:
+    schema = _strict_schema(ExtractedRecipe)
+    seen_objects = 0
+
+    def walk(node) -> None:
+        nonlocal seen_objects
+        if isinstance(node, list):
+            for child in node:
+                walk(child)
+            return
+        if not isinstance(node, dict):
+            return
+        assert set(node) <= STRICT_SCHEMA_KEYWORDS, set(node) - STRICT_SCHEMA_KEYWORDS
+        if "properties" in node:
+            seen_objects += 1
+            assert node["required"] == list(node["properties"])
+            assert node["additionalProperties"] is False
+        for key, child in node.items():
+            if key in ("properties", "$defs"):
+                for grandchild in child.values():
+                    walk(grandchild)
+            else:
+                walk(child)
+
+    walk(schema)
+    assert seen_objects >= 3  # recipe, ingredient and nutrition objects, the last two reached through $defs
+    assert "default" not in json.dumps(schema)
+    assert "minLength" not in json.dumps(schema)
+    assert "maxLength" not in json.dumps(schema)
+
+
+def test_incomplete_response_gives_a_clear_reason_and_records_it_in_usage() -> None:
+    result = response()
+    result.status = "incomplete"
+    result.incomplete_details = SimpleNamespace(reason="max_output_tokens")
+    extractor = OpenAIRecipeSearchExtractor(
+        api_key="unused", model="test-model", client=SimpleNamespace(responses=FakeResponses(result))
+    )
+
+    with pytest.raises(RecipeSearchError, match="cut off.*max_output_tokens"):
+        extractor.search_and_extract("ginger tofu")
+
+    assert extractor.last_usage["incomplete_reason"] == "max_output_tokens"
+    assert extractor.last_usage["output_tokens"] == 45
 
 
 def test_openai_client_disables_sdk_retries(monkeypatch: pytest.MonkeyPatch) -> None:

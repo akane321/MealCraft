@@ -1,6 +1,6 @@
 {
   "seed": 20261025,
-  "rule": "Group candidate URLs by the four predeclared strata; sort each stratum by source_url; sample without replacement using Python random.Random(seed), counts local_en=8, local_zh=8, general_en=7, general_zh=7; selected URLs are targets for exact-source recipe queries. Convenience search frame, not a probability sample of all public recipes.",
+  "rule": "Group candidate URLs by the four predeclared strata; sort each stratum by source_url; sample without replacement using one Python random.Random(seed) drawn in the order local_en, local_zh, general_en, general_zh (rng.sample on each sorted stratum in that order), counts local_en=8, local_zh=8, general_en=7, general_zh=7; selected URLs are targets for exact-source recipe queries. Convenience search frame, not a probability sample of all public recipes.",
   "frame_count": 53,
   "selected_count": 30,
   "items": [
