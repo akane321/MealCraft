@@ -51,6 +51,26 @@ statement that nothing is saved at the start, relative dates are tied to the giv
 only, and the sources line refers to each system's registered configuration. The revised bytes have not been
 reviewed again and are not registered; the earlier review no longer applies to them.
 
+Because the bytes are shared, changing them is a shared-part change under `ADR-0092` item 5: it needs an entry in
+`operations/sprint2-plan/02-baselines-freeze-log.md` of the Knowledge repository, which together with the other
+shared-part changes forms a new pre-registered formal-run freeze point, a second neutrality review of the new bytes,
+and the agreement of the baseline layer's owners to register the change.
+
+"No saved household, plan or profile" and the product. The sentence is true for the product only if the caller
+prepares the run that way; nothing here enforces it. `ProductTransport` never creates a household or profile
+([product-transport.md](product-transport.md)), and the adapter has no initial-state seed. The product always has a
+household record behind the authenticated client (created at registration), but a household profile exists only
+when someone creates one, and a new agent session starts from the profile's constraints only if there is one
+(`get_agent_service`). A run is therefore prepared as the sentence says when its household has no profile and no
+saved plan. The harness does not check this. `ADR-0092` item 3 allows a later initial-state attachment for cases
+that presuppose an existing household or plan; for those cases the sentence would not hold and would need to change
+with the attachment.
+
+Known asymmetry in what a later turn carries. `normalize_product` includes the session's saved plan on every turn
+once the session links one, also on a plain question. A model arm told "use `plan` only when the user asks for a meal
+plan or a change to one" omits `plan` on such a turn. Whether the scorer or the normalizer should treat this
+difference is not decided here (Knowledge `OPEN_QUESTIONS.md` question 77).
+
 This phase does not implement a product transport, model arm, one-shot arm
 presentation, field-dictionary mapping, catalog ID matching, scoring, sealed file loading, freeze or admission. A change
 preview that is linked and not yet applied counts as waiting for confirmation in `normalize_product`, like a
