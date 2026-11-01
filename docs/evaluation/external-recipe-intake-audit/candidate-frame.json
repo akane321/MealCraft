@@ -1,0 +1,373 @@
+[
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/hainanese-chicken-rice-recipe/",
+    "title": "Hainanese Chicken Rice",
+    "language": "en",
+    "locality": "Singapore/Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/char-kway-teow-fried-flat-rice-noodles/",
+    "title": "Char Kway Teow",
+    "language": "en",
+    "locality": "Singapore/Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/mee-siam-kuah/",
+    "title": "Mee Siam Kuah",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/singapore-beef-hor-fun/",
+    "title": "Singapore Beef and Seafood Hor Fun",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/singapore-chilli-crab/",
+    "title": "Singapore Chilli Crab",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/roti-jala-recipe/",
+    "title": "Roti Jala",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/roti-sardin-goreng/",
+    "title": "Roti Sardin Goreng",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://www.singaporeanmalaysianrecipes.com/teh-tarik-frothy-milky-tea/",
+    "title": "Teh Tarik",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/ngoh-hiang-recipe/",
+    "title": "Ngoh Hiang",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/crab-bee-hoon/",
+    "title": "Crab Bee Hoon",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/singapore-hokkien-mee-recipe/",
+    "title": "Singapore Hokkien Mee",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/chili-crab/",
+    "title": "Chili Crab",
+    "language": "en",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/nasi-lemak-recipe/",
+    "title": "Nasi Lemak",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/laksa-recipe/",
+    "title": "Laksa",
+    "language": "en",
+    "locality": "Malaysia/Singapore"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/beef-rendang-recipe-rendang-daging/",
+    "title": "Beef Rendang",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_en",
+    "source_url": "https://rasamalaysia.com/assam-laksa-nyonya-noodles-with-fish-broth/",
+    "title": "Asam Laksa",
+    "language": "en",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/102870872/",
+    "title": "海南鸡饭（去骨鸡腿版）",
+    "language": "zh",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/103685019/",
+    "title": "海南鸡饭（新加坡版）",
+    "language": "zh",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/101888336/",
+    "title": "超详版海南鸡饭",
+    "language": "zh",
+    "locality": "Singapore/Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/104715509/",
+    "title": "海南鸡饭家常版",
+    "language": "zh",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/100128173/",
+    "title": "马来西亚椰浆饭",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/107419333/",
+    "title": "马来西亚炒粿条",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/104345482/",
+    "title": "马来西亚肉骨茶",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/100586251/",
+    "title": "仁当牛肉配椰浆饭",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/107144096/",
+    "title": "椰浆饭（嘛嘛档版）",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/104035497/",
+    "title": "海鲜炒粿条",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://www.daydaycook.com/zh-Hans/recipe/hainan-chicken-wings-rice-2",
+    "title": "海南鸡翼饭",
+    "language": "zh",
+    "locality": "Singapore"
+  },
+  {
+    "stratum": "local_zh",
+    "source_url": "https://m.xiachufang.com/recipe/106850600/",
+    "title": "马来西亚椰浆饭 Nasi Lemak",
+    "language": "zh",
+    "locality": "Malaysia"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/15-minute-chicken-pasta",
+    "title": "15-minute chicken pasta",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/chicken-pot-pie",
+    "title": "Chicken pot pie",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/easy-one-pot-chicken-casserole",
+    "title": "Easy one-pot chicken casserole",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/kadala-curry",
+    "title": "Chickpea curry",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/5612/lemon-and-pea-risotto",
+    "title": "Lemon and pea risotto",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/chicken-sweet-potato-pea-curry",
+    "title": "Chicken, sweet potato and pea curry",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/chicken-vegetable-curry",
+    "title": "Chicken and vegetable curry",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/chicken-broccoli-pasta-bake",
+    "title": "Chicken and broccoli pasta bake",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/lemon-oregano-chicken-traybake",
+    "title": "Lemon and oregano chicken traybake",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.bbcgoodfood.com/recipes/pad-thai",
+    "title": "Pad Thai",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.taste.com.au/recipes/chicken-vegetable-pasta-soup/59c67834-c18d-41cc-8496-7b3b4717036c",
+    "title": "Chicken, vegetable and pasta soup",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.taste.com.au/recipes/chicken-soup/aec9c819-3b0d-49d1-bda3-a5ffdf7eca7c",
+    "title": "Warming chicken soup",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_en",
+    "source_url": "https://www.taste.com.au/recipes/chicken-sweet-corn-soup-2/960da5d9-22ec-4441-9743-15b99bae644a",
+    "title": "Chicken and sweet corn soup",
+    "language": "en",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/1000430/",
+    "title": "宫保鸡丁",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/101833860/",
+    "title": "番茄炒蛋",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/102884601/",
+    "title": "峨嵋酒家家常宫保鸡丁",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/100464831/",
+    "title": "红烧牛肉土豆",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/102216272/",
+    "title": "家常糖醋排骨",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/103884178/",
+    "title": "老师傅的糖醋排骨",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/100453110/",
+    "title": "鲜香番茄蒸鸡蛋羹",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/1015542/",
+    "title": "蒸鸡蛋羹",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/104484038/",
+    "title": "黄焖鸡",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/104610496/",
+    "title": "红烧牛肉土豆",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/103487883/",
+    "title": "家常糖醋排骨",
+    "language": "zh",
+    "locality": "general"
+  },
+  {
+    "stratum": "general_zh",
+    "source_url": "https://m.xiachufang.com/recipe/106133194/",
+    "title": "宫保鸡丁小美家常菜",
+    "language": "zh",
+    "locality": "general"
+  }
+]
