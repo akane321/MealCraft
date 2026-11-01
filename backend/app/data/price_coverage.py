@@ -45,7 +45,13 @@ SCOPE = (
 
 
 def priced(mapping: dict[str, dict]) -> set[str]:
-    return {name for name, entry in mapping.items() if entry["status"] == "mapped" and entry.get("products")}
+    """Ingredients a mapping can fill: mapped, with a product in stock (the planner buys no other), so one whose only
+    products are out of stock counts for the next layer, or as unpriced."""
+    return {
+        name
+        for name, entry in mapping.items()
+        if entry["status"] == "mapped" and any(product.get("in_stock", True) for product in entry.get("products", ()))
+    }
 
 
 def share(count: int, whole: int) -> float:
@@ -216,7 +222,7 @@ def main() -> None:
         )
     # Of the committed text, a Windows checkout's CRLF hashed as the repository's LF (as halal_pool does).
     snapshots = (FAIRPRICE_SNAPSHOT_FILE, COLD_STORAGE_SNAPSHOT_FILE, REDMART_SNAPSHOT_FILE, MANUAL_SNAPSHOT_FILE)
-    result["sources"] = {name: sha256(name) for name in snapshots}
+    result["sources"] = {name: digest for name in snapshots if (digest := sha256(name)) is not None}  # those present
     directory = repository_root() / REPORT_DIRECTORY
     write(result, directory)
     combined = result["ingredients"]

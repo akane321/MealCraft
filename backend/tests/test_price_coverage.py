@@ -48,6 +48,16 @@ def test_ingredients_are_counted_without_the_not_purchased_ones() -> None:
     assert ingredients["target_met"] is False
 
 
+def test_a_mapping_whose_products_are_all_out_of_stock_prices_nothing() -> None:
+    """The planner buys only a product in stock: FairPrice's basil (331 recipes) was counted priced with none."""
+    sold_out = {"status": "mapped", "products": [{"external_id": "1", "in_stock": False}]}
+    names = {"basil", "dill"}
+
+    ingredients = report([], names, {"basil": sold_out, "dill": sold_out}, {"dill": mapped()}, {})["ingredients"]
+
+    assert (ingredients["fairprice"], ingredients["cold_storage_only"], ingredients["combined"]) == (0, 1, 1)
+
+
 def test_the_target_is_met_at_ninety_percent_either_store() -> None:
     names = {f"item{i}" for i in range(9)}
     covered = {name: mapped() for name in names}

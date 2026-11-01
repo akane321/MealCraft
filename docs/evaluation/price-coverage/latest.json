@@ -1,37 +1,47 @@
 {
  "ingredients": {
   "total": 699,
-  "fairprice": 519,
-  "combined": 567,
-  "fairprice_share": 0.7425,
-  "combined_share": 0.8112,
+  "fairprice": 505,
+  "combined": 549,
+  "fairprice_share": 0.7225,
+  "combined_share": 0.7854,
   "released": 701,
   "not_purchased": [
    "ice",
    "water"
   ],
-  "cold_storage_only": 43,
-  "cold_storage_only_share": 0.0615,
+  "cold_storage_only": 39,
+  "cold_storage_only_share": 0.0558,
   "redmart_only": 5,
   "redmart_only_share": 0.0072,
+  "manual_only": 0,
+  "manual_only_share": 0.0,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 8967,
-  "fairprice": 7185,
-  "combined": 7894,
-  "fairprice_share": 0.8013,
-  "combined_share": 0.8803
+  "fairprice": 6694,
+  "combined": 7309,
+  "fairprice_share": 0.7465,
+  "combined_share": 0.8151
  },
  "lines": {
   "total": 75661,
-  "fairprice": 73642,
-  "combined": 74498,
-  "fairprice_share": 0.9733,
-  "combined_share": 0.9846
+  "fairprice": 73012,
+  "combined": 73828,
+  "fairprice_share": 0.965,
+  "combined_share": 0.9758
  },
  "unpriced": [
+  {
+   "ingredient": "basil",
+   "recipes": 331
+  },
+  {
+   "ingredient": "mustard",
+   "recipes": 145
+  },
   {
    "ingredient": "allspice",
    "recipes": 118
@@ -61,6 +71,10 @@
    "recipes": 52
   },
   {
+   "ingredient": "msg",
+   "recipes": 52
+  },
+  {
    "ingredient": "mixed_nuts",
    "recipes": 47
   },
@@ -75,6 +89,10 @@
   {
    "ingredient": "dried_onion_flakes",
    "recipes": 27
+  },
+  {
+   "ingredient": "baguette",
+   "recipes": 25
   },
   {
    "ingredient": "lime_zest",
@@ -95,22 +113,6 @@
   {
    "ingredient": "onion_salt",
    "recipes": 22
-  },
-  {
-   "ingredient": "lard",
-   "recipes": 20
-  },
-  {
-   "ingredient": "orange_juice_conc",
-   "recipes": 19
-  },
-  {
-   "ingredient": "pistachio",
-   "recipes": 17
-  },
-  {
-   "ingredient": "phyllo",
-   "recipes": 15
   }
  ],
  "sources": {

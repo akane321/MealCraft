@@ -8,8 +8,11 @@ remaining gap is filled by hand, and the list groups these lines by platform.
 ## The sheet
 
 `data-engineering/data/enrichment/manual/v1/price-sheet.csv` (UTF-8 with BOM, so that Excel reads it) lists the
-ingredients no store prices. They are ordered by how many release recipes use them, and the first 63 reach the 90%
-target.
+ingredients no store priced when it was drawn up (132). They are ordered by how many release recipes use them.
+Since the coverage counts only mappings with a product in stock (2026-11-02), 150 bought ingredients are unpriced
+(549 of 699 priced, 78.5%), and 81 more reach the 90% target. 18 of the 150 are not on the sheet: their only
+FairPrice or Cold Storage products were out of stock at capture (basil, mustard, msg, baguette and 14 others; the
+coverage report lists the most used).
 
 - **Given:** `rank`, `ingredient_id`, `ingredient`, `recipes`, `typical_grams_per_recipe`, `example_lines`, and
   search links for Shopee, Lazada and Amazon.
@@ -28,13 +31,16 @@ target.
 - **`validate <sheet>`** checks every filled row:
   - the fields are present and well formed;
   - the price is positive with whole cents;
-  - the size is positive;
+  - the size is positive, and works out to at least 0.01 g;
+  - a number too long to read is listed as a problem, like any other;
   - a comma is read only as a thousands separator in a price (`1,234.50`). A decimal comma such as `4,5` is
     refused, never read as 45, and a size may not contain a comma at all;
   - the unit is known;
   - the URL's host belongs to the stated platform, as the domain or one of its subdomains: `shopee.sg`,
     `lazada.sg`, `amazon.sg`; `redmart.lazada.sg` or `lazada.sg` for `redmart`, since RedMart's own product pages
-    are on `www.lazada.sg`; any host for `other`;
+    are on `www.lazada.sg`; any host for `other`. A `redmart` row's URL cannot be told from another Lazada
+    seller's by its host, since both are `www.lazada.sg/products/...` pages; the person recording it checks that
+    RedMart sells it (see "Not in this version");
   - the date is not in the future.
 
   It names every problem by rank.
@@ -64,12 +70,16 @@ target.
   - A manual line has `retailer` set to its platform, so the list groups it with that platform. A manual `redmart`
     row groups with RedMart's own lines.
   - `PriceEvidence.source` gains `"manual"`, with `mode: "snapshot"`.
-- **Labels.** A manual line reads "Price recorded by hand on <date>". Halal is unknown (`None`), as for every store
-  but FairPrice.
+- **Labels.** A manual line's note reads "No store we read sells this; price recorded by hand on <date>". Halal is
+  unknown (`None`), as for every store but FairPrice.
+- **Evidence.** In the evidence packet a confirmed plan saves, a manual line's item has `source: "manual"` whatever
+  its platform: the observation is the person's (`schemas/retrieval.EvidenceSource`).
 - **Cart and coverage.** The cart's `other_stores` has one entry per platform. The coverage report adds a
   "Recorded by hand only" column.
 
 ## Not in this version
 
 - Live prices for these lines.
+- A check that a `redmart` row is RedMart's own listing. The URL host cannot show it, and nothing else in the row
+  does.
 - A console page for them: the sheet is edited and imported again.
