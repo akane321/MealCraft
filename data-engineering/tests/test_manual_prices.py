@@ -130,6 +130,23 @@ class ManualPricesTest(unittest.TestCase):
         ):
             self.assertIn(expected, text)
 
+    def test_a_tiny_size_and_an_overlong_number_are_listed_not_crashed_on(self):
+        problems, products = self.check(
+            [
+                good(ingredient_id="ING_MIRIN", package_size="0.001", package_unit="ml"),
+                good(rank="2", price_sgd="1" * 40),
+                good(rank="3", ingredient_id="ING_MIRIN", package_size="9" * 40, package_unit="l"),
+            ]
+        )
+        self.assertEqual(products, [])
+        text = "\n".join(problems)
+        for expected in (
+            "rank 1 (line 2): package_size '0.001' ml is less than 0.01 g",
+            "rank 2 (line 3): price_sgd '" + "1" * 40 + "' is not a positive price in whole cents",
+            "rank 3 (line 4): package_size '" + "9" * 40 + "' is too large",
+        ):
+            self.assertIn(expected, text)
+
     def test_hosts_match_the_platform_exactly_or_as_a_subdomain(self):
         cases = [
             ("shopee", "https://shopee.sg/a", True),

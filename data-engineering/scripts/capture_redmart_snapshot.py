@@ -76,8 +76,7 @@ def parse_search(body: str) -> tuple[int, list[dict]]:
     items = mods.get("listItems") if isinstance(mods, dict) else None
     info = data.get("mainInfo") if isinstance(data.get("mainInfo"), dict) else {}
     total = int(info.get("totalResults") or 0)
-    if items is None and total == 0 and "mods" in data:
-        return 0, []
+    # Only a listItems list is a result, an empty one included; `mods` without it is drift, as the live adapter has it.
     if not isinstance(items, list) or any(not isinstance(item, dict) for item in items):
         raise ProductSchemaDriftError("response has no mods.listItems list")
     return total or len(items), items
@@ -102,6 +101,9 @@ def trim_product(item: dict) -> dict:
         original = float(item["originalPrice"]) if item.get("originalPrice") else None
     except (TypeError, ValueError) as error:
         raise ProductSchemaDriftError(f"RedMart item with a price of {item['price']!r}") from error
+    if not isinstance(item["inStock"], bool):
+        raise ProductSchemaDriftError(f"RedMart item with a stock flag of {item['inStock']!r}")
+    url = str(item["itemUrl"])
     return {
         "product_id": str(item["itemId"]),
         "sku_id": str(item["skuId"]) if item.get("skuId") else None,
@@ -109,8 +111,8 @@ def trim_product(item: dict) -> dict:
         "brand": item.get("brandName") or None,
         "price": price,
         "original_price": original,
-        "in_stock": bool(item["inStock"]),
-        "url": f"https:{item['itemUrl']}",
+        "in_stock": item["inStock"],
+        "url": f"https:{url}" if url.startswith("//") else url,
         "image": item.get("image"),
     }
 

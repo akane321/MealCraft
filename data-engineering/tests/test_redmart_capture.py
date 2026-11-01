@@ -43,6 +43,8 @@ class ParseSearchTest(unittest.TestCase):
             "<html>x5sec captcha</html>",
             '{"ret": ["FAIL_SYS_USER_VALIDATE"]}',
             '{"mods": {"listItems": "nope"}}',
+            '{"mods": {}}',  # no listItems at all is not an empty result
+            '{"mods": {"listItems": null}, "mainInfo": {"totalResults": "0"}}',
             "[]",
         ):
             with self.assertRaises(capture.ProductSchemaDriftError, msg=body):
@@ -87,6 +89,14 @@ class TrimTest(unittest.TestCase):
             capture.trim_product({key: value for key, value in good.items() if key != "name"})
         with self.assertRaises(capture.ProductSchemaDriftError):
             capture.trim_product(dict(good, price="free"))
+
+    def test_a_stock_flag_that_is_not_a_boolean_is_schema_drift_and_a_full_url_is_kept(self):
+        good = {"itemId": "1", "name": "x", "price": "1.5", "inStock": True, "itemUrl": "//www.lazada.sg/p"}
+        for flag in ("false", 0, None):
+            with self.assertRaises(capture.ProductSchemaDriftError, msg=repr(flag)):
+                capture.trim_product(dict(good, inStock=flag))
+        full = capture.trim_product(dict(good, itemUrl="https://www.lazada.sg/p"))
+        self.assertEqual(full["url"], "https://www.lazada.sg/p")
 
 
 class RequestTest(unittest.TestCase):

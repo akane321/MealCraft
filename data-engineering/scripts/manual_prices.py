@@ -61,6 +61,13 @@ def _decimal(text: str, *, thousands: bool = True) -> Decimal | None:
         return None
 
 
+def _whole_cents(value: Decimal) -> bool:
+    try:
+        return value == value.quantize(Decimal("0.01"))
+    except InvalidOperation:  # more digits than a Decimal carries: listed as a problem, not a crash
+        return False
+
+
 def release_grams(path: Path = RELEASE) -> dict[str, dict]:
     """Per ingredient: `per_ml` (its own grams per millilitre, if a record carries one) and `per_item` (its grams
     per piece). The v2.2 records give grams per cup, which is a volume of chopped or sliced food and not a density,
@@ -130,7 +137,7 @@ def check_row(row: dict, grams: dict[str, dict], today: date) -> tuple[list[str]
     if row["price_sgd"]:
         match = MONEY.match(row["price_sgd"])
         price = _decimal(match.group(1)) if match else None
-        if price is None or price <= 0 or price != price.quantize(Decimal("0.01")):
+        if price is None or price <= 0 or not _whole_cents(price):
             issues.append(f"price_sgd {row['price_sgd']!r} is not a positive price in whole cents")
             price = None
 
@@ -161,9 +168,17 @@ def check_row(row: dict, grams: dict[str, dict], today: date) -> tuple[list[str]
 
     package = None
     if size is not None and unit and row["ingredient_id"] in grams:
-        package = package_grams(size, unit, grams[row["ingredient_id"]])
-        if package is None:
-            issues.append(f"{size} count has no known weight: the release has no grams per item for this ingredient")
+        try:
+            package = package_grams(size, unit, grams[row["ingredient_id"]])
+        except InvalidOperation:
+            issues.append(f"package_size {row['package_size']!r} is too large")
+        else:
+            if package is None:
+                issues.append(
+                    f"{size} count has no known weight: the release has no grams per item for this ingredient"
+                )
+            elif package[0] <= 0:  # 0 g would divide by zero where the planner prices a package
+                issues.append(f"package_size {row['package_size']!r} {unit} is less than 0.01 g")
     if issues:
         return issues, None
     grams_value, basis = package
