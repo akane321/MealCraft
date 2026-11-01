@@ -51,7 +51,6 @@ def test_stated_values_map_to_the_dictionary_fields():
     )
     assert got.fields == {
         "household_size": 2,
-        "start_date": "2026-10-23",
         "weekly_budget_sgd": 140.0,
         "allergens": ["peanut"],
         "excluded_ingredients": ["pork"],
@@ -63,12 +62,23 @@ def test_stated_values_map_to_the_dictionary_fields():
 
 
 def test_a_missing_value_is_not_stated_never_a_default():
-    got = map_request_fields(native(household_size=None, start_date=None, requires_halal=False))
+    got = map_request_fields(native(household_size=None, requires_halal=False))
     assert got.fields == {}
     # halal is dropped from the echo when false: the mapping says "not stated", it does not invent False.
     assert "halal_required" in got.not_stated
     # the no-limit sentinel and an empty list are not stated values either
     assert {"cooking_time_minutes", "weekly_budget_sgd", "allergens", "household_size"} <= set(got.not_stated)
+
+
+def test_a_default_start_date_is_not_read_as_stated():
+    # The product fills the start day with today or tomorrow when the request names none, so the echo always
+    # carries one and cannot tell "from Wednesday" from the default: it is never mapped, never listed as unmapped.
+    got = map_request_fields(native(start_date="2026-11-03"))
+    assert "start_date" not in got.fields
+    assert "start_date" not in got.not_stated
+    assert "start_date" not in got.unmapped_native
+    assert "start_date" in got.dictionary_not_produced
+    assert "start_date" not in MAPPED_FIELDS
 
 
 def test_values_without_a_dictionary_field_are_listed_and_never_converted():
@@ -117,7 +127,9 @@ def test_everything_it_can_emit_exists_in_the_public_dictionary_with_the_right_t
 def test_dictionary_fields_it_never_produces_are_listed():
     got = map_request_fields(native())
     assert set(got.dictionary_not_produced) == set(DICTIONARY) - set(MAPPED_FIELDS)
-    assert {"members", "attendance", "pantry", "sodium_limit_mg", "action"} <= set(got.dictionary_not_produced)
+    assert {"members", "attendance", "pantry", "sodium_limit_mg", "action", "start_date"} <= set(
+        got.dictionary_not_produced
+    )
 
 
 def test_it_reads_only_the_echoed_fields_and_changes_nothing():
