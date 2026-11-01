@@ -1,0 +1,517 @@
+{
+ "seed": 20261103,
+ "size": 50,
+ "release": "v3 (new recipes, not in v2.2)",
+ "recipes_in_release": 3927,
+ "strata": {
+  "crustaceans": {
+   "recipes": 182,
+   "drawn": 3
+  },
+  "eggs": {
+   "recipes": 726,
+   "drawn": 5
+  },
+  "fish": {
+   "recipes": 230,
+   "drawn": 4
+  },
+  "gluten": {
+   "recipes": 381,
+   "drawn": 4
+  },
+  "gluten_candidate": {
+   "recipes": 241,
+   "drawn": 4
+  },
+  "milk": {
+   "recipes": 435,
+   "drawn": 4
+  },
+  "molluscs": {
+   "recipes": 96,
+   "drawn": 3
+  },
+  "none": {
+   "recipes": 600,
+   "drawn": 5
+  },
+  "peanuts": {
+   "recipes": 200,
+   "drawn": 4
+  },
+  "sesame": {
+   "recipes": 180,
+   "drawn": 3
+  },
+  "soy": {
+   "recipes": 225,
+   "drawn": 4
+  },
+  "sulfites": {
+   "recipes": 181,
+   "drawn": 3
+  },
+  "tree_nuts": {
+   "recipes": 250,
+   "drawn": 4
+  }
+ },
+ "recipes": [
+  {
+   "id": "RCP2_0C755073861E",
+   "stratum": "peanuts",
+   "stratum_size": 200,
+   "allergens": [
+    "gluten",
+    "peanuts",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_13F1BC180C18",
+   "stratum": "fish",
+   "stratum_size": 230,
+   "allergens": [
+    "fish"
+   ]
+  },
+  {
+   "id": "RCP2_16F033D98AF0",
+   "stratum": "sulfites",
+   "stratum_size": 181,
+   "allergens": [
+    "milk",
+    "sulfites",
+    "tree_nuts"
+   ]
+  },
+  {
+   "id": "RCP2_1AB3E38DE3E9",
+   "stratum": "peanuts",
+   "stratum_size": 200,
+   "allergens": [
+    "gluten",
+    "peanuts",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_28DCB4F8952D",
+   "stratum": "sulfites",
+   "stratum_size": 181,
+   "allergens": [
+    "fish",
+    "sulfites"
+   ]
+  },
+  {
+   "id": "RCP2_2A86FA8BECC3",
+   "stratum": "crustaceans",
+   "stratum_size": 182,
+   "allergens": [
+    "crustaceans"
+   ]
+  },
+  {
+   "id": "RCP2_2EAA5A1E63A8",
+   "stratum": "soy",
+   "stratum_size": 225,
+   "allergens": [
+    "gluten",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_34BCFA20EF26",
+   "stratum": "peanuts",
+   "stratum_size": 200,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "peanuts"
+   ]
+  },
+  {
+   "id": "RCP2_34E5366CC56A",
+   "stratum": "gluten_candidate",
+   "stratum_size": 241,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "gluten_candidate",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_379CF37BD72B",
+   "stratum": "gluten_candidate",
+   "stratum_size": 241,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "gluten_candidate",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_3F027BBC23E7",
+   "stratum": "gluten",
+   "stratum_size": 381,
+   "allergens": [
+    "gluten"
+   ]
+  },
+  {
+   "id": "RCP2_42944A087EE0",
+   "stratum": "crustaceans",
+   "stratum_size": 182,
+   "allergens": [
+    "crustaceans",
+    "gluten",
+    "sesame",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_4685BE9C7567",
+   "stratum": "crustaceans",
+   "stratum_size": 182,
+   "allergens": [
+    "crustaceans",
+    "eggs",
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_4719B422E521",
+   "stratum": "tree_nuts",
+   "stratum_size": 250,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk",
+    "tree_nuts"
+   ]
+  },
+  {
+   "id": "RCP2_4E7A476FC219",
+   "stratum": "eggs",
+   "stratum_size": 726,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_50E4A93EE9E2",
+   "stratum": "tree_nuts",
+   "stratum_size": 250,
+   "allergens": [
+    "milk",
+    "tree_nuts"
+   ]
+  },
+  {
+   "id": "RCP2_54330909F671",
+   "stratum": "milk",
+   "stratum_size": 435,
+   "allergens": [
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_563E194222A3",
+   "stratum": "soy",
+   "stratum_size": 225,
+   "allergens": [
+    "gluten",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_59EE8D4D94C0",
+   "stratum": "eggs",
+   "stratum_size": 726,
+   "allergens": [
+    "eggs",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_61C75AFA4B74",
+   "stratum": "fish",
+   "stratum_size": 230,
+   "allergens": [
+    "eggs",
+    "fish",
+    "gluten",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_648AF1B021DF",
+   "stratum": "eggs",
+   "stratum_size": 726,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_6E7808617051",
+   "stratum": "none",
+   "stratum_size": 600,
+   "allergens": []
+  },
+  {
+   "id": "RCP2_703781931A43",
+   "stratum": "molluscs",
+   "stratum_size": 96,
+   "allergens": [
+    "fish",
+    "molluscs"
+   ]
+  },
+  {
+   "id": "RCP2_70978A980394",
+   "stratum": "sesame",
+   "stratum_size": 180,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk",
+    "sesame"
+   ]
+  },
+  {
+   "id": "RCP2_7395CA39C119",
+   "stratum": "molluscs",
+   "stratum_size": 96,
+   "allergens": [
+    "gluten",
+    "molluscs",
+    "peanuts",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_781270228F5C",
+   "stratum": "milk",
+   "stratum_size": 435,
+   "allergens": [
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_7D7D407092FB",
+   "stratum": "peanuts",
+   "stratum_size": 200,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk",
+    "peanuts"
+   ]
+  },
+  {
+   "id": "RCP2_8029232A49F1",
+   "stratum": "none",
+   "stratum_size": 600,
+   "allergens": []
+  },
+  {
+   "id": "RCP2_8178B9BBE973",
+   "stratum": "soy",
+   "stratum_size": 225,
+   "allergens": [
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_8799AD20355D",
+   "stratum": "gluten_candidate",
+   "stratum_size": 241,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "gluten_candidate",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_87C3EA4A0463",
+   "stratum": "soy",
+   "stratum_size": 225,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "soy"
+   ]
+  },
+  {
+   "id": "RCP2_A0C53DB4F837",
+   "stratum": "molluscs",
+   "stratum_size": 96,
+   "allergens": [
+    "molluscs"
+   ]
+  },
+  {
+   "id": "RCP2_A54CE0A3EA77",
+   "stratum": "milk",
+   "stratum_size": 435,
+   "allergens": [
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_A8BDFDFF5908",
+   "stratum": "none",
+   "stratum_size": 600,
+   "allergens": []
+  },
+  {
+   "id": "RCP2_B2371883EDB4",
+   "stratum": "sulfites",
+   "stratum_size": 181,
+   "allergens": [
+    "gluten",
+    "soy",
+    "sulfites"
+   ]
+  },
+  {
+   "id": "RCP2_B42368395C0A",
+   "stratum": "fish",
+   "stratum_size": 230,
+   "allergens": [
+    "fish"
+   ]
+  },
+  {
+   "id": "RCP2_B68181BF3B4D",
+   "stratum": "gluten",
+   "stratum_size": 381,
+   "allergens": [
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_C4CE68DAA368",
+   "stratum": "sesame",
+   "stratum_size": 180,
+   "allergens": [
+    "sesame"
+   ]
+  },
+  {
+   "id": "RCP2_C9045F0FA954",
+   "stratum": "milk",
+   "stratum_size": 435,
+   "allergens": [
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_CDFE0EA7EAB2",
+   "stratum": "none",
+   "stratum_size": 600,
+   "allergens": []
+  },
+  {
+   "id": "RCP2_D13979FB28B4",
+   "stratum": "sesame",
+   "stratum_size": 180,
+   "allergens": [
+    "gluten",
+    "sesame"
+   ]
+  },
+  {
+   "id": "RCP2_D14E18002828",
+   "stratum": "tree_nuts",
+   "stratum_size": 250,
+   "allergens": [
+    "milk",
+    "tree_nuts"
+   ]
+  },
+  {
+   "id": "RCP2_D3567CD8AF01",
+   "stratum": "gluten_candidate",
+   "stratum_size": 241,
+   "allergens": [
+    "eggs",
+    "gluten_candidate",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_DB51910E060D",
+   "stratum": "tree_nuts",
+   "stratum_size": 250,
+   "allergens": [
+    "eggs",
+    "tree_nuts"
+   ]
+  },
+  {
+   "id": "RCP2_E64D5669DB3B",
+   "stratum": "eggs",
+   "stratum_size": 726,
+   "allergens": [
+    "eggs",
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_E6C156F6B261",
+   "stratum": "none",
+   "stratum_size": 600,
+   "allergens": []
+  },
+  {
+   "id": "RCP2_E74448C4FB7D",
+   "stratum": "eggs",
+   "stratum_size": 726,
+   "allergens": [
+    "eggs",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_E76E40F8F649",
+   "stratum": "fish",
+   "stratum_size": 230,
+   "allergens": [
+    "eggs",
+    "fish",
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_EA68C1D1DF91",
+   "stratum": "gluten",
+   "stratum_size": 381,
+   "allergens": [
+    "gluten",
+    "milk"
+   ]
+  },
+  {
+   "id": "RCP2_F37F8577E5C5",
+   "stratum": "gluten",
+   "stratum_size": 381,
+   "allergens": [
+    "gluten"
+   ]
+  }
+ ]
+}
