@@ -27,6 +27,7 @@ from app.data.external_source_policies import (
     AcquisitionMethod,
     resolve_external_source_policy,
 )
+from app.data.halal import recipe_halal_status
 from app.data.recipe_tags import Dish, Line, rule_tags
 from app.data.release_v2 import RELEASE_VERSION
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
@@ -490,16 +491,9 @@ def persist_admitted_recipe(
     slug = f"external-{stem}-{digest}"[:160]
     nutrients = draft.nutrition_per_serving
     known_allergens = sorted({allergen for line in draft.ingredients for allergen in (line.allergens or [])})
-    halal_values = {line.halal_status for line in draft.ingredients}
-    halal_status = (
-        "not_halal"
-        if "not_halal" in halal_values
-        else "needs_certification"
-        if "needs_certification" in halal_values
-        else "uncertain"
-        if None in halal_values or "uncertain" in halal_values
-        else "halal"
-    )
+    # ingredients.halal_status never holds needs_certification, so the status comes from the labels (a line
+    # with no canonical id is unknown).
+    halal_status = recipe_halal_status(line.canonical_id for line in draft.ingredients)
     recipe = Recipe(
         slug=slug,
         title=draft.title,

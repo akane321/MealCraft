@@ -28,12 +28,14 @@ from app.planning.product_path import (
     pool_for,
 )
 from app.planning.replan_pantry import remaining_stock
+from app.planning.retailers import is_fairprice_only, retailer_of
 from app.planning.week_floor import WeekFloor, week_floor
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.planning.weekly_planner import WeeklyPlanSelector
-from app.repositories.meal_plan import MealPlanRepository, ScheduledDish
+from app.repositories.meal_plan import MealPlanRepository, ScheduledDish, replaced_by
 from app.repositories.recipe import FOUND_WEEKS_KEPT, RecipeRepository, found_weeks
 from app.repositories.recipe_feedback import RecipeFeedbackRepository, with_never_again
+from app.schemas.fairprice_cart import cart_state
 from app.schemas.meal_plan import (
     MEAL_ORDER,
     MealPlanEntryStatus,
@@ -321,6 +323,7 @@ class WeeklyMealPlanService:
     def _found_key(self, constraints: WeeklyMealPlanRequest, profile_version: int | None = None) -> tuple:
         return (
             id(self.recipe_repository.session.get_bind()),  # the database, as the pool is keyed
+            is_fairprice_only(),  # a week found with both stores is not the frozen evaluation's
             self.repository.household_id,
             repr(self.planning_engine.limits),
             profile_version,
@@ -746,6 +749,7 @@ class WeeklyMealPlanService:
                     replaces_plan_id=plan.replaces_plan_id,
                     start_date=plan.start_date,
                     end_date=plan.end_date,
+                    day_count=plan.day_count,
                     household_size=plan.household_size,
                     purchase_total_sgd=float(plan.purchase_total_sgd),
                     consumed_total_sgd=(
@@ -753,10 +757,7 @@ class WeeklyMealPlanService:
                     ),
                     within_weekly_budget=plan.within_weekly_budget,
                     created_at=plan.created_at,
-                    current=not any(
-                        newer.start_date <= plan.end_date and newer.end_date >= plan.start_date
-                        for newer in plans[:index]
-                    ),
+                    current=not replaced_by(plan, plans[:index]),
                 )
                 for index, plan in enumerate(plans)
             ]
@@ -844,6 +845,7 @@ class WeeklyMealPlanService:
             revision=plan.revision,
             start_date=plan.start_date,
             end_date=plan.end_date,
+            day_count=plan.day_count,
             household_size=plan.household_size,
             completion_rate=round(completed_count / max(len(plan.entries), 1) * 100, 1),
             status_counts=MealPlanStatusCounts(**counts),
@@ -953,6 +955,7 @@ class WeeklyMealPlanService:
             warnings=plan.warnings,
             created_at=plan.created_at,
             plan_shape=week_shape(plan.constraints),
+            fairprice_cart=cart_state(plan.fairprice_cart, grocery_lines),
         )
 
     @staticmethod
@@ -971,6 +974,7 @@ class WeeklyMealPlanService:
                 image_url=item.product_image_url,
                 in_stock=not (item.price_evidence and item.price_evidence.get("lookup_status") == "out_of_stock"),
                 source=item.product_source,
+                halal_certified=item.product_halal_certified,
                 fetched_at=(
                     item.product_fetched_at.replace(tzinfo=UTC)
                     if item.product_fetched_at.tzinfo is None
@@ -994,6 +998,8 @@ class WeeklyMealPlanService:
             evidence=PriceEvidence.model_validate(item.price_evidence) if item.price_evidence else None,
             shopping_trip=item.shopping_trip,
             perishable=item.perishable,
+            # Lines saved before the store was kept read as the store their product came from.
+            retailer=item.retailer or (retailer_of(product) if product else None),
         )
 
     @staticmethod

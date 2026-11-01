@@ -92,6 +92,20 @@ def test_unmatchable_ingredients_are_never_searched_for_products(session: Sessio
     assert estimate.complete is False
 
 
+def test_an_at_home_line_reads_at_home_whatever_the_item(session: Session) -> None:
+    """Rice is an at-home item but not a seasoning, so its line must not call it one."""
+    from app.schemas.household_rules import HouseholdPlanning
+    from app.schemas.meal_plan import WeeklyMealPlanRequest
+
+    request = WeeklyMealPlanRequest(
+        household_size=2, household=HouseholdPlanning(members=[{"name": "Ann", "servings": 1}])
+    )
+    recipe = session.scalar(select(Recipe).where(Recipe.slug == "v2-priced"))
+    estimate = GroceryEstimator(CountingProducts()).estimate(recipe, request)
+    rice = next(line for line in estimate.items if line.ingredient_name == "brown_rice")
+    assert rice.note == "At home: not bought or priced." and rice.product is None and rice.purchase_cost_sgd == 0
+
+
 def test_nutrition_ranking_observes_visibility_order_and_limits(session: Session) -> None:
     private = session.scalar(select(Recipe).where(Recipe.slug == "v2-unpriced"))
     private.owner_household_id = 7

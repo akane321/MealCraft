@@ -1,14 +1,16 @@
 """The one place a household's rules are read for planning (layer 08): who eats each meal, its time limit,
-which basic seasonings are at home, and the nutrition limits it switched on.
+which basics (seasonings, rice, flours and the like) are at home, and the nutrition limits it switched on.
 
 Every function takes `household=None` as "no household block": the request plans exactly as before.
 """
 
+from collections import Counter
 from datetime import date
 from fractions import Fraction
 from functools import lru_cache
 
-from app.data.household_reference import basic_seasonings, hpb, meal_shares
+from app.data.halal import needs_certification
+from app.data.household_reference import basic_seasonings, basic_short_labels, hpb, meal_shares
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.schemas.household_rules import WEEKDAYS, HouseholdPlanning
 from app.schemas.planning_nutrition import ProductNutritionTarget
@@ -98,33 +100,41 @@ def widest_time_limit(household: HouseholdPlanning | None, default: int) -> int:
 
 
 @lru_cache(maxsize=256)
-def _assumed(missing: tuple[str, ...], excluded: tuple[str, ...]) -> frozenset[str]:
-    return frozenset(basic_seasonings()) - set(missing) - set(expand_exclusions(excluded))
+def _assumed(missing: tuple[str, ...], excluded: tuple[str, ...], requires_halal: bool) -> frozenset[str]:
+    names = frozenset(basic_seasonings()) - set(missing) - set(expand_exclusions(excluded))
+    return frozenset(name for name in names if not needs_certification(name)) if requires_halal else names
 
 
-def assumed_basics(household: HouseholdPlanning | None, excluded: list[str]) -> frozenset[str]:
+def assumed_basics(
+    household: HouseholdPlanning | None, excluded: list[str], requires_halal: bool = False
+) -> frozenset[str]:
     """The basic seasonings taken as at home: off the list, unpriced, outside the budget.
 
     Shopping only. A basic stays a recipe ingredient for allergens, exclusions and diets, and one the household
     excludes is never assumed, so its exclusion is still matched against the recipe's lines. A basic any single
     member excludes is not assumed either: the household buys it knowingly rather than cooking with a jar of it
     nobody meant to use (ADR-0071 section 1 moves the limits to members, it does not move this assumption).
+    A halal household does not assume a basic that needs a certified product (soy sauce, mayo): an unknown jar at
+    home is never halal, so it is bought as a Halal-marked product (docs/design/halal.md).
     """
     if household is None:
         return frozenset()
     stated = {*excluded, *(item for member in household.members or [] for item in member.excluded_ingredients)}
-    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(stated)))
+    return _assumed(tuple(sorted(household.missing_basics)), tuple(sorted(stated)), requires_halal)
 
 
-def basics_note(names) -> str | None:
-    """The grocery list's note for the basics a week uses and does not buy."""
-    shown = sorted(basic_seasonings()[name]["display_name"].lower() for name in names if name in basic_seasonings())
-    if not shown:
+def basics_note(names, requires_halal: bool = False) -> str | None:
+    """The grocery list's note for what a week uses and does not buy: categories and counts, not every name."""
+    table = basic_seasonings()
+    counts = Counter(table[name]["category"] for name in names if name in table)
+    if not counts:
         return None
-    return (
-        f"Basic seasonings are assumed at home and left off this list: {', '.join(shown)}. "
+    shown = ", ".join(f"{noun} ({counts[key]})" for key, noun in basic_short_labels().items() if key in counts)
+    note = (
+        f"Pantry basics are assumed at home and left off this list: {shown}. "
         "Mark one as run out on your profile to buy it."
     )
+    return f"{note} Basics that need a Halal-marked product are bought." if requires_halal else note
 
 
 def limit_targets(household: HouseholdPlanning | None, planned_meals) -> list[ProductNutritionTarget]:

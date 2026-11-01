@@ -136,25 +136,7 @@ class BoundedAgentOrchestrator:
         context_version: int,
         pending_interaction: InteractionRequest | None = None,
     ) -> AgentTurnOutcome:
-        explicit_halal = requests_halal(message)
-        decision = None if explicit_halal else self.classify(message, history=history)
-        if explicit_halal or (current.requires_halal and decision.should_mutate_state):
-            # ADR-0091: persist the requirement and block old ready cards without calling the model/planner.
-            return AgentTurnOutcome(
-                constraints=current.model_copy(update={"requires_halal": True}),
-                acknowledged_unknowns=acknowledged_unknowns,
-                missing_fields=["requires_halal"],
-                status="collecting",
-                assistant_message=say("halal_unsupported", language(message, history)),
-                scope_decision=ScopeDecision(
-                    scope_class=ScopeClass.RESTRICTED,
-                    unsupported_segments=[message],
-                    reason_code="HALAL_NOT_SUPPORTED",
-                ),
-                context_version=max(context_version + 1, 1),
-                state_mutated=True,
-            )
-        assert decision is not None
+        decision = self.classify(message, history=history)
         if decision.scope_class is ScopeClass.AMBIGUOUS and current_questions:
             decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
@@ -162,6 +144,15 @@ class BoundedAgentOrchestrator:
                 supported_segments=[message],
                 should_mutate_state=True,
                 reason_code="PENDING_CLARIFICATION_RESPONSE",
+            )
+        elif decision.scope_class is ScopeClass.AMBIGUOUS and requests_halal(message):
+            # A bare "halal" or "清真" is a requirement for the plan, not a wish to ask about (ADR-0104).
+            decision = ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["halal_requirement"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="HALAL_REQUIREMENT",
             )
 
         lang = language(message, history)
