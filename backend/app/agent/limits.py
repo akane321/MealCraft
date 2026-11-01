@@ -39,6 +39,11 @@ EMPTIED = {
 ROLE_EN = {"main": "main dish", "vegetable": "vegetable dish", "soup": "soup"}
 
 
+def _say(constraints, key: str, lang: str, **values) -> str:
+    """`say`, in plan words, not week words, for a plan of fewer than seven days (owner, 2026-10-29)."""
+    return say(key, lang, short=getattr(constraints, "day_count", 7) < 7, **values)
+
+
 @dataclass(frozen=True)
 class Refusal:
     field: str  # the constraint that binds
@@ -79,7 +84,8 @@ def refusal(
         needed = math.ceil(floor.days / cap)
         if found.required and found.count < needed:
             rule = say("no_repeats_rule", lang) if cap == 1 else say("cap_rule", lang, count=cap)
-            text = say(
+            text = _say(
+                constraints,
                 "too_few",
                 lang,
                 rule=rule,
@@ -104,7 +110,16 @@ def refusal(
         # The search found no week: the floor, with no amount a week backs to offer.
         size, meals = constraints.household_size or 1, floor.meals
         each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
-        text = say("floor_week", lang, budget=weekly, people=people(size, lang), each=each, meals=meals, floor=least)
+        text = _say(
+            constraints,
+            "floor_week",
+            lang,
+            budget=weekly,
+            people=people(size, lang),
+            each=each,
+            meals=meals,
+            floor=least,
+        )
         return Refusal("weekly_budget_sgd", text)
     if check is not None and weekly is not None:
         # Over the floor, whole packages decide, by no ratio that holds: on the release catalog the cheapest week
@@ -118,11 +133,15 @@ def refusal(
         # ADR-0056): a four-dish week within the budget is planned instead (the check keeps it for Plan), else the
         # reply adds what a four-dish week the search found and checked costs. That week is not proven the least.
         dishes = distinct_dishes() if error is None and distinct_dishes is not None else None
-        few = dishes is not None and dishes < BUDGET_VARIETY_TARGET
-        if few and check(minimum_distinct_dishes=BUDGET_VARIETY_TARGET) is not None:
-            varied = cheapest(minimum_distinct_dishes=BUDGET_VARIETY_TARGET)
+        # No more different dishes than the plan has places for: a dinner for one cannot hold four.
+        shape = constraints.plan_shape or default_plan_shape()
+        target = min(BUDGET_VARIETY_TARGET, floor.days * sum(len(roles) for roles in shape.meals.values()))
+        few = dishes is not None and dishes < target
+        if few and check(minimum_distinct_dishes=target) is not None:
+            varied = cheapest(minimum_distinct_dishes=target)
             if varied is not None and varied > weekly + SLACK_SGD:
-                return Refusal("weekly_budget_sgd", say("budget_variety", lang, cost=varied), aside=True)
+                text = _say(constraints, "budget_variety", lang, cost=varied, count=target)
+                return Refusal("weekly_budget_sgd", text, aside=True)
     return None
 
 
@@ -161,14 +180,14 @@ def _no_dish(constraints, floor_of, check, meal: str, role: str, lang: str) -> R
         elif field == "dietary_preferences":
             diets = joined((word(diet, lang) for diet in constraints.dietary_preferences), lang)
             limit = say("limit_diet", lang, diet=diets)
-        return Refusal(field, _no_dish_text(meal, role, limit, lang), options)
+        return Refusal(field, _no_dish_text(constraints, meal, role, limit, lang), options)
     if probes:
         # No one limit, eased alone, lets a dish in: they bind together.
         limit = say("limit_together", lang, limits=joined(details(constraints, lang), lang))
-        return Refusal(probes[0][0], _no_dish_text(meal, role, limit, lang))
+        return Refusal(probes[0][0], _no_dish_text(constraints, meal, role, limit, lang))
     if constraints.allergens or constraints.excluded_ingredients:
-        return Refusal("allergens", _no_dish_text(meal, role, say("limit_safety", lang), lang))
-    return Refusal("plan_shape", say("no_role", lang, role=_role(role, lang), meal=word(meal, lang)))
+        return Refusal("allergens", _no_dish_text(constraints, meal, role, say("limit_safety", lang), lang))
+    return Refusal("plan_shape", _say(constraints, "no_role", lang, role=_role(role, lang), meal=word(meal, lang)))
 
 
 def _uncovered(constraints, floor_of, meal: str, name: str, lang: str) -> Refusal:
@@ -183,11 +202,11 @@ def _uncovered(constraints, floor_of, meal: str, name: str, lang: str) -> Refusa
     for field, eased in probes:
         if (meal, name) not in floor_of(**{field: eased}).uncovered:
             return Refusal(field, say("no_cover_limit", lang, name=name, meal=word(meal, lang)))
-    return Refusal("members", say("no_cover", lang, name=name, meal=word(meal, lang)))
+    return Refusal("members", _say(constraints, "no_cover", lang, name=name, meal=word(meal, lang)))
 
 
-def _no_dish_text(meal: str, role: str, limit: str, lang: str) -> str:
-    return say("no_dish", lang, role=_role(role, lang), meal=word(meal, lang), limit=limit)
+def _no_dish_text(constraints, meal: str, role: str, limit: str, lang: str) -> str:
+    return _say(constraints, "no_dish", lang, role=_role(role, lang), meal=word(meal, lang), limit=limit)
 
 
 def _role(role: str, lang: str, *, plural: bool = False) -> str:
@@ -208,7 +227,7 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
     """
     status, trace = getattr(error, "status", None), getattr(error, "trace", None) or {}
     if status in {"needs_clarification", "needs_data"} or not trace:
-        text = say("not_planned", lang, reason=planner_message(str(error), lang))
+        text = _say(constraints, "not_planned", lang, reason=planner_message(str(error), lang))
         # Missing allergen coverage stays missing however often the same week is asked for.
         lasting = bool(set(constraints.allergens) - checked_allergens())
         return Refusal("plan", text, retry=status == "needs_data" and not lasting)
@@ -216,7 +235,7 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
     if search.get("exhausted"):
         # Every allowed combination was searched: the same request searches the same way again, so a limit must
         # change (ADR-0080; owner, 2026-10-22).
-        return Refusal("plan", say("exhausted", lang))
+        return Refusal("plan", _say(constraints, "exhausted", lang))
     attempts = trace.get("validation_attempts") or []
     failed = Counter(code for attempt in attempts for code in _failed(attempt))
     code = failed.most_common(1)[0][0] if failed else EMPTIED.get(search.get("emptied_by"))
@@ -237,7 +256,7 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
         if any(failed != {"purchase_budget"} for failed in ranked):
             code = None
     if code == "purchase_budget" and weekly is not None:
-        limit, field = say("weekly_limit", lang, amount=weekly), "weekly_budget_sgd"
+        limit, field = _say(constraints, "weekly_limit", lang, amount=weekly), "weekly_budget_sgd"
     elif code == "per_meal_budget" and per_meal is not None:
         limit, field = say("meal_limit", lang, amount=per_meal), "budget_per_meal_sgd"
     elif code in {"time_limit", "dish_time_limit"} and minutes is not None:
@@ -249,8 +268,10 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
     elif code == "request":
         limit, field = say("request_limit", lang), "plan"
     else:
-        return Refusal("plan", say("search_failed_generic", lang, limits=joined(details(constraints, lang), lang)))
-    return Refusal(field, say("search_failed", lang, limit=limit))
+        return Refusal(
+            "plan", _say(constraints, "search_failed_generic", lang, limits=joined(details(constraints, lang), lang))
+        )
+    return Refusal(field, _say(constraints, "search_failed", lang, limit=limit))
 
 
 def _failed(attempt: dict) -> set[str]:
@@ -262,7 +283,8 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
     cost, and the budgets a real week backs."""
     weekly, size = constraints.weekly_budget_sgd, constraints.household_size or 1
     meals = getattr(constraints, "day_count", 7) * len((constraints.plan_shape or default_plan_shape()).meals)
-    text = say(
+    text = _say(
+        constraints,
         "budget_short",
         lang,
         budget=weekly,
@@ -272,7 +294,8 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
         cost=cost,
     )
     whole = math.ceil(cost)
-    options = [_option("use_weekly", lang, amount=whole)]
+    short = getattr(constraints, "day_count", 7) < 7
+    options = [_option("use_weekly", lang, short=short, amount=whole)]
     fewer = size // 2
     # Half the household at its own cheapest week takes a second search, for every plan shape: planning time has no
     # limit (owner, 2026-10-22; ADR-0080).
@@ -285,18 +308,25 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
             options.append(_option("fewer_people", lang, count=fewer, people=people(fewer, lang)))
         else:
             options.append(
-                _option("fewer_people_at", lang, count=fewer, people=people(fewer, lang), amount=math.ceil(smaller))
+                _option(
+                    "fewer_people_at",
+                    lang,
+                    short=short,
+                    count=fewer,
+                    people=people(fewer, lang),
+                    amount=math.ceil(smaller),
+                )
             )
     elif smaller is not None:
         text += " " + say("fewer_not_cheaper", lang)
     return Refusal("weekly_budget_sgd", text, tuple(options))
 
 
-def _option(key: str, lang: str, **values) -> tuple[str, str]:
+def _option(key: str, lang: str, *, short: bool = False, **values) -> tuple[str, str]:
     label_values = {**values}
     if "people" in label_values:
         label_values["people"] = people(values["count"], "en")
-    return say(key, "en", **label_values), say(f"{key}_say", lang, **values)
+    return say(key, "en", short=short, **label_values), say(f"{key}_say", lang, short=short, **values)
 
 
 def _cents_down(amount: float) -> float:

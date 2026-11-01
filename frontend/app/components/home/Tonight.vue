@@ -112,9 +112,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
   </section>
   <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
     <div class="head">
-      <span class="mc-label">This week</span>
-      <h2>Every meal this week is done.</h2>
-      <p class="meta">Ask for next week whenever you're ready.</p>
+      <span class="mc-label">This plan</span>
+      <h2>Every meal in this plan is done.</h2>
+      <p class="meta">Ask for a new plan whenever you're ready.</p>
     </div>
   </section>
 </template>

@@ -16,6 +16,7 @@ from app.agent.replies import listed, word
 from app.core.paths import repository_root
 from app.data.allergens import allergen_conflicts
 from app.data.external_ingredient_mapping import ReviewedIngredientMapper, normalize_alias
+from app.data.halal import needs_certification
 from app.data.ingredient_hierarchy import expand_exclusions
 from app.models.recipe import Ingredient
 from app.planning.vegetable_led import food_groups
@@ -237,13 +238,11 @@ def filter_safe_substitutes(
 
         if requires_halal and getattr(ingredient, "halal_status", None) != "halal":
             continue
+        display_name = str(getattr(ingredient, "display_name", ingredient_id))
+        if requires_halal and needs_certification(ingredient_id):  # meat, sausage, gelatin ... (ADR-0108)
+            display_name += " (only as a Halal-marked product)"
 
-        safe.append(
-            SafeSubstitute(
-                ingredient_id=ingredient_id,
-                display_name=str(getattr(ingredient, "display_name", ingredient_id)),
-            )
-        )
+        safe.append(SafeSubstitute(ingredient_id=ingredient_id, display_name=display_name))
     return safe
 
 

@@ -25,7 +25,7 @@ async function loadList() {
     if (value.trim()) query[key] = value.trim();
   }
   try {
-    page.value = await apiFetch(api("/recipes"), { query });
+    page.value = await apiFetch<NonNullable<typeof page.value>>(api("/recipes"), { query });
   }
   catch {
     listFailed.value = true;

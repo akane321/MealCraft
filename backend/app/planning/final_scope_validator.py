@@ -3,8 +3,10 @@ from __future__ import annotations
 from collections import defaultdict
 from math import isfinite
 
+from app.data.halal import needs_certification
 from app.planning.dietary_tags import expand_tags
 from app.planning.diversity_validation import diversity_checks
+from app.planning.halal import halal_ok
 from app.planning.input_audit import nonfinite_issues
 from app.planning.meal_composition import (
     equipment_met,
@@ -86,7 +88,7 @@ class FinalPlanningValidator:
             )
         )
         checks.extend(self._nutrition_checks(problem, meals))
-        checks.extend(self._shopping_checks(problem, shopping))
+        checks.extend(self._shopping_checks(problem, meals, shopping))
         demand_checks = self._demand_checks(problem, meals, shopping)
         checks.extend(demand_checks)
         product_checks, purchase_total, cost_complete = self._product_checks(problem, shopping)
@@ -480,11 +482,11 @@ class FinalPlanningValidator:
             )
         if problem.dietary_requirements and "diet" in recipe.unknown_safety:
             checks.append(self._failed("dietary_status_unknown", "Recipe dietary tags are unverified.", slot_id))
-        if problem.requires_halal and recipe.halal_status != "halal":
+        if not halal_ok(recipe, problem):
             checks.append(
                 self._failed(
                     "halal_requirement",
-                    "Recipe halal status is not verified as halal.",
+                    "Recipe is not verified as halal, or a meat line has no certified product.",
                     slot_id,
                 )
             )
@@ -750,6 +752,8 @@ class FinalPlanningValidator:
                 )
             if not product.available:
                 reject("product_available", "Selected product is unavailable in the snapshot.")
+            if problem.requires_halal and needs_certification(line.ingredient_id) and not product.halal_certified:
+                reject("halal_product", "A meat line of a halal household needs a halal-certified product.")
             if product.ingredient_id != line.ingredient_id:
                 reject("product_ingredient", "Selected product belongs to a different ingredient.")
             if product.package_unit != line.unit:
@@ -763,6 +767,7 @@ class FinalPlanningValidator:
     @staticmethod
     def _shopping_checks(
         problem: FinalPlanningProblem,
+        meals: dict[str, list[PlanningAssignment]],
         shopping: list[PlanningShoppingSelection],
     ) -> list[PlanningConstraintCheck]:
         checks: list[PlanningConstraintCheck] = []
@@ -793,7 +798,10 @@ class FinalPlanningValidator:
                         line.ingredient_id,
                     )
                 )
-        if not shopping and any(slot.required for slot in problem.slots):
+        # A plan of dishes made only of basics at home has nothing to buy (a candidate keeps no line for them).
+        recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+        buys = any(recipes[dish.recipe_id].ingredients for dishes in meals.values() for dish in dishes)
+        if not shopping and buys and any(slot.required for slot in problem.slots):
             checks.append(
                 PlanningConstraintCheck(
                     code="shopping_list",

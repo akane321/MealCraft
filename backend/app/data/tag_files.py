@@ -14,7 +14,8 @@ from __future__ import annotations
 import json
 from functools import cache
 
-from app.core.paths import repository_root
+from app.core.paths import data_root, repository_root
+from app.data.halal import LABELS_FILE, OVERRIDES_FILE, halal_labels
 
 RECIPE_TAGS = "data/recipes/recipe-tags-v1.json"
 INGREDIENT_TAGS = "data/ingredients/ingredient-tags-v1.json"
@@ -91,3 +92,20 @@ def apply_ingredient_tags(row, release_food_group: str | None = None) -> None:
     for name, value in values.items():
         if not (runtime and getattr(row, name) is not None):
             setattr(row, name, value)
+
+
+def halal_file_bytes() -> bytes:
+    """The halal label and override files, for the release digest; a missing file digests as empty."""
+    paths = [data_root() / name for name in (LABELS_FILE, OVERRIDES_FILE)]
+    return b"".join(path.read_bytes() if path.exists() else b"" for path in paths)
+
+
+def apply_ingredient_halal(row) -> None:
+    """The label's status (docs/design/halal.md); an ingredient with no label is `uncertain`, never halal.
+
+    A runtime-written row (`provenance` set) keeps a status it already has.
+    """
+    if row.provenance is not None and row.halal_status is not None:
+        return
+    label = halal_labels().get(row.normalized_name)
+    row.halal_status = label["status"] if label else "uncertain"
