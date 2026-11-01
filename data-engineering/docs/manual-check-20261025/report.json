@@ -1,0 +1,144 @@
+{
+ "sampled": 100,
+ "checked": 99,
+ "correct": 91,
+ "rate": 0.919,
+ "wilson95": [
+  0.849,
+  0.958
+ ],
+ "target": 0.95,
+ "unsure": [
+  {
+   "id": "RCP2_91CAA9872649",
+   "title": "Toum (Lebanese Garlic Sauce)",
+   "note": "“1份”可能指整批蒜酱；缺少单份用量，待确认。"
+  }
+ ],
+ "unchecked": 0,
+ "refill": [],
+ "errors_by_check": {
+  "菜谱完整": {
+   "recipes": 2,
+   "share_of_errors": 0.2
+  },
+  "步骤合理": {
+   "recipes": 8,
+   "share_of_errors": 0.8
+  },
+  "份量正常": {
+   "recipes": 0,
+   "share_of_errors": 0.0
+  }
+ },
+ "by_course": {
+  "baked_good": {
+   "checked": 5,
+   "correct": 4
+  },
+  "breakfast": {
+   "checked": 6,
+   "correct": 5
+  },
+  "dessert": {
+   "checked": 6,
+   "correct": 6
+  },
+  "drink": {
+   "checked": 4,
+   "correct": 3
+  },
+  "main": {
+   "checked": 45,
+   "correct": 43
+  },
+  "salad": {
+   "checked": 7,
+   "correct": 4
+  },
+  "sauce_condiment": {
+   "checked": 4,
+   "correct": 4
+  },
+  "side": {
+   "checked": 12,
+   "correct": 12
+  },
+  "snack_appetizer": {
+   "checked": 5,
+   "correct": 5
+  },
+  "soup": {
+   "checked": 5,
+   "correct": 5
+  }
+ },
+ "problems": [
+  {
+   "id": "RCP2_072BE93E736D",
+   "title": "Sloppy Joes",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "步骤提到汉堡面包，食材清单未列；建议补充或注明可选。"
+  },
+  {
+   "id": "RCP2_078A1CDDBE40",
+   "title": "Thai-Inspired Jicama Salad",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "食材含花生，但步骤未说明加入；需补充操作。"
+  },
+  {
+   "id": "RCP2_12BC1359FD35",
+   "title": "Banana Buttermilk Lassi",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "步骤称“加倍可供2人”，与标注2份矛盾。"
+  },
+  {
+   "id": "RCP2_85D396F3CA96",
+   "title": "Mexican Corn Bread",
+   "failed": [
+    "菜谱完整",
+    "步骤合理"
+   ],
+   "note": "关键混合及烘烤步骤缺失；8份产量无法核实。（用户确认）"
+  },
+  {
+   "id": "RCP2_94A964FFDAE2",
+   "title": "Korean Coleslaw",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "糖、油、醋等调味食材未在步骤中使用；需补充调味步骤。"
+  },
+  {
+   "id": "RCP2_E3702CD9DF6F",
+   "title": "Spinach And Feta Frittata",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "烘烤时间“32–25分钟”逆序，需更正。"
+  },
+  {
+   "id": "RCP2_E465663E8372",
+   "title": "Dinner Tonight: Kimchi Chahan (Fried Rice) Recipe",
+   "failed": [
+    "菜谱完整",
+    "步骤合理"
+   ],
+   "note": "缺少米饭、鸡蛋的关键处理步骤。（用户确认）"
+  },
+  {
+   "id": "RCP2_EF25D1FE7687",
+   "title": "Ethiopian Eggplant Salad",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "茄子仅腌制未加热；按严格口径判步骤不合理，需核实原做法。"
+  }
+ ]
+}

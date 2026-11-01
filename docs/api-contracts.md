@@ -62,7 +62,7 @@ Available endpoints:
 - POST /api/ops/data/recipes/{recipe_id}/restore
 - GET /api/ops/data/ingredients
 - PATCH /api/ops/data/ingredients/{ingredient_id}
-- GET /api/ops/data/mappings
+- GET /api/ops/data/mappings?retailer={fairprice|cold_storage}
 - GET /api/ops/data-quality
 - GET /api/ops/data-quality/dropped?reason={reason}&offset={offset}&limit={limit}
 - PUT /api/ops/data/mappings/{ingredient}
@@ -75,7 +75,7 @@ Available endpoints:
 - POST /api/ingredient-substitutions/suggest
 - POST /api/ingredient-substitutions/review
 - POST /api/recommendations/recipes
-- GET /api/products/search?q={query}&live={boolean}&refresh={boolean}
+- GET /api/products/search?q={query}&live={boolean}&refresh={boolean}&retailer={fairprice|cold_storage}
 - POST /api/plans/generate
 - GET /api/plans
 - GET /api/plans/{plan_id}
@@ -86,6 +86,9 @@ Available endpoints:
 - POST /api/plans/{plan_id}/shape/preview
 - POST /api/plans/{plan_id}/replan/{event_id}/confirm
 - GET /api/plans/{plan_id}/events
+- POST /api/plans/{plan_id}/fairprice-cart/prepare
+- POST /api/plans/{plan_id}/fairprice-cart/report
+- POST /api/plans/{plan_id}/fairprice-cart/ordered
 - GET /api/feedback/recipes?kind={kind}
 - PUT /api/feedback/recipes/{recipe_id}
 - DELETE /api/feedback/recipes/{recipe_id}
@@ -397,11 +400,19 @@ each empty by default (stored as NULL):
 - `cooking_time_rules`: `CookingTimeRule` objects (the same text, weekday and
   meal fields, and `max_minutes` 5 to 240). A meal's time limit is the tightest
   rule naming it, else `max_cooking_time_minutes`; 240 is no limit.
-- `missing_basics`: basic seasonings (`data/ingredients/basic-seasonings-v1.json`)
-  the household has run out of. Every other basic is assumed at home: left off
-  the shopping list, unpriced and outside the budget, with a note on the list.
-  A basic stays a recipe ingredient for allergens, exclusions and diets, and a
-  basic the household excludes is never assumed.
+- `missing_basics`: ingredients of the at-home list
+  (`data/ingredients/basic-seasonings-v2.json`, 164 of them since the owner's
+  decision of 2026-10-29) the household has run out of, up to 200. The list is
+  the 13 basic seasonings, rice, vinegars, small-amount sauces and condiments,
+  spices and blends, dried herbs, stock cubes, starches and flours; cooking
+  sauces and pastes that are a dish's base, tomato products, coconut milk,
+  fresh herbs, liquid broths, baking items, pasta and noodles are bought. Every
+  other item of the list is assumed at home: left off the shopping list, unpriced
+  and outside the budget, with a note on the list that gives counts by category,
+  not names ("Pantry basics are assumed at home and left off this list: basics
+  (2), rice (1)."). A dish made only of at-home items buys nothing. An item
+  stays a recipe ingredient for allergens, exclusions and diets, and one the
+  household excludes is never assumed.
 - `nutrition_limits`: at most one `NutritionLimit`, and only `sodium_mg`
   (`scope: "per_day"`). A `max_value` of null is the tightest HPB limit of the
   usually-home members (2,000 mg for adults and seniors); a household whose
@@ -415,7 +426,8 @@ The server writes each rule's `restatement` itself, from a fixed template.
 `GET /api/household-profiles/reference` is read-only:
 `default_servings[age_band][female|male|any][low|moderate|high][none|fat_loss|muscle_gain]`,
 `sodium_limit_mg[age_band]` (null where HPB gives none), `basics`
-(`normalized_name`, `display_name`, `allergens`), `meal_shares` and the
+(`normalized_name`, `display_name`, `category`, `allergens`), `basic_categories`
+(`id`, `label`, in the order the page lists them), `meal_shares` and the
 `sources` (title, URL, retrieved date). The profile page looks values up here
 and never repeats the formula. It also returns `meal_structure` (ADR-0070):
 `presets` (meal -> preset name -> roles of `meal_roles`; the first preset of each
@@ -561,9 +573,8 @@ accuracy remains unverified. The decision boundary is ADR-0096.
 - an explicit `requires_halal` boolean (required at this HTTP boundary, and at
   `/api/plans/generate`; omitted or null returns 422, never implicit false).
   The internal/stored request model retains its legacy default only for reading
-  old records; that default does not satisfy a new HTTP declaration. Until the
-  halal source is decided, conversation requests for halal are declined as not
-  yet supported (ADR-0091).
+  old records; that default does not satisfy a new HTTP declaration. A halal
+  household's plan is described in `docs/design/halal.md` (ADR-0104).
 - optional health preferences and user-entered nutrition targets
 - an optional explicit sodium ceiling
 - available ingredients with optional quantities and units
@@ -608,6 +619,11 @@ Every fallback sets `fallback_used=true` and a warning; the source is never
 silently misrepresented. When FairPrice answers with no products, the response
 is empty with status `no_match`: that ingredient is left unpriced rather than
 given sample prices.
+
+`retailer=cold_storage` (default `fairprice`) searches Cold Storage instead, with its own cache source, lookup
+budget and failure counter. Its chain is live, then cache, then nothing: there are no Cold Storage fixtures, and
+offline Cold Storage prices come only from its reviewed snapshot (`data/products/cold-storage-v1-snapshot.json`).
+Product ids are `cs-<id>`; Cold Storage products never carry `halal_certified` ([Cold Storage](design/cold-storage.md)).
 
 Every product response also carries a retrieval trace with requested source,
 provider used, `live`/`cache`/`fixture` mode, `success`/`no_match`/`degraded` status,
@@ -782,12 +798,29 @@ produces no adjustment suggestions. See [conflict explanations](design/planning-
 for the declared-group minimality and resource limits.
 
 `GET /api/plans/{plan_id}` returns the persisted snapshot and a `current`
-boolean. A plan is no longer current when a newer plan in the same household
-overlaps its dates. This check covers the full plan history, independent of
-the recent-list page size; creation time and then ID determine which is newer.
+boolean. A plan is no longer current when newer plans in the same household
+together cover every one of its (date, meal) places (owner decision
+2026-10-29; a plan's places are its days times the meals it plans). A newer plan
+that overlaps only part of it leaves it current: a dinner planned again inside
+a week does not replace the week, and a week planned again over a week does.
+This check covers the full plan history, independent of the recent-list page
+size; creation time and then ID determine which is newer.
 Pending replan confirmations and interaction answers for a replaced plan are
 rejected. `GET /api/plans` returns recent plan summaries for later history and
-dashboard integration.
+dashboard integration; each item carries `day_count` (1 to 14) beside
+`start_date`, `end_date` and `current`.
+
+The plan snapshot also carries `fairprice_cart`: per shopping trip, whether the list was put into the household's
+FairPrice cart or ordered, with a `stale` flag when the list changed after it was sent. The three
+`/fairprice-cart/` routes re-check the trip's FairPrice lines live, record what the browser extension put into the
+person's own cart, and record that the person checked out; MealCraft never calls FairPrice's cart itself. Shapes and
+rules are in [FairPrice cart](design/fairprice-cart.md).
+
+Each grocery line carries `retailer` (`fairprice`, `cold_storage`, or `null` with no product). FairPrice comes first;
+Cold Storage prices only a line FairPrice has no in-stock product for, never one it is merely cheaper for, and never a
+line a halal household needs a Halal-marked product for. The totals and budget count both stores. `prepare` takes only
+FairPrice lines; its response adds `other_stores` (`[{retailer, lines, purchase_total_sgd}]`), which the cart panel adds
+to its budget figure ([Cold Storage](design/cold-storage.md)).
 
 ## Meal Check-in and Nutrition Dashboard
 
@@ -798,6 +831,7 @@ meal record or duplicate nutrition contribution is created.
 
 `GET /api/plans/{plan_id}/dashboard` returns:
 
+- the plan's `day_count` (1 to 14) beside `start_date` and `end_date`
 - planned-meal and completed-meal nutrition totals
 - per-day planned and completed nutrition values
 - planned, completed, and skipped entry counts
@@ -910,6 +944,51 @@ optional typed `pending_interaction`. `POST
 /api/agent/sessions/{session_id}/messages` appends another turn and merges only
 explicitly extracted values into the current state.
 
+A conversation can ask for a short plan (owner decision 2026-10-29): "one dinner
+for 1 person tomorrow", "dinner tonight", "today", "this weekend", "the next 3
+days", 明天晚餐, 今晚, 今天, 周末两天, 接下来三天. The state's `constraints`
+carry `day_count` (1 to 14, default 7; left out of the dump while it is 7, so a
+week's constraints are unchanged) and the plan is made for those days and meals
+only, with its shopping list and budget. Rules read the span first
+(`agent/plan_dates.py`); the model parser fills `plan_day_count` and
+`plan_meals` only when the rules find none. The rules are high-precision: a
+day word next to a negation or an absence ("no soup on the weekend", "I'm away
+this weekend", 周末不做饭, 今天不用做饭), in a clause about food at home ("chicken
+I bought today"), a duration ("expires in 2 days", "leftovers last 3 days", 放了三天,
+每周五天), two kinds of day in one message, or "the day after tomorrow" reads as
+no span, and the model's `plan_day_count` and `plan_meals` decide. "N days"
+needs a plan word with it ("for 3 days", "the next 3 days", "5 days of dinners",
+接下来三天, 三天的饭). Today is the household's meals
+not yet past (breakfast 10:00, lunch 15:00, dinner 21:00, Singapore time),
+tonight is today's dinner, and with every such meal past the plan starts
+tomorrow and says so; "today and tomorrow" is two days from today; this weekend
+is the coming Saturday and Sunday (today and tomorrow on a Saturday, today on a
+Sunday); "the next N days" (N up to 14) start at the default start; "dinners
+only" or 只要晚餐 narrows the meals and leaves the days. A meal named anywhere in
+the message narrows a day span ("Dinner for 2 tomorrow", "lunch and dinner for
+the weekend", 晚餐两个人，明天), and one said no is left out ("no breakfast
+tomorrow" is tomorrow without breakfast). The meals are a subset of the
+household's shape, each keeping its dish composition (the household's whole shape
+is kept in `usual_plan_shape` while fewer meals are planned). A week phrase with
+no days ("a week", "this week", "the whole week", "next week", "plan a week of
+dinners", 一周, 这周, 下周) puts the conversation back to 7 days, the household's
+shape and its weekly budget; an amount said per week ("S$100 a week") is not one.
+The reply says "The plan runs ..." or "The plan is for
+..." and speaks of the plan, not the week, below seven days. An amount stated for
+the plan ("S$15 for tomorrow's dinner", "$20 for the weekend", "the plan budget
+S$20") is that plan's budget; an amount said per week ("S$140 a week") is the
+week's and is pro-rated; an amount per day with the days stated ("S$10 a day for
+the next 3 days") is that times the days; an amount "each" is per person. The
+unprorated weekly budget (saved, or stated per week) is kept as
+`base_weekly_budget_sgd`, left out of the dump while empty. Every change of days
+or meals pro-rates from it by planned meals over 7 times the household's meals
+a day, rounded to cents, a week restores it, and the reply says so ("S$6.67 of
+your S$140 weekly budget"). The request's `weekly_budget_sgd` means this plan's
+budget. A new plan of a saved short plan keeps its days and
+meals. A change that names a day outside the plan is answered "That day is not
+in this plan" and changes nothing; a message about an ingredient that cannot be
+bought "today", or how the user is today, names no day.
+
 `PUT /api/agent/sessions/{session_id}/preferences` replaces the confirmation
 card's soft `planning_preferences` with a typed object, without a model call.
 The body requires `context_version` and `planning_preferences`; extra fields
@@ -967,11 +1046,12 @@ tell by (a number, "ok"), of their last one that had some
 change to a saved week gives for turning a request down; one with no Chinese
 wording yet is said in general terms rather than in English.
 
-Under ADR-0091, an explicit halal request is declined as not yet supported,
-without invoking the parser or planner. The requirement is retained with
-`HALAL_NOT_SUPPORTED`, invalidating any prior ready card. Stored ready states
-and replan previews cannot bypass this guard through confirmation. This is an
-unsupported capability, not a claim that an ordinary menu satisfies halal.
+Under ADR-0104 (superseding ADR-0091's decline), an explicit halal request
+("halal", "清真", not negated) sets `requires_halal` for that plan, and the reply
+offers to save it to the household profile; it is saved only on a yes. A halal
+plan uses only halal dishes, and buys a meat line only as a product certified
+halal (`docs/design/halal.md`). Swaps, can't-buy replans and shape changes keep
+the flag from the stored plan constraints.
 
 Counted create/reply turns have the existing four-request allowance enforced
 before each external request, including retries. Accounting records sent

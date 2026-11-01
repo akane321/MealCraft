@@ -4,6 +4,9 @@ Input is only `UnifiedOutput.request_fields`, the product's own echo of its cons
 answer text, a recipe name or a category. A value the product did not state is reported as not stated, never as a
 default; a native value with no counterpart in the dictionary is listed and never converted (a per-meal budget is not a
 weekly one, a per-meal sodium cap is not a daily limit with a dinner share, uses per recipe is not repeats).
+`start_date` is not produced: the product fills a default start day when the request names none
+(agent/workflow.py, default_start), so the echo cannot tell a stated day from the default. An empty list or None reads
+as not stated, so "stated none" and "not stated" cannot be told apart here (the scorer handles that).
 
 The dictionary is the public neutral one (`scripts/sprint2-heldout-fields.json`). Fields the sealed set may add beyond
 it are not known here. This module does not load a sealed file or score anything.
@@ -23,7 +26,6 @@ from app.schemas.recommendation import NO_COOKING_TIME_LIMIT
 # The dictionary fields this mapping can produce.
 MAPPED_FIELDS = (
     "household_size",
-    "start_date",
     "weekly_budget_sgd",
     "allergens",
     "excluded_ingredients",
@@ -35,7 +37,6 @@ MAPPED_FIELDS = (
 # Native keys that are read; any other non-empty key is reported as unmapped.
 READ_KEYS = {
     "household_size",
-    "start_date",
     "weekly_budget_sgd",
     "allergens",
     "excluded_ingredients",
@@ -44,8 +45,9 @@ READ_KEYS = {
     "max_cooking_time_minutes",
     "plan_shape",
 }
-# Native keys that carry only a default or a non-constraint: never reported as unmapped.
-IGNORED_KEYS = {"pricing_mode", "avoid_recipe_ids"}
+# Native keys that carry only a default or a non-constraint: never reported as unmapped. start_date is one: the
+# product fills it with today or tomorrow when the request names no day, so it is almost always present.
+IGNORED_KEYS = {"pricing_mode", "avoid_recipe_ids", "start_date"}
 MEAL_ORDER = ("breakfast", "lunch", "dinner")
 
 
@@ -78,8 +80,6 @@ def map_request_fields(request_fields: Mapping[str, Any]) -> FieldMapping:
 
     if native.get("household_size") is not None:
         put("household_size", native["household_size"])
-    if native.get("start_date"):
-        put("start_date", str(native["start_date"]))
     if native.get("weekly_budget_sgd") is not None:
         put("weekly_budget_sgd", native["weekly_budget_sgd"])
     for source, target in (

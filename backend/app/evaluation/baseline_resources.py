@@ -7,8 +7,11 @@
 - Allergen vocabulary: `checked_allergens()` (`data/ingredients/allergen-vocabulary.json`). An allergen outside
   it is unverifiable for every ingredient (`app.data.allergens`).
 - Prices: the frozen FairPrice v2 snapshot through `load_release_catalog`, whole packages only.
-- Not bought: water and ice always; the basic seasonings (`data/ingredients/basic-seasonings-v1.json`) unless
-  the household lists them as missing or excludes them. They still count for every safety check.
+- Not bought: water and ice always; the basics assumed at home (`data/ingredients/basic-seasonings-v2.json`: seasonings,
+  rice, vinegars, small-amount sauces, dried herbs, flours and the like) unless the household lists them as missing
+  or excludes them. They still count for every safety check. The file's digest is recorded with the others.
+  A halal episode leaves out of that the basics that need a certified product (soy sauce, vinegar, mayonnaise): an
+  unknown jar at home is never halal, so they are bought (docs/evaluation/halal.md).
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from pathlib import Path
 from app.agent.ingredient_matcher import IngredientMatcher, catalog_aliases
 from app.core.paths import repository_root
 from app.data.allergens import checked_allergens
+from app.data.halal import needs_certification
 from app.data.household_reference import basic_seasonings
 from app.data.ingredient_hierarchy import read_links
 from app.data.release_v2 import map_allergens
@@ -33,6 +37,7 @@ from app.schemas.planning_v2 import PlanningNutrients, PlanningProductOption
 RELEASE = Path("data-engineering/data/release/v2.2")
 RELEASE_INGREDIENTS = RELEASE / "ingredients.jsonl"
 RELEASE_MANIFEST = RELEASE / "release_manifest.json"
+BASICS = Path("data/ingredients/basic-seasonings-v2.json")
 
 
 @dataclass(frozen=True)
@@ -51,9 +56,14 @@ class BaselineResources:
     release_version: str | None = None
     data_digests: tuple[tuple[str, str], ...] = ()
 
-    def not_bought(self, household: dict) -> frozenset[str]:
-        """Water, ice and the basics this household is taken to have (`app.planning.household_slots`)."""
+    def not_bought(self, household: dict, halal: bool = False) -> frozenset[str]:
+        """Water, ice and the basics this household is taken to have (`app.planning.household_slots`).
+
+        A halal household (`halal`, or its profile's `requires_halal`) is not taken to have a basic that needs a
+        certified product: it is bought, as a product FairPrice marks Halal."""
         keep = {*(household.get("missing_basics") or []), *(household.get("excluded_ingredients") or [])}
+        if halal or household.get("requires_halal"):
+            keep |= {name for name in self.basic_seasonings if needs_certification(name)}
         return self.not_purchased | (self.basic_seasonings - keep)
 
 
@@ -88,7 +98,7 @@ def load_resources(root: Path | None = None) -> BaselineResources:
         release_version=manifest.get("release_version"),
         data_digests=tuple(
             (str(path), hashlib.sha256((root / path).read_bytes()).hexdigest())
-            for path in (RELEASE_INGREDIENTS, RELEASE_MANIFEST, SNAPSHOT, CURATED)
+            for path in (RELEASE_INGREDIENTS, RELEASE_MANIFEST, SNAPSHOT, CURATED, BASICS)
         ),
     )
 

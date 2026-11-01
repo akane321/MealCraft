@@ -46,8 +46,9 @@ neutrality by someone who did not write them before formal use. Neither the
 synthetic example date nor a readiness attestation is run admission.
 
 This phase does not implement a product transport, model arm, one-shot arm
-presentation, field-dictionary mapping, replan-confirmation marker mapping,
-catalog ID matching, scoring, sealed file loading, freeze or admission. A caller
+presentation, field-dictionary mapping, catalog ID matching, scoring, sealed file loading, freeze or admission. A change
+preview that is linked and not yet applied counts as waiting for confirmation in `normalize_product`, like a
+plan card (see [product-transport.md](product-transport.md)). A caller
 must not silently use an existing runner that reads gold. The product currently
 separates conversational replies from confirmation actions; this harness does
 **not** call a product-only confirm endpoint or treat a fixed message as a hidden
