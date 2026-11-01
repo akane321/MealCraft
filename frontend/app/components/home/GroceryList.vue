@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, packageLabel, priceSourceLabel } from "~/lib/home-surface";
+import { basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, hasColdStorage, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -10,20 +10,18 @@ const sumOf = (lines: GroceryLineEstimate[]) => lines.reduce((total, line) => to
 const trips = computed(() => groceryTrips(props.estimate.items).map(trip => ({
   ...trip,
   groups: trip.groups.map(group => ({ ...group, sum: sumOf(group.lines) })),
+  stores: trip.stores.map(store => ({ ...store, groups: store.groups.map(group => ({ ...group, sum: sumOf(group.lines) })), sum: sumOf(store.groups.flatMap(group => group.lines)) })),
   sum: sumOf(trip.groups.flatMap(group => group.lines)),
 })));
 const groups = computed(() => trips.value.flatMap(trip => trip.groups));
-const lines = computed(() => groups.value.flatMap(group => group.lines));
-// A line of the second trip is its own purchase, even of an ingredient the first trip also buys.
-const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${line.ingredient_name}`;
+// Stores are shown apart (FairPrice first, then Cold Storage) only once some line is bought at Cold Storage.
+const byStore = computed(() => hasColdStorage(props.estimate.items));
+// A line of the second trip is its own purchase, even of an ingredient the first trip also buys; so is one of each store.
+const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${lineRetailer(line)}:${line.ingredient_name}`;
+// The note counts live, saved and sample prices; its dot and the amber "Saved FairPrice price" lines read them the same way.
 const source = computed(() => priceSourceLabel(props.estimate));
 const basics = computed(() => basicsNote(props.estimate));
-// Green when every price is FairPrice's, amber when some are samples, grey when all are.
-const sourceTone = computed(() => (source.value.startsWith("FairPrice prices") ? "ok" : source.value.startsWith("FairPrice") ? "warn" : ""));
-const priceSource = (line: GroceryLineEstimate) => line.evidence?.price_source ?? line.evidence?.mode;
-const live = computed(() => lines.value.filter(line => priceSource(line) === "live").length);
-// A saved (not freshly checked) FairPrice price reads amber.
-const stale = (line: GroceryLineEstimate) => Boolean(line.product && line.product.source === "fairprice" && priceSource(line) !== "live");
+const sourceTone = computed(() => priceTone(props.estimate));
 // Ticked items only matter while shopping; they are not saved.
 const got = ref(new Set<string>());
 
@@ -38,25 +36,29 @@ function toggle(name: string) {
   <div class="groceries">
     <p class="source">
       <i :class="sourceTone" aria-hidden="true" />
-      <b>{{ source }}</b>
-      <span class="count">{{ live ? `${live} live · ${lines.length - live} saved` : `${lines.length} items` }}</span>
+      <b :title="source">{{ source }}</b>
     </p>
     <div class="list">
       <template v-for="trip in trips" :key="trip.trip ?? 0">
         <h3 v-if="trip.label" class="trip">{{ trip.label }}<span class="mc-num">{{ formatSgd(trip.sum) }}</span></h3>
-        <template v-for="group in trip.groups" :key="group.name">
-          <h3 class="aisle">{{ group.name }}<span class="rule" /><span class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
-          <label v-for="line in group.lines" :key="lineKey(line)" class="item">
-            <input type="checkbox" :checked="got.has(lineKey(line))" @change="toggle(lineKey(line))">
-            <span class="what">
-              <span class="p-line">
-                <span class="p">{{ line.ingredient_display_name }}</span>
-                <span v-if="line.perishable" class="fresh" title="Fresh: cooked within 3 days of this shop">Use within 3 days</span>
+        <template v-for="store in trip.stores" :key="store.retailer">
+          <h3 v-if="byStore" class="store">{{ store.name }}<span class="mc-num">{{ formatSgd(store.sum) }}</span></h3>
+          <template v-for="group in store.groups" :key="group.name">
+            <h3 class="aisle">{{ group.name }}<span class="rule" /><span class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
+            <label v-for="line in group.lines" :key="lineKey(line)" class="item">
+              <input type="checkbox" :checked="got.has(lineKey(line))" @change="toggle(lineKey(line))">
+              <span class="what">
+                <span class="p-line">
+                  <span class="p">{{ line.ingredient_display_name }}</span>
+                  <span v-if="line.perishable" class="fresh" title="Fresh: cooked within 3 days of this shop">Use within 3 days</span>
+                  <span v-if="line.product?.halal_certified" class="fresh" title="FairPrice lists this product as Halal">Halal-certified</span>
+                  <a v-if="store.retailer === 'cold_storage' && line.product?.product_url" class="shop-link" :href="line.product.product_url" target="_blank" rel="noopener" @click.stop>View at Cold Storage</a>
+                </span>
+                <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
               </span>
-              <span class="s" :class="{ stale: stale(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
-            </span>
-            <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
-          </label>
+              <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
+            </label>
+          </template>
         </template>
       </template>
       <template v-if="estimate.unmapped_ingredients.length">
@@ -75,7 +77,6 @@ function toggle(name: string) {
 .source i.ok { background: var(--c-green); }
 .source i.warn { background: var(--c-amber); }
 .source b { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.count { margin-left: auto; flex: none; color: var(--c-muted); }
 .list { padding: 4px 16px 12px; }
 .aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
@@ -87,6 +88,8 @@ function toggle(name: string) {
 .p-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .p { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fresh { flex: none; padding: 0 6px; border-radius: 999px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 11px; line-height: 16px; font-weight: 700; }
+.store { margin: 8px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
+.shop-link { flex: none; font-size: 11px; line-height: 16px; font-weight: 700; color: var(--c-info-text); text-decoration: underline; }
 .trip { margin: 10px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
 .s { font-size: 12px; line-height: 16px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .s.stale { color: var(--c-amber-text); }

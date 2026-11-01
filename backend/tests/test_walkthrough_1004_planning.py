@@ -13,11 +13,13 @@
 import logging
 import math
 import re
+import tempfile
 import threading
 import time
 from collections import Counter
 from contextlib import contextmanager
 from datetime import timedelta
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -353,7 +355,7 @@ def test_a_swap_preview_says_what_it_does_to_the_groceries_and_the_budget():
         purchase_total_delta_sgd=2.9,
         over_budget_sgd=0.16,
     )
-    plan = SimpleNamespace(grocery_estimate=SimpleNamespace(weekly_budget_sgd=100.0))
+    plan = SimpleNamespace(day_count=7, grocery_estimate=SimpleNamespace(weekly_budget_sgd=100.0))
     describe = AgentSessionService.__new__(AgentSessionService)._describe_dish_preview
     assert describe(preview, plan, "en") == (
         "How about Kimchi Chahan (Fried Rice) instead of Teriyaki Fried Rice? Groceries +S$2.90. "
@@ -497,8 +499,9 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
     assert [option.label for option in refused.pending_interaction.options] == ["Use S$70 for the week"]
     # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
-    # (ADR-0067: a budget no week fits is refused as before).
-    assert planned == [(4, None, True), (4, 53, False), (2, None, True), (2, 40, False)]
+    # (ADR-0067: a budget no week fits is refused as before). Four's cheapest week is S$51.54 since Cold Storage priced
+    # higher-ranked salads and noodles into the ranked packet (S$52.83 before), so the budgeted check is at S$52.
+    assert planned == [(4, None, True), (4, 52, False), (2, None, True), (2, 40, False)]
 
 
 @pytest.fixture(scope="module")
@@ -704,23 +707,32 @@ def loads(monkeypatch):
 
 @contextmanager
 def pooled():
-    """A session over a small catalog of every course a dinner role takes, its pool kept as production keeps it."""
-    engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine, expire_on_commit=False)
-    with factory() as session:
-        session.add_all(
-            [
-                _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
-                _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
-                _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
-                _dish("tomato-soup", "soup", "tomato", 500, calories=150),
-            ]
+    """A session over a small catalog of every course a dinner role takes, its pool kept as production keeps it.
+
+    A database file with a connection per thread, as PostgreSQL gives each session. On one in-memory connection
+    shared by every thread (StaticPool), the background thread's poll rolled back, as it closed its session, an
+    insert the test had sent but not yet committed, and the commit then saved nothing (flaky in CI, 2026-10-27)."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as directory:
+        engine = create_engine(
+            f"sqlite+pysqlite:///{Path(directory) / 'pool.db'}", connect_args={"check_same_thread": False}
         )
-        session.commit()
-    with kept_for(300), factory() as session:
-        yield session
-    engine.dispose()
+        try:
+            Base.metadata.create_all(engine)
+            factory = sessionmaker(bind=engine, expire_on_commit=False)
+            with factory() as session:
+                session.add_all(
+                    [
+                        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+                        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+                        _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+                        _dish("tomato-soup", "soup", "tomato", 500, calories=150),
+                    ]
+                )
+                session.commit()
+            with kept_for(300), factory() as session:
+                yield session
+        finally:
+            engine.dispose()  # before the directory goes: Windows keeps an open database file
 
 
 def joined(name: str) -> None:

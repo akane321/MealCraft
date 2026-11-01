@@ -119,13 +119,22 @@ class AgentReplanInterpreter:
             # "Keep the Chicken And Dumplings": a title on one day of the week names that day.
             titled = {dish.day_index for dish in plan.days if dish.recipe.title.lower() in lower}
             day_index = titled.pop() if len(titled) == 1 else None
+        ingredient = self._ingredient(lower, plan)
+        if (
+            day_index is None
+            and ingredient is None
+            and draft.event_type != "ITEM_UNAVAILABLE"
+            and self.day_indexes(lower, plan) == []
+        ):
+            # A day the plan does not have (a short plan has no Friday): nothing is asked or changed. An ingredient
+            # that cannot be bought "today" is not a day asked for.
+            return current.model_copy(deep=True), [say("not_in_plan", lang or language(text))]
         if day_index is not None:
             draft.day_index = day_index
             draft.entry_id = None
         if draft.entry_id is None and draft.day_index is not None:
             draft.entry_id, draft.whole_meal = self._dish_entry(lower, plan, draft.day_index, draft.event_type)
 
-        ingredient = self._ingredient(lower, plan)
         if ingredient is not None:
             draft.unavailable_ingredient = ingredient
 
@@ -298,6 +307,15 @@ class AgentReplanInterpreter:
     _months = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
     _day_month = re.compile(rf"(?<!\d)(\d{{1,2}}) ({'|'.join(_months)})[a-z]*|(\d{{1,2}})月(\d{{1,2}})[日号]")
 
+    # A day named by its date or its number, which `day_index` looks for in the plan.
+    _names_a_date = re.compile(
+        rf"(?<!\d)\d{{1,2}} (?:{'|'.join(_months)})|\d{{1,2}}月\d{{1,2}}[日号]|\b\d{{4}}-\d{{2}}-\d{{2}}\b"
+        r"|(?:day\s*|第\s*)(?:\d{1,2}|[一二三四五六七])"
+    )
+    # Today and tomorrow, except as how the user is ("I'm tired today", 今天太累了), which is no day to change.
+    _names_today = re.compile(r"(?<![a-z])(?:today|tonight|tomorrow)(?![a-z])|今天|今晚|明天")
+    _how_i_am = re.compile(r"(?<![a-z])(?:tired|busy|sick|ill|exhausted|unwell)(?![a-z])|累|忙|没空|生病|不舒服")
+
     def day_index(self, text: str, plan: WeeklyMealPlanResponse) -> int | None:
         dated = self._day_month.search(text)
         if dated:
@@ -309,7 +327,7 @@ class AgentReplanInterpreter:
             )
             if found is not None:
                 return found
-        numbered = re.search(r"(?:day\s*|第\s*)([1-7一二三四五六七])(?:\s*天)?", text)
+        numbered = re.search(r"(?:day\s*|第\s*)(\d{1,2}|[一二三四五六七])(?:\s*天)?", text)
         if numbered:
             value = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7}.get(
                 numbered.group(1), int(numbered.group(1)) if numbered.group(1).isdigit() else 0
@@ -330,8 +348,14 @@ class AgentReplanInterpreter:
             return next((day.day_index for day in plan.days if day.planned_date.weekday() == min(named)), None)
         return None
 
+    def _names_a_plan_day(self, text: str) -> bool:
+        return bool(
+            self._names_a_date.search(text) or (self._names_today.search(text) and not self._how_i_am.search(text))
+        )
+
     def day_indexes(self, text: str, plan: WeeklyMealPlanResponse) -> list[int] | None:
-        """Every day the message names, in the week's order; None when it names none (the whole week).
+        """Every day the message names, in the week's order; None when it names none (the whole week); an empty
+        list when it names days the plan does not have (a short plan has no Friday).
 
         "on weekends", "weekdays", "during the week", "Monday to Friday", "Wednesday and Friday",
         "except weekends" and the same in Chinese ("工作日", "平日", "周一到五", "除了周末").
@@ -345,8 +369,8 @@ class AgentReplanInterpreter:
         weekdays = set().union(*(changed or [days for _, days in clauses]))
         if not weekdays:
             day = self.day_index(text, plan)
-            return [day] if day is not None else None
-        return sorted({day.day_index for day in plan.days if day.planned_date.weekday() in weekdays}) or None
+            return [day] if day is not None else ([] if self._names_a_plan_day(text) else None)
+        return sorted({day.day_index for day in plan.days if day.planned_date.weekday() in weekdays})
 
     def _named_days(self, text: str) -> set[int]:
         """The weekdays (0 = Monday) one clause names; "except weekends" names the other five."""

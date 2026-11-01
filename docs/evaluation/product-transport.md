@@ -16,12 +16,15 @@ one case.
   plan fetched from the plans endpoint when there is one.
 - **One responder, one case.** A second first turn on the same responder is an error, so a session never carries
   over to the next case.
+- **Change previews wait like plan cards.** In `normalize_product` a change preview that the session links and has
+  not applied marks the turn as awaiting confirmation, so a change to a saved week gets the same one confirmation
+  message as a new plan. An applied preview, or one left over from an earlier turn, does not.
 - **Failures are errors.** A non-success status raises `ProductTransportError`; it is never reported as a refusal or
   an infeasible request.
 
 Not covered: creating a household or profile and authenticating the client (the caller prepares the run), sealed
-file loading, scoring, mapping the product's native constraint echoes to the neutral field dictionary, the replan
-confirmation marker, catalog ID matching, the neutrality review and registration of the confirmation bytes, run
+file loading, scoring, mapping the product's native constraint echoes to the neutral field dictionary, catalog
+ID matching, the neutrality review and registration of the confirmation bytes, run
 admission and the freeze.
 
 ```text

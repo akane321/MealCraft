@@ -362,3 +362,11 @@ def test_substitution_client_uses_configured_timeout(monkeypatch):
     monkeypatch.setattr("app.services.ingredient_substitutions.OpenAI", lambda **kw: captured.update(kw) or object())
     OpenAISubstituteGenerator(api_key="unused", model="test", timeout_seconds=47)
     assert captured["timeout"] == 47
+
+
+def test_a_halal_household_is_told_which_substitute_needs_a_halal_marked_product():
+    """Sausage or chicken suits a halal household only as a product FairPrice marks Halal (ADR-0108)."""
+    safe = filter_safe_substitutes([ingredient("chicken_breast"), ingredient("broccoli")], requires_halal=True)
+    assert [item.display_name for item in safe] == ["chicken breast (only as a Halal-marked product)", "broccoli"]
+    plain = filter_safe_substitutes([ingredient("chicken_breast")])
+    assert [item.display_name for item in plain] == ["chicken breast"]

@@ -47,6 +47,14 @@ class HouseholdProfileRepository:
     def keep_plan_shape(self, plan_shape: dict) -> HouseholdProfile | None:
         """A new profile version that differs only in its meals and dishes (ADR-0046: a change made in
         the conversation becomes the household's usual shape when they say so)."""
+        return self._next_version({"plan_shape": plan_shape, "meal_composition": None})
+
+    def keep_requires_halal(self) -> HouseholdProfile | None:
+        """A new profile version that differs only in being halal (ADR-0104: a halal week asked for in the
+        conversation becomes the household's usual one when they say so)."""
+        return self._next_version({"requires_halal": True})
+
+    def _next_version(self, changes: dict) -> HouseholdProfile | None:
         profile = self.get_current()
         if profile is None:
             return None
@@ -57,12 +65,7 @@ class HouseholdProfileRepository:
             if column.key not in {"id", "profile_id", "version", "created_at"}
         }
         profile.current_version += 1
-        profile.versions.append(
-            HouseholdProfileVersion(
-                **{**copied, "plan_shape": plan_shape, "meal_composition": None},
-                version=profile.current_version,
-            )
-        )
+        profile.versions.append(HouseholdProfileVersion(**{**copied, **changes}, version=profile.current_version))
         self.session.commit()
         return self.get(profile.id)
 
@@ -156,4 +159,5 @@ class HouseholdProfileRepository:
             missing_basics=list(payload.missing_basics) or None,
             nutrition_limits=[limit.model_dump(mode="json") for limit in payload.nutrition_limits] or None,
             missing_equipment=list(payload.missing_equipment) or None,
+            requires_halal=payload.requires_halal,
         )

@@ -34,9 +34,9 @@ onMounted(load);
         </NuxtLink>
         <!-- The week happens on the home surface; these pages lead back to it and to each other. -->
         <nav class="primary-nav" aria-label="Primary navigation">
-          <NuxtLink to="/">Back to my week</NuxtLink>
+          <NuxtLink to="/">Back to my plan</NuxtLink>
           <NuxtLink to="/browse">Recipes</NuxtLink>
-          <NuxtLink to="/history">Past weeks</NuxtLink>
+          <NuxtLink to="/history">Past plans</NuxtLink>
           <button v-if="actor" class="nav-auth" type="button" @click="logout">
             Sign out {{ actor.user.display_name }}
           </button>
