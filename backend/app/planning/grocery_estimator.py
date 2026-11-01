@@ -14,6 +14,7 @@ from app.planning.household_slots import assumed_basics
 from app.planning.retailers import SECOND_STORES, retailer_of, store_products
 from app.schemas.product import GroceryEstimateResponse, GroceryLineEstimate, PriceEvidence, ProductResponse
 from app.schemas.recommendation import AvailableIngredientInput, RecipeRecommendationRequest
+from app.schemas.retrieval import RetrievalTrace
 from app.services.product import ProductSearchService
 
 
@@ -296,13 +297,22 @@ def _second_store_choice(
         return choice
     products = [_release_product(item, source=store) for item in entry["products"]]
     query, trace = entry["products"][0].get("query"), None
+    traces: dict[str, RetrievalTrace] = {}
     if live:
-        search = product_service.search(query, live=True, limit=live_limit, retailer=store)
-        trace = search.retrieval
-        if search.warning:
-            choice.warnings.append(search.warning)
-        current = {item.external_id: item for item in search.items}
-        products = [
+        # Each query the reviewed products were captured with ("gochugaru", then "korean chili powder"): one query's
+        # page shows only some of them. A product no search returns is gone from the shelf.
+        current, failed = {}, False
+        for asked in dict.fromkeys(item.get("query") or query for item in entry["products"]):
+            search = product_service.search(asked, live=True, limit=live_limit, retailer=store)
+            failed |= search.retrieval.status in ("degraded", "unavailable")
+            if search.warning:
+                choice.warnings.append(search.warning)
+            for item in search.items:
+                current.setdefault(item.external_id, item)
+                traces.setdefault(item.external_id, search.retrieval)
+            if all(product.external_id in current for product in products):
+                break
+        refreshed = [
             product.model_copy(
                 update={
                     key: getattr(current[product.external_id], key)
@@ -312,13 +322,20 @@ def _second_store_choice(
             for product in products
             if product.external_id in current
         ]
-        if not products:
-            choice.warnings.append(
-                f"Live {label} search did not return a reviewed product for {ingredient_display_name}."
-            )
+        if not refreshed and failed:
+            # The store could not be read (a failure, a challenge): its reviewed prices of the snapshot date stand in,
+            # so the line is not filled from a later store the earlier one may still stock (ADR-0110).
+            choice.warnings.append(f"{label} could not be read live; its reviewed snapshot prices were used.")
+        else:
+            products = refreshed
+            if not products:
+                choice.warnings.append(
+                    f"Live {label} search did not return a reviewed product for {ingredient_display_name}."
+                )
     grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
     choice.product = _cheapest_in_stock(products, grams)
     if choice.product is not None:
+        trace = traces.get(choice.product.external_id)
         choice.evidence = (
             price_evidence(choice.product, mode=trace.mode, query=trace.query, parser_version=trace.parser_version)
             if trace is not None

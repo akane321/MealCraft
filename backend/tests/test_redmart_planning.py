@@ -11,7 +11,7 @@ from app.planning.retailers import SECOND_STORES, fairprice_only, retailer_of, s
 from app.products.provider import ProductProviderError
 from app.retrieval.evidence import grocery_packet
 from app.schemas.product import ProductResponse
-from app.services.product import LIVE_FAILURE_LIMIT, LIVE_LOOKUP_BUDGET, ProductSearchService
+from app.services.product import LIVE_LOOKUP_BUDGET, REDMART_FAILURE_LIMIT, ProductSearchService
 
 FETCHED = "2026-11-01T00:00:00+00:00"
 
@@ -293,9 +293,10 @@ def test_redmart_has_its_own_lookup_budget_and_failure_count() -> None:
     assert service.search("fresh query", live=True).provider_used == "fairprice"
     assert service.search("fresh query", live=True, retailer="cold_storage").items
 
+    # RedMart is asked nothing more after its first failure (ADR-0110 item 2), where the other stores allow three.
     failing, providers, _ = live_service(redmart_fails=True)
     responses = [failing.search(f"query {number}", live=True, retailer="redmart") for number in range(6)]
-    assert len(providers["redmart"].calls) == LIVE_FAILURE_LIMIT
+    assert len(providers["redmart"].calls) == REDMART_FAILURE_LIMIT == 1
     assert all(response.items == [] and response.fallback_used for response in responses)
     assert "not asked again" in responses[-1].warning
     assert failing.search("other query", live=True, retailer="cold_storage").items
@@ -331,6 +332,35 @@ def test_a_live_choice_refreshes_the_reviewed_redmart_products_with_a_limit_of_4
     missing = choose(service=live_service()[0], live=True)
     assert missing.product is None
     assert any("RedMart search did not return a reviewed product" in warning for warning in missing.warnings)
+
+
+def test_a_live_choice_searches_each_query_the_reviewed_products_were_captured_with(stores) -> None:
+    """Gochugaru's products came from "gochugaru" (page 2) and "korean chili powder": the first query's page alone
+    returned none of them, and the line went to a later store although RedMart stocks it."""
+    _, _, redmart = stores
+    first, second = entry("rm-7", 9.0)["products"][0], entry("rm-2", 9.0)["products"][0]
+    redmart["flour"] = {"status": "mapped", "products": [first, {**second, "query": "korean chili powder"}]}
+    service, providers, _ = live_service()
+
+    choice = choose(service=service, live=True)
+
+    assert providers["redmart"].calls == ["query rm 7", "korean chili powder"]
+    assert choice.product.external_id == "rm-2" and choice.product.price_sgd == 3.0
+    assert choice.evidence.mode == "live"
+
+
+def test_a_failed_live_search_keeps_the_reviewed_snapshot_price_and_no_later_store_fills_it(stores) -> None:
+    """A store that cannot be read is not a store that has nothing: its reviewed prices of the snapshot date stand in
+    (ADR-0110: live RedMart prices fail closed to the snapshot price)."""
+    _, _, redmart = stores
+    redmart["flour"] = entry("rm-2", 9.0)
+    service, providers, _ = live_service(redmart_fails=True)
+
+    choice = choose(service=service, live=True)
+
+    assert providers["redmart"].calls == ["query rm 2"]
+    assert (choice.product.external_id, choice.product.price_sgd, choice.evidence.mode) == ("rm-2", 9.0, "snapshot")
+    assert any("could not be read live" in warning for warning in choice.warnings)
 
 
 def test_a_live_choice_tries_redmart_after_cold_storage_found_nothing_reviewed(stores) -> None:

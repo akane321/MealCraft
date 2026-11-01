@@ -50,6 +50,9 @@ def create_product_search_service(repository: ProductSnapshotRepository) -> "Pro
 # or sample prices, and say so. These two limit the requests sent to the retailer's site, not the wait, and stay.
 LIVE_LOOKUP_BUDGET = 60
 LIVE_FAILURE_LIMIT = 3
+# RedMart is asked nothing more after its first failure (a non-200, a challenge, a redirect): Lazada's terms restrict
+# robots, and the owner accepted that risk only within this stop (Knowledge ADR-0110 item 2, docs/design/redmart.md).
+REDMART_FAILURE_LIMIT = 1
 # How long one basket's final price check waits for the retailer before the lines it has not heard back on keep
 # their snapshot prices. 10 s, not 3: a slow site still gives the household its real prices (owner, 2026-10-22).
 FINAL_PRICE_SECONDS = 10.0
@@ -67,6 +70,7 @@ class _LiveStore:
     label: str
     cache_ttl_minutes: int
     parser_version: str
+    failure_limit: int = LIVE_FAILURE_LIMIT
     lookups: int = 0
     failures_in_a_row: int = 0
 
@@ -105,6 +109,7 @@ class ProductSearchService:
                 "RedMart",
                 cache_ttl_minutes if redmart_cache_ttl_minutes is None else redmart_cache_ttl_minutes,
                 REDMART_PARSER_VERSION,
+                REDMART_FAILURE_LIMIT,
             ),
         }
 
@@ -344,7 +349,7 @@ class ProductSearchService:
         try:
             if store.provider is None:
                 raise ProductProviderError(f"{store.label} is not set up for live lookups")
-            if store.failures_in_a_row >= LIVE_FAILURE_LIMIT:
+            if store.failures_in_a_row >= store.failure_limit:
                 raise ProductProviderError(
                     f"{store.label} failed {store.failures_in_a_row} times in a row; not asked again this time"
                 )

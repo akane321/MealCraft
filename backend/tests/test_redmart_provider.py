@@ -11,6 +11,14 @@ from app.products.redmart import RedMartProductProvider
 PAGES = repository_root() / "data/fixtures/redmart-pages"
 
 
+@pytest.fixture(autouse=True)
+def waits(monkeypatch: pytest.MonkeyPatch) -> list[float]:
+    """The spacing waits a search asked for, none of them slept."""
+    asked: list[float] = []
+    monkeypatch.setattr("app.products.redmart.sleep", asked.append)
+    return asked
+
+
 def provider() -> RedMartProductProvider:
     return RedMartProductProvider(base_url="https://www.lazada.sg/", timeout_seconds=5)
 
@@ -89,6 +97,23 @@ def test_a_name_with_a_count_is_flagged_and_one_without_a_size_is_unknown() -> N
 
     assert counted.package_warning == "count_package"
     assert (unsized.package_size, unsized.package_warning) == (None, "unknown_package")
+
+
+@pytest.mark.parametrize(
+    ("name", "size"),
+    [
+        ("[EXTRA 50G] NESCAFE Gold Pure Soluble Coffee 200g", 250),  # the shared parser read the bracket: 50 g
+        ("[FREE 50G] Moccona Classic Medium Roast 200g", 250),
+        ("Milo 3 in 1 200g x 3", 600),  # the shared parser missed the count: 200 g
+        ("Jus-Rol 2 Puff Pastry Sheets 2 X 320G [640G] - Frozen", 640),
+        ("Puff Pastry [640G]", 640),
+        ("RedMart Ground Coffee 250G", 250),
+    ],
+)
+def test_a_pack_size_counts_bonus_contents_and_a_count_after_the_size(name: str, size: float) -> None:
+    (product,) = provider().parse_page(listing(item(name=name)), limit=10)
+
+    assert (product.package_size, product.package_unit) == (size, "g")
 
 
 def test_halal_in_a_name_is_never_trusted() -> None:
@@ -177,6 +202,19 @@ def test_search_asks_for_the_ajax_endpoint_with_the_apps_own_user_agent(monkeypa
         "agent": "MealCraft/0.1 academic prototype",
         "timeout": 2,
     }
+
+
+def test_searches_are_a_second_apart(monkeypatch: pytest.MonkeyPatch, waits: list[float]) -> None:
+    """At most one request a second (ADR-0110 item 2), counted from the end of the last one."""
+    clock = iter([100.0, 100.0, 100.25, 100.5, 102.0, 102.0])
+    monkeypatch.setattr("app.products.redmart.monotonic", lambda: next(clock))
+    monkeypatch.setattr("app.products.redmart._last_request", [float("-inf")])
+    monkeypatch.setattr("app.products.redmart.urlopen", lambda request, timeout: Response(page("empty.json")))
+
+    for query in ("dill", "chervil", "sorrel"):
+        provider().search(query, limit=5)
+
+    assert waits == [0.0, 0.75, 0.0]
 
 
 def test_a_non_200_answer_is_an_unavailable_provider(monkeypatch: pytest.MonkeyPatch) -> None:

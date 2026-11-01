@@ -1,12 +1,17 @@
 import json
+import re
 from datetime import UTC, datetime
+from threading import Lock
+from time import monotonic, sleep
 from urllib.error import HTTPError
 from urllib.parse import quote, urlencode, urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from app.products.provider import (
+    MULTIPACK_PATTERN,
     ProductProviderError,
     ProductSchemaDriftError,
+    _to_base_unit,
     normalize_search_text,
     parse_package_size,
 )
@@ -16,6 +21,17 @@ PARSER_VERSION = "redmart-ajax-v1"
 REDMART_SELLER_ID = "1000008313"
 # Words of Lazada's bot check and login pages (docs/design/redmart.md): such a page is never read as a result.
 BLOCK_MARKERS = ("punish", "captcha", "x5sec")
+# At most one request a second, across every search of the process (Knowledge ADR-0110 item 2).
+REQUEST_SPACING_SECONDS = 1.0
+_spacing = Lock()
+_last_request = [float("-inf")]
+# Bracketed offers and totals in a RedMart name: "[EXTRA 50G]" and "[FREE 50G]" are bonus contents, "[640G]" a total.
+BRACKETED = re.compile(r"\[[^\]]*\]")
+BONUS = re.compile(r"\[\s*(?:extra|free)\s+(?P<size>\d+(?:\.\d+)?)\s*(?P<unit>kg|g|ml|l)\s*\]", re.IGNORECASE)
+# "Milo 200g x 3": the count after the size, which the shared parser does not read.
+TRAILING_MULTIPACK = re.compile(
+    r"(?P<size>\d+(?:\.\d+)?)\s*(?P<unit>kg|g|gm|ml|l)\s*[xX]\s*(?P<count>\d+)\b", re.IGNORECASE
+)
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -52,8 +68,13 @@ class RedMartProductProvider:
         )
         try:
             timeout = self.timeout_seconds if timeout_seconds is None else min(self.timeout_seconds, timeout_seconds)
-            with urlopen(request, timeout=timeout) as response:  # noqa: S310
-                body = response.read().decode("utf-8")
+            with _spacing:  # one request at a time, each a second after the last
+                sleep(max(0.0, _last_request[0] + REQUEST_SPACING_SECONDS - monotonic()))
+                try:
+                    with urlopen(request, timeout=timeout) as response:  # noqa: S310
+                        body = response.read().decode("utf-8")
+                finally:
+                    _last_request[0] = monotonic()
         except HTTPError as error:
             # A redirect is not followed: one to a login page is a stop before that page is fetched.
             location = error.headers.get("Location", "") if error.headers else ""
@@ -101,7 +122,7 @@ class RedMartProductProvider:
         if not isinstance(in_stock, bool):
             return None
 
-        package_size, package_unit = parse_package_size(name)
+        package_size, package_unit = pack_size(name)
         image, brand = record.get("image"), record.get("brandName")
         return ProductResponse(
             external_id=external_id,
@@ -124,6 +145,27 @@ class RedMartProductProvider:
                 "unknown_package" if package_size is None else "count_package" if package_unit == "whole" else None
             ),
         )
+
+
+def pack_size(name: str) -> tuple[float | None, str | None]:
+    """The pack size in a RedMart name: "[EXTRA 50G] NESCAFE Gold 200g" is 250 g, "Milo 200g x 3" is 600 g.
+
+    The shared parser read the first bracket ("[EXTRA 50G]" as 50 g) and missed a count after the size; it stays as it
+    is, since FairPrice's names are read with it.
+    """
+    text = BRACKETED.sub(" ", name)
+    trailing = None if MULTIPACK_PATTERN.search(text) else TRAILING_MULTIPACK.search(text)
+    if trailing:
+        size, unit = _to_base_unit(float(trailing.group("size")) * int(trailing.group("count")), trailing.group("unit"))
+    else:
+        size, unit = parse_package_size(text)
+    if size is None:
+        return parse_package_size(name)  # only a bracket gives the size ("Puff Pastry [640G]")
+    for bonus in BONUS.finditer(name):
+        extra, extra_unit = _to_base_unit(float(bonus.group("size")), bonus.group("unit"))
+        if extra_unit == unit:
+            size += extra
+    return size, unit
 
 
 def is_redmart(record: dict) -> bool:
