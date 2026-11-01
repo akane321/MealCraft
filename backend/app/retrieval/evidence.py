@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 
 from app.orchestration.contracts import EvidenceFact, GroundingReport, ResponseClaim
 from app.orchestration.grounding import verify_structured_claims
+from app.planning.retailers import retailer_of
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse
 from app.schemas.product import GroceryEstimateResponse
 from app.schemas.retrieval import (
@@ -26,7 +27,7 @@ Estimate = WeeklyGroceryEstimateResponse | GroceryEstimateResponse
 def grocery_packet(estimate: Estimate, *, generated_at: datetime | None = None) -> RetrievalEvidencePacket:
     items = [
         RetrievalEvidenceItem(
-            source="fairprice",
+            source=line.retailer or retailer_of(line.product),
             external_id=line.product.external_id,
             title=line.product.name,
             url=line.product.product_url,

@@ -8,11 +8,12 @@ never written to the output. No question text, gold or provenance is accepted: u
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
 from collections.abc import Iterable
-from typing import Literal
+from typing import Literal, get_args
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 Category = Literal["planning", "intent", "multi_turn", "adversarial"]
 Language = Literal["zh", "en"]
@@ -32,6 +33,49 @@ class CaseOutcome(BaseModel):
     source: Source
     status: Status
     voided: bool = False
+    binary_metrics: dict[str, bool] = Field(default_factory=dict)
+    continuous_metrics: dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("binary_metrics", "continuous_metrics")
+    @classmethod
+    def _metric_names(cls, value: dict) -> dict:
+        if any(not name or not all(character.isalnum() or character in "_.-" for character in name) for name in value):
+            raise ValueError("metric names use only letters, numbers, dot, underscore and hyphen")
+        return value
+
+    @field_validator("continuous_metrics")
+    @classmethod
+    def _finite_metrics(cls, value: dict[str, float]) -> dict[str, float]:
+        if any(not math.isfinite(metric) for metric in value.values()):
+            raise ValueError("continuous metrics must be finite")
+        return value
+
+
+class ExpectedManifest(BaseModel):
+    """Aggregate counts the sealed side expects, so an omission shared by every system and run is caught.
+
+    Counts only: no case reference or text. `cells` maps "category|language|source" to the declared number of cases in
+    it, voided ones included; `voided` is the declared number of voided cases in the whole set.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    systems: list[str] = Field(min_length=1)
+    runs: int = Field(ge=1)
+    cells: dict[str, int] = Field(min_length=1)
+    voided: int = Field(ge=0)
+
+    @field_validator("cells")
+    @classmethod
+    def _cells(cls, value: dict[str, int]) -> dict[str, int]:
+        categories, languages, sources = (set(get_args(t)) for t in (Category, Language, Source))
+        for key, count in value.items():
+            parts = key.split("|")
+            if len(parts) != 3 or parts[0] not in categories or parts[1] not in languages or parts[2] not in sources:
+                raise ValueError("a cell is written category|language|source with the known labels")
+            if count < 1:
+                raise ValueError("a cell holds at least one case")
+        return value
 
 
 def _counts(rows: list[CaseOutcome]) -> dict:
@@ -87,11 +131,31 @@ def _validate(records: list[CaseOutcome]) -> None:
         raise ValueError("every system and run must cover the same cases; use status 'missing' for no output")
 
 
-def aggregate(records: Iterable[CaseOutcome]) -> dict:
+def _check_manifest(records: list[CaseOutcome], expected: ExpectedManifest) -> None:
+    if {r.system_id for r in records} != set(expected.systems):
+        raise ValueError("the systems in the records differ from the expected systems")
+    for system_id in expected.systems:
+        if {r.run for r in records if r.system_id == system_id} != set(range(1, expected.runs + 1)):
+            raise ValueError("the runs of a system differ from the expected runs")
+    cells: dict[str, set[str]] = defaultdict(set)
+    voided: set[str] = set()
+    for r in records:
+        cells[f"{r.category}|{r.language}|{r.source}"].add(r.case_ref)
+        if r.voided:
+            voided.add(r.case_ref)
+    if {k: len(v) for k, v in cells.items()} != expected.cells:
+        raise ValueError("the cells in the records differ from the expected cells")
+    if len(voided) != expected.voided:
+        raise ValueError("the number of voided cases differs from the expected number")
+
+
+def aggregate(records: Iterable[CaseOutcome], expected: ExpectedManifest | None = None) -> dict:
     records = list(records)
     if not records:
         raise ValueError("no outcomes")
     _validate(records)
+    if expected is not None:
+        _check_manifest(records, expected)
     by_system: dict[str, dict[int, list[CaseOutcome]]] = defaultdict(lambda: defaultdict(list))
     for r in records:
         by_system[r.system_id][r.run].append(r)

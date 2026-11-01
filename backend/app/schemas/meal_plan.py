@@ -8,6 +8,7 @@ from app.core.clock import today as local_today
 from app.data import meal_structure
 from app.schemas.catalog_tags import FeedbackKind
 from app.schemas.display import ShownTitle
+from app.schemas.fairprice_cart import FairPriceCartState
 from app.schemas.household_rules import HouseholdPlanning, PlanningPreferences
 from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.schemas.planning_v2 import MealComposition, real_meal_roles
@@ -221,6 +222,8 @@ class WeeklyMealPlanResponse(BaseModel):
     created_at: datetime
     # The meals and dishes this week plans, including changes made in the conversation (ADR-0046).
     plan_shape: MealPlanShape | None = None
+    # What was put in the household's FairPrice cart, by shopping trip; None before anything was sent.
+    fairprice_cart: FairPriceCartState | None = None
 
 
 class WeeklyMealPlanListItem(BaseModel):
@@ -231,13 +234,15 @@ class WeeklyMealPlanListItem(BaseModel):
     replaces_plan_id: int | None
     start_date: date
     end_date: date
+    day_count: int
     household_size: int
     purchase_total_sgd: float
     consumed_total_sgd: float | None
     within_weekly_budget: bool | None
     created_at: datetime
-    # The newest plan for its dates. False when a newer plan covers any of its days: the household
-    # planned again before this week ended, so that plan replaced this one.
+    # The newest plan for its dates. False when newer plans together cover every (date, meal) of it: the household
+    # planned again before this plan ended, so that plan replaced this one. A dinner planned again inside a week
+    # leaves the week current.
     current: bool
 
 
@@ -287,6 +292,7 @@ class WeeklyNutritionDashboardResponse(BaseModel):
     revision: int
     start_date: date
     end_date: date
+    day_count: int
     household_size: int
     completion_rate: float
     status_counts: MealPlanStatusCounts

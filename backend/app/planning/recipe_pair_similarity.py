@@ -41,6 +41,12 @@ def _preparation(title: str) -> str | None:
         "balls",
         "parcels",
         "stuffed",
+        "noodle",
+        "noodles",
+        "vermicelli",
+        "burger",
+        "omelette",
+        "pudding",
     }:
         return "fried_rice"
     return None

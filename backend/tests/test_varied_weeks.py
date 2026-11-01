@@ -513,7 +513,7 @@ def test_a_heavy_week_varies_every_start_whatever_the_clock_says(product, monkey
     plans.generate(three_meals(100.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))
     assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
-    request = three_meals(200.0)
+    request = three_meals(150.0)
     recipes, found = plans._candidates(request)
     course = {recipe.id: recipe.course for recipe in recipes}
     main = next(r.recipe.slug for r in found.recommendations if course.get(r.recipe.id) == "main")

@@ -53,5 +53,6 @@ def product_input(product: ProductResponse, *, ingredient_id: str, required_unit
         package_unit=source.package_unit,
         price_sgd=source.price_sgd,
         available=source.in_stock,
+        halal_certified=source.halal_certified,
     )
     return ProductInputResult(option, source, ())
