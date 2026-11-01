@@ -8,6 +8,7 @@ never written to the output. No question text, gold or provenance is accepted: u
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
 from collections.abc import Iterable
 from typing import Literal, get_args
@@ -32,6 +33,22 @@ class CaseOutcome(BaseModel):
     source: Source
     status: Status
     voided: bool = False
+    binary_metrics: dict[str, bool] = Field(default_factory=dict)
+    continuous_metrics: dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("binary_metrics", "continuous_metrics")
+    @classmethod
+    def _metric_names(cls, value: dict) -> dict:
+        if any(not name or not all(character.isalnum() or character in "_.-" for character in name) for name in value):
+            raise ValueError("metric names use only letters, numbers, dot, underscore and hyphen")
+        return value
+
+    @field_validator("continuous_metrics")
+    @classmethod
+    def _finite_metrics(cls, value: dict[str, float]) -> dict[str, float]:
+        if any(not math.isfinite(metric) for metric in value.values()):
+            raise ValueError("continuous metrics must be finite")
+        return value
 
 
 class ExpectedManifest(BaseModel):

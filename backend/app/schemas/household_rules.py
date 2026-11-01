@@ -20,6 +20,8 @@ AgeBand = Literal["toddler", "child", "teen", "adult", "senior"]
 Sex = Literal["female", "male"]
 ActivityLevel = Literal["low", "moderate", "high"]
 PersonalGoal = Literal["fat_loss", "muscle_gain"]
+# Room for every basic in data/ingredients/basic-seasonings-v2.json (164 at the owner decision of 2026-10-29).
+MAX_MISSING_BASICS = 200
 Weekday = Literal["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 # household_profile_versions.missing_equipment: equipment the household says it lacks; NULL or [] lacks none.
@@ -114,8 +116,9 @@ class HouseholdPlanning(BaseModel):
     members: list[PlanningMember] | None = Field(default=None, min_length=1, max_length=12)
     presence_rules: list[PresenceRule] = Field(default_factory=list, max_length=20)
     cooking_time_rules: list[CookingTimeRule] = Field(default_factory=list, max_length=20)
-    # Basic seasonings the household has run out of: bought and priced as any ingredient.
-    missing_basics: list[str] = Field(default_factory=list, max_length=20)
+    # Basics (seasonings, rice, flours and the like) the household has run out of: bought and priced as any
+    # ingredient.
+    missing_basics: list[str] = Field(default_factory=list, max_length=MAX_MISSING_BASICS)
     # Each limit's max_value resolved (a profile's None is its members' HPB limit) before planning.
     nutrition_limits: list[NutritionLimit] = Field(default_factory=list, max_length=1)
     # A member's muscle-gain goal: protein-rich dishes rank higher.

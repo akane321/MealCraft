@@ -115,6 +115,22 @@ const members = ref<MemberForm[]>([newMember(1)]);
 const presenceRules = ref<PresenceRule[]>([]);
 const timeRules = ref<CookingTimeRule[]>([]);
 const missingBasics = ref<string[]>([]);
+// The run-out picker: the basics grouped by category, each group collapsed until opened or until a filter names it.
+const basicsFilter = ref("");
+const basicGroups = computed(() => {
+  const words = basicsFilter.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const basics = reference.value?.basics ?? [];
+  return (reference.value?.basic_categories ?? [])
+    .map((category) => {
+      const all = basics.filter(basic => basic.category === category.id);
+      const shown = all.filter((basic) => {
+        const name = `${basic.display_name} ${basic.normalized_name.replaceAll("_", " ")}`.toLowerCase();
+        return words.every(word => name.includes(word));
+      });
+      return { ...category, total: all.length, shown, marked: all.filter(basic => missingBasics.value.includes(basic.normalized_name)).length };
+    })
+    .filter(group => group.shown.length);
+});
 const sodiumLimitOn = ref(false);
 const sodiumLimitMg = ref<number | null>(null); // empty: the HPB limit
 const pantryItems = ref<AvailableIngredientInput[]>([
@@ -125,6 +141,8 @@ const saveNotice = ref<string | null>(null);
 const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
 // Equipment the kitchen lacks (layer 08): a dish that needs it is never planned. Empty: all at home.
 const missingEquipment = ref<Equipment[]>([]);
+// The whole household eats halal (ADR-0104): one switch, never per member.
+const requiresHalal = ref(false);
 // Days a plan covers (1 to 14); longer than a week shops twice, before day 1 and day 8 (ADR-0072).
 const dayCount = ref(7);
 const DAY_OPTIONS = Array.from({ length: 14 }, (_, index) => index + 1);
@@ -252,6 +270,7 @@ function hydrateFromCurrent() {
   timeRules.value = (version.cooking_time_rules ?? []).map(rule => ({ ...rule }));
   missingBasics.value = [...(version.missing_basics ?? [])];
   missingEquipment.value = [...(version.missing_equipment ?? [])];
+  requiresHalal.value = version.requires_halal ?? false;
   const sodium = (version.nutrition_limits ?? []).find(limit => limit.nutrient === "sodium_mg");
   sodiumLimitOn.value = Boolean(sodium);
   sodiumLimitMg.value = sodium?.max_value ?? null;
@@ -320,6 +339,7 @@ function buildPayload(): HouseholdProfileInput {
     cooking_time_rules: timeRules.value,
     missing_basics: missingBasics.value,
     missing_equipment: missingEquipment.value,
+    requires_halal: requiresHalal.value,
     nutrition_limits: sodiumLimitOn.value
       ? [{ nutrient: "sodium_mg", scope: "per_day", max_value: toOptionalNumber(sodiumLimitMg.value) }]
       : [],
@@ -383,6 +403,11 @@ onMounted(async () => {
           <span>Household name</span>
           <input v-model="form.name" type="text" maxlength="120" required>
         </label>
+
+        <div class="halal-switch">
+          <label class="choice-card plain"><input v-model="requiresHalal" type="checkbox" role="switch"><span>Halal household</span></label>
+          <p class="field-help">Only halal dishes; meat only from products FairPrice marks Halal.</p>
+        </div>
 
         <div class="profile-section-heading member-heading">
           <div>
@@ -565,19 +590,27 @@ onMounted(async () => {
         </section>
 
         <section v-if="reference?.basics.length" class="profile-form-section">
-          <p class="form-kicker">Basics at home</p>
-          <h2>Salt, oil, soy sauce and the like</h2>
-          <p class="field-help">We assume these are in your kitchen and leave them off the shopping list. Tick any you've run out of, and they're bought and priced again.</p>
+          <p class="form-kicker">At home</p>
+          <h2>Salt, rice, spices, sauces, flour and the like</h2>
+          <p class="field-help">We assume these are in your kitchen and leave them off the shopping list. Open a group and tick anything you've run out of, and it's bought and priced again.</p>
           <div class="member-constraint-group">
-            <p>Run out of</p>
-            <div class="choice-grid">
-              <label v-for="basic in reference.basics" :key="basic.normalized_name" class="choice-card plain">
-                <input v-model="missingBasics" type="checkbox" :value="basic.normalized_name">
-                <span>{{ basic.display_name }}<small v-if="basic.allergens.length"> · contains {{ basic.allergens.map(allergenLabel).join(", ") }}</small></span>
-              </label>
-            </div>
+            <p>Run out of <span class="basics-count">{{ missingBasics.length ? `${missingBasics.length} marked` : "none marked" }}</span></p>
+            <input v-model="basicsFilter" class="basics-filter" type="search" placeholder="Find an item, e.g. ketchup or cumin" aria-label="Find an item at home" autocomplete="off" @keydown.enter.prevent>
+            <p v-if="!basicGroups.length" class="field-help">Nothing matches that.</p>
+            <details v-for="group in basicGroups" :key="group.id" class="basics-group" :open="basicsFilter.trim() !== ''">
+              <summary>
+                <span>{{ group.label }}</span>
+                <small>{{ group.marked ? `${group.marked} marked · ` : "" }}{{ group.total }} items</small>
+              </summary>
+              <div class="choice-grid">
+                <label v-for="basic in group.shown" :key="basic.normalized_name" class="choice-card plain">
+                  <input v-model="missingBasics" type="checkbox" :value="basic.normalized_name">
+                  <span>{{ basic.display_name }}<small v-if="basic.allergens.length"> · contains {{ basic.allergens.map(allergenLabel).join(", ") }}</small></span>
+                </label>
+              </div>
+            </details>
           </div>
-          <p class="field-help basics-safety">Allergen checks still apply to basics: a dish with soy sauce is never planned for a soy allergy.</p>
+          <p class="field-help basics-safety">Allergen checks still apply to everything here: a dish with soy sauce is never planned for a soy allergy.</p>
         </section>
 
         <section class="profile-form-section">
@@ -624,6 +657,7 @@ onMounted(async () => {
         <section class="profile-summary-card">
           <p class="form-kicker">At the table</p>
           <h2>{{ formatPortions(homePortions) }} {{ homePortions === 1 ? "portion" : "portions" }} a meal</h2>
+          <span v-if="current?.current.requires_halal" class="version-badge halal-chip">Halal</span>
           <p>An allergen is left out for everyone, unless someone marks it "only I avoid it". A diet and the foods someone won't eat are that person's own: every meal still gives each person a main dish, a staple and a vegetable they can eat. Meals with someone away or a guest over are cooked for who's home.</p>
           <dl v-if="current" class="profile-summary-list">
             <div><dt>Whole household avoids</dt><dd>{{ current.current.allergens.join(", ") || "None" }}</dd></div>
@@ -681,6 +715,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.halal-switch { display: grid; justify-items: start; gap: 6px; margin-top: 16px; }
+.halal-chip { display: inline-block; margin-bottom: 8px; }
 .never-list { margin: 14px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
 .never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 650; }
 .never-list span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -695,5 +731,11 @@ onMounted(async () => {
 .sodium-limit > .choice-card { justify-self: start; }
 .sodium-field { max-width: 320px; }
 .basics-safety { margin-top: 12px; }
+.basics-count { margin-left: 6px; color: var(--muted); font-weight: 500; }
+.basics-filter { width: 100%; max-width: 360px; margin-bottom: 10px; }
+.basics-group { border-top: 1px solid var(--border); padding-block: 8px; }
+.basics-group:last-of-type { border-bottom: 1px solid var(--border); }
+.basics-group > summary { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; cursor: pointer; font-weight: 650; }
+.basics-group > .choice-grid { margin-top: 10px; }
 .plan-when { display: grid; gap: 12px; }
 </style>

@@ -47,7 +47,7 @@ function kcal(event: MealPlanReplanEvent) {
   </div>
   <details v-if="applied.length" class="changes">
     <summary>
-      <span>Changes this week</span>
+      <span>Changes</span>
       <span class="count">{{ applied.length }}</span>
     </summary>
     <ol>

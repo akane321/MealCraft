@@ -15,6 +15,7 @@ from app.data.catalog import CATALOG_REFRESH_MARKER
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition
 from app.planning.grocery_estimator import priceable_ingredients
 from app.planning.recipe_quality import incomplete
+from app.planning.retailers import is_fairprice_only
 from app.schemas.planning_v2 import DishCourse
 
 logger = logging.getLogger(__name__)
@@ -256,7 +257,8 @@ class RecipeRepository:
         """
         wanted = set(courses or MEAL_COURSES)
         seconds = get_settings().planning_pool_cache_seconds
-        if not seconds or not wanted <= POOL_COURSES:
+        # The cached pool is the product's (both stores); a FairPrice-only caller (the frozen evaluation) loads its own.
+        if not seconds or not wanted <= POOL_COURSES or is_fairprice_only():
             return self._load_for_planning(self.session, courses, household_id=self.household_id)
         bind = self.session.get_bind()
         cached = _planning_pool.get(id(bind))

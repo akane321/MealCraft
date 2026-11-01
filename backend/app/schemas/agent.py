@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer
 from pydantic.json_schema import SkipJsonSchema
 
 from app.orchestration.contracts import (
@@ -15,6 +15,7 @@ from app.orchestration.contracts import (
 )
 from app.schemas.household_rules import HouseholdPlanning, PlanningPreferences
 from app.schemas.meal_plan import (
+    MEAL_ORDER,
     MealPlanEventType,
     MealPlanReplanEventResponse,
     MealPlanShape,
@@ -92,6 +93,23 @@ class AgentConstraintExtraction(BaseModel):
             "when they state it (at most twice is 2). Null when the message says nothing about repeating."
         ),
     )
+    plan_day_count: int | None = Field(
+        default=None,
+        ge=1,
+        le=14,
+        description=(
+            "How many days the plan covers, only when the user asks for fewer than a week or for a stated number "
+            "of days: tomorrow's dinner, tonight, today is 1; this weekend is 2; the next 3 days, 接下来三天 is 3. "
+            "At most 14. Null when the message does not say how many days (the plan then covers the week)."
+        ),
+    )
+    plan_meals: list[Literal["breakfast", "lunch", "dinner"]] | None = Field(
+        default=None,
+        description=(
+            "Which meals of each day to plan, only when the user names them for this plan: dinner tonight, "
+            "tomorrow's dinner, dinners only, 只要晚餐 is [dinner]. Null when the message does not narrow the meals."
+        ),
+    )
     medical_request_detected: bool = False
     assistant_summary: str | None = None
     # Filled by the server, never by the model: words the household used that match no
@@ -99,6 +117,12 @@ class AgentConstraintExtraction(BaseModel):
     unmatched_terms: list[str] = Field(default_factory=list)
     # Server-only as well, and left out of the schema the model fills (SkipJsonSchema).
     unmatched_suggestions: SkipJsonSchema[list[UnmatchedTermSuggestion]] = Field(default_factory=list)
+
+    @field_validator("plan_meals")
+    @classmethod
+    def _meals_in_order(cls, meals):
+        # Each meal once, in the order they are eaten; none left is no narrowing.
+        return [meal for meal in MEAL_ORDER if meal in (meals or ())] or None
 
 
 class AgentConstraintState(BaseModel):
@@ -126,6 +150,14 @@ class AgentConstraintState(BaseModel):
     # The week's first day: what the request said ("next week", "from Wednesday"), else today or tomorrow
     # (agent/plan_dates.py). A day already past by the time the week is planned becomes today.
     start_date: date | None = None
+    # How many days the plan covers (1 to 14): fewer than a week for "dinner tonight", "this weekend", "the next 3
+    # days" (agent/plan_dates.py). Left out of the dump when 7, like the household key (and the two fields below).
+    day_count: int = Field(default=7, ge=1, le=14)
+    # The weekly budget before it is pro-rated to a plan of fewer days or meals (saved, or stated per week):
+    # every change of days or meals pro-rates from it, and a week restores it. None until a short plan needs it.
+    base_weekly_budget_sgd: float | None = None
+    # The household's meals while a plan names fewer of them (plan_shape then holds only those): a week restores it.
+    usual_plan_shape: MealPlanShape | None = None
     # The saved household's members, rules and limits (layer 08); a size the conversation states replaces its
     # members and who is home. None: a conversation with no saved household.
     household: HouseholdPlanning | None = None
@@ -134,6 +166,11 @@ class AgentConstraintState(BaseModel):
     def _no_household_key(self, handler):
         # Without a household block a state dumps as before the field existed (digests, stored checkpoints).
         data = handler(self)
+        if self.day_count == 7 and isinstance(data, dict):
+            data.pop("day_count", None)
+        for field in ("base_weekly_budget_sgd", "usual_plan_shape"):
+            if getattr(self, field) is None and isinstance(data, dict):
+                data.pop(field, None)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
         if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
@@ -147,7 +184,7 @@ class AgentReplanDraft(BaseModel):
     event_type: MealPlanEventType | None = None
     entry_id: int | None = Field(default=None, gt=0)
     # The day named so far, kept when that day holds several dishes and the dish is still to be asked.
-    day_index: int | None = Field(default=None, ge=1, le=7)
+    day_index: int | None = Field(default=None, ge=1, le=14)
     unavailable_ingredient: str | None = None
     reason: str | None = None
     # A lock of a whole named meal ("don't change Monday's dinner"): every dish of the entry's meal.

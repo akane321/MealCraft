@@ -1,0 +1,215 @@
+{
+ "seed": 20261031,
+ "drawn_at": "2026-10-31T08:51:00+00:00",
+ "reviewed_at": "2026-10-31T12:17:19+00:00",
+ "reviewer": "owner",
+ "sampled": 40,
+ "verdicts_recorded": 40,
+ "results": {
+  "accepted": 33,
+  "corrected": 3,
+  "uncertain": 4
+ },
+ "verdicts": [
+  {
+   "ingredient_id": "ING_ASIAN_PEAR",
+   "verdict": "uncertain",
+   "note": "Golden Pear 为1unit；Fragrant Pear 标题/规格写1s，但URL含6s且主图是多果盒。不能确认200g是否对应整销售单位；250g/200g也均非标注净重。先核实第二款包装数量，再决定整包克数。"
+  },
+  {
+   "ingredient_id": "ING_BANANA_KETCHUP",
+   "verdict": "accepted",
+   "note": "banana ketchup/sauce/catsup 与 Jufran 等已采集查询未命中。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_BISCUIT_DOUGH",
+   "verdict": "accepted",
+   "note": "冷藏饼干面团、Pillsbury 等采集查询未命中，不用其他烘焙成品代替。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_CALAMANSI",
+   "verdict": "accepted",
+   "note": "返回调味金枪鱼及即饮果汁，不是目标鲜果或已核实可烹调原汁。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_CHIPPED_BEEF",
+   "verdict": "corrected",
+   "note": "网页确认是 Bresaola 意式风干牛肉，100g、S$12.95。原提议自己注明 stands in for，是替代购买而非已证明同一 chipped beef；不应以恰好0.60的置信度自动放行。需专门替代审批，否则撤回映射。"
+  },
+  {
+   "ingredient_id": "ING_CLAM_JUICE",
+   "verdict": "accepted",
+   "note": "蛤蜊汁相关查询未命中，seafood stock 返回的是明太鱼汤料，不是蛤蜊汁。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_COLESLAW",
+   "verdict": "accepted",
+   "note": "候选为 coleslaw dressing，不是已做好的卷心菜沙拉，采集的成品或混合菜查询未命中。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_COLESLAW_MIX",
+   "verdict": "accepted",
+   "note": "返回生菜类混合菜及沙拉酱，没有适配的卷心菜胡萝卜切丝混合物；不能用整颗菜直接当已加工混合包。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_CREPE",
+   "verdict": "accepted",
+   "note": "返回迷你 blini 厚松饼，不是薄可丽饼皮。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_CRYSTALLIZED_GINGER",
+   "verdict": "accepted",
+   "note": "糖渍姜相关查询未命中，stem ginger 返回姜味燕麦饼干，不是糖渍姜原料。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_DILL_SEED",
+   "verdict": "accepted",
+   "note": "采集的 dill seed/spice/whole seed 等查询均未命中；莳萝叶也不等于莳萝籽。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_FISH_OIL",
+   "verdict": "accepted",
+   "note": "采集返回胶囊补充剂及鱼罐头，不是本目录拟购买的液体食用鱼油。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_GRAVY",
+   "verdict": "accepted",
+   "note": "候选有宠物食品、粉状颗粒及风味浓缩汁，不是目录的成品肉汁；没有可核实复水得率时不按粉重当成品重。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_HABANERO_PEPPER",
+   "verdict": "corrected",
+   "note": "两页是红、绿 Chilli Padi，不是 habanero 或 Scotch bonnet，不能仅因都辣就自动互换。应撤回此原料映射或另走明确替代流程；本行0.50低于导出门槛，目前运行时快照未采用。"
+  },
+  {
+   "ingredient_id": "ING_HALLOUMI",
+   "verdict": "accepted",
+   "note": "实页为 Lemnos Haloumi 180g，当前显示售价S$6.90，品类和包装相符；旁边其他划线价不当成交价。"
+  },
+  {
+   "ingredient_id": "ING_HAZELNUT",
+   "verdict": "accepted",
+   "note": "返回的已保存候选为巧克力、酱、饼干、饮料或谷物制品。hazelnut总结果73但只保存首30，不能据此证明全站无原味榛子。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_JICAMA",
+   "verdict": "accepted",
+   "note": "jicama、bangkwang、bengkuang、yam bean 等已采集查询未返回适配商品。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_LIME_ZEST",
+   "verdict": "uncertain",
+   "note": "网页只确认整青柠260g与150g，不确认每包16g/12g果皮。每包约4/3果、每果4g均为估计；缺少实际计数或得率核查。本行0.55低于导出门槛，运行时快照未采用。"
+  },
+  {
+   "ingredient_id": "ING_MINCEMEAT",
+   "verdict": "accepted",
+   "note": "果馅、品牌和 Christmas mincemeat 等已采集查询未命中，不是新鲜绞肉。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_ORANGE_ZEST",
+   "verdict": "uncertain",
+   "note": "网站确认整橙1只或800g，不直接销售6g或24g橙皮。买整橙取皮可行，但每果6g、800g约4果是未核实的得率假设，不能记为包装标注重量；先确认可用于采购核算的得率口径。"
+  },
+  {
+   "ingredient_id": "ING_PANCETTA",
+   "verdict": "accepted",
+   "note": "实页为 Smokin Bros Mild Pancetta 100g，S$11.95，品类与包装相符。本结论不确认其清真或具体营养值。"
+  },
+  {
+   "ingredient_id": "ING_PANCIT_CANTON",
+   "verdict": "accepted",
+   "note": "返回附辣味调料包的方便面，不是目录的普通干面条；不应按整包重量冒充纯面条重量。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_PATE",
+   "verdict": "uncertain",
+   "note": "Foie Pate 的网页明确为肝酱；Campagne Pate 只说明乡村肉酱，未列完整配料，无法确认同属目录肝酱。两项均100g、S$7.95，但不能把其中一项的证据覆盖另一项。"
+  },
+  {
+   "ingredient_id": "ING_PERILLA",
+   "verdict": "accepted",
+   "note": "shiso、perilla、kkaennip 等采集查询未命中，不能用普通其他香草补上。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_PIE_CRUST",
+   "verdict": "accepted",
+   "note": "pie crust、pie shell、tart shell、shortcrust pastry 等采集查询未命中。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_RABBIT",
+   "verdict": "accepted",
+   "note": "返回 White Rabbit 糖果与品牌饮料，没有适配兔肉，不能只按 rabbit 词匹配。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_RANCH_DRESSING",
+   "verdict": "accepted",
+   "note": "两页均为 ranch dressing，250ml/S$9.80、473ml/S$10.70。242g/457g是约0.97g/ml估计，非标示克重。Hidden Valley 实页标 Sold Out，仍须排除缺货项；接受身份不代表验证品牌配方营养等同。"
+  },
+  {
+   "ingredient_id": "ING_RANCH_MIX",
+   "verdict": "accepted",
+   "note": "只命中瓶装 ranch dressing，不是干调味粉，不能跨干湿形态套用整包克数。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_RHUBARB",
+   "verdict": "accepted",
+   "note": "返回的是大黄糖果与甜品，不是原料大黄茎。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_RICE_CAKE",
+   "verdict": "accepted",
+   "note": "三页均为原味待烹调韩式年糕，500g、500g、650g，各S$5.75，品类和包装相符。未确认完整配方、过敏原或清真认证。"
+  },
+  {
+   "ingredient_id": "ING_ROTEL",
+   "verdict": "accepted",
+   "note": "已采集的 rotel 和番茄绿辣椒组合查询未命中；普通罐装番茄不自动等于这类混合配方。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_SINIGANG_MIX",
+   "verdict": "accepted",
+   "note": "采集的 sinigang、Knorr、tamarind soup mix 等查询未命中。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_SOUR_MILK",
+   "verdict": "accepted",
+   "note": "目录明确 sour milk 或 buttermilk；网页为 Dairy Farmers Buttermilk 600ml、S$6.05。612g属于约1.02g/ml的已注明密度换算，不是网站打印的净克重。"
+  },
+  {
+   "ingredient_id": "ING_SPELT",
+   "verdict": "accepted",
+   "note": "命中 spelt flour，但目标是原粒斯佩尔特小麦，不应把面粉当原粒。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_TAPAI",
+   "verdict": "accepted",
+   "note": "tapai、tape ketan 等采集查询未命中，其他发酵物也不能无条件替代。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_THAI_BASIL",
+   "verdict": "accepted",
+   "note": "返回干罗勒，不是鲜泰国罗勒，不能跨品种和鲜干形态直接等量匹配。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_TOMATO_SOUP",
+   "verdict": "accepted",
+   "note": "实页与罐身显示 Campbell’s Condensed Tomato Soup，303g、S$5.60，符合目录未稀释浓缩汤形态。不是把 ready-to-serve 汤按同重映射。"
+  },
+  {
+   "ingredient_id": "ING_VANILLA_WAFER",
+   "verdict": "corrected",
+   "note": "已目视包装，是长方形多层夹心无糖威化，150g、S$6.75；目标是 vanilla wafer cookies/Nilla型小饼干。不是同一商品形态，不能仅因同含 vanilla wafer 字样放行。"
+  },
+  {
+   "ingredient_id": "ING_WATER_CHESTNUT",
+   "verdict": "accepted",
+   "note": "命中荸荠饮料，不是鲜荸荠或荸荠罐头原料。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  },
+  {
+   "ingredient_id": "ING_WILD_RICE",
+   "verdict": "accepted",
+   "note": "wild rice 查询未命中；黑米、黑糯米及其制品不是菰米，不应混淆。 仅接受已保存查询/候选范围内的 unavailable，不是全站停售或已查遍库存的证明。"
+  }
+ ]
+}
