@@ -57,7 +57,8 @@ only when no other dish passes the checks, so the filter never refuses a swap
 the checks alone would allow. The out-of-stock ingredient filter, role and member
 coverage checks apply first, then the near preference, then the default
 variety cap, then the whole-week shopping check; a stated cap on uses always
-holds. Repetition penalties also count known near matches elsewhere in
+holds. Because the shopping check runs last, a dearer dish that is not near can
+be taken over a near dish that would have fitted the week budget. Repetition penalties also count known near matches elsewhere in
 the week. A pair with no vector is unknown: it is neither filtered nor
 penalised, so it does not prove that the replacement is different and the
 repetition penalty does not apply to it. This does not change the
