@@ -23,9 +23,14 @@ const chart = computed(() => {
   const done = cumulativeNutritionValues(props.dashboard.days, metric.value, "completed");
   const plan = cumulativeNutritionValues(props.dashboard.days, metric.value, "planned");
   const max = Math.max(...done, ...plan, 1);
+  const donePoints = chartPointCoordinates(done, 640, 180, 24, max);
+  const planPoints = chartPointCoordinates(plan, 640, 180, 24, max);
   return {
-    done: lineSegments(chartPointCoordinates(done, 640, 180, 24, max)),
-    plan: lineSegments(chartPointCoordinates(plan, 640, 180, 24, max)),
+    done: lineSegments(donePoints),
+    plan: lineSegments(planPoints),
+    // A one-dish plan has a single point and so no line: it is drawn as a dot.
+    doneDots: donePoints.length === 1 ? donePoints : [],
+    planDots: planPoints.length === 1 ? planPoints : [],
     max: Math.round(max),
   };
 });
@@ -56,7 +61,7 @@ useDialog(overlay, () => emit("close"));
     <section class="mc-ribbed panel">
       <header>
         <div>
-          <h2 class="mc-serif">Nutrition this week</h2>
+          <h2 class="mc-serif">Nutrition</h2>
           <p>Per person · cooked dishes count as actual · general guidance, not medical advice</p>
         </div>
         <button type="button" class="mc-pill close" aria-label="Close nutrition details" @click="emit('close')">
@@ -85,6 +90,8 @@ useDialog(overlay, () => emit("close"));
         <svg viewBox="0 0 640 180" role="img" :aria-label="`Cumulative ${definition.label}: cooked against the current plan`">
           <polyline v-for="(points, index) in chart.plan" :key="`p${index}`" :points="points" class="plan" />
           <polyline v-for="(points, index) in chart.done" :key="`d${index}`" :points="points" class="done" />
+          <circle v-for="(point, index) in chart.planDots" :key="`pd${index}`" :cx="point.x" :cy="point.y" r="5" class="plan-dot" />
+          <circle v-for="(point, index) in chart.doneDots" :key="`dd${index}`" :cx="point.x" :cy="point.y" r="4" class="done-dot" />
         </svg>
         <p class="legend"><span><i class="done" />Cooked</span><span><i class="plan" />Current plan</span></p>
       </figure>
@@ -140,6 +147,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .chart polyline { stroke-width: 2.5; }
 .chart .done { stroke: var(--mc-ivory); }
 .chart .plan { stroke: var(--mc-text-3); stroke-dasharray: 6 5; }
+.chart .plan-dot { fill: none; stroke: var(--mc-text-3); stroke-width: 2; }
+.chart .done-dot { fill: var(--mc-ivory); stroke: none; }
 .legend { margin: 0; display: flex; gap: 16px; font-size: 12px; color: var(--mc-text-3); }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 18px; height: 0; border-top: 2.5px solid var(--mc-ivory); }

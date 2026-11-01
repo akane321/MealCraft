@@ -11,11 +11,9 @@ const today = todayIsoDate();
 const week = computed(() => mealsByDay(props.days));
 const meals = computed(() => week.value.flatMap(day => day.meals));
 const dinnersOnly = computed(() => meals.value.every(meal => meal.mealType === "dinner"));
-const headline = computed(() => (dinnersOnly.value ? `${countWord(meals.value.length)} dinners` : `${countWord(meals.value.length)} meals`));
+const headline = computed(() => `${countWord(meals.value.length)} ${dinnersOnly.value ? "dinner" : "meal"}${meals.value.length === 1 ? "" : "s"}`);
 // A plan longer than a week shops twice (before day 1 and day 8).
 const shops = computed(() => (shoppingTrips(props.estimate) > 1 ? "two shops" : "one shop"));
-// Seven tiles a row; a plan longer than a week takes a second row.
-const columns = computed(() => Math.min(7, Math.max(1, week.value.length)));
 const eyebrow = computed(() => [props.rangeLabel, props.householdSize ? `${dinnersOnly.value ? "dinners" : "meals"} for ${props.householdSize}` : null].filter(Boolean).join(" · "));
 // Cooking time of a meal is its main dish's; nutrition per meal, or per day when a day has several.
 const avgCook = computed(() => Math.round(meals.value.reduce((sum, meal) => sum + meal.dishes[0]!.recipe.total_time_minutes, 0) / (meals.value.length || 1)));
@@ -42,7 +40,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
 </script>
 
 <template>
-  <section class="week-card mc-card" aria-label="Your week">
+  <section class="week-card mc-card" aria-label="Your plan">
     <div class="head">
       <div class="title">
         <span class="mc-label">{{ eyebrow }}</span>
@@ -55,7 +53,8 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
         <div v-if="!left" class="fig"><span class="k">{{ perPlateLabel }}</span><span class="v mc-num">{{ perPlate }} kcal</span></div>
       </div>
     </div>
-    <div class="strip" :style="{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }">
+    <!-- Seven tiles a row however short the plan (a one-day plan keeps a one-day tile); a longer plan takes a second row. -->
+    <div class="strip">
       <button
         v-for="day in week"
         :key="day.dayIndex"

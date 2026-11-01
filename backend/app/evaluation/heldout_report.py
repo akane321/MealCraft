@@ -8,6 +8,7 @@ never written to the output. No question text, gold or provenance is accepted: u
 from __future__ import annotations
 
 import json
+import math
 from collections import defaultdict
 from collections.abc import Iterable
 from typing import Literal, get_args
@@ -32,6 +33,22 @@ class CaseOutcome(BaseModel):
     source: Source
     status: Status
     voided: bool = False
+    binary_metrics: dict[str, bool] = Field(default_factory=dict)
+    continuous_metrics: dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("binary_metrics", "continuous_metrics")
+    @classmethod
+    def _metric_names(cls, value: dict) -> dict:
+        if any(not name or not all(character.isalnum() or character in "_.-" for character in name) for name in value):
+            raise ValueError("metric names use only letters, numbers, dot, underscore and hyphen")
+        return value
+
+    @field_validator("continuous_metrics")
+    @classmethod
+    def _finite_metrics(cls, value: dict[str, float]) -> dict[str, float]:
+        if any(not math.isfinite(metric) for metric in value.values()):
+            raise ValueError("continuous metrics must be finite")
+        return value
 
 
 class ExpectedManifest(BaseModel):
@@ -132,23 +149,33 @@ def _check_manifest(records: list[CaseOutcome], expected: ExpectedManifest) -> N
         raise ValueError("the number of voided cases differs from the expected number")
 
 
-def _withhold_small(system: dict, minimum: int) -> None:
-    """Withhold what could identify a question (ADR-0100 item 5, proposed).
+def _withhold_small(system: dict, minimum: int) -> dict:
+    """Withhold what could identify a question (ADR-0100 item 5).
 
-    A cell with fewer than `minimum` remaining cases hides its whole category's cell breakdown: the other cells of that
-    category would otherwise let a reader subtract the small cell from the category total. A total under the minimum
-    shows no figures. This lowers the risk of identifying a question; it is not a proof that none is possible.
+    Hiding one small cell is not enough while the language and source totals stay: a reader subtracts the cells that
+    remain from them. So when any category-language-source cell has fewer than `minimum` remaining cases, the system
+    gets no cross cells at all, only the one-dimensional totals and the overall total. A one-dimensional total under
+    the minimum is withheld too; when a dimension then has exactly one withheld value, the smallest other value of that
+    dimension goes with it, because the overall total minus the shown values would give the withheld one back. If the
+    overall total is under the minimum, only "withheld" is shown. A withheld value is replaced as a whole, so none of
+    its counts or rates is published. Voided cases do not count. This lowers the risk of identifying a question; it is
+    not a proof that none is possible, so the sealed side still reviews the real counts before a report leaves it.
     """
-    withheld = {}
-    for key, summary in system["cells"].items():
-        if summary["remaining_n"] < minimum:
-            withheld[key.split("|")[0]] = f"a cell has fewer than {minimum} remaining cases"
-    system["cells"] = {key: value for key, value in system["cells"].items() if key.split("|")[0] not in withheld}
+    small = f"fewer than {minimum} remaining cases"
+    if system["overall"]["remaining_n"] < minimum:
+        return {"overall": {"withheld": small}}
+    if any(summary["remaining_n"] < minimum for summary in system["cells"].values()):
+        system["cells"] = {"withheld": f"a cell has {small}"}
     for part in ("by_category", "by_language", "by_source"):
-        for name, summary in system[part].items():
-            if summary["remaining_n"] < minimum:
-                system[part][name] = {"withheld": f"fewer than {minimum} remaining cases"}
-    system["withheld_categories"] = dict(sorted(withheld.items()))
+        totals = system[part]
+        low = [name for name, summary in totals.items() if summary["remaining_n"] < minimum]
+        if len(low) == 1:
+            others = [name for name in totals if name != low[0]]
+            nearest = min(others, key=lambda name: (totals[name]["remaining_n"], name))
+            totals[nearest] = {"withheld": "withheld so the overall total cannot give back the small value beside it"}
+        for name in low:
+            totals[name] = {"withheld": small}
+    return system
 
 
 def aggregate(
@@ -183,7 +210,7 @@ def aggregate(
             "cells": group(runs, lambda r: f"{r.category}|{r.language}|{r.source}"),
         }
         if min_cell_n is not None:
-            _withhold_small(systems[system_id], min_cell_n)
+            systems[system_id] = _withhold_small(systems[system_id], min_cell_n)
     return {
         "note": "Counts only. Timeouts, errors and missing outputs stay in the denominator and are never successes.",
         "systems": systems,

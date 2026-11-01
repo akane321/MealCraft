@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -30,5 +30,6 @@ def search_products(
     live: bool = False,
     refresh: bool = False,
     limit: Annotated[int, Query(ge=1, le=20)] = 10,
+    retailer: Literal["fairprice", "cold_storage"] = "fairprice",
 ) -> ProductSearchResponse:
-    return service.search(q, live=live, refresh=refresh, limit=limit)
+    return service.search(q, live=live, refresh=refresh, limit=limit, retailer=retailer)

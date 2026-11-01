@@ -5,7 +5,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from app.evaluation.heldout_report import CaseOutcome, aggregate, render
+from app.evaluation.heldout_report import STATUSES, CaseOutcome, aggregate, render
 
 
 def outcome(case_ref="c1", system_id="s1", run=1, category="planning", language="en", source="authored", **extra):
@@ -201,7 +201,7 @@ def test_the_manifest_cannot_carry_case_identifiers_or_bad_labels():
         manifest(runs=0)
 
 
-# --- small cells: withheld when too few cases remain (ADR-0100 item 5, proposed) ---------------------------------
+# --- small cells: withheld when too few cases remain (ADR-0100 item 5) --------------------------------------------
 
 
 def cells_of(spec):
@@ -222,6 +222,66 @@ def cells_of(spec):
 
 
 BIG = ["success"] * 4 + ["failure"] * 2
+SMALL_TOTAL = {"withheld": "fewer than 5 remaining cases"}
+CELLS_WITHHELD = {"withheld": "a cell has fewer than 5 remaining cases"}
+COUNT_FIELDS = ("declared_n", "voided_n", "remaining_n", *(f"{s}_n" for s in STATUSES))
+
+
+def withheld_names(totals):
+    return [name for name, summary in totals.items() if "withheld" in summary]
+
+
+def consistent_values(system, keys, target, field):
+    """Every value `target` takes over whole-number cell tables, one entry per key, that agree with all the figures
+    `system` publishes for `field`. A single value means the published figures give the cell away."""
+    position = {"by_category": 0, "by_language": 1, "by_source": 2}
+    checks = [(lambda key: True, system["overall"][field])]
+    for part, index in position.items():
+        for name, summary in system[part].items():
+            if field in summary:
+                checks.append((lambda key, index=index, name=name: key.split("|")[index] == name, summary[field]))
+    for cell_key, summary in system["cells"].items():
+        if isinstance(summary, dict) and field in summary:
+            checks.append((lambda key, cell_key=cell_key: key == cell_key, summary[field]))
+
+    def tables(total, count):
+        if count == 1:
+            yield (total,)
+            return
+        for first in range(total + 1):
+            for rest in tables(total - first, count - 1):
+                yield (first, *rest)
+
+    values = set()
+    for table in tables(system["overall"][field], len(keys)):
+        cells = dict(zip(keys, table, strict=True))
+        if all(sum(v for key, v in cells.items() if member(key)) == total for member, total in checks):
+            values.add(cells[target])
+    return values
+
+
+def reviews_table():
+    """The review's invented counts: planning|en|authored 2, planning|zh|authored 30, intent|en|authored 20 and
+    intent|zh|authored 20 remaining cases, with every status and some voided cases in every cell."""
+    sizes = {
+        ("planning", "en"): (2, 3),
+        ("planning", "zh"): (30, 1),
+        ("intent", "en"): (20, 2),
+        ("intent", "zh"): (20, 4),
+    }
+    records = []
+    for (category, language), (remaining, voided) in sizes.items():
+        for i in range(remaining + voided):
+            records.append(
+                outcome(
+                    f"{category}-{language}-{i}",
+                    category=category,
+                    language=language,
+                    status=STATUSES[i % len(STATUSES)],
+                    voided=i >= remaining,
+                )
+            )
+    return records
 
 
 def test_without_a_minimum_nothing_is_withheld():
@@ -229,7 +289,7 @@ def test_without_a_minimum_nothing_is_withheld():
     assert "planning|en|authored" in report["systems"]["s1"]["cells"]
 
 
-def test_a_small_cell_withholds_the_whole_category_breakdown_not_only_itself():
+def test_a_small_cell_removes_every_cross_cell_and_keeps_only_the_totals():
     records = cells_of(
         {
             ("planning", "en", "authored"): ["success", "failure"],  # 2 remaining: below 5
@@ -238,25 +298,93 @@ def test_a_small_cell_withholds_the_whole_category_breakdown_not_only_itself():
         }
     )
     system = aggregate(records, min_cell_n=5)["systems"]["s1"]
-    # Showing the other planning cells beside the planning total would let a reader subtract the small cell out.
-    assert not any(key.startswith("planning|") for key in system["cells"])
-    assert "intent|en|authored" in system["cells"]
-    assert system["withheld_categories"] == {"planning": "a cell has fewer than 5 remaining cases"}
+    # The other cells beside the totals would let a reader subtract the small cell out, so none is shown.
+    assert system["cells"] == CELLS_WITHHELD
+    assert system["overall"]["remaining_n"] == 14
     assert system["by_category"]["planning"]["remaining_n"] == 8
+    assert system["by_language"]["en"]["remaining_n"] == 8
+    assert system["by_source"]["authored"]["remaining_n"] == 14
+
+
+def test_the_reviews_table_cannot_be_subtracted_back_to_the_small_cell():
+    records = reviews_table()
+    keys = ["planning|en|authored", "planning|zh|authored", "intent|en|authored", "intent|zh|authored"]
+    plain = aggregate(records)["systems"]["s1"]
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    assert system["cells"] == CELLS_WITHHELD
+    assert system["by_language"]["en"]["remaining_n"] == 22  # still published, as the review found
+    for field in COUNT_FIELDS:
+        true_value = plain["cells"]["planning|en|authored"][field]
+        # control: with the cells shown the published figures do give the small cell away
+        assert consistent_values(plain, keys, "planning|en|authored", field) == {true_value}
+        # with the rule, many different small cells fit the published figures, the real one among them
+        possible = consistent_values(system, keys, "planning|en|authored", field)
+        assert true_value in possible and len(possible) > 1, field
+
+
+def test_without_a_small_cell_the_report_is_unchanged():
+    records = cells_of({("planning", "en", "authored"): BIG, ("intent", "zh", "forum"): BIG})
+    assert aggregate(records, min_cell_n=5) == aggregate(records)
+
+
+def test_one_withheld_total_takes_the_smallest_other_value_of_its_dimension_with_it():
+    records = cells_of(
+        {
+            ("planning", "en", "authored"): ["success", "failure"],  # 2 remaining: below 5
+            ("intent", "en", "authored"): ["success"] * 20,
+            ("multi_turn", "zh", "authored"): ["success"] * 10,
+            ("adversarial", "zh", "authored"): ["success"] * 15,
+        }
+    )
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    by_category = system["by_category"]
+    # The overall total minus intent and adversarial would be planning plus multi_turn, not planning alone.
+    assert withheld_names(by_category) == ["multi_turn", "planning"]
+    assert by_category["planning"] == SMALL_TOTAL
+    assert by_category["multi_turn"] != SMALL_TOTAL
+    assert by_category["intent"]["remaining_n"] == 20
+    assert by_category["adversarial"]["remaining_n"] == 15
+    assert system["overall"]["remaining_n"] == 47
+    assert withheld_names(system["by_language"]) == []
+    assert withheld_names(system["by_source"]) == []
+
+
+def test_a_tie_for_the_smallest_other_value_goes_to_the_first_name():
+    records = cells_of(
+        {
+            ("planning", "en", "authored"): ["success", "failure"],
+            ("intent", "en", "authored"): ["success"] * 10,
+            ("multi_turn", "zh", "authored"): ["success"] * 10,
+            ("adversarial", "zh", "authored"): ["success"] * 15,
+        }
+    )
+    assert withheld_names(aggregate(records, min_cell_n=5)["systems"]["s1"]["by_category"]) == ["intent", "planning"]
+
+
+def test_two_withheld_totals_in_one_dimension_need_no_neighbour():
+    records = cells_of(
+        {
+            ("planning", "en", "authored"): ["success", "failure"],
+            ("intent", "zh", "authored"): ["success"] * 3,
+            ("multi_turn", "en", "authored"): ["success"] * 10,
+            ("adversarial", "zh", "authored"): ["success"] * 15,
+        }
+    )
+    by_category = aggregate(records, min_cell_n=5)["systems"]["s1"]["by_category"]
+    assert withheld_names(by_category) == ["intent", "planning"]
+    assert by_category["multi_turn"]["remaining_n"] == 10
+
+
+def test_a_small_overall_total_shows_only_withheld():
+    records = cells_of({("planning", "en", "authored"): ["success", "success", "failure"]})
+    assert aggregate(records, min_cell_n=5)["systems"]["s1"] == {"overall": SMALL_TOTAL}
 
 
 def test_voided_cases_do_not_count_towards_the_minimum():
     records = [outcome(f"c{i}", voided=i < 3) for i in range(6)]  # 6 declared, 3 voided, 3 remaining
-    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
-    assert system["cells"] == {}
-
-
-def test_a_small_total_is_withheld_too():
-    records = cells_of({("planning", "en", "authored"): ["success"] * 3, ("intent", "zh", "forum"): BIG})
-    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
-    assert system["by_category"]["planning"] == {"withheld": "fewer than 5 remaining cases"}
-    assert system["by_category"]["intent"]["remaining_n"] == 6
-    assert "success_rate" in system["overall"]
+    assert aggregate(records, min_cell_n=5)["systems"]["s1"] == {"overall": SMALL_TOTAL}
+    # exactly the minimum is enough: only fewer than it is withheld
+    assert cell(aggregate(records, min_cell_n=3))["remaining_n"] == 3
 
 
 def test_withheld_output_carries_no_counts_of_the_small_cell():
@@ -266,6 +394,6 @@ def test_withheld_output_carries_no_counts_of_the_small_cell():
 
 
 def test_the_minimum_must_be_a_positive_whole_number():
-    for bad in (0, -1):
+    for bad in (0, -1, True):
         with pytest.raises(ValueError, match="minimum"):
             aggregate(cells_of({("planning", "en", "authored"): BIG}), min_cell_n=bad)
