@@ -703,7 +703,7 @@ class WeeklyMealPlanService:
     ) -> OperationRun:
         # The sources the planner priced with, and FairPrice where it priced the saved list (`final_list`). Only the
         # provider is added: a line FairPrice did not confirm keeps its evidence label (release_snapshot), which is
-        # no provider, and with it "fairprice,fixture,release_snapshot" overflows provider_mode's String(30).
+        # no provider. Every product source joined fits provider_mode's String(64) (migration 0034).
         checked = {"fairprice"} & set(trace.get("final_list", {}).get("price_sources", []))
         sources = {*trace.get("observed_sources", []), *checked}
         return OperationRun(

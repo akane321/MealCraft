@@ -27,7 +27,8 @@ Estimate = WeeklyGroceryEstimateResponse | GroceryEstimateResponse
 def grocery_packet(estimate: Estimate, *, generated_at: datetime | None = None) -> RetrievalEvidencePacket:
     items = [
         RetrievalEvidenceItem(
-            source=line.retailer or retailer_of(line.product),
+            # A hand-recorded price is a person's observation, whatever platform it was read from (its url).
+            source="manual" if line.product.source == "manual" else line.retailer or retailer_of(line.product),
             external_id=line.product.external_id,
             title=line.product.name,
             url=line.product.product_url,

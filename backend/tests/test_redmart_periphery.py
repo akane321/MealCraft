@@ -165,3 +165,19 @@ def test_the_product_search_route_passes_redmart(monkeypatch):
     finally:
         app.dependency_overrides.pop(get_product_search_service)
     assert [options["retailer"] for options in asked] == ["redmart"]
+
+
+def test_every_product_source_joined_fits_the_saved_provider_mode() -> None:
+    """A planning run saves the sources it priced with, joined (`WeeklyMealPlanService._operation_run`); with RedMart
+    and the hand-recorded prices the longest is 45 characters, past the String(30) PostgreSQL enforced."""
+    from typing import get_args
+
+    from app.models.agent import AgentToolExecution
+    from app.models.platform import OperationRun
+    from app.schemas.product import ProductSource
+
+    longest = ",".join(sorted(get_args(ProductSource)))
+
+    assert longest == "cold_storage,fairprice,fixture,manual,redmart"
+    for model in (OperationRun, AgentToolExecution):
+        assert len(longest) <= model.__table__.c.provider_mode.type.length

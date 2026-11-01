@@ -9,6 +9,9 @@ RetrievalMode = Literal["live", "cache", "fixture"]
 RetrievalStatus = Literal["success", "no_match", "degraded", "unavailable"]
 RetrievalProvider = Literal["fairprice", "cold_storage", "redmart", "youtube", "fixture"]
 ExternalSource = Literal["fairprice", "cold_storage", "redmart", "youtube"]
+# Where an evidence item's observation is from: a source MealCraft reads, or a price a person recorded by hand
+# (docs/design/manual-prices.md), whose platform is a fact of the item, not its source.
+EvidenceSource = Literal[ExternalSource, "manual"]
 
 
 class RetrievalTrace(BaseModel):
@@ -29,7 +32,7 @@ class RetrievalTrace(BaseModel):
 class RetrievalEvidenceItem(BaseModel):
     """A typed item for future RAG packets; it is evidence, not a model answer."""
 
-    source: ExternalSource
+    source: EvidenceSource
     external_id: str
     title: str
     url: str

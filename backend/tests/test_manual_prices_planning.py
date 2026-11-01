@@ -106,6 +106,31 @@ def test_a_line_is_bought_where_it_was_recorded_and_says_so(stores, manual) -> N
     assert line("agar", choose("agar").product).retailer == "other"
 
 
+def test_a_hand_recorded_line_goes_into_the_evidence_packet_the_agent_saves(stores, manual) -> None:  # noqa: F811
+    """A line priced from Shopee, Lazada, Amazon or another site is evidence a person recorded: the packet that
+    confirming a plan saves (`AgentSessionService._grocery_evidence`) refused every platform but RedMart."""
+    from types import SimpleNamespace
+
+    from app.retrieval.evidence import grocery_packet
+    from app.services.agent import AgentSessionService
+
+    lines = []
+    for number, platform in enumerate(("shopee", "lazada", "amazon", "other", "redmart"), start=1):
+        name = f"item{number}"
+        manual[name] = manual_entry(f"mn-{number}-1", 2.0, platform)
+        choice = choose(name)
+        lines.append(line(name, choice.product).model_copy(update={"evidence": choice.evidence}))
+    total = round(sum(line.purchase_cost_sgd for line in lines), 2)
+    estimate = SimpleNamespace(items=lines, pricing_mode="snapshot", purchase_total_sgd=total)
+
+    packet = grocery_packet(estimate)
+    evidence = AgentSessionService._grocery_evidence(estimate)
+
+    assert [line.retailer for line in lines] == ["shopee", "lazada", "amazon", "other", "redmart"]
+    assert {item.source for item in packet.items} == {"manual"}
+    assert (evidence["items"], evidence["modes"], evidence["unsupported_claims"]) == (5, ["snapshot"], [])
+
+
 def test_a_hand_recorded_price_is_never_searched_live(stores, manual) -> None:  # noqa: F811
     manual["flour"] = manual_entry("mn-1-1", 4.0)
 
