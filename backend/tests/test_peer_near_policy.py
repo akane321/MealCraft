@@ -33,6 +33,24 @@ def test_shared_preparation_requires_both_titles_and_rejects_other_forms():
         assert index.compare("slug:0", other).shared_preparation is None
 
 
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Stir-Fried Rice Noodles",
+        "Fried Rice Noodles With Beef",
+        "Fried Rice Vermicelli",
+        "Fried Rice Burger",
+        "Fried Rice Omelette",
+        "Fried Rice Pudding",
+    ],
+)
+def test_other_dishes_made_with_fried_rice_are_not_the_fried_rice_preparation(title):
+    from app.planning.recipe_pair_similarity import _preparation
+
+    assert _preparation(title) is None
+    assert _preparation("Chicken Fried Rice") == "fried_rice"
+
+
 def test_original_policy_does_not_implicitly_use_preparation_threshold():
     signals = RecipePairSignals(0.5, 0.3, 0.65, "available", "fried_rice")
     assert classify(signals, NearDuplicatePolicy("old", 0.2, 0.05, 0.7)) == "distinct"

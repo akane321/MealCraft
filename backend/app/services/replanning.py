@@ -845,8 +845,7 @@ class MealPlanReplanningService:
                     "under the current hard constraints."
                 )
             raise MealPlanReplanValidationError(
-                f"No different dish from {shown_title(entry.recipe.title)} satisfies the current constraints "
-                "and near-duplicate check."
+                f"No dish other than {shown_title(entry.recipe.title)} satisfies the current hard constraints."
             )
 
         # The same dish position on the neighbouring days, so a swap does not repeat them.
@@ -956,18 +955,6 @@ class MealPlanReplanningService:
             # release's "tofu, firm, cubed"), as this household would cook the dish.
             gone = same_food(unavailable)
             candidates = [item for item in candidates if not uses(recipes_by_id[item.recipe.id], constraints, gone)]
-        # Exclude near dishes before choosing the default repeat-cap fallback.
-        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
-        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
-        diversity = SwapDiversity(list(evidence_recipes.values()))
-        same_meal = {
-            item.recipe_id
-            for item in plan.entries
-            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
-        } | {entry.recipe_id}
-        candidates = [
-            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
-        ]
         if self._slot_members(constraints, entry):
             # Every meal, composed or not: a swap may not leave a member at the table with nothing to eat
             # (ADR-0071 section 1). `_meal_still_holds` only runs for a dish of a composed meal, so a one-dish
@@ -993,12 +980,29 @@ class MealPlanReplanningService:
         fitting = [item for item in candidates if entry.meal_type in meal_affinity(recipes_by_id[item.recipe.id])]
         candidates = fitting or candidates
         served, limit = self._repeat_limit(plan, entry, constraints)
-        if limit is None:
+        explicit = constraints.max_uses_per_recipe is not None
+        if limit is not None and explicit:
+            # A stated cap always holds, so it narrows the pool before any preference below.
+            candidates = [item for item in candidates if served[dish_family(item.recipe.title)] < limit]
+        # A dish near the one it replaces or near one the meal keeps comes only when no other dish can take the place:
+        # a preference, never a refusal, so every swap the checks above allow stays possible.
+        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
+        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
+        diversity = SwapDiversity(list(evidence_recipes.values()))
+        same_meal = {
+            item.recipe_id
+            for item in plan.entries
+            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+        } | {entry.recipe_id}
+        candidates = [
+            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
+        ] or candidates
+        if limit is None or explicit:
             return candidates
-        # A stated cap always holds. Otherwise a dish comes more often than the week allows only when no other dish
-        # can take the place at all, whatever the budget (2026-10-26: Malaysian Fried Noodles a third time).
+        # Otherwise a dish comes more often than the week allows only when no other dish can take the place at all,
+        # whatever the budget (2026-10-26: Malaysian Fried Noodles a third time).
         within = [item for item in candidates if served[dish_family(item.recipe.title)] < limit]
-        return within if within or constraints.max_uses_per_recipe is not None else candidates
+        return within or candidates
 
     @staticmethod
     def _repeat_limit(plan: MealPlan, entry: MealPlanEntry, constraints) -> tuple[Counter, int | None]:
