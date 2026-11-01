@@ -1,7 +1,7 @@
 # Prices recorded by hand
 
 The last fill layer. After FairPrice, Cold Storage and RedMart, an ingredient none of them prices may have a price
-that a person recorded from an online platform, such as Shopee, Lazada or Amazon. Source: the owner, 2026-11-01
+that a person recorded from an online platform, such as Shopee, Lazada or Amazon. Source: the owner, 2026-10-31
 (Knowledge ADR-0110, which this extends). Lazada blocked the RedMart capture after about 60 requests, so the
 remaining gap is filled by hand, and the list groups these lines by platform.
 

@@ -6,13 +6,13 @@ in-stock product for the line, and never because it is cheaper. Sources:
 - Knowledge ADR-0072 section 1 (other retailers fill gaps, the same flow);
 - ADR-0109 (mappings confirmed as FairPrice's; coverage by ingredient; the evaluation takes the second stores in at
   the 11-07 freeze);
-- ADR-0110 (owner, 2026-11-01): add an online platform to reach 90%, with RedMart chosen and the risk of Lazada's
+- ADR-0110 (owner, 2026-10-31): add an online platform to reach 90%, with RedMart chosen and the risk of Lazada's
   terms accepted.
 
 The machinery is Cold Storage's (`docs/design/cold-storage.md`), generalised from one second store to an ordered
 list.
 
-## The site (observed 2026-11-01)
+## The site (observed 2026-10-31)
 
 - **Search.** `GET https://www.lazada.sg/tag/<slug>/?ajax=true&q=<query>&page=<n>` returns JSON. The front end
   calls it itself, and it needs no login.
