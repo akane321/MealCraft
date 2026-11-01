@@ -32,7 +32,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from app.data.halal import recipe_halal_status
 from app.evaluation.common_output import CommonEpisodeResponse, ShoppingLine
+from app.evaluation.halal_scoring import bought_certified, line_problem
 from app.planning.vegetable_led import row_vegetable_led, vegetable_role
 
 CheckOutcome = Literal["passed", "failed", "indeterminate", "not_applicable"]
@@ -519,6 +521,9 @@ def _check_hard_constraints(
         )
     )
 
+    if gold.get("halal_required"):
+        checks.append(_check_halal(present, response))
+
     limit = gold.get("max_cooking_time_minutes")
     if limit is None:
         checks.append(Check("cooking_time_respected", "not_applicable", "no stated time limit"))
@@ -550,6 +555,34 @@ def _check_hard_constraints(
     checks.append(_check_nutrition(gold, recipes, tolerances.nutrition_relative))
     checks.append(_check_repetition(gold, response, catalogs))
     return checks
+
+
+def _check_halal(recipes: list[dict], response: CommonEpisodeResponse) -> Check:
+    """A halal household's plan: every dish halal, and each line that needs certification bought as a certified product.
+
+    A recipe's status takes all its lines (as the planner does); a purchase is needed only for a line with a
+    quantity. Only the Shopping List shows what was bought, so an uncertified or unlisted line fails, a pantry
+    basic that needs certification (soy sauce, vinegar) included: a halal household has no such basic at home."""
+    assert response.plan is not None
+    certified = bought_certified((line.ingredient_id, line.product_id) for line in response.plan.shopping)
+    hits = []
+    for recipe in recipes:
+        status = recipe_halal_status([item["ingredient"] for item in recipe["ingredients"]])
+        if status in {"not_halal", "uncertain"}:
+            hits.append(f"{recipe['slug']}: {status}")
+            continue
+        hits += [
+            f"{recipe['slug']}:{item['ingredient']} ({why})"
+            for item in recipe["ingredients"]
+            if float(item["quantity"]) > 0 and (why := line_problem(item["ingredient"], certified))
+        ]
+    return Check(
+        "halal_respected",
+        "failed" if hits else "passed",
+        "; ".join(sorted(set(hits)))
+        if hits
+        else "every dish is halal and every line that needs certification is a certified product",
+    )
 
 
 def _check_repetition(gold: dict, response: CommonEpisodeResponse, catalogs: Catalogs) -> Check:

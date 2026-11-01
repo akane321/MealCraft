@@ -63,6 +63,7 @@ class LiveAnswer(BaseModel):
     repetition: LiveRepetition | None = None
     clarification_fields: list[str] = Field(default_factory=list)
     conflict: str | None = None
+    requires_halal: bool = False
     dishes: list[LiveDish] = Field(default_factory=list)
 
 
@@ -191,6 +192,7 @@ below. Rules:
   its number ("our usual budget", "keep it to the normal time") has not given it: put that field
   in clarification_fields and plan nothing. Do not treat it as "no limit".
   Asking about something you were already told is an error.
+- requires_halal: true when the request or the profile asks for halal food (including 清真), otherwise false.
 - conflict: one sentence if the request cannot be met as stated, otherwise null.
 - Leave `dishes` empty.
 
@@ -206,7 +208,8 @@ with the slot_id from the week, the role_id from the household's meal_compositio
 when the profile states no composition), and the recipe_id of a candidate. Fill every required
 role of every slot. Respect what the household asked: allergens, excluded ingredients, diet, the
 per-meal time limit, the weekly grocery budget (whole packages are bought, so overshoot costs
-money), and anything said about repeating.
+money), and anything said about repeating. Set requires_halal when the request or the profile asks
+for halal food (including 清真); then choose only halal dishes.
 
 If the request cannot be met, leave `dishes` empty and give the conflict. If you cannot plan
 without an answer, leave `dishes` empty and name the clarification fields from {fields}.

@@ -50,17 +50,22 @@ adds overhead and does not enter product traces, scores or stopping rules.
 ### Replacement near-dish checks
 
 `planning/swap_diversity.py` supplies separate recipe-pair evidence for
-`ReplanningService._select_replacement`. Known near matches to the replaced
-dish or another retained dish in the same meal are excluded. Repetition
-penalties also count known near matches elsewhere in the week. Existing
-eligibility, role, member coverage and whole-week shopping checks still apply.
-Missing vectors remain unknown and retain the existing eligibility behavior;
-they do not prove that the replacement is different. This does not change the
+`ReplanningService._select_replacement`. A replacement that is a known near
+match to the replaced dish or to another retained dish in the same meal is
+only a fallback: dishes that are not near come first, and a near dish is taken
+only when no other dish passes the checks, so the filter never refuses a swap
+the checks alone would allow. The out-of-stock ingredient filter, role and member
+coverage checks apply first, then the near preference, then the default
+variety cap, then the whole-week shopping check; a stated cap on uses always
+holds. Repetition penalties also count known near matches elsewhere in
+the week. A pair with no vector is unknown: it is neither filtered nor
+penalised, so it does not prove that the replacement is different and the
+repetition penalty does not apply to it. This does not change the
 product improvement objective or its `dish_kind` grouping (ADR-0089).
 
 The explicit developer policy combines title and ingredient overlap with
 vector cosine. A lower cosine threshold applies only when both titles name
-fried rice, excluding titles that indicate soup, cakes or other listed forms.
+fried rice, excluding titles that indicate soup, cakes, noodles, burgers or other listed forms.
 The policy and thresholds live in `SWAP_POLICY`; this title cue is not a
 general understanding of cooking methods. Developer regression agreement is
 not independent accuracy or a frozen near-duplicate acceptance result.

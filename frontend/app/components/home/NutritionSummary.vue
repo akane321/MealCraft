@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nutritionMetrics } from "~/lib/dashboard";
 import { MEAL_LABEL, mealsByDay } from "~/lib/home-surface";
-import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
+import { formatPlanDate, planDayName, todayIsoDate } from "~/lib/meal-plan-format";
 import { nutritionForDishes } from "~/lib/nutrition-summary";
 import type { WeeklyNutritionDashboard } from "~/types/meal-plan";
 
@@ -9,6 +9,8 @@ const props = defineProps<{ dashboard: WeeklyNutritionDashboard; sodiumLimit: nu
 const emit = defineEmits<{ details: [] }>();
 
 const week = computed(() => mealsByDay(props.dashboard.days));
+// Past seven days a weekday repeats, so the picker and the heading name the date too.
+const numbered = computed(() => week.value.length > 7);
 const selectedDay = ref<number | null>(null);
 const selectedMeal = ref("all");
 const day = computed(() => week.value.find(item => item.dayIndex === selectedDay.value)
@@ -32,7 +34,7 @@ const macros = computed(() => {
 });
 const scopeLabel = computed(() => {
   if (!day.value) return "";
-  const when = formatPlanDate(day.value.date, { weekday: "long" });
+  const when = planDayName(day.value.date, "long", numbered.value);
   const only = meal.value ?? (day.value.meals.length === 1 ? day.value.meals[0] : undefined);
   return only ? `${when} ${MEAL_LABEL[only.mealType].toLowerCase()}` : `${when}, all meals`;
 });
@@ -59,7 +61,7 @@ function chooseDay(value: number) {
           :aria-label="`${formatPlanDate(item.date, { weekday: 'long', day: 'numeric', month: 'short' })}, ${kcal(dayKcal(item.dayIndex))} kcal`"
           @click="chooseDay(item.dayIndex)"
         >
-          {{ formatPlanDate(item.date, { weekday: "short" }) }}<span class="mc-num">{{ kcal(dayKcal(item.dayIndex)) }}</span>
+          {{ planDayName(item.date, "short", numbered) }}<span class="mc-num">{{ kcal(dayKcal(item.dayIndex)) }}</span>
         </button>
       </div>
       <div class="body">
@@ -120,7 +122,7 @@ function chooseDay(value: number) {
 </template>
 
 <style scoped>
-.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 14px 16px 6px; }
+.days { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 96px)); gap: 4px; padding: 14px 16px 6px; }
 .days button { height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--c-rail); color: var(--c-ink) !important; font-size: 12px; line-height: 16px; font-weight: 800; }
 .days button span { font-weight: 700; color: var(--c-muted); }
 .days button[aria-pressed="true"] { background: var(--c-ink); color: #fff !important; }

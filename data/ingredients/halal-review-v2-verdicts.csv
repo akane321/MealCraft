@@ -1,0 +1,76 @@
+queue,normalized_name,status,needs_certification,source,reason,verdict,note
+second_round,agar,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",ok,仅按纯食用琼脂或琼脂条这一藻类原料定义保留，不涵盖含香精、色素等的甜品预拌粉；目录分组为 prepared 不决定其清真性。
+second_round,almond_paste,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,杏仁膏是烘焙复合配方，香料或提取物、保湿剂等未核实。杏仁本身可接受，不足以证明整份配方。
+second_round,apple_butter,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,果酱类 apple butter 通常不指黄油，但实际香料、提取物或其他调味未给出，不能凭名称确认成品。
+second_round,balsamic,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,香醋可能涉及葡萄汁、酒醋及不同生产工艺，具体成分、转化与适用认定缺失，不直接等同于饮用酒。
+second_round,banana_ketchup,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,香蕉番茄酱属于复合调味品，实际醋、香料和其他添加物未核实。
+second_round,bean_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,豆酱泛称涵盖发酵豆酱与含其他调味的复合配方，豆类来源不证明整份酱料合规。
+second_round,black_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,黑醋的原料与工艺未给出；不能仅凭颜色、植物来源或酸味确认清真。
+second_round,capers,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录为罐装沥干酸豆，不是未加工花蕾。腌汁的醋或其他辅料及生产信息未核实。
+second_round,celery_soup,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,芹菜汤可能含肉汤、乳制添加物或酒，当前没有完整汤底配方。
+second_round,chili_garlic_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,蒜蓉辣椒酱为复合配方，实际醋、其他酱料及添加剂未知。
+second_round,chili_oil,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,辣椒油可为植物油与辣椒，也可含动物油、肉粒或复合调味。未限定具体配方。
+second_round,chili_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,辣椒膏的油脂、发酵辅料及其他调味未给出。
+second_round,chili_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,辣椒酱泛称不能排除酒类调味或不明辅料，需具体配方或适用认证。
+second_round,chutney,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,酸辣酱的醋、调味酒和其他辅料因配方而异，当前没有确切配方。
+second_round,cider_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",ok,MUIS 明确普通苹果醋一般可接受。仅保留纯苹果醋定义，仍需排除另加 wine、spirit vinegar 或其他存疑配料；不能推广到所有醋。
+second_round,clam_juice,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,蛤蜊本身可接受，瓶装蛤蜊汁的全部配料和生产信息未核实，不等于已证明含酒。
+second_round,crepe,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,成品薄饼的实际用油、香草提取物及其他添加物未给出。
+second_round,curry_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,咖喱膏可能含虾酱、鱼露、动物油或其他复合调味，需完整配方；虾本身不是判疑理由。
+second_round,curry_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,成品咖喱酱的肉汤、脂肪、乳制或其他调味来源未知。
+second_round,dashi,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,出汁可为昆布或鲣鱼汤，也可为含其他高汤、酒类调味的商品。未明确是哪一种。
+second_round,dijon,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,第戎芥末酱的酒、醋和其他配方因产品不同，不能凭芥末植物来源放行。
+second_round,doenjang,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,发酵大酱的具体工艺及是否另加酒精未核实；不能因发酵就断言不清真。
+second_round,enchilada_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,墨西哥卷饼酱的高汤、油脂和其他调味未知。
+second_round,falafel,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,炸豆丸的豆类本身可接受，但实际完整配方、煎炸油来源及加工过程未核实。
+second_round,fish_broth,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,鱼本身可接受，但鱼高汤可能混入其他肉汤、酒或调味，完整配方未知。
+second_round,french_fries,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,冷冻薯条的预处理用油、涂层和香料未核实。不能仅凭土豆是植物就认定整份加工品。
+second_round,fruit_pie_filling,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,罐装果馅的增稠剂、香料及其他添加物未核实。并非声称果馅必含明胶。
+second_round,ginger_garlic,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录为加水的成品姜蒜膏，不是仅凭鲜姜鲜蒜的名称即可证明全部配方，需核实载体及其他辅料。
+second_round,gochujang,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,发酵辣椒酱存在不同酒精添加及加工配方，具体商品未知。
+second_round,gochujang_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,在辣椒酱基础上的复合酱汁，基础酱和额外调味均须核实。
+second_round,hoisin,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,海鲜酱属于复合酱料，名称不证明含海鲜，也不证明配方已清真。
+second_round,horseradish,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录为醋渍辣根，不是原味鲜根。醋、香料或其他添加物未核实。
+second_round,hot_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,辣椒调味汁的醋及其他配料未给出，不能以常见植物配方替代实际证据。
+second_round,italian_dressing,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,意式沙拉酱可能使用不同酒醋、奶酪或香料，具体配方未知。
+second_round,jam,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,果酱或橘皮酱的具体香料、凝胶配料及其他辅料未知，不把所有果酱一概判禁。
+second_round,ketchup,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,番茄酱属于复合调味品，实际配方和适用证据未提供；并非声称普通番茄酱必含禁忌成分。
+second_round,kitchen_bouquet,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,褐色调味汁的品牌泛称不锁定市场、版本和实际配方，需具体商品证据。
+second_round,laksa_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,叻沙膏的虾酱、其他复合调味及油脂来源未核实。
+second_round,marinara,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,番茄意面酱可能加酒或其他调味，完整配方未知。
+second_round,mayo,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,蛋黄酱需核实醋、乳化剂及香料等来源；鸡蛋本身不构成禁忌。
+second_round,mayo_or_dressing,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,组合里 dressing 的配方未限定，不能用某一合规蛋黄酱覆盖另一选项。
+second_round,miso,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,味噌的工艺及是否添加酒精未知，发酵或豆类名称都不能单独定案。
+second_round,mushroom_soup,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,蘑菇汤可能使用肉汤、乳制辅料或酒，完整配方未知。
+second_round,mustard,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,需区分芥末籽或粉与成品芥末酱，具体醋、酒和其他调味未给出。
+second_round,nutella,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,已查到 FairPrice 商品 13140390 的 Halal 标记，但目录定义是 chocolate hazelnut spread (Nutella-type)，不是锁定这款商品。不能外推到所有同类榛子酱。
+second_round,oyster_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,蚝油是复合酱汁，牡蛎本身可接受但不能证明其余调味和添加物。
+second_round,peanut_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,花生酱汁可能含鱼露、虾酱、肉汤或其他调味，完整配方未核实。花生过敏仍须另判。
+second_round,pesto,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,青酱可能含奶酪，需核实凝乳酶来源及其他原料，不能默认纯植物。
+second_round,pizza_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,披萨酱的奶酪、其他调味或添加物依配方而异，当前缺少配方。
+second_round,plum_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,梅子酱的实际醋、香料和其他辅料未知。
+second_round,preserved_lemon,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",ok,仅按柠檬与食盐腌制的食材类型保留，不涵盖加酒、未知调味或其他辅料的复合商品。
+second_round,ranch_mix,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,牧场沙拉酱粉中的乳制、酶及香料来源未核实。
+second_round,relish,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,酸甜腌菜酱的腌汁、醋和其他调味配方未提供。
+second_round,rice_vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,米醋不是味醂，不能直接判为酒；实际工艺、混配及适用认定未给出。
+second_round,salad_dressing,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,沙拉酱泛称范围过广，可能涉及奶酪、酒醋或其他存疑辅料。
+second_round,salsa,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录为瓶装番茄莎莎酱，其完整配料和生产信息未提供，不能仅凭番茄主料确认。
+second_round,sambal_oelek,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,可为简单辣椒酱，但实际醋、加工辅料及具体版本未核实。
+second_round,sesame_tahini,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",ok,仅按纯芝麻酱原料定义保留，不涵盖加未知乳化剂、香料或其他调味的复合酱。
+second_round,shrimp_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,虾本身可接受，商品虾酱的发酵、调味与添加物仍需具体证据，不把所有虾酱当作已核实。
+second_round,soy_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,泛称不能区分普通酿造、另加酒精及专门认证版本。Kikkoman 官方明确存在清真专用工艺；应核实具体商品，不能全放行或全判禁。
+second_round,sriracha,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,是复合辣椒酱，实际醋、香料和加工配方未提供。
+second_round,steak_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,牛排酱名称表示用途，不证明含牛肉；实际配方仍可能含其他复合酱料或存疑调味。
+second_round,stir_fry_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,炒菜酱泛称，可能含蚝油、酱油、肉汤或酒，完整配方未知。
+second_round,sweet_chili_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,甜辣酱实际醋、香料及其他辅料未核实。
+second_round,taco_sauce,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,塔可酱的完整调味及添加物未给出，不因名称就认定含肉。
+second_round,tamari,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,无小麦酱油不等于无酒精或已认证，需核实具体商品及工艺。
+second_round,tamarind_soup_base,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,罗望子汤底的风味料、肉源或其他添加物未知，果实本身可接受。
+second_round,tapioca_pearl,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",ok,仅按原味干木薯淀粉珍珠定义保留，不涵盖有未知色素、香料或复合配方的即食甜品。
+second_round,tempeh_starter,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,需核实菌种培养基、载体及加工助剂，不能仅凭天贝用途认定来源全部合规。
+second_round,tom_yum_paste,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,冬阴功膏可能含复合鱼虾调味、动物油或其他添加物，需完整配方。
+second_round,tomato_soup,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,番茄汤完整高汤、乳制辅料和其他调味来源未知。
+second_round,vegan_mayonnaise,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,纯素排除了动物原料，但不自动排除酒精或未知工艺，vegan 不是 halal 认证。
+second_round,vegetable_broth,halal,FALSE,rule:food_group,"prepared, no pork or alcohol",uncertain,蔬菜汤可能为复杂调味配方，需核实酒、香料载体及其他辅料；植物名称不等于已认证。
+second_round,vinegar,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录覆盖蒸馏醋或甘蔗醋，泛称和营养代表形态不能证明所有具体醋的工艺及配料。
+second_round,wasabi,halal,FALSE,rule:food_group,"condiment, no pork or alcohol",uncertain,目录同时涵盖膏与粉，混合香料、溶剂和其他配料未核实，不等同原味山葵根。

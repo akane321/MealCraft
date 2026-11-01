@@ -154,7 +154,7 @@ test("at 1280x720 eight conversations keep their rows and the list scrolls", asy
   const rail = page.getByRole("complementary", { name: "Navigation" });
   const rows = rail.locator(".convos .open");
   await expect(rows).toHaveCount(8);
-  await expect(page.getByRole("complementary", { name: "This week" }).getByText("Lemon Herb Chicken").first()).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" }).getByText("Lemon Herb Chicken").first()).toBeVisible();
 
   const layout = await rail.locator(".convos .groups").evaluate((list) => {
     const buttons = [...list.querySelectorAll("button.open")] as HTMLElement[];
@@ -184,7 +184,7 @@ test("at 1280x720 eight conversations keep their rows and the list scrolls", asy
 test("printing the shopping list with background graphics puts every page on the light paper", async ({ page }) => {
   await stub(page, { conversations: [conversation(100, "Dinners for two", 9001)], plans: [{ id: 9001, current: true }] });
   await openWeek(page);
-  await expect(page.getByRole("complementary", { name: "This week" }).getByText("Lemon Herb Chicken").first()).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" }).getByText("Lemon Herb Chicken").first()).toBeVisible();
 
   await page.emulateMedia({ media: "print" });
   // The page itself is the paper past the sheet's first page: never the dark workspace.
@@ -250,17 +250,17 @@ test("a week planned again is shown read-only beside its conversation, with the 
     plans: [{ id: 9002, current: true }, { id: 9001, current: false }],
   });
   await openWeek(page);
-  const panel = page.getByRole("complementary", { name: "This week" });
+  const panel = page.getByRole("complementary", { name: "This plan" });
   await expect(panel.getByText("Lemon Herb Chicken (9002)").first()).toBeVisible();
   await expect(panel.getByRole("button", { name: "Mark cooked" })).toBeVisible();
 
   await page.getByRole("complementary", { name: "Navigation" }).locator(".convos .open", { hasText: "First plan of the week" }).click();
   await expect(panel.getByText("Lemon Herb Chicken").first()).toBeVisible();
-  await expect(page.getByText("You planned these days again, so this week was replaced.")).toBeVisible();
+  await expect(page.getByText("You planned these days again, so this plan was replaced.")).toBeVisible();
   // Read, not changed: no marking cooked, no swaps, no change chips, nothing to send.
   await expect(panel.getByRole("button", { name: "Mark cooked" })).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "Swap" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Swap tomorrow's dinner" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Swap / })).toHaveCount(0);
   const chat = page.getByRole("main");
   await expect(chat.getByLabel("Message MealCraft")).toHaveAttribute("readonly", "");
   await expect(chat.getByLabel("Message MealCraft")).not.toBeEditable();
@@ -287,7 +287,7 @@ test("past weeks mark the weeks that were planned again", async ({ page }) => {
 test("nutrition details name each dish's meal, lunch before that day's dinner", async ({ page }) => {
   await stub(page, { conversations: [conversation(100, "Dinners for two", 9001)], plans: [{ id: 9001, current: true }] });
   await openWeek(page);
-  const panel = page.getByRole("complementary", { name: "This week" });
+  const panel = page.getByRole("complementary", { name: "This plan" });
   await panel.getByRole("tab", { name: "Nutrition" }).click();
   await panel.getByRole("button", { name: /All six nutrients/ }).click();
   const details = page.getByRole("dialog", { name: "Nutrition details" });
@@ -339,7 +339,7 @@ test("a conversation is renamed, pinned and deleted from its own menu; rows only
   // The panel switches (This week, Groceries, Nutrition) are gone from the rail; its pages read as links.
   await expect(rail.getByRole("button", { name: "Nutrition", exact: true })).toHaveCount(0);
   await expect(rail.getByRole("navigation", { name: "Pages" }).getByRole("link")).toHaveCount(2);
-  await expect(rail.locator(".convos .open", { hasText: "Dinners for two" })).toContainText("This week");
+  await expect(rail.locator(".convos .open", { hasText: "Dinners for two" })).toContainText("Current plan");
 
   await rail.getByRole("button", { name: "Options for Lunch ideas" }).click();
   await rail.getByRole("menuitem", { name: "Rename" }).click();

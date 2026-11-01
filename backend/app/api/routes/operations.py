@@ -583,6 +583,10 @@ def update_ingredient(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found") from error
 
 
+# The store a mapping edit is for (docs/design/cold-storage.md).
+MappingRetailer = Annotated[Literal["fairprice", "cold_storage"], Query()]
+
+
 @router.get("/data/mappings", response_model=OpsProductMappingCollection)
 def list_product_mappings(
     current: CurrentOperationsViewDependency,
@@ -594,8 +598,11 @@ def list_product_mappings(
     ] = None,
     offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    retailer: MappingRetailer = "fairprice",
 ) -> OpsProductMappingCollection:
-    return _data(current, database).mappings(query=q, status=mapping_status, offset=offset, limit=limit)
+    return _data(current, database).mappings(
+        query=q, status=mapping_status, offset=offset, limit=limit, retailer=retailer
+    )
 
 
 @router.put("/data/mappings/{ingredient}", response_model=OpsProductMapping)
@@ -604,18 +611,22 @@ def change_product_mapping(
     change: OpsProductMappingChange,
     current: CurrentOperationsWriteDependency,
     database: DatabaseDependency,
+    retailer: MappingRetailer = "fairprice",
 ) -> OpsProductMapping:
     try:
-        return _data(current, database).change_mapping(ingredient, change.product)
+        return _data(current, database).change_mapping(ingredient, change.product, retailer)
     except OpsDataNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingredient not found") from error
 
 
 @router.delete("/data/mappings/{ingredient}", response_model=OpsProductMapping)
 def remove_product_mapping(
-    ingredient: str, current: CurrentOperationsWriteDependency, database: DatabaseDependency
+    ingredient: str,
+    current: CurrentOperationsWriteDependency,
+    database: DatabaseDependency,
+    retailer: MappingRetailer = "fairprice",
 ) -> OpsProductMapping:
     try:
-        return _data(current, database).remove_mapping(ingredient)
+        return _data(current, database).remove_mapping(ingredient, retailer)
     except OpsDataNotFoundError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No mapping for this ingredient") from error

@@ -31,7 +31,7 @@ Layer 08 PR-2 (recipe and ingredient tags) **writes** the `recipes` columns
 `meal_role`, `contains_staple`, `protein_sources`, `cooking_methods`,
 `equipment`, `flavor_tags` and `estimated`, and the `ingredients` columns
 `food_group`, `perishable` and `basic_seasoning` (from
-`data/ingredients/basic-seasonings-v1.json`). Both importers copy them from the
+`data/ingredients/basic-seasonings-v2.json`). Both importers copy them from the
 tag files `data/recipes/recipe-tags-v1.json` and
 `data/ingredients/ingredient-tags-v1.json`, made by
 `python -m app.data.recipe_tags`, at importer version `6`.
