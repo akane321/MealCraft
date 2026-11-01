@@ -1,0 +1,169 @@
+{
+  "parameters": {
+    "total": 12400,
+    "assumed_loss": 0.25,
+    "label_cap": 0.2,
+    "seed": "v3-5105"
+  },
+  "projection": {
+    "v2_2_recipes": 8968,
+    "over_quota_funnel": {
+      "built with the current rules": 11680,
+      "built and not in v2.2": 2712,
+      "excluded: cuisine international": 215,
+      "excluded: title already in the release": 582,
+      "excluded: ingredient id not in v2.2": 47,
+      "kept": 1868
+    },
+    "over_quota_cut_by_label_cap": {
+      "american": 132
+    },
+    "over_quota_added": 1736,
+    "label_cap_recipes": 2480,
+    "new_needed": 1696,
+    "new_selected": 2262,
+    "largest_label_share_if_all_selected_keep_their_triage_label": {
+      "american": 0.2,
+      "chinese": 0.1041,
+      "thai": 0.0594
+    }
+  },
+  "pool_scan": {
+    "unmapped ingredient name": 141240,
+    "qualifies": 35065,
+    "american bucket": 32437,
+    "selected for v2": 17359,
+    "unpriced ingredient": 10911,
+    "title already in the release": 9152,
+    "completeness flagged": 3595,
+    "ingredient id not in v2.2": 2337,
+    "no ingredient form or unit weight": 541
+  },
+  "qualifying": {
+    "by_bucket": {
+      "italian": 8934,
+      "chinese": 4202,
+      "mexican": 4079,
+      "central_european": 3001,
+      "french": 2936,
+      "indian": 2533,
+      "british_irish": 1874,
+      "mena": 1867,
+      "greek_mediterranean": 1628,
+      "spanish_portuguese": 1073,
+      "scandinavian": 1015,
+      "japanese": 934,
+      "latin_caribbean": 448,
+      "thai": 330,
+      "southeast_asian": 129,
+      "african": 50,
+      "vietnamese": 21,
+      "korean": 11
+    },
+    "mains": 12725
+  },
+  "selected": {
+    "by_triage_cuisine": {
+      "chinese": 365,
+      "indian": 213,
+      "italian": 183,
+      "japanese": 182,
+      "thai": 151,
+      "middle_eastern": 124,
+      "french": 121,
+      "mexican": 107,
+      "british_irish": 92,
+      "greek": 92,
+      "spanish_portuguese": 75,
+      "eastern_european": 74,
+      "latin_american": 61,
+      "caribbean": 59,
+      "indonesian": 50,
+      "african": 46,
+      "malaysian_singaporean": 45,
+      "tex_mex": 44,
+      "north_african": 43,
+      "german": 33,
+      "scandinavian": 29,
+      "filipino": 26,
+      "vietnamese": 21,
+      "turkish": 15,
+      "korean": 11
+    },
+    "by_quota_bucket": {
+      "chinese": 365,
+      "indian": 213,
+      "italian": 183,
+      "mena": 182,
+      "japanese": 182,
+      "mexican": 151,
+      "thai": 151,
+      "southeast_asian": 121,
+      "french": 121,
+      "latin_caribbean": 120,
+      "central_european": 107,
+      "british_irish": 92,
+      "greek_mediterranean": 92,
+      "spanish_portuguese": 75,
+      "african": 46,
+      "scandinavian": 29,
+      "vietnamese": 21,
+      "korean": 11
+    },
+    "by_triage_course": {
+      "main": 2008,
+      "sauce_condiment": 92,
+      "snack_appetizer": 49,
+      "soup": 38,
+      "side": 22,
+      "salad": 22,
+      "dessert": 21,
+      "baked_good": 5,
+      "drink": 5
+    },
+    "by_source": {
+      "recipenlg": 2262
+    },
+    "servings_stated": 551,
+    "malaysian_singaporean": 45
+  },
+  "over_quota_added_by_cuisine": {
+    "american": 975,
+    "southern_us": 136,
+    "thai": 86,
+    "latin_american": 74,
+    "mexican": 71,
+    "korean": 54,
+    "tex_mex": 46,
+    "caribbean": 44,
+    "japanese": 42,
+    "scandinavian": 30,
+    "british_irish": 26,
+    "greek": 24,
+    "vietnamese": 24,
+    "african": 22,
+    "cajun_creole": 20,
+    "spanish_portuguese": 16,
+    "middle_eastern": 12,
+    "north_african": 8,
+    "eastern_european": 8,
+    "german": 5,
+    "malaysian_singaporean": 4,
+    "indonesian": 4,
+    "filipino": 3,
+    "dutch_belgian": 1,
+    "turkish": 1
+  },
+  "over_quota_added_by_course": {
+    "side": 456,
+    "dessert": 262,
+    "salad": 229,
+    "breakfast": 192,
+    "sauce_condiment": 166,
+    "snack_appetizer": 144,
+    "baked_good": 131,
+    "soup": 91,
+    "drink": 64,
+    "main": 1
+  }
+}
