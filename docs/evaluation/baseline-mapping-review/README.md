@@ -73,16 +73,19 @@ table: `source_suspicious_row_count / source_mapping_row_count`. The corrected
 rate uses all valid reviewed rows as its denominator. Allergen omissions and
 false allergen assignments are reported separately and list their row IDs.
 
-## Developer dry run
+## No checked-in review table yet
 
-The checked-in dry run was generated without new API calls from the existing
-developer comparison output under
-`.local/evaluation/sprint2-live-baseline-smoke-2026-10-25/comparison.json`.
-It contains all suspicious rows plus the required seed-364 matched sample. The
-generated pre-review report is the authority for its counts. The table
-deliberately contains no human decisions.
+No review table is committed. An earlier revision of this directory carried a
+283-row dry-run table and its pre-review summary, said to come from a local,
+untracked `comparison.json`. Those files were not reproducible: the input is not
+in the repository, and their `mapping_method` and `review_reason` values
+(`exact`, `fixed_seed_matched_sample`, `candidate_suggestion`,
+`mapping_requires_human_confirmation`) are not what this tool writes. They were
+removed on 2026-11-02, and the table must not be filled in by hand.
 
-- `developer-smoke-2026-10-25.review.jsonl` is the blank review table.
-- `developer-smoke-2026-10-25.prereview.json` is the computable pre-review
-  summary. Its accuracy, correction, and safety rates remain null or zero until
-  a person completes the table; they are not claims of correctness.
+The repository holds no `offline-algorithm-comparison-dev-v1` output at the
+moment, so there is no input from which to regenerate a table. Once a
+development-set comparison output is committed (or its location is named here),
+add the exact `generate` command and the output file names to this section so
+anyone can reproduce the table byte for byte; the tool is deterministic for a
+given input and seed. Do not hand out a table for review until then.
