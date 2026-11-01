@@ -100,6 +100,9 @@ SHORTCUTS = [
     "The release total is what passes the checks, not trimmed to the 12,400 target.",
     "ingredients.jsonl is v2.2's file byte for byte, so its recipe_occurrences count v2.2's recipes only.",
     "Composite substitutes are not built (no schema field).",
+    "The American label sits exactly at the 20% cap, with no headroom: after any withdrawal of a non-American recipe "
+    "re-run the build (or withdraw an American recipe too).",
+    "The cuisine labels of the model-enriched recipes are unreviewed model output (some are debatable).",
     "The added recipes have no recipe tags, embeddings or planner-pool report yet: the product switch to v3 is a "
     "later step.",
 ]
