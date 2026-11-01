@@ -154,7 +154,9 @@ def _withhold_small(system: dict, minimum: int) -> dict:
 
     Hiding one small cell is not enough while the language and source totals stay: a reader subtracts the cells that
     remain from them. So when any category-language-source cell has fewer than `minimum` remaining cases, the system
-    gets no cross cells at all, only the one-dimensional totals and the overall total. A one-dimensional total under
+    gets no cross cells at all, only the one-dimensional totals and the overall total, and the one-dimensional totals
+    show their remaining count alone (their status and void counts would locate the small cell's outcomes, for
+    example a status found only in one language). A one-dimensional total under
     the minimum is withheld too; when a dimension then has exactly one withheld value, the smallest other value of that
     dimension goes with it, because the overall total minus the shown values would give the withheld one back. If the
     overall total is under the minimum, only "withheld" is shown. A withheld value is replaced as a whole, so none of
@@ -164,8 +166,9 @@ def _withhold_small(system: dict, minimum: int) -> dict:
     small = f"fewer than {minimum} remaining cases"
     if system["overall"]["remaining_n"] < minimum:
         return {"overall": {"withheld": small}}
-    if any(summary["remaining_n"] < minimum for summary in system["cells"].values()):
-        system["cells"] = {"withheld": f"a cell has {small}"}
+    if not any(summary["remaining_n"] < minimum for summary in system["cells"].values()):
+        return system
+    system["cells"] = {"withheld": f"a cell has {small}"}
     for part in ("by_category", "by_language", "by_source"):
         totals = system[part]
         low = [name for name, summary in totals.items() if summary["remaining_n"] < minimum]
@@ -175,6 +178,11 @@ def _withhold_small(system: dict, minimum: int) -> dict:
             totals[nearest] = {"withheld": "withheld so the overall total cannot give back the small value beside it"}
         for name in low:
             totals[name] = {"withheld": small}
+        # Status and void counts of a group would show where the small cell's outcomes sit (a status found only in
+        # one language, say), so the groups keep their remaining count alone; the overall total keeps everything.
+        for name, summary in totals.items():
+            if "withheld" not in summary:
+                totals[name] = {"remaining_n": summary["remaining_n"]}
     return system
 
 

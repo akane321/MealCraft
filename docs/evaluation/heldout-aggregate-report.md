@@ -33,6 +33,9 @@ ignores them, while the paired analysis below consumes them without changing the
     it and a reader subtracts the cells that remain. With planning|en|authored 2, planning|zh|authored 30,
     intent|en|authored 20 and intent|zh|authored 20 cases, the English total of 22 minus the intent|en|authored cell
     of 20 gives the small cell back; the same subtraction works for the success, failure and voided counts.
+  - The one-dimensional totals then show their remaining count only. Their status and void counts would locate the
+    small cell's outcomes: if a baseline fails every English case, the errors shown for planning all sit in
+    planning|en, which gives its size and its errors back. The overall total keeps every count.
   - A one-dimensional total below `min_cell_n` is withheld. If a dimension then has exactly one withheld value, the
     smallest other value of that dimension is withheld too (ties go to the first name), because the overall total
     minus the values still shown would give the single withheld value back.

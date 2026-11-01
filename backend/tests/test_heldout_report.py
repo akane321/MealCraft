@@ -322,6 +322,28 @@ def test_the_reviews_table_cannot_be_subtracted_back_to_the_small_cell():
         assert true_value in possible and len(possible) > 1, field
 
 
+def test_a_status_found_only_in_one_language_does_not_locate_the_small_cell():
+    # A baseline that fails every English case: with status counts in the language and category totals, the 2 errors
+    # shown for planning would all sit in planning|en, giving its size and its errors back.
+    sizes = {("planning", "en"): 2, ("planning", "zh"): 30, ("intent", "en"): 20, ("intent", "zh"): 20}
+    records = cells_of(
+        {
+            (category, language, "authored"): ["error" if language == "en" else "success"] * count
+            for (category, language), count in sizes.items()
+        }
+    )
+    keys = ["planning|en|authored", "planning|zh|authored", "intent|en|authored", "intent|zh|authored"]
+    plain = aggregate(records)["systems"]["s1"]
+    system = aggregate(records, min_cell_n=5)["systems"]["s1"]
+    for part in ("by_category", "by_language", "by_source"):
+        assert all(set(summary) == {"remaining_n"} for summary in system[part].values()), part
+    for field in ("error_n", "success_n"):
+        assert consistent_values(plain, keys, "planning|en|authored", field) == {
+            plain["cells"]["planning|en|authored"][field]
+        }
+        assert len(consistent_values(system, keys, "planning|en|authored", field)) > 1, field
+
+
 def test_without_a_small_cell_the_report_is_unchanged():
     records = cells_of({("planning", "en", "authored"): BIG, ("intent", "zh", "forum"): BIG})
     assert aggregate(records, min_cell_n=5) == aggregate(records)
