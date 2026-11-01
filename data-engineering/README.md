@@ -73,6 +73,47 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 不在本轮。每一行的前后克数和出处在 `data/release/v2.2/corrections.jsonl`，数量、守卫告警和未修的项目
 在 `data/release/v2.2/quality_report.md` 末节。产品导入和基线评分从这一版起读 v2.2。
 
+## data release v3：v2.2 原样 + 新增菜谱（Knowledge ADR-0103 第 3 节，issue #390）
+
+"data release v3"是数据版本，不是名为 v3 的留出评测协议。这一版**还没有接入产品**：后端 `RELEASE_VERSION`
+仍是 v2.2，切换（标签、清真、嵌入、规划池报告、各处 v2.2 路径和测试）是之后单独的 PR。
+
+构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：
+
+```bash
+python scripts/select_v3_candidates.py      # 第 1 步：从 v2_pool.jsonl 挑新候选 -> staging v3_selected.jsonl（约 45 秒）
+python scripts/enrich_v3_openai.py --env-file ../.env --workers 8 --max-usd 25   # 第 2 步：OpenAI API 富化，可断点续跑
+python scripts/build_release_v3.py          # 第 3 步：写 data/release/v3/（约 15 秒）
+python scripts/build_release_v3.py --out DIR   # 同样的文件写到 DIR；两次运行逐字节相同
+python -I -X utf8 scripts/manual_check.py draw --new     # 新增菜谱的 100 道人工抽检样本 -> docs/manual-check-20261103/
+python -I -X utf8 scripts/allergen_review.py draw --new  # 新增菜谱的 50 道过敏原复核样本 -> docs/allergen-review-20261103/
+PYTHONPATH=src python -m unittest discover -s tests -p "test_build_release_v3.py"
+```
+
+输入：已提交的 `data/release/v2.2/`；staging 的 `v2_enrich_set.jsonl`、`v2_merged.recipes.jsonl`、
+`v2_merged.ingredients.jsonl`（v2 富化集，重建超配额菜谱）和 `v3_selected.jsonl`、`v3_merged.recipes.jsonl`、
+`v3_enrich_failed.jsonl`（新候选）；`enrichment-work/part-*/recipes.input.jsonl`（v2 给富化者看的时长）。
+每个输入的 sha256 记在 `release_manifest.json` 的 `derived_from`，`fingerprint` 覆盖 recipes.jsonl、
+ingredients.jsonl 和去掉该字段的 manifest。
+
+决定（owner 2026-11-02"直接做，中等质量也可以"，完整列表在 manifest 的 `change_notes` 和 `quality_report.md`）：
+
+- v2.2 的每条记录逐字节复制（id、文字、字段都不变），`ingredients.jsonl` 就是 v2.2 的 701 个食材，不新增食材 id；
+- 新增菜谱两条来源，都走 `build_release_v2.build_recipe` 的同一套规则，再套 v2.2 的克数修正
+  （`correct_release_v22.correct_recipe`，对 v2.2 的食材形态称重，改动记在 `corrections.jsonl`）：
+  v2.1 构建过但超配额没发布的菜谱，和 v2 从未选中、每行都已映射到 701 个食材、每个食材都能按规划器规则定价、
+  分诊菜系不属于美国桶的 RecipeNLG 新候选（主菜优先）；
+- 新候选用 OpenAI API（`gpt-5.4-mini`，推理强度 low）按 v2 同样的字段、词表、说明和校验富化，修订了 ADR-0030 用会话富化的做法；
+- 不发布：用到 v2.2 以外食材 id 的、菜系 `international` 的（ADR-0034，不改标）、完整性标记了但没有复核结论的
+  （不做新的完整性复核）、修正后每份热量不合理的、低于导入下限（2 行食材和 1 个步骤）的、标题（小写、空白归一）
+  和已发布菜谱重复的（顺序：v2.2，再超配额，再新候选，各按 recipe_id）；
+- 任何一个菜系标签不超过最终总数的 20%：超出时先留规划器能用的类别（main、side、soup、salad、breakfast，其余在后），
+  同类按 recipe_id；名额按最终总数反复重算到不再变化；
+- 总数是通过全部检查的数量，没有裁到 12,400；组合替代品（"half-and-half = 牛奶 + 奶油"）这一版不做，schema 没有字段。
+
+每个没有发布的候选都在 `dropped.jsonl` 里，带原因。新增菜谱的人工抽检和过敏原复核只抽新增菜谱（种子 20261103），
+"至少 95%"按点估计读，同时报告 Wilson 区间（issue #392）。
+
 ## 规划器可用池报告（每次发布、改价格或改标签之后重跑）
 
 `quality_report.md` 只管 release 本身；发布出来的菜有多少真正进得了规划器、每道关挡掉多少，由下面这条命令生成
