@@ -45,11 +45,15 @@ bytes are **drafts**. Their exact bytes must be registered and reviewed for
 neutrality by someone who did not write them before formal use. Neither the
 synthetic example date nor a readiness attestation is run admission.
 
-The shared instructions were revised after an AI-executed neutrality review (`ADR-0100` items 3 and 4, still
-proposed): `awaiting_confirmation` is defined with an example, the `Initial state` line is replaced by a plain
-statement that nothing is saved at the start, relative dates are tied to the given date, `plan` is for plan requests
-only, and the sources line refers to each system's registered configuration. The revised bytes have not been
-reviewed again and are not registered; the earlier review no longer applies to them.
+The shared instructions were revised after an AI-executed neutrality review (`ADR-0100` items 3 and 4, confirmed by
+the owner on 2026-10-29; the ADR record itself is still proposed until its pull request merges):
+`awaiting_confirmation` is defined with an example, the `Initial state` line is replaced by a plain statement that
+nothing is saved at the start, relative dates are tied to the given date, `plan` is for plan requests only, and the
+sources line refers to each system's registered configuration. The earlier review does not cover the revised bytes. A
+second review, AI-executed and recorded in the Knowledge freeze log entry for this change, found them neutral with
+residuals (the product-versus-model plan asymmetry, the example read as a script, the product-native propose-and-apply
+shape of the confirmation definition); the bytes become a registered shared-part change only when this pull request
+merges.
 
 Because the bytes are shared, changing them is a shared-part change under `ADR-0092` item 5: it needs an entry in
 `operations/sprint2-plan/02-baselines-freeze-log.md` of the Knowledge repository, which together with the other
