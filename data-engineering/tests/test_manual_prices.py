@@ -147,6 +147,25 @@ class ManualPricesTest(unittest.TestCase):
         ):
             self.assertIn(expected, text)
 
+    def test_sizes_below_a_hundredth_of_a_gram_or_beyond_a_float_are_refused(self):
+        problems, products = self.check(
+            [
+                good(package_size="0.001"),
+                good(rank="2", package_size="1e400"),
+                good(rank="3", package_size="1E+999999999999"),
+                good(rank="4", package_size="1E+999999999999", package_unit="kg"),
+            ]
+        )
+        self.assertEqual(products, [])
+        text = "\n".join(problems)
+        for expected in (
+            "rank 1 (line 2): package_size '0.001' g is less than 0.01 g",
+            "rank 2 (line 3): package_size '1e400' is too large",
+            "rank 3 (line 4): package_size '1E+999999999999' is too large",
+            "rank 4 (line 5): package_size '1E+999999999999' is too large",
+        ):
+            self.assertIn(expected, text)
+
     def test_hosts_match_the_platform_exactly_or_as_a_subdomain(self):
         cases = [
             ("shopee", "https://shopee.sg/a", True),

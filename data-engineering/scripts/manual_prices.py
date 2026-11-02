@@ -12,10 +12,11 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, Overflow
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -64,7 +65,7 @@ def _decimal(text: str, *, thousands: bool = True) -> Decimal | None:
 def _whole_cents(value: Decimal) -> bool:
     try:
         return value == value.quantize(Decimal("0.01"))
-    except InvalidOperation:  # more digits than a Decimal carries: listed as a problem, not a crash
+    except (InvalidOperation, Overflow):  # more digits than a Decimal carries: listed as a problem, not a crash
         return False
 
 
@@ -170,14 +171,16 @@ def check_row(row: dict, grams: dict[str, dict], today: date) -> tuple[list[str]
     if size is not None and unit and row["ingredient_id"] in grams:
         try:
             package = package_grams(size, unit, grams[row["ingredient_id"]])
-        except InvalidOperation:
+        except (InvalidOperation, Overflow):
             issues.append(f"package_size {row['package_size']!r} is too large")
         else:
             if package is None:
                 issues.append(
                     f"{size} count has no known weight: the release has no grams per item for this ingredient"
                 )
-            elif package[0] <= 0:  # 0 g would divide by zero where the planner prices a package
+            elif not math.isfinite(package[0]):  # 1e400 g is a float infinity
+                issues.append(f"package_size {row['package_size']!r} is too large")
+            elif package[0] < 0.01:  # 0 g would divide by zero where the planner prices a package
                 issues.append(f"package_size {row['package_size']!r} {unit} is less than 0.01 g")
     if issues:
         return issues, None
