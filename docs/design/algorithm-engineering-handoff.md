@@ -23,7 +23,7 @@ checkout cents first, while preserving the requested minimum recipe count.
 The greedy baseline and explicit over-budget preview selection retain their
 separate paths. This heuristic supplies a checked price, not a proven minimum.
 
-The product keeps whole-table title-based `dish_kind` grouping. It does not
+The product improvement pass keeps whole-table title-based `dish_kind` grouping. It does not
 adopt the offline member-mean objective or unreviewed recipe-pair thresholds
 (ADR-0089). Member eligibility remains enforced by validation. The score orders
 empty optional positions, table kinds, repetition, soft nutrition deviation,
@@ -46,6 +46,30 @@ These stage durations are inclusive and overlap, so they must not be summed
 as total runtime. `--cases` selects named developer households and `--steps`
 selects iteration counts; omitted options retain the full comparison. Profiling
 adds overhead and does not enter product traces, scores or stopping rules.
+
+### Replacement near-dish checks
+
+`planning/swap_diversity.py` supplies separate recipe-pair evidence for
+`ReplanningService._select_replacement`. A replacement that is a known near
+match to the replaced dish or to another retained dish in the same meal is
+only a fallback: dishes that are not near come first, and a near dish is taken
+only when no other dish passes the checks, so the filter never refuses a swap
+the checks alone would allow. The out-of-stock ingredient filter, role and member
+coverage checks apply first, then the near preference, then the default
+variety cap, then the whole-week shopping check; a stated cap on uses always
+holds. Because the shopping check runs last, a dearer dish that is not near can
+be taken over a near dish that would have fitted the week budget. Repetition penalties also count known near matches elsewhere in
+the week. A pair with no vector is unknown: it is neither filtered nor
+penalised, so it does not prove that the replacement is different and the
+repetition penalty does not apply to it. This does not change the
+product improvement objective or its `dish_kind` grouping (ADR-0089).
+
+The explicit developer policy combines title and ingredient overlap with
+vector cosine. A lower cosine threshold applies only when both titles name
+fried rice, excluding titles that indicate soup, cakes, noodles, burgers or other listed forms.
+The policy and thresholds live in `SWAP_POLICY`; this title cue is not a
+general understanding of cooking methods. Developer regression agreement is
+not independent accuracy or a frozen near-duplicate acceptance result.
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final
