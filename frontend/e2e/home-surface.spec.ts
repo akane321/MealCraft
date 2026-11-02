@@ -675,8 +675,11 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
     expect(last!.y + last!.height).toBeLessThanOrEqual(body!.y + body!.height);
     const context = await page.locator(".composer-wrap .context").boundingBox();
     const input = await page.getByLabel("Message MealCraft").boundingBox();
+    const composer = await page.locator(".composer-wrap .composer").boundingBox();
     expect(context).not.toBeNull();
-    expect(context!.y + context!.height).toBeLessThanOrEqual(input!.y);
+    // The chip sits in the composer's bottom row: under the message, never over it, and inside the box.
+    expect(context!.y).toBeGreaterThanOrEqual(input!.y + input!.height);
+    expect(context!.y + context!.height).toBeLessThanOrEqual(composer!.y + composer!.height);
     await expect(overview.locator("[title]").first()).toHaveAttribute("title", /Lemon Herb Chicken Rice Bowl/);
   });
   test(`dish actions stay on one row at ${viewport.width}`, async ({ page }) => {

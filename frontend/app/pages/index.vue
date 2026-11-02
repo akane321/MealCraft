@@ -16,14 +16,14 @@ type Tab = "dinners" | "groceries" | "nutrition";
 
 const DRAFT_KEY = "mealcraft-draft";
 const starters = ["Dinners for two this week, around S$90", "A high-protein week", "Vegetarian, under S$60", "Dinner tonight for two", "Three days, S$30"];
-// The first four starters as cards on the empty plan (icon names stay literal so the icon bundle finds them).
+// The first four starters as cards on the empty plan: a short title, the full request as the button's name
+// (icon names stay literal so the icon bundle finds them).
 const starterCards = [
-  { text: starters[0]!, desc: "Seven dinners and one shopping list, kept near the budget.", icon: "i-lucide-calendar-days", tone: "violet" },
-  { text: starters[1]!, desc: "A week of dinners with more protein.", icon: "i-lucide-dumbbell", tone: "rose" },
-  { text: starters[2]!, desc: "Meat-free dinners that stay under S$60.", icon: "i-lucide-salad", tone: "green" },
-  { text: starters[3]!, desc: "One meal for tonight and what to buy for it.", icon: "i-lucide-cooking-pot", tone: "orange" },
+  { text: starters[0]!, title: "Dinners for two", desc: "Seven dinners this week around S$90, with one shopping list.", icon: "i-lucide-calendar-days", tone: "violet" },
+  { text: starters[1]!, title: "High-protein week", desc: "A week of dinners with more protein on every plate.", icon: "i-lucide-dumbbell", tone: "rose" },
+  { text: starters[2]!, title: "Vegetarian, under S$60", desc: "Meat-free dinners for the week that stay under S$60.", icon: "i-lucide-salad", tone: "green" },
+  { text: starters[3]!, title: "Tonight for two", desc: "One dinner for tonight and what to buy for it.", icon: "i-lucide-cooking-pot", tone: "orange" },
 ];
-const moreStarters = starters.slice(4);
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -119,6 +119,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
 const title = computed(() => session.value?.title || messages.value.find(m => m.role === "user")?.content || "New plan");
 // The days the conversation will plan (a week unless it was asked for fewer or more), shown before planning with a way to move its first day.
 const weekStart = computed(() => constraints.value?.start_date ?? null);
+const planQuery = ref("");
 const planDays = computed(() => plan.value?.day_count ?? constraints.value?.day_count ?? 7);
 // The words that depend on the plan's length: "a week" only for seven days.
 const labels = computed(() => planLabels(planDays.value));
@@ -644,7 +645,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             New plan<UKbd class="sb-kbd" value="Ctrl K" />
           </UButton>
         </template>
+        <template #search>
+          <label class="sb-search">
+            <UIcon name="i-lucide-search" aria-hidden="true" />
+            <input id="plan-search" v-model="planQuery" type="search" placeholder="Search plans" aria-label="Search plans" autocomplete="off">
+          </label>
+        </template>
         <HomeConversationList
+          v-model:query="planQuery"
           :items="recent"
           :current-id="session?.id ?? null"
           :week-id="weekId"
@@ -661,7 +669,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             <div v-if="home.chips.length" class="chips">
               <span v-for="chip in home.chips" :key="chip.label" class="mc-chip" :class="{ alert: chip.alert }">{{ chip.label }}</span>
             </div>
-            <NuxtLink to="/profile" class="home-link">Household<UIcon name="i-lucide-arrow-up-right" /></NuxtLink>
+            <NuxtLink to="/profile" class="home-link">Household<UIcon name="i-lucide-chevron-right" /></NuxtLink>
           </div>
         </template>
       </ShellSidebar>
@@ -826,12 +834,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         </section>
 
         <div class="composer-wrap">
-          <div class="after">
-            <span v-if="contextLabel" class="mc-chip context">{{ contextLabel }}</span>
-            <template v-if="canChangeWeek">
-              <button v-for="text in followUps" :key="text" type="button" class="mc-suggest" @click="suggest(text)">{{ text }}</button>
-            </template>
-          </div>
           <form class="composer" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
             <input
@@ -845,13 +847,19 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             >
             <div class="composer-foot">
               <!-- The household's own limits as the prompt's chips; each opens the household page. -->
-              <template v-if="isEmpty">
+              <div v-if="isEmpty" class="tools">
                 <NuxtLink v-for="chip in home.chips" :key="chip.label" to="/profile" class="tool" :class="{ alert: chip.alert }">
                   <UIcon :name="chip.alert ? 'i-lucide-shield-alert' : 'i-lucide-leaf'" />{{ chip.label }}
                 </NuxtLink>
                 <NuxtLink v-if="!home.chips.length" to="/profile" class="tool"><UIcon name="i-lucide-users" />Household</NuxtLink>
-              </template>
-              <span class="grow" />
+              </div>
+              <!-- In a conversation: what it plans for, then follow-ups for its week (one row, scrolling sideways). -->
+              <div v-else class="after">
+                <span v-if="contextLabel" class="mc-chip context"><UIcon name="i-lucide-users" aria-hidden="true" />{{ contextLabel }}</span>
+                <template v-if="canChangeWeek">
+                  <button v-for="text in followUps" :key="text" type="button" class="mc-suggest" @click="suggest(text)">{{ text }}</button>
+                </template>
+              </div>
               <UButton
                 type="submit"
                 color="neutral"
@@ -868,13 +876,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
         <section v-if="isEmpty" class="ideas" aria-label="Suggestions">
           <div class="idea-grid">
-            <button v-for="card in starterCards" :key="card.text" type="button" class="idea" :data-tone="card.tone" @click="send(card.text)">
+            <button v-for="card in starterCards" :key="card.text" type="button" class="idea" :data-tone="card.tone" :aria-label="card.text" @click="send(card.text)">
               <span class="mc-tile"><UIcon :name="card.icon" /></span>
-              <b>{{ card.text }}</b>
+              <b>{{ card.title }}</b>
               <span class="idea-text" aria-hidden="true">{{ card.desc }}</span>
             </button>
           </div>
-          <button v-for="text in moreStarters" :key="text" type="button" class="mc-suggest more" @click="send(text)">{{ text }}<UIcon name="i-lucide-chevron-right" /></button>
         </section>
         <p v-if="isEmpty" class="fine foot">Suggestions can be wrong. Check allergens on product labels.</p>
       </main>
@@ -1050,7 +1057,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 /* Workspace: the sidebar on the page, then one white panel holding the chat and the plan. */
 .app { position: absolute; inset: 0; z-index: 1; display: grid; grid-template-columns: 244px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); animation: mc-rise 900ms var(--ease) 200ms both; }
-.work { display: grid; grid-template-columns: minmax(0, 1fr) 424px; }
+.work { display: grid; grid-template-columns: minmax(0, 1fr) clamp(340px, 26.4vw, 380px); }
 .app.no-panel .work { grid-template-columns: minmax(0, 1fr); }
 .grow { flex: 1; }
 
@@ -1083,8 +1090,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .chat.is-empty { overflow-y: auto; }
 .chat.is-empty .thread { flex: 0 0 auto; margin-top: auto; overflow: visible; padding: 0 28px 28px; }
 .hello { text-align: center; }
-.hello h2 { display: flex; flex-direction: column; align-items: center; margin: 0; font-size: 40px; line-height: 46px; letter-spacing: -0.02em; }
-.hello-2 { color: #8f8f99; font-weight: 600; }
+.hello h2 { display: flex; flex-direction: column; align-items: center; margin: 0; font-size: 40px; line-height: 46px; font-weight: 600; letter-spacing: -0.025em; }
+.hello-2 { color: #8f8f99; font-weight: 500; }
 .ideas { flex: none; width: min(880px, 100% - 56px); margin: 24px auto auto; padding-bottom: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .idea-grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .app:not(.no-panel) .idea-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1092,10 +1099,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .idea:hover { transform: translateY(-1px); border-color: #e1e1e5; box-shadow: var(--mc-shadow-md); }
 .idea .mc-tile { width: 28px; height: 28px; margin-bottom: 8px; border-radius: 8px; }
 .idea .mc-tile > * { width: 16px; height: 16px; }
-.idea b { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
+.idea b { max-width: 100%; overflow: hidden; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 .idea-text { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #71717a; font-size: 13px; line-height: 1.45; }
-.ideas .more { gap: 4px; height: 26px; color: #52525b; }
-.ideas .more .iconify { width: 14px; height: 14px; color: #a1a1aa; }
 /* A 720px-high window keeps the whole empty plan in view. */
 @media (max-height: 800px) {
   .hello h2 { font-size: 34px; line-height: 40px; }
@@ -1136,24 +1141,25 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 @keyframes mc-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 .error { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--c-allergy-bg); color: var(--c-allergy-text); font-size: 13px; }
 
-/* Composer: a floating rounded box with a round dark send; follow-ups sit just above it. */
+/* Composer: one rounded card, the message on top and a row of chips with a round dark send below. */
 .composer-wrap { position: relative; flex: none; padding: 0 28px 10px; }
 .composer-wrap::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 24px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); pointer-events: none; }
 .chat.is-empty .composer-wrap::before { display: none; }
-/* Follow-ups keep one row: a longer set scrolls sideways under a fade rather than wrap. */
-.after { max-width: 720px; margin: 0 auto 8px; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
-.after::-webkit-scrollbar { display: none; }
-.after > * { flex: none; }
-.after:empty { display: none; }
-.composer { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 18px; border: 1px solid #ececef; border-radius: 26px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
-.composer:hover { border-color: #e1e1e5; }
+.composer { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 10px 16px; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
+.composer:hover { border-color: #d4d4d8; }
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
-.composer input { height: 34px; font-size: 15px; font-weight: 400; color: #18181b; }
+.composer input { height: 40px; font-size: 14.5px; font-weight: 400; color: #18181b; }
 .composer :focus-visible { outline: 0; }
-.composer-foot { display: contents; }
-.chat.is-empty .composer { max-width: 760px; min-height: 112px; flex-wrap: wrap; padding: 16px 12px 12px 16px; border-color: #e4e4e7; border-radius: 18px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -16px rgba(16, 16, 20, 0.14); }
-.chat.is-empty .composer input { flex-basis: 100%; height: 40px; align-self: flex-start; }
-.chat.is-empty .composer-foot { display: flex; flex: 1; align-items: center; gap: 6px; min-width: 0; min-height: 32px; margin-top: 4px; }
+.composer-foot { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 32px; }
+/* The chips keep one row: a longer set scrolls sideways under a fade rather than wrap. */
+.tools, .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.after { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+.tools::-webkit-scrollbar, .after::-webkit-scrollbar { display: none; }
+.tools > *, .after > * { flex: none; }
+.after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
+.after .context .iconify { width: 14px; height: 14px; color: #71717a; }
+.chat.is-empty .composer { max-width: 760px; min-height: 112px; padding: 14px 12px 12px 16px; border-radius: 18px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -16px rgba(16, 16, 20, 0.14); }
+.chat.is-empty .composer input { height: 44px; }
 .tool { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
 .tool:hover { background: #f7f7f8; }
 .tool .iconify { width: 14px; height: 14px; color: #71717a; }
@@ -1161,7 +1167,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .tool.alert .iconify { color: currentColor; }
 .mc-send { width: 32px; height: 32px; flex: none; justify-content: center; padding: 0; border-radius: 999px; background: #18181b; color: #fff; }
 .mc-send:hover:not(:disabled) { background: #27272a; }
-.mc-send:disabled { background: #18181b; color: #fff; opacity: 0.35; }
+.mc-send:disabled { background: #18181b; color: #fff; opacity: 1; cursor: default; }
+.mc-send:disabled :deep(.iconify) { opacity: 0.5; }
 .fine { max-width: 720px; margin: 8px auto 0; color: #a1a1aa; font-size: 12px; line-height: 16px; text-align: center; }
 .fine.foot { flex: none; margin: 0 auto; padding: 0 28px 14px; }
 .context { flex: none; }
@@ -1185,8 +1192,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .foot-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .foot-acts button { flex: 1; }
 .cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
-
-.chat:not(.is-empty) .composer .grow { display: none; }
 
 /* Shopping list preview */
 .mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; background: rgba(42, 42, 72, 0.45); animation: mc-rise 420ms var(--ease) both; }

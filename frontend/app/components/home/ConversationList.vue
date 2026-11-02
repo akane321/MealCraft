@@ -2,7 +2,7 @@
 import { todayIsoDate } from "~/lib/meal-plan-format";
 import type { AgentSession } from "~/types/agent";
 
-// The household's conversations: search, pinned first, then by when each last changed; each can be renamed,
+// The household's conversations (filtered by `query`, typed in the sidebar's search): pinned first, then by when each last changed; each can be renamed,
 // pinned or deleted from its menu. Opening one is the only thing a row itself does.
 const props = defineProps<{ items: AgentSession[]; currentId: number | null; weekId: number | null }>();
 const emit = defineEmits<{
@@ -12,7 +12,7 @@ const emit = defineEmits<{
   remove: [item: AgentSession];
 }>();
 
-const query = ref("");
+const query = defineModel<string>("query", { default: "" });
 const menuFor = ref<number | null>(null);
 const editing = ref<number | null>(null);
 const draftTitle = ref("");
@@ -91,10 +91,6 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 
 <template>
   <section class="convos" aria-label="Your plans">
-    <label class="search">
-      <UIcon name="i-lucide-search" aria-hidden="true" />
-      <input id="plan-search" v-model="query" type="search" placeholder="Search plans" aria-label="Search plans" autocomplete="off">
-    </label>
     <p v-if="!filtered.length" class="empty mc-small">{{ query ? "No plan matches." : "Your plans will appear here." }}</p>
     <div class="groups">
       <section v-for="group in groups" :key="group.label" :aria-label="group.label">
@@ -117,7 +113,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
               <svg v-if="item.pinned_at" class="pin" viewBox="0 0 24 24" aria-label="Pinned"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" /></svg>
               <span class="t">{{ titleOf(item) }}</span>
               <!-- One line a row: the status is a dot for the current plan, and read out for every row. -->
-              <span class="s" :class="statusOf(item).tone" aria-hidden="true" />
+              <span class="s" :class="statusOf(item).tone" :title="statusOf(item).label" aria-hidden="true" />
               <span class="visually-hidden">{{ statusOf(item).label }}</span>
             </button>
             <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="menuFor = menuFor === item.id ? null : item.id">
@@ -137,12 +133,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 </template>
 
 <style scoped>
-.convos { min-height: 0; display: flex; flex-direction: column; gap: 8px; }
-.search { flex: none; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid #ededf0; border-radius: 10px; background: #fff; }
-.search .iconify { width: 15px; height: 15px; flex: none; color: #a1a1aa; }
-.search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font: inherit; font-size: 13.5px; color: #18181b; }
-.search input::placeholder { color: #a1a1aa; }
-.search:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12); }
+.convos { min-height: 0; display: flex; flex-direction: column; gap: 6px; }
 .empty { margin: 4px 10px; color: #a1a1aa; }
 .groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; -webkit-mask-image: linear-gradient(#000 calc(100% - 6px), transparent); mask-image: linear-gradient(#000 calc(100% - 6px), transparent); }
 h3 { margin: 0; padding: 0 10px 2px; font-size: 11px; line-height: 14px; font-weight: 500; color: #a1a1aa; }

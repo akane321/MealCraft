@@ -19,6 +19,7 @@ const on = (page: string) => ({ on: props.current === page });
     <slot name="action">
       <UButton to="/" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan</UButton>
     </slot>
+    <slot name="search" />
     <nav class="pages" aria-label="Pages">
       <!-- On the plan itself this is not a link, so the nav holds only the pages that leave it. -->
       <span v-if="current === 'plan'" class="sb-item on" aria-current="page"><UIcon name="i-lucide-house" />My plan</span>
@@ -36,7 +37,7 @@ const on = (page: string) => ({ on: props.current === page });
       <div class="home-card">
         <b>Your household</b>
         <small>Who's eating, the budget and what to avoid.</small>
-        <NuxtLink to="/profile" class="home-link">Household<UIcon name="i-lucide-arrow-up-right" /></NuxtLink>
+        <NuxtLink to="/profile" class="home-link">Household<UIcon name="i-lucide-chevron-right" /></NuxtLink>
       </div>
     </slot>
     <div class="sb-user">

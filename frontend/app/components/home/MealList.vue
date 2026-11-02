@@ -34,7 +34,7 @@ const severalMeals = computed(() => week.value.some(day => day.meals.length > 1)
 const dayText = (day: { meals: PlannedMeal[] }) => day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(", ")}`).join("; ");
 
 const STATE: Record<string, string> = { completed: "Cooked", skipped: "Skipped", partial: "Part cooked" };
-const CHIP_TONE: Record<string, string> = { next: "warn", tomorrow: "info" };
+const CHIP_TONE: Record<string, string> = { next: "warn", tomorrow: "info", completed: "ok" };
 const tomorrow = computed(() => {
   const date = new Date(`${todayIsoDate()}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() + 1);
@@ -49,16 +49,20 @@ function chip(meal: PlannedMeal): { kind: string; label: string } {
 }
 
 // Each action is a sentence the assistant already understands; it is previewed before anything changes.
+// Shown as small icon buttons; the label is each one's name and tooltip (icon names literal for the icon bundle).
 const ACTIONS = [
-  { label: "Swap", text: (when: string, title: string) => `Swap ${when}'s ${title} for something else` },
-  { label: "Keep", text: (when: string, title: string) => `Lock ${when}'s ${title}` },
-  { label: "Skip", text: (when: string, title: string) => `Skip ${when}'s ${title}` },
-  { label: "Can't buy…", text: (when: string, title: string) => `I can't buy an ingredient for ${when}'s ${title}: ` },
+  { label: "Swap", icon: "i-lucide-repeat", text: (when: string, title: string) => `Swap ${when}'s ${title} for something else` },
+  { label: "Keep", icon: "i-lucide-lock", text: (when: string, title: string) => `Lock ${when}'s ${title}` },
+  { label: "Skip", icon: "i-lucide-skip-forward", text: (when: string, title: string) => `Skip ${when}'s ${title}` },
+  { label: "Can't buy…", icon: "i-lucide-package-x", text: (when: string, title: string) => `I can't buy an ingredient for ${when}'s ${title}: ` },
 ];
+const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", dislike: "i-lucide-thumbs-down", never_again: "i-lucide-ban" };
 </script>
 
 <template>
   <div>
+    <!-- The whole plan at a glance, one line a day, above the rows that change each dish. -->
+    <p class="overview-head">At a glance</p>
     <ol class="overview" :class="{ numbered }" aria-label="Plan overview">
       <li v-for="day in week" :key="day.dayIndex">
         <span>{{ planDayName(day.date, "short", numbered) }}</span>
@@ -127,9 +131,11 @@ const ACTIONS = [
                     v-for="action in ACTIONS"
                     :key="action.label"
                     type="button"
+                    :aria-label="action.label"
+                    :title="action.label"
                     @click="emit('ask', action.text(sentenceDay(day.date, numbered), dish.recipe.title))"
                   >
-                    {{ action.label }}
+                    <UIcon :name="action.icon" aria-hidden="true" />
                   </button>
                 </span>
                 <!-- Pressing the pressed button again undoes it; the whole household's, whoever pressed it. -->
@@ -141,9 +147,11 @@ const ACTIONS = [
                     :aria-pressed="dish.feedback === button.kind"
                     :aria-busy="feedbackRecipeId === dish.recipe.id"
                     :disabled="feedbackRecipeId === dish.recipe.id"
+                    :aria-label="button.label"
+                    :title="button.label"
                     @click="emit('feedback', dish.recipe.id, nextFeedback(dish.feedback, button.kind))"
                   >
-                    {{ button.label }}
+                    <UIcon :name="FEEDBACK_ICON[button.kind]!" aria-hidden="true" />
                   </button>
                 </span>
                 <span v-if="rated(dish) && dish.feedback === 'never_again'" class="never">
@@ -160,11 +168,13 @@ const ACTIONS = [
 </template>
 
 <style scoped>
-.overview { list-style: none; margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--c-line-soft); }
-.overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12px; line-height: 22px; }
-.overview li > span:first-child { font-weight: 800; }
+/* At a glance: a small titled card, one quiet line a day. */
+.overview-head { margin: 12px 16px 0; padding: 10px 12px 4px; border: 1px solid #ececef; border-bottom: 0; border-radius: 12px 12px 0 0; background: #fff; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.overview { list-style: none; margin: 0 16px 4px; padding: 0 12px 8px; border: 1px solid #ececef; border-top: 0; border-radius: 0 0 12px 12px; background: #fff; }
+.overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12.5px; line-height: 22px; }
+.overview li > span:first-child { color: #71717a; font-weight: 500; }
 .overview.numbered li { grid-template-columns: 56px minmax(0, 1fr); }
-.overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--c-muted); }
+.overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #27272a; }
 /* Each meal's main shrinks in proportion to its length, so the last (dinner) never falls off the line. */
 .overview-mains { display: flex; min-width: 0; }
 .overview-mains > span { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -174,10 +184,9 @@ const ACTIONS = [
 .row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
 /* With several meals a day the first column names the meal ("Breakfast"), wider than a weekday. */
 .row.named { grid-template-columns: 64px 32px minmax(0, 1fr); }
-.row.done { opacity: 0.6; }
 .d { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
-.d b { font-weight: 800; }
-.d span { color: var(--c-muted); }
+.d b { color: #71717a; font-weight: 600; }
+.d span { color: #a1a1aa; }
 .dishes { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .dish { min-width: 0; display: flex; flex-direction: column; }
 .title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -187,25 +196,24 @@ const ACTIONS = [
 .title-line .mc-chip { flex: none; margin-left: auto; }
 .title-line .mc-chip.warn { background: #f5f3ff; color: #6d28d9; }
 .title-line .mc-chip.info { background: #f4f4f5; color: #52525b; }
-.name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dish.side .name { font-size: 13px; font-weight: 700; }
-.name:hover { color: var(--c-coral); }
+.name { max-width: 100%; padding: 0; border: 0; background: none; color: var(--mc-strong); font: inherit; font-size: 14px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dish.side .name { font-size: 13px; font-weight: 500; }
+.name:hover { color: #6d28d9; }
 .rest { font-size: 12.5px; line-height: 18px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kept { color: var(--c-green-text); font-weight: 800; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes and its feedback, quiet until the row is pointed at or focused; each group wraps as a whole
-   rather than run under the chip. */
-.act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; }
-.acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.75; transition: opacity 120ms var(--ease); }
-.acts { flex-wrap: wrap; }
+/* A dish's changes and its feedback: small ghost icon buttons, dim until the row is pointed at or focused. */
+.act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 4px 0 0 -5px; }
+.acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.6; transition: opacity 120ms var(--ease); }
+.feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; }
 .row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
-/* Quiet text buttons: one calm line under the dish, a fill only when pointed at. */
-.acts button, .feedback button { flex: none; height: 24px; padding: 0 7px; white-space: nowrap; border: 0; border-radius: 999px; background: transparent; color: #71717a; font-size: 12px; font-weight: 500; }
+.acts button, .feedback button { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+.acts button .iconify, .feedback button .iconify { width: 16px; height: 16px; }
 .acts button:hover, .feedback button:hover { background: #f4f4f5; color: var(--mc-strong); }
-.feedback button[aria-pressed="true"] { border-color: var(--c-ink); background: var(--c-ink); color: #fff; }
+.feedback button[aria-pressed="true"] { background: #f5f3ff; color: #6d28d9; }
 .feedback button:disabled { opacity: 0.6; }
-.never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 700; white-space: nowrap; }
-.never button { padding: 0; border: 0; background: none; color: var(--c-coral); font: inherit; text-decoration: underline; }
+.never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 500; white-space: nowrap; }
+.never button { padding: 0; border: 0; background: none; color: #6d28d9; font: inherit; font-weight: 600; }
 .reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
 .reason { height: 20px; padding: 0 8px; border: 1px solid var(--c-line); border-radius: 999px; background: none; color: var(--c-muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .reason:hover, .reason[aria-expanded="true"] { border-color: var(--c-ink); color: var(--c-ink); }

@@ -76,7 +76,7 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
             <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once in this plan"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
           </span>
         </span>
-        <span class="n">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
+        <span class="n" :title="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
         <!-- The name above is the day's last meal; with several meals, count them rather than name one. -->
         <span class="mc-small more">{{ [day.meals.length > 1 ? `${day.meals.length} meals` : null, dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0))].filter(Boolean).join(" · ") }}</span>
       </button>
@@ -100,15 +100,16 @@ h3 { margin: 0; }
 .fig.ok .v { color: var(--c-green-text); }
 .fig.over .v { color: var(--c-amber-text); }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--c-line-soft); }
-.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 4px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 6px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
 .tile:last-child, .tile:nth-child(7n) { border-right: 0; }
 .tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
 .tile.skipped { opacity: 0.5; }
-.tile.today { background: var(--c-today); }
-.d { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-ink); }
-.d span { color: var(--c-muted); font-weight: 700; }
-.today .d { color: var(--c-today-text); font-weight: 700; box-shadow: inset 0 -2px 0 #8b5cf6; }
+.tile.today { background: #fafaff; }
+.d { padding: 2px 8px; border-radius: 999px; font-size: 11px; line-height: 16px; font-weight: 600; color: #52525b; letter-spacing: 0.02em; }
+.d span { color: #a1a1aa; font-weight: 500; }
+.today .d { background: #f5f3ff; color: #6d28d9; }
+.today .d span { color: #8b5cf6; }
 .meals { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; justify-content: center; }
 .meal { position: relative; display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; }
 .meal.several { width: 40px; height: 36px; }
@@ -121,8 +122,8 @@ h3 { margin: 0; }
 .tick circle { stroke: #fff; stroke-width: 1.5; }
 .again { left: -2px; top: -2px; stroke: var(--c-blue); stroke-width: 1.8; }
 .again path { fill: none; stroke-width: 2; }
-/* Up to three lines, so a narrow day keeps a long name whole rather than one word and an ellipsis. */
-.n { min-height: 36px; width: 100%; font-size: 12px; line-height: 18px; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+/* Two lines at most; the full name is the tooltip. */
+.n { min-height: 34px; width: 100%; padding: 0 2px; color: #27272a; font-size: 12.5px; line-height: 17px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
 </style>
