@@ -201,9 +201,12 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const names = stores.length ? stores.map(store => RETAILER_SHORT[store]) : [RETAILER_SHORT.fairprice];
   if (samples) return `${andList([...names, "sample"])} prices — source shown on each item`;
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
-  const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `${andList(names)} prices from ${date}`;
+  return `${andList(names)} prices from ${shortDate(fetched)}`;
 }
+
+/** A date in Singapore, as "29 Oct", whatever the time zone of the machine showing it. */
+export const shortDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
 
 /** An observation's date is never replaced by the time a later price check was attempted. */
 export function groceryPriceLabel(line: GroceryLineEstimate): string {
@@ -212,11 +215,8 @@ export function groceryPriceLabel(line: GroceryLineEstimate): string {
   const source = evidence?.price_source ?? evidence?.mode;
   if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
   const kind = priceKind(line);
-  const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  if (line.product.source === "manual") {
-    const day = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
-    return `Price recorded by hand on ${day}`; // observed on a person's visit; never checked live
-  }
+  const date = shortDate(evidence?.fetched_at ?? line.product.fetched_at);
+  if (line.product.source === "manual") return `Price recorded by hand on ${date}`; // observed on a person's visit; never checked live
   const base = kind === "sample"
     ? "Sample price"
     : lineRetailer(line) !== "fairprice" ? `${RETAILER_SHORT[lineRetailer(line)]} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
@@ -249,8 +249,7 @@ export function productSourceLabel(result: ProductSearchResponse): string {
   if (!result.cached) return "FairPrice prices now";
   const fetched = result.items.map(item => item.fetched_at).sort()[0];
   if (!fetched) return `Saved FairPrice prices${missed}`;
-  const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `FairPrice prices from ${date}${missed}`;
+  return `FairPrice prices from ${shortDate(fetched)}${missed}`;
 }
 
 /** Per-person nutrition averaged over the dinners that still count (skipped ones don't). */

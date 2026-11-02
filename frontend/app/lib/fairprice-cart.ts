@@ -10,7 +10,7 @@ import type {
   FairPriceResultStatus,
 } from "~/types/meal-plan";
 import type { Retailer } from "~/types/recommendation";
-import { RETAILER_SHORT, STORE_ORDER, andList, formatSgd } from "./home-surface";
+import { RETAILER_SHORT, STORE_ORDER, andList, formatSgd, shortDate } from "./home-surface";
 
 export const FAIRPRICE_LOGIN_URL = "https://www.fairprice.com.sg/login";
 export const FAIRPRICE_CHECKOUT_URL = "https://www.fairprice.com.sg/checkout";
@@ -151,10 +151,6 @@ export const CART_CHANGED_NOTE = "Other items already in your FairPrice cart cha
 
 /** True when the extension saw other items of the cart differ after its write. */
 export const cartChanged = (reply: FairPriceExtensionReply): boolean => Array.isArray(reply.cart_changed) && reply.cart_changed.length > 0;
-
-/** A date in Singapore, as "29 Oct". */
-export const shortDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
 
 export interface CartStateLabel {
   key: string;
