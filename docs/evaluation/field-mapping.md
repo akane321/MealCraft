@@ -23,7 +23,7 @@ A missing or empty value is listed under `not_stated`; it is never filled with a
 
 **An empty list or `None` reads as "not stated".** The echo cannot tell "the user said there is no allergen" (or no
 limit) from "the user said nothing", so a stated "none" and "not stated" look the same here. The mapping does not try
-to separate them; the intent scorer treats an empty expected value as
+to separate them; the intent scorer (`docs/evaluation/intent-scorer.md`) treats an empty expected value as
 satisfied by silence.
 
 **Premise.** `household_size` and `max_cooking_time_minutes` can come from a saved household instead of the
