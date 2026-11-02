@@ -11,6 +11,13 @@ const WIDTH = 560;
 const HEIGHT = 150;
 const max = computed(() => niceMax(Math.max(0, ...props.series.flatMap(item => item.values.filter((value): value is number => value !== null)))));
 const step = computed(() => (props.days.length > 1 ? WIDTH / (props.days.length - 1) : 0));
+// Days with no timed run leave a gap; a dashed line joins the points either side, so a gap reads as "no runs".
+function bridges(values: Array<number | null>) {
+  const points = values.flatMap((value, index) => (value === null ? [] : [{ index, value }]));
+  return points.slice(1).map((to, i) => ({ from: points[i]!, to })).filter(pair => pair.to.index - pair.from.index > 1);
+}
+const gapped = computed(() => props.series.some(item => bridges(item.values).length));
+const y = (value: number) => HEIGHT - (value / max.value) * HEIGHT;
 const empty = computed(() => props.series.every(item => item.values.every(value => value === null)));
 
 function shortDay(day: string) {
@@ -25,6 +32,7 @@ function shortDay(day: string) {
       <line x1="0" y1="0" :x2="WIDTH" y2="0" class="grid" />
       <text x="0" y="-2" class="tick">{{ formatSeconds(max) }}</text>
       <g v-for="item in series" :key="item.name">
+        <line v-for="gap in bridges(item.values)" :key="gap.from.index" :x1="gap.from.index * step" :y1="y(gap.from.value)" :x2="gap.to.index * step" :y2="y(gap.to.value)" class="gap" />
         <path :d="linePath(item.values, max, WIDTH, HEIGHT)" fill="none" :stroke="item.color" stroke-width="2" stroke-linejoin="round" />
         <template v-for="(value, index) in item.values" :key="index">
           <circle v-if="value !== null" :cx="index * step" :cy="HEIGHT - (value / max) * HEIGHT" r="3" :fill="item.color">
@@ -38,13 +46,17 @@ function shortDay(day: string) {
     </svg>
     <figcaption class="legend">
       <template v-if="empty">No timed planning runs in these two weeks.</template>
-      <span v-for="item in series" v-else :key="item.name"><i :style="{ background: item.color }" />{{ item.name }}</span>
+      <template v-else>
+        <span v-for="item in series" :key="item.name"><i :style="{ background: item.color }" />{{ item.name }}</span>
+        <span v-if="gapped"><i class="gap-key" />no timed runs</span>
+      </template>
     </figcaption>
   </figure>
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; --sage: #34d399; --accent: #a78bfa; --danger: #f87171; --c-green: #6ee7b7; --c-blue: #a5b4fc; }
+.ops-chart { margin: 0; --sage: #8b5cf6; --accent: #c4b5fd; --danger: #f87171; --c-green: #ddd6fe; --c-blue: #a5b4fc; }
+.gap { stroke: #d4d4d8; stroke-width: 1.5; stroke-dasharray: 3 4; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
 .axis { stroke: #ececef; }
 .grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
@@ -52,4 +64,5 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; border-radius: 50%; }
+.legend .gap-key { width: 14px; height: 0; border-radius: 0; border-top: 1.5px dashed #d4d4d8; }
 </style>

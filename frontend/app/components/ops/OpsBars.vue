@@ -14,8 +14,8 @@ const HEIGHT = 150;
 const totals = computed(() => props.days.map((_, index) => props.series.reduce((sum, item) => sum + (item.values[index] ?? 0), 0)));
 const max = computed(() => niceMax(Math.max(0, ...totals.value)));
 const slot = computed(() => WIDTH / Math.max(props.days.length, 1));
-// Thin bars, at most 14 units wide, centred in their day.
-const barWidth = computed(() => Math.min(slot.value * 0.5, 14));
+// Thin bars, at most 8 units wide, centred in their day.
+const barWidth = computed(() => Math.min(slot.value * 0.5, 8));
 
 const bars = computed(() => props.days.flatMap((day, index) => {
   let top = HEIGHT;
@@ -54,7 +54,8 @@ function shortDay(day: string) {
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; --sage: #34d399; --accent: #a78bfa; --danger: #f87171; --c-green: #6ee7b7; --c-blue: #a5b4fc; }
+/* Calm series: violet for counts, lilac for the good statuses, red only for failures. */
+.ops-chart { margin: 0; --sage: #c4b5fd; --accent: #8b5cf6; --danger: #f87171; --c-green: #ddd6fe; --c-blue: #a5b4fc; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
 .axis { stroke: #ececef; }
 .grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
