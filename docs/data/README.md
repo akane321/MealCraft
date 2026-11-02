@@ -67,7 +67,8 @@ Data release v3 (Knowledge ADR-0103 section 3, issue #390; not the v3 held-out e
 in `data-engineering/data/release/v3/` and is the release the product imports (Knowledge ADR-0111). It holds
 18,335 recipes: the first v3 build's 12,895, byte for byte, plus a second wave of new RecipeNLG candidates added
 on 2026-11-02 (owner: grow the recipe count, medium quality is fine). The importer skips `RCP2_5EFEFE98D566`, as
-it did on v2.2 (it loaded 12,894 of the first build; the 18,335-recipe import is not yet re-run). v2.2 stays as
+it did on v2.2, so it loads 18,334 (12,894 of the first build). The wave-2 recipes have rule tags only and
+recipe vectors like the rest. v2.2 stays as
 v3's frozen base. v3 is every v2.2 record copied verbatim (8,968) plus recipes added from the over-quota v2.1 set
 (1,867) and from new RecipeNLG candidates: wave 1 (2,237) enriched through the OpenAI API, wave 2 (5,263) partly
 through the OpenAI API and partly by Claude subagents with the same instructions and checks. v2.2's 701
