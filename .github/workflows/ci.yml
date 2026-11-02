@@ -58,7 +58,9 @@ jobs:
     # backend job took 26. Planning time has no hard limit (ADR-0080), so the jobs get room to finish. Raised to 120
     # for data release v3 (2026-11-02): on the development machine the suite took 12.3 min (10.9 on the branch
     # before its packet fix), full_default 3.5 and shared_dish 4.7, about 20.5 min; at the 3.25-3.75x hosted
-    # slowdown above that is 67-77 min before the other steps. No hosted run on v3 had been timed yet.
+    # slowdown above that is 67-77 min before the other steps. No hosted run on v3 had been timed yet. With v3's
+    # second wave (18,335 recipes, 2026-11-02) the suite took 15.4 min, full_default 4.0 and shared_dish 4.5, about
+    # 23.8 min; at 3.75x that is about 89 min before the other steps, so 120 still leaves room.
     timeout-minutes: 120
 
     steps:
