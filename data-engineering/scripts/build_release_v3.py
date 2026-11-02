@@ -28,6 +28,11 @@
 5. Every record of the first v3 build (2026-11-03: 12,895 recipes; the added ones' line sha256 are in
    `data/enrichment/v3_first_build_lines.tsv`) stays byte for byte, and recipes.jsonl stays under 95,000,000 bytes
    (GitHub refuses files over 100 MB); either failing stops the build.
+6. Reviewed corrections (`data/enrichment/v3-corrections.csv`, checked by `v3_corrections.py`, issue #408): the
+   cuisine, course and servings rows go into the added recipes' enrichment results before they are built, so the
+   cap, the checks and the per-serving nutrition see the reviewed values; only the corrected recipes are exempt from
+   rule 5. Withdraw rows stay released (`v3_corrections.py withdraw` keeps them out of plans). An empty table
+   changes nothing.
 
 Every candidate not released is in `dropped.jsonl` with its reason. The manifest carries the sha256 of every input
 and a `fingerprint` over recipes.jsonl, ingredients.jsonl and the manifest itself without that field. Nothing reads
@@ -49,6 +54,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import build_release_v2 as build  # noqa: E402
 import correct_release_v22 as correct  # noqa: E402
+import v3_corrections as reviewed  # noqa: E402
 from build_v2_candidates import QUOTAS  # noqa: E402
 from prepare_v2_inputs import stated_durations  # noqa: E402
 from select_v3_candidates import CAP, cap_by_label, title_key  # noqa: E402
@@ -66,6 +72,7 @@ PACKETS = ROOT / "enrichment-work"
 ENRICHMENT = ROOT / "data" / "enrichment"
 WAVE1_CSV = ENRICHMENT / "v3_selected_wave1.csv"
 FIRST_BUILD = ENRICHMENT / "v3_first_build_lines.tsv"  # recipe_id and line sha256 of the first build's added records
+CORRECTIONS = reviewed.TABLE  # data/enrichment/v3-corrections.csv
 STAGING_INPUTS = (
     "v2_enrich_set.jsonl",
     "v2_merged.recipes.jsonl",
@@ -241,8 +248,41 @@ def choose(v22: list[dict], legs: list[tuple[str, list[dict]]], entries: dict):
     return kept, drops, corrections, {r["recipe_id"]: leg_of[r["recipe_id"]] for r in kept}
 
 
-def legs_from_staging(staging: Path, packets: Path, rules: dict) -> tuple[dict, list[tuple[str, list]], list]:
-    """Rebuild the v2 enrichment set (over-quota leg) and the v3 selection (new leg) from the staging inputs."""
+def recipe_id_of(candidate_id: str) -> str:
+    """The recipe id `build_release_v2.build_recipe` gives a candidate."""
+    return "RCP2_" + sha256(candidate_id.encode())[:12].upper()
+
+
+def apply_reviews(results: dict[str, dict], fixes: dict[str, list[dict]]) -> tuple[list[str], set[str]]:
+    """Put the reviewed cuisine, course and servings rows into the enrichment results they name, so that
+    `build_recipe` computes nutrition per serving from the reviewed servings. The field's evidence says who reviewed
+    it and why, its confidence is 1.0. Returns the problems (old_value is not the built value) and the ids found."""
+    problems, found = [], set()
+    for candidate_id, result in results.items():
+        rid = recipe_id_of(candidate_id)
+        if rid not in fixes or "exclude" in result:
+            continue
+        found.add(rid)
+        result = results[candidate_id] = {
+            **result,
+            "evidence": dict(result["evidence"]),
+            "confidence": dict(result["confidence"]),
+        }
+        for row in fixes[rid]:
+            field, old = row["field"], row["old_value"]
+            if str(result[field]) != old:
+                problems.append(f"row {row['row']}: old_value {old!r} is not the built {field} {result[field]!r}")
+            result[field] = reviewed.new_value(row)
+            result["evidence"][field] = f"reviewed by {row['reviewer']}: {row['reason']} (was {old})"
+            result["confidence"][field] = 1.0
+    return problems, found
+
+
+def legs_from_staging(
+    staging: Path, packets: Path, rules: dict, fixes: dict[str, list[dict]] | None = None
+) -> tuple[dict, list[tuple[str, list]], list]:
+    """Rebuild the v2 enrichment set (over-quota leg) and the v3 selection (new leg) from the staging inputs, with
+    the reviewed corrections applied (`fixes`: recipe_id -> its cuisine, course and servings rows)."""
     v2_set = {r["candidate_id"]: r for r in read_jsonl(staging / "v2_enrich_set.jsonl")}
     # As build_release_v2: the durations the packet showed the enricher decide whether a time may be "stated".
     for part in ("A", "B", "C"):
@@ -257,6 +297,14 @@ def legs_from_staging(staging: Path, packets: Path, rules: dict) -> tuple[dict, 
         record["stated_durations"] = stated_durations(record["instructions"])  # what enrich_v3_openai showed
     new_results = {r["candidate_id"]: r for r in read_jsonl(staging / "v3_merged.recipes.jsonl")}
     failed = {r["candidate_id"]: "; ".join(r["errors"]) for r in read_jsonl(staging / "v3_enrich_failed.jsonl")}
+    fixes = fixes or {}
+    problems, found = [], set()
+    for results in (v2_results, new_results):
+        more, ids = apply_reviews(results, fixes)
+        problems, found = problems + more, found | ids
+    problems += [f"row {fixes[rid][0]['row']}: {rid} is not a recipe this build makes" for rid in set(fixes) - found]
+    if problems:
+        raise SystemExit("v3 corrections: " + "; ".join(sorted(problems)))
     over, over_drops = rebuild(v2_set, v2_results, forms, rules, {})
     new, new_drops = rebuild(new_set, new_results, forms, rules, failed)
     first = [r for r in new if r["source"]["candidate_id"] in wave1]
@@ -294,9 +342,18 @@ def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: d
     if not set(v22_lines) <= set(lines):
         problems.append("a v2.2 record is not byte-identical in v3")
     hashes, first = line_hashes(lines), limits["first_build"]
-    changed = sorted(key for key, digest in first.items() if hashes.get(key) != digest)
+    exempt = {row["recipe_id"] for row in limits["reviews"] if row["field"] != "withdraw"}
+    changed = sorted(key for key, digest in first.items() if key not in exempt and hashes.get(key) != digest)
     if changed:
         problems.append(f"{len(changed)} first-build records missing or changed, e.g. {changed[:3]}")
+    by_id = {r["recipe_id"]: r for r in added}
+    unapplied = [
+        row["row"]
+        for row in limits["reviews"]
+        if row["field"] != "withdraw" and by_id.get(row["recipe_id"], {}).get(row["field"]) != reviewed.new_value(row)
+    ]
+    if unapplied:
+        problems.append(f"corrections not in the released recipes, table rows {unapplied[:5]}")
     size = sum(len(line.encode()) + 1 for line in lines)
     if size > limits["max_bytes"]:
         problems.append(f"recipes.jsonl is {size} bytes > {limits['max_bytes']}")
@@ -327,7 +384,9 @@ def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: d
         raise SystemExit("release v3 checks failed: " + "; ".join(problems))
     return {
         "v2_2_records_byte_identical": len(v22_lines),
-        "first_build_records_byte_identical": len(set(first) | {json.loads(line)["recipe_id"] for line in v22_lines}),
+        "first_build_records_byte_identical": len(
+            (set(first) - exempt) | {json.loads(line)["recipe_id"] for line in v22_lines}
+        ),
         "recipes_bytes": size,
         "max_bytes": limits["max_bytes"],
         "largest_label": {"cuisine": top, "recipes": top_n, "share": share(top_n, len(recipes))},
@@ -364,6 +423,7 @@ def assemble(
     minimum: int = MINIMUM_RELEASED,
     first_build: dict[str, str] | None = None,
     max_bytes: int = MAX_RECIPES_BYTES,
+    reviews: list[dict] = (),
 ) -> dict[str, bytes]:
     """Every file of data/release/v3 as bytes, from v2.2's records and ingredients and the built recipes of each leg."""
     v22 = [json.loads(line) for line in v22_lines]
@@ -382,7 +442,7 @@ def assemble(
     by_id.update({r["recipe_id"]: json.dumps(r, ensure_ascii=False, sort_keys=True) for r in added})
     lines = [by_id[key] for key in sorted(by_id)]
     recipes = [json.loads(line) for line in lines]
-    limits = {"minimum": minimum, "first_build": first_build or {}, "max_bytes": max_bytes}
+    limits = {"minimum": minimum, "first_build": first_build or {}, "max_bytes": max_bytes, "reviews": reviews}
     checks = verify(lines, v22_lines, added, entries, rules, limits)
     enrichment_set = sizes["v2_enrichment_set"] + sizes["v3_selected"]
     if len(recipes) + len(drops) != enrichment_set:
@@ -434,6 +494,11 @@ def assemble(
         },
         "change_notes": CHANGE_NOTES,
     }
+    if reviews:  # an empty table leaves the manifest as it was
+        manifest["derived_from"]["reviewed_corrections"] = {
+            "rows_by_field": tally(row["field"] for row in reviews),
+            "recipes_corrected": len({row["recipe_id"] for row in reviews if row["field"] != "withdraw"}),
+        }
     files = {
         "recipes.jsonl": "".join(line + "\n" for line in lines).encode(),
         "ingredients.jsonl": ingredients,
@@ -517,6 +582,22 @@ def report(manifest: dict, estimated: dict, checks: dict, added: list[dict], dig
         for by, n in counts[key].items()
     )
     largest = checks["largest_label"]
+    review = derived.get("reviewed_corrections")
+    corrected = ""
+    if review:  # an empty table leaves the report as it was
+        rows = "\n".join(f"| `{field}` | {n} |" for field, n in review["rows_by_field"].items())
+        corrected = f"""## Reviewed corrections
+
+From `data/enrichment/v3-corrections.csv` (checked by `scripts/v3_corrections.py`; its sha256 is in the manifest's
+`committed_sha256`): {review["recipes_corrected"]} added recipes corrected (exempt from check 2), and each corrected
+field's evidence names the reviewer and the reason. Withdrawn: {review["rows_by_field"].get("withdraw", 0)}; they
+stay released, and `data/recipes/withdrawn.json` keeps them out of plans (`v3_corrections.py withdraw`).
+
+| Field | Rows |
+| --- | ---: |
+{rows}
+
+"""
     return f"""# Data release v3 quality report
 
 Generated by `scripts/build_release_v3.py` from `data/release/v2.2/` and the git-ignored staging inputs whose sha256
@@ -584,7 +665,7 @@ built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corr
 | --- | ---: |
 {classes}
 
-## Checks
+{corrected}## Checks
 
 All pass, or the build stops:
 
@@ -629,9 +710,18 @@ def main() -> int:
     args = parser.parse_args()
     v22_lines = [line for line in (V22 / "recipes.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
     rules = build.ingredient_rules()
-    sizes, legs, build_drops = legs_from_staging(STAGING, PACKETS, rules)
+    reviews = reviewed.read_table(CORRECTIONS)
+    problems = reviewed.check_rows(reviews, {json.loads(line)["recipe_id"] for line in v22_lines})
+    if problems:
+        raise SystemExit("v3 corrections: " + "; ".join(problems))
+    fixes = collections.defaultdict(list)
+    for row in reviews:
+        if row["field"] != "withdraw":
+            fixes[row["recipe_id"]].append(row)
+    sizes, legs, build_drops = legs_from_staging(STAGING, PACKETS, rules, fixes)
     staging = {name: sha256((STAGING / name).read_bytes()) for name in STAGING_INPUTS}
-    committed = {f"data/enrichment/{path.name}": sha256(path.read_bytes()) for path in (WAVE1_CSV, FIRST_BUILD)}
+    tables = (WAVE1_CSV, FIRST_BUILD, CORRECTIONS) if reviews else (WAVE1_CSV, FIRST_BUILD)
+    committed = {f"data/enrichment/{path.name}": sha256(path.read_bytes()) for path in tables}
     for part in ("A", "B", "C"):
         staging[f"enrichment-work/part-{part}/recipes.input.jsonl"] = sha256(
             (PACKETS / f"part-{part}" / "recipes.input.jsonl").read_bytes()
@@ -645,7 +735,9 @@ def main() -> int:
         "committed_sha256": committed,
     }
     ingredients = (V22 / "ingredients.jsonl").read_bytes()
-    files = assemble(v22_lines, ingredients, rules, sizes, legs, build_drops, inputs, first_build=read_first_build())
+    files = assemble(
+        v22_lines, ingredients, rules, sizes, legs, build_drops, inputs, first_build=read_first_build(), reviews=reviews
+    )
     args.out.mkdir(parents=True, exist_ok=True)
     for name, data in files.items():
         (args.out / name).write_bytes(data)
