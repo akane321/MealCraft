@@ -387,6 +387,67 @@ def test_rule_regeneration_keeps_the_unreviewed_model_batch_gated(monkeypatch) -
     assert unreviewed(SimpleNamespace(**entry))
 
 
+def test_model_answers_for_v3_recipes_form_their_own_batch_and_v22_recipes_are_not_asked(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ADR-0111: the model is asked only about recipes the release before v3 lacks; its values wait in their own
+    batch, which `--accept-batch` releases without touching the frozen model batch."""
+    from types import SimpleNamespace
+
+    from app.data import recipe_tags
+    from app.planning.meal_composition import unreviewed
+
+    def kiflik(key: str):
+        item = dish("Kifliks", "baked_good", [("flour", 300), ("egg", 100), ("walnut", 100)], sugar_g=8.0)
+        item.key = key
+        return item
+
+    asked: list[str] = []
+
+    def answer(open_dishes, max_usd, log) -> dict:
+        asked.extend(item.key for item, _ in open_dishes)
+        usage = {"calls": 1, "input_tokens": 1, "output_tokens": 1, "usd": 0.0, "stopped": False, "model": "test"}
+        return {
+            "answers": {"RCP2_NEWV3": {"key": "RCP2_NEWV3", "meal_role": "dessert", "protein_sources": None}},
+            "usage": usage,
+        }
+
+    monkeypatch.setattr(recipe_tags, "curated_dishes", lambda: [])
+    monkeypatch.setattr(recipe_tags, "release_dishes", lambda: [kiflik("RCP2_NEWV3"), kiflik("RCP2_OLDV22")])
+    monkeypatch.setattr(recipe_tags, "base_release_keys", lambda: {"RCP2_OLDV22"})
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {})
+    monkeypatch.setattr(recipe_tags, "ask_model", answer)
+    built = recipe_tags.build(True, 1.0)
+    entries = {item.key: recipe_tags.recipe_entry(found) for item, found in built["tagged"]}
+    assert asked == ["RCP2_NEWV3"]
+    assert entries["RCP2_OLDV22"]["meal_role"] is None and not entries["RCP2_OLDV22"]["estimated"].get("meal_role")
+    wanted = {"method": "llm", "batch": recipe_tags.V3_LLM_BATCH, "reviewed": False}
+    assert entries["RCP2_NEWV3"]["meal_role"] == "dessert"
+    assert all(entries["RCP2_NEWV3"]["estimated"][name] == wanted for name in recipe_tags.CRITICAL_MODEL_FIELDS)
+    assert unreviewed(SimpleNamespace(**entries["RCP2_NEWV3"]))
+
+    # A re-run asks nothing: the answer comes back from the tag file, in the same batch.
+    asked.clear()
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": entries})
+    rerun = {
+        item.key: recipe_tags.recipe_entry(found, entries[item.key])
+        for item, found in recipe_tags.build(True, 1.0)["tagged"]
+    }
+    assert not asked
+    assert rerun == entries
+
+    # Accepting the v3 batch releases its values and leaves the frozen model batch alone.
+    frozen = {"meal_role": "snack", "estimated": {"meal_role": wanted | {"batch": recipe_tags.LLM_BATCH}}}
+    target = tmp_path / tag_files.RECIPE_TAGS
+    target.parent.mkdir(parents=True)
+    recipe_tags.write_keyed(target, {"version": "test"}, "recipes", entries | {"FROZEN": frozen})
+    monkeypatch.setattr(recipe_tags, "repository_root", lambda: tmp_path)
+    assert recipe_tags.accept_batch(recipe_tags.V3_LLM_BATCH) == 3
+    after = json.loads(target.read_text(encoding="utf-8"))["recipes"]
+    assert all(after["RCP2_NEWV3"]["estimated"][name]["reviewed"] for name in recipe_tags.CRITICAL_MODEL_FIELDS)
+    assert after["FROZEN"]["estimated"]["meal_role"]["reviewed"] is False
+
+
 def test_a_frozen_homemade_staple_takes_the_rules_staple_but_stays_gated(monkeypatch) -> None:
     from types import SimpleNamespace
 
@@ -543,6 +604,9 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
     assert sides and all(
         entries[key]["meal_role"] == "vegetable"
         or unreviewed(SimpleNamespace(**entries[key]))
+        # Release v3 added two vegetable sides whose title names a meat they do not list ("Mushrooms And Onions For
+        # Steak", RCP2_AECF64BC758E and RCP2_B09DC0550438): untagged as incomplete, and out of the pool the same way.
+        or (entries[key]["meal_role"] is None and rule_tags(dishes()[key]).incomplete_reason is not None)
         or (entries[key]["meal_role"] == "protein_main" and protein_side_share(dishes()[key]) >= 0.5)
         or (
             entries[key]["meal_role"] in {"staple", "one_bowl"}

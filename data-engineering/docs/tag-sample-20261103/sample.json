@@ -1,0 +1,498 @@
+{
+  "batch": "recipe-tags-v1/llm-v3-20261103",
+  "seed": 20261103,
+  "size": 40,
+  "distinct_recipes": 40,
+  "batch_recipes": 116,
+  "batch_values": 276,
+  "layers": {
+    "table": {
+      "breakfast": {
+        "recipes": 15,
+        "drawn": 5
+      },
+      "dessert": {
+        "recipes": 29,
+        "drawn": 10
+      },
+      "one_bowl": {
+        "recipes": 16,
+        "drawn": 6
+      },
+      "sauce": {
+        "recipes": 15,
+        "drawn": 5
+      },
+      "snack": {
+        "recipes": 22,
+        "drawn": 8
+      },
+      "soup": {
+        "recipes": 6,
+        "drawn": 2
+      },
+      "staple": {
+        "recipes": 13,
+        "drawn": 4
+      }
+    }
+  },
+  "how_to_check": "data-engineering/docs/tag-sample-20261103/README.md; fill sample.xlsx in person",
+  "recipes": [
+    {
+      "id": "RCP2_38F9A9C523F0",
+      "title": "Ethiopian Honey Bread",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_D475737AA6A4",
+      "title": "Kimchi Stuffing",
+      "course": "side",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_D5A2E336A0A4",
+      "title": "Golden Cornbread",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F1B3BFFB4BCE",
+      "title": "Double Cornbread",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_F1D4C2B4A839",
+      "title": "Swedish Cardamom Braids",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "breakfast",
+      "values": {
+        "meal_role": "breakfast",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_46F19FA6DC55",
+      "title": "Honeyed Apple Rings",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_4CB46715223E",
+      "title": "Fruit Curry",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_4DBEB5DF75A6",
+      "title": "Spiced Apples",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_7200A0F07544",
+      "title": "Country Fried Apples",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_B0AA2AFB445D",
+      "title": "Hungarian Butterhorns",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_C140135520DB",
+      "title": "Classic Candied Sweet Potatoes",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_D0D00E0BE51C",
+      "title": "Apple Bean Bake",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_D62C16D2C812",
+      "title": "Gourmet Sweet Potato Classic",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_E2A4AA0EFE72",
+      "title": "Kahlua Candied Yams",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_FCA8B08BDA2F",
+      "title": "Senator Russell Sweet Potato Souffle",
+      "course": "side",
+      "layer": "table",
+      "stratum": "dessert",
+      "values": {
+        "meal_role": "dessert",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_7160598B0E84",
+      "title": "Spicy Rice And Vegetables",
+      "course": "side",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_98EA656F2225",
+      "title": "Sour Cream Cornbread",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_BA21C876BBC1",
+      "title": "Hargadon'S Brown Soda Bread",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_CA518ABE7704",
+      "title": "Adobo Rice With Beans And Tomato",
+      "course": "side",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_F3F91FF88085",
+      "title": "Caribbean Rice In Rice Cooker",
+      "course": "side",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_FF5EE14CA689",
+      "title": "Peruvian Quinoa",
+      "course": "side",
+      "layer": "table",
+      "stratum": "one_bowl",
+      "values": {
+        "meal_role": "one_bowl",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_3BBE43E93A1B",
+      "title": "Baked Beans",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_418ABCCF343C",
+      "title": "Baked Eggplant Parmigiana",
+      "course": "main",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_5BB20EB1E32E",
+      "title": "Sauteed Peppers",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_BDC0CEA53793",
+      "title": "Texas Style Baked Beans",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_CA5CC81FBE31",
+      "title": "Easy Brazilian Feijao",
+      "course": "side",
+      "layer": "table",
+      "stratum": "sauce",
+      "values": {
+        "meal_role": "sauce",
+        "contains_staple": false,
+        "protein_sources": []
+      }
+    },
+    {
+      "id": "RCP2_05426F648B01",
+      "title": "Pirishki",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_244D8C7CC69D",
+      "title": "Baked Grits Souffle",
+      "course": "side",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_3F150B2A9B44",
+      "title": "Luchi",
+      "course": "side",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_607381EA69EE",
+      "title": "Bhatura",
+      "course": "side",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_639FAA64235E",
+      "title": "Saloon \"Hard Track\" Pilot Crackers",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_87C0C08CAA11",
+      "title": "French Wafers",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_90A96655F635",
+      "title": "Brazilian Cheese Puffs (Pao De Queijo)",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_C36A9F958772",
+      "title": "Tomato Fritters",
+      "course": "side",
+      "layer": "table",
+      "stratum": "snack",
+      "values": {
+        "meal_role": "snack",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_6BBA70AC5E9E",
+      "title": "Grammie Bea'S Herbed Dumplings",
+      "course": "side",
+      "layer": "table",
+      "stratum": "soup",
+      "values": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_882366890116",
+      "title": "Indiana Baked Beans",
+      "course": "side",
+      "layer": "table",
+      "stratum": "soup",
+      "values": {
+        "meal_role": "soup",
+        "contains_staple": false
+      }
+    },
+    {
+      "id": "RCP2_55D610F7F931",
+      "title": "Garden Kabobs",
+      "course": "main",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_6DE7B474EFEC",
+      "title": "Rice Almondine",
+      "course": "side",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_A6801EDDEF8F",
+      "title": "Halloumi Cheese Kebabs",
+      "course": "main",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    },
+    {
+      "id": "RCP2_AB5F9F789C34",
+      "title": "Chilean Dobladitas",
+      "course": "baked_good",
+      "layer": "table",
+      "stratum": "staple",
+      "values": {
+        "meal_role": "staple",
+        "contains_staple": true
+      }
+    }
+  ]
+}

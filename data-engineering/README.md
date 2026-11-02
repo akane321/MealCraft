@@ -271,6 +271,12 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
 `--accept-batch recipe-tags-v1/review-table-20261024`。owner 逐道决定的五道菜的角色（`OWNER_ROLES`）立即生效，覆盖规则。
 见 [复核批次](docs/review-table-20261024/README.md)。
 
+数据版本 v3 新增的菜（v2.2 没有的 3927 道，ADR-0111）另有一批模型值：规则留空的字段由模型估计，记在批次
+`recipe-tags-v1/llm-v3-20261103`（`V3_LLM_BATCH`），未复核、规划器不读。`--llm` 只问这些新菜；v2.2 的条目不动。
+接受前由复核人亲自核对固定种子的抽样（`data-engineering/scripts/v3_tag_sample.py`，
+[抽样说明](docs/tag-sample-20261103/README.md)），再由 owner 决定
+`--accept-batch recipe-tags-v1/llm-v3-20261103`；它不影响冻结的 `recipe-tags-v1/llm` 批次。
+
 面团、饼底、面糊、酱、腌料、干料、沙拉汁、肉汁、高汤、酱料膏和调味料这类"菜的一部分"由规则判成 `sauce`
 （`sauce` 即所有不能单独成菜的部分），永远不填一餐：标题去掉括号、结尾的 `Recipe`/`I`/`II` 和 ` - ...`、
 ` for ...` 之后，最后一个名词是这类词，且它前面没有 `with`、`in`、`on`、`over`（酱汁类还要没有 `and`/`&`/`'n`）；
