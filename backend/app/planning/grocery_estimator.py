@@ -312,26 +312,27 @@ def _second_store_choice(
                 traces.setdefault(item.external_id, search.retrieval)
             if all(product.external_id in current for product in products):
                 break
-        refreshed = [
+        if failed and any(product.external_id not in current for product in products):
+            # A query could not be read (a failure, a challenge): the reviewed products no search returned keep their
+            # prices of the snapshot date, so the line is not filled from a later store the earlier one may still
+            # stock (ADR-0110). Only when every query was read is a product no search returned gone.
+            choice.warnings.append(f"{label} could not be read live; its reviewed snapshot prices were used.")
+        products = [
             product.model_copy(
                 update={
                     key: getattr(current[product.external_id], key)
                     for key in ("price_sgd", "in_stock", "source", "fetched_at", "halal_certified")
                 }
             )
-            for product in products
             if product.external_id in current
+            else product
+            for product in products
+            if product.external_id in current or failed
         ]
-        if not refreshed and failed:
-            # The store could not be read (a failure, a challenge): its reviewed prices of the snapshot date stand in,
-            # so the line is not filled from a later store the earlier one may still stock (ADR-0110).
-            choice.warnings.append(f"{label} could not be read live; its reviewed snapshot prices were used.")
-        else:
-            products = refreshed
-            if not products:
-                choice.warnings.append(
-                    f"Live {label} search did not return a reviewed product for {ingredient_display_name}."
-                )
+        if not products:
+            choice.warnings.append(
+                f"Live {label} search did not return a reviewed product for {ingredient_display_name}."
+            )
     grams = convert_quantity(quantity, unit, "g") if quantity is not None else None
     choice.product = _cheapest_in_stock(products, grams)
     if choice.product is not None:

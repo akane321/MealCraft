@@ -363,6 +363,30 @@ def test_a_failed_live_search_keeps_the_reviewed_snapshot_price_and_no_later_sto
     assert any("could not be read live" in warning for warning in choice.warnings)
 
 
+def test_a_query_that_fails_after_another_was_read_keeps_its_products_at_snapshot_prices(stores) -> None:
+    """The first query was read and the second failed: a reviewed product only the second would have returned is
+    not gone, so it keeps its snapshot price (here the cheapest) instead of being dropped."""
+    _, _, redmart = stores
+    first, second = entry("rm-1", 9.0)["products"][0], entry("rm-77", 1.0)["products"][0]
+    redmart["flour"] = {"status": "mapped", "products": [first, {**second, "query": "korean chili powder"}]}
+    service, providers, _ = live_service()
+    search = providers["redmart"].search
+
+    def second_query_fails(query, **kwargs):
+        if query == "korean chili powder":
+            providers["redmart"].calls.append(query)
+            raise ProductProviderError("down")
+        return search(query, **kwargs)
+
+    providers["redmart"].search = second_query_fails
+
+    choice = choose(service=service, live=True)
+
+    assert providers["redmart"].calls == ["query rm 1", "korean chili powder"]
+    assert (choice.product.external_id, choice.product.price_sgd, choice.evidence.mode) == ("rm-77", 1.0, "snapshot")
+    assert any("could not be read live" in warning for warning in choice.warnings)
+
+
 def test_a_live_choice_tries_redmart_after_cold_storage_found_nothing_reviewed(stores) -> None:
     _, cold_storage, redmart = stores
     cold_storage["flour"] = entry("cs-77", 1.0)  # the shelf does not return this id
