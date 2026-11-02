@@ -14,6 +14,8 @@ const HEIGHT = 150;
 const totals = computed(() => props.days.map((_, index) => props.series.reduce((sum, item) => sum + (item.values[index] ?? 0), 0)));
 const max = computed(() => niceMax(Math.max(0, ...totals.value)));
 const slot = computed(() => WIDTH / Math.max(props.days.length, 1));
+// Thin bars, at most 14 units wide, centred in their day.
+const barWidth = computed(() => Math.min(slot.value * 0.5, 14));
 
 const bars = computed(() => props.days.flatMap((day, index) => {
   let top = HEIGHT;
@@ -22,7 +24,7 @@ const bars = computed(() => props.days.flatMap((day, index) => {
     if (!value) return [];
     const height = (value / max.value) * HEIGHT;
     top -= height;
-    return [{ key: `${day}-${item.name}`, x: index * slot.value + slot.value * 0.18, y: top, width: slot.value * 0.64, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
+    return [{ key: `${day}-${item.name}`, x: index * slot.value + (slot.value - barWidth.value) / 2, y: top, width: barWidth.value, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
   });
 }));
 
@@ -37,7 +39,7 @@ function shortDay(day: string) {
       <line x1="0" :y1="HEIGHT" :x2="WIDTH" :y2="HEIGHT" class="axis" />
       <line x1="0" y1="0" :x2="WIDTH" y2="0" class="grid" />
       <text x="0" y="-2" class="tick">{{ max }}</text>
-      <rect v-for="bar in bars" :key="bar.key" :x="bar.x" :y="bar.y" :width="bar.width" :height="bar.height" :fill="bar.color" rx="2">
+      <rect v-for="bar in bars" :key="bar.key" :x="bar.x" :y="bar.y" :width="bar.width" :height="bar.height" :fill="bar.color" rx="3">
         <title>{{ bar.title }}</title>
       </rect>
       <template v-for="(day, index) in days" :key="day">
@@ -52,12 +54,12 @@ function shortDay(day: string) {
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; }
+.ops-chart { margin: 0; --sage: #34d399; --accent: #a78bfa; --danger: #f87171; --c-green: #6ee7b7; --c-blue: #a5b4fc; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
-.axis { stroke: var(--border); }
-.grid { stroke: rgba(42, 42, 72, 0.1); stroke-dasharray: 3 4; }
-.tick { fill: var(--t3); font-size: 12px; }
+.axis { stroke: #ececef; }
+.grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
+.tick { fill: #a1a1aa; font-size: 11px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 9px; height: 9px; border-radius: 2px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; }
 </style>

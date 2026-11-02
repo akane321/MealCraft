@@ -44,12 +44,12 @@ function shortDay(day: string) {
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; }
+.ops-chart { margin: 0; --sage: #34d399; --accent: #a78bfa; --danger: #f87171; --c-green: #6ee7b7; --c-blue: #a5b4fc; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
-.axis { stroke: var(--border); }
-.grid { stroke: rgba(42, 42, 72, 0.1); stroke-dasharray: 3 4; }
-.tick { fill: var(--t3); font-size: 12px; }
+.axis { stroke: #ececef; }
+.grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
+.tick { fill: #a1a1aa; font-size: 11px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 12px; height: 2px; border-radius: 1px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; }
 </style>
