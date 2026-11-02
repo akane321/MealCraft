@@ -98,7 +98,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
     <p v-if="!filtered.length" class="empty mc-small">{{ query ? "No plan matches." : "Your plans will appear here." }}</p>
     <div class="groups">
       <section v-for="group in groups" :key="group.label" :aria-label="group.label">
-        <h3 class="mc-label">{{ group.label }}</h3>
+        <h3 v-if="groups.length > 1" class="mc-label">{{ group.label }}</h3>
         <ul>
           <li v-for="item in group.list" :key="item.id" class="row" :class="{ on: item.id === currentId }">
             <input
@@ -114,8 +114,11 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
             >
             <button v-else type="button" class="open" :title="titleOf(item)" :aria-current="item.id === currentId ? 'true' : undefined" @click="emit('open', item)">
               <UIcon name="i-lucide-message-circle" class="ic" aria-hidden="true" />
-              <span class="t"><svg v-if="item.pinned_at" class="pin" viewBox="0 0 24 24" aria-label="Pinned"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" /></svg>{{ titleOf(item) }}</span>
-              <span class="s" :class="statusOf(item).tone">{{ statusOf(item).label }}</span>
+              <svg v-if="item.pinned_at" class="pin" viewBox="0 0 24 24" aria-label="Pinned"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" /></svg>
+              <span class="t">{{ titleOf(item) }}</span>
+              <!-- One line a row: the status is a dot for the current plan, and read out for every row. -->
+              <span class="s" :class="statusOf(item).tone" aria-hidden="true" />
+              <span class="visually-hidden">{{ statusOf(item).label }}</span>
             </button>
             <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="menuFor = menuFor === item.id ? null : item.id">
               <UIcon name="i-lucide-ellipsis" aria-hidden="true" />
@@ -143,21 +146,20 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 .empty { margin: 4px 10px; color: #a1a1aa; }
 .groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; -webkit-mask-image: linear-gradient(#000 calc(100% - 6px), transparent); mask-image: linear-gradient(#000 calc(100% - 6px), transparent); }
 h3 { margin: 0; padding: 0 10px 2px; font-size: 11px; line-height: 14px; font-weight: 500; color: #a1a1aa; }
-ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.row { position: relative; display: flex; align-items: center; border: 1px solid #ededf0; border-radius: 10px; background: #fff; transition: border-color 150ms, box-shadow 150ms; }
-.row:hover, .row:focus-within { border-color: #e1e1e5; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); }
-.row.on { border-color: #ddd6fe; }
-.open { min-width: 0; flex: 1; display: grid; grid-template-columns: 15px minmax(0, 1fr); column-gap: 8px; align-items: center; padding: 6px 2px 6px 10px; border: 0; background: transparent; color: #27272a; text-align: left; }
-.ic { grid-row: 1 / span 2; width: 15px; height: 15px; color: #71717a; }
+ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.row { position: relative; display: flex; align-items: center; height: 36px; border: 1px solid transparent; border-radius: 10px; transition: background 150ms, border-color 150ms; }
+.row:hover, .row:focus-within { background: #efeff1; }
+.row.on { border-color: #ececef; background: #fff; }
+.open { min-width: 0; flex: 1; height: 100%; display: flex; align-items: center; gap: 8px; padding: 0 4px 0 10px; border: 0; background: transparent; color: #27272a; text-align: left; }
+.ic { flex: none; width: 16px; height: 16px; color: #a1a1aa; }
 .row.on .ic { color: #8b5cf6; }
-.t { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; font-size: 13.5px; line-height: 18px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.t { min-width: 0; flex: 1; overflow: hidden; font-size: 13.5px; line-height: 18px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
 .row.on .t { color: #0f0f12; }
 .pin { width: 12px; height: 12px; flex: none; fill: none; stroke: #a1a1aa; stroke-width: 2; stroke-linejoin: round; }
-.s { font-size: 11.5px; line-height: 14px; color: #a1a1aa; }
-.s.week { color: var(--c-green-text); font-weight: 500; }
-.s.gone { font-style: italic; }
+.s { display: none; }
+.s.week { display: block; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--c-green); }
 .more { flex: none; width: 24px; height: 24px; margin-right: 4px; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #71717a; opacity: 0; }
-.row:hover .more, .row:focus-within .more, .row.on .more, .more[aria-expanded="true"] { opacity: 1; }
+.row:hover .more, .row:focus-within .more, .more[aria-expanded="true"] { opacity: 1; }
 .more:hover { background: #f4f4f5; color: #18181b; }
 .more .iconify { width: 16px; height: 16px; }
 .row-menu { position: absolute; z-index: 20; top: 36px; right: 0; min-width: 160px; padding: 4px; display: grid; border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -12px rgba(16, 16, 20, 0.16); }

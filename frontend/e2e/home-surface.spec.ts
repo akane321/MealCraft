@@ -830,7 +830,8 @@ test("a failed current-week lookup shows an error and can be retried", async ({ 
   await expect(week.getByRole("heading", { name: "No plan yet" })).toHaveCount(0);
   failing = false;
   await week.getByRole("button", { name: "Try again" }).click();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  // Loaded, with nothing planned yet: the welcome takes the whole panel and the error goes with the column.
+  await expect(week).toHaveCount(0);
 });
 
 test("Escape closes a sheet from anywhere and focus goes back to what opened it", async ({ page }) => {
@@ -1020,7 +1021,8 @@ test("reopening the app opens the conversation that planned the week, not the ne
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("I plan meals and shopping.")).toBeHidden();
   await expect(week.getByText("Tofu Brown Rice Stir-fry")).toBeHidden();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  // A new plan with nothing planned yet is one wide welcome: no plan column.
+  await expect(week).toHaveCount(0);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/17-new-plan-beside-week.png` });
 });
 
@@ -1143,7 +1145,8 @@ test("a new conversation stays empty until its previous week is explicitly reope
   // New plan clears the old week; reopening its conversation restores the dish actions.
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  // A new plan with nothing planned yet is one wide welcome: no plan column.
+  await expect(week).toHaveCount(0);
   await expect(week.getByRole("button", { name: "Swap", exact: true })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Swap" }).click();
@@ -1522,7 +1525,7 @@ test("a dish's words sent from the landing after a reload go to the conversation
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 
@@ -1596,7 +1599,7 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing se
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 

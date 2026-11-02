@@ -65,6 +65,8 @@ const filmPlaying = ref(true);
 const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
 // Nothing said yet: the greeting, the prompt box and the starter cards.
 const isEmpty = computed(() => !messages.value.length && !isLoading.value);
+// A fresh conversation with no week to show is one wide welcome: the plan column comes with a plan or a failed load.
+const panelShown = computed(() => panelOpen.value && !(isEmpty.value && (planState.value === "empty" || planState.value === "loading")));
 const interaction = computed(() => session.value?.pending_interaction ?? null);
 const constraints = computed(() => session.value?.constraints ?? null);
 const editingPreferences = ref(false);
@@ -223,8 +225,9 @@ const home = computed(() => {
     planned && (planned !== saved || !labels.value.isWeek) ? `S$${planned} ${labels.value.budgetSuffix}` : null,
   ];
   return {
-    name: household.current.value?.name ?? actor.value?.user.display_name ?? "Your household",
-    line: [size ? `${size} ${size === 1 ? "person" : "people"}` : null, ...budgets].filter(Boolean).join(" · ") || "Tell me who's eating",
+    // The account's name is already in the row below the card.
+    name: household.current.value?.name ?? "Your household",
+    line: [size ? `${size} ${size === 1 ? "person" : "people"}` : null, ...budgets].filter(Boolean).join(" · ") || "Add who's eating",
     chips: [
       ...(p?.requires_halal || c?.requires_halal ? [{ label: "Halal", alert: false }] : []),
       ...(p?.dietary_preferences ?? c?.dietary_preferences ?? []).map(value => ({ label: value.replaceAll("_", " "), alert: false })),
@@ -634,7 +637,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </section>
     </Transition>
 
-    <div v-if="view === 'app'" class="app" :class="{ 'no-panel': !panelOpen }">
+    <div v-if="view === 'app'" class="app" :class="{ 'no-panel': !panelShown }">
       <ShellSidebar current="plan" brand-button @brand="view = 'landing'">
         <template #action>
           <UButton color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus" title="Start a new plan" @click="newChat">
@@ -669,7 +672,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <h1 class="mc-heading" :title="title">{{ title }}</h1>
           <span v-if="plan" class="date">{{ rangeLabel }}</span>
           <span class="grow" />
-          <UTooltip :text="panelOpen ? 'Hide plan' : 'Show plan'">
+          <UTooltip v-if="!isEmpty || planState === 'ready' || planState === 'error'" :text="panelOpen ? 'Hide plan' : 'Show plan'">
             <UButton
               color="neutral"
               variant="ghost"
@@ -686,7 +689,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <div class="col">
             <div v-if="isEmpty" class="hello mc-rise">
               <h2><span class="mc-greet">Hello, {{ actor?.user.display_name ?? "there" }}</span><span class="hello-2">What shall we cook next?</span></h2>
-              <p>Tell me who's eating, what you can spend and anything to avoid. I'll plan the meals and one shopping list.</p>
             </div>
 
             <template v-for="message in messages" :key="message.id">
@@ -861,7 +863,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               />
             </div>
           </form>
-          <p class="fine">Suggestions can be wrong. Check allergens on product labels.</p>
+          <p v-if="!isEmpty" class="fine">Suggestions can be wrong. Check allergens on product labels.</p>
         </div>
 
         <section v-if="isEmpty" class="ideas" aria-label="Suggestions">
@@ -874,9 +876,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           </div>
           <button v-for="text in moreStarters" :key="text" type="button" class="mc-suggest more" @click="send(text)">{{ text }}<UIcon name="i-lucide-chevron-right" /></button>
         </section>
+        <p v-if="isEmpty" class="fine foot">Suggestions can be wrong. Check allergens on product labels.</p>
       </main>
 
-      <aside v-if="panelOpen" class="panel" aria-label="This plan">
+      <aside v-if="panelShown" class="panel" aria-label="This plan">
         <template v-if="planState === 'ready' && plan && days.length">
           <div class="panel-head">
             <div class="tabs mc-segmented" role="tablist" aria-label="Plan details">
@@ -1051,23 +1054,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .app.no-panel .work { grid-template-columns: minmax(0, 1fr); }
 .grow { flex: 1; }
 
-/* Sidebar: the conversations take its free height and scroll; the household card sits below them. */
+/* Sidebar: the conversations take its free height and scroll; the household card (product.css) sits below them. */
 .rail > .convos { flex: 1 1 auto; }
-.home-card { flex: none; display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 14px; border: 1px solid #ede4fa; border-radius: 14px; background: linear-gradient(#ffffff80 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, #ffffff80 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(180deg, #f3e8ff 0%, #fbf7ff 45%, #fff 100%); }
-.home-card b { overflow: hidden; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
-.home-card small { color: #71717a; font-size: 12.5px; line-height: 17px; }
-.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.chips .mc-chip:not(.alert) { background: #fff; box-shadow: inset 0 0 0 1px #ece6f7; }
-.home-link { display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; margin-top: 8px; border: 1px solid #e4e4e7; border-radius: 8px; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; text-decoration: none; }
-.home-link:hover { background: #fafafa; border-color: #d4d4d8; }
-.home-link .iconify { width: 14px; height: 14px; }
 
 /* Chat column */
-.chat { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #fff; }
+.chat { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .chat-head { height: 56px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 24px; border-bottom: 1px solid #f0f0f2; }
 .chat.is-empty .chat-head { border-color: transparent; background: transparent; }
-.chat-head h1 { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.date { flex: none; color: #a1a1aa; font-size: 13px; }
+.chat-head h1 { min-width: 0; max-width: 60%; margin: 0; overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.date { flex: none; color: #a1a1aa; font-size: 12.5px; }
 .thread { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px 8px; }
 .col { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .me { align-self: flex-end; max-width: 72%; padding: 10px 14px; border-radius: 18px 18px 6px 18px; background: #f4f4f5; color: #18181b; font-size: 14.5px; line-height: 22px; white-space: pre-line; }
@@ -1086,28 +1081,28 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
 /* Empty plan: a centred greeting, the prompt box and the starter cards, over soft glows. */
 .chat.is-empty { overflow-y: auto; }
-.chat.is-empty .thread { flex: 0 0 auto; margin-top: auto; overflow: visible; padding: 0 28px 24px; }
+.chat.is-empty .thread { flex: 0 0 auto; margin-top: auto; overflow: visible; padding: 0 28px 28px; }
 .hello { text-align: center; }
-.hello h2 { display: flex; flex-direction: column; align-items: center; margin: 0; font-size: 36px; line-height: 42px; letter-spacing: -0.025em; }
-.hello-2 { color: #8f8f99; font-weight: 500; }
-.hello p { max-width: 520px; margin: 12px auto 0; color: #71717a; font-size: 14px; line-height: 20px; }
-.ideas { flex: none; width: min(720px, 100% - 56px); margin: 20px auto auto; padding-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.hello h2 { display: flex; flex-direction: column; align-items: center; margin: 0; font-size: 40px; line-height: 46px; letter-spacing: -0.02em; }
+.hello-2 { color: #8f8f99; font-weight: 600; }
+.ideas { flex: none; width: min(880px, 100% - 56px); margin: 24px auto auto; padding-bottom: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .idea-grid { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .app:not(.no-panel) .idea-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.idea { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 112px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: radial-gradient(220px 110px at 85% 0%, color-mix(in srgb, var(--tile) 16%, transparent), transparent 70%), #fff; box-shadow: var(--mc-shadow-sm); text-align: left; transition: transform 160ms, box-shadow 160ms, border-color 160ms; }
+.idea { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 132px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: radial-gradient(220px 110px at 85% 0%, color-mix(in srgb, var(--tile) 16%, transparent), transparent 70%), #fff; box-shadow: var(--mc-shadow-sm); text-align: left; transition: transform 160ms, box-shadow 160ms, border-color 160ms; }
 .idea:hover { transform: translateY(-1px); border-color: #e1e1e5; box-shadow: var(--mc-shadow-md); }
-.idea .mc-tile { margin-bottom: 8px; }
+.idea .mc-tile { width: 28px; height: 28px; margin-bottom: 8px; border-radius: 8px; }
+.idea .mc-tile > * { width: 16px; height: 16px; }
 .idea b { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
-.idea-text { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #8a8a93; font-size: 13px; line-height: 18px; }
+.idea-text { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #71717a; font-size: 13px; line-height: 1.45; }
 .ideas .more { gap: 4px; height: 26px; color: #52525b; }
 .ideas .more .iconify { width: 14px; height: 14px; color: #a1a1aa; }
 /* A 720px-high window keeps the whole empty plan in view. */
 @media (max-height: 800px) {
-  .hello h2 { font-size: 32px; line-height: 38px; }
-  .chat.is-empty .thread { padding-bottom: 18px; }
-  .ideas { margin-top: 14px; gap: 10px; }
-  .idea { min-height: 0; padding: 12px; }
-  .idea .mc-tile { width: 28px; height: 28px; margin-bottom: 4px; }
+  .hello h2 { font-size: 34px; line-height: 40px; }
+  .chat.is-empty .thread { padding-bottom: 22px; }
+  .ideas { margin-top: 20px; gap: 10px; }
+  .idea { min-height: 0; padding: 14px; }
+  .idea .mc-tile { margin-bottom: 6px; }
 }
 
 /* Swap preview: before struck and faded, after with a green inset ring. */
@@ -1145,24 +1140,30 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer-wrap { position: relative; flex: none; padding: 0 28px 10px; }
 .composer-wrap::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 24px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); pointer-events: none; }
 .chat.is-empty .composer-wrap::before { display: none; }
-.after { max-width: 720px; margin: 0 auto 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* Follow-ups keep one row: a longer set scrolls sideways under a fade rather than wrap. */
+.after { max-width: 720px; margin: 0 auto 8px; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+.after::-webkit-scrollbar { display: none; }
+.after > * { flex: none; }
 .after:empty { display: none; }
-.composer { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 18px; border: 1px solid #e4e4e7; border-radius: 26px; background: #fff; box-shadow: var(--mc-shadow-md); transition: border-color 150ms, box-shadow 150ms; }
-.composer:focus-within { border-color: #d4d4d8; box-shadow: var(--mc-shadow-md), 0 0 0 4px rgba(139, 92, 246, 0.1); }
+.composer { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 18px; border: 1px solid #ececef; border-radius: 26px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
+.composer:hover { border-color: #e1e1e5; }
+.composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
 .composer input { height: 34px; font-size: 15px; font-weight: 400; color: #18181b; }
 .composer :focus-visible { outline: 0; }
 .composer-foot { display: contents; }
-.chat.is-empty .composer { flex-wrap: wrap; padding: 14px 12px 10px 18px; border-radius: 20px; }
-.chat.is-empty .composer input { flex-basis: 100%; height: 48px; }
+.chat.is-empty .composer { max-width: 760px; min-height: 112px; flex-wrap: wrap; padding: 16px 12px 12px 16px; border-color: #e4e4e7; border-radius: 18px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -16px rgba(16, 16, 20, 0.14); }
+.chat.is-empty .composer input { flex-basis: 100%; height: 40px; align-self: flex-start; }
 .chat.is-empty .composer-foot { display: flex; flex: 1; align-items: center; gap: 6px; min-width: 0; min-height: 32px; margin-top: 4px; }
 .tool { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
 .tool:hover { background: #f7f7f8; }
 .tool .iconify { width: 14px; height: 14px; color: #71717a; }
 .tool.alert { border-color: #fecdca; background: var(--c-allergy-bg); color: var(--c-allergy-text); }
 .tool.alert .iconify { color: currentColor; }
-.mc-send { width: 32px; height: 32px; flex: none; justify-content: center; padding: 0; }
-.mc-send:disabled { background: #e4e4e7; color: #a1a1aa; opacity: 1; }
+.mc-send { width: 32px; height: 32px; flex: none; justify-content: center; padding: 0; border-radius: 999px; background: #18181b; color: #fff; }
+.mc-send:hover:not(:disabled) { background: #27272a; }
+.mc-send:disabled { background: #18181b; color: #fff; opacity: 0.35; }
 .fine { max-width: 720px; margin: 8px auto 0; color: #a1a1aa; font-size: 12px; line-height: 16px; text-align: center; }
+.fine.foot { flex: none; margin: 0 auto; padding: 0 28px 14px; }
 .context { flex: none; }
 
 /* Plan column, inside the same white panel. */
@@ -1173,9 +1174,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .panel-foot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; border-top: 1px solid #f0f0f2; background: #fff; }
 .spend { display: flex; align-items: baseline; gap: 8px; }
 .spend .of { min-width: 0; font-size: 12px; color: var(--c-muted); white-space: nowrap; }
-.spend .left { margin-left: auto; white-space: nowrap; color: var(--c-green-text); font-size: 12px; font-weight: 500; }
+.spend .left { margin-left: auto; white-space: nowrap; color: var(--c-green-text); font-size: 12.5px; font-weight: 600; }
 .spend .left.near, .spend .left.over { color: var(--c-amber-text); }
-.meter { display: flex; height: 6px; border-radius: 999px; background: #f0f0f2; overflow: hidden; }
+.meter { display: flex; height: 4px; border-radius: 999px; background: #f4f4f5; overflow: hidden; }
 .meter i { display: block; height: 100%; transition: width 600ms var(--ease); }
 .meter .fill { border-radius: 999px; background: #18181b; }
 .meter.near .fill { background: #f59e0b; }

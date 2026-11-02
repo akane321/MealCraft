@@ -171,7 +171,7 @@ const ACTIONS = [
 .overview-mains > span + span::before { content: " · "; white-space: pre; }
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
-.row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--c-line-soft); }
+.row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
 /* With several meals a day the first column names the meal ("Breakfast"), wider than a weekday. */
 .row.named { grid-template-columns: 64px 32px minmax(0, 1fr); }
 .row.done { opacity: 0.6; }
@@ -185,20 +185,23 @@ const ACTIONS = [
 .not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
 .title-line .mc-chip { flex: none; margin-left: auto; }
+.title-line .mc-chip.warn { background: #f5f3ff; color: #6d28d9; }
+.title-line .mc-chip.info { background: #f4f4f5; color: #52525b; }
 .name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dish.side .name { font-size: 13px; font-weight: 700; }
 .name:hover { color: var(--c-coral); }
-.rest { font-size: 12px; line-height: 16px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rest { font-size: 12.5px; line-height: 18px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kept { color: var(--c-green-text); font-weight: 800; }
 .ok-tick { color: var(--c-green); }
 /* A dish's changes and its feedback, quiet until the row is pointed at or focused; each group wraps as a whole
    rather than run under the chip. */
 .act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 4px; }
-.acts, .feedback { display: flex; align-items: center; gap: 4px; opacity: 0.6; transition: opacity 150ms var(--ease); }
+.acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.75; transition: opacity 120ms var(--ease); }
 .acts { flex-wrap: wrap; }
 .row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
-.acts button, .feedback button { flex: none; height: 24px; padding: 0 8px; white-space: nowrap; border: 1px solid var(--c-line); border-radius: 999px; background: #fff; color: var(--c-ink); font-size: 12px; font-weight: 700; }
-.acts button:hover, .feedback button:hover { border-color: var(--c-coral); }
+/* Quiet text buttons: one calm line under the dish, a fill only when pointed at. */
+.acts button, .feedback button { flex: none; height: 24px; padding: 0 7px; white-space: nowrap; border: 0; border-radius: 999px; background: transparent; color: #71717a; font-size: 12px; font-weight: 500; }
+.acts button:hover, .feedback button:hover { background: #f4f4f5; color: var(--mc-strong); }
 .feedback button[aria-pressed="true"] { border-color: var(--c-ink); background: var(--c-ink); color: #fff; }
 .feedback button:disabled { opacity: 0.6; }
 .never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 700; white-space: nowrap; }

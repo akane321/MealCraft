@@ -90,17 +90,17 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
 </template>
 
 <style scoped>
-.head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; padding: 16px 20px 14px; }
+.head { display: flex; align-items: flex-end; gap: 12px 16px; padding: 16px 20px 14px; }
 .title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 h3 { margin: 0; }
-.figures { margin-left: auto; display: flex; gap: 22px; }
+.figures { flex: none; margin-left: auto; display: flex; gap: 18px; }
 .fig { display: flex; flex-direction: column; align-items: flex-end; }
-.k { font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.v { font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 26px; white-space: nowrap; }
+.k { font-size: 11px; line-height: 16px; color: var(--c-muted); }
+.v { font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; white-space: nowrap; }
 .fig.ok .v { color: var(--c-green-text); }
 .fig.over .v { color: var(--c-amber-text); }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--c-line-soft); }
-.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 6px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 4px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
 .tile:last-child, .tile:nth-child(7n) { border-right: 0; }
 .tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
@@ -108,7 +108,7 @@ h3 { margin: 0; }
 .tile.today { background: var(--c-today); }
 .d { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-ink); }
 .d span { color: var(--c-muted); font-weight: 700; }
-.today .d { color: var(--c-today-text); }
+.today .d { color: var(--c-today-text); font-weight: 700; box-shadow: inset 0 -2px 0 #8b5cf6; }
 .meals { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; justify-content: center; }
 .meal { position: relative; display: flex; width: 56px; height: 56px; align-items: center; justify-content: center; }
 .meal.several { width: 40px; height: 36px; }
@@ -121,7 +121,8 @@ h3 { margin: 0; }
 .tick circle { stroke: #fff; stroke-width: 1.5; }
 .again { left: -2px; top: -2px; stroke: var(--c-blue); stroke-width: 1.8; }
 .again path { fill: none; stroke-width: 2; }
-.n { height: 36px; width: 100%; font-size: 12px; line-height: 18px; font-weight: 800; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* Up to three lines, so a narrow day keeps a long name whole rather than one word and an ellipsis. */
+.n { min-height: 36px; width: 100%; font-size: 12px; line-height: 18px; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
 </style>

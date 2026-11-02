@@ -120,12 +120,12 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 </template>
 
 <style scoped>
-.tonight { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; margin: 16px 16px 4px; padding: 16px; border-radius: 16px; background: var(--c-tonight); }
+.tonight { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; margin: 16px 16px 4px; padding: 16px; border: 1px solid #ececef; border-radius: 14px; background: radial-gradient(260px 140px at 100% 0%, rgba(253, 205, 225, 0.45), transparent 70%), #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); }
 .big-icon { grid-row: 1; align-self: start; }
 .head { grid-column: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .video, .acts { grid-column: 1 / -1; }
 .quiet .head { grid-column: 1 / -1; }
-.kicker { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-amber-text); }
+.kicker { font-size: 12px; line-height: 16px; font-weight: 600; color: #7c3aed; }
 h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 26px; }
 .with { margin: 0; font-size: 13px; color: var(--c-neutral-text); }
 .dish-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: var(--c-tonight-border); text-underline-offset: 3px; }
@@ -143,8 +143,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 2
 .caption { min-width: 0; display: flex; flex-direction: column; }
 .caption small { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
 .caption span { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff; font-size: 12px; line-height: 16px; color: var(--c-muted); }
+.no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fafafa; font-size: 12px; line-height: 16px; color: var(--c-muted); }
 .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .acts .cooked { border-color: var(--c-tonight-border); }
-.quiet { background: var(--c-canvas); }
+.quiet { background: #fafafa; }
 </style>
