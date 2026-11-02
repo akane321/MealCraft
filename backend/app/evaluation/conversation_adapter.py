@@ -24,11 +24,18 @@ VERSION = "conversation-adapter-draft-v1"
 CONFIRMATION_MESSAGE = "I confirm. Please proceed."
 CLOCK_SENTENCE = "Today is {day} ({weekday}); timezone: Asia/Singapore."
 SHARED_TEMPLATE = (
-    "{clock_sentence}\n"
-    "Initial state: {{}}\n"
-    "Use only this conversation and your own previous responses. "
-    "Return JSON conforming to the following shared output schema. "
-    "Set awaiting_confirmation only when waiting for confirmation, not when asking for missing information.\n"
+    "{clock_sentence} "
+    'Resolve relative dates such as "this weekend" or "next Monday" against this date.\n'
+    "There is no saved household, plan or profile at the start of the conversation.\n"
+    "Use this conversation and your own previous responses, "
+    "and the tools or sources your registered configuration provides. "
+    "Return JSON conforming to the following shared output schema.\n"
+    "Set awaiting_confirmation to true only when your reply proposes a meal plan, or a change to a plan, "
+    "that the user must approve before it takes effect. "
+    "Set it to false when you ask for missing information, answer a question, refuse, "
+    "or have already applied the change. "
+    "Example: after proposing a weekly plan and asking whether to go ahead, set it to true.\n"
+    "Use plan only when the user asks for a meal plan or a change to one.\n"
     "{schema}"
 )
 WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")

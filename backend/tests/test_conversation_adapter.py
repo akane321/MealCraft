@@ -137,7 +137,7 @@ def test_single_turn_plan_preserves_original_bytes_and_injects_product_clock(mon
         assert history == ()
         assert clock.now().isoformat() == "2031-02-03T12:00:00+08:00"
         assert config().clock_sentence in instructions
-        assert "Initial state: {}" in instructions
+        assert "There is no saved household, plan or profile at the start of the conversation." in instructions
         return plan_output()
 
     result = harness.run("synthetic", [text], respond)
@@ -411,3 +411,38 @@ def test_an_applied_change_or_an_unrelated_turn_is_not_an_invitation():
         last_scope_decision={"scope_class": "domain_question", "should_mutate_state": False, "reason_code": "x"},
     )
     assert normalize_product(question).awaiting_confirmation is False
+
+
+# --- the revised shared instructions (ADR-0100 items 3 and 4, proposed) -----------------------------------------
+
+
+def instructions_text():
+    return shared_instructions(config())
+
+
+def test_awaiting_confirmation_is_defined_with_both_cases_and_an_example():
+    text = instructions_text()
+    assert "Set awaiting_confirmation to true only when your reply proposes a meal plan, or a change to a plan" in text
+    assert "that the user must approve before it takes effect" in text
+    for false_case in ("ask for missing information", "answer a question", "refuse", "already applied the change"):
+        assert false_case in text
+    assert "Example: after proposing a weekly plan and asking whether to go ahead, set it to true." in text
+
+
+def test_the_start_state_the_dates_and_the_sources_are_stated_plainly():
+    text = instructions_text()
+    assert "Initial state" not in text and "{}" not in text.split('{"')[0]
+    assert 'Resolve relative dates such as "this weekend" or "next Monday" against this date.' in text
+    assert "the tools or sources your registered configuration provides" in text
+    assert "Use only this conversation" not in text
+
+
+def test_plan_is_for_plan_requests_only():
+    assert "Use plan only when the user asks for a meal plan or a change to one." in instructions_text()
+
+
+def test_the_instructions_carry_no_confirmation_bytes_label_or_category():
+    text = instructions_text()
+    assert CONFIRMATION_MESSAGE not in text
+    for word in ("planning", "intent", "multi_turn", "adversarial", "forum", "authored", "gold"):
+        assert word not in text.split('{"')[0]
