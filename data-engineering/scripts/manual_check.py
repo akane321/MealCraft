@@ -3,11 +3,13 @@ by course, and the reviewer's three checks on every recipe: complete, steps sens
 
     python -I -X utf8 data-engineering/scripts/manual_check.py draw               # sample.json and check.xlsx
     python -I -X utf8 data-engineering/scripts/manual_check.py score <filled.xlsx>    # report.md and report.json
+    python -I -X utf8 data-engineering/scripts/manual_check.py draw --new         # data release v3's new recipes
 
 Nothing in the sheet is prefilled. Only rows the reviewer marked 是 count. A recipe is correct when all three checks
 are 对 and wrong when any is 错; each 错 counts under its check, so a recipe can count under more than one. A recipe
 with no 错 and some 看不出 is reported apart and counts neither way. The correct rate carries a Wilson 95% interval;
-the 03 plan's target is 95%.
+the 03 plan's target is 95%. With --new (draw and score) the sample is drawn from the recipes of data release v3 that
+v2.2 does not have (issue #392), with seed 20261103, into manual-check-20261103/; the 2026-10-25 v2.2 sample stays.
 Offline, with a Python that has openpyxl, from the repository root.
 """
 
@@ -25,16 +27,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from review_sampling import (  # noqa: E402
     CHECKED,
+    NEW_SEED,
     REPOSITORY,
     allocate,
     checked,
     interval,
+    new_recipes,
     percent,
     release_recipes,
     wilson,
 )
 
 OUT = REPOSITORY / "data-engineering/docs/manual-check-20261025"
+NEW_OUT = REPOSITORY / "data-engineering/docs/manual-check-20261103"
 SEED = 20261025
 SIZE = 100
 MINIMUM = 3
@@ -58,17 +63,17 @@ HEAD = (
 )
 
 
-def draw(version: str, recipes: list[dict]) -> dict:
+def draw(version: str, recipes: list[dict], seed: int = SEED) -> dict:
     by_course = defaultdict(list)
     for recipe in recipes:
         by_course[recipe["course"]].append(recipe)
     plan = allocate({course: len(members) for course, members in by_course.items()}, SIZE, MINIMUM)
-    rng = random.Random(SEED)
+    rng = random.Random(seed)
     picked = []
     for course, n in sorted(plan.items()):
         picked += rng.sample(sorted(by_course[course], key=lambda r: r["recipe_id"]), n)
     return {
-        "seed": SEED,
+        "seed": seed,
         "size": len(picked),
         "release": version,
         "by_course": dict(sorted(plan.items())),
@@ -283,24 +288,28 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="The in-person 100-recipe manual check of a release (03 plan 2.7).")
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("draw", help="draw sample.json and write check.xlsx")
+    drawing = commands.add_parser("draw", help="draw sample.json and write check.xlsx")
     scoring = commands.add_parser("score", help="score the filled check.xlsx into report.md and report.json")
     scoring.add_argument("filled", type=Path)
+    for command in (drawing, scoring):
+        command.add_argument("--new", action="store_true", help="data release v3's new recipes only (issue #392)")
     args = parser.parse_args()
+    out = NEW_OUT if args.new else OUT
     if args.command == "draw":
-        version, recipes = release_recipes()
-        sample = draw(version, recipes)
-        (OUT / "sample.json").write_text(
+        version, recipes = new_recipes() if args.new else release_recipes()
+        sample = draw(version, recipes, NEW_SEED if args.new else SEED)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "sample.json").write_text(
             json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
         )
-        workbook(sample, {recipe["recipe_id"]: recipe for recipe in recipes}).save(OUT / "check.xlsx")
+        workbook(sample, {recipe["recipe_id"]: recipe for recipe in recipes}).save(out / "check.xlsx")
         print(json.dumps(sample["by_course"], ensure_ascii=False))
         return
-    sample = json.loads((OUT / "sample.json").read_text(encoding="utf-8"))
+    sample = json.loads((out / "sample.json").read_text(encoding="utf-8"))
     result = score(read_filled(args.filled), sample)
     report = markdown(result, sample, hashlib.sha256(args.filled.read_bytes()).hexdigest())
-    (OUT / "report.md").write_text(report, encoding="utf-8", newline="\n")
-    (OUT / "report.json").write_text(
+    (out / "report.md").write_text(report, encoding="utf-8", newline="\n")
+    (out / "report.json").write_text(
         json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )
     print(report)

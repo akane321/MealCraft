@@ -64,44 +64,57 @@ def form_key(line: dict) -> str:
 
 
 # ------------------------------------------------------------------------------ select
-def select_enrichment_set() -> None:
-    resolve = resolver()
-    corrections = {
+def alias_corrections() -> dict[str, str]:
+    """Ingredient text -> the more specific id that release v2 re-points an already-mapped alias to."""
+    return {
         name: spec["ingredient_id"]
         for name, spec in json.loads(CORRECTIONS.read_text(encoding="utf-8")).items()
         if not name.startswith("_")
     }
-    usable, reasons = [], collections.Counter()
-    for record in read_jsonl(CANDIDATES):
-        ok = True
-        for line in record["ingredients"]:
-            corrected = corrections.get((line.get("ingredient_text") or "").strip())
-            if line["normalization_status"] == "mapped" and corrected:
-                line["normalization_status"] = "corrected"
-            if line["normalization_status"] == "mapped":
-                continue
-            if line["normalization_status"] == "corrected":
-                decision = resolve(corrected, by_id=True)
-                if decision is None:
-                    raise SystemExit(f"correction target {corrected} is not a stage-3 ingredient")
-                line["canonical_ingredient_id"], line["canonical_name"], allergens, status = decision
-                line["allergens"] = [a for a in allergens.replace(";", "|").split("|") if a]
-                line["allergen_status"] = status
-                line["normalization_status"] = "mapped"
-                line["mapping_basis"] = "v2_correction"
-                continue
-            decision = resolve(line["ingredient_text"])
-            if decision is None or decision == "drop":
-                reasons["dropped name" if decision == "drop" else "undecided name"] += 1
-                ok = False
-                break
+
+
+def resolve_lines(record: dict, resolve, corrections: dict[str, str]) -> str | None:
+    """Resolve every unmapped line of a candidate through the stage-3 decisions, in place.
+
+    Returns why the candidate cannot be used ("dropped name" or "undecided name"), or None when every line is mapped.
+    """
+    for line in record["ingredients"]:
+        corrected = corrections.get((line.get("ingredient_text") or "").strip())
+        if line["normalization_status"] == "mapped" and corrected:
+            line["normalization_status"] = "corrected"
+        if line["normalization_status"] == "mapped":
+            continue
+        if line["normalization_status"] == "corrected":
+            decision = resolve(corrected, by_id=True)
+            if decision is None:
+                raise SystemExit(f"correction target {corrected} is not a stage-3 ingredient")
             line["canonical_ingredient_id"], line["canonical_name"], allergens, status = decision
             line["allergens"] = [a for a in allergens.replace(";", "|").split("|") if a]
             line["allergen_status"] = status
             line["normalization_status"] = "mapped"
-            line["mapping_basis"] = "v2_additions"
-        if ok:
+            line["mapping_basis"] = "v2_correction"
+            continue
+        decision = resolve(line["ingredient_text"])
+        if decision is None or decision == "drop":
+            return "dropped name" if decision == "drop" else "undecided name"
+        line["canonical_ingredient_id"], line["canonical_name"], allergens, status = decision
+        line["allergens"] = [a for a in allergens.replace(";", "|").split("|") if a]
+        line["allergen_status"] = status
+        line["normalization_status"] = "mapped"
+        line["mapping_basis"] = "v2_additions"
+    return None
+
+
+def select_enrichment_set() -> None:
+    resolve = resolver()
+    corrections = alias_corrections()
+    usable, reasons = [], collections.Counter()
+    for record in read_jsonl(CANDIDATES):
+        reason = resolve_lines(record, resolve, corrections)
+        if reason is None:
             usable.append(record)
+        else:
+            reasons[reason] += 1
     chosen = select(usable, factor=ENRICH_FACTOR)
     write_jsonl(ENRICH_SET, chosen)
     by_bucket = collections.Counter(r["quota_bucket"] for r in chosen)
@@ -120,22 +133,24 @@ def stated_durations(steps: list[dict]) -> list[str]:
     ]
 
 
+def recipe_item(record: dict) -> dict:
+    """The packet item an enricher reads for one candidate."""
+    return {
+        "candidate_id": record["candidate_id"],
+        "title": record["title"],
+        "servings": record["servings"],
+        "ingredients": [
+            {"index": index, "text": line["original_text"], "needs_amount": needs_amount(line)}
+            for index, line in enumerate(record["ingredients"], 1)
+        ],
+        "steps": [f"{s['step_number']}. {s['text']}" for s in record["instructions"]],
+        "stated_durations": stated_durations(record["instructions"]),
+        "cuisine_hint": record["triage"]["cuisine"],
+    }
+
+
 def recipes() -> list[dict]:
-    return [
-        {
-            "candidate_id": record["candidate_id"],
-            "title": record["title"],
-            "servings": record["servings"],
-            "ingredients": [
-                {"index": index, "text": line["original_text"], "needs_amount": needs_amount(line)}
-                for index, line in enumerate(record["ingredients"], 1)
-            ],
-            "steps": [f"{s['step_number']}. {s['text']}" for s in record["instructions"]],
-            "stated_durations": stated_durations(record["instructions"]),
-            "cuisine_hint": record["triage"]["cuisine"],
-        }
-        for record in read_jsonl(ENRICH_SET)
-    ]
+    return [recipe_item(record) for record in read_jsonl(ENRICH_SET)]
 
 
 # --------------------------------------------------------------------------- ingredients

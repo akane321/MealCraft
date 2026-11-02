@@ -63,6 +63,14 @@ v2.1 and v2.2 grams and its source are in `data-engineering/data/release/v2.2/co
 guard warnings and what this round leaves open are in the
 [v2.2 quality report](../../data-engineering/data/release/v2.2/quality_report.md) (last section).
 
+Data release v3 (Knowledge ADR-0103 section 3, issue #390; not the v3 held-out evaluation protocol) is built
+in `data-engineering/data/release/v3/` but **not imported yet**: the product still reads v2.2, and switching it
+is a separate change. v3 is every v2.2 record copied verbatim plus recipes added from the over-quota v2.1 set and
+from new RecipeNLG candidates enriched through the OpenAI API, with v2.2's 701 ingredients unchanged and no
+cuisine label above 20%. Counts, decisions and shortcuts are in the
+[v3 quality report](../../data-engineering/data/release/v3/quality_report.md); how to rebuild it is in
+`data-engineering/README.md`.
+
 Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
 [quality report](../../data-engineering/data/release/v2.1/quality_report.md)):
 

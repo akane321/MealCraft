@@ -3,6 +3,7 @@ stratified by allergen kind, AI candidates beside the catalog's allergens, and t
 
     python -I -X utf8 data-engineering/scripts/allergen_review.py draw              # sample.json and review.xlsx
     python -I -X utf8 data-engineering/scripts/allergen_review.py score <filled.xlsx>   # report.md and report.json
+    python -I -X utf8 data-engineering/scripts/allergen_review.py draw --new        # data release v3's new recipes
 
 A recipe's stratum is the rarest allergen the catalog gives it, or "none" when it has none, so every allergen kind is
 seen at least MINIMUM times and the misses on "no allergen" recipes are measured too. Only rows the reviewer marked
@@ -11,7 +12,10 @@ the overall agreement weights each stratum by its share of the release, since ra
 `ai_candidates.json` holds Claude's candidates, read from the ingredient text and steps only; they are scored against
 the reviewer the same way and never stand in for the reviewer. A recipe where the reviewer only dropped allergens that
 come from "A or B" ingredient lines (the catalog takes the first of the two) is a disagreement on the rule, not a
-catalog error, and is listed apart from the errors. Offline, with a Python that has openpyxl, from the repository root.
+catalog error, and is listed apart from the errors. With --new (draw and score) the sample is drawn from the recipes of
+data release v3 that v2.2 does not have (issue #392), with seed 20261103, into allergen-review-20261103/, which has no
+AI candidates: those two columns stay empty. The 2026-10-25 v2.2 sample stays as it is. Offline, with a Python that has
+openpyxl, from the repository root.
 """
 
 from __future__ import annotations
@@ -29,16 +33,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from review_sampling import (  # noqa: E402
     CHECKED,
+    NEW_SEED,
     REPOSITORY,
     allocate,
     checked,
     interval,
+    new_recipes,
     percent,
     release_recipes,
     wilson,
 )
 
 OUT = REPOSITORY / "data-engineering/docs/allergen-review-20261025"
+NEW_OUT = REPOSITORY / "data-engineering/docs/allergen-review-20261103"
 SEED = 20261025
 SIZE = 50
 MINIMUM = 3
@@ -76,14 +83,14 @@ HEAD = (
 )
 
 
-def draw(version: str, recipes: list[dict]) -> dict:
+def draw(version: str, recipes: list[dict], seed: int = SEED) -> dict:
     frequency = Counter(allergen for recipe in recipes for allergen in recipe["allergens"])
     strata = defaultdict(list)
     for recipe in recipes:
         allergens = recipe["allergens"]
         strata[min(allergens, key=lambda a: (frequency[a], a)) if allergens else "none"].append(recipe)
     plan = allocate({name: len(members) for name, members in sorted(strata.items())}, SIZE, MINIMUM)
-    rng = random.Random(SEED)
+    rng = random.Random(seed)
     picked = []
     for name in sorted(plan):
         for recipe in rng.sample(sorted(strata[name], key=lambda r: r["recipe_id"]), plan[name]):
@@ -96,7 +103,7 @@ def draw(version: str, recipes: list[dict]) -> dict:
                 }
             )
     return {
-        "seed": SEED,
+        "seed": seed,
         "size": len(picked),
         "release": version,
         "recipes_in_release": len(recipes),
@@ -144,7 +151,12 @@ def workbook(sample: dict, ai: dict, recipes: dict[str, dict]):
         "4. 只有亲自看完这一道菜之后，才在“已亲自核对”填“是”。没填“是”的不计入结果。",
         "",
         "口径（和目录一致）：配菜建议（serve with ...）和可选的（if desired）不算；"
-        "“A 或 B”两样都可能用，两样的过敏原都算。",
+        + (
+            "“A 或 B”两样都可能用，两样的过敏原都算。"
+            if ai
+            else "“A 或 B”目录只取第一项的过敏原；请按你认为正确的填，报告会把只差在“A 或 B”上的单列。"
+        ),
+        *(() if ai else ("这一轮没有 AI 候选，“AI 候选”和“AI 说明”两栏是空的。",)),
         "不要改其他栏，不要增删行。",
     ):
         notes.append([text])
@@ -164,7 +176,7 @@ def workbook(sample: dict, ai: dict, recipes: dict[str, dict]):
             for line in recipe["ingredients"]
         )
         steps = "\n".join(f"{step['step_number']}. {step['text']}" for step in recipe["instructions"])
-        candidate = ai[drawn["id"]]
+        candidate = ai.get(drawn["id"]) or {"allergens": None, "note": None}
         sheet.append(
             [
                 number,
@@ -175,7 +187,7 @@ def workbook(sample: dict, ai: dict, recipes: dict[str, dict]):
                 lines,
                 steps,
                 shown(drawn["allergens"]),
-                shown(candidate["allergens"]),
+                None if candidate["allergens"] is None else shown(candidate["allergens"]),
                 candidate["note"],
                 None,
                 None,
@@ -255,7 +267,9 @@ def score(rows: list[dict], sample: dict, ai: dict, either: dict[str, list[str]]
         counts = strata[recipe["stratum"]]
         counts["checked"] += 1
         counts["agree"] += confirmed == catalog
-        if confirmed == set(ai[row["id"]]["allergens"]):
+        if row["id"] not in ai:
+            pass
+        elif confirmed == set(ai[row["id"]]["allergens"]):
             ai_agree += 1
         else:
             ai_differs.append({"number": number[row["id"]], "id": row["id"], "title": row["title"]})
@@ -314,8 +328,8 @@ def score(rows: list[dict], sample: dict, ai: dict, either: dict[str, list[str]]
         "either_or_disagreements": policy,
         "ai_candidates": {
             "agree": ai_agree,
-            "checked": total_checked,
-            "wilson95": wilson(ai_agree, total_checked),
+            "checked": ai_agree + len(ai_differs),
+            "wilson95": wilson(ai_agree, ai_agree + len(ai_differs)),
             "differs": ai_differs,
         },
     }
@@ -332,9 +346,14 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
         f"Filled sheet SHA-256 `{digest}`; sample `sample.json` ({sample['size']} recipes, seed {sample['seed']}, "
         "stratified by the rarest catalog allergen of each recipe). Only rows the reviewer marked 是 count.",
         "",
-        f"> The reviewer's allergens equal Claude's candidates, which the sheet showed beside the catalog's, on "
-        f"{ai['agree']} of {ai['checked']} checked recipes; they differ only on rows {differs}. The agreement below is "
-        "therefore mostly the AI candidates' agreement with the catalog, plus the reviewer's changes to them.",
+        (
+            f"> The reviewer's allergens equal Claude's candidates, which the sheet showed beside the catalog's, on "
+            f"{ai['agree']} of {ai['checked']} checked recipes; they differ only on rows {differs}. The agreement "
+            "below is therefore mostly the AI candidates' agreement with the catalog, plus the reviewer's changes to "
+            "them."
+            if ai["checked"]
+            else "> The sheet showed no AI candidates."
+        ),
         "",
         f"- Sampled {result['sampled']}, marked 是 (checked) {result['checked']}, unchecked {result['unchecked']}, "
         f"marked null (cannot tell) {result['cannot_tell']}, to refill {len(result['refill'])}.",
@@ -390,6 +409,8 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
     if result["refill"]:
         lines += ["", "## To refill", ""]
         lines += [f"- {row['id']} {row['title']}: {row['why']}" for row in result["refill"]]
+    if not ai["checked"]:
+        return "\n".join(lines) + "\n"
     lines += [
         "",
         "## AI candidates",
@@ -404,30 +425,34 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="The in-person allergen review of a release (03 plan 2.5).")
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("draw", help="draw sample.json and write review.xlsx")
+    drawing = commands.add_parser("draw", help="draw sample.json and write review.xlsx")
     scoring = commands.add_parser("score", help="score the filled review.xlsx into report.md and report.json")
     scoring.add_argument("filled", type=Path)
+    for command in (drawing, scoring):
+        command.add_argument("--new", action="store_true", help="data release v3's new recipes only (issue #392)")
     args = parser.parse_args()
+    out = NEW_OUT if args.new else OUT
+    candidates = out / "ai_candidates.json"
+    ai = json.loads(candidates.read_text(encoding="utf-8")) if candidates.is_file() else {}
     if args.command == "draw":
-        version, recipes = release_recipes()
-        sample = draw(version, recipes)
-        (OUT / "sample.json").write_text(
+        version, recipes = new_recipes() if args.new else release_recipes()
+        sample = draw(version, recipes, NEW_SEED if args.new else SEED)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "sample.json").write_text(
             json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
         )
-        ai = json.loads((OUT / "ai_candidates.json").read_text(encoding="utf-8"))
         by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
-        workbook(sample, ai, by_id).save(OUT / "review.xlsx")
+        workbook(sample, ai, by_id).save(out / "review.xlsx")
         print(json.dumps(sample["strata"], ensure_ascii=False))
         return
-    sample = json.loads((OUT / "sample.json").read_text(encoding="utf-8"))
-    ai = json.loads((OUT / "ai_candidates.json").read_text(encoding="utf-8"))
-    _, recipes = release_recipes()
+    sample = json.loads((out / "sample.json").read_text(encoding="utf-8"))
+    _, recipes = new_recipes() if args.new else release_recipes()
     by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
     either = {drawn["id"]: either_or(by_id[drawn["id"]]) for drawn in sample["recipes"]}
     result = score(read_filled(args.filled), sample, ai, either)
     report = markdown(result, sample, hashlib.sha256(args.filled.read_bytes()).hexdigest())
-    (OUT / "report.md").write_text(report, encoding="utf-8", newline="\n")
-    (OUT / "report.json").write_text(
+    (out / "report.md").write_text(report, encoding="utf-8", newline="\n")
+    (out / "report.json").write_text(
         json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
     )
     print(report)
