@@ -606,9 +606,10 @@ def test_the_vegetable_role_agrees_with_the_planners_vegetable_led_rule() -> Non
         or unreviewed(SimpleNamespace(**entries[key]))
         # Release v3 added two vegetable sides whose title names a meat they do not list ("Mushrooms And Onions For
         # Steak", RCP2_AECF64BC758E and RCP2_B09DC0550438): untagged as incomplete, and out of the pool the same way.
-        # Only these two: a new untagged side still fails here.
+        # Only these two: a new untagged side still fails here. v3 wave 2 (2026-11-02) added a third of the same kind,
+        # "Punajuuripihvit -- Finnish Beet Steaks" (RCP2_81D0561060DD, no meat listed): two -> three ids.
         or (
-            key in {"RCP2_AECF64BC758E", "RCP2_B09DC0550438"}
+            key in {"RCP2_AECF64BC758E", "RCP2_B09DC0550438", "RCP2_81D0561060DD"}
             and entries[key]["meal_role"] is None
             and rule_tags(dishes()[key]).incomplete_reason is not None
         )

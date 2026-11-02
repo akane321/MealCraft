@@ -4,6 +4,8 @@ stratified by allergen kind, AI candidates beside the catalog's allergens, and t
     python -I -X utf8 data-engineering/scripts/allergen_review.py draw              # sample.json and review.xlsx
     python -I -X utf8 data-engineering/scripts/allergen_review.py score <filled.xlsx>   # report.md and report.json
     python -I -X utf8 data-engineering/scripts/allergen_review.py draw --new        # data release v3's new recipes
+    python -I -X utf8 data-engineering/scripts/allergen_review.py draw --wave 2     # v3's extra wave only (30)
+    python -I -X utf8 data-engineering/scripts/allergen_review.py score --wave 2 <filled.xlsx> --with <wave-1 filled>
 
 A recipe's stratum is the rarest allergen the catalog gives it, or "none" when it has none, so every allergen kind is
 seen at least MINIMUM times and the misses on "no allergen" recipes are measured too. Only rows the reviewer marked
@@ -14,8 +16,10 @@ the reviewer the same way and never stand in for the reviewer. A recipe where th
 come from "A or B" ingredient lines (the catalog takes the first of the two) is a disagreement on the rule, not a
 catalog error, and is listed apart from the errors. With --new (draw and score) the sample is drawn from the recipes of
 data release v3 that v2.2 does not have (issue #392), with seed 20261103, into allergen-review-20261103/, which has no
-AI candidates: those two columns stay empty. The 2026-10-25 v2.2 sample stays as it is. Offline, with a Python that has
-openpyxl, from the repository root.
+AI candidates: those two columns stay empty. The 2026-10-25 v2.2 sample stays as it is. --new is wave 1, the first v3
+build's new recipes. --wave 2 draws 30 of the extra wave added after it (at least 2 per stratum: it has 13), with seed
+20261104, into allergen-review-20261104/; its score with --with (wave 1's filled sheet) also weights every allergen
+stratum of both waves by its recipes. Offline, with a Python that has openpyxl, from the repository root.
 """
 
 from __future__ import annotations
@@ -33,10 +37,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from review_sampling import (  # noqa: E402
     CHECKED,
-    NEW_SEED,
     REPOSITORY,
+    V3,
+    WAVE_SEEDS,
     allocate,
     checked,
+    combined,
+    combined_lines,
     interval,
     new_recipes,
     percent,
@@ -46,9 +53,11 @@ from review_sampling import (  # noqa: E402
 
 OUT = REPOSITORY / "data-engineering/docs/allergen-review-20261025"
 NEW_OUT = REPOSITORY / "data-engineering/docs/allergen-review-20261103"
+WAVE_OUT = {1: NEW_OUT, 2: REPOSITORY / "data-engineering/docs/allergen-review-20261104"}
 SEED = 20261025
 SIZE = 50
 MINIMUM = 3
+WAVE_SIZE = {1: (SIZE, MINIMUM), 2: (30, 2)}  # wave 2: 13 strata, so 3 each would not fit in 30
 SHEET = "复核"
 CONFIRMED = "你确认的过敏原"
 EITHER_OR = re.compile(r"\bor\b", re.IGNORECASE)
@@ -83,13 +92,13 @@ HEAD = (
 )
 
 
-def draw(version: str, recipes: list[dict], seed: int = SEED) -> dict:
+def draw(version: str, recipes: list[dict], seed: int = SEED, size: int = SIZE, minimum: int = MINIMUM) -> dict:
     frequency = Counter(allergen for recipe in recipes for allergen in recipe["allergens"])
     strata = defaultdict(list)
     for recipe in recipes:
         allergens = recipe["allergens"]
         strata[min(allergens, key=lambda a: (frequency[a], a)) if allergens else "none"].append(recipe)
-    plan = allocate({name: len(members) for name, members in sorted(strata.items())}, SIZE, MINIMUM)
+    plan = allocate({name: len(members) for name, members in sorted(strata.items())}, size, minimum)
     rng = random.Random(seed)
     picked = []
     for name in sorted(plan):
@@ -125,7 +134,7 @@ def shown(values) -> str:
     return ", ".join(values) if values else "[]"
 
 
-def workbook(sample: dict, ai: dict, recipes: dict[str, dict]):
+def workbook(sample: dict, ai: dict, recipes: dict[str, dict], minimum: int = MINIMUM):
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.worksheet.datavalidation import DataValidation
@@ -137,7 +146,7 @@ def workbook(sample: dict, ai: dict, recipes: dict[str, dict]):
         "过敏原复核（03 方案 2.5）",
         "",
         f"这 {sample['size']} 道菜按固定种子 {sample['seed']} 从 release {sample['release']} 里抽出，按过敏原种类分层："
-        f"每道菜归到它目录里最少见的那种过敏原（没有过敏原的单独一层），每层至少 {MINIMUM} 道，其余按层的大小分。",
+        f"每道菜归到它目录里最少见的那种过敏原（没有过敏原的单独一层），每层至少 {minimum} 道，其余按层的大小分。",
         "“目录里的过敏原”是现在规则算出来的值，要复核的就是它。“AI 候选”是 Claude 只看食材原文和步骤给的判断，"
         "和目录不同时写了理由。",
         "",
@@ -335,6 +344,17 @@ def score(rows: list[dict], sample: dict, ai: dict, either: dict[str, list[str]]
     }
 
 
+def by_wave(results: dict[int, dict]) -> dict:
+    """Every allergen stratum of every wave, weighted by its recipes, for the agreement over both waves."""
+    return combined(
+        [
+            {"name": f"wave {wave} `{name}`", "population": c["recipes_in_release"], "k": c["agree"], "n": c["checked"]}
+            for wave, result in sorted(results.items())
+            for name, c in result["strata"].items()
+        ]
+    )
+
+
 def markdown(result: dict, sample: dict, digest: str) -> str:
     cover = result["weighted_cover"]
     ai = result["ai_candidates"]
@@ -409,6 +429,8 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
     if result["refill"]:
         lines += ["", "## To refill", ""]
         lines += [f"- {row['id']} {row['title']}: {row['why']}" for row in result["refill"]]
+    if "waves" in result:
+        lines += combined_lines(result["waves"], "agreement", "Agree")
     if not ai["checked"]:
         return "\n".join(lines) + "\n"
     lines += [
@@ -428,28 +450,41 @@ def main() -> None:
     drawing = commands.add_parser("draw", help="draw sample.json and write review.xlsx")
     scoring = commands.add_parser("score", help="score the filled review.xlsx into report.md and report.json")
     scoring.add_argument("filled", type=Path)
+    scoring.add_argument("--with", dest="other", type=Path, help="wave 1's filled sheet, to report both waves")
     for command in (drawing, scoring):
         command.add_argument("--new", action="store_true", help="data release v3's new recipes only (issue #392)")
+        command.add_argument("--wave", type=int, choices=(1, 2), help="v3's new recipes of one wave (--new is wave 1)")
     args = parser.parse_args()
-    out = NEW_OUT if args.new else OUT
+    wave = args.wave or (1 if args.new else None)
+    out = WAVE_OUT[wave] if wave else OUT
+    size, minimum = WAVE_SIZE[wave] if wave else (SIZE, MINIMUM)
     candidates = out / "ai_candidates.json"
     ai = json.loads(candidates.read_text(encoding="utf-8")) if candidates.is_file() else {}
     if args.command == "draw":
-        version, recipes = new_recipes() if args.new else release_recipes()
-        sample = draw(version, recipes, NEW_SEED if args.new else SEED)
+        version, recipes = new_recipes(wave=wave) if wave else release_recipes()
+        sample = draw(version, recipes, WAVE_SEEDS[wave] if wave else SEED, size, minimum)
         out.mkdir(parents=True, exist_ok=True)
         (out / "sample.json").write_text(
             json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
         )
         by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
-        workbook(sample, ai, by_id).save(out / "review.xlsx")
+        workbook(sample, ai, by_id, minimum).save(out / "review.xlsx")
         print(json.dumps(sample["strata"], ensure_ascii=False))
         return
     sample = json.loads((out / "sample.json").read_text(encoding="utf-8"))
-    _, recipes = new_recipes() if args.new else release_recipes()
+    _, recipes = release_recipes(V3) if wave else release_recipes()
     by_id = {recipe["recipe_id"]: recipe for recipe in recipes}
-    either = {drawn["id"]: either_or(by_id[drawn["id"]]) for drawn in sample["recipes"]}
-    result = score(read_filled(args.filled), sample, ai, either)
+
+    def scored(filled: Path, drawn: dict) -> dict:
+        either = {row["id"]: either_or(by_id[row["id"]]) for row in drawn["recipes"]}
+        return score(read_filled(filled), drawn, ai if drawn is sample else {}, either)
+
+    result = scored(args.filled, sample)
+    if args.other:
+        if wave != 2:
+            raise SystemExit("--with goes with --wave 2: it adds wave 1's filled sheet")
+        first = json.loads((WAVE_OUT[1] / "sample.json").read_text(encoding="utf-8"))
+        result["waves"] = by_wave({1: scored(args.other, first), 2: result})
     report = markdown(result, sample, hashlib.sha256(args.filled.read_bytes()).hexdigest())
     (out / "report.md").write_text(report, encoding="utf-8", newline="\n")
     (out / "report.json").write_text(

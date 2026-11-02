@@ -39,17 +39,18 @@ def _release_directory(target: Path, counts: dict | None) -> Path:
 def test_every_offered_reason_returns_the_rows_its_count_stands_for() -> None:
     service = DataQualityService.current()
     offered = service.summary().dropped_by_reason
-    # Data release v3's quality_summary.json dropped_by_reason (2026-11-02), 1,338 records in all; v2.2 had only the
-    # first three buckets (221, 70, 1). Each bucket's filter still returns exactly its count (measured).
+    # Data release v3's quality_summary.json dropped_by_reason after wave 2 (2026-11-02), 1,177 records in all (first
+    # v3 build 1,338: cuisine not in a quota bucket 218 -> 221, energy 73 -> 84, excluded by enricher 1 -> 2, and the
+    # cuisine label cap 177 -> 0, no longer binding). Each bucket's filter still returns exactly its count (measured).
     assert offered == {
         "title already in the release": 582,
+        "cuisine not in a quota bucket": 221,
         "reviewed incomplete": 220,
-        "cuisine not in a quota bucket": 218,
-        "cuisine label cap": 177,
-        "implausible energy # kcal per serving": 73,
+        "implausible energy # kcal per serving": 84,
         "new ingredient id": 47,
         "enrichment failed validation": 19,
-        "excluded by enricher": 1,
+        "excluded by enricher": 2,
+        "implausible energy after the unit-weight correction": 1,
         "below the importer floor": 1,
     }
 
@@ -57,7 +58,7 @@ def test_every_offered_reason_returns_the_rows_its_count_stands_for() -> None:
     enricher = service.dropped(offset=0, limit=5, reason="excluded by enricher").items
 
     assert totals == offered
-    assert [item.title for item in enricher] == ["Furniture Polish"]
+    assert [item.title for item in enricher] == ["Copper Polish", "Furniture Polish"]  # wave 2 added Copper Polish
     # A raw recorded reason still narrows to exactly its own rows.
     assert service.dropped(offset=0, limit=1, reason="reviewed incomplete: gluten").total == 69
 
@@ -91,11 +92,12 @@ def test_the_registered_release_accounts_for_the_quota_cut() -> None:
     coverage = DataQualityService.current().summary().coverage
 
     assert coverage is not None
-    # Data release v3 manifest counts (2026-11-02): enrichment_set 14,233, built_before_quota 13,920, released
-    # 12,895, so the quota cut 1,025; unbucketed_cuisine 220 (v2.2: 11,971, 11,679, 8,968, 2,711 and 217).
-    assert (coverage.enrichment_set, coverage.built_before_quota, coverage.released_recipes) == (14233, 13920, 12895)
-    assert coverage.not_picked_by_quota == 1025
-    assert coverage.unbucketed_cuisine == 220
+    # Data release v3 manifest counts after wave 2 (2026-11-02): enrichment_set 19,512, built_before_quota 19,187,
+    # released 18,335, so the quota cut 852; unbucketed_cuisine 223 (first v3 build: 14,233, 13,920, 12,895, 1,025
+    # and 220; v2.2: 11,971, 11,679, 8,968, 2,711 and 217).
+    assert (coverage.enrichment_set, coverage.built_before_quota, coverage.released_recipes) == (19512, 19187, 18335)
+    assert coverage.not_picked_by_quota == 852
+    assert coverage.unbucketed_cuisine == 223
 
 
 def test_a_manifest_without_counts_leaves_the_quota_cut_unknown(tmp_path: Path) -> None:

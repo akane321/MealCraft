@@ -10,16 +10,16 @@ Each household plans breakfast, lunch and dinner from 2027-01-03 (a Sunday) for 
 
 | Case | Days | Servable recipes | Narrowest member's own | Dishes | Different dishes | Portions cooked | Trips | Purchase total (SGD) | Lowest attainment | Covered |
 |---|---:|---|---|---|---|---|---|---|---|:---:|
-| `four-one-vegetarian` | 7 | 2995 → 10422 | 2995 → 2995 | 57 → 55 | 47 → 48 | 164.22 → 153.42 | 1 → 1 | 518.64 → 535.25 | 1.592 → 1.494 | PASS |
-| `two-one-vegetarian` | 10 | 2995 → 10422 | 2995 → 2995 | 74 → 62 | 58 → 60 | 111.0 → 92.12 | 2 → 2 | 540.72 → 719.52 | 1.537 → 1.528 | PASS |
-| `with-a-child` | 3 | 9716 → 10422 | 9716 → 9716 | 25 → 24 | 21 → 21 | 48.46 → 46.41 | 1 → 1 | 203.5 → 252.11 | 1.446 → 1.388 | PASS |
-| `weekday-lunch-away` | 7 | 2995 → 10422 | 2995 → 2995 | 57 → 55 | 47 → 48 | 156.56 → 147.4 | 1 → 1 | 509.26 → 521.35 | 1.592 → 1.494 | PASS |
-| `weekend-guest` | 7 | 2995 → 10422 | 2995 → 2995 | 59 → 57 | 48 → 51 | 172.1 → 160.41 | 1 → 1 | 597.24 → 540.23 | 1.211 → 1.04 | PASS |
-| `peanut-whole-household` | 3 | 9821 → 9821 | 9821 → 9821 | 25 → 23 | 21 → 21 | 72.42 → 66.3 | 1 → 1 | 246.84 → 261.56 | 1.416 → 1.404 | PASS |
-| `peanut-only-mei-avoids` | 3 | 9821 → 10422 | 9821 → 9821 | 25 → 23 | 21 → 21 | 72.42 → 66.3 | 1 → 1 | 246.84 → 276.18 | 1.416 → 1.395 | PASS |
-| `mixed-diets` | 3 | 1408 → 10422 | 1408 → 2995 | 25 → 24 | 20 → 19 | 72.42 → 66.11 | 1 → 1 | 198.43 → 210.18 | 1.454 → 1.495 | PASS |
-| `six-one-vegetarian` | 3 | 2995 → 10422 | 2995 → 2995 | 27 → 26 | 24 → 24 | 103.1 → 96.46 | 1 → 1 | 244.15 → 304.41 | 1.734 → 1.405 | PASS |
-| `tight-budget` | 3 | 2995 → 10422 | 2995 → 2995 | 25 → 23 | 21 → 21 | 71.4 → 65.56 | 1 → 1 | 95.82 → 116.46 | 1.279 → 1.491 | PASS |
+| `four-one-vegetarian` | 7 | 4193 → 14621 | 4193 → 4193 | 59 → 57 | 48 → 48 | 169.32 → 159.68 | 1 → 1 | 489.14 → 484.36 | 1.577 → 1.578 | PASS |
+| `two-one-vegetarian` | 10 | 4193 → 14621 | 4193 → 4193 | 74 → 64 | 60 → 60 | 111.0 → 95.56 | 2 → 2 | 648.5 → 643.3 | 1.521 → 1.565 | PASS |
+| `with-a-child` | 3 | 13513 → 14621 | 13513 → 13513 | 24 → 22 | 21 → 21 | 45.73 → 42.31 | 1 → 1 | 263.58 → 274.62 | 1.415 → 1.544 | PASS |
+| `weekday-lunch-away` | 7 | 4193 → 14621 | 4193 → 4193 | 59 → 57 | 48 → 48 | 161.11 → 152.02 | 1 → 1 | 487.34 → 477.4 | 1.577 → 1.578 | PASS |
+| `weekend-guest` | 7 | 4193 → 14621 | 4193 → 4193 | 61 → 59 | 51 → 49 | 177.2 → 166.4 | 1 → 1 | 494.25 → 522.79 | 1.218 → 1.139 | PASS |
+| `peanut-whole-household` | 3 | 13841 → 13841 | 13841 → 13841 | 24 → 23 | 21 → 21 | 69.36 → 66.3 | 1 → 1 | 237.91 → 227.18 | 1.386 → 1.354 | PASS |
+| `peanut-only-mei-avoids` | 3 | 13841 → 14621 | 13841 → 13841 | 24 → 22 | 21 → 21 | 69.36 → 64.26 | 1 → 1 | 237.91 → 287.35 | 1.386 → 1.491 | PASS |
+| `mixed-diets` | 3 | 2042 → 14621 | 2042 → 4193 | 24 → 23 | 20 → 20 | 69.36 → 64.75 | 1 → 1 | 121.5 → 164.71 | 1.434 → 1.358 | PASS |
+| `six-one-vegetarian` | 3 | 4193 → 14621 | 4193 → 4193 | 26 → 27 | 24 → 24 | 100.22 → 102.22 | 1 → 1 | 257.63 → 283.13 | 1.496 → 1.727 | PASS |
+| `tight-budget` | 3 | 4193 → 14621 | 4193 → 4193 | 25 → 23 | 21 → 21 | 72.42 → 65.42 | 1 → 1 | 46.28 → 99.89 | 1.331 → 1.391 | PASS |
 
 Each cell reads `merged → shared`. **Servable recipes** are the tagged catalog recipes that may reach the table; **the narrowest member's own** is the smallest of the per-member counts, which is the one that says whether the most restricted person is well served. A household holding one member with no limits of their own makes every tagged recipe servable, which is the model working rather than a filter missing: it is the others who stop being narrowed by that member's diet. Neither count applies the planner's time, equipment or shelf-life filters or its per-role caps.
 
@@ -38,10 +38,10 @@ Two adults, a teen and a child; Ann is vegetarian. A whole week, the product's o
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.494 | 2995 → 2995 |
-| Ben | 1.606 | 2995 → 10422 |
-| Kai | 1.607 | 2995 → 10422 |
-| Mei | 1.614 | 2995 → 10422 |
+| Ann | 1.578 | 4193 → 4193 |
+| Ben | 1.717 | 4193 → 14621 |
+| Kai | 1.718 | 4193 → 14621 |
+| Mei | 1.725 | 4193 → 14621 |
 
 ## two-one-vegetarian
 
@@ -58,8 +58,8 @@ Two adults, one of them vegetarian: the smallest household the model has to serv
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Lin | 1.528 | 2995 → 2995 |
-| Raj | 1.553 | 2995 → 10422 |
+| Lin | 1.565 | 4193 → 4193 |
+| Raj | 1.586 | 4193 → 14621 |
 
 ## with-a-child
 
@@ -76,9 +76,9 @@ Two adults and a child who will not eat mushroom; the child's exclusion is the c
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.388 | 9716 → 10422 |
-| Ben | 1.388 | 9716 → 10422 |
-| Mei | 1.395 | 9716 → 9716 |
+| Ann | 1.544 | 13513 → 14621 |
+| Ben | 1.544 | 13513 → 14621 |
+| Mei | 1.551 | 13513 → 13513 |
 
 ## weekday-lunch-away
 
@@ -95,10 +95,10 @@ Four, one vegetarian; the child eats lunch at school on weekdays, so those lunch
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.494 | 2995 → 2995 |
-| Ben | 1.606 | 2995 → 10422 |
-| Kai | 1.607 | 2995 → 10422 |
-| Mei | 1.726 | 2995 → 10422 |
+| Ann | 1.578 | 4193 → 4193 |
+| Ben | 1.717 | 4193 → 14621 |
+| Kai | 1.718 | 4193 → 14621 |
+| Mei | 1.831 | 4193 → 14621 |
 
 ## weekend-guest
 
@@ -115,11 +115,11 @@ Four, one vegetarian; a grandparent who is vegetarian too joins weekend dinners.
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.461 | 2995 → 2995 |
-| Ben | 1.585 | 2995 → 10422 |
-| Grandma | 1.04 | - → - |
-| Kai | 1.586 | 2995 → 10422 |
-| Mei | 1.593 | 2995 → 10422 |
+| Ann | 1.56 | 4193 → 4193 |
+| Ben | 1.712 | 4193 → 14621 |
+| Grandma | 1.139 | - → - |
+| Kai | 1.713 | 4193 → 14621 |
+| Mei | 1.72 | 4193 → 14621 |
 
 ## peanut-whole-household
 
@@ -136,10 +136,10 @@ Four; Mei is allergic to peanut and the whole household avoids it, which is the 
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.404 | 9821 → 9821 |
-| Ben | 1.404 | 9821 → 9821 |
-| Kai | 1.405 | 9821 → 9821 |
-| Mei | 1.411 | 9821 → 9821 |
+| Ann | 1.354 | 13841 → 13841 |
+| Ben | 1.354 | 13841 → 13841 |
+| Kai | 1.355 | 13841 → 13841 |
+| Mei | 1.361 | 13841 → 13841 |
 
 ## peanut-only-mei-avoids
 
@@ -156,10 +156,10 @@ The same household with "only Mei avoids it" on, so peanut is left out of Mei's 
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.395 | 9821 → 10422 |
-| Ben | 1.395 | 9821 → 10422 |
-| Kai | 1.396 | 9821 → 10422 |
-| Mei | 1.402 | 9821 → 9821 |
+| Ann | 1.491 | 13841 → 14621 |
+| Ben | 1.491 | 13841 → 14621 |
+| Kai | 1.492 | 13841 → 14621 |
+| Mei | 1.499 | 13841 → 13841 |
 
 ## mixed-diets
 
@@ -176,10 +176,10 @@ Four with two different diets: Ann vegetarian, Kai dairy-free.
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.495 | 1408 → 2995 |
-| Ben | 1.586 | 1408 → 10422 |
-| Kai | 1.495 | 1408 → 6257 |
-| Mei | 1.593 | 1408 → 10422 |
+| Ann | 1.358 | 2042 → 4193 |
+| Ben | 1.419 | 2042 → 14621 |
+| Kai | 1.384 | 2042 → 8666 |
+| Mei | 1.425 | 2042 → 14621 |
 
 ## six-one-vegetarian
 
@@ -196,12 +196,12 @@ Six adults, one of them vegetarian: dinner is the 5-6 row of the ADR-0070 table.
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Adult 1 | 1.405 | 2995 → 2995 |
-| Adult 2 | 1.483 | 2995 → 10422 |
-| Adult 3 | 1.483 | 2995 → 10422 |
-| Adult 4 | 1.483 | 2995 → 10422 |
-| Adult 5 | 1.483 | 2995 → 10422 |
-| Adult 6 | 1.483 | 2995 → 10422 |
+| Adult 1 | 1.727 | 4193 → 4193 |
+| Adult 2 | 1.807 | 4193 → 14621 |
+| Adult 3 | 1.807 | 4193 → 14621 |
+| Adult 4 | 1.807 | 4193 → 14621 |
+| Adult 5 | 1.807 | 4193 → 14621 |
+| Adult 6 | 1.807 | 4193 → 14621 |
 
 ## tight-budget
 
@@ -218,8 +218,8 @@ Four, one vegetarian, on a tight weekly budget for three days (S$120, chosen onc
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.491 | 2995 → 2995 |
-| Ben | 1.576 | 2995 → 10422 |
-| Kai | 1.577 | 2995 → 10422 |
-| Mei | 1.584 | 2995 → 10422 |
+| Ann | 1.391 | 4193 → 4193 |
+| Ben | 1.457 | 4193 → 14621 |
+| Kai | 1.458 | 4193 → 14621 |
+| Mei | 1.464 | 4193 → 14621 |
 

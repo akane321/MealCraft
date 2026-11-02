@@ -21,17 +21,17 @@ Snapshots: `products/fairprice-v2-snapshot.json` `2cfd10e150fd38cb`, `products/c
 
 ## Recipes with every bought line priced
 
-| priced at | recipes | of 12894 |
+| priced at | recipes | of 18334 |
 | --- | ---: | ---: |
-| FairPrice alone | 9699 | 75.2% |
-| Any store | 10631 | 82.5% |
+| FairPrice alone | 14019 | 76.5% |
+| Any store | 15533 | 84.7% |
 
 ## Recipe lines priced
 
-| priced at | lines | of 109266 |
+| priced at | lines | of 159486 |
 | --- | ---: | ---: |
-| FairPrice alone | 105565 | 96.6% |
-| Any store | 106778 | 97.7% |
+| FairPrice alone | 154545 | 96.9% |
+| Any store | 156437 | 98.1% |
 
 ## The 20 most used ingredients still unpriced
 
@@ -39,23 +39,23 @@ Used by the most release recipes, priced at no store.
 
 | ingredient | recipes |
 | --- | ---: |
-| basil | 510 |
-| mustard | 205 |
-| allspice | 147 |
+| basil | 773 |
+| mustard | 257 |
+| allspice | 151 |
+| sesame_tahini | 99 |
+| mixed_nuts | 94 |
+| pie_crust | 90 |
 | turkey | 90 |
-| pie_crust | 88 |
-| mixed_nuts | 85 |
-| celery_seed | 77 |
-| biscuit_mix | 71 |
-| seasoned_salt | 67 |
-| msg | 64 |
+| msg | 86 |
+| celery_seed | 78 |
+| enchilada_sauce | 77 |
+| biscuit_mix | 72 |
+| seasoned_salt | 68 |
 | water_chestnut | 61 |
+| kaffir_lime_leaf | 55 |
 | meat | 54 |
-| sesame_tahini | 51 |
-| kaffir_lime_leaf | 39 |
+| pepperoni | 51 |
 | radish | 37 |
-| enchilada_sauce | 34 |
-| dried_onion_flakes | 33 |
-| spaghetti_squash | 30 |
-| mashed_potatoes | 29 |
-| chow_mein_noodles | 28 |
+| dried_onion_flakes | 34 |
+| fennel | 33 |
+| baguette | 31 |

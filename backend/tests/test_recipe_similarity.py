@@ -121,4 +121,4 @@ def test_the_committed_vectors_cover_every_recipe_of_the_release_the_product_rea
     meta, index, rows = recipe_similarity._catalog()
 
     assert ids <= set(index)
-    assert len(rows) == len(meta["keys"]) * meta["dimensions"]  # 2026-11-02: 12,925 keys, 3927 added for v3
+    assert len(rows) == len(meta["keys"]) * meta["dimensions"]  # 2026-11-02: 12,925 -> 18,365 keys (wave 2 added 5,440)

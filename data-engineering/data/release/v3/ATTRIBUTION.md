@@ -11,8 +11,8 @@ Use is non-commercial.
 
 | Source | Recipes | Licence as recorded |
 | --- | ---: | --- |
-| RecipeNLG (Gathered) | 12557 | RecipeNLG: non-commercial research and educational use only |
-| TheMealDB | 241 | TheMealDB terms of use (attribution; non-commercial course use) |
+| RecipeNLG (Gathered) | 17994 | RecipeNLG: non-commercial research and educational use only |
+| TheMealDB | 244 | TheMealDB terms of use (attribution; non-commercial course use) |
 | Wikibooks Cookbook | 97 | CC BY-SA 4.0 (Wikibooks Cookbook) |
 
 **RecipeNLG (Gathered).** RecipeNLG, `Gathered` subset only. Non-commercial research and educational use. Each recipe keeps the URL of the site it was gathered from.
@@ -21,7 +21,7 @@ Use is non-commercial.
 
 **Wikibooks Cookbook.** Wikibooks Cookbook, CC BY-SA 4.0. Attribution and share-alike apply to the source text; our derived fields are listed separately below.
 
-Per-recipe source URLs: 12895 of 12895 records carry one. The remainder come from a source that publishes no per-recipe URL; their dataset is named in `source.dataset`.
+Per-recipe source URLs: 18335 of 18335 records carry one. The remainder come from a source that publishes no per-recipe URL; their dataset is named in `source.dataset`.
 
 ## Ingredient nutrition and weights
 
