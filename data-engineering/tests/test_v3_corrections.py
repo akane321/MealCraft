@@ -91,6 +91,31 @@ class CheckerTest(unittest.TestCase):
             rows = corrections.read_table(write_table(Path(folder), TABLE[:1]))
         self.assertEqual(corrections.check_rows(rows, V22, released), [])
 
+    def test_a_gbk_table_is_named_not_a_traceback(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "t.csv"
+            path.write_bytes((HEADER + "\r\nRCP2_000000000005,cuisine,italian,greek,ok,张三\r\n").encode("gbk"))
+            with self.assertRaisesRegex(SystemExit, "not UTF-8; in Excel save as 'CSV UTF-8"):
+                corrections.read_table(path)
+
+    def test_case_spaces_and_a_float_cell_are_read_as_the_vocabulary_value(self) -> None:
+        lines = ["RCP2_000000000005,Cuisine,Italian ,Greek,ok,amy", "RCP2_000000000006,servings,4.0,3.0,ok,amy"]
+        with tempfile.TemporaryDirectory() as folder:
+            rows = corrections.read_table(write_table(Path(folder), lines))
+        self.assertEqual(corrections.check_rows(rows, V22, RELEASED), [])
+        bad = {**rows[0], "new_value": "malaysian", "row": 2}
+        self.assertIn("malaysian_singaporean", corrections.check_rows([bad], V22, RELEASED)[0])
+
+    def test_export_lists_only_the_added_recipes(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "sheet.csv"
+            released = {rid: {**r, "servings_basis": "estimated"} for rid, r in RELEASED.items()}
+            self.assertEqual(corrections.export(path, released, V22), 8)
+            lines = path.read_text(encoding="utf-8-sig").splitlines()
+        self.assertEqual(lines[0], "recipe_id,title,cuisine,course,servings,servings_basis")
+        self.assertEqual(lines[1], "RCP2_000000000001,Dish 1,thai,main,4,estimated")
+        self.assertEqual(len(lines), 9)
+
 
 class WithdrawTest(unittest.TestCase):
     def test_withdraw_writes_slug_reason_and_reviewer_and_is_idempotent(self) -> None:
@@ -235,6 +260,20 @@ class BuildAppliesCorrectionsTest(unittest.TestCase):
             harness.assemble(*changed, first_build=first, reviews=[row])
         with self.assertRaises(SystemExit):  # a row whose value the released recipe does not carry
             harness.assemble(*args, first_build=first, reviews=[{**row, "new_value": "thai"}])
+
+    def test_a_corrected_recipe_that_the_build_dropped_is_named_with_its_reason(self) -> None:
+        rid = v3.recipe_id_of("recipenlg:99")
+        row = {"row": 7, "recipe_id": rid, "field": "servings", "new_value": "2"}
+        args = harness.inputs(harness.V22, [], [harness.recipe(21, "thai")], drops=("recipenlg:99",))
+        with self.assertRaisesRegex(SystemExit, r"table rows 7 \(reviewed incomplete: milk\)"):
+            harness.assemble(*args, reviews=[row])
+
+    def test_a_crlf_table_hashes_as_its_lf_file(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            crlf, lf = Path(folder) / "crlf.csv", Path(folder) / "lf.csv"
+            crlf.write_bytes(b"a,b\r\n1,2\r\n")
+            lf.write_bytes(b"a,b\n1,2\n")
+            self.assertEqual(v3.table_sha256(crlf), v3.table_sha256(lf))
 
     def test_an_empty_table_changes_no_output(self) -> None:
         args = harness.inputs(harness.V22, [harness.recipe(20, "chinese")], [harness.recipe(21, "thai")])

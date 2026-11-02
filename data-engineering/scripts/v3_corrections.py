@@ -2,10 +2,12 @@
 
     python scripts/v3_corrections.py validate TABLE   # name every problem by row; exit 1 if any
     python scripts/v3_corrections.py withdraw TABLE   # write the withdraw rows into data/recipes/withdrawn.json
+    python scripts/v3_corrections.py export SHEET     # write the added recipes to browse in Excel (not committed)
 
 The table is `data/enrichment/v3-corrections.csv` (UTF-8 with BOM, so that Excel reads it), one row per recipe and
 field: recipe_id, field, old_value, new_value, reason, reviewer. Fields: cuisine, course, servings (a whole number
-1-50) and withdraw (new_value `yes`, old_value empty). Only recipes added in v3 (not in v2.2) may be corrected.
+1-50) and withdraw (new_value `yes`, old_value empty). Case and spaces in cuisine and course do not matter
+(`Snack Appetizer` reads as `snack_appetizer`). Only recipes added in v3 (not in v2.2) may be corrected.
 `validate` reads the committed `data/release/v3/recipes.jsonl`, so it runs on main without the staging inputs; a row
 the release already carries (released value = new_value) passes. `build_release_v3.py` applies the cuisine, course
 and servings rows; a withdrawn recipe stays released and is only kept out of plans. Standard library only.
@@ -16,6 +18,7 @@ from __future__ import annotations
 import argparse
 import collections
 import csv
+import io
 import json
 import re
 import sys
@@ -41,17 +44,32 @@ SLUG_PREFIX = "v2-"  # backend app/data/release_v2.py recipe_slug
 
 def read_table(path: Path = TABLE) -> list[dict]:
     """The filled rows, each with its sheet row number (`row`). `utf-8-sig` drops the BOM; `newline=""` handles CRLF."""
-    with path.open(encoding="utf-8-sig", newline="") as handle:
-        reader = csv.DictReader(handle)
-        missing = set(COLUMNS) - set(reader.fieldnames or [])
-        if missing:
-            raise SystemExit(f"{path}: missing columns {sorted(missing)}")
-        rows = []
-        for row in reader:
-            row = {key: (value or "").strip() for key, value in row.items() if key}
-            if any(row[key] for key in COLUMNS):
-                rows.append(dict(row, row=reader.line_num))
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError:
+        raise SystemExit(f"{path}: not UTF-8; in Excel save as 'CSV UTF-8 (逗号分隔)', not plain 'CSV'") from None
+    reader = csv.DictReader(io.StringIO(text, newline=""))
+    missing = set(COLUMNS) - set(reader.fieldnames or [])
+    if missing:
+        raise SystemExit(f"{path}: missing columns {sorted(missing)}")
+    rows = []
+    for row in reader:
+        row = {key: (value or "").strip() for key, value in row.items() if key}
+        if any(row[key] for key in COLUMNS):
+            row["field"] = row["field"].lower()
+            for key in ("old_value", "new_value"):
+                row[key] = clean_value(row["field"], row[key])
+            rows.append(dict(row, row=reader.line_num))
     return rows
+
+
+def clean_value(field: str, value: str) -> str:
+    """Lower case with underscores for cuisine and course; `4.0` (a number cell) reads as `4` for servings."""
+    if field in ("cuisine", "course"):
+        return re.sub(r"[\s-]+", "_", value.lower())
+    if field == "servings":
+        return re.sub(r"\.0+$", "", value)
+    return value
 
 
 def read_release(version: str) -> dict[str, dict]:
@@ -61,7 +79,7 @@ def read_release(version: str) -> dict[str, dict]:
 
 def value_problem(field: str, value: str) -> str | None:
     if field == "cuisine" and value not in CUISINES:
-        return f"new_value {value!r} is not a cuisine of the v3 build"
+        return f"new_value {value!r} is not a cuisine of the v3 build: {', '.join(sorted(CUISINES))}"
     if field == "course" and value not in COURSES:
         return f"new_value {value!r} is not one of {', '.join(VOCAB['course'])}"
     if field == "servings" and not (re.fullmatch(r"\d+", value) and 1 <= int(value) <= 50):
@@ -158,13 +176,27 @@ def withdraw(rows: list[dict], released: dict[str, dict], path: Path = WITHDRAWN
     return changed
 
 
+def export(path: Path, released: dict[str, dict], v22: set[str]) -> int:
+    """The recipes added in v3, one row each, to browse and filter in Excel. Not committed."""
+    columns = ("recipe_id", "title", "cuisine", "course", "servings", "servings_basis")
+    added = [r for rid, r in sorted(released.items()) if rid not in v22]
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(columns)
+        writer.writerows([r[column] for column in columns] for r in added)
+    return len(added)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("validate", "withdraw"))
-    parser.add_argument("table", type=Path)
+    parser.add_argument("command", choices=("validate", "withdraw", "export"))
+    parser.add_argument("table", type=Path, help="the corrections table (export: the sheet to write)")
     args = parser.parse_args()
-    rows = read_table(args.table)
     released = read_release("v3")
+    if args.command == "export":
+        print(f"{export(args.table, released, set(read_release('v2.2')))} recipes written to {args.table}")
+        return
+    rows = read_table(args.table)
     problems = check_rows(rows, set(read_release("v2.2")), released)
     if problems:
         print("\n".join(problems))

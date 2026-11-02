@@ -142,6 +142,15 @@ ingredients.jsonl 和去掉该字段的 manifest。
 - `servings`：份数，1-50 的整数；
 - `withdraw`：撤下不合适的菜，`new_value` 写 `yes`，`old_value` 留空；撤下的菜不再改别的字段。
 
+`course` 只改 `course`，不会改 `meal_types`（早餐、午餐、晚餐、点心的槽位仍是模型原来填的）；改完类别后规划器还是按原槽位排它，
+owner 在 11-05 前决定要不要同步。菜系和类别不分大小写，空格当下划线读（`Snack Appetizer` 即 `snack_appetizer`）。
+
+先导出新增菜的清单（recipe_id、标题、菜系、类别、份数及其来源），用 Excel 打开筛选，从这里查 id 和现在的值：
+
+```bash
+python scripts/v3_corrections.py export 新增菜.csv   # 只写你给的文件，不进仓库
+```
+
 例子（写在这里，不要加进文件）：`RCP2_0E5566E889D9,cuisine,chinese,american,Pizza is an American-style dish,张三`。
 
 在 main 上检查自己填好的副本（读已提交的 `data/release/v3/recipes.jsonl`，不需要 staging）：
@@ -151,13 +160,13 @@ python scripts/v3_corrections.py validate 你的副本.csv   # 按行号列出�
 ```
 
 它查：未知或 v2.2 的 recipe_id、未知字段、词表或范围外的值、`old_value` 不是现在发布的值、同一道菜同一字段重复、
-`reason` 或 `reviewer` 为空、撤下的菜又改了别的字段、改菜系后某个标签超过 20%。在 Excel 里另存时选"CSV UTF-8"。
+`reason` 或 `reviewer` 为空、撤下的菜又改了别的字段、改菜系后某个标签超过 20%。在 Excel 里另存时选"CSV UTF-8 (逗号分隔)"，不要选普通"CSV"（否则读不了中文）。
 填好的副本发给 owner，不要直接改仓库里的文件。
 
 owner 11-05 的重建顺序（要有 staging）：
 
 ```bash
-# 把各组的表合进 data/enrichment/v3-corrections.csv（保留表头和 BOM）
+# 把各组的表合进 data/enrichment/v3-corrections.csv（保留表头和 BOM；表的 sha256 按 LF 行尾算，CRLF 副本也一样）
 python scripts/v3_corrections.py validate data/enrichment/v3-corrections.csv
 python scripts/build_release_v3.py --out DIR      # 先写到别处看；只有被修正的菜允许和第一次构建不同
 python scripts/build_release_v3.py                # 写 data/release/v3/
@@ -165,6 +174,7 @@ python scripts/v3_corrections.py withdraw data/enrichment/v3-corrections.csv   #
 PYTHONPATH=src python -m unittest discover -s tests
 ```
 
+份数改动可能让每份营养过不了 v2 的合理性关，那道菜会被丢掉；构建停下时括号里写了丢弃原因。
 构建把 cuisine、course、servings 改进新增菜的富化结果再构建：上限、检查和每份营养都按修正后的值算，字段的 evidence 写
 "reviewed by 复核人: 理由 (was 原值)"，confidence 记 1.0；manifest 的 `committed_sha256` 记表的 sha256，
 `quality_report.md` 按字段计数（含撤下数）。撤下的菜仍在发布里（前 12,895 道不删），只是不进规划；`withdraw`

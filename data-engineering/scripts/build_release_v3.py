@@ -145,6 +145,11 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def table_sha256(path: Path) -> str:
+    """sha256 of a committed table with LF line endings, so an Excel (CRLF) copy hashes as the file git stores."""
+    return sha256(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
 def bucket(reason: str) -> str:
     """The summary bucket of a raw reason, as build_release_v2 counts it (the ops console reads it the same way)."""
     return re.sub(r"ING_\S+|\d+(\.\d+)?|\([^)]*\)", "#", reason).split(":")[0].strip()
@@ -348,12 +353,14 @@ def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: d
         problems.append(f"{len(changed)} first-build records missing or changed, e.g. {changed[:3]}")
     by_id = {r["recipe_id"]: r for r in added}
     unapplied = [
-        row["row"]
+        row
         for row in limits["reviews"]
         if row["field"] != "withdraw" and by_id.get(row["recipe_id"], {}).get(row["field"]) != reviewed.new_value(row)
     ]
     if unapplied:
-        problems.append(f"corrections not in the released recipes, table rows {unapplied[:5]}")
+        # A servings change can make the per-serving nutrition fail a gate; the drop reason says so.
+        why = [f"{r['row']} ({limits['dropped_ids'].get(r['recipe_id'], 'not released')})" for r in unapplied[:5]]
+        problems.append(f"corrections not in the released recipes, table rows {', '.join(why)}")
     size = sum(len(line.encode()) + 1 for line in lines)
     if size > limits["max_bytes"]:
         problems.append(f"recipes.jsonl is {size} bytes > {limits['max_bytes']}")
@@ -442,7 +449,14 @@ def assemble(
     by_id.update({r["recipe_id"]: json.dumps(r, ensure_ascii=False, sort_keys=True) for r in added})
     lines = [by_id[key] for key in sorted(by_id)]
     recipes = [json.loads(line) for line in lines]
-    limits = {"minimum": minimum, "first_build": first_build or {}, "max_bytes": max_bytes, "reviews": reviews}
+    dropped_ids = {recipe_id_of(d["candidate_id"]): d["reason"] for d in drops}  # names why a corrected recipe is gone
+    limits = {
+        "minimum": minimum,
+        "first_build": first_build or {},
+        "max_bytes": max_bytes,
+        "reviews": reviews,
+        "dropped_ids": dropped_ids,
+    }
     checks = verify(lines, v22_lines, added, entries, rules, limits)
     enrichment_set = sizes["v2_enrichment_set"] + sizes["v3_selected"]
     if len(recipes) + len(drops) != enrichment_set:
@@ -721,7 +735,7 @@ def main() -> int:
     sizes, legs, build_drops = legs_from_staging(STAGING, PACKETS, rules, fixes)
     staging = {name: sha256((STAGING / name).read_bytes()) for name in STAGING_INPUTS}
     tables = (WAVE1_CSV, FIRST_BUILD, CORRECTIONS) if reviews else (WAVE1_CSV, FIRST_BUILD)
-    committed = {f"data/enrichment/{path.name}": sha256(path.read_bytes()) for path in tables}
+    committed = {f"data/enrichment/{path.name}": table_sha256(path) for path in tables}
     for part in ("A", "B", "C"):
         staging[f"enrichment-work/part-{part}/recipes.input.jsonl"] = sha256(
             (PACKETS / f"part-{part}" / "recipes.input.jsonl").read_bytes()
