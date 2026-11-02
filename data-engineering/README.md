@@ -188,6 +188,40 @@ python scripts/cold_storage_mapping.py export               # 写运行时快照
 商品列表在页面的 Next.js flight 数据（`self.__next_f.push` 的字符串拼起来）里 `"initialProducts":` 之后。
 按重量卖的商品价格是每公斤价，导出的整包价是 `round(促销价 × averageWeight, 2)`。`external_id` 是 `cs-<productId>`。
 
+## RedMart 商品映射（第三家零售商）
+
+只给 FairPrice 和 Cold Storage 快照都没有的 v2.2 食材找 RedMart（Lazada 新加坡的超市）商品（`docs/design/redmart.md`）：
+
+```bash
+python scripts/capture_redmart_snapshot.py             # 规范名、简化叫法、两家的 search_again，每个食材最多 3 次，写 data/enrichment/redmart/v1/observations.jsonl
+python scripts/redmart_mapping.py packet --shards 3    # 只打包有 RedMart 候选的食材（data/review/redmart/batch<i>.jsonl，不提交）
+python scripts/redmart_mapping.py validate FILE...     # 检查提议，规则同 Cold Storage
+python scripts/redmart_mapping.py merge FILE...        # 合并进 data/enrichment/redmart/v1/mapping.jsonl
+python scripts/redmart_mapping.py sample --size 40     # 抽查样本，种子 20261101
+python scripts/redmart_mapping.py record VERDICTS.jsonl  # 记录 owner 的判定，写 docs/redmart-v1-sampled-review.json
+python scripts/redmart_mapping.py export               # 写运行时快照 ../data/products/redmart-v1-snapshot.json
+```
+
+只用标准库的公开 GET，只访问 `https://www.lazada.sg/tag/<slug>/?ajax=true&q=<query>&page=<n>` 这一个搜索接口（返回 JSON，
+商品在 `mods.listItems`）：每秒最多 1 次、单次最多 500 次，遇到第一个非 200、重定向（含登录）或不认识的响应（含 punish/captcha/x5sec 页面）就停，
+不绕过任何限制（ADR-0110）。搜索覆盖整个 Lazada，只保留 `sellerName == "RedMart"`（或 `sellerId` 为 `1000008313`、或带 `Redmart` 图标）的商品；
+第 1 页没有 RedMart 商品且结果多于一页时才读第 2 页。包装规格只在商品名里，价格取列表价 `price`。`external_id` 是 `rm-<itemId>`，
+`product_url` 是 `https:` 加 `itemUrl`。
+
+## 手工录入价格（最后一层）
+
+FairPrice、Cold Storage、RedMart 都没有的食材，由人从 Shopee、Lazada、Amazon 等平台查价后填表（`docs/design/manual-prices.md`）：
+
+```bash
+python scripts/manual_prices.py validate SHEET   # 逐行检查，按 rank 列出全部问题；有问题时退出码为 1
+python scripts/manual_prices.py export SHEET     # 全部通过才写运行时快照 ../data/products/manual-v1-snapshot.json
+```
+
+表为 `data/enrichment/manual/v1/price-sheet.csv`（UTF-8 带 BOM，Excel 可直接打开；CRLF 也能读）。没填任何字段的行视为空行；同一食材有多个商品就重复该行。
+价格可以写成 `4.5`、`S$4.50`，必须为正且精确到分；链接的域名要属于所填平台（`other` 不限；`redmart` 接受 `redmart.lazada.sg` 与 `lazada.sg`）；日期不能晚于新加坡今天。
+包装克数：`g`/`kg` 直接换算；`ml`/`l` 用发布版食材记录自带的每毫升克数，没有就按 1.0 g/ml 并在 `package_grams_basis` 里注明（v2.2 目前没有这个字段，所以都是 1.0）；
+`count` 用发布版该食材的 `piece` 单件克重，没有就拒绝该行。`external_id` 是 `mn-<rank>-<n>`，`fetched_at` 是 `observed_date` 的新加坡零点，每个商品都是 `owner_recorded`。
+
 ## 菜谱与食材标签 v1 的抽检（Reviewing recipe and ingredient tags）
 
 ### 规则修复与原审查分开

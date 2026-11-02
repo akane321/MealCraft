@@ -5,8 +5,11 @@ from pydantic import BaseModel, Field
 
 from app.schemas.retrieval import RetrievalTrace
 
-Retailer = Literal["fairprice", "cold_storage"]
-ProductSource = Literal["fairprice", "cold_storage", "fixture"]
+# The last four are platforms a person recorded a price from by hand (docs/design/manual-prices.md).
+Retailer = Literal["fairprice", "cold_storage", "redmart", "shopee", "lazada", "amazon", "other"]
+# A store MealCraft reads itself (live search, the console's mapping queue); hand-recorded platforms are not.
+ReadStore = Literal["fairprice", "cold_storage", "redmart"]
+ProductSource = Literal["fairprice", "cold_storage", "redmart", "manual", "fixture"]
 PricingMode = Literal["fixture", "live"]
 
 
@@ -34,6 +37,8 @@ class ProductResponse(BaseModel):
     cart_item_id: str | None = None
     # True when the listing's "Dietary Attributes" carry "Halal"; None is unknown, never False (docs/design/halal.md).
     halal_certified: bool | None = None
+    # A hand-recorded product (source "manual"): the platform it was recorded from; None for every other source.
+    retailer: Retailer | None = None
 
 
 class ProductSearchResponse(BaseModel):
@@ -55,7 +60,7 @@ class PriceEvidence(BaseModel):
     """
 
     fact_id: str
-    source: Literal["fairprice", "cold_storage", "fixture", "release_snapshot"]
+    source: Literal["fairprice", "cold_storage", "redmart", "manual", "fixture", "release_snapshot"]
     mode: Literal["live", "cache", "snapshot", "fixture"]
     query: str | None
     parser_version: str | None

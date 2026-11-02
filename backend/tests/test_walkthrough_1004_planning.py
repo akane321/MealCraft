@@ -628,10 +628,10 @@ def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_se
         assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 70
 
 
-def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
+def test_the_walkthrough_week_found_boring_swaps_its_repeats_or_says_what_a_swap_would_take(walked):
     # v3 wave 2 (18,335 recipes, re-measured 2026-11-02): the S$100 week no longer repeats a dish (21 different
     # families; it repeated before), so the swap is checked on the same household at S$65, whose week has one dish
-    # five times.
+    # five times (four with RedMart).
     assert max(Counter(dish_family(dish.recipe.title) for dish in walked["plan"].days).values()) == 1
     budget = 65
     with kept_for(300), walked["factory"]() as session:
@@ -642,7 +642,16 @@ def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(w
         assert max(served.values()) > 1, served  # this week repeats a dish
         answered = service.reply(snapshot.id, "the dishes are boring")
     preview = answered.pending_replan
-    assert preview is not None, answered.messages[-1].content
+    # 18,335 recipes with RedMart (re-measured 2026-11-02): the S$65 week is S$64.34 and repeats Sesame Ramen With
+    # Green Peas four times; two repeats are swapped at +S$0.44, two stay (the closest needs S$4.77 more). On 12,895
+    # recipes with RedMart the S$100 week found no swap that fits (the closest needed S$1.58 more), hence the branch.
+    if preview is None:
+        assert re.fullmatch(
+            r"No different dish fits in place of the repeated ones: the closest swap I found needs S\$\d+\.\d\d more "
+            rf"than the S\${budget}\.00 the week can spend\. I can swap a dish anyway\.",
+            answered.messages[-1].content,
+        ), answered.messages[-1].content
+        return
     assert answered.messages[-1].content.startswith("For more variety: ")
     change = preview.shape_change
     assert {dish_family(dish.recipe_title) for dish in change.added}.isdisjoint(served)

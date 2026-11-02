@@ -1,42 +1,54 @@
 {
  "ingredients": {
   "total": 699,
-  "fairprice": 519,
-  "combined": 562,
-  "fairprice_share": 0.7425,
-  "combined_share": 0.804,
+  "fairprice": 505,
+  "combined": 549,
+  "fairprice_share": 0.7225,
+  "combined_share": 0.7854,
   "released": 701,
   "not_purchased": [
    "ice",
    "water"
   ],
-  "cold_storage_only": 43,
-  "cold_storage_only_share": 0.0615,
+  "cold_storage_only": 39,
+  "cold_storage_only_share": 0.0558,
+  "redmart_only": 5,
+  "redmart_only_share": 0.0072,
+  "manual_only": 0,
+  "manual_only_share": 0.0,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 18334,
-  "fairprice": 15225,
-  "combined": 16801,
-  "fairprice_share": 0.8304,
-  "combined_share": 0.9164
+  "fairprice": 14019,
+  "combined": 15533,
+  "fairprice_share": 0.7646,
+  "combined_share": 0.8472
  },
  "lines": {
   "total": 159486,
-  "fairprice": 156027,
-  "combined": 157808,
-  "fairprice_share": 0.9783,
-  "combined_share": 0.9895
+  "fairprice": 154545,
+  "combined": 156437,
+  "fairprice_share": 0.969,
+  "combined_share": 0.9809
  },
  "unpriced": [
+  {
+   "ingredient": "basil",
+   "recipes": 773
+  },
+  {
+   "ingredient": "mustard",
+   "recipes": 257
+  },
   {
    "ingredient": "allspice",
    "recipes": 151
   },
   {
-   "ingredient": "dill",
-   "recipes": 110
+   "ingredient": "sesame_tahini",
+   "recipes": 99
   },
   {
    "ingredient": "mixed_nuts",
@@ -51,8 +63,16 @@
    "recipes": 90
   },
   {
+   "ingredient": "msg",
+   "recipes": 86
+  },
+  {
    "ingredient": "celery_seed",
    "recipes": 78
+  },
+  {
+   "ingredient": "enchilada_sauce",
+   "recipes": 77
   },
   {
    "ingredient": "biscuit_mix",
@@ -67,8 +87,16 @@
    "recipes": 61
   },
   {
+   "ingredient": "kaffir_lime_leaf",
+   "recipes": 55
+  },
+  {
    "ingredient": "meat",
    "recipes": 54
+  },
+  {
+   "ingredient": "pepperoni",
+   "recipes": 51
   },
   {
    "ingredient": "radish",
@@ -79,40 +107,17 @@
    "recipes": 34
   },
   {
-   "ingredient": "chow_mein_noodles",
-   "recipes": 30
+   "ingredient": "fennel",
+   "recipes": 33
   },
   {
-   "ingredient": "spaghetti_squash",
-   "recipes": 30
-  },
-  {
-   "ingredient": "mashed_potatoes",
-   "recipes": 29
-  },
-  {
-   "ingredient": "lime_zest",
-   "recipes": 27
-  },
-  {
-   "ingredient": "orange_juice_conc",
-   "recipes": 26
-  },
-  {
-   "ingredient": "coffee",
-   "recipes": 24
-  },
-  {
-   "ingredient": "onion_salt",
-   "recipes": 24
-  },
-  {
-   "ingredient": "gochugaru",
-   "recipes": 22
+   "ingredient": "baguette",
+   "recipes": 31
   }
  ],
  "sources": {
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
-  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358"
+  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358",
+  "products/redmart-v1-snapshot.json": "a63f7c3ba676f967"
  }
 }

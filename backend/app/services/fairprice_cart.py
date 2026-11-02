@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import get_args
 
 from app.models.meal_plan import MealPlan
 from app.repositories.meal_plan import MealPlanRepository
@@ -15,7 +16,7 @@ from app.schemas.fairprice_cart import (
     line_key,
     trip_lines,
 )
-from app.schemas.product import GroceryLineEstimate
+from app.schemas.product import GroceryLineEstimate, Retailer
 from app.services.meal_plan import WeeklyMealPlanService
 from app.services.product import ProductSearchService
 
@@ -49,9 +50,13 @@ class FairPriceCartService:
         for line in trip:
             if line.retailer not in {"fairprice", None} and line.packages_required > 0:
                 other_cents.setdefault(line.retailer, []).append(_cents(line.purchase_cost_sgd))
+        # One entry per other store or platform that has lines, in the order Retailer lists them (the fill order).
         other_stores = [
-            OtherStoreTrip(retailer=retailer, lines=len(cents), purchase_total_sgd=sum(cents) / 100)
-            for retailer, cents in other_cents.items()
+            OtherStoreTrip(
+                retailer=store, lines=len(other_cents[store]), purchase_total_sgd=sum(other_cents[store]) / 100
+            )
+            for store in get_args(Retailer)
+            if store in other_cents
         ]
         # A fixture plan has no FairPrice products to check, and asks FairPrice nothing.
         live = plan.pricing_mode != "fixture"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, hasColdStorage, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
+import { RETAILER_SHORT, basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, hasOtherStore, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -14,8 +14,8 @@ const trips = computed(() => groceryTrips(props.estimate.items).map(trip => ({
   sum: sumOf(trip.groups.flatMap(group => group.lines)),
 })));
 const groups = computed(() => trips.value.flatMap(trip => trip.groups));
-// Stores are shown apart (FairPrice first, then Cold Storage) only once some line is bought at Cold Storage.
-const byStore = computed(() => hasColdStorage(props.estimate.items));
+// Stores are shown apart (FairPrice, Cold Storage, RedMart) only once some line is bought away from FairPrice.
+const byStore = computed(() => hasOtherStore(props.estimate.items));
 // A line of the second trip is its own purchase, even of an ingredient the first trip also buys; so is one of each store.
 const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${lineRetailer(line)}:${line.ingredient_name}`;
 // The note counts live, saved and sample prices; its dot and the amber "Saved FairPrice price" lines read them the same way.
@@ -52,7 +52,7 @@ function toggle(name: string) {
                   <span class="p">{{ line.ingredient_display_name }}</span>
                   <span v-if="line.perishable" class="fresh" title="Fresh: cooked within 3 days of this shop">Use within 3 days</span>
                   <span v-if="line.product?.halal_certified" class="fresh" title="FairPrice lists this product as Halal">Halal-certified</span>
-                  <a v-if="store.retailer === 'cold_storage' && line.product?.product_url" class="shop-link" :href="line.product.product_url" target="_blank" rel="noopener" @click.stop>View at Cold Storage</a>
+                  <a v-if="store.retailer !== 'fairprice' && line.product?.product_url" class="shop-link" :href="line.product.product_url" target="_blank" rel="noopener" @click.stop>View at {{ store.retailer === 'other' ? 'the shop' : RETAILER_SHORT[store.retailer] }}</a>
                 </span>
                 <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
               </span>

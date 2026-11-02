@@ -1,0 +1,3 @@
+{"ingredient_id": "ING_COCONUT_MILK", "canonical_name": "coconut milk", "forms": {"ING_COCONUT_MILK": {"unit_grams": [{"unit": "cup", "grams": 226, "basis": "x"}, {"unit": "piece", "grams": 400, "basis": "can"}]}}}
+{"ingredient_id": "ING_SAFFRON", "canonical_name": "saffron", "forms": {"ING_SAFFRON": {"unit_grams": [{"unit": "cup", "grams": 100, "basis": "x"}]}}}
+{"ingredient_id": "ING_MIRIN", "canonical_name": "mirin", "grams_per_ml": 1.05, "forms": {"ING_MIRIN": {"unit_grams": []}}}

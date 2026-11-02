@@ -285,15 +285,18 @@ def dish_cost(recommendation) -> float:
 def cheap_first(recommendation) -> tuple[bool, float]:
     """The budget half's order: dishes FairPrice alone supplies first (FairPrice stays the main store), then cost.
 
-    A dish that buys a line at Cold Storage is often cheap as used and dear in whole packages; ranked by use alone,
-    the few such soups pushed the cheap FairPrice soups out of the packet and every week came dearer
-    (docs/design/cold-storage.md). Without a Cold Storage line the order is `dish_cost`'s.
+    A dish that buys a line at a second store (Cold Storage, RedMart) is often cheap as used and dear in whole
+    packages; ranked by use alone, the few such soups pushed the cheap FairPrice soups out of the packet and every
+    week came dearer (docs/design/cold-storage.md). Without a second-store line the order is `dish_cost`'s.
     """
+    return buys_at_second_store(recommendation), dish_cost(recommendation)
+
+
+def buys_at_second_store(recommendation) -> bool:
     estimate = recommendation.grocery_estimate
-    second_store = estimate is not None and any(
-        getattr(item, "retailer", None) == "cold_storage" for item in getattr(estimate, "items", ())
+    return estimate is not None and any(
+        getattr(item, "retailer", None) not in (None, "fairprice") for item in getattr(estimate, "items", ())
     )
-    return second_store, dish_cost(recommendation)
 
 
 def bought_first(recommendation) -> tuple[bool, float]:

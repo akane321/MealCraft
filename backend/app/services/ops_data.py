@@ -267,7 +267,7 @@ class DataService:
     def mappings(
         self, *, query: str | None, status: str | None, offset: int, limit: int, retailer: str = "fairprice"
     ) -> OpsProductMappingCollection:
-        snapshot = release_snapshot() if retailer == "fairprice" else retailers.cold_storage_snapshot()
+        snapshot = self._snapshot(retailer)
         entries = {**snapshot, **catalog_overrides.overrides(_mapping_kind(retailer))}
         names = dict(self.database.execute(select(Ingredient.normalized_name, Ingredient.display_name)).tuples().all())
         items = [self._mapping_view(key, entry, names.get(key), retailer) for key, entry in sorted(entries.items())]
@@ -301,7 +301,11 @@ class DataService:
 
     @staticmethod
     def _products(retailer: str) -> dict[str, Any]:
-        return release_products() if retailer == "fairprice" else retailers.cold_storage_products()
+        return release_products() if retailer == "fairprice" else retailers.store_products(retailer)
+
+    @staticmethod
+    def _snapshot(retailer: str) -> dict[str, Any]:
+        return release_snapshot() if retailer == "fairprice" else retailers.store_snapshot(retailer)
 
     def _set_mapping(self, action: str, ingredient: str, value: dict[str, Any], retailer: str) -> OpsProductMapping:
         kind = _mapping_kind(retailer)

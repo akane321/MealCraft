@@ -263,7 +263,7 @@ class AgentToolExecution(Base):
     status: Mapped[str] = mapped_column(String(20))
     arguments_digest: Mapped[str] = mapped_column(String(64))
     result_reference: Mapped[str | None] = mapped_column(String(240), nullable=True)
-    provider_mode: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    provider_mode: Mapped[str | None] = mapped_column(String(64), nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(120), nullable=True)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

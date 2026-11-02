@@ -61,8 +61,8 @@ def prepare_mixed_purchase(
                 and fact.mode == "fixture"
                 or fact.source == source.source == "fairprice"
                 and fact.mode in {"live", "cache"}
-                # Cold Storage's reviewed prices are its own snapshot (docs/design/cold-storage.md).
-                or fact.source == source.source == "cold_storage"
+                # The second stores' reviewed prices are their own snapshots (docs/design/cold-storage.md, redmart.md).
+                or fact.source == source.source in {"cold_storage", "redmart"}
                 and fact.mode in {"live", "cache", "snapshot"}
             )
             if (

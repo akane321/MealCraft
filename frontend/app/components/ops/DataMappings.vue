@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { RETAILER_SHORT } from "~/lib/home-surface";
 import { humanKey, packageGrams } from "~/lib/ops";
 import type { OpsMappedProduct, OpsProductMapping } from "~/types/ops";
-import type { Product, ProductSearchResponse } from "~/types/recommendation";
+import type { Product, ProductSearchResponse, Retailer } from "~/types/recommendation";
 
-// The reviewed ingredient → FairPrice mapping the estimator prices release ingredients with; a store switch shows Cold Storage's,
-// which fills only the ingredients FairPrice lacks.
+// The reviewed ingredient → FairPrice mapping the estimator prices release ingredients with; a store switch shows Cold Storage's and RedMart's,
+// which fill only the ingredients FairPrice lacks (in that order).
 const PAGE = 25;
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
@@ -14,8 +15,8 @@ const detailOf = (error: unknown, fallback: string) => {
   return typeof found === "string" ? found : fallback;
 };
 
-const filters = reactive({ q: "", status: "", retailer: "fairprice" as "fairprice" | "cold_storage" });
-const storeName = computed(() => (filters.retailer === "cold_storage" ? "Cold Storage" : "FairPrice"));
+const filters = reactive({ q: "", status: "", retailer: "fairprice" as Retailer });
+const storeName = computed(() => RETAILER_SHORT[filters.retailer]);
 const offset = ref(0);
 const page = ref<{ items: OpsProductMapping[]; total: number } | null>(null);
 const listFailed = ref(false);
@@ -34,7 +35,7 @@ async function loadList() {
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 watch(() => filters.retailer, (retailer) => {
   selected.value = null;
-  search.live = retailer === "cold_storage"; // Cold Storage has no stored fixture to search
+  search.live = retailer !== "fairprice"; // the second stores have no stored fixture to search
 });
 watch(filters, () => {
   clearTimeout(searchTimer);
@@ -149,6 +150,7 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
         <select v-model="filters.retailer">
           <option value="fairprice">FairPrice</option>
           <option value="cold_storage">Cold Storage</option>
+          <option value="redmart">RedMart</option>
         </select>
       </label>
       <label>Show
@@ -224,7 +226,7 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
         <form class="edit" @submit.prevent="find">
           <h3>Change the product</h3>
           <label>Search {{ storeName }} <input v-model="search.q" required minlength="2" maxlength="100"></label>
-          <fieldset><label><input v-model="search.live" type="checkbox"> Live {{ storeName }} (otherwise {{ filters.retailer === "cold_storage" ? "only saved searches, often nothing" : "the stored fixture" }})</label></fieldset>
+          <fieldset><label><input v-model="search.live" type="checkbox"> Live {{ storeName }} (otherwise {{ filters.retailer !== "fairprice" ? "only saved searches, often nothing" : "the stored fixture" }})</label></fieldset>
           <button type="submit" class="mc-pill" :disabled="searching || search.q.trim().length < 2">{{ searching ? "Searching…" : "Search" }}</button>
           <p v-if="results && !results.length" class="ops-muted">Nothing found.</p>
           <ul v-else-if="results" class="rows" aria-label="Search results">

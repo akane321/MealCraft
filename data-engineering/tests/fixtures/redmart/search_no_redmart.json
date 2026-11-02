@@ -1,0 +1,24 @@
+{
+ "mods": {
+  "listItems": [
+   {
+    "name": "Third-party Allspice Berries 50g",
+    "itemId": "111",
+    "icons": [],
+    "image": "https://example.test/x.jpg",
+    "sellerName": "Spice Shop",
+    "sellerId": "42",
+    "brandName": "Spice",
+    "skuId": "1",
+    "price": "3.2",
+    "inStock": true,
+    "itemUrl": "//www.lazada.sg/products/pdp-i111.html"
+   }
+  ]
+ },
+ "mainInfo": {
+  "totalResults": "1966",
+  "pageSize": "40",
+  "page": "1"
+ }
+}
