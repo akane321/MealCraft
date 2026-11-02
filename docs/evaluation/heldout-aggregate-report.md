@@ -23,9 +23,33 @@ ignores them, while the paired analysis below consumes them without changing the
   and remaining counts are the same in every run by construction.
 - **Output.** Sorted-key JSON with an LF ending, byte-identical for the same records in any order.
 
-Not covered: a cell with very few cases can identify a single question; whether to suppress small cells is not
-decided here. The report does not choose failure cases for analysis, load the sealed file, run any system or
-decide which cases are void.
+- **Small cells (`ADR-0100` item 5).** The owner accepted the threshold of 5 on 2026-10-29. `aggregate(records,
+  min_cell_n=5)` withholds what could identify a question; the default is no withholding. The hiding rule is the
+  development side's decision of 2026-11-02 after review of the first version, which hid only the cells of a small
+  cell's category. Per system:
+  - If any category-language-source cell has fewer than `min_cell_n` remaining cases (voided cases do not count), the
+    system gets **no cross cells**: only the totals by category, by language and by source, and the overall total, are
+    published. Hiding that cell or its category is not enough, because the language and source totals still contain
+    it and a reader subtracts the cells that remain. With planning|en|authored 2, planning|zh|authored 30,
+    intent|en|authored 20 and intent|zh|authored 20 cases, the English total of 22 minus the intent|en|authored cell
+    of 20 gives the small cell back; the same subtraction works for the success, failure and voided counts.
+  - The one-dimensional totals then show their remaining count only. Their status and void counts would locate the
+    small cell's outcomes: if a baseline fails every English case, the errors shown for planning all sit in
+    planning|en, which gives its size and its errors back. The overall total keeps every count.
+  - A one-dimensional total below `min_cell_n` is withheld. If a dimension then has exactly one withheld value, the
+    smallest other value of that dimension is withheld too (ties go to the first name), because the overall total
+    minus the values still shown would give the single withheld value back.
+  - A withheld value is replaced as a whole by `{"withheld": reason}`, so none of its counts or rates is published:
+    declared, voided, remaining and status counts all follow the same suppression. If the overall remaining total is
+    below `min_cell_n`, the system shows only `withheld`.
+  - This lowers the risk of identifying a question. It is **not a proof against every inference**: a withheld value is
+    still known to be small, two withheld values whose sum can be worked out may still be bounded, and the cell sizes
+    in the `ExpectedManifest` are the real ones (the manifest is an input to the check, not part of the report, and
+    must not be published beside it). The sealed side therefore still reviews the real counts before a report leaves
+    it. The `include_groups` output of the paired comparison below is not covered by this rule.
+
+Not covered: the report does not choose failure cases for analysis, load the sealed file, run any system or decide
+which cases are void.
 
 By default the coverage checks are relative to the supplied records. `aggregate(records, expected)` also takes an
 `ExpectedManifest` from the sealed side, made of aggregate counts only: the expected systems, the number of runs per
@@ -33,8 +57,9 @@ system, the declared number of cases in each category-language-source cell (void
 number of voided cases. A different system set, a missing run, a different cell count, an unexpected cell or a
 different void count raises an error, so an omission shared by every system and run is caught. The manifest holds no
 case reference or text. A wholly failed run must still supply one `missing`, `timeout` or `error` outcome for every
-expected case. Without a manifest this module is not a completeness gate, and it is still not a disclosure gate:
-small-cell policy remains a prerequisite for formal use.
+expected case. Without a manifest this module is not a completeness gate, and it is not a disclosure gate by itself
+either: small-cell withholding applies only when `min_cell_n` is set, and the sealed side still reviews the real counts
+before formal use.
 
 ```text
 PYTHONPATH=backend python -m pytest backend/tests/test_heldout_report.py -p no:cacheprovider --basetemp <new-temporary-directory>

@@ -90,7 +90,7 @@ from typing import get_args
 
 from app.core.paths import repository_root
 from app.data.catalog import load_catalog
-from app.data.release_v2 import LINE_CORRECTIONS, release_dir
+from app.data.release_v2 import LINE_CORRECTIONS, RELEASE_VERSION, release_dir
 from app.data.tag_files import INGREDIENT_TAGS, RECIPE_TAGS, REVIEW_TABLE_BATCH, waits_for_review
 from app.planning.recipe_quality import missing_named_protein, reviewed_source_conflict
 from app.planning.vegetable_led import (
@@ -112,6 +112,11 @@ VERSION = "recipe-tags-v1"
 INGREDIENT_VERSION = "ingredient-tags-v1"
 RULE_BATCH = f"{VERSION}/rules"
 LLM_BATCH = f"{VERSION}/llm"
+# The model's answers for the recipes data release v3 added (ADR-0111): their own batch, so accepting it after its
+# in-person sample (data-engineering/docs/tag-sample-20261103) never touches the frozen `LLM_BATCH`. The model is
+# asked only about recipes the release before v3 (`V3_BASE_RELEASE`) does not have; its entries stay as they are.
+V3_LLM_BATCH = f"{VERSION}/llm-v3-20261103"
+V3_BASE_RELEASE = "v2.2"
 # The review batch for the frozen model batch (owner 2026-10-24, ADR-0076's route; `REVIEW_TABLE_BATCH`, defined in
 # app.data.tag_files for the planner's gate). It holds two parts, both unreviewed until the owner accepts the batch
 # after the reviewer's in-person sample check:
@@ -1142,25 +1147,33 @@ def ask_model(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict
     return {"answers": answers, "usage": usage}
 
 
-def merge_answer(tags: Tags, answer: dict) -> None:
-    """Take the model's open fields when they are allowed; anything else stays null.
+def merge_answer(tags: Tags, answer: dict, batch: str | None = None) -> None:
+    """Take the model's open fields when they are allowed; anything else stays null. `batch` names the batch the
+    values are recorded in when it is not the frozen `LLM_BATCH`.
 
     A protein the dish's lines do not support (a legume with no bean line) is dropped, and a role
     the model makes sweet or a condiment has no protein, as with the rules.
     """
+
+    def decided(*names: str) -> None:
+        for name in names:
+            tags.methods[name] = "llm"
+            if batch:
+                tags.batches[name] = batch
+
     role = answer.get("meal_role")
     if "meal_role" in tags.open and role in tags.allowed_roles:
         tags.values["meal_role"] = role
         tags.values["contains_staple"] = role in {"one_bowl", "staple"}
-        tags.methods["meal_role"] = tags.methods["contains_staple"] = "llm"
+        decided("meal_role", "contains_staple")
         if role in SWEET_OR_CONDIMENT:
             tags.values["protein_sources"] = []
-            tags.methods["protein_sources"] = "llm"
+            decided("protein_sources")
             return
     sources = answer.get("protein_sources")
     if "protein_sources" in tags.open and sources is not None and set(sources) <= set(PROTEIN_SOURCES):
         tags.values["protein_sources"] = [s for s in PROTEIN_SOURCES if s in sources and s in tags.allowed_sources]
-        tags.methods["protein_sources"] = "llm"
+        decided("protein_sources")
 
 
 def review_table_values() -> dict[str, dict]:
@@ -1245,32 +1258,45 @@ def previous_file() -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def previous_answers(previous: dict) -> dict[str, dict]:
-    """The model's earlier decisions, so a re-run asks only for what is still open. The review table's values are
-    read again from their own file, not taken for the model's answers."""
+def previous_answers(previous: dict, batch: str = LLM_BATCH) -> dict[str, dict]:
+    """The model's earlier decisions in `batch`, so a re-run asks only for what is still open. The review table's
+    values are read again from their own file, not taken for the model's answers."""
     kept = {}
     for key, entry in previous.get("recipes", {}).items():
         llm = [
             name
             for name, estimate in entry.get("estimated", {}).items()
-            if estimate["method"] == "llm" and estimate.get("batch", LLM_BATCH) == LLM_BATCH
+            if estimate["method"] == "llm" and estimate.get("batch", LLM_BATCH) == batch
         ]
         if llm:
             kept[key] = {name: entry[name] for name in llm}
     return kept
 
 
+def base_release_keys() -> set[str]:
+    """The recipe ids of the release before data release v3: their entries are not the v3 batch's to change.
+
+    Only the paid `--llm` run reads this, and it runs on the host (data-engineering/README.md): compose mounts no
+    v2.2 directory, so inside the containers `--llm` stops here with FileNotFoundError."""
+    path = release_dir().parent / V3_BASE_RELEASE / "recipes.jsonl"
+    with path.open(encoding="utf-8") as handle:
+        return {json.loads(line)["recipe_id"] for line in handle if line.strip()}
+
+
 def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict:
-    dishes = curated_dishes() + release_dishes()
-    tagged = [(dish, rule_tags(dish)) for dish in dishes]
+    release = release_dishes()
+    tagged = [(dish, rule_tags(dish)) for dish in curated_dishes() + release]
     previous = previous_file()
     earlier = {} if reask else previous_answers(previous)
+    earlier_v3 = {} if reask else previous_answers(previous, V3_LLM_BATCH)
     review_table = review_table_values()
     for dish, tags in tagged:
         ruled = {name: tags.values[name] for name in CRITICAL_MODEL_FIELDS}
         roles = review_roles(dish, tags)
         if dish.key in earlier and tags.open:
             merge_answer(tags, earlier[dish.key])
+        if dish.key in earlier_v3 and tags.open:
+            merge_answer(tags, earlier_v3[dish.key], V3_LLM_BATCH)
         # Better rules alone do not release the failed, unreviewed model batch (owner 2026-10-24). A frozen field the
         # rules now decide takes the rule's value into the review batch, still waiting for review; one they leave
         # open stays frozen for the reviewer's table below, whose values come from decisions.json alone. The owner's
@@ -1281,6 +1307,8 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
                 estimate = entry.get("estimated", {}).get(name, {})
                 if not waits_for_review(estimate) or tags.batches.get(name) == OWNER_BATCH:
                     continue
+                if estimate.get("batch") == V3_LLM_BATCH:
+                    continue  # not frozen: the rules replace it where they decide, `earlier_v3` keeps it where not
                 if ruled[name] is not None:
                     tags.values[name], tags.methods[name] = ruled[name], "rule"
                     tags.batches[name] = REVIEW_TABLE_BATCH
@@ -1294,26 +1322,31 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
         if without_main_protein(dish, tags.values["meal_role"]):
             role = field_estimate(tags, "meal_role", entry)
             tags.values["protein_sources"], tags.methods["protein_sources"] = [], "rule"
-            if waits_for_review(role) or role["batch"] == REVIEW_TABLE_BATCH:
+            if role["batch"] == V3_LLM_BATCH:  # follows its role into the v3 batch, as `merge_answer` records it
+                tags.methods["protein_sources"], tags.batches["protein_sources"] = "llm", V3_LLM_BATCH
+            elif waits_for_review(role) or role["batch"] == REVIEW_TABLE_BATCH:
                 tags.batches["protein_sources"] = REVIEW_TABLE_BATCH
             else:
                 tags.batches.pop("protein_sources", None)
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
+    # Only recipes data release v3 added are asked about; the others' open fields stay as they are.
+    new_keys = {dish.key for dish in release} - base_release_keys() if use_llm else set()
+    to_ask = [(dish, tags) for dish, tags in still_open if dish.key in new_keys]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
-    if use_llm and still_open:
-        result = ask_model(still_open, max_usd, log)
+    if use_llm and to_ask:
+        result = ask_model(to_ask, max_usd, log)
         run = result["usage"]
         for name in ("calls", "input_tokens", "output_tokens", "usd"):
             usage[name] += run[name]
         usage.update(
-            asked=usage["asked"] + (len(still_open) if run["calls"] else 0),
+            asked=usage["asked"] + (len(to_ask) if run["calls"] else 0),
             stopped=run["stopped"],
             model=run["model"] or usage["model"],
         )
-        for dish, tags in still_open:
+        for dish, tags in to_ask:
             if dish.key in result["answers"]:
-                merge_answer(tags, result["answers"][dish.key])
+                merge_answer(tags, result["answers"][dish.key], V3_LLM_BATCH)
     usage["usd"] = round(usage["usd"], 4)
     return {"tagged": tagged, "usage": usage, "open": len(still_open)}
 
@@ -1416,7 +1449,7 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         "# Recipe and ingredient tags v1: coverage",
         "",
         "Generated by `python -m app.data.recipe_tags` (rules in `backend/app/data/recipe_tags.py`); do not edit.",
-        f"Recipes: {len(tagged)} (release v2.2 recipes the importer loads, and the curated catalog). "
+        f"Recipes: {len(tagged)} (release {RELEASE_VERSION} recipes the importer loads, and the curated catalog). "
         f"Ingredients: {len(ingredients)}.",
         "",
         "## How each recipe field was decided",
@@ -1441,6 +1474,25 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         f"{review['released']} of them, and {review['still gated']} still wait on frozen model fields the rules and "
         f"the table leave open. The owner decided {review['owner values']} values dish by dish (`{OWNER_BATCH}`, "
         "reviewed).",
+    ]
+    v3 = [
+        estimate
+        for entry in entries.values()
+        for estimate in entry["estimated"].values()
+        if estimate.get("batch") == V3_LLM_BATCH
+    ]
+    v3_recipes = sum(
+        any(e.get("batch") == V3_LLM_BATCH for e in entry["estimated"].values()) for entry in entries.values()
+    )
+    lines += [
+        "",
+        "## The model batch for data release v3",
+        "",
+        f"`{V3_LLM_BATCH}` (ADR-0111) holds the model's values for recipes data release v3 added, in fields the rules "
+        f"leave open: {len(v3)} values on {v3_recipes} recipes, {sum(not e['reviewed'] for e in v3)} of them "
+        "unreviewed. The planner reads none of them before the owner accepts the batch "
+        "(`--accept-batch`) after an in-person sample (`data-engineering/docs/tag-sample-20261103`). The frozen "
+        f"`{LLM_BATCH}` batch is not touched. The rule-decided tags of the new recipes are not gated.",
     ]
     lines += ["", "## Meal role by method", "", "| Meal role | rule | llm |", "| --- | ---: | ---: |"]
     roles = Counter((tags.values["meal_role"], tags.methods.get("meal_role", "open")) for _, tags in tagged)
@@ -1530,7 +1582,8 @@ def main() -> None:
     parser.add_argument(
         "--accept-batch",
         metavar="BATCH",
-        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}, {REVIEW_TABLE_BATCH}) reviewed in the tag "
+        help=f"mark the model's values of a reviewed batch ({LLM_BATCH}, {REVIEW_TABLE_BATCH}, {V3_LLM_BATCH}) "
+        "reviewed in the tag "
         "file, and stop",
     )
     args = parser.parse_args()

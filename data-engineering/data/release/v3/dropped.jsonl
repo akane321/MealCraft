@@ -1,0 +1,1338 @@
+{"candidate_id": "recipenlg:100015", "title": "Beef Chow Mein", "reason": "reviewed incomplete: gluten, soy"}
+{"candidate_id": "recipenlg:1001418", "title": "Low-Carb Spaghetti Squash", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:100152", "title": "Shrimp Tempura", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg:1002633", "title": "Couscous With Peas And Onions", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1003616", "title": "Cooking Light Easy Tzatziki Sauce", "reason": "implausible energy 9.8 kcal per serving"}
+{"candidate_id": "recipenlg:1003883", "title": "Empanada Dough", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1005555", "title": "Burmese-Style Pork Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1006625", "title": "Coconut Curry Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1007947", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:1008322", "title": "Spaghetti Squash Casserole", "reason": "title already in the release: spaghetti squash casserole"}
+{"candidate_id": "recipenlg:1008603", "title": "Grilled Chicken Satay Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1009143", "title": "Balsamic-Honey Grilled Peaches With Feta", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1010401", "title": "Dosa Pizza Crust", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1010750", "title": "Mexican Coleslaw", "reason": "title already in the release: mexican coleslaw"}
+{"candidate_id": "recipenlg:1012544", "title": "Brown Russian", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1012955", "title": "Mild Curry Powder", "reason": "implausible energy 4.6 kcal per serving"}
+{"candidate_id": "recipenlg:1013652", "title": "Home Mixed Curry Powder", "reason": "implausible energy 7.0 kcal per serving"}
+{"candidate_id": "recipenlg:1018050", "title": "Thai Cucumber Salad", "reason": "title already in the release: thai cucumber salad"}
+{"candidate_id": "recipenlg:1018114", "title": "Chickee'S Favourite Gluten Free Sandwich (Or French!) Bread", "reason": "new ingredient id: ING_XANTHAN_GUM"}
+{"candidate_id": "recipenlg:1018289", "title": "Sesame Greek Easter Cookies (Koulourakia)", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:1019707", "title": "Moroccan Fish Charmoula", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg:1019832", "title": "Simple, Sweet And Mild Curry Blend", "reason": "implausible energy 6.4 kcal per serving"}
+{"candidate_id": "recipenlg:1021398", "title": "Nando'S Mediterranean Rice Copycat", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1021839", "title": "Nuoc Cham", "reason": "title already in the release: nuoc cham"}
+{"candidate_id": "recipenlg:1022139", "title": "Chicken Curried Fried Rice", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg:1023977", "title": "Chicken Dumpling Soup", "reason": "title already in the release: chicken dumpling soup"}
+{"candidate_id": "recipenlg:1025073", "title": "Adobo Seasoning - Salt Free", "reason": "implausible energy 3.9 kcal per serving"}
+{"candidate_id": "recipenlg:1025487", "title": "Mealworm Fried Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1025982", "title": "Japanese Curry Powder", "reason": "implausible energy 7.7 kcal per serving"}
+{"candidate_id": "recipenlg:1027009", "title": "Empanada Dough", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1027651", "title": "Swedish Style, Vegan Kofta Balls", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1027683", "title": "Ras El Hanout", "reason": "implausible energy 8.0 kcal per serving"}
+{"candidate_id": "recipenlg:1030099", "title": "Tzatziki", "reason": "title already in the release: tzatziki"}
+{"candidate_id": "recipenlg:1033059", "title": "Flan", "reason": "title already in the release: flan"}
+{"candidate_id": "recipenlg:1034050", "title": "Baked Mediterranean Brie", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1035356", "title": "Mashed Thai Red Curry Sweet Potatoes", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1039082", "title": "Indian Style (Jeera Aloo)Cumin Potato And Fennel Seeds N Rosemar", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1039349", "title": "Easy Crumpets", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1039889", "title": "Curry Roasted Vegetables", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1042153", "title": "Ras El Hanout A Moroccan Spice Blend By Rachael Ray", "reason": "implausible energy 5.0 kcal per serving"}
+{"candidate_id": "recipenlg:1042430", "title": "Hungarian Chicken Paprikash", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1045764", "title": "Asian Ground Beef Stir Fry", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1046907", "title": "Perfect Short-Grain White Rice By Listening (Japanese, Korean, C", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1048484", "title": "Karaage-Japanese Fried Chicken", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1049169", "title": "Exotic Chicken Kebabs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1050811", "title": "Ratatouille With Couscous", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1051087", "title": "Chicken Satay Noodle Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:105112", "title": "2 To 3 Pound English Cut Roast", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1051780", "title": "Vegetarian Pho (Crock Pot)", "reason": "new ingredient id: ING_SEITAN"}
+{"candidate_id": "recipenlg:1052996", "title": "Curry Rice Indienne With Raisins & Almonds", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1053253", "title": "Instant Garam Masala", "reason": "implausible energy 5.5 kcal per serving"}
+{"candidate_id": "recipenlg:1053820", "title": "Substitutions Using Greek Yogurt", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1054343", "title": "Thai Chili Chocolate Ice Cream", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:1055315", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:1056527", "title": "Curry Coleslaw", "reason": "title already in the release: curry coleslaw"}
+{"candidate_id": "recipenlg:1059549", "title": "Middle Eastern Spice Mix", "reason": "implausible energy 3.5 kcal per serving"}
+{"candidate_id": "recipenlg:1060058", "title": "Tomato Sesame Crusted Lamb Racks", "reason": "implausible energy 3565.2 kcal per serving"}
+{"candidate_id": "recipenlg:1061616", "title": "Korean Potatoes", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:1063834", "title": "Korean Fried Chicken", "reason": "implausible energy 4713.2 kcal per serving"}
+{"candidate_id": "recipenlg:1064264", "title": "Substitute Gochujang Sauce In A Pinch", "reason": "implausible energy 7.8 kcal per serving"}
+{"candidate_id": "recipenlg:1065733", "title": "La Kama Moroccan Spice Blend", "reason": "implausible energy 3.1 kcal per serving"}
+{"candidate_id": "recipenlg:1066065", "title": "French-Fried Bell Pepper Rings", "reason": "implausible energy 4438.2 kcal per serving"}
+{"candidate_id": "recipenlg:1067249", "title": "Femmes' Revenge Caribbean Curry Mix", "reason": "implausible energy 4.6 kcal per serving"}
+{"candidate_id": "recipenlg:1068673", "title": "Almond And Honey Nougat", "reason": "new ingredient id: ING_LIQUID_GLUCOSE"}
+{"candidate_id": "recipenlg:1070247", "title": "Top Ramen Breakfast Burritos", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1070506", "title": "Cilantro-Cumin Bechamel", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1071511", "title": "My Version Of Nasi Goreng (Indonesian Fried Rice)", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1072308", "title": "Stir-Fry Broccoli", "reason": "title already in the release: stir-fry broccoli"}
+{"candidate_id": "recipenlg:1073418", "title": "Egyptian Rice", "reason": "reviewed incomplete: milk, tree_nuts"}
+{"candidate_id": "recipenlg:1075342", "title": "Kedgeree Curry (Curried Pinto Beans And Rice)", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1078078", "title": "Korean Chicken Soup", "reason": "title already in the release: korean chicken soup"}
+{"candidate_id": "recipenlg:1078700", "title": "Mediterranean Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1079123", "title": "Sweet Potato, Red Onion & Feta Frittata", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1079679", "title": "Pickled Lebanese Cucumber", "reason": "implausible energy 9.9 kcal per serving"}
+{"candidate_id": "recipenlg:1080570", "title": "Burma Curry Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1080812", "title": "Lemon Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1090211", "title": "Mediterranean Herb Oil", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1093534", "title": "Roasted Asparagus Masala", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1096859", "title": "Amuse Bouche Walnut And Blue Cheese Grape In Chinese Spoon", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1097505", "title": "Top Ramen Chow Mein", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:1099542", "title": "Ground Beef Curry Pasty", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1100208", "title": "Thai Steak Salad", "reason": "title already in the release: thai steak salad"}
+{"candidate_id": "recipenlg:1102174", "title": "Malaysian Turmeric And Lemongrass Chicken Wings", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1102840", "title": "Better-Than-Tuna, Tempeh Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1103191", "title": "Crock Pot Mediterranean Stew", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:110495", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:1107687", "title": "Indian Sweet Potato Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1111141", "title": "Never Fail Dumplings", "reason": "title already in the release: never fail dumplings"}
+{"candidate_id": "recipenlg:1111309", "title": "Spicy Cottage Cheese Breakfast", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1111322", "title": "Sheri'S Steak Fajitas", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1113465", "title": "Chinese Harvest Moon Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1114136", "title": "Korean Bbq Chicken Marinade", "reason": "title already in the release: korean bbq chicken marinade"}
+{"candidate_id": "recipenlg:1114222", "title": "Kauai Pepita Pate", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1114391", "title": "Beef Curry Pillows", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1114606", "title": "Cow Stomach Pho With Spicy Preserved Chili Peppers", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:1116234", "title": "Spiced Beef Kebabs - New Zealnd", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1117271", "title": "Lime And Coriander Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1117289", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:1120450", "title": "Fruit And Yogurt Breakfast Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1120821", "title": "Homemade Curry Powder", "reason": "implausible energy 8.0 kcal per serving"}
+{"candidate_id": "recipenlg:1121493", "title": "Alfredo Sauce Thin Or Thick", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1121926", "title": "Vietnamese Spring Rolls", "reason": "title already in the release: vietnamese spring rolls"}
+{"candidate_id": "recipenlg:1122723", "title": "Coconut Curry Chicken Soft Tacos", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1124251", "title": "Moroccan Spice Blend", "reason": "implausible energy 1.9 kcal per serving"}
+{"candidate_id": "recipenlg:112576", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:1127760", "title": "Curry Wheat Berry Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1129177", "title": "Thai Chicken Fettuccine, Southwest Style", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1129222", "title": "Nasi Goreng Istimewa (Special Fried Rice)", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1129524", "title": "Couscous Summer Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1132184", "title": "Crispy Chicken Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1133602", "title": "Preserved Lemons Middle Eastern Style", "reason": "implausible energy 8.2 kcal per serving"}
+{"candidate_id": "recipenlg:1133665", "title": "Caribbean Rice", "reason": "title already in the release: caribbean rice"}
+{"candidate_id": "recipenlg:1136135", "title": "Curry Crumbed Chicken Schnitzels", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1138449", "title": "Beef & Shrimp Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1139464", "title": "Exotic Indonesian Style Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1139726", "title": "Grilled Banana And Strawberry Kebabs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1141786", "title": "Pesto Chicken With Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1145670", "title": "Carrot Satay Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1145806", "title": "Asian Hummus", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1146401", "title": "Shortcut Bearnaise Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1146675", "title": "Scrambled Eggs And Bamboo", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1149841", "title": "Green Pea, Feta & Mint Fritters", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1156070", "title": "Black Or White Russian Poptails", "reason": "new ingredient id: ING_PUDDING_MIX"}
+{"candidate_id": "recipenlg:1158565", "title": "Carrot Apple Curry Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1159155", "title": "Gamja Sogogi Jorim (Korean Braised Potatoes And Beef)", "reason": "new ingredient id: ING_SESAME_SALT"}
+{"candidate_id": "recipenlg:1159233", "title": "Spicy Tofu Kimchi Over Rice", "reason": "reviewed incomplete: molluscs"}
+{"candidate_id": "recipenlg:116035", "title": "Sangria", "reason": "title already in the release: sangria"}
+{"candidate_id": "recipenlg:1161175", "title": "Malaysian Curry Powder", "reason": "implausible energy 9.8 kcal per serving"}
+{"candidate_id": "recipenlg:1164328", "title": "Quick Homemade Spring Roll Wrappers", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1164728", "title": "Korean Rice Punce (Shik Hae)", "reason": "new ingredient id: ING_BARLEY_MALT_SYRUP"}
+{"candidate_id": "recipenlg:1165691", "title": "Tropical Island Chicken Kabobs", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1170638", "title": "Garam Masala", "reason": "implausible energy 8.8 kcal per serving"}
+{"candidate_id": "recipenlg:1171042", "title": "Marketplace Indian Fried Bread Tostada", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1172178", "title": "Pizza Turkey Burgers", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1173849", "title": "Thai-One-On Pizza", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1174286", "title": "Caribbean Spice Rub", "reason": "implausible energy 1.7 kcal per serving"}
+{"candidate_id": "recipenlg:1176228", "title": "Pepperoni Pizza Pita", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1176789", "title": "Penne Bombay", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1177291", "title": "My Favorite Grilled Lemon Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1179541", "title": "Creamy Scrambled Eggs With Curry And Cardamom", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1180371", "title": "Thai Chicken Enchiladas From Homesweeteats.Com", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1180871", "title": "Easy Falafel", "reason": "reviewed incomplete: sesame, milk"}
+{"candidate_id": "recipenlg:1181120", "title": "Dry Jerk Spice Rub", "reason": "implausible energy 9.2 kcal per serving"}
+{"candidate_id": "recipenlg:1182904", "title": "Mandarin Pear Sunrise", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1183148", "title": "Malaysian Coconut Milk Rice (Nasi Lemak)", "reason": "reviewed incomplete: eggs, peanuts"}
+{"candidate_id": "recipenlg:1183739", "title": "Clean Eating Ras El Hanout Moroccan Spice Mix", "reason": "implausible energy 4.8 kcal per serving"}
+{"candidate_id": "recipenlg:1185170", "title": "Adobo Seasoning", "reason": "implausible energy 4.3 kcal per serving"}
+{"candidate_id": "recipenlg:1185580", "title": "Cara Cara Orange Glazed Scones", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1186307", "title": "Asian Beef Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1190287", "title": "Tzatziki", "reason": "title already in the release: tzatziki"}
+{"candidate_id": "recipenlg:1191203", "title": "Scrambled Eggless Eggs", "reason": "new ingredient id: ING_LIQUID_AMINOS"}
+{"candidate_id": "recipenlg:1194155", "title": "Thai Caesar Salad", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg:1197011", "title": "Cheese-Curry Biscuit (Australia)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1197226", "title": "French Fry Seasoning", "reason": "implausible energy 0.7 kcal per serving"}
+{"candidate_id": "recipenlg:1197926", "title": "Grilled Artichokes With Thai Sauce", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1199538", "title": "Gazpacho Dip", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1200112", "title": "Pasta Cabbage Stir-Fry , Low Cal, Low Fat", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1201950", "title": "Navajo Flatbreads With Sumac Za’Atar", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1203288", "title": "Sugar-Free Sweet And Sour Mix", "reason": "implausible energy 7.5 kcal per serving"}
+{"candidate_id": "recipenlg:1203493", "title": "Creamy Curry Zucchini Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1208834", "title": "6-Layer Mediterranean Dip", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1209264", "title": "Lemon-Curry Aioli", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1210746", "title": "Boulettes De Poisson (Senegal Fish Balls)", "reason": "new ingredient id: ING_COCKTAIL_SAUCE"}
+{"candidate_id": "recipenlg:1210956", "title": "Kielbasa Fajitas With Pita Bread", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:12122", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:1212505", "title": "Chicken Couscous With Sun-Dried Tomatoes", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1213955", "title": "Portuguese Spice Blend", "reason": "implausible energy 8.2 kcal per serving"}
+{"candidate_id": "recipenlg:1217331", "title": "Edamame Bean Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1217451", "title": "Quinoa And Edamame Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1218886", "title": "Falafel Dry Mix", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1219276", "title": "Banana Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1220432", "title": "Mexican Coffee Fudge", "reason": "new ingredient id: ING_ESPRESSO_POWDER"}
+{"candidate_id": "recipenlg:122307", "title": "Irish Potato Casserole", "reason": "title already in the release: irish potato casserole"}
+{"candidate_id": "recipenlg:1223836", "title": "Garam Masala", "reason": "implausible energy 3.6 kcal per serving"}
+{"candidate_id": "recipenlg:1224483", "title": "Indian Pudding--Eggless", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1224856", "title": "Chocolate Fruit Kebabs (Diabetic)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1226667", "title": "Mini Ramen Noodle Frittatas", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1227183", "title": "Loukomades (Greek Honey Balls)", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg:1227986", "title": "Irish Potato Skins", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1228209", "title": "Indian Spice Blend", "reason": "implausible energy 6.6 kcal per serving"}
+{"candidate_id": "recipenlg:1230012", "title": "Tajine Spices", "reason": "implausible energy 4.5 kcal per serving"}
+{"candidate_id": "recipenlg:1233349", "title": "Blueberry Teriyaki", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1233748", "title": "Jammin' Jamaican Spice Blend", "reason": "implausible energy 7.8 kcal per serving"}
+{"candidate_id": "recipenlg:1233817", "title": "Curry Broccoli Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1233949", "title": "Lemon Chicken Soup With Spaghetti", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:123412", "title": "Heart Healthy Stir-Fry", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg:1234122", "title": "Homemade Greek Seasoning Mix", "reason": "implausible energy 7.7 kcal per serving"}
+{"candidate_id": "recipenlg:1235284", "title": "Papa Gouras'S Lemon Chicken", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1236365", "title": "Asian Chili Chicken Noodle Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1236521", "title": "Orange Breakfast Couscous", "reason": "new ingredient id: ING_APPLE_JUICE_CONC"}
+{"candidate_id": "recipenlg:1237353", "title": "Garlic Shrimp Linguine", "reason": "reviewed incomplete: molluscs"}
+{"candidate_id": "recipenlg:1238333", "title": "Gomasio & Avocado Soba Noodles", "reason": "reviewed incomplete: soy, sesame"}
+{"candidate_id": "recipenlg:1238669", "title": "Scottish Mixed Spice", "reason": "implausible energy 3.2 kcal per serving"}
+{"candidate_id": "recipenlg:1239035", "title": "Garam Masala", "reason": "implausible energy 9.0 kcal per serving"}
+{"candidate_id": "recipenlg:1239939", "title": "Oatmeal Pizza Crust", "reason": "new ingredient id: ING_OAT_FLOUR"}
+{"candidate_id": "recipenlg:1240134", "title": "Thai Styled Potato Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1240190", "title": "Oriental-Style Carrot Risotto With Raisins", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1240376", "title": "Oka Ita (Tongan Ceviche)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1241491", "title": "Portuguese Chicken Burger", "reason": "reviewed incomplete: eggs, milk"}
+{"candidate_id": "recipenlg:1242876", "title": "Tempeh Pepper \"Steak\"", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1243525", "title": "Peppered Spinach And Feta Damper", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1243529", "title": "Chinese Corn Soup", "reason": "reviewed incomplete: crustaceans, sesame"}
+{"candidate_id": "recipenlg:1245277", "title": "Sunflower Seed Hummus", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1245797", "title": "Tangy Couscous Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1246424", "title": "Mark Bittman'S Qunioa Salad With Tempeh", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1247851", "title": "Nepali Style Chicken Curry With Basmati Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1249896", "title": "Roasted Beets With Feta And Lemon Zest", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1250104", "title": "Spring Onion Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1250436", "title": "Vegetarian Kebabs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1251463", "title": "Layered Indian Rice Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1254894", "title": "Cauliflower And Cheese Frittatas", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:125661", "title": "Egg Souffle", "reason": "title already in the release: egg souffle"}
+{"candidate_id": "recipenlg:1256842", "title": "Pumpkin, Bacon, And Feta Muffins", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1256967", "title": "Oatmeal, Rum Raisin And Tahini Balls", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1257765", "title": "Pork And Ramen Frittata", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:125780", "title": "Spanish Coffee Cake", "reason": "title already in the release: spanish coffee cake"}
+{"candidate_id": "recipenlg:1263632", "title": "Cranberry And Pistachio Nougat", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1265141", "title": "Pork And Cabbage Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1266916", "title": "Pork And Couscous Patties With Spinach Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1268324", "title": "Thyme And Tofu Stir-Fry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1276461", "title": "Kalbi Marinate", "reason": "title already in the release: kalbi marinate"}
+{"candidate_id": "recipenlg:1276995", "title": "Korean Bean Sprout Salad", "reason": "title already in the release: korean bean sprout salad"}
+{"candidate_id": "recipenlg:127724", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:1277814", "title": "Au Gratin Potatoes", "reason": "title already in the release: au gratin potatoes"}
+{"candidate_id": "recipenlg:1279888", "title": "South African Crunchies", "reason": "title already in the release: south african crunchies"}
+{"candidate_id": "recipenlg:128161", "title": "Mexican Wedding Rings", "reason": "title already in the release: mexican wedding rings"}
+{"candidate_id": "recipenlg:1285163", "title": "Tempura Batter", "reason": "title already in the release: tempura batter"}
+{"candidate_id": "recipenlg:1286794", "title": "Greek Salad", "reason": "title already in the release: greek salad"}
+{"candidate_id": "recipenlg:1291170", "title": "Chimichurri", "reason": "title already in the release: chimichurri"}
+{"candidate_id": "recipenlg:1294813", "title": "Irish Potatoes", "reason": "title already in the release: irish potatoes"}
+{"candidate_id": "recipenlg:1296110", "title": "Bulgur Salad With Grilled Chicken And Parsley Pesto", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1296452", "title": "Orange Tempeh And Kale", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1296477", "title": "Wild Rice Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1296601", "title": "Curried Couscous With Chicken And Zucchini", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1301698", "title": "Shrimp And Vegetable Kebabs", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1302747", "title": "Rainbow Pad Thai (Vegan)", "reason": "implausible energy 5583.8 kcal per serving"}
+{"candidate_id": "recipenlg:130489", "title": "Apple Dumplings", "reason": "title already in the release: apple dumplings"}
+{"candidate_id": "recipenlg:1304936", "title": "Korean Kimchi (Fermented Spicy Cabbage)", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:1305989", "title": "Grilled Rib Eye With Indian-Spiced Mushrooms", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1307794", "title": "Spicy Steel-Cut Oatmeal With Garlic Chips", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1312524", "title": "Balsamic Hoisin Sauce", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1313230", "title": "Spicy Thai Shrimp And Fettucine", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1313702", "title": "Korean Yak Bak - Sweet Rice Cake", "reason": "new ingredient id: ING_CHESTNUT"}
+{"candidate_id": "recipenlg:1315816", "title": "Harissa", "reason": "title already in the release: harissa"}
+{"candidate_id": "recipenlg:1316290", "title": "Sambal Oelek Paste", "reason": "implausible energy 4.0 kcal per serving"}
+{"candidate_id": "recipenlg:1317684", "title": "Gupta Curry Powder", "reason": "implausible energy 6.7 kcal per serving"}
+{"candidate_id": "recipenlg:1323148", "title": "Korean Kongjaban (Korean Sweet Black Beans)", "reason": "new ingredient id: ING_BLACK_SOYBEAN"}
+{"candidate_id": "recipenlg:1323281", "title": "Ceviche", "reason": "title already in the release: ceviche"}
+{"candidate_id": "recipenlg:1335451", "title": "Tteokguk", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1338765", "title": "Thai Cucumber Salad", "reason": "title already in the release: thai cucumber salad"}
+{"candidate_id": "recipenlg:1339464", "title": "Classic Cheese Ball", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1341474", "title": "Crab Rangoons", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1341518", "title": "Safta'S Schnitzel", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1341664", "title": "Tzatziki", "reason": "title already in the release: tzatziki"}
+{"candidate_id": "recipenlg:1342907", "title": "Feta-Stuffed Watermelon Blocks", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1343380", "title": "Chermoula", "reason": "title already in the release: chermoula"}
+{"candidate_id": "recipenlg:1346118", "title": "Coconut Chicken Curry", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg:1347204", "title": "Za'Atar", "reason": "implausible energy 8.2 kcal per serving"}
+{"candidate_id": "recipenlg:1352800", "title": "Thai Beef Salad", "reason": "title already in the release: thai beef salad"}
+{"candidate_id": "recipenlg:1355761", "title": "Zucchini Hummus", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1356798", "title": "Cucumber Sushi", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1357943", "title": "Garam Masala", "reason": "implausible energy 4.2 kcal per serving"}
+{"candidate_id": "recipenlg:1363865", "title": "Vietnamese Lemongrass Beef Noodle Salad", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg:1364071", "title": "Spicy Thai Pb&J", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1367047", "title": "Cabbage Kimchi", "reason": "title already in the release: cabbage kimchi"}
+{"candidate_id": "recipenlg:1367088", "title": "Beef & Kimchi Burgers", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1369843", "title": "Thai Chicken Pizza", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1372705", "title": "Champorado (Filipino Rice Porridge With Dark Chocolate)", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg:1375082", "title": "Spaghetti Squash Salad With Gochujang", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1377370", "title": "Wild Rice Breakfast Cereal", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:137749", "title": "Spanish Cream Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1379185", "title": "Grilled Brussel Sprout Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:137949", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:1381298", "title": "Paleo Humus", "reason": "implausible energy 12301.1 kcal per serving"}
+{"candidate_id": "recipenlg:1381315", "title": "Nuoc Cham", "reason": "title already in the release: nuoc cham"}
+{"candidate_id": "recipenlg:1381668", "title": "Ellen'S Cranberry Chutney", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1383371", "title": "Red Curry Scalloped Sweet Potatoes And Parsnips", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1384533", "title": "Butternut, Lentil & Feta Pasta Free Lasagne", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:138550", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:1386819", "title": "Green Curry Oatmeal", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1388107", "title": "Sizzling Cha! Ramen With Shrimp", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1395187", "title": "Homemade Dulce De Leche", "reason": "title already in the release: homemade dulce de leche"}
+{"candidate_id": "recipenlg:1396452", "title": "Syrian Baharat", "reason": "implausible energy 5.8 kcal per serving"}
+{"candidate_id": "recipenlg:1401129", "title": "Citrus-Buttermilk Sorbet With Thai Basil", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1401815", "title": "Weekday Vegetarian Roast And Mediterranean Salada", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1402745", "title": "Rice With Curry And Fruits", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1404403", "title": "Asparagus, Mint And Edamame Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1411375", "title": "Red Curry Meatloaf", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1415392", "title": "Vietnamese Dipping Sauce (Nuoc Cham)", "reason": "implausible energy 4.8 kcal per serving"}
+{"candidate_id": "recipenlg:1416658", "title": "Pico De Gallo", "reason": "title already in the release: pico de gallo"}
+{"candidate_id": "recipenlg:1416927", "title": "Korean Dak Juk (Chicken Porridge)", "reason": "reviewed incomplete: soy, sesame"}
+{"candidate_id": "recipenlg:1417164", "title": "Puerto Rican Cabbage Salad", "reason": "title already in the release: puerto rican cabbage salad"}
+{"candidate_id": "recipenlg:1422797", "title": "Salt-Crusted Herbed Cornish Hen", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1424213", "title": "Gingerbread Biscotti", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1424665", "title": "Seoul-Ful Chicken With Minted Cucumbers", "reason": "enrichment failed validation: line_estimates for ingredient line 1 needs quantity, unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis; line_estimates for ingredient line 11 needs quantity, unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1425829", "title": "Herbed Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1428678", "title": "Pineapple Satay With Coconut Caramel", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1430810", "title": "Garam Masala", "reason": "implausible energy 5.7 kcal per serving"}
+{"candidate_id": "recipenlg:1431266", "title": "Gingered Rhubarb Chutney", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1432305", "title": "Edamame Mashed Potatoes", "reason": "title already in the release: edamame mashed potatoes"}
+{"candidate_id": "recipenlg:1433821", "title": "Gingered Vinegar", "reason": "implausible energy 9.1 kcal per serving"}
+{"candidate_id": "recipenlg:1435132", "title": "Moroccan Spice Blend", "reason": "implausible energy 4.0 kcal per serving"}
+{"candidate_id": "recipenlg:1436461", "title": "Red Pepper Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1436700", "title": "Garam Masala", "reason": "implausible energy 8.2 kcal per serving"}
+{"candidate_id": "recipenlg:1438743", "title": "Curried Beef Stir-Fry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1441154", "title": "Garam Masala", "reason": "implausible energy 7.7 kcal per serving"}
+{"candidate_id": "recipenlg:1443780", "title": "Tzatziki", "reason": "title already in the release: tzatziki"}
+{"candidate_id": "recipenlg:1446391", "title": "Edamame Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1449811", "title": "Malaysian Barbecue-Glazed Halibut", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1451282", "title": "Berbere", "reason": "implausible energy 7.6 kcal per serving"}
+{"candidate_id": "recipenlg:1454049", "title": "Spaghetti Squash Slaw With Fresh Herbs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1454204", "title": "Curry Chicken Salad", "reason": "title already in the release: curry chicken salad"}
+{"candidate_id": "recipenlg:1455376", "title": "Feta, Green Onion, And Asparagus Frittata", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1455863", "title": "Vietnamese Barbecue Tacos", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1459540", "title": "Curry Ketchup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1459579", "title": "Sesame Shrimp-And-Couscous Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1462124", "title": "\"Fried\" Chicken With Cucumber And Fennel Raita", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1463814", "title": "Kale And Mushroom Paella", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1465187", "title": "Citrus Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1465224", "title": "Thai Peanut Sauce", "reason": "title already in the release: thai peanut sauce"}
+{"candidate_id": "recipenlg:1465735", "title": "Garam Masala", "reason": "implausible energy 8.3 kcal per serving"}
+{"candidate_id": "recipenlg:1466007", "title": "Thai Sweet-Hot Pineapple Blossoms", "reason": "implausible energy 8.5 kcal per serving"}
+{"candidate_id": "recipenlg:1468515", "title": "Ras El Hanout", "reason": "implausible energy 5.4 kcal per serving"}
+{"candidate_id": "recipenlg:1469035", "title": "Indian Spice Blend Mix", "reason": "implausible energy 5.1 kcal per serving"}
+{"candidate_id": "recipenlg:1469382", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg:147082", "title": "Japanese Pie", "reason": "title already in the release: japanese pie"}
+{"candidate_id": "recipenlg:1471716", "title": "Tzatziki", "reason": "title already in the release: tzatziki"}
+{"candidate_id": "recipenlg:1473145", "title": "Bean Salad With Shrimp And Curry Yogurt", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1474064", "title": "Cuban Beans And Rice Salad", "reason": "title already in the release: cuban beans and rice salad"}
+{"candidate_id": "recipenlg:1474441", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg:1474985", "title": "Curry-Spiced Sweet Potatoes", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:147639", "title": "English Pea Casserole", "reason": "title already in the release: english pea casserole"}
+{"candidate_id": "recipenlg:1479477", "title": "Grilled Steak Banh Mi Recipe", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:1483783", "title": "Dinner Tonight: Couscous-Stuffed Peppers Recipe", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1490981", "title": "Curry Blend", "reason": "implausible energy 8.5 kcal per serving"}
+{"candidate_id": "recipenlg:1492847", "title": "Salmon Couscous Supper", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1494185", "title": "Curry Carrot-Leek Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1496147", "title": "Lemony Almond-Feta Green Beans", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1496777", "title": "Quick Vegetable Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1498723", "title": "Curry Spiced Cashews", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1498833", "title": "Pressure-Cooker Mediterranean Chicken Orzo", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1501241", "title": "Mandarin Orange Breakfast Bites", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1503709", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg:1503733", "title": "Chicken Spaghetti Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1503932", "title": "Edamame Corn Carrot Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1507043", "title": "Curry Powder", "reason": "implausible energy 4.9 kcal per serving"}
+{"candidate_id": "recipenlg:1508556", "title": "Mediterranean Orange Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1509863", "title": "Chocolate Chow Mein Clusters", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1515833", "title": "Greek Green Beans", "reason": "title already in the release: greek green beans"}
+{"candidate_id": "recipenlg:1516514", "title": "Mediterranean Chicken Orzo", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1517820", "title": "Shrimp Fried Rice Quesadillas", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1519249", "title": "Calico Cranberry Couscous Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1519919", "title": "Sugared Curry Pecans", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1525862", "title": "Peppered Tuna Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1527075", "title": "Shrimp Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1533236", "title": "Pad Thai Cupcakes", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1534589", "title": "Spicy Peanut Chicken Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1534754", "title": "Gluten-Free Pizza Crust", "reason": "new ingredient id: ING_XANTHAN_GUM"}
+{"candidate_id": "recipenlg:1535128", "title": "Chili-Lime Shrimp Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1540614", "title": "Homemade Guacamole", "reason": "title already in the release: homemade guacamole"}
+{"candidate_id": "recipenlg:1554048", "title": "Swedish Rusks", "reason": "title already in the release: swedish rusks"}
+{"candidate_id": "recipenlg:1555932", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:155837", "title": "Curried Orange Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1560319", "title": "Curry And Coconut Corn On The Cob", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1561478", "title": "Roasted Beets With Feta Cheese & Balsamic Vinegar", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1562945", "title": "Easy Classic Chocolate Chip Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1568885", "title": "Diy Curry Powder", "reason": "implausible energy 5.7 kcal per serving"}
+{"candidate_id": "recipenlg:1574360", "title": "Copcycat Near East Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1574755", "title": "Greek Yogurt Fudgesicles", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1574797", "title": "Chinese Chicken Salad", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1577202", "title": "Adobo Seasoning", "reason": "implausible energy 8.5 kcal per serving"}
+{"candidate_id": "recipenlg:1577553", "title": "Irish Coffee Icing", "reason": "new ingredient id: ING_ESPRESSO_POWDER"}
+{"candidate_id": "recipenlg:1577945", "title": "Thai Cucumber Salad", "reason": "title already in the release: thai cucumber salad"}
+{"candidate_id": "recipenlg:157955", "title": "Indian Puddinga Yankee Favorite!", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1581745", "title": "Creme Brulee With Blackberries And Cardamom", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1581816", "title": "Peppery Greek Yogurt Cheddar Biscuits", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1585602", "title": "Vegetable Curry Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:158775", "title": "Ensaymada", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1588152", "title": "Thai Elopement Cookies", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1588654", "title": "Toffee Latte Scones", "reason": "new ingredient id: ING_TOFFEE_BITS"}
+{"candidate_id": "recipenlg:1594177", "title": "Laksa Lemak", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1594603", "title": "Indonesian Chicken Sate'", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg:159478", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:1599948", "title": "Puff Pastry Apple Dumplings", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:1601865", "title": "My Variation On Chao Tom (Vietnamese Sugar Cane Shrimp)", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:1603777", "title": "Tamago", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:160700", "title": "Lasagna With Uncooked Noodles", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1607591", "title": "Pumpkin Curry Fritters", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1608947", "title": "Korean Kimchi Jeon (Kimchi Pancakes)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1611590", "title": "I Saw Feet! ~ Matcha Macarons", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:1613560", "title": "Vegetable Lentil And Broken Wheat Porridge", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1616426", "title": "Gado Gado", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg:1619179", "title": "Vietnamese Pork Noodle Soup Recipe - Hủ TiếU Mì", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:1621281", "title": "Chocolate Infused Churros", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:1624442", "title": "Chicken Saigon", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1626006", "title": "Korean Barbecue", "reason": "title already in the release: korean barbecue"}
+{"candidate_id": "recipenlg:1628237", "title": "Asian Soft Scrambled Eggs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:1628316", "title": "Brazilian Rice", "reason": "title already in the release: brazilian rice"}
+{"candidate_id": "recipenlg:1629229", "title": "Peri-Peri Fennel Bloody Mary With Vodka-Infused Tomatoes", "reason": "new ingredient id: ING_PERI_PERI_SAUCE"}
+{"candidate_id": "recipenlg:1629623", "title": "Kimchi", "reason": "title already in the release: kimchi"}
+{"candidate_id": "recipenlg:1630093", "title": "Korean Bean Sprouts", "reason": "title already in the release: korean bean sprouts"}
+{"candidate_id": "recipenlg:1641745", "title": "Light Creme Brulee", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg:165889", "title": "German Slaw", "reason": "title already in the release: german slaw"}
+{"candidate_id": "recipenlg:167593", "title": "Beefy Burritos", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:17041", "title": "Fried Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:172404", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:174180", "title": "Ratatouille", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:18218", "title": "Breakfast Tacos(Eggs With Chile)", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:18221", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:183266", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg:183715", "title": "Corn Dumplings", "reason": "title already in the release: corn dumplings"}
+{"candidate_id": "recipenlg:186430", "title": "Spaghetti Salad", "reason": "title already in the release: spaghetti salad"}
+{"candidate_id": "recipenlg:191983", "title": "French Coconut Pie", "reason": "title already in the release: french coconut pie"}
+{"candidate_id": "recipenlg:194556", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:194994", "title": "Shrimp Fried Rice", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:195675", "title": "Mexicana Chicken", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg:197179", "title": "Spanish Beans", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:201619", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:203171", "title": "Oriental Stir-Fry Chicken", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:205424", "title": "Mandarin Chicken Salad", "reason": "title already in the release: mandarin chicken salad"}
+{"candidate_id": "recipenlg:209284", "title": "Japanese Pie", "reason": "title already in the release: japanese pie"}
+{"candidate_id": "recipenlg:209836", "title": "Mandarin Salad", "reason": "title already in the release: mandarin salad"}
+{"candidate_id": "recipenlg:210070", "title": "German Chocolate Frosting", "reason": "title already in the release: german chocolate frosting"}
+{"candidate_id": "recipenlg:210183", "title": "Tomato Fritters(South African Recipe)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:210201", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg:210311", "title": "Apple Dumplings", "reason": "title already in the release: apple dumplings"}
+{"candidate_id": "recipenlg:212538", "title": "Tofu Veg Enchiladas", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg:216784", "title": "Cornish Pastries", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg:219924", "title": "Japanese Pie", "reason": "title already in the release: japanese pie"}
+{"candidate_id": "recipenlg:220611", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:222820", "title": "Mother'S Chinese Chews", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:224022", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:225503", "title": "Tempura Batter", "reason": "title already in the release: tempura batter"}
+{"candidate_id": "recipenlg:226534", "title": "Chocolate Chip \"Pizza\" Cookie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:229145", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:229368", "title": "Chinese Cheese Wafers", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:233673", "title": "My Chinese Candy", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:234049", "title": "Polish Crullers", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:238738", "title": "Party Pizza", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:24061", "title": "Trilby(Greek)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:244458", "title": "Teriyaki Marinade", "reason": "title already in the release: teriyaki marinade"}
+{"candidate_id": "recipenlg:246362", "title": "Potatoes Au Gratin", "reason": "title already in the release: potatoes au gratin"}
+{"candidate_id": "recipenlg:24682", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:247583", "title": "Beef Curry", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:24781", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:248636", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:249405", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg:252496", "title": "Mary Jane Pita Snacks", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:252862", "title": "Curry Chicken And Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:257861", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:261535", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:262282", "title": "Mexican Wedding Cakes", "reason": "title already in the release: mexican wedding cakes"}
+{"candidate_id": "recipenlg:269002", "title": "Indian Bread", "reason": "title already in the release: indian bread"}
+{"candidate_id": "recipenlg:269253", "title": "Teriyaki Marinade", "reason": "title already in the release: teriyaki marinade"}
+{"candidate_id": "recipenlg:2736", "title": "Virgina'S Easy Bake Lasagna", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:273771", "title": "Sourdough Starter", "reason": "title already in the release: sourdough starter"}
+{"candidate_id": "recipenlg:274387", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:27443", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:275628", "title": "Sukiyaki", "reason": "title already in the release: sukiyaki"}
+{"candidate_id": "recipenlg:276435", "title": "Teriyaki Marinade", "reason": "title already in the release: teriyaki marinade"}
+{"candidate_id": "recipenlg:278852", "title": "Cabbage Stir-Fry", "reason": "title already in the release: cabbage stir-fry"}
+{"candidate_id": "recipenlg:279438", "title": "Curry Chicken Delight(Makes 8 Servings)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:279569", "title": "Caramel Dumplings", "reason": "title already in the release: caramel dumplings"}
+{"candidate_id": "recipenlg:281679", "title": "Irish Cream", "reason": "title already in the release: irish cream"}
+{"candidate_id": "recipenlg:282208", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:282710", "title": "Breakfast Burritos", "reason": "title already in the release: breakfast burritos"}
+{"candidate_id": "recipenlg:282857", "title": "Bailey'S Irish Creme", "reason": "title already in the release: bailey's irish creme"}
+{"candidate_id": "recipenlg:283721", "title": "Bernie'S Chinese Wings", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:285864", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg:287710", "title": "Tempura (Shrimp Batter)", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg:289645", "title": "Spanish Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:289824", "title": "Chile Con Queso", "reason": "title already in the release: chile con queso"}
+{"candidate_id": "recipenlg:290903", "title": "Burritos", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg:291391", "title": "Teriyaki Sauce", "reason": "title already in the release: teriyaki sauce"}
+{"candidate_id": "recipenlg:294907", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:296506", "title": "Fruit Pizza", "reason": "title already in the release: fruit pizza"}
+{"candidate_id": "recipenlg:298681", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:30059", "title": "Indian Bread", "reason": "title already in the release: indian bread"}
+{"candidate_id": "recipenlg:30664", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:309162", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:313409", "title": "Irish Stew", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:313419", "title": "Bailey'S Irish Cream", "reason": "title already in the release: bailey's irish cream"}
+{"candidate_id": "recipenlg:314988", "title": "French Coconut Pie", "reason": "title already in the release: french coconut pie"}
+{"candidate_id": "recipenlg:315387", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:317057", "title": "Breakfast Burritos", "reason": "title already in the release: breakfast burritos"}
+{"candidate_id": "recipenlg:317390", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:317521", "title": "Dulce De Leche", "reason": "title already in the release: dulce de leche"}
+{"candidate_id": "recipenlg:320279", "title": "Mexican Wedding Cookies", "reason": "title already in the release: mexican wedding cookies"}
+{"candidate_id": "recipenlg:32049", "title": "Stir-Fry Vegetables", "reason": "title already in the release: stir-fry vegetables"}
+{"candidate_id": "recipenlg:321547", "title": "Frittata", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:321780", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:324350", "title": "Teeny Weeny Pizza", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:326150", "title": "Korean Chocolate Fudge", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:33251", "title": "Sugar English Walnuts", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:334125", "title": "Sweet And Sour Meatballs", "reason": "title already in the release: sweet and sour meatballs"}
+{"candidate_id": "recipenlg:337260", "title": "Chicken And Dumplings", "reason": "title already in the release: chicken and dumplings"}
+{"candidate_id": "recipenlg:337812", "title": "Rosy Beef Stroganoff", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:341392", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg:342660", "title": "\"Granny Decie'S Apple Dumplings\"", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:34804", "title": "Stir-Fry Chicken", "reason": "reviewed incomplete: soy, eggs"}
+{"candidate_id": "recipenlg:348568", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:356371", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:356859", "title": "Sweet And Sour Carrots", "reason": "title already in the release: sweet and sour carrots"}
+{"candidate_id": "recipenlg:359116", "title": "Spaghetti Salad", "reason": "title already in the release: spaghetti salad"}
+{"candidate_id": "recipenlg:360901", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:361290", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:361363", "title": "Chicken And Dumplings", "reason": "title already in the release: chicken and dumplings"}
+{"candidate_id": "recipenlg:367722", "title": "Irish Potatoes", "reason": "title already in the release: irish potatoes"}
+{"candidate_id": "recipenlg:369516", "title": "Chinese Egg Rolls", "reason": "reviewed incomplete: gluten, eggs"}
+{"candidate_id": "recipenlg:372895", "title": "Chicken Curry", "reason": "reviewed incomplete: milk, gluten"}
+{"candidate_id": "recipenlg:37303", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:375235", "title": "Chicken Paprikash(Yields 4 Servings)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:375640", "title": "Italian Nut Balls", "reason": "title already in the release: italian nut balls"}
+{"candidate_id": "recipenlg:376540", "title": "Irish Potato Casserole", "reason": "title already in the release: irish potato casserole"}
+{"candidate_id": "recipenlg:377621", "title": "Welsh Rarebit", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:380453", "title": "Teriyaki Marinade", "reason": "title already in the release: teriyaki marinade"}
+{"candidate_id": "recipenlg:383163", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:383865", "title": "Fruit Pizza", "reason": "title already in the release: fruit pizza"}
+{"candidate_id": "recipenlg:390096", "title": "Irish Potatoes", "reason": "title already in the release: irish potatoes"}
+{"candidate_id": "recipenlg:392041", "title": "Honey Lemon Chicken", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:393709", "title": "Irish Potatoes(5 Dozen)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:394523", "title": "Chinese Chews From Alaska(By Jimmie Mae King)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:394973", "title": "French Silk Frosting", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:404817", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg:406747", "title": "Irish Potato Casserole", "reason": "title already in the release: irish potato casserole"}
+{"candidate_id": "recipenlg:407170", "title": "Cashew Chicken", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg:409210", "title": "Breakfast Pizza", "reason": "title already in the release: breakfast pizza"}
+{"candidate_id": "recipenlg:410764", "title": "Singapore Green Rice(Chinese)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:413065", "title": "Yorkshire Puffs", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:413083", "title": "Dumpling Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:413295", "title": "Honey Lemon Chicken", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:414542", "title": "Chicken Oporto(Good Housekeeping Illustrated Cookbook)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:42525", "title": "Tempura Batter", "reason": "title already in the release: tempura batter"}
+{"candidate_id": "recipenlg:427912", "title": "Chicken Primavera Stir-Fry", "reason": "reviewed incomplete: soy, gluten"}
+{"candidate_id": "recipenlg:435029", "title": "Breakfast Burrito", "reason": "title already in the release: breakfast burrito"}
+{"candidate_id": "recipenlg:439740", "title": "Mexican Cornbread", "reason": "title already in the release: mexican cornbread"}
+{"candidate_id": "recipenlg:439972", "title": "Beef Egg Roll Filling", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg:442044", "title": "Apple Lasagna", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:445319", "title": "Fruit Pizza", "reason": "title already in the release: fruit pizza"}
+{"candidate_id": "recipenlg:445411", "title": "Sauerkraut Balls", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:451144", "title": "Hawaiian Pizza", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:452517", "title": "Lemon Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:454571", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:456774", "title": "Spinach Souffle", "reason": "title already in the release: spinach souffle"}
+{"candidate_id": "recipenlg:457378", "title": "Spanish Punch", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:459843", "title": "Cherry Pizza", "reason": "title already in the release: cherry pizza"}
+{"candidate_id": "recipenlg:462147", "title": "Indian Wedding Cake", "reason": "title already in the release: indian wedding cake"}
+{"candidate_id": "recipenlg:462224", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:464361", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:467941", "title": "Russian Tea Cookies", "reason": "title already in the release: russian tea cookies"}
+{"candidate_id": "recipenlg:468566", "title": "Potato Au Gratin", "reason": "title already in the release: potato au gratin"}
+{"candidate_id": "recipenlg:470723", "title": "Russian Rocks Or Snowballs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:471904", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:47501", "title": "Irish Kisses", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:476063", "title": "Brunch Quiche", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:477254", "title": "Guacamole Dip", "reason": "title already in the release: guacamole dip"}
+{"candidate_id": "recipenlg:47796", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:478787", "title": "Irish Stew", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:480189", "title": "Mexican Corn Bread", "reason": "title already in the release: mexican corn bread"}
+{"candidate_id": "recipenlg:480370", "title": "Noodle Beef Stroganoff", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:481415", "title": "Mexican Corn Bread", "reason": "title already in the release: mexican corn bread"}
+{"candidate_id": "recipenlg:482187", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:48554", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:48699", "title": "Shrimp Singapore", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:488047", "title": "Raisin (Japanese Fruit) Pie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:488949", "title": "James Beard'S Chinese Chews", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:489756", "title": "Teriyaki Chicken Wings", "reason": "title already in the release: teriyaki chicken wings"}
+{"candidate_id": "recipenlg:491383", "title": "Baklava", "reason": "title already in the release: baklava"}
+{"candidate_id": "recipenlg:492517", "title": "Fish Batter(English Pub Style)", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg:4930", "title": "Guacamole Dip", "reason": "title already in the release: guacamole dip"}
+{"candidate_id": "recipenlg:494855", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:494857", "title": "Mexican Bean Soup", "reason": "title already in the release: mexican bean soup"}
+{"candidate_id": "recipenlg:495643", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:498396", "title": "Paximadia Greek Toasts", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:502503", "title": "Shish Kabob Marinade", "reason": "title already in the release: shish kabob marinade"}
+{"candidate_id": "recipenlg:511061", "title": "Sushi", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:511928", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:513689", "title": "Irish Potato Casserole", "reason": "title already in the release: irish potato casserole"}
+{"candidate_id": "recipenlg:514173", "title": "Polish Mistakes", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:514247", "title": "Poppy Seed Mandarin Orange Salad", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:515712", "title": "Grandma Debrun'S French Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:515925", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:517222", "title": "Irish Cream", "reason": "title already in the release: irish cream"}
+{"candidate_id": "recipenlg:518156", "title": "Mandarin Orange Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:523210", "title": "Spanish Gazpacho", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:523244", "title": "Breakfast Burrito", "reason": "title already in the release: breakfast burrito"}
+{"candidate_id": "recipenlg:523954", "title": "Chicken And Mushroom Kabobs", "reason": "implausible energy 2.4 kcal per serving"}
+{"candidate_id": "recipenlg:525119", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:525468", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:526331", "title": "Zucchini Pizza", "reason": "title already in the release: zucchini pizza"}
+{"candidate_id": "recipenlg:52712", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:527634", "title": "Apple Dumplings", "reason": "title already in the release: apple dumplings"}
+{"candidate_id": "recipenlg:527854", "title": "Tempura Batter", "reason": "title already in the release: tempura batter"}
+{"candidate_id": "recipenlg:528205", "title": "Flan", "reason": "title already in the release: flan"}
+{"candidate_id": "recipenlg:528978", "title": "Russian Dressing", "reason": "title already in the release: russian dressing"}
+{"candidate_id": "recipenlg:529372", "title": "Apple Bavarian Torte", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:529717", "title": "Drop Dumplings", "reason": "title already in the release: drop dumplings"}
+{"candidate_id": "recipenlg:531184", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:531991", "title": "Breakfast Pizza", "reason": "title already in the release: breakfast pizza"}
+{"candidate_id": "recipenlg:539408", "title": "Mexican Squash Casserole", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:54162", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:541644", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:545207", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:548196", "title": "Mexican Corn Bread", "reason": "title already in the release: mexican corn bread"}
+{"candidate_id": "recipenlg:548815", "title": "Chinese Chows", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:550354", "title": "Apple Rolls(Quick, Easy Apple Dumplings.)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:554350", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:555863", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:558188", "title": "German Skillet", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:55882", "title": "Nasi Goreng", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg:559025", "title": "Blueberry Dumplings", "reason": "title already in the release: blueberry dumplings"}
+{"candidate_id": "recipenlg:559028", "title": "Macaroni & English Pea Salad", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:559429", "title": "Fried Rice", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:561449", "title": "Sweet And Sour Beets", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:562381", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:564861", "title": "Cornish Pasties", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:568456", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:573008", "title": "Japanese Salad", "reason": "title already in the release: japanese salad"}
+{"candidate_id": "recipenlg:573229", "title": "Fruit Pizza", "reason": "title already in the release: fruit pizza"}
+{"candidate_id": "recipenlg:57710", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:578486", "title": "Rose'S Barbecue Thai Chicken", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "recipenlg:584740", "title": "Apple Dumplings", "reason": "title already in the release: apple dumplings"}
+{"candidate_id": "recipenlg:587363", "title": "Irish Potatoes", "reason": "title already in the release: irish potatoes"}
+{"candidate_id": "recipenlg:592851", "title": "Colcannon", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:593230", "title": "Spanish Steak", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:595683", "title": "Pizza Snacks", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:600321", "title": "Tomato Curry Soup", "reason": "title already in the release: tomato curry soup"}
+{"candidate_id": "recipenlg:60473", "title": "Couscous Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:607626", "title": "Baked Kielbasa", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:608513", "title": "Grilled Italian Chicken", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:608791", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:613434", "title": "Texan Chinese Chews", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:613757", "title": "\"Turkish Pizza\"", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:614667", "title": "Okra Goulash", "reason": "title already in the release: okra goulash"}
+{"candidate_id": "recipenlg:617091", "title": "Sweet And Sour Cole Slaw", "reason": "title already in the release: sweet and sour cole slaw"}
+{"candidate_id": "recipenlg:617146", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:617876", "title": "Bacon Curry Coleslaw", "reason": "title already in the release: bacon curry coleslaw"}
+{"candidate_id": "recipenlg:620722", "title": "English Pea Salad", "reason": "title already in the release: english pea salad"}
+{"candidate_id": "recipenlg:621396", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg:622673", "title": "Pico De Gallo", "reason": "title already in the release: pico de gallo"}
+{"candidate_id": "recipenlg:622810", "title": "French Coconut Pie", "reason": "title already in the release: french coconut pie"}
+{"candidate_id": "recipenlg:625815", "title": "Egyptian Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:627429", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:628813", "title": "Indiana Picnic Cake", "reason": "title already in the release: indiana picnic cake"}
+{"candidate_id": "recipenlg:629517", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:632012", "title": "Irish Cream", "reason": "title already in the release: irish cream"}
+{"candidate_id": "recipenlg:633959", "title": "Furniture Polish", "reason": "not a food recipe: furniture polish of warm water, vinegar and oil"}
+{"candidate_id": "recipenlg:634959", "title": "Japanese Fruitcake", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg:635103", "title": "Sweet And Sour Cucumbers", "reason": "title already in the release: sweet and sour cucumbers"}
+{"candidate_id": "recipenlg:637588", "title": "Indian Corn Pone", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:638578", "title": "Microwave Sweet And Sour Hot Dogs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:647346", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:652438", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:65310", "title": "Guacamole", "reason": "title already in the release: guacamole"}
+{"candidate_id": "recipenlg:656245", "title": "Fruit Pizza", "reason": "new ingredient id: ING_COOKIE_DOUGH"}
+{"candidate_id": "recipenlg:657528", "title": "Breakfast Burritos", "reason": "title already in the release: breakfast burritos"}
+{"candidate_id": "recipenlg:658706", "title": "Italian Cream Cake", "reason": "title already in the release: italian cream cake"}
+{"candidate_id": "recipenlg:660129", "title": "Party Pizzas", "reason": "reviewed incomplete: gluten, eggs"}
+{"candidate_id": "recipenlg:660903", "title": "Japanese Salad", "reason": "title already in the release: japanese salad"}
+{"candidate_id": "recipenlg:662126", "title": "Thai Fettucini", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:666171", "title": "Cabbage Lasagna(4 Servings)", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:666758", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg:670052", "title": "Fried Rice", "reason": "title already in the release: fried rice"}
+{"candidate_id": "recipenlg:670757", "title": "Pizza Ryes", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:6779", "title": "Zucchini Madeleines(A Quickie Appetizer)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:680911", "title": "Polish Pizza", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:680934", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:68150", "title": "Baked English Omelette", "reason": "title already in the release: baked english omelette"}
+{"candidate_id": "recipenlg:68159", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:684259", "title": "Taco Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:686190", "title": "Mexican Wedding Balls", "reason": "title already in the release: mexican wedding balls"}
+{"candidate_id": "recipenlg:687750", "title": "Spanish Punch", "reason": "title already in the release: spanish punch"}
+{"candidate_id": "recipenlg:693196", "title": "Cherry Pizza", "reason": "title already in the release: cherry pizza"}
+{"candidate_id": "recipenlg:693909", "title": "Vietnamese Egg Rolls", "reason": "title already in the release: vietnamese egg rolls"}
+{"candidate_id": "recipenlg:696569", "title": "Greek Salad Dressing", "reason": "title already in the release: greek salad dressing"}
+{"candidate_id": "recipenlg:69906", "title": "Ramen Noodle Salad", "reason": "title already in the release: ramen noodle salad"}
+{"candidate_id": "recipenlg:705883", "title": "Danish Puff", "reason": "title already in the release: danish puff"}
+{"candidate_id": "recipenlg:709480", "title": "Zucchini Indian Relish", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:711330", "title": "Portuguese Shrimp (G)", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg:713223", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:71428", "title": "Indonesian Pork Butt Roast", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:715165", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:716003", "title": "P'Nutty Chicken Salad Crepes", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg:716347", "title": "Empanadas Argentinas", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:717131", "title": "Beef Stroganoff", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:71784", "title": "French Silk Pie", "reason": "title already in the release: french silk pie"}
+{"candidate_id": "recipenlg:726672", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg:729532", "title": "Curry Rice", "reason": "title already in the release: curry rice"}
+{"candidate_id": "recipenlg:731527", "title": "Crab Meat Quiche", "reason": "reviewed incomplete: crustaceans, eggs"}
+{"candidate_id": "recipenlg:731919", "title": "Irish Potato Candies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:734723", "title": "Kringler", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:737855", "title": "Swedish Pecan Balls", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:738493", "title": "English Rocks", "reason": "title already in the release: english rocks"}
+{"candidate_id": "recipenlg:738992", "title": "Guacamole Salad", "reason": "title already in the release: guacamole salad"}
+{"candidate_id": "recipenlg:739682", "title": "Mexican Corn Bread", "reason": "title already in the release: mexican corn bread"}
+{"candidate_id": "recipenlg:743382", "title": "Fried Rice", "reason": "reviewed incomplete: soy"}
+{"candidate_id": "recipenlg:745197", "title": "Irish Potato Cheese Casserole", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:747018", "title": "Wet Burritos", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:749452", "title": "Stir-Fry Cabbage", "reason": "title already in the release: stir-fry cabbage"}
+{"candidate_id": "recipenlg:750300", "title": "Heloise'S Jamaican Barbecue Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:750802", "title": "Pie Crust(Can Also Be Used For Homemade Pizza Crust.)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:753909", "title": "Indian Fried Bread", "reason": "title already in the release: indian fried bread"}
+{"candidate_id": "recipenlg:75523", "title": "Mexican Fruit Cake", "reason": "title already in the release: mexican fruit cake"}
+{"candidate_id": "recipenlg:756695", "title": "Korean Barbecue Meat Sauce", "reason": "new ingredient id: ING_KIMCHI_SAUCE"}
+{"candidate_id": "recipenlg:770913", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg:772831", "title": "Crisp Pita Circles", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:773639", "title": "Pico De Gallo", "reason": "title already in the release: pico de gallo"}
+{"candidate_id": "recipenlg:773645", "title": "Egg Souffle", "reason": "title already in the release: egg souffle"}
+{"candidate_id": "recipenlg:776740", "title": "Aunt Camille'S Chinese Chews", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:777342", "title": "Potatoes Au Gratin", "reason": "title already in the release: potatoes au gratin"}
+{"candidate_id": "recipenlg:77984", "title": "German Slaw", "reason": "title already in the release: german slaw"}
+{"candidate_id": "recipenlg:782645", "title": "Sweet And Sour Fondue", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:783374", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:785487", "title": "Mexican Corn Bread", "reason": "title already in the release: mexican corn bread"}
+{"candidate_id": "recipenlg:786319", "title": "Singapore Noodle Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:787504", "title": "Vegetable Stir-Fry", "reason": "title already in the release: vegetable stir-fry"}
+{"candidate_id": "recipenlg:791208", "title": "Irish Potato Soup", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:794236", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:803228", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:804519", "title": "Breakfast Pizza", "reason": "title already in the release: breakfast pizza"}
+{"candidate_id": "recipenlg:805599", "title": "Cashew Chicken Balls", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:810752", "title": "Mexican Fruitcake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:812307", "title": "Fruit Kabobs With Whiskey Baste", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:813104", "title": "Polish Mistakes", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:816371", "title": "Zucchini Italiano", "reason": "title already in the release: zucchini italiano"}
+{"candidate_id": "recipenlg:818406", "title": "Egg Rolls (Lumpia)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:827847", "title": "Miniature Quiche", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:831315", "title": "Irish Cream", "reason": "title already in the release: irish cream"}
+{"candidate_id": "recipenlg:833400", "title": "South African Milk Tart", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:833829", "title": "Chinese Chews", "reason": "title already in the release: chinese chews"}
+{"candidate_id": "recipenlg:836481", "title": "Bailey'S Irish Cream", "reason": "title already in the release: bailey's irish cream"}
+{"candidate_id": "recipenlg:837342", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:83783", "title": "Mexican Chicken", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:838628", "title": "Shrimp Curry", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg:840256", "title": "Spaghetti Salad", "reason": "title already in the release: spaghetti salad"}
+{"candidate_id": "recipenlg:84222", "title": "Zucchini Stir-Fry", "reason": "title already in the release: zucchini stir-fry"}
+{"candidate_id": "recipenlg:842621", "title": "Sukiyaki", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:848899", "title": "Party-Perfect Cashew Chicken Balls", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:850144", "title": "Breakfast Burritos", "reason": "title already in the release: breakfast burritos"}
+{"candidate_id": "recipenlg:867083", "title": "Chicken Enchilada Casserole", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:87132", "title": "Carrots Au Gratin", "reason": "title already in the release: carrots au gratin"}
+{"candidate_id": "recipenlg:874335", "title": "Irish Potato Casserole", "reason": "title already in the release: irish potato casserole"}
+{"candidate_id": "recipenlg:87714", "title": "Mexican Chocolate", "reason": "title already in the release: mexican chocolate"}
+{"candidate_id": "recipenlg:877374", "title": "Egg Foo Yong", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:878649", "title": "Spanish Eggplant", "reason": "title already in the release: spanish eggplant"}
+{"candidate_id": "recipenlg:878809", "title": "Turkey Salad Burritos", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:879251", "title": "Irish Cream", "reason": "title already in the release: irish cream"}
+{"candidate_id": "recipenlg:880105", "title": "Chicken A La Mexican", "reason": "implausible energy 2.5 kcal per serving"}
+{"candidate_id": "recipenlg:882124", "title": "English Pea Salad", "reason": "title already in the release: english pea salad"}
+{"candidate_id": "recipenlg:882767", "title": "Sauerkraut Salad", "reason": "title already in the release: sauerkraut salad"}
+{"candidate_id": "recipenlg:886916", "title": "Danish Puff", "reason": "title already in the release: danish puff"}
+{"candidate_id": "recipenlg:887685", "title": "Mexican Fudge", "reason": "title already in the release: mexican fudge"}
+{"candidate_id": "recipenlg:891699", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:891871", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:892959", "title": "Spicy Mandarin Muffins", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:89304", "title": "Fried Rice", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:897884", "title": "Lebanese 7 Spices", "reason": "implausible energy 4.9 kcal per serving"}
+{"candidate_id": "recipenlg:899255", "title": "Maple Curry Penne", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:899440", "title": "Breakfast Fried Rice", "reason": "title already in the release: breakfast fried rice"}
+{"candidate_id": "recipenlg:900500", "title": "Mah'S Jerk Rub", "reason": "implausible energy 1.5 kcal per serving"}
+{"candidate_id": "recipenlg:904247", "title": "Sweet And Sour Salad Dressing", "reason": "title already in the release: sweet and sour salad dressing"}
+{"candidate_id": "recipenlg:904952", "title": "Toasted Pumpkin Seeds Teriyaki Cajun Style", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:905473", "title": "Traci'S Adobo Seasoning", "reason": "implausible energy 4.9 kcal per serving"}
+{"candidate_id": "recipenlg:906407", "title": "Thai Fried Bananas", "reason": "title already in the release: thai fried bananas"}
+{"candidate_id": "recipenlg:908175", "title": "Paleo Spicy Shrimp Stir-Fry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:908420", "title": "Caribbean-Style Fried Salmon Fritters", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:908872", "title": "Blueberry-Cinnamon Overnight Oats With Greek Yogurt", "reason": "new ingredient id: ING_SOY_MILK"}
+{"candidate_id": "recipenlg:910794", "title": "Incredibly Delicious Italian Cream Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:912301", "title": "Dulce De Leche", "reason": "title already in the release: dulce de leche"}
+{"candidate_id": "recipenlg:91253", "title": "Japanese Fruit Cake", "reason": "title already in the release: japanese fruit cake"}
+{"candidate_id": "recipenlg:913704", "title": "Homemade Adobo All-Purpose Seasoning", "reason": "implausible energy 3.3 kcal per serving"}
+{"candidate_id": "recipenlg:913727", "title": "Maho, Vietnamese Chicken Recipe", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:914144", "title": "Ratatouille With Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:914732", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg:914932", "title": "Maple Chicken Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:915159", "title": "Tempura Batter", "reason": "title already in the release: tempura batter"}
+{"candidate_id": "recipenlg:91569", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg:918246", "title": "Norwegian Krumkake", "reason": "new ingredient id: ING_BUTTER_FLAVORING"}
+{"candidate_id": "recipenlg:919228", "title": "Ginger Garlic Pesto", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:919744", "title": "Indian Spiced Rice Treats", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:923434", "title": "German French Toast", "reason": "title already in the release: german french toast"}
+{"candidate_id": "recipenlg:926280", "title": "Pumpkin, Spinach, And Feta Frittata", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:926451", "title": "Mild Curry Powder", "reason": "implausible energy 4.6 kcal per serving"}
+{"candidate_id": "recipenlg:928177", "title": "Scallop And Shrimp Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:928338", "title": "Argentinean Chimichurri", "reason": "title already in the release: argentinean chimichurri"}
+{"candidate_id": "recipenlg:930374", "title": "Homemade Teriyaki Sauce", "reason": "title already in the release: homemade teriyaki sauce"}
+{"candidate_id": "recipenlg:930385", "title": "Satay Chicken Pizza", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:930449", "title": "Grilled Teriyaki Beer Chicken", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:930674", "title": "Ras El Hanout", "reason": "implausible energy 3.7 kcal per serving"}
+{"candidate_id": "recipenlg:932802", "title": "Easy Curry Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:933722", "title": "Brazilian Rice", "reason": "title already in the release: brazilian rice"}
+{"candidate_id": "recipenlg:934556", "title": "Classic Ham Glaze", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:934905", "title": "Vietnamese-Style Shrimp Soup", "reason": "new ingredient id: ING_SHRIMP_STOCK"}
+{"candidate_id": "recipenlg:935406", "title": "Thai Chicken Slaw Burgers", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:936326", "title": "Spaghetti Pudding", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:940166", "title": "Curry Beef Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:940583", "title": "Roasted Veggies With Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:942150", "title": "Brazilian White Rice", "reason": "title already in the release: brazilian white rice"}
+{"candidate_id": "recipenlg:943986", "title": "Cilantro And Pork Stir Fry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:944525", "title": "Tempura Shrimp", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:944934", "title": "Pupusas De Queso (Cheese-Stuffed Tortillas)", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg:945290", "title": "Creamy Curried Scrambled Eggs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:9472", "title": "Mexican Hot Sauce", "reason": "implausible energy 8.2 kcal per serving"}
+{"candidate_id": "recipenlg:947355", "title": "Easy Garam Masala", "reason": "implausible energy 3.9 kcal per serving"}
+{"candidate_id": "recipenlg:947751", "title": "Grandmom'S Irish Potatoes", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:948122", "title": "Kimchi Pancakes", "reason": "title already in the release: kimchi pancakes"}
+{"candidate_id": "recipenlg:948391", "title": "Thai Chicken Balls", "reason": "title already in the release: thai chicken balls"}
+{"candidate_id": "recipenlg:948561", "title": "Oven Baked Tempeh", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:949691", "title": "Polished Eggs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:949811", "title": "Mediterranean Rice", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:950608", "title": "Banana Lumpia", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:952615", "title": "Paleo Cauli Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:952915", "title": "Korean Salad", "reason": "title already in the release: korean salad"}
+{"candidate_id": "recipenlg:953768", "title": "Navaho Indian Fry Bread", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:95387", "title": "Sweet Potato Souffle", "reason": "new ingredient id: ING_BUTTER_FLAVORING"}
+{"candidate_id": "recipenlg:958175", "title": "Guam Fried Rice", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:958661", "title": "Apple, Cranberry, And Feta Stuffed Chicken Breast", "reason": "enrichment failed validation: consumed_estimates entries need the index of a line with a stated amount, quantity, a unit in ['cup', 'g', 'kg', 'l', 'lb', 'ml', 'oz', 'tbsp', 'tsp'] and basis"}
+{"candidate_id": "recipenlg:960863", "title": "Korean Crown Daisy Salad", "reason": "new ingredient id: ING_CHRYSANTHEMUM_GREENS"}
+{"candidate_id": "recipenlg:961762", "title": "Chicken Piccata", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg:963382", "title": "Lemon Chicken Tortilla Soup", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg:964147", "title": "Mediterranean Couscous", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:966280", "title": "Chermoula", "reason": "title already in the release: chermoula"}
+{"candidate_id": "recipenlg:967379", "title": "Curry Cauliflower Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:967463", "title": "Tandoori Spice Blend", "reason": "implausible energy 4.1 kcal per serving"}
+{"candidate_id": "recipenlg:968983", "title": "Couscous Flax Seed Porridge", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:970143", "title": "Mediterranean Tomato Soup", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:972270", "title": "Malaysian Curry Laksa", "reason": "reviewed incomplete: crustaceans, eggs, gluten, soy"}
+{"candidate_id": "recipenlg:972609", "title": "Mexican Adobo – Red Chile Paste", "reason": "new ingredient id: ING_ANCHO_CHILE"}
+{"candidate_id": "recipenlg:974308", "title": "Elegant Shrimp On Chinese Spoons", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:975903", "title": "Brown Rice, Nut & Tempeh Casserole", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:97834", "title": "Fried Rice", "reason": "reviewed incomplete: gluten, soy"}
+{"candidate_id": "recipenlg:980944", "title": "Israeli Couscous With Asparagus", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:982629", "title": "Mediterranean Bread In The Thermomix", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:984901", "title": "Shish Kabob Marinade", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:985083", "title": "Curried Quinoa And Edamame Salad (Vegan And Gluten-Free)", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:985098", "title": "Curry Powder", "reason": "implausible energy 4.7 kcal per serving"}
+{"candidate_id": "recipenlg:985247", "title": "Injera", "reason": "title already in the release: injera"}
+{"candidate_id": "recipenlg:986406", "title": "Fresh Halibut In Rice Wrap", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:987407", "title": "Pasta With Cream Curry And Salmon", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:987619", "title": "Nigerian Peppersoup Seasoning Substitute", "reason": "implausible energy 1.6 kcal per serving"}
+{"candidate_id": "recipenlg:988496", "title": "Tortellini With Edamame And Smoked Sausage", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:988775", "title": "Mexican Cole Slaw", "reason": "title already in the release: mexican cole slaw"}
+{"candidate_id": "recipenlg:989628", "title": "English Pea Salad", "reason": "title already in the release: english pea salad"}
+{"candidate_id": "recipenlg:989976", "title": "Satay Chicken Pasta Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:991036", "title": "Grilled Veggie Kabobs", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg:993026", "title": "Sambal Oelek", "reason": "implausible energy 5.8 kcal per serving"}
+{"candidate_id": "recipenlg:995985", "title": "Favorite Pizza Crust", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:998643", "title": "Italian Herb Rolls", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg:999999", "title": "Awesome Apricot Chicken Curry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_006617D3C4625B15", "title": "Chocolate Decadence", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_00AD8B42A10CED2F", "title": "Barbecue Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_00CAC2308D0DF3C1", "title": "Egg And Sausage Casserole", "reason": "title already in the release: egg and sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_0179BABA3F02C074", "title": "Cream Of Broccoli Soup", "reason": "title already in the release: cream of broccoli soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_01AE1B3F23B4E0BA", "title": "Okra And Tomatoes", "reason": "title already in the release: okra and tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_0215E459326EF293", "title": "Potato Chip Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_02A443C7703C8C95", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_02D70050B9494978", "title": "Sweet Potato Pie", "reason": "title already in the release: sweet potato pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_0343D9386F4B87D3", "title": "Baked Devil'S Float", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_05273D455A390DA9", "title": "Lock-In Sausage Gravy", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_054E23981236C6E3", "title": "Poor Man'S Lobster", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_05B5E5B5F765A37B", "title": "Strawberry Soup", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_05DF93F89904C0AA", "title": "Slice O' Lemon Pie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_06109D8DA74CE37B", "title": "Baked French Toast", "reason": "title already in the release: baked french toast"}
+{"candidate_id": "recipenlg_v1.1:RCP_06765E7265262807", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_07EEE8C11365BBBA", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_08C314AD058179FF", "title": "Overnight Coffee Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_0B1306E26BBF7360", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_0C7D28CD0E484A8F", "title": "Southern Pecan Pie", "reason": "title already in the release: southern pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_0C9A93402977FEE1", "title": "Gingered Carrots", "reason": "title already in the release: gingered carrots"}
+{"candidate_id": "recipenlg_v1.1:RCP_0D2A115498C9DE5C", "title": "Aunt Betty'S Apple Cinnamon Puffs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_0E159A89A0969116", "title": "Breakfast Quiche", "reason": "title already in the release: breakfast quiche"}
+{"candidate_id": "recipenlg_v1.1:RCP_0F85586D7C674A31", "title": "Easy Jelly Roll", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_0FEB6E0D9570FFD6", "title": "Sweet And Sour Chicken Wings", "reason": "title already in the release: sweet and sour chicken wings"}
+{"candidate_id": "recipenlg_v1.1:RCP_1060AF9B650C6959", "title": "Blue Cheese Dressing", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_1114D09756CFD905", "title": "Golden Parmesan Potatoes", "reason": "title already in the release: golden parmesan potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_111A314D4A5F29DB", "title": "Sausage Breakfast Casserole", "reason": "title already in the release: sausage breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_11380CE5A7A7038B", "title": "Bread Pudding", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_114E7403DFCB4F5B", "title": "Cinnamon Apple Wraps", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_12DFCD857B48B700", "title": "Skillet Cabbage", "reason": "title already in the release: skillet cabbage"}
+{"candidate_id": "recipenlg_v1.1:RCP_138601676B493E14", "title": "Southern Corn Pudding", "reason": "title already in the release: southern corn pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_143BBAF1AFE69491", "title": "Pineapple Torte", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_15DC11CCFA6849BC", "title": "Rice Creole", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_172340EE401DBCD9", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_174E01B16705868A", "title": "Zucchini Quiche", "reason": "title already in the release: zucchini quiche"}
+{"candidate_id": "recipenlg_v1.1:RCP_1753D8EA24EA9F83", "title": "Parmesan Curry Dressing", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_17A09882F163E028", "title": "Fried Green Tomatoes", "reason": "title already in the release: fried green tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_180693E164684322", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_19182E396CD5EF88", "title": "Macaroni Cheese Salad", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg_v1.1:RCP_1A19F9D2FB7706A8", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_1BD8F53A3BBC9463", "title": "Guacamole", "reason": "title already in the release: guacamole"}
+{"candidate_id": "recipenlg_v1.1:RCP_1C30BF96F3EB5739", "title": "Sausage And Egg Souffle", "reason": "title already in the release: sausage and egg souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_1C7D4F70BAA44BF5", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_1DABA8D525E84D2E", "title": "Southern Spoon Bread", "reason": "title already in the release: southern spoon bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_1DC4B75C6A26DF3C", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_1DDF8D4AF2F5AF94", "title": "English Apple Pie", "reason": "title already in the release: english apple pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_1E03C23B1799F758", "title": "Spanish Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_1F38150E3BC5C123", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_1F8A2212645387C6", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_21FE37A71B2ED5CD", "title": "Snowball Dessert", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_229A4429D38D2054", "title": "Irish Soda Bread", "reason": "title already in the release: irish soda bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_22EA779428734E24", "title": "Sauerkraut Salad", "reason": "title already in the release: sauerkraut salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_235B361E1CF4E58C", "title": "Cauliflower Salad", "reason": "title already in the release: cauliflower salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_271BB5AAF301F3D3", "title": "Caper Salad Dressing For Pasta", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_2756EC877AC45D26", "title": "Quick Pizza Dip", "reason": "title already in the release: quick pizza dip"}
+{"candidate_id": "recipenlg_v1.1:RCP_27D89F0B8E78DDDF", "title": "Squash Casserole", "reason": "title already in the release: squash casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_27F6BC605261BDA6", "title": "Caesar Salad(Mexican)", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg_v1.1:RCP_28120147CD3C8BD4", "title": "Pico De Gallo", "reason": "title already in the release: pico de gallo"}
+{"candidate_id": "recipenlg_v1.1:RCP_2858A602C4BE43D3", "title": "Carrot Parsnip Stir-Fry", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_29810BC28B3B7BB1", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_2A1D1AF03CE8FBF5", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_2A77B58EDC2AE972", "title": "Classic Brooklyn Egg Cream", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_2AE53EFD56F7E1BE", "title": "Corn Souffle", "reason": "title already in the release: corn souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_2BA43704E381CA75", "title": "Scalloped Potatoes", "reason": "title already in the release: scalloped potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_2CD5819CEBA7680E", "title": "Jalapeno Cornbread", "reason": "new ingredient id: ING_CORN_BREAD_MIX"}
+{"candidate_id": "recipenlg_v1.1:RCP_2D4CA73EEDCAD791", "title": "Sugared Nuts", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_2EA7F9D3D54CF493", "title": "Egg Casserole", "reason": "title already in the release: egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_2F55B30E9AA5EE3A", "title": "Carrot Salad", "reason": "title already in the release: carrot salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_2F892247BDF570F5", "title": "Harvard Beets", "reason": "title already in the release: harvard beets"}
+{"candidate_id": "recipenlg_v1.1:RCP_2FB240CFC3C618DF", "title": "Macaroni Salad", "reason": "title already in the release: macaroni salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_3064FA4DB9BBF646", "title": "Oven Denver Omelet", "reason": "title already in the release: oven denver omelet"}
+{"candidate_id": "recipenlg_v1.1:RCP_3162AA5B69155DE8", "title": "Sausage Casserole", "reason": "title already in the release: sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_31DEFE741680985F", "title": "Blond Brownies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_32F350C61AB8DB0F", "title": "Waldorf Salad", "reason": "title already in the release: waldorf salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_33B1247258BBB1FE", "title": "Au Gratin Potatoes", "reason": "title already in the release: au gratin potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_34DA1E40E6A65ACA", "title": "Bourbon Hot Dogs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_36185E2455FBE83E", "title": "Baked Apple Chunks", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3704B4BEA909F7CA", "title": "Broccoli Salad", "reason": "title already in the release: broccoli salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_372A6A942A7532B0", "title": "Vegetable Soup", "reason": "title already in the release: vegetable soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_380CE19112953E51", "title": "Low-Fat Crab Enchiladas", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg_v1.1:RCP_394D8B793482F4E3", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_395FA3E3FACC6C7F", "title": "Sausage And Egg Casserole", "reason": "title already in the release: sausage and egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_39ADFF0056844216", "title": "Banana-Pineapple Yogurt Smoothie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_39CA956296695780", "title": "Caramel Coffee Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3A01A65DA50FA009", "title": "Banana-Nut Bread", "reason": "title already in the release: banana-nut bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_3A38723CCFCFC511", "title": "Beef Stroganoff", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_3A77EA6D3065FFB8", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_3A8251CB3710D373", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_3AC9B80B7B01E329", "title": "Byron Nelson'S Mustard Ring", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3AEE71E794DF69C3", "title": "Breakfast Casserole", "reason": "new ingredient id: ING_CRESCENT_ROLLS"}
+{"candidate_id": "recipenlg_v1.1:RCP_3B0C92EF8D6B3FB6", "title": "California Cornbread-Gift In A Jar", "reason": "reviewed incomplete: eggs, milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_3B3D8E6A2FED76E3", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_3B6F257F221DBEFB", "title": "French Toast", "reason": "title already in the release: french toast"}
+{"candidate_id": "recipenlg_v1.1:RCP_3C014564233C0EC7", "title": "Potatoes Au Gratin", "reason": "title already in the release: potatoes au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_3C0320BFC5BEBC0D", "title": "Potato Soup", "reason": "title already in the release: potato soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_3CA715F628354E1F", "title": "Date Nut Log", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3CE5F14F3AAFB885", "title": "French Toast", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_3D0A23F4C33ED655", "title": "Glazed Carrots", "reason": "title already in the release: glazed carrots"}
+{"candidate_id": "recipenlg_v1.1:RCP_3D968014DA35D12D", "title": "Peach Delight", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3DEC7B7DD213BFB7", "title": "Very Berry Compote", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_3EA40CA70A11FCF4", "title": "Mandarin Orange Salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_3EC025F38A36E6BA", "title": "Hot Potato Salad", "reason": "title already in the release: hot potato salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_41032F46CCD3EC7D", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_4112580E083FA404", "title": "Kielbasa Cabbage Pot", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_413B03464440D9BB", "title": "Fried Green Tomatoes", "reason": "title already in the release: fried green tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_41C377F4B9F57A4E", "title": "Zucchini Casserole", "reason": "title already in the release: zucchini casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_4257C572E7FFF178", "title": "Guacamole", "reason": "title already in the release: guacamole"}
+{"candidate_id": "recipenlg_v1.1:RCP_4271E20DCEF2F26E", "title": "Sauerkraut Balls", "reason": "title already in the release: sauerkraut balls"}
+{"candidate_id": "recipenlg_v1.1:RCP_4388696F53451F8D", "title": "Cranberry Freeze", "reason": "new ingredient id: ING_CRANBERRY_SAUCE"}
+{"candidate_id": "recipenlg_v1.1:RCP_462BD7782E9200BC", "title": "Jogger'S Nog", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_488719D20FA61DBC", "title": "Sausage Breakfast Casserole", "reason": "title already in the release: sausage breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_48F6DA3D20EAED2C", "title": "Stir-Fry Cabbage", "reason": "title already in the release: stir-fry cabbage"}
+{"candidate_id": "recipenlg_v1.1:RCP_48F8CC708A9EED6E", "title": "Carrots Au Gratin", "reason": "title already in the release: carrots au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_4AC6A68D12E40349", "title": "Eggplant Souffle", "reason": "title already in the release: eggplant souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_4B99B292B21C8704", "title": "Italian Zucchini", "reason": "title already in the release: italian zucchini"}
+{"candidate_id": "recipenlg_v1.1:RCP_4B9E9B7D78E90317", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_4D8E2765AB0831E5", "title": "Strawberry And Sour Cream Ambrosia", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_4DA898A6649271DA", "title": "Puffy Omelet", "reason": "reviewed incomplete: crustaceans"}
+{"candidate_id": "recipenlg_v1.1:RCP_4E1F0A929907FC67", "title": "Sausage And Egg Souffle", "reason": "title already in the release: sausage and egg souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_50260DC3ED940851", "title": "Flan", "reason": "title already in the release: flan"}
+{"candidate_id": "recipenlg_v1.1:RCP_50C42A9D306274D5", "title": "Cayenne Lemon Tonic", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_53690DD419CB642D", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_541173BDBED2BB5B", "title": "Rolled Dumplings", "reason": "title already in the release: rolled dumplings"}
+{"candidate_id": "recipenlg_v1.1:RCP_5414604D01853869", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_54CC9B577FC29DAF", "title": "Skillet Cornbread", "reason": "title already in the release: skillet cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_55E35BF2B85F8473", "title": "Cornbread Dressing", "reason": "new ingredient id: ING_CORN_BREAD_MIX"}
+{"candidate_id": "recipenlg_v1.1:RCP_5742EA7D485161C7", "title": "Mexican Salad", "reason": "title already in the release: mexican salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_57AD2D3E39006A34", "title": "Fried Okra", "reason": "title already in the release: fried okra"}
+{"candidate_id": "recipenlg_v1.1:RCP_5882697B5F85317B", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_58B17A124BA5E39F", "title": "Fried Okra", "reason": "title already in the release: fried okra"}
+{"candidate_id": "recipenlg_v1.1:RCP_59F1EAC078DD3CD4", "title": "Pepper Steak", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_59F64B8DEF61F10B", "title": "Cream Of Broccoli Soup", "reason": "title already in the release: cream of broccoli soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_5A9DABB667DD2194", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_5AED177D0B1D8DF7", "title": "Dessert Dumplings", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_5B666C518D6881C3", "title": "Sausage Souffle", "reason": "title already in the release: sausage souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_5B8A6F0934EC76A1", "title": "Curry Chicken Salad", "reason": "title already in the release: curry chicken salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_5BD4CA4E2189846A", "title": "Potato Soup", "reason": "title already in the release: potato soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_5F900E6746EF4764", "title": "Carrot Ring", "reason": "title already in the release: carrot ring"}
+{"candidate_id": "recipenlg_v1.1:RCP_5F909D232067A03E", "title": "Hot Blueberry Tea Bread", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_607C35E5EF45FF4C", "title": "That'S Good Peaches - Crock-Pot Style", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_61E32EF2CE71803B", "title": "Scalloped Potatoes With Pork Chops", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_6243D9E121CF6BBB", "title": "Southern Spoon Bread", "reason": "title already in the release: southern spoon bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_62966C1B9352DD4A", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_62B2C8BA3F2FA5E3", "title": "Oyster Stew", "reason": "title already in the release: oyster stew"}
+{"candidate_id": "recipenlg_v1.1:RCP_62CA8FB426DE0FB7", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_62EE74F0BAC055C6", "title": "Prune Sunburst", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_63E7484A9B52C7A6", "title": "Welsh Rarebit", "reason": "title already in the release: welsh rarebit"}
+{"candidate_id": "recipenlg_v1.1:RCP_6444BCA12B22EB4F", "title": "Squash Casserole", "reason": "title already in the release: squash casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_6448C21C1CB9B13B", "title": "Glazed Carrots", "reason": "title already in the release: glazed carrots"}
+{"candidate_id": "recipenlg_v1.1:RCP_64D3F2B788C817DC", "title": "Morning Rice", "reason": "new ingredient id: ING_SOY_MILK"}
+{"candidate_id": "recipenlg_v1.1:RCP_64F10FDB69A3E66B", "title": "Zucchini Casserole", "reason": "title already in the release: zucchini casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_65830B20D5EBEBBD", "title": "Crunch Torte", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_659CD5C811930959", "title": "Classic Pecan Pie", "reason": "title already in the release: classic pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_66642A87F0981279", "title": "Scalloped Potatoes", "reason": "title already in the release: scalloped potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_66C5F3EE5CCCC261", "title": "Fruit Freeze", "reason": "new ingredient id: ING_FRUIT_COCKTAIL"}
+{"candidate_id": "recipenlg_v1.1:RCP_6734F133AF4A7BA5", "title": "Finest Barbecue Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_67B439F6DBA673F4", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_684509761EA09B5B", "title": "Squash Casserole", "reason": "title already in the release: squash casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_688746F41BB6EBF0", "title": "Paradise Cran-Applesauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_693BF601622443B1", "title": "Brunch Egg Casserole", "reason": "title already in the release: brunch egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_69520F3DFE215401", "title": "Cranberry Punch", "reason": "title already in the release: cranberry punch"}
+{"candidate_id": "recipenlg_v1.1:RCP_6988D3EFF24AE4AC", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_6B7D3584BBA9DF8A", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_6B84C8A0F16C47AC", "title": "Shrimp Flambe", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_6BA3EF7451CF0E93", "title": "Candied Yams", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_6BEAEB6DAAE21CE4", "title": "Chicken Au Gratin", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_6C6843A92B4E6679", "title": "Spice Tea", "reason": "new ingredient id: ING_DRINK_MIX_POWDER"}
+{"candidate_id": "recipenlg_v1.1:RCP_6D35C5E31A4601F4", "title": "7-Cup Salad", "reason": "new ingredient id: ING_FRUIT_COCKTAIL"}
+{"candidate_id": "recipenlg_v1.1:RCP_6D885CA2AB9003F8", "title": "Cheese Cornbread", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_6E9A7B911AA8180F", "title": "Sauteed Zucchini", "reason": "title already in the release: sauteed zucchini"}
+{"candidate_id": "recipenlg_v1.1:RCP_6F0971446957B677", "title": "Indian Fry Bread", "reason": "title already in the release: indian fry bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_6F2515F472B821F9", "title": "Potato Soup", "reason": "title already in the release: potato soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_701F61E98B5DA5F4", "title": "Pina Coladas", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_709E7F48FE99EFB2", "title": "Fried Rice", "reason": "reviewed incomplete: soy, sesame"}
+{"candidate_id": "recipenlg_v1.1:RCP_709FCE705F010FC5", "title": "Sauerkraut Casserole", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_7128786095D14C86", "title": "Maple Hot Chocolate", "reason": "new ingredient id: ING_MAPLE_EXTRACT"}
+{"candidate_id": "recipenlg_v1.1:RCP_714A3F3A9922E17E", "title": "Carrot Souffle", "reason": "title already in the release: carrot souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_72445B2E68350B31", "title": "Cranberry Relish", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_727F35B610B10ABB", "title": "Southern Spoon Bread", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_72AB57DFBB660116", "title": "Southern Pecan Pie", "reason": "title already in the release: southern pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_72D5EC2DC2A3E541", "title": "Museli(Delicious Morning Starter)", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_73858EFE563ED845", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_744895EABC7DE8C7", "title": "Zucchini Casserole", "reason": "title already in the release: zucchini casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_74679E49DA7F50FD", "title": "Classic Pecan Pie", "reason": "title already in the release: classic pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_7510D3B5E8A53646", "title": "Creole Okra", "reason": "title already in the release: creole okra"}
+{"candidate_id": "recipenlg_v1.1:RCP_764A777BFC2D5024", "title": "Chuckwagon Beef Bake", "reason": "reviewed incomplete: milk, gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_765431EA667D8A81", "title": "Eggplant A La Riegeldale", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_7840D8B24897C309", "title": "Stir-Fry Chicken With Vegetables", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg_v1.1:RCP_78B13862AE9771D2", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_792896E462B2CCFD", "title": "Breakfast Pizza", "reason": "title already in the release: breakfast pizza"}
+{"candidate_id": "recipenlg_v1.1:RCP_794031408A771A5E", "title": "Crustless Quiche", "reason": "title already in the release: crustless quiche"}
+{"candidate_id": "recipenlg_v1.1:RCP_7966E9775EAB4C11", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_7A26123E7717DCC3", "title": "Gotta-Have-It Cornbread Mix", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "recipenlg_v1.1:RCP_7B5F83FB62462CDB", "title": "Baked Pineapple", "reason": "title already in the release: baked pineapple"}
+{"candidate_id": "recipenlg_v1.1:RCP_7BCB83B711AF58DE", "title": "Dumplings", "reason": "title already in the release: dumplings"}
+{"candidate_id": "recipenlg_v1.1:RCP_7C320A70851811A7", "title": "Old Fashioned Bread Pudding", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_7CFF4A900474CC26", "title": "Scrambled Egg Casserole", "reason": "title already in the release: scrambled egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_7DD5648DBD5605F8", "title": "Flan", "reason": "title already in the release: flan"}
+{"candidate_id": "recipenlg_v1.1:RCP_7E14E09AC83B4862", "title": "Egg Souffle", "reason": "title already in the release: egg souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_7E1875293C5998EB", "title": "Cornbread", "reason": "title already in the release: cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_7F21B0FF42619D86", "title": "Strawberry Milkshakes", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_7F5E85F0CED5F16E", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_7F77B331DF0ECE1A", "title": "Japanese Fruit Pie", "reason": "title already in the release: japanese fruit pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_7F90040646BB78A8", "title": "Mama'S Lemon Sponge", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_81649DF389CBC06E", "title": "Cornbread", "reason": "title already in the release: cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_81E21E376B490134", "title": "Onion Cheese Cornbread", "reason": "new ingredient id: ING_CORN_BREAD_MIX"}
+{"candidate_id": "recipenlg_v1.1:RCP_8225F00D2E31685D", "title": "Onion Casserole", "reason": "title already in the release: onion casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_823793E9964B1A85", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_8501B7D0E6D3A1C4", "title": "Make-Ahead Breakfast Bake", "reason": "title already in the release: make-ahead breakfast bake"}
+{"candidate_id": "recipenlg_v1.1:RCP_85AEB88A2F786A32", "title": "Zucchini Au Gratin", "reason": "title already in the release: zucchini au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_85E8CE373B1A3F32", "title": "Cabbage Slaw", "reason": "title already in the release: cabbage slaw"}
+{"candidate_id": "recipenlg_v1.1:RCP_877D823A6B7A1EE2", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_8797FA3A6E582B78", "title": "Mandarin Chicken", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg_v1.1:RCP_88F105F86E16B89D", "title": "Rice Pudding", "reason": "title already in the release: rice pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_89753A973CD66BB1", "title": "Spaghetti", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_8A9A2A75E98AF77B", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_8B032202DEC96845", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_8B1934F6D3E0B26C", "title": "Baked Oatmeal", "reason": "title already in the release: baked oatmeal"}
+{"candidate_id": "recipenlg_v1.1:RCP_8B4C1F3CCC7D0623", "title": "Banana Oatmeal Cake With Caramel Fudge Frosting", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_8B9708C7D3212224", "title": "Strawberries Romanoff", "reason": "title already in the release: strawberries romanoff"}
+{"candidate_id": "recipenlg_v1.1:RCP_8C5E1DAD4E117CAE", "title": "Baked Apple Slices", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_8CBB936A07F8C6EA", "title": "Spaghetti Aglia D'Olio", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_8CDF342F770D2522", "title": "French Toast Casserole", "reason": "title already in the release: french toast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_8DE707070F7A54F1", "title": "Curried Beef Stew", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_8DEBC07C28DD1924", "title": "Hush Puppies(Fishermen'S Bread)", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "recipenlg_v1.1:RCP_8F215A1ADA1D63D7", "title": "Sausage Casserole", "reason": "title already in the release: sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_8F352348BD92645C", "title": "Strawberry Rhubarb Cream", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_8F4D6E3B33C5B42C", "title": "Sweet And Sour Salad Dressing", "reason": "title already in the release: sweet and sour salad dressing"}
+{"candidate_id": "recipenlg_v1.1:RCP_8FDA6CCB36784983", "title": "Noodles Alfredo", "reason": "title already in the release: noodles alfredo"}
+{"candidate_id": "recipenlg_v1.1:RCP_90F4A1E346F65193", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_91A4D3AC64F90800", "title": "Savory Red Cabbage", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_91A76F06D8B92F5A", "title": "Make-Ahead Breakfast Casserole", "reason": "title already in the release: make-ahead breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_91B3B79AC16F9165", "title": "Apricot Ice", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_91E181421EF2C4DA", "title": "French Toast", "reason": "title already in the release: french toast"}
+{"candidate_id": "recipenlg_v1.1:RCP_91E6E12C405E7976", "title": "Carrot Salad", "reason": "title already in the release: carrot salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_924D284EA84A5E2D", "title": "Beef Or Venison Stroganoff", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_9278E621E4E7A005", "title": "Macaroni And Cheese", "reason": "title already in the release: macaroni and cheese"}
+{"candidate_id": "recipenlg_v1.1:RCP_92971D60AFF9FDD2", "title": "Little Red Hens", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg_v1.1:RCP_92BC90F48AE48FBC", "title": "Cooked Cucumbers", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_92DA52EE921C4C99", "title": "Scalloped Potatoes", "reason": "title already in the release: scalloped potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_93013B18A811D073", "title": "Strawberries Romanoff", "reason": "title already in the release: strawberries romanoff"}
+{"candidate_id": "recipenlg_v1.1:RCP_93B1C5DAE6700717", "title": "Squash Spaghetti(Microwave)", "reason": "below the importer floor: fewer than two ingredient lines or no step"}
+{"candidate_id": "recipenlg_v1.1:RCP_94062DEBB4BBF28D", "title": "Biscuit Dumplings", "reason": "title already in the release: biscuit dumplings"}
+{"candidate_id": "recipenlg_v1.1:RCP_9562D8D8F312C3C1", "title": "Cheese Biscuits", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_9582563E6C6907F9", "title": "Irish Soda Bread", "reason": "title already in the release: irish soda bread"}
+{"candidate_id": "recipenlg_v1.1:RCP_95EFE69640AE65BB", "title": "Apple Fritters", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_962AB7556DA59B1C", "title": "Scrambled Egg Casserole", "reason": "title already in the release: scrambled egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_9728A40EEB270E14", "title": "Sausage Casserole", "reason": "title already in the release: sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_97978E13B7302FE4", "title": "Acorn Squash", "reason": "title already in the release: acorn squash"}
+{"candidate_id": "recipenlg_v1.1:RCP_97A87F0EB374C39F", "title": "Scottish Shortbread", "reason": "title already in the release: scottish shortbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_97DC92393DA77AA0", "title": "Peanut Butter Creamy Snack", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_980691BD591254EB", "title": "Southern Peanut Pie", "reason": "title already in the release: southern peanut pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_99BA1964CCAF7E8F", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_9AE44A13FDBE3763", "title": "Banana Milk Shake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_9BCA4E95FFCC75D8", "title": "Corn Meal Mush", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_9DD6183D45E5E0EF", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_9DF55FFC5CDFB8DA", "title": "Harvard Beets", "reason": "title already in the release: harvard beets"}
+{"candidate_id": "recipenlg_v1.1:RCP_9E1F15E9F88AB484", "title": "Baked Pineapple", "reason": "title already in the release: baked pineapple"}
+{"candidate_id": "recipenlg_v1.1:RCP_9E6C4714DA2FB949", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_9EEC5A9D82A48498", "title": "Vegetable Medley", "reason": "title already in the release: vegetable medley"}
+{"candidate_id": "recipenlg_v1.1:RCP_9F7694C7FDBB03F0", "title": "Nana Buckley'S Popovers", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_9F8D56225B8DF634", "title": "Pork Tenderloin", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_A0733F31D705995B", "title": "Hot Buttered Rum", "reason": "title already in the release: hot buttered rum"}
+{"candidate_id": "recipenlg_v1.1:RCP_A0C58242F741C5FE", "title": "Fried Green Tomatoes", "reason": "title already in the release: fried green tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_A174792BF35883C7", "title": "Waldorf Salad", "reason": "title already in the release: waldorf salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_A1DDDD5B84E6E50A", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_A208CA8275B7C3A5", "title": "Breakfast Pizza", "reason": "new ingredient id: ING_CRESCENT_ROLLS"}
+{"candidate_id": "recipenlg_v1.1:RCP_A23FDBE04594BBB7", "title": "Weight Watchers Chicken-Rice Curry", "reason": "reviewed incomplete: tree_nuts"}
+{"candidate_id": "recipenlg_v1.1:RCP_A2D14EC74F01CF40", "title": "Cornbread", "reason": "title already in the release: cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_A2FDF9ADCEF9771F", "title": "Southern Corn Pudding", "reason": "title already in the release: southern corn pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_A3E960D457346826", "title": "Breakfast Egg Casserole", "reason": "title already in the release: breakfast egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_A4115E68FB3E67B1", "title": "Orange Julius", "reason": "title already in the release: orange julius"}
+{"candidate_id": "recipenlg_v1.1:RCP_A4DC52A6A5C47E63", "title": "Banana Nut Bread", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_A56D3D814AD8103F", "title": "Spinach Souffle", "reason": "title already in the release: spinach souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_A5B2D669797552B8", "title": "Peanut Butter Pie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_A74D7039B1B91B96", "title": "Layered Pesto And Roasted Red Pepper Dip", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_A7B1487A7B8441D6", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_A7B6957060B209D1", "title": "Fresh Fruit Sauce(Low-Calorie)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_A8C895457C4EC60D", "title": "Fruited Chicken Salad", "reason": "new ingredient id: ING_CRANBERRY_SAUCE"}
+{"candidate_id": "recipenlg_v1.1:RCP_A933A66418F07965", "title": "Popovers", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_AA2832C309C8B97E", "title": "Zucchini Casserole", "reason": "title already in the release: zucchini casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_AB38A1E121157747", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_AB928DF22B737215", "title": "Orange Julius", "reason": "title already in the release: orange julius"}
+{"candidate_id": "recipenlg_v1.1:RCP_AC76D7CAA695D700", "title": "Floothy Peach", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_ADCDE8A20FDD951B", "title": "Mexican Cornbread", "reason": "title already in the release: mexican cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_ADD67CE1546E2756", "title": "Au Gratin Potatoes", "reason": "title already in the release: au gratin potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_AE24C5A181EB8F53", "title": "Southern Corn Pudding", "reason": "title already in the release: southern corn pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_AEEB4B5ED0C37251", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_AEFD301C0F5CED5E", "title": "Glazed Carrots", "reason": "title already in the release: glazed carrots"}
+{"candidate_id": "recipenlg_v1.1:RCP_AF624F52BCE8975C", "title": "Open Devil Burgers", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_AF8FD9F2D6C10118", "title": "Peanut Butter Chocolate Chip Scones", "reason": "new ingredient id: ING_PEANUT_BUTTER_CHIPS"}
+{"candidate_id": "recipenlg_v1.1:RCP_AFC385C2104D9F04", "title": "Egg And Sausage Casserole", "reason": "title already in the release: egg and sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_AFD7B92741DB6BA9", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_B062BE2314F68850", "title": "Carrot Casserole", "reason": "title already in the release: carrot casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_B06A3ED07AE8647A", "title": "Apple Oatmeal Crisp(Quick And Easy)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_B090DE1DBA9060F9", "title": "Marinated Cucumber Salad", "reason": "title already in the release: marinated cucumber salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_B1A2B712ABDA0EDF", "title": "Spinach Potatoes Au Gratin", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_B1C0C42921DB1BFE", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_B2B92CFB4DF81556", "title": "Peach Spectacular", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_B39BAAF01A6FEF6F", "title": "Strawberry-Raisin Scones", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_B3D39BF02B15AF9D", "title": "Eggplant Casserole", "reason": "title already in the release: eggplant casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_B3E72103C1098EBE", "title": "Caramel Rhubarb And Dumplings(Microwave)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_B4633FF6D6F9959D", "title": "Candied Yams", "reason": "title already in the release: candied yams"}
+{"candidate_id": "recipenlg_v1.1:RCP_B4DC30FB54462BC0", "title": "Hawaiian Ham Filling", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_B53A809360B28A65", "title": "Cornbread", "reason": "title already in the release: cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_B5520B31997A9412", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_B6DCCB357A9BA609", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_B6F4C4F2BC9BBE4B", "title": "Apple Crunch", "reason": "title already in the release: apple crunch"}
+{"candidate_id": "recipenlg_v1.1:RCP_B866321C9FB105CA", "title": "Sweet And Sour Onions", "reason": "title already in the release: sweet and sour onions"}
+{"candidate_id": "recipenlg_v1.1:RCP_B892D800C4C59954", "title": "Sausage Balls", "reason": "title already in the release: sausage balls"}
+{"candidate_id": "recipenlg_v1.1:RCP_B8BD515FDC0BCBE0", "title": "Potato Salad", "reason": "title already in the release: potato salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_B924C362029D2AEB", "title": "French Toast", "reason": "title already in the release: french toast"}
+{"candidate_id": "recipenlg_v1.1:RCP_B9B209A6D6E74FDB", "title": "My Sister'S Cheesecake(Prep Time: 15 Minutes)", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_B9CF45D110699268", "title": "Blueberry Dumplings", "reason": "title already in the release: blueberry dumplings"}
+{"candidate_id": "recipenlg_v1.1:RCP_BAB378212E319F89", "title": "Onions Au Gratin", "reason": "title already in the release: onions au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_BACD4EF451FC24C1", "title": "Baked Eggs", "reason": "title already in the release: baked eggs"}
+{"candidate_id": "recipenlg_v1.1:RCP_BB0E2729D4DA946B", "title": "Italian Pork Noodles", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_BB824FB0E60DF6E6", "title": "Potato Patties", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_BBDA6488AC6D369B", "title": "Granny'S Cornbread Dressing", "reason": "new ingredient id: ING_CORN_BREAD_MIX"}
+{"candidate_id": "recipenlg_v1.1:RCP_BC11C4011A29DE16", "title": "Cornbread Dressing", "reason": "new ingredient id: ING_CORN_BREAD_MIX"}
+{"candidate_id": "recipenlg_v1.1:RCP_BC635AE7400862A3", "title": "Garlic-Buffalo Drumettes", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_BC643CD59E5D85EC", "title": "Candied Yams", "reason": "title already in the release: candied yams"}
+{"candidate_id": "recipenlg_v1.1:RCP_BD07D66D4B6C22A7", "title": "Breakfast Sausage Casserole", "reason": "title already in the release: breakfast sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_BD0DDACA02818308", "title": "Oven French Toast", "reason": "title already in the release: oven french toast"}
+{"candidate_id": "recipenlg_v1.1:RCP_BE1A126266DB7881", "title": "Gaston Beef Stew", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_BE4E3823EAA3FD8F", "title": "Glogg Nog", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_BE864209E019EB15", "title": "Champagne Raisin Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_BEA78217264F1C2C", "title": "Frozen Fruit Salad", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_BEB92A27C318FCF7", "title": "Mandarin Orange Carrots(Excellent Side Dish)", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_BF829563DBE25894", "title": "Orange Pecans", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_C103C0B644665A37", "title": "Country Fried Apples", "reason": "title already in the release: country fried apples"}
+{"candidate_id": "recipenlg_v1.1:RCP_C138E3ED0EDBCC03", "title": "Au Gratin Potatoes", "reason": "title already in the release: au gratin potatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_C16D1EB4CA05CFFB", "title": "Apple Yogurt Treat", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_C1E19E6C9B597681", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_C31C8E90598E7722", "title": "Saucy Hot Dogs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_C33B1C172B7A392E", "title": "Fried Green Tomatoes", "reason": "title already in the release: fried green tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_C3559571FBE21CB7", "title": "Squash Casserole", "reason": "title already in the release: squash casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_C3CB18E9A91BB676", "title": "Fried Apples", "reason": "title already in the release: fried apples"}
+{"candidate_id": "recipenlg_v1.1:RCP_C4EA275FEE8BBD9F", "title": "Parmesan Wings", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_C5D205FD1A0E8745", "title": "Broccoli Salad", "reason": "title already in the release: broccoli salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_C6C2F116499B56FB", "title": "Baked Eggplant", "reason": "title already in the release: baked eggplant"}
+{"candidate_id": "recipenlg_v1.1:RCP_C709CB5FC1CF06CB", "title": "Chicken Paprikish", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_C70D164B635907D8", "title": "Strawberry Delight", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_C75BE56177D2C7BC", "title": "Welsh Rarebit", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_C878897C5C96F32B", "title": "Carrot Cake", "reason": "title already in the release: carrot cake"}
+{"candidate_id": "recipenlg_v1.1:RCP_C994A58152D223FA", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_C9C1CC2EDE03070E", "title": "Creamy Carrot Casserole", "reason": "title already in the release: creamy carrot casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_CADC5BC7B270A6E3", "title": "Chocolate Peanut Butter Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_CAF84AB48A1398BB", "title": "Strawberry Freeze", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_CB2AFE6F4487750D", "title": "Greek Green Beans", "reason": "title already in the release: greek green beans"}
+{"candidate_id": "recipenlg_v1.1:RCP_CB3B76FB653B0158", "title": "Carrot Raisin Salad", "reason": "title already in the release: carrot raisin salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_CCB04A9A49553E6A", "title": "Egg And Sausage Casserole", "reason": "title already in the release: egg and sausage casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_CD8B3E7F0D9AA33B", "title": "French Toast Casserole", "reason": "title already in the release: french toast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_CDA23D32DA9AD6D5", "title": "Brunch Egg Casserole", "reason": "title already in the release: brunch egg casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_CDA4C34488E5271E", "title": "Turkey Tidbits", "reason": "new ingredient id: ING_CRANBERRY_SAUCE"}
+{"candidate_id": "recipenlg_v1.1:RCP_CF1AAD1755A4DCF8", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_CFE88DBB9A80357F", "title": "Eggplant Casserole", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_D00FBEE200B7A85C", "title": "Apple Crows Nest", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_D050550F2FB51A25", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_D076F518A0DB47B5", "title": "Onions Au Gratin", "reason": "title already in the release: onions au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_D09527A3A6E3A4EF", "title": "Barbecue Leftovers", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_D1AC53C0FD109C26", "title": "Genoese Pesto", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_D1BD17C7D78D035B", "title": "Zucchini Casserole", "reason": "title already in the release: zucchini casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_D34D4221A0CBF55D", "title": "Pecan Pie", "reason": "title already in the release: pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_D37CD44A609009B5", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_D50CE497D17D4F91", "title": "Chicken Paprikas", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_D5174492E2928434", "title": "Creole Okra", "reason": "title already in the release: creole okra"}
+{"candidate_id": "recipenlg_v1.1:RCP_D53D87DBBB170E21", "title": "Cranberry Torte", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_D61396C39EA1325F", "title": "Sweet Potato Pie", "reason": "title already in the release: sweet potato pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_D64DC42536E89BDA", "title": "Southern Pecan Pie", "reason": "title already in the release: southern pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_D71CD456B0B5F7BC", "title": "Mexican Cornbread", "reason": "title already in the release: mexican cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_D766354A3DF00E56", "title": "Cabbage Soup", "reason": "title already in the release: cabbage soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_D7CC0DB808CF93EC", "title": "Chocolate Chip Pecan Pie", "reason": "new ingredient id: ING_PEANUT_BUTTER_CHIPS"}
+{"candidate_id": "recipenlg_v1.1:RCP_D7FBCC29B7F1F245", "title": "Strawberry Crunch Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_D7FEE831B0B11CD6", "title": "Southern Corn Pudding", "reason": "title already in the release: southern corn pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_D899A091A0CD3D1C", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_D89BE8EF8E9C612A", "title": "Cole Slaw", "reason": "title already in the release: cole slaw"}
+{"candidate_id": "recipenlg_v1.1:RCP_D8CA82EC453EA81C", "title": "Indian Pudding", "reason": "title already in the release: indian pudding"}
+{"candidate_id": "recipenlg_v1.1:RCP_D93679A052BC9693", "title": "Carrots Au Gratin", "reason": "title already in the release: carrots au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_D956670BAD67834D", "title": "Fruity Chicken Risotto", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_D9E2EE6CAD732526", "title": "Waffles", "reason": "title already in the release: waffles"}
+{"candidate_id": "recipenlg_v1.1:RCP_DA898C81158ABE90", "title": "Banana Nog", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_DAF96D580CEB7F81", "title": "Hot Apple Cider", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_DB1814E75AB54F87", "title": "Waldorf Salad", "reason": "title already in the release: waldorf salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_DB8FCFA3D8D525DE", "title": "Pavlova - From Edmonds Classics: New Zealander'S Favourite Recip", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_DBB5ED75D3074330", "title": "Sesame Green Beans", "reason": "title already in the release: sesame green beans"}
+{"candidate_id": "recipenlg_v1.1:RCP_DC198291904BADA8", "title": "Chicken, Shrimp And Rice(From Guyana)", "reason": "reviewed incomplete: peanuts"}
+{"candidate_id": "recipenlg_v1.1:RCP_DC73B4C000104F70", "title": "Clam Fritters", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_DC769F6404FF0C90", "title": "Frozen Watermelon Virgin Margaritas", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_DC8D4937B75D5B42", "title": "Taffy", "reason": "title already in the release: taffy"}
+{"candidate_id": "recipenlg_v1.1:RCP_DCA5C82B90CD60E5", "title": "Pumpkin Puff", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_DD47206ED724E1FD", "title": "Hearty Potato Soup", "reason": "title already in the release: hearty potato soup"}
+{"candidate_id": "recipenlg_v1.1:RCP_DE1A6D120D12D41E", "title": "Mexican Rice", "reason": "title already in the release: mexican rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_E026C01D48F98D23", "title": "Stuffed Mushrooms", "reason": "title already in the release: stuffed mushrooms"}
+{"candidate_id": "recipenlg_v1.1:RCP_E02FC1CD92B92C8F", "title": "Stuffed Mushrooms", "reason": "title already in the release: stuffed mushrooms"}
+{"candidate_id": "recipenlg_v1.1:RCP_E069A1972E32C156", "title": "Acorn Squash", "reason": "title already in the release: acorn squash"}
+{"candidate_id": "recipenlg_v1.1:RCP_E0C4CE24AE936D00", "title": "Eggplant Casserole", "reason": "title already in the release: eggplant casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_E193ED0CF4DCB2BB", "title": "Norwegian Apple Pie", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_E1DA9A45B9028323", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_E20F84E152A5ACA0", "title": "Apple Crisp", "reason": "title already in the release: apple crisp"}
+{"candidate_id": "recipenlg_v1.1:RCP_E2B813A03E7D9230", "title": "Easy Potato Soup", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_E34AAFCE777FBEEC", "title": "Cornbread", "reason": "title already in the release: cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_E3A04FD2ACFCDDBE", "title": "Texas Hash", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_E3F0D40000DE4EB9", "title": "Taco Sauce", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_E5084397BEBB2825", "title": "Crustless Quiche", "reason": "title already in the release: crustless quiche"}
+{"candidate_id": "recipenlg_v1.1:RCP_E6619A35F1A9DDA7", "title": "Breakfast Souffle", "reason": "title already in the release: breakfast souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_E70F9667A8F411CF", "title": "Creamy Carrot Casserole", "reason": "title already in the release: creamy carrot casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_E758FFD9E40F5906", "title": "Sauteed Zucchini", "reason": "title already in the release: sauteed zucchini"}
+{"candidate_id": "recipenlg_v1.1:RCP_E82A0F412F74A510", "title": "Deluxe Pecan Pie", "reason": "title already in the release: deluxe pecan pie"}
+{"candidate_id": "recipenlg_v1.1:RCP_E8696241EF79C348", "title": "Calico Potato Salad", "reason": "title already in the release: calico potato salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_E920DCA202F96269", "title": "Breakfast Dish", "reason": "title already in the release: breakfast dish"}
+{"candidate_id": "recipenlg_v1.1:RCP_EA06606BDA643F45", "title": "Baked Beans", "reason": "title already in the release: baked beans"}
+{"candidate_id": "recipenlg_v1.1:RCP_EA21127EB35D3B76", "title": "Mexican Cornbread", "reason": "title already in the release: mexican cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_EA4A9669A379E5FD", "title": "Fried Green Tomatoes", "reason": "title already in the release: fried green tomatoes"}
+{"candidate_id": "recipenlg_v1.1:RCP_EB5AE49639C5D9B1", "title": "Lemon Chicken", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_EBDEBC9662F92EFE", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_ECDD27EF298BC251", "title": "Fresh Vegetable Medley", "reason": "title already in the release: fresh vegetable medley"}
+{"candidate_id": "recipenlg_v1.1:RCP_ECDD3F33649E9470", "title": "Orange Breakfast Flip", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_ED3EFD055D424C2F", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_ED8474F26B8DDF72", "title": "Fried Rice", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_EDFD8A7E56F9E11A", "title": "Vanilla Pops", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_EE1510FC8553EF08", "title": "Russian Tea", "reason": "new ingredient id: ING_DRINK_MIX_POWDER"}
+{"candidate_id": "recipenlg_v1.1:RCP_EE24AEBDAEA31405", "title": "Freezer Cheese Sauce", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_EE92528A274ABCA7", "title": "Pico De Gallo", "reason": "title already in the release: pico de gallo"}
+{"candidate_id": "recipenlg_v1.1:RCP_EF057FBCA554F028", "title": "Apple Cream Coffee Cake", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_EF6A54E786C5C17C", "title": "Breakfast Casserole", "reason": "title already in the release: breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_EFA0A15AAA8B7003", "title": "Asian Chicken With Red Onion Salsa", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "recipenlg_v1.1:RCP_EFF06659AE26A5A1", "title": "Authentic Caesar Salad Dressing", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_EFF0F69C7306FDBF", "title": "Baked Oatmeal", "reason": "title already in the release: baked oatmeal"}
+{"candidate_id": "recipenlg_v1.1:RCP_F042DA28DAA735DE", "title": "Banana And Date Salad", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F0C3A5B24DEF6188", "title": "Betsy'S English Toffee Icebox Dessert", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F0E06C9D36F417A7", "title": "German Potato Salad", "reason": "title already in the release: german potato salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_F160C82F45C45FD8", "title": "Spanish Rice", "reason": "title already in the release: spanish rice"}
+{"candidate_id": "recipenlg_v1.1:RCP_F19414D5ED881F51", "title": "Carrot Raisin Salad", "reason": "title already in the release: carrot raisin salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_F25B618FDF87BC45", "title": "Breakfast Bake", "reason": "title already in the release: breakfast bake"}
+{"candidate_id": "recipenlg_v1.1:RCP_F25DD00C0AAE512A", "title": "Spinach Pesto", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "recipenlg_v1.1:RCP_F26D76887BBB66D4", "title": "Blanc Mange", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F29E1CDC3DE86CA5", "title": "Mexican Cornbread", "reason": "title already in the release: mexican cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_F43752BE6A5BB8E2", "title": "Spiked Kielbasa", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F4D22B8E4E216C85", "title": "Cauliflower Salad", "reason": "title already in the release: cauliflower salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_F516DDF37F131421", "title": "Hush Puppies", "reason": "title already in the release: hush puppies"}
+{"candidate_id": "recipenlg_v1.1:RCP_F57FC85AAD9AD86E", "title": "Harvard Beets", "reason": "title already in the release: harvard beets"}
+{"candidate_id": "recipenlg_v1.1:RCP_F60824D83CE114C7", "title": "Potato Salad", "reason": "title already in the release: potato salad"}
+{"candidate_id": "recipenlg_v1.1:RCP_F62E0BAAF4CE29C7", "title": "Country Apples - Crock-Pot Style", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F66E720607AADB95", "title": "Potatoes Au Gratin", "reason": "title already in the release: potatoes au gratin"}
+{"candidate_id": "recipenlg_v1.1:RCP_F670A6586AC6FED2", "title": "Torte", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F68523DD0FA16741", "title": "Peanutty Breakfast Mugs", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F6A1F70441135398", "title": "Stuffed Peppers", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_F70A8CF36883DDB4", "title": "Green Beans With Lemon And Walnuts", "reason": "implausible energy 5.9 kcal per serving"}
+{"candidate_id": "recipenlg_v1.1:RCP_F747236E6E6078E3", "title": "Glazed Carrots", "reason": "title already in the release: glazed carrots"}
+{"candidate_id": "recipenlg_v1.1:RCP_F76D25D5F778942B", "title": "Eggplant Caviar", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_F891C30277BA6BBD", "title": "Microwave Fish Fillets With Mushrooms", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_F9462104C85EEDB0", "title": "Sausage Breakfast Casserole", "reason": "title already in the release: sausage breakfast casserole"}
+{"candidate_id": "recipenlg_v1.1:RCP_FAE6DE51B099D375", "title": "Maidrites", "reason": "reviewed incomplete: gluten, milk"}
+{"candidate_id": "recipenlg_v1.1:RCP_FC7ADAE3868704AC", "title": "Sweet Potato Souffle", "reason": "title already in the release: sweet potato souffle"}
+{"candidate_id": "recipenlg_v1.1:RCP_FDEFEDD69AB0CDEE", "title": "Pineapple Salad", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "recipenlg_v1.1:RCP_FE79F18FE43BB57F", "title": "Skillet Cornbread", "reason": "title already in the release: skillet cornbread"}
+{"candidate_id": "recipenlg_v1.1:RCP_FEF395D3173B0A10", "title": "Apple Sour Cream Ring", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "themealdb:52784", "title": "Smoky Lentil Chili with Squash", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:52788", "title": "Christmas Pudding Flapjack", "reason": "new ingredient id: ING_CHRISTMAS_PUDDING"}
+{"candidate_id": "themealdb:52816", "title": "Roasted Eggplant With Tahini, Pine Nuts, and Lentils", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "themealdb:52853", "title": "Chocolate Avocado Mousse", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:52857", "title": "Pumpkin Pie", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "themealdb:52859", "title": "Key Lime Pie", "reason": "new ingredient id: ING_DIGESTIVE_BISCUIT"}
+{"candidate_id": "themealdb:52873", "title": "Beef Dumpling Stew", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "themealdb:52895", "title": "English Breakfast", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "themealdb:52896", "title": "Full English Breakfast", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "themealdb:52918", "title": "Fish Stew with Rouille", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "themealdb:52938", "title": "Jamaican Beef Patties", "reason": "title already in the release: jamaican beef patties"}
+{"candidate_id": "themealdb:52955", "title": "Egg Drop Soup", "reason": "reviewed incomplete: eggs"}
+{"candidate_id": "themealdb:52958", "title": "Peanut Butter Cookies", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "themealdb:52989", "title": "Christmas Pudding Trifle", "reason": "new ingredient id: ING_CHRISTMAS_PUDDING, ING_CUSTARD"}
+{"candidate_id": "themealdb:52997", "title": "Beef Banh Mi Bowls with Sriracha Mayo, Carrot & Pickled Cucumber", "reason": "reviewed incomplete: milk, eggs"}
+{"candidate_id": "themealdb:53065", "title": "Sushi", "reason": "reviewed incomplete: fish"}
+{"candidate_id": "themealdb:53068", "title": "Beef Mechado", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "themealdb:53101", "title": "Chocolate Coconut Squares", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:53104", "title": "Lamingtons", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:53111", "title": "Anzac biscuits", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:53127", "title": "Authentic Norwegian Kransekake", "reason": "reviewed incomplete: gluten"}
+{"candidate_id": "themealdb:53153", "title": "Churros", "reason": "title already in the release: churros"}
+{"candidate_id": "themealdb:53221", "title": "Mamoul (Eid biscuits)", "reason": "reviewed incomplete: sesame"}
+{"candidate_id": "themealdb:53238", "title": "Beef pho", "reason": "title already in the release: beef pho"}
+{"candidate_id": "themealdb:53248", "title": "Salmon noodle wraps", "reason": "reviewed incomplete: milk"}
+{"candidate_id": "themealdb:53265", "title": "Chilli ginger lamb chops", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:53267", "title": "Aubergine couscous salad", "reason": "cuisine not in a quota bucket: international"}
+{"candidate_id": "themealdb:53338", "title": "Date squares", "reason": "cuisine label cap: american held at 2579 of 12895 recipes (20%)"}
+{"candidate_id": "themealdb:53351", "title": "Jamaican Banana Fritters", "reason": "title already in the release: jamaican banana fritters"}
+{"candidate_id": "themealdb:53363", "title": "Jamaican Cornmeal Porridge", "reason": "title already in the release: jamaican cornmeal porridge"}
+{"candidate_id": "wikibooks:295193", "title": "Thong Yib (Thai Candied Egg Yolks)", "reason": "new ingredient id: ING_DUCK_EGG, ING_JASMINE_WATER"}

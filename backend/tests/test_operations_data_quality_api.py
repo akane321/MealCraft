@@ -150,12 +150,14 @@ def test_registered_current_release_is_readable() -> None:
     dropped = service.dropped(offset=0, limit=1, reason=None)
 
     assert summary.status == "available"
-    assert summary.release_version == "v2.2"
+    # Data release v3 (2026-11-02): release_manifest.json and quality_summary.json give 12,895 recipes and 701
+    # ingredients; dropped.jsonl holds 1,338 records, the sum of its dropped_by_reason (was v2.2: 8,968, 701, 292).
+    assert summary.release_version == "v3"
     assert summary.coverage is not None
-    assert summary.coverage.released_recipes == 8968
+    assert summary.coverage.released_recipes == 12895
     assert summary.coverage.released_ingredients == 701
     assert dropped.status == "available"
-    assert dropped.total == 292
+    assert dropped.total == 1338
     assert len(dropped.items) == 1
 
 

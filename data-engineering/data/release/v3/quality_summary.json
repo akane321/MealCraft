@@ -1,0 +1,90 @@
+{
+  "release_version": "v3",
+  "created_at": "2026-11-03T00:00:00+00:00",
+  "coverage": {
+    "released_recipes": 12895,
+    "enrichment_set": 14233,
+    "released_ingredients": 701,
+    "recipes_with_every_field": 12895
+  },
+  "by_cuisine": {
+    "american": 2579,
+    "chinese": 1250,
+    "thai": 736,
+    "italian": 716,
+    "japanese": 715,
+    "indian": 679,
+    "korean": 515,
+    "mexican": 435,
+    "greek": 415,
+    "tex_mex": 361,
+    "filipino": 355,
+    "vietnamese": 352,
+    "french": 348,
+    "middle_eastern": 336,
+    "british_irish": 335,
+    "latin_american": 323,
+    "caribbean": 317,
+    "southern_us": 289,
+    "north_african": 266,
+    "eastern_european": 250,
+    "spanish_portuguese": 242,
+    "african": 221,
+    "german": 214,
+    "indonesian": 204,
+    "malaysian_singaporean": 152,
+    "scandinavian": 144,
+    "cajun_creole": 77,
+    "turkish": 60,
+    "dutch_belgian": 9
+  },
+  "by_course": {
+    "main": 7007,
+    "side": 1694,
+    "salad": 743,
+    "dessert": 737,
+    "breakfast": 597,
+    "sauce_condiment": 559,
+    "snack_appetizer": 530,
+    "soup": 444,
+    "baked_good": 429,
+    "drink": 155
+  },
+  "by_source": {
+    "RecipeNLG (Gathered)": 12557,
+    "TheMealDB": 241,
+    "Wikibooks Cookbook": 97
+  },
+  "estimated_share": {
+    "servings": 0.7358,
+    "times": 0.5226,
+    "ingredient_amounts": 0.0399
+  },
+  "dropped_by_reason": {
+    "title already in the release": 582,
+    "reviewed incomplete": 220,
+    "cuisine not in a quota bucket": 218,
+    "cuisine label cap": 177,
+    "implausible energy # kcal per serving": 73,
+    "new ingredient id": 47,
+    "enrichment failed validation": 19,
+    "excluded by enricher": 1,
+    "below the importer floor": 1
+  },
+  "allergen_rules_pending_human": 0,
+  "nutrition_per_serving": {
+    "median_energy_kcal": 332.8
+  },
+  "unit_weight_corrections": {
+    "lasagna_sheet": 29,
+    "n_times_total": 27,
+    "pizza_crust": 12,
+    "red_pepper_alias": 190,
+    "red_pepper_alias+stated_weight": 1,
+    "stated_weight": 261,
+    "stated_weight+whole_bird_edible": 55,
+    "whole_bird": 132,
+    "whole_bird_edible": 90,
+    "whole_head": 197
+  }
+}

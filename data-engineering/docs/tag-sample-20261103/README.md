@@ -1,0 +1,57 @@
+# Acceptance sample for the v3 model-tag batch (`recipe-tags-v1/llm-v3-20261103`)
+
+Plain summary. Data release v3 added 3,927 recipes that v2.2 does not have. The tag rules decided
+most of their tags. Where the rules left a field open, `gpt-5.4-mini` decided it. Those values form
+their own batch. They are model estimates, not human labels. The planner does not read them until
+the owner accepts the batch (ADR-0094's route, ADR-0111).
+
+## The batch
+
+- 116 recipes, 276 values (116 `meal_role`, 116 `contains_staple`, 44 `protein_sources`).
+- Every value is `method: llm`, `reviewed: false`.
+- The model was asked 138 questions in 7 calls: 36,428 input and 3,478 output tokens.
+  The code's upper-bound estimate is US$0.043. The frozen `recipe-tags-v1/llm` batch and the
+  v2.2 entries were not touched.
+- 22 of the 138 asked recipes stay open (the model answered null, or gave a role the rules do not allow).
+  After the run 57 new recipes keep a null in a gated field (27 meal role, 35 protein sources). The rules do not
+  send an unknown animal or a missing quantity to the model, so those stay null and untagged.
+
+## The sample
+
+- Drawn by `data-engineering/scripts/v3_tag_sample.py`, seed 20261103, from the tag file.
+- 40 recipes, 95 rows, one row per field. At least one recipe in every meal-role stratum.
+
+| Role in the batch | Recipes in batch | Drawn |
+| --- | ---: | ---: |
+| breakfast | 15 | 5 |
+| dessert | 29 | 10 |
+| one_bowl | 16 | 6 |
+| sauce | 15 | 5 |
+| snack | 22 | 8 |
+| soup | 6 | 2 |
+| staple | 13 | 4 |
+
+- `sample.xlsx` is the sheet for the reviewer. The reviewer columns ("value after looking" and
+  "checked in person") are empty. The sheet does not show the source or any other batch value.
+- `sample.json` is the draw record.
+
+## Scoring
+
+After the reviewer fills `sample.xlsx` in person:
+
+```text
+uv run --project backend --with openpyxl python -I -X utf8 data-engineering/scripts/review_table_accuracy.py <filled.xlsx> --sample data-engineering/docs/tag-sample-20261103/sample.json --out data-engineering/docs/tag-sample-20261103/accuracy.md
+```
+
+Only rows marked 是 count. Publish the accuracy with the filled sheet. Then the owner decides:
+
+```text
+uv run --project backend python -m app.data.recipe_tags --accept-batch recipe-tags-v1/llm-v3-20261103
+```
+
+It marks only this batch's `llm` values reviewed. It does not touch `recipe-tags-v1/llm` or the review-table batch.
+
+## Not covered
+
+Rule-decided tags of the new recipes (3,784 role values) are not gated and not sampled here.
+The planner reads them now. That was already true for v2.2 and is the owner's call (see the PR notes).

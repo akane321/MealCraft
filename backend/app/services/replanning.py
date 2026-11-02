@@ -24,6 +24,7 @@ from app.planning.member_coverage import CoverageDish, catalog_can_eat, coverage
 from app.planning.product_path import ProductPlanningError, meal_affinity, meals_of_the_day, pool_courses, pool_for
 from app.planning.recipe_quality import dish_family, dish_kind
 from app.planning.recipe_similarity import RecipeSimilarity
+from app.planning.swap_diversity import SwapDiversity
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
 from app.repositories.meal_plan import (
     MealPlanRepository,
@@ -832,6 +833,9 @@ class MealPlanReplanningService:
         candidates = self._replacements(
             plan, entry, constraints, result.recommendations, recipes_by_id, unavailable=request.unavailable_ingredient
         )
+        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
+        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
+        diversity = SwapDiversity(list(evidence_recipes.values()))
         if not candidates:
             if request.unavailable_ingredient:
                 # Never a dish with what the shop lacks, however little else fits.
@@ -861,6 +865,12 @@ class MealPlanReplanningService:
         use_counts = Counter(
             item.recipe_id for item in plan.entries if item.id != entry.id and item.status != "skipped"
         )
+        near_counts = {
+            candidate.recipe.id: sum(
+                count for recipe_id, count in use_counts.items() if diversity.near(candidate.recipe.id, recipe_id)
+            )
+            for candidate in candidates
+        }
 
         # "Can Wednesday be fish instead?": among the candidates that already hold every hard constraint,
         # what was asked for leads and the recommendation score only breaks near-ties. Nothing described,
@@ -885,7 +895,7 @@ class MealPlanReplanningService:
                 if asked
                 else candidate.total_score
             )
-            value = fit - use_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
+            value = fit - near_counts[candidate.recipe.id] * 8.0 - neighbor_penalty
             return value, -candidate.recipe.id
 
         ranked = sorted(candidates, key=score, reverse=True)
@@ -970,12 +980,29 @@ class MealPlanReplanningService:
         fitting = [item for item in candidates if entry.meal_type in meal_affinity(recipes_by_id[item.recipe.id])]
         candidates = fitting or candidates
         served, limit = self._repeat_limit(plan, entry, constraints)
-        if limit is None:
+        explicit = constraints.max_uses_per_recipe is not None
+        if limit is not None and explicit:
+            # A stated cap always holds, so it narrows the pool before any preference below.
+            candidates = [item for item in candidates if served[dish_family(item.recipe.title)] < limit]
+        # A dish near the one it replaces or near one the meal keeps comes only when no other dish can take the place:
+        # a preference, never a refusal, so every swap the checks above allow stays possible.
+        evidence_recipes = {item.recipe.id: recipes_by_id[item.recipe.id] for item in candidates}
+        evidence_recipes.update({item.recipe_id: item.recipe for item in plan.entries})
+        diversity = SwapDiversity(list(evidence_recipes.values()))
+        same_meal = {
+            item.recipe_id
+            for item in plan.entries
+            if item.day_index == entry.day_index and item.meal_type == entry.meal_type and item.status != "skipped"
+        } | {entry.recipe_id}
+        candidates = [
+            item for item in candidates if not any(diversity.near(item.recipe.id, recipe_id) for recipe_id in same_meal)
+        ] or candidates
+        if limit is None or explicit:
             return candidates
-        # A stated cap always holds. Otherwise a dish comes more often than the week allows only when no other dish
-        # can take the place at all, whatever the budget (2026-10-26: Malaysian Fried Noodles a third time).
+        # Otherwise a dish comes more often than the week allows only when no other dish can take the place at all,
+        # whatever the budget (2026-10-26: Malaysian Fried Noodles a third time).
         within = [item for item in candidates if served[dish_family(item.recipe.title)] < limit]
-        return within if within or constraints.max_uses_per_recipe is not None else candidates
+        return within or candidates
 
     @staticmethod
     def _repeat_limit(plan: MealPlan, entry: MealPlanEntry, constraints) -> tuple[Counter, int | None]:

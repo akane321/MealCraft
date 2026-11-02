@@ -1,8 +1,8 @@
 """The frozen facts every ingredient-level baseline is scored on (02-baselines.md sections 3.1 and 4).
 
-- Names, nutrition and allergens: release v2.2 `ingredients.jsonl` (the frozen data version; v2.1 until
-  2026-10-23), with the curated catalog's allergen lists (`data/ingredients/ingredients.json`) added for the ids
-  both hold, as the product's import does: an allergen list only ever grows.
+- Names, nutrition and allergens: data release v3 `ingredients.jsonl` (the frozen data version since 2026-11-02;
+  v2.2 from 2026-10-23, v2.1 before), with the curated catalog's allergen lists (`data/ingredients/ingredients.json`)
+  added for the ids both hold, as the product's import does: an allergen list only ever grows.
 - Hierarchy step: the `same` and `variety` links of `data/ingredients/hierarchy` whose parent the release names.
 - Allergen vocabulary: `checked_allergens()` (`data/ingredients/allergen-vocabulary.json`). An allergen outside
   it is unverifiable for every ingredient (`app.data.allergens`).
@@ -34,7 +34,7 @@ from app.schemas.planning_v2 import PlanningNutrients, PlanningProductOption
 
 # The frozen data version the baselines and the product are scored on (02-baselines.md section 4); a change is
 # logged in the Knowledge baseline freeze log (operations/sprint2-plan/02-baselines-freeze-log.md).
-RELEASE = Path("data-engineering/data/release/v2.2")
+RELEASE = Path("data-engineering/data/release/v3")
 RELEASE_INGREDIENTS = RELEASE / "ingredients.jsonl"
 RELEASE_MANIFEST = RELEASE / "release_manifest.json"
 BASICS = Path("data/ingredients/basic-seasonings-v2.json")

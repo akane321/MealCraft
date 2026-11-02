@@ -11,7 +11,7 @@ from decimal import Decimal
 import pytest
 
 from app.core.clock import today as local_today
-from app.core.paths import data_root
+from app.data.release_v2 import release_dir
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 from app.planning.grocery_estimator import GroceryEstimator
 from app.planning.weekly_grocery import WeeklyGroceryAggregator
@@ -26,7 +26,7 @@ def test_densities_are_the_release_catalog_cup_weights() -> None:
     from app.data.units import CUP_ML, GRAMS_PER_CUP
 
     assert CUP_ML == 236.6
-    release = data_root().parent / "data-engineering/data/release/v2.2/ingredients.jsonl"
+    release = release_dir() / "ingredients.jsonl"
     cups = {}
     for line in release.read_text(encoding="utf-8").splitlines():
         record = json.loads(line)

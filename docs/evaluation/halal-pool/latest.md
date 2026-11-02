@@ -7,24 +7,24 @@ Labels, overrides and certification facts: `ingredients/halal-labels-v1.json` `a
 
 A recipe is plannable for a halal household when it is `halal`, or `needs_certification` and every such line has a certified, in-stock product in the release snapshot. An `uncertain` or `not_halal` recipe never is. Curated recipes are judged on the release snapshot too (the live search may find more certified products).
 
-**4792 of 8997 shared recipes are plannable for a halal household.**
+**6765 of 12924 shared recipes are plannable for a halal household.**
 
 ## Recipes by halal status
 
 | status | release | curated |
 | --- | ---: | ---: |
-| halal | 1816 | 23 |
-| needs_certification | 5542 | 7 |
-| not_halal | 1609 | 0 |
+| halal | 2744 | 23 |
+| needs_certification | 7883 | 7 |
+| not_halal | 2267 | 0 |
 | uncertain | 0 | 0 |
 
 ## Plannable for a halal household
 
 | recipes | release | curated |
 | --- | ---: | ---: |
-| halal | 1816 | 23 |
-| needs_certification, all lines certified | 2946 | 7 |
-| total | 4762 | 30 |
+| halal | 2744 | 23 |
+| needs_certification, all lines certified | 3991 | 7 |
+| total | 6735 | 30 |
 
 ## Ingredients that need a certified product, with one (60 of 207)
 
@@ -244,21 +244,21 @@ A recipe is counted under every ingredient that blocks it.
 
 | ingredient | recipes |
 | --- | ---: |
-| vanilla | 271 |
-| rice_vinegar | 238 |
-| mayo | 211 |
-| worcestershire | 205 |
-| ketchup | 184 |
-| sausage | 159 |
-| mustard | 119 |
-| beef_broth | 114 |
-| shortening | 113 |
-| hot_sauce | 105 |
-| salsa | 104 |
-| dijon | 86 |
-| red_wine_vinegar | 83 |
-| marinara | 75 |
-| turkey | 72 |
+| vanilla | 463 |
+| mayo | 324 |
+| rice_vinegar | 324 |
+| worcestershire | 285 |
+| sausage | 250 |
+| ketchup | 246 |
+| shortening | 170 |
+| mustard | 163 |
+| salsa | 162 |
+| hot_sauce | 160 |
+| beef_broth | 141 |
+| red_wine_vinegar | 137 |
+| dijon | 117 |
+| vegetable_broth | 105 |
+| marinara | 101 |
 
 ## Label review
 

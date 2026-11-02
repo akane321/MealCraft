@@ -4,7 +4,6 @@ import json
 
 import pytest
 
-from app.core.paths import repository_root
 from app.data import household_reference
 from app.data.allergens import checked_allergens
 from app.data.household_reference import (
@@ -16,6 +15,7 @@ from app.data.household_reference import (
     reference_table,
     sodium_limit,
 )
+from app.data.release_v2 import release_dir
 from app.schemas.household_rules import MAX_MISSING_BASICS
 
 # Transcribed from HealthHub on 2026-10-18 (moderate activity; toddlers are not split by activity).
@@ -120,7 +120,7 @@ def test_a_band_with_no_researched_energy_falls_back_to_one_portion(monkeypatch)
 
 def test_basics_are_exact_catalog_names_with_their_allergens():
     # Flour types and rare spices are not priced items, so the names are checked against the release catalog.
-    release = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
+    release = release_dir() / "ingredients.jsonl"
     names = {
         json.loads(line)["ingredient_id"].removeprefix("ING_").lower()
         for line in release.read_text(encoding="utf-8").splitlines()

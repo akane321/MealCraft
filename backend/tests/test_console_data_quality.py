@@ -39,10 +39,18 @@ def _release_directory(target: Path, counts: dict | None) -> Path:
 def test_every_offered_reason_returns_the_rows_its_count_stands_for() -> None:
     service = DataQualityService.current()
     offered = service.summary().dropped_by_reason
+    # Data release v3's quality_summary.json dropped_by_reason (2026-11-02), 1,338 records in all; v2.2 had only the
+    # first three buckets (221, 70, 1). Each bucket's filter still returns exactly its count (measured).
     assert offered == {
-        "reviewed incomplete": 221,
-        "implausible energy # kcal per serving": 70,
+        "title already in the release": 582,
+        "reviewed incomplete": 220,
+        "cuisine not in a quota bucket": 218,
+        "cuisine label cap": 177,
+        "implausible energy # kcal per serving": 73,
+        "new ingredient id": 47,
+        "enrichment failed validation": 19,
         "excluded by enricher": 1,
+        "below the importer floor": 1,
     }
 
     totals = {reason: service.dropped(offset=0, limit=1, reason=reason).total for reason in offered}
@@ -83,9 +91,11 @@ def test_the_registered_release_accounts_for_the_quota_cut() -> None:
     coverage = DataQualityService.current().summary().coverage
 
     assert coverage is not None
-    assert (coverage.enrichment_set, coverage.built_before_quota, coverage.released_recipes) == (11971, 11679, 8968)
-    assert coverage.not_picked_by_quota == 2711
-    assert coverage.unbucketed_cuisine == 217
+    # Data release v3 manifest counts (2026-11-02): enrichment_set 14,233, built_before_quota 13,920, released
+    # 12,895, so the quota cut 1,025; unbucketed_cuisine 220 (v2.2: 11,971, 11,679, 8,968, 2,711 and 217).
+    assert (coverage.enrichment_set, coverage.built_before_quota, coverage.released_recipes) == (14233, 13920, 12895)
+    assert coverage.not_picked_by_quota == 1025
+    assert coverage.unbucketed_cuisine == 220
 
 
 def test_a_manifest_without_counts_leaves_the_quota_cut_unknown(tmp_path: Path) -> None:

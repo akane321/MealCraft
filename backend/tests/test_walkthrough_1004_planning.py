@@ -461,22 +461,26 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
         options = refused.pending_interaction.options
-        assert [option.label for option in options] == ["Use S$90 for the week"]
-        # Two people's week (S$107 on release v2.2, S$103 on v2.1) costs more than four's: said without its amount
-        # (2026-10-09 rehearsal).
-        assert "S$107" not in refused.messages[-1].content
-        assert "减少人数也不能降低这个预算" in refused.messages[-1].content
-        for chosen in options:
+        # Release v3 with the composed budget packet ordered by cost as bought (`product_path.bought_first`,
+        # re-measured 2026-11-02): two people's S$47 check now plans, so fewer people is offered too. Before, on v3
+        # and v2.2, that check failed and the reply said fewer people would not lower the budget.
+        assert [option.label for option in options] == ["Use S$70 for the week", "2 people at S$47 a week"]
+        assert "减少人数也不能降低这个预算" not in refused.messages[-1].content
+    for chosen, size in zip(options, (4, 2), strict=True):
+        # A fresh refusal for each button: once one week is planned, the session reads the next tap as an edit.
+        with walked["factory"]() as session:
+            service = agent(session)
+            service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
+            refused = service.create("一共10新币给4个人做一周")
             ready = service.reply(refused.id, chosen.value)
             assert ready.can_confirm, (chosen.label, ready.messages[-1].content)
-            assert ready.constraints.household_size == 4
+            assert ready.constraints.household_size == size
             confirmed = service.confirm(ready.id)
             assert confirmed.plan.grocery_estimate.purchase_total_sgd <= ready.constraints.weekly_budget_sgd
 
 
 REFUSED_FOR_FOUR = (
-    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$89.80。"
-    " 减少人数也不能降低这个预算。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$69.21。"
 )
 
 
@@ -497,14 +501,18 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
         service.starting_constraints = WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60})
         refused = service.create("一共10新币给4个人做一周")
     assert refused.messages[-1].content == REFUSED_FOR_FOUR
-    assert [option.label for option in refused.pending_interaction.options] == ["Use S$90 for the week"]
+    # Two people's S$47 check plans on release v3 with the budget packet ordered by cost as bought (2026-11-02).
+    assert [option.label for option in refused.pending_interaction.options] == [
+        "Use S$70 for the week",
+        "2 people at S$47 a week",
+    ]
     # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
-    # (ADR-0067: a budget no week fits is refused as before). Four's cheapest week is S$51.54 since Cold Storage priced
-    # higher-ranked salads and noodles into the ranked packet (S$52.83 before), so the budgeted check is at S$52.
-    # The week it names is S$89.80 since RedMart priced four higher-ranked salads (dill, gochugaru) into that check's
-    # packet: it buys nothing at RedMart, and leaving those four out of the recommendations gives S$69.99 again. The
-    # cost-led search is sensitive to its packet (Knowledge history 2026-10-31-cold-storage, "Planner findings").
-    assert planned == [(4, None, True), (4, 52, False), (2, None, True), (2, 40, False)]
+    # (ADR-0067: a budget no week fits is refused as before). The cost-led cheapest-week search is dearer on release
+    # v3 (re-measured 2026-11-02): four's cheapest week rose from S$51.54 on v2.2 to S$69.21 and two's from S$39.49
+    # to S$46.27, because new v3 dishes rank into its packet (no budget, so ranked only). The budgeted checks are at
+    # S$70 and S$47 and both plan; on v2.2 the checks at S$52 and S$40 failed and the refusal named S$69.99. A budget
+    # still plans below these amounts (four at S$60, two at S$38: `test_varied_weeks`), as on v2.2.
+    assert planned == [(4, None, True), (4, 70, False), (2, None, True), (2, 47, False)]
 
 
 @pytest.fixture(scope="module")
@@ -562,15 +570,18 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
         request = service._plan_request(
             WALKTHROUGH.model_copy(update={"max_cooking_time_minutes": 60, "household_size": 2})
         )
-        error = service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": 41}))
+        # S$37: the most a check refuses on release v3 with the budget packet ordered by cost as bought (S$38 plans;
+        # S$41 refused on v2.2 and before, re-measured 2026-11-02).
+        error = service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": 37}))
         backed = sorted(
             attempt["purchase_total_sgd"]
             for attempt in error.trace["validation_attempts"]
             if attempt.get("cheapest_search") and limits._failed(attempt) == {"purchase_budget"}
         )
-        # S$107 on release v2.2 (S$101 on v2.1, S$103 before task 15): the cheapest-week search bisects to the
-        # dollar with the ranked meals.
-        assert backed and math.ceil(backed[0]) == 107
+        # S$38 on release v3 (S$37.68, re-measured 2026-11-02): the cost-led search inside the budgeted check bisects
+        # to the dollar. With the old per-use packet order it was S$117 at S$41 on v3 (S$116.33), a dearer week than
+        # v2.2's S$107 (S$101 on v2.1, S$103 before task 15); the order by cost as bought finds the cheaper one.
+        assert backed and math.ceil(backed[0]) == 38
         for cost in {backed[0], backed[-1]}:
             budget = math.ceil(cost)
             assert service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": budget})) is None
@@ -579,9 +590,9 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
 def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_searching_again(walked, monkeypatch):
     """Tapping an offered budget searched its week again (about 1-1.5 s) before the reply. Where the offer is the
     budget the refusal checked, the week kept by that check answers the tap's check and Plan saves it: the same week
-    a new search finds. Since the dough-only recipes left the pool the offer (S$90 with RedMart, S$70 before it,
-    S$87 on v2.1) is the cost of a week the budgeted check turned down for its budget alone, so the tap runs that one
-    search."""
+    a new search finds. On release v3 the offer (S$70) is again the budget the refusal checked, so the tap needs no
+    search. On release v2.2 (S$70) and v2.1 (S$87) it was the cost of a week the check at S$53 turned down for its
+    budget alone, so the tap ran that one search."""
     planned = []
     plan = ProductPlanningEngine.plan
 
@@ -595,17 +606,21 @@ def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_se
         refused = service.create("一共10新币给4个人做一周")
         monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
         ready = service.reply(refused.id, refused.pending_interaction.options[0].value)
-        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 90
+        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 70
         confirmed = service.confirm(ready.id)
-        # The offered S$90 is the cost of a week the S$52 check turned down for its budget alone, so no kept week
-        # answers the tap: one search, where the offered amount used to be the kept week's own budget (S$53).
-        assert planned == [(4, 90.0)]
+        # Release v3 (re-measured 2026-11-02): the refusal checked S$70 itself and that check planned, so its kept week
+        # answers the tap and Plan saves it with no search. On v2.2 the S$70 offer was the cost of a week the S$53
+        # check turned down, so the tap ran one search, [(4, 70.0)].
+        assert planned == []
+        # The tap's week keeps its variety: 12 dish families, as on v2.2. With the budget packet ordered by cost as
+        # used, v3's S$70 week had 6 (one soup seven times); ordered by cost as bought it has 12 (2026-11-02).
+        assert len({dish_family(day.recipe.title) for day in confirmed.plan.days}) >= 12
         monkeypatch.setattr(ProductPlanningEngine, "plan", plan)
         request = service._plan_request(ready.constraints)
         _, fresh = service.meal_plan_service._search(request, service.meal_plan_service._candidates(request))
         saved = sorted(day.recipe.slug for day in confirmed.plan.days)
         assert saved == sorted(item.recipe.slug for item in fresh.selected)
-        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 90
+        assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 70
 
 
 def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):

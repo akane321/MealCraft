@@ -63,7 +63,7 @@ from app.data.tag_files import (
 from app.models.meal_plan import MealPlanEntry, MealPlanEvent
 from app.models.recipe import CatalogImport, Ingredient, Recipe, RecipeIngredient, RecipeNutrition, RecipeStep
 
-RELEASE_VERSION = "v2.2"
+RELEASE_VERSION = "v3"  # data release v3 since 2026-11-02 (Knowledge ADR-0111); v2.2 before
 SLUG_PREFIX = "v2-"
 RELEASE_FILES = ("release_manifest.json", "ingredients.jsonl", "recipes.jsonl")
 

@@ -44,7 +44,9 @@ const funnel = computed(() => {
     { label: "dropped by the build", count: built === null ? null : coverage.enrichment_set - built, note: "" },
     { label: "built", count: built, note: "" },
     {
-      label: "not picked by the cuisine and course quota",
+      // Data release v3 (ADR-0111) also drops built recipes for a repeated title, implausible energy or a new
+      // ingredient id after the build, so this step is no longer the quota pick alone.
+      label: "not picked by the cuisine and course quota or dropped by the release checks",
       count: coverage.not_picked_by_quota ?? null,
       note: unbucketed ? `${unbucketed.toLocaleString()} with a cuisine no quota bucket claims` : "",
     },
@@ -217,7 +219,7 @@ onMounted(retryAll);
         <header>
           <div>
             <h2 id="dropped-title">Dropped candidates</h2>
-            <p class="ops-muted">Candidates that failed the build, with the recorded reason. Built recipes the cuisine and course quota did not pick have a count, not a record.</p>
+            <p class="ops-muted">Candidates that failed the build, with the recorded reason. From data release v3 the record also lists built recipes the release did not take; before v3 those have a count, not a record.</p>
           </div>
           <label>Reason
             <select v-model="reason" @change="selectReason">

@@ -1,0 +1,132 @@
+{
+  "release_version": "v3",
+  "schema_version": "mealcraft.recipe.v2",
+  "decision": "ADR-0030; Knowledge ADR-0103 section 3 (issue #390); owner 2026-11-02",
+  "created_at": "2026-11-03T00:00:00+00:00",
+  "counts": {
+    "released_recipes": 12895,
+    "built_before_quota": 13920,
+    "enrichment_set": 14233,
+    "released_ingredients": 701,
+    "unbucketed_cuisine": 220,
+    "dropped_by_reason": {
+      "title already in the release": 582,
+      "reviewed incomplete": 220,
+      "cuisine not in a quota bucket": 218,
+      "cuisine label cap": 177,
+      "implausible energy # kcal per serving": 73,
+      "new ingredient id": 47,
+      "enrichment failed validation": 19,
+      "excluded by enricher": 1,
+      "below the importer floor": 1
+    },
+    "by_cuisine": {
+      "american": 2579,
+      "chinese": 1250,
+      "thai": 736,
+      "italian": 716,
+      "japanese": 715,
+      "indian": 679,
+      "korean": 515,
+      "mexican": 435,
+      "greek": 415,
+      "tex_mex": 361,
+      "filipino": 355,
+      "vietnamese": 352,
+      "french": 348,
+      "middle_eastern": 336,
+      "british_irish": 335,
+      "latin_american": 323,
+      "caribbean": 317,
+      "southern_us": 289,
+      "north_african": 266,
+      "eastern_european": 250,
+      "spanish_portuguese": 242,
+      "african": 221,
+      "german": 214,
+      "indonesian": 204,
+      "malaysian_singaporean": 152,
+      "scandinavian": 144,
+      "cajun_creole": 77,
+      "turkish": 60,
+      "dutch_belgian": 9
+    },
+    "by_course": {
+      "main": 7007,
+      "side": 1694,
+      "salad": 743,
+      "dessert": 737,
+      "breakfast": 597,
+      "sauce_condiment": 559,
+      "snack_appetizer": 530,
+      "soup": 444,
+      "baked_good": 429,
+      "drink": 155
+    },
+    "by_source": {
+      "RecipeNLG (Gathered)": 12557,
+      "TheMealDB": 241,
+      "Wikibooks Cookbook": 97
+    },
+    "servings_estimated": 9488,
+    "time_estimated": 6739,
+    "lines_with_estimated_amount": 4474,
+    "from_v2_2": 8968,
+    "added_over_quota": 1694,
+    "added_new": 2233,
+    "model_enriched": 2233
+  },
+  "licensing": "Each record keeps its own licence in source.license; the release is a collection, not relicensed. Non-commercial use only. See ATTRIBUTION.md.",
+  "derived_from": {
+    "release_version": "v2.2",
+    "step": "scripts/build_release_v3.py",
+    "inputs": {
+      "v2_enrichment_set": 11971,
+      "v3_selected": 2262
+    },
+    "corrected_lines": 242,
+    "corrected_recipes": 239,
+    "corrected_lines_by_class": {
+      "lasagna_sheet": 8,
+      "n_times_total": 10,
+      "pizza_crust": 3,
+      "red_pepper_alias": 56,
+      "stated_weight": 69,
+      "stated_weight+whole_bird_edible": 15,
+      "whole_bird": 7,
+      "whole_bird_edible": 10,
+      "whole_head": 64
+    },
+    "v2_1_sha256": {
+      "recipes.jsonl": "df6b428714c74db6fef71c806d14a7620e97527de318f56810dff9cddac810db",
+      "ingredients.jsonl": "499798b92e76994b4a62f7194ba290c0badff77d03f6a8d3c16723de7945db25"
+    },
+    "v2_2_sha256": {
+      "recipes.jsonl": "1f4f64f6156050290b256fd016495ebcec52377209170c659f0e831ca1ab44b2",
+      "ingredients.jsonl": "4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e",
+      "release_manifest.json": "4bc1e50629bc12e4b3283aa9d1c58ac2c6792af5c3b79712e073d2b4762a54e8"
+    },
+    "staging_sha256": {
+      "v2_enrich_set.jsonl": "bfeacf4ce4e0dee42371d9dfadd478f8a00a21bae8e11833ed50f36911c253bd",
+      "v2_merged.recipes.jsonl": "e891190e300c8b05829f4e1b6585d20f35f9ee1ec10e3803198eccab08be2841",
+      "v2_merged.ingredients.jsonl": "0554cafc36eca75c30b3fc9abc93442e25a13801660091979a60bf1ea4abb1c4",
+      "v3_selected.jsonl": "8ab14302d2f3d21bb002de2395b76c9aa7e079d693fdc1a035aea626240ee81b",
+      "v3_merged.recipes.jsonl": "2cd107022edec2385251e4d7f025825cf90110922d3d86d31c1e4bc0f18faa70",
+      "v3_enrich_failed.jsonl": "21658d0dd79cb14d228031726e4aeb4b0368c2df360c1de48b916c2f0bb9b23d",
+      "enrichment-work/part-A/recipes.input.jsonl": "daf13902e2b22b03f68a3d0bb8dcc8d3a9e0372b190c03fc4d9969c820d5a4a1",
+      "enrichment-work/part-B/recipes.input.jsonl": "848039816a5eacd7657f1e677ad5df9edb3f4395c4f973efc24a72879edb7040",
+      "enrichment-work/part-C/recipes.input.jsonl": "6b17dde55e3bcb83876b20854760503204be032ae5516a66971cbb1d792b3397"
+    }
+  },
+  "change_notes": [
+    "Data release v3 = every release v2.2 record copied verbatim (same ids, wording and fields) plus added recipes; ingredients.jsonl is v2.2's 701 ingredients unchanged, so no ingredient id is new (recipe_occurrences still count v2.2's recipes).",
+    "Added recipes: the built-but-over-quota v2.1 recipes rebuilt from the v2 staging inputs with the current build rules, and new RecipeNLG (Gathered) candidates never selected in v2 (select_v3_candidates.py); both then take the v2.2 unit-weight corrections (correct_release_v22.correct_recipe), listed in corrections.jsonl.",
+    "New candidates qualify only when every line maps to a v2.2 ingredient, every ingredient is priced by the planner rule (backend priceable_ingredients: FairPrice not removed, Cold Storage mapped, curated; no at-home exemption), every ingredient form and unit weight exists, and the triage cuisine is not in the American bucket (american, southern_us, cajun_creole); mains first. Pool lines may resolve through stage-3 alias decisions that land on one of the 701 ids.",
+    "New candidates are enriched by the OpenAI API (gpt-5.4-mini, reasoning effort low) with the v2 recipe field set, vocabulary, instructions and validation (enrich_v3_openai.py); this amends ADR-0030's choice of agent sessions. Their records say enrichment.by 'openai/gpt-5.4-mini'.",
+    "Not released: an ingredient id outside v2.2, cuisine international (ADR-0034, not relabelled), a completeness-flagged recipe with no review verdict (no new completeness review), implausible energy after the correction, below the importer floor, or a title equal (lower-cased, whitespace-normalised) to one already in the release.",
+    "No cuisine label is above 20% of the final total; over a label's room usable courses stay first (main, side, soup, salad, breakfast, then the rest), ties by recipe_id.",
+    "Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.",
+    "Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point estimate, reported with Wilson 95% intervals."
+  ],
+  "fingerprint": "079d88f95965f61a0a97258771cc1f606fa697450709c0ed1ba1939747e7056c"
+}

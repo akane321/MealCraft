@@ -110,3 +110,15 @@ def test_without_the_model_a_chinese_request_still_finds_its_dish():
     beef = _recipe(1, "slug:beef-stew", "Beef Stew", ["beef", "carrot"])
     tofu = _recipe(2, "slug:tofu-soba", "Tofu Soba", ["tofu"])
     assert RecipeSimilarity(None).scores("换成牛肉的", [beef, tofu]) == {1: 3.0, 2: 0.0}
+
+
+def test_the_committed_vectors_cover_every_recipe_of_the_release_the_product_reads():
+    import json
+
+    from app.data.release_v2 import release_dir
+
+    ids = {json.loads(line)["recipe_id"] for line in (release_dir() / "recipes.jsonl").read_text("utf-8").splitlines()}
+    meta, index, rows = recipe_similarity._catalog()
+
+    assert ids <= set(index)
+    assert len(rows) == len(meta["keys"]) * meta["dimensions"]  # 2026-11-02: 12,925 keys, 3927 added for v3

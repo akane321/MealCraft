@@ -3,9 +3,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.core.paths import repository_root
 from app.data.external_ingredient_mapping import ReviewedIngredientMapper
-from app.data.release_v2 import map_allergens
+from app.data.release_v2 import map_allergens, release_dir
 from app.planning.vegetable_led import food_groups
 from app.schemas.agent import AgentConstraintState
 from app.services.ingredient_substitutions import (
@@ -187,9 +186,7 @@ def test_member_only_limits_are_not_lost_in_substitution():
 
 RELEASE_ROWS = {
     json.loads(line)["ingredient_id"].removeprefix("ING_").lower(): json.loads(line)
-    for line in (repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl")
-    .read_text(encoding="utf-8")
-    .splitlines()
+    for line in (release_dir() / "ingredients.jsonl").read_text(encoding="utf-8").splitlines()
     if line.strip()
 }
 

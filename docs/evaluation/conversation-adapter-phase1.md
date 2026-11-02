@@ -45,6 +45,36 @@ bytes are **drafts**. Their exact bytes must be registered and reviewed for
 neutrality by someone who did not write them before formal use. Neither the
 synthetic example date nor a readiness attestation is run admission.
 
+The shared instructions were revised after an AI-executed neutrality review (`ADR-0100` items 3 and 4, confirmed by
+the owner on 2026-10-29; the ADR record itself is still proposed until its pull request merges):
+`awaiting_confirmation` is defined with an example, the `Initial state` line is replaced by a plain statement that
+nothing is saved at the start, relative dates are tied to the given date, `plan` is for plan requests only, and the
+sources line refers to each system's registered configuration. The earlier review does not cover the revised bytes. A
+second review, AI-executed and recorded in the Knowledge freeze log entry for this change, found them neutral with
+residuals (the product-versus-model plan asymmetry, the example read as a script, the product-native propose-and-apply
+shape of the confirmation definition); the bytes become a registered shared-part change only when this pull request
+merges.
+
+Because the bytes are shared, changing them is a shared-part change under `ADR-0092` item 5: it needs an entry in
+`operations/sprint2-plan/02-baselines-freeze-log.md` of the Knowledge repository, which together with the other
+shared-part changes forms a new pre-registered formal-run freeze point, a second neutrality review of the new bytes,
+and the agreement of the baseline layer's owners to register the change.
+
+"No saved household, plan or profile" and the product. The sentence is true for the product only if the caller
+prepares the run that way; nothing here enforces it. `ProductTransport` never creates a household or profile
+([product-transport.md](product-transport.md)), and the adapter has no initial-state seed. The product always has a
+household record behind the authenticated client (created at registration), but a household profile exists only
+when someone creates one, and a new agent session starts from the profile's constraints only if there is one
+(`get_agent_service`). A run is therefore prepared as the sentence says when its household has no profile and no
+saved plan. The harness does not check this. `ADR-0092` item 3 allows a later initial-state attachment for cases
+that presuppose an existing household or plan; for those cases the sentence would not hold and would need to change
+with the attachment.
+
+Known asymmetry in what a later turn carries. `normalize_product` includes the session's saved plan on every turn
+once the session links one, also on a plain question. A model arm told "use `plan` only when the user asks for a meal
+plan or a change to one" omits `plan` on such a turn. Whether the scorer or the normalizer should treat this
+difference is not decided here (Knowledge `OPEN_QUESTIONS.md` question 77).
+
 This phase does not implement a product transport, model arm, one-shot arm
 presentation, field-dictionary mapping, catalog ID matching, scoring, sealed file loading, freeze or admission. A change
 preview that is linked and not yet applied counts as waiting for confirmation in `normalize_product`, like a
