@@ -5,7 +5,7 @@ const polling = { usePolling: pollForChanges, interval: 300 };
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-31",
-  css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css"],
+  css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css", "~/assets/css/product.css"],
   devtools: { enabled: true },
   // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
   icon: { clientBundle: { scan: true }, fallbackToApi: false },
