@@ -1,6 +1,6 @@
 """Data release v3, step 1: pick the new RecipeNLG candidates (Knowledge ADR-0103 section 3, MealCraft issue #390).
 
-    python scripts/select_v3_candidates.py [--total 12400] [--loss 0.25]
+    python scripts/select_v3_candidates.py [--total 18280] [--loss 0.0128]
 
 Release v3 is every release v2.2 recipe, verbatim, plus recipes added from two places: the built-but-over-quota
 v2.1 recipes (rebuilt with the current rules, then the v2.2 unit-weight corrections), and new candidates picked
@@ -26,6 +26,12 @@ proportion to their targets and capped by supply, so no label approaches the 20%
 candidates that qualify are all taken. Within a bucket mains come first and other courses only when the mains run
 out (sides, soups, salads and breakfasts before the rest), then recipes whose servings the source states, then a
 fixed hash order.
+
+Selection grows in waves and never drops a pick. Wave 1 (`--total 12400 --loss 0.25`, 2,262 picks) is frozen in the
+committed `data/enrichment/v3_selected_wave1.csv`; its picks are kept as they are, and a larger total picks the extra
+ones from the other qualifying candidates by the same rules (no title repeats a wave-1 title). Wave 2 (owner
+2026-11-02: grow v3 to about 19,000) is sized so release v3's recipes.jsonl stays under 95,000,000 bytes, with the
+loss measured on wave 1 (2,262 picked, 2,233 released).
 
 Outputs: `data/staging/v3_selected.jsonl` (git-ignored; candidate records in the shape of `v2_enrich_set.jsonl`),
 and committed `data/enrichment/v3_selection_summary.json` and `v3_selected.csv`.
@@ -60,6 +66,7 @@ SELECTED = STAGING / "v3_selected.jsonl"
 ENRICHMENT = ROOT / "data" / "enrichment"
 SUMMARY = ENRICHMENT / "v3_selection_summary.json"
 SELECTED_CSV = ENRICHMENT / "v3_selected.csv"
+WAVE1_CSV = ENRICHMENT / "v3_selected_wave1.csv"
 V22 = ROOT / "data" / "release" / "v2.2"
 PRODUCTS = ROOT.parent / "data" / "products"
 CURATED = ROOT.parent / "data" / "ingredients" / "ingredients.json"
@@ -292,6 +299,19 @@ def allocate(rows: list[dict], count: int) -> list[dict]:
     return sorted(picked, key=lambda r: r["candidate_id"])
 
 
+def extend(rows: list[dict], first: dict[str, str], count: int) -> list[dict]:
+    """Wave-1 picks (`first`: candidate_id -> bucket) as they are, then `allocate` up to `count` from the rest."""
+    kept = [{**r, "wave": 1} for r in rows if r["candidate_id"] in first]
+    lost = sorted(set(first) - {r["candidate_id"] for r in kept})
+    if lost:
+        raise SystemExit(f"{len(lost)} wave-1 picks no longer qualify, e.g. {lost[:3]}")
+    assert all(r["bucket"] == first[r["candidate_id"]] for r in kept)
+    titles = {r["title"] for r in kept}
+    rest = [r for r in rows if r["candidate_id"] not in first and r["title"] not in titles]
+    extra = [{**r, "wave": 2} for r in allocate(rest, max(count - len(kept), 0))]
+    return sorted(kept + extra, key=lambda r: r["candidate_id"])
+
+
 def tally(values) -> dict:
     return dict(collections.Counter(values).most_common())
 
@@ -299,9 +319,11 @@ def tally(values) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        "--total", type=int, default=12400, help="target size of release v3 (ADR-0103 asks for 12,000+)"
+        "--total", type=int, default=18280, help="target size of release v3 (wave 1 was 12400; ADR-0103 asks 12,000+)"
     )
-    parser.add_argument("--loss", type=float, default=0.25, help="share of new candidates assumed lost in enrichment")
+    parser.add_argument(
+        "--loss", type=float, default=0.0128, help="share of new candidates assumed lost (wave 1: 29 of 2,262)"
+    )
     args = parser.parse_args()
 
     ctx = Context()
@@ -316,7 +338,10 @@ def main() -> int:
 
     taken = ctx.titles | {title_key(r["title"]) for r in added}
     rows, why = scan_pool(ctx, taken)
-    picked = allocate(rows, count)
+    with WAVE1_CSV.open(encoding="utf-8", newline="") as handle:
+        first = {r["candidate_id"]: r["quota_bucket"] for r in csv.DictReader(handle)}
+    picked = extend(rows, first, count)
+    wave = {r["candidate_id"]: r["wave"] for r in picked}
     print(f"qualifying pool candidates {len(rows)}; picked {len(picked)}")
 
     records = []
@@ -337,10 +362,17 @@ def main() -> int:
     )
     with SELECTED_CSV.open("w", encoding="utf-8", newline="") as out:
         writer = csv.writer(out, lineterminator="\n")
-        writer.writerow(["candidate_id", "source", "triage_cuisine", "triage_course", "quota_bucket"])
+        writer.writerow(["candidate_id", "source", "triage_cuisine", "triage_course", "quota_bucket", "wave"])
         for r in records:
             writer.writerow(
-                [r["candidate_id"], r["source"], r["triage"]["cuisine"], r["triage"]["course"], r["quota_bucket"]]
+                [
+                    r["candidate_id"],
+                    r["source"],
+                    r["triage"]["cuisine"],
+                    r["triage"]["course"],
+                    r["quota_bucket"],
+                    wave[r["candidate_id"]],
+                ]
             )
 
     final = collections.Counter(base)
@@ -356,6 +388,8 @@ def main() -> int:
             "label_cap_recipes": limit,
             "new_needed": need,
             "new_selected": len(records),
+            "wave_1_selected": sum(w == 1 for w in wave.values()),
+            "wave_2_selected": sum(w == 2 for w in wave.values()),
             "largest_label_share_if_all_selected_keep_their_triage_label": {
                 label: round(n / args.total, 4) for label, n in final.most_common(3)
             },
@@ -372,6 +406,11 @@ def main() -> int:
             "by_source": tally(r["source"] for r in records),
             "servings_stated": sum(r["servings"] is not None for r in records),
             "malaysian_singaporean": sum(r["triage"]["cuisine"] == LOCAL for r in records),
+        },
+        "selected_wave_2": {
+            "by_quota_bucket": tally(r["quota_bucket"] for r in records if wave[r["candidate_id"]] == 2),
+            "by_triage_course": tally(r["triage"]["course"] for r in records if wave[r["candidate_id"]] == 2),
+            "servings_stated": sum(r["servings"] is not None for r in records if wave[r["candidate_id"]] == 2),
         },
         "over_quota_added_by_cuisine": tally(r["cuisine"] for r in kept),
         "over_quota_added_by_course": tally(r["course"] for r in kept),

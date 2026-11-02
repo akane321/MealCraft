@@ -87,6 +87,29 @@ class SelectTest(unittest.TestCase):
         rows = [row(n, "chinese", "chinese", servings=n % 2 or None) for n in range(30)]
         self.assertEqual(select.allocate(rows, 10), select.allocate(list(reversed(rows)), 10))
 
+    def test_a_larger_total_keeps_every_first_wave_pick(self) -> None:
+        rows = [row(n, "chinese", "chinese", servings=n % 2 or None) for n in range(40)]
+        rows += [row(100 + n, "thai", "thai", "dessert") for n in range(20)]
+        rows += [{**row(200, "indian", "indian"), "title": "dish 3"}]
+        first_rows = select.allocate(rows, 10)
+        first = {r["candidate_id"]: r["bucket"] for r in first_rows}
+        grown = select.extend(rows, first, 30)
+        self.assertEqual(len(grown), 30)
+        self.assertLessEqual(set(first), {r["candidate_id"] for r in grown})
+        by_id = {r["candidate_id"]: r for r in rows}
+        for r in grown:
+            self.assertEqual(r["wave"], 1 if r["candidate_id"] in first else 2)
+            self.assertEqual({k: v for k, v in r.items() if k != "wave"}, by_id[r["candidate_id"]])
+        titles = [r["title"] for r in grown]
+        self.assertEqual(len(titles), len(set(titles)))
+        self.assertEqual(grown, select.extend(list(reversed(rows)), first, 30))
+        self.assertEqual({r["candidate_id"] for r in select.extend(rows, first, 10)}, set(first))
+
+    def test_a_first_wave_pick_that_no_longer_qualifies_stops_the_run(self) -> None:
+        rows = [row(n, "chinese", "chinese") for n in range(5)]
+        with self.assertRaises(SystemExit):
+            select.extend(rows, {"recipenlg:999": "chinese"}, 5)
+
 
 if __name__ == "__main__":
     unittest.main()

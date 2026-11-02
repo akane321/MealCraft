@@ -81,7 +81,8 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：
 
 ```bash
-python scripts/select_v3_candidates.py      # 第 1 步：从 v2_pool.jsonl 挑新候选 -> staging v3_selected.jsonl（约 45 秒）
+python scripts/select_v3_candidates.py      # 第 1 步：从 v2_pool.jsonl 挑新候选 -> staging v3_selected.jsonl（约 25 秒）；
+                                            # 第 1 波 2,262 道冻结在 data/enrichment/v3_selected_wave1.csv，第 2 波只加不删
 python scripts/enrich_v3_openai.py --env-file ../.env --workers 8 --max-usd 25   # 第 2 步：OpenAI API 富化，可断点续跑
 python scripts/build_release_v3.py          # 第 3 步：写 data/release/v3/（约 15 秒）
 python scripts/build_release_v3.py --out DIR   # 同样的文件写到 DIR；两次运行逐字节相同
