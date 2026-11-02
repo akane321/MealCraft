@@ -29,6 +29,14 @@ const shellPage = computed(() => {
   const page = path.split("/")[1];
   return page === "browse" || page === "history" || page === "profile" || page === "system" ? page : "other";
 });
+// The panel's top bar: the page's icon and name (icon names literal so the icon bundle finds them).
+const BARS = {
+  browse: { icon: "i-lucide-book-open", label: "Recipes & groceries" },
+  history: { icon: "i-lucide-calendar-clock", label: "Past plans" },
+  profile: { icon: "i-lucide-users", label: "Household" },
+  system: { icon: "i-lucide-activity", label: "Status" },
+  other: { icon: "i-lucide-layout-grid", label: "MealCraft" },
+} as const;
 
 onMounted(load);
 </script>
@@ -41,6 +49,7 @@ onMounted(load);
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
         <ShellSidebar :current="shellPage" />
         <div class="mc-frame product-frame">
+          <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}</div>
           <NuxtPage />
         </div>
       </div>
@@ -74,5 +83,6 @@ onMounted(load);
 .product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .product-frame { height: calc(100vh - 16px); overflow-y: auto; }
 /* The profile's sticky column sticks inside the panel, not the window. */
-.product-frame :deep(.profile-sidebar) { top: 16px; max-height: calc(100vh - 48px); }
+.product-frame :deep(.profile-sidebar) { top: 72px; max-height: calc(100vh - 104px); }
+.product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
 </style>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// The product sidebar: brand, an optional action, the pages, an optional list (recent plans) and card, the account.
-// The home surface fills the slots; the other product pages use it as it is.
+// The product sidebar: brand, New plan, the pages, an optional list (recent plans), the household card, the account.
+// The home surface fills the slots; the other product pages get the same rows, so only the current item moves.
 const props = defineProps<{ current?: "plan" | "browse" | "history" | "profile" | "system" | "other" | null; brandButton?: boolean }>();
 const emit = defineEmits<{ brand: [] }>();
 const slots = useSlots();
@@ -16,14 +16,15 @@ const on = (page: string) => ({ on: props.current === page });
       <ShellMark />MealCraft
     </button>
     <NuxtLink v-else to="/" class="sb-brand"><ShellMark />MealCraft</NuxtLink>
-    <slot name="action" />
+    <slot name="action">
+      <UButton to="/" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan</UButton>
+    </slot>
     <nav class="pages" aria-label="Pages">
       <!-- On the plan itself this is not a link, so the nav holds only the pages that leave it. -->
       <span v-if="current === 'plan'" class="sb-item on" aria-current="page"><UIcon name="i-lucide-house" />My plan</span>
       <NuxtLink v-else to="/" class="sb-item"><UIcon name="i-lucide-house" />My plan</NuxtLink>
       <NuxtLink to="/browse" class="sb-item" :class="on('browse')"><UIcon name="i-lucide-book-open" />Recipes &amp; groceries</NuxtLink>
       <NuxtLink to="/history" class="sb-item" :class="on('history')"><UIcon name="i-lucide-calendar-clock" />Past plans</NuxtLink>
-      <NuxtLink v-if="!slots.card" to="/profile" class="sb-item" :class="on('profile')"><UIcon name="i-lucide-users" />Household</NuxtLink>
     </nav>
     <template v-if="slots.default">
       <div class="sb-sep" />
@@ -31,7 +32,13 @@ const on = (page: string) => ({ on: props.current === page });
       <slot />
     </template>
     <div v-else class="sb-fill" />
-    <slot name="card" />
+    <slot name="card">
+      <div class="home-card">
+        <b>Your household</b>
+        <small>Who's eating, the budget and what to avoid.</small>
+        <NuxtLink to="/profile" class="home-link">Household<UIcon name="i-lucide-arrow-up-right" /></NuxtLink>
+      </div>
+    </slot>
     <div class="sb-user">
       <template v-if="actor">
         <span class="sb-avatar" aria-hidden="true">{{ initials }}</span>

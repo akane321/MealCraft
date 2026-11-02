@@ -87,7 +87,7 @@ function packLabel(size: number | null, unit: string | null) {
     <section class="head">
       <p class="eyebrow">Browse</p>
       <h1>Everything the planner can choose from.</h1>
-      <div class="tabs" role="tablist" aria-label="What to browse">
+      <div class="tabs mc-segmented" role="tablist" aria-label="What to browse">
         <button type="button" role="tab" :aria-selected="tab === 'recipes'" @click="tab = 'recipes'">Recipes</button>
         <button type="button" role="tab" :aria-selected="tab === 'products'" @click="tab = 'products'">Groceries</button>
       </div>
@@ -96,6 +96,7 @@ function packLabel(size: number | null, unit: string | null) {
     <section v-if="tab === 'recipes'" aria-label="Recipes">
       <div class="controls">
         <label class="search">
+          <UIcon name="i-lucide-search" aria-hidden="true" />
           <span class="visually-hidden">Search recipes</span>
           <input v-model="query" type="search" placeholder="Search recipes, e.g. tofu soba" autocomplete="off">
         </label>
@@ -122,6 +123,7 @@ function packLabel(size: number | null, unit: string | null) {
     <section v-else aria-label="Groceries">
       <form class="controls" @submit.prevent="searchProducts">
         <label class="search">
+          <UIcon name="i-lucide-search" aria-hidden="true" />
           <span class="visually-hidden">Search groceries</span>
           <input v-model="productQuery" type="search" placeholder="Search FairPrice, e.g. chicken breast" autocomplete="off" minlength="2">
         </label>
@@ -151,23 +153,29 @@ function packLabel(size: number | null, unit: string | null) {
 </template>
 
 <style scoped>
-.browse { padding-block: 32px 64px; }
-.head h1 { margin: 6px 0 18px; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 4vw, 36px); text-wrap: balance; }
-.tabs { display: flex; gap: 6px; }
-.tabs button, .chip { padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--t2); cursor: pointer; font: inherit; font-size: 13px; }
-.tabs button[aria-selected="true"], .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ivory); background: rgba(240, 103, 92, 0.1); }
-.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 16px; }
-.search { flex: 1 1 260px; }
-.search input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--s1); color: var(--ivory); font: inherit; }
+.browse { padding-block: 28px 48px; }
+.head h1 { margin: 0 0 16px; }
+.tabs { display: inline-flex; gap: 2px; }
+.tabs button { border: 0; background: transparent; cursor: pointer; font: inherit; }
+.tabs button[aria-selected="true"] { background: #fff; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0 16px; }
+.search { flex: 0 1 360px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 12px; background: #fff; }
+.search:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12); }
+.search .iconify { width: 16px; height: 16px; flex: none; color: #a1a1aa; }
+.search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--mc-strong); font: inherit; }
+.search input::placeholder { color: #a1a1aa; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { height: 30px; padding: 0 12px; border: 1px solid #ececef; border-radius: 999px; background: #fff; color: #52525b; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; }
+.chip:hover { border-color: #d4d4d8; }
+.chip[aria-pressed="true"] { border-color: #18181b; background: #18181b; color: #fff; }
 .live { display: flex; gap: 6px; align-items: center; color: var(--t2); font-size: 13px; }
 .notice { color: var(--t3); }
-.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-.card { width: 100%; height: 100%; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); color: inherit; text-align: left; cursor: pointer; font: inherit; }
-.card:hover, .card:focus-visible { border-color: var(--accent); }
-.card .icon { grid-row: 1 / 3; }
-.card .title { font-family: var(--serif); font-size: 15px; line-height: 1.25; }
-.card small { color: var(--t3); font-size: 12px; }
+.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 14px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); transition: border-color 150ms, box-shadow 150ms; }
+.card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: 0 6px 20px -12px rgba(16, 16, 20, 0.15); }
+.card .icon { margin-bottom: 8px; }
+.card .title { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
+.card small { color: #71717a; font-size: 12.5px; }
 .more { margin-top: 18px; }
 .products { width: 100%; border-collapse: collapse; font-size: 14px; }
 .products th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
