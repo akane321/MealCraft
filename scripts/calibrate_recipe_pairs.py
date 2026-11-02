@@ -11,6 +11,7 @@ from itertools import product
 from pathlib import Path
 from types import SimpleNamespace
 
+from app.data.release_v2 import release_dir
 from app.planning.near_duplicate_groups import NearDuplicatePolicy, classify
 from app.planning.recipe_pair_similarity import RecipePairIndex
 
@@ -21,7 +22,7 @@ OUT = ROOT / "docs/evaluation/algorithm-dev/near-duplicates.json"
 
 def catalog_recipes(keys):
     recipes = {}
-    release = ROOT / "data-engineering/data/release/v2.2/recipes.jsonl"
+    release = release_dir() / "recipes.jsonl"
     for line in release.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
         key = row["recipe_id"]

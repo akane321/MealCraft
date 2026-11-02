@@ -55,8 +55,11 @@ jobs:
     # inside the shared-dish step with everything before it passing. Same budget as `compose`, which does the
     # same work and finished in 23 minutes. Kept at 30 after task 15 on the development machine's 8 minutes, but
     # hosted runners are several times slower: on main after task 15 `compose` was cancelled at 30 minutes, and the
-    # backend job took 26. Planning time has no hard limit (ADR-0080), so the jobs get room to finish.
-    timeout-minutes: 60
+    # backend job took 26. Planning time has no hard limit (ADR-0080), so the jobs get room to finish. Raised to 120
+    # for data release v3 (2026-11-02): on the development machine the suite took 12.3 min (10.9 on the branch
+    # before its packet fix), full_default 3.5 and shared_dish 4.7, about 20.5 min; at the 3.25-3.75x hosted
+    # slowdown above that is 67-77 min before the other steps. No hosted run on v3 had been timed yet.
+    timeout-minutes: 120
 
     steps:
       - name: Checkout
@@ -209,8 +212,9 @@ jobs:
     name: compose
     runs-on: ubuntu-latest
     # Raised with the shared-dish report, which plans ten households twice (layer 08 PR-4), and to 60 when main
-    # after task 15 was cancelled at 30 minutes inside the evaluation steps (see `backend`).
-    timeout-minutes: 60
+    # after task 15 was cancelled at 30 minutes inside the evaluation steps (see `backend`), and to 120 for data
+    # release v3 (see `backend`).
+    timeout-minutes: 120
 
     # The `backend` job runs the suite from a checkout: `<repo>/backend/tests`.
     # CONTRIBUTING.md and AGENTS.md tell contributors to verify through the

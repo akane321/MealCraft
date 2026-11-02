@@ -2,9 +2,16 @@
 
 import json
 
-from app.data.ingredient_hierarchy import FILES, GROUPS_FILE, empty_groups, load, read_links
+from app.core.paths import repository_root
+from app.data.ingredient_hierarchy import FILES, GROUPS_FILE, PRODUCT_RELEASE, empty_groups, load, read_links
+from app.data.release_v2 import release_dir
 
 ALCOHOL = {"group:alcohol": {"description": "Drinks and cooking liquids with alcohol.", "serves": "No alcohol."}}
+
+
+def test_the_hierarchy_reads_the_release_the_product_imports():
+    # The module names the release itself to stay standard-library only (scripts/check_ingredient_hierarchy.py).
+    assert repository_root() / PRODUCT_RELEASE == release_dir()
 
 
 RELEASE = [
@@ -22,7 +29,7 @@ CURATED = ["firm_tofu", "cherry_tomato", "milk"]
 
 
 def catalog(root):
-    release = root / "data-engineering/data/release/v2.2"
+    release = root / PRODUCT_RELEASE
     release.mkdir(parents=True)
     release.joinpath("ingredients.jsonl").write_text(
         "\n".join(
@@ -104,7 +111,7 @@ def test_excluding_a_food_excludes_all_that_belongs_to_it_and_never_climbs(tmp_p
 def test_the_run_time_reader_sees_the_same_links_without_the_catalog(tmp_path):
     root = catalog(tmp_path)
     checked = valid(root)
-    (root / "data-engineering/data/release/v2.2/recipes.jsonl").unlink()  # the product never reads it
+    (root / PRODUCT_RELEASE / "recipes.jsonl").unlink()  # the product never reads it
 
     links = read_links(root)
 

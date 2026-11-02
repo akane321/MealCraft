@@ -24,13 +24,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.data.ingredient_hierarchy import FILES, empty_groups, load, look_alikes  # noqa: E402
+from app.data.ingredient_hierarchy import FILES, PRODUCT_RELEASE, empty_groups, load, look_alikes  # noqa: E402
 
 
 def _recipe_lines(ingredient_id: str, limit: int) -> list[str]:
     """How recipes actually write this ingredient: the evidence a decision should rest on."""
     lines: list[str] = []
-    release = ROOT / "data-engineering/data/release/v2.2/recipes.jsonl"
+    release = ROOT / PRODUCT_RELEASE / "recipes.jsonl"
     for raw in release.read_text(encoding="utf-8").splitlines():
         if not raw.strip():
             continue

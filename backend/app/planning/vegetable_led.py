@@ -56,7 +56,7 @@ from collections.abc import Iterable
 from functools import cache
 
 from app.core.paths import repository_root
-from app.data.ingredient_hierarchy import runtime
+from app.data.ingredient_hierarchy import PRODUCT_RELEASE, runtime
 
 VEGETABLE_ROLE = "vegetable"
 VEGETABLE_LED_SHARE = 0.5
@@ -283,7 +283,7 @@ def food_groups() -> dict[str, tuple[str, str, str, str]]:
     An ingredient the release does not hold (the curated `baby_spinach`) takes the release ingredient it is
     the same as or a variety of in the ingredient hierarchy (`spinach`).
     """
-    path = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
+    path = repository_root() / PRODUCT_RELEASE / "ingredients.jsonl"
     rows = (json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
     groups = {
         name: (name, row["food_group"], row["dietary_origin"], row["allergen_status"])

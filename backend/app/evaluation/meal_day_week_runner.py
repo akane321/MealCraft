@@ -1,7 +1,7 @@
 """Run protocol v3-meal-day-week episodes through the product planner and score them.
 
 Each episode is planned the way the product plans a week: an in-memory database
-holds only the episode's drawn pool (release v2.2, imported by the product's own
+holds only the episode's drawn pool (the product's release, imported by the product's own
 importer), `WeeklyMealPlanService.generate` plans the household's plan shape with
 fixture prices, and a shape-change episode then reads the household's words with
 the product's rules (`read_shape_change`), previews the change
@@ -125,7 +125,10 @@ def plan_request(episode: dict) -> WeeklyMealPlanRequest:
 
 
 def _product_ids() -> dict[tuple[str, str], str]:
-    """(product external id, ingredient) -> the frozen price row's id."""
+    """(product external id, ingredient) -> the frozen price row's id.
+
+    The rows come from the FairPrice snapshot alone (`load_release_catalog` reads no release for its products),
+    so a recipe of any release finds its products here."""
     ids = {}
     for row in [*fixture_products(), *load_release_catalog().products]:  # a snapshot row wins a tie
         external = row["external_id"].removeprefix("fixture:").split("@")[0]
@@ -333,8 +336,16 @@ def _secondary(episode: dict, response: dict) -> dict:
     plan = response.get("plan")
     if not plan:
         return {}
-    recipes = load_release_catalog().by_slug
     dishes = plan["assignments"]
+    recipes = load_release_catalog().by_slug
+    # A recipe v2.1 does not price (data release v3 added it) takes its facts from the product's release;
+    # a v2.1 recipe keeps its v2.1 facts.
+    if {a["recipe_id"] for a in dishes} - recipes.keys():
+        product = load_release_catalog(release=release_dir().relative_to(repository_root())).by_slug
+        recipes = {**product, **recipes}
+        unknown = sorted({a["recipe_id"] for a in dishes} - recipes.keys())
+        if unknown:
+            raise ValueError(f"recipes in neither release v2.1 nor the product's release: {', '.join(unknown)}")
     fit = sum(a["slot_id"].split("-", 1)[1] in recipes[a["recipe_id"]]["meal_types"] for a in dishes)
     kinds = [dish_kind(recipes[a["recipe_id"]]["title"]) for a in dishes]
     return {
@@ -355,7 +366,7 @@ def scorer_catalogs(episode: dict) -> Catalogs:
     household can eat and buy, the rule the product states in `app.planning.alternatives`;
     this is the scorer's own copy of it. The frozen prices include the fixture file's.
 
-    The facts are the release the product imports (owner 2026-10-24): scoring a plan made from v2.2 grams
+    The facts are the release the product imports (owner 2026-10-24): scoring a plan made from v2.2 (now v3) grams
     against v2.1 grams failed plans the product had right. Protocol v2-multidish keeps v2.1.
     """
     catalog = load_release_catalog(release=release_dir().relative_to(repository_root()))
@@ -507,11 +518,11 @@ def main() -> int:
     }
     for fixed in (
         # Titles, courses and products come from v2.1 (`load_release_catalog`); the pool is imported by the product's
-        # importer, which reads the product's release (v2.2 since 2026-10-23).
+        # importer, which reads the product's release (v2.2 from 2026-10-23, data release v3 from 2026-11-02).
         "data-engineering/data/release/v2.1/recipes.jsonl",
         "data-engineering/data/release/v2.1/ingredients.jsonl",
-        "data-engineering/data/release/v2.2/recipes.jsonl",
-        "data-engineering/data/release/v2.2/ingredients.jsonl",
+        "data-engineering/data/release/v3/recipes.jsonl",
+        "data-engineering/data/release/v3/ingredients.jsonl",
         "data/products/fairprice-v2-snapshot.json",
         "data/fixtures/fairprice-products.json",
     ):

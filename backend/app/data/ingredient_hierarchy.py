@@ -28,6 +28,9 @@ GROUP_PREFIX = "group:"
 MIN_REASON = 20
 # A reason written more often than this is a template, not a judgement about one ingredient.
 MAX_REASON_REPEATS = 3
+# The release the product imports (`app.data.release_v2.release_dir()`; a test keeps them equal). Named here
+# because this module and scripts/check_ingredient_hierarchy.py stay standard-library only.
+PRODUCT_RELEASE = Path("data-engineering/data/release/v3")
 
 # Who decides each ingredient. Release v2.1 ids go by the food group the release gives
 # them; the curated catalog's own ids (those release v2.1 does not share) go to WP1.
@@ -149,13 +152,13 @@ def look_alikes(ingredient_id: str, known: Iterable[str]) -> list[str]:
 
 def _load_vocabulary(root: Path) -> dict[str, Ingredient]:
     occurrences: Counter[str] = Counter()
-    release_recipes = root / "data-engineering/data/release/v2.2/recipes.jsonl"
+    release_recipes = root / PRODUCT_RELEASE / "recipes.jsonl"
     for line in release_recipes.read_text(encoding="utf-8").splitlines():
         if line.strip():
             recipe = json.loads(line)
             occurrences.update({row["canonical_ingredient_id"][4:].lower() for row in recipe["ingredients"]})
     ingredients: dict[str, Ingredient] = {}
-    release = root / "data-engineering/data/release/v2.2/ingredients.jsonl"
+    release = root / PRODUCT_RELEASE / "ingredients.jsonl"
     for line in release.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue

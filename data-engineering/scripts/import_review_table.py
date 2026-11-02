@@ -370,14 +370,14 @@ SAMPLE_COLUMNS = (
 )
 
 
-def write_sample_xlsx(path: Path, recipes: list[dict]) -> None:
+def write_sample_xlsx(path: Path, recipes: list[dict], instructions: list[str] = INSTRUCTIONS) -> None:
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
 
     workbook = Workbook()
     guide = workbook.active
     guide.title = "说明"
-    for line in INSTRUCTIONS:
+    for line in instructions:
         guide.append([line])
     guide["A1"].font = Font(bold=True)
     guide.column_dimensions["A"].width = 110

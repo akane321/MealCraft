@@ -19,17 +19,17 @@ Snapshots: `products/fairprice-v2-snapshot.json` `2cfd10e150fd38cb`, `products/c
 
 ## Recipes with every bought line priced
 
-| priced at | recipes | of 8967 |
+| priced at | recipes | of 12894 |
 | --- | ---: | ---: |
-| FairPrice alone | 7185 | 80.1% |
-| Either store | 7764 | 86.6% |
+| FairPrice alone | 10476 | 81.2% |
+| Either store | 11394 | 88.4% |
 
 ## Recipe lines priced
 
-| priced at | lines | of 75661 |
+| priced at | lines | of 109266 |
 | --- | ---: | ---: |
-| FairPrice alone | 73642 | 97.3% |
-| Either store | 74350 | 98.3% |
+| FairPrice alone | 106549 | 97.5% |
+| Either store | 107628 | 98.5% |
 
 ## The 20 most used ingredients still unpriced
 
@@ -37,23 +37,23 @@ Used by the most release recipes, priced at neither store.
 
 | ingredient | recipes |
 | --- | ---: |
-| allspice | 118 |
-| dill | 87 |
-| turkey | 83 |
-| pie_crust | 60 |
-| biscuit_mix | 58 |
-| water_chestnut | 57 |
-| seasoned_salt | 53 |
-| meat | 52 |
-| mixed_nuts | 47 |
-| celery_seed | 46 |
-| radish | 32 |
-| dried_onion_flakes | 27 |
-| lime_zest | 25 |
-| spaghetti_squash | 24 |
-| chow_mein_noodles | 23 |
-| mashed_potatoes | 23 |
-| onion_salt | 22 |
-| gochugaru | 20 |
-| lard | 20 |
-| orange_juice_conc | 19 |
+| allspice | 147 |
+| dill | 110 |
+| turkey | 90 |
+| pie_crust | 88 |
+| mixed_nuts | 85 |
+| celery_seed | 77 |
+| biscuit_mix | 71 |
+| seasoned_salt | 67 |
+| water_chestnut | 61 |
+| meat | 54 |
+| radish | 37 |
+| dried_onion_flakes | 33 |
+| spaghetti_squash | 30 |
+| mashed_potatoes | 29 |
+| chow_mein_noodles | 28 |
+| lime_zest | 27 |
+| orange_juice_conc | 26 |
+| coffee | 24 |
+| onion_salt | 23 |
+| gochugaru | 22 |

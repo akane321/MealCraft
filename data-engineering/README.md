@@ -75,8 +75,8 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 
 ## data release v3：v2.2 原样 + 新增菜谱（Knowledge ADR-0103 第 3 节，issue #390）
 
-"data release v3"是数据版本，不是名为 v3 的留出评测协议。这一版**还没有接入产品**：后端 `RELEASE_VERSION`
-仍是 v2.2，切换（标签、清真、嵌入、规划池报告、各处 v2.2 路径和测试）是之后单独的 PR。
+"data release v3"是数据版本，不是名为 v3 的留出评测协议。产品从这一版起读 v3（Knowledge ADR-0111）：后端
+`RELEASE_VERSION` 是 v3，导入 12,895 道里的 12,894 道（和 v2.2 一样跳过 `RCP2_5EFEFE98D566`）；v2.2 作为 v3 的冻结底本保留。
 
 构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：
 
@@ -270,6 +270,12 @@ uv run --project backend python -m app.data.recipe_tags --llm    # 规则定不�
 两部分都等待接受，规划器在此之前不读；复核人亲自核对两部分的分层抽样、公开准确率后，owner 才决定是否
 `--accept-batch recipe-tags-v1/review-table-20261024`。owner 逐道决定的五道菜的角色（`OWNER_ROLES`）立即生效，覆盖规则。
 见 [复核批次](docs/review-table-20261024/README.md)。
+
+数据版本 v3 新增的菜（v2.2 没有的 3927 道，ADR-0111）另有一批模型值：规则留空的字段由模型估计，记在批次
+`recipe-tags-v1/llm-v3-20261103`（`V3_LLM_BATCH`），未复核、规划器不读。`--llm` 只问这些新菜；v2.2 的条目不动。
+接受前由复核人亲自核对固定种子的抽样（`data-engineering/scripts/v3_tag_sample.py`，
+[抽样说明](docs/tag-sample-20261103/README.md)），再由 owner 决定
+`--accept-batch recipe-tags-v1/llm-v3-20261103`；它不影响冻结的 `recipe-tags-v1/llm` 批次。
 
 面团、饼底、面糊、酱、腌料、干料、沙拉汁、肉汁、高汤、酱料膏和调味料这类"菜的一部分"由规则判成 `sauce`
 （`sauce` 即所有不能单独成菜的部分），永远不填一餐：标题去掉括号、结尾的 `Recipe`/`I`/`II` 和 ` - ...`、

@@ -4,6 +4,8 @@ import copy
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from app.core.paths import repository_root
 from app.evaluation import meal_day_week_runner
 from app.evaluation.meal_day_week_runner import evaluate, run_episode, scorer_catalogs, v3_checks
@@ -51,6 +53,34 @@ def test_secondary_counts_variety_by_recipe_and_by_the_planners_dish_kind(monkey
         "meal_fit": "5/5",
         "total_cost_sgd": 12.0,
     }
+
+
+def test_secondary_reads_a_recipe_v21_lacks_from_the_product_release_and_names_an_unknown_one(monkeypatch):
+    """A recipe data release v3 added is not in v2.1: its facts come from the product's release, while a recipe
+    both hold keeps its v2.1 facts. A recipe in neither is named, not a bare KeyError."""
+    v21 = {"bean-chili": {"title": "Bean Chili", "meal_types": ["dinner"]}}
+    product = {
+        "bean-chili": {"title": "Changed Chili", "meal_types": ["lunch"]},
+        "v3-only": {"title": "Kimchi Fried Rice", "meal_types": ["dinner"]},
+    }
+    monkeypatch.setattr(
+        meal_day_week_runner,
+        "load_release_catalog",
+        lambda release=None: SimpleNamespace(by_slug=v21 if release is None else product),
+    )
+
+    def response(*slugs):
+        return {
+            "plan": {
+                "assignments": [{"slot_id": f"d{i}-dinner", "recipe_id": s} for i, s in enumerate(slugs)],
+                "total_cost_sgd": 9.0,
+            }
+        }
+
+    secondary = meal_day_week_runner._secondary({}, response("bean-chili", "v3-only"))
+    assert (secondary["dishes"], secondary["distinct_dish_kinds"], secondary["meal_fit"]) == (2, 2, "2/2")
+    with pytest.raises(ValueError, match="nowhere"):
+        meal_day_week_runner._secondary({}, response("bean-chili", "nowhere"))
 
 
 def test_the_committed_pools_are_the_drawn_ones_and_every_label_is_proven():

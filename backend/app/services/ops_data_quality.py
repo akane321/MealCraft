@@ -10,7 +10,7 @@ from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from app.core.paths import repository_root
+from app.data.release_v2 import RELEASE_VERSION, release_dir
 from app.schemas.operations_data_quality import (
     OpsDataQualityArtifact,
     OpsDataQualityCoverage,
@@ -22,7 +22,7 @@ from app.schemas.operations_data_quality import (
     OpsDroppedCandidateCollection,
 )
 
-CURRENT_RELEASE = "v2.2"
+CURRENT_RELEASE = RELEASE_VERSION
 QUALITY_SUMMARY = "quality_summary.json"
 RELEASE_MANIFEST = "release_manifest.json"
 DROPPED_RECORDS = "dropped.jsonl"
@@ -105,7 +105,7 @@ class DataQualityService:
 
     @classmethod
     def current(cls) -> DataQualityService:
-        directory = repository_root() / "data-engineering" / "data" / "release" / CURRENT_RELEASE
+        directory = release_dir()
         return cls(directory)
 
     def summary(self) -> OpsDataQualitySummary:

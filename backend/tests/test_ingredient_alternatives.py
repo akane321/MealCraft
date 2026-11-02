@@ -2,9 +2,9 @@
 
 import json
 
-from app.core.paths import repository_root
 from app.data.alternatives import options
 from app.data.ingredient_hierarchy import expand_exclusions
+from app.data.release_v2 import release_dir
 from app.models.recipe import Ingredient, Recipe, RecipeIngredient, RecipeNutrition
 from app.planning import alternatives
 from app.planning.recommendation_engine import RecipeRecommendationEngine
@@ -91,7 +91,7 @@ def test_with_no_option_left_the_recipe_is_excluded_as_before():
 
 
 def test_the_options_table_names_real_catalog_ingredients():
-    release = repository_root() / "data-engineering/data/release/v2.2/ingredients.jsonl"
+    release = release_dir() / "ingredients.jsonl"
     names = {
         json.loads(line)["ingredient_id"][4:].lower()
         for line in release.read_text(encoding="utf-8").splitlines()

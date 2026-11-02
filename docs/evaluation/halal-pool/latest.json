@@ -1,13 +1,13 @@
 {
  "recipes": {
-  "release": 8967,
+  "release": 12894,
   "curated": 30
  },
  "by_status": {
   "release": {
-   "halal": 1816,
-   "needs_certification": 5542,
-   "not_halal": 1609,
+   "halal": 2744,
+   "needs_certification": 7883,
+   "not_halal": 2267,
    "uncertain": 0
   },
   "curated": {
@@ -19,9 +19,9 @@
  },
  "plannable": {
   "release": {
-   "halal": 1816,
-   "needs_certification, all lines certified": 2946,
-   "total": 4762
+   "halal": 2744,
+   "needs_certification, all lines certified": 3991,
+   "total": 6735
   },
   "curated": {
    "halal": 23,
@@ -32,190 +32,234 @@
  "blocked_by": [
   {
    "ingredient": "vanilla",
-   "recipes": 271
-  },
-  {
-   "ingredient": "rice_vinegar",
-   "recipes": 238
+   "recipes": 463
   },
   {
    "ingredient": "mayo",
-   "recipes": 211
+   "recipes": 324
+  },
+  {
+   "ingredient": "rice_vinegar",
+   "recipes": 324
   },
   {
    "ingredient": "worcestershire",
-   "recipes": 205
-  },
-  {
-   "ingredient": "ketchup",
-   "recipes": 184
+   "recipes": 285
   },
   {
    "ingredient": "sausage",
-   "recipes": 159
+   "recipes": 250
   },
   {
-   "ingredient": "mustard",
-   "recipes": 119
-  },
-  {
-   "ingredient": "beef_broth",
-   "recipes": 114
+   "ingredient": "ketchup",
+   "recipes": 246
   },
   {
    "ingredient": "shortening",
-   "recipes": 113
+   "recipes": 170
   },
   {
-   "ingredient": "hot_sauce",
-   "recipes": 105
+   "ingredient": "mustard",
+   "recipes": 163
   },
   {
    "ingredient": "salsa",
-   "recipes": 104
+   "recipes": 162
   },
   {
-   "ingredient": "dijon",
-   "recipes": 86
+   "ingredient": "hot_sauce",
+   "recipes": 160
+  },
+  {
+   "ingredient": "beef_broth",
+   "recipes": 141
   },
   {
    "ingredient": "red_wine_vinegar",
-   "recipes": 83
+   "recipes": 137
   },
   {
-   "ingredient": "marinara",
-   "recipes": 75
-  },
-  {
-   "ingredient": "turkey",
-   "recipes": 72
+   "ingredient": "dijon",
+   "recipes": 117
   },
   {
    "ingredient": "vegetable_broth",
-   "recipes": 72
+   "recipes": 105
   },
   {
-   "ingredient": "hoisin",
-   "recipes": 66
+   "ingredient": "marinara",
+   "recipes": 101
   },
   {
    "ingredient": "cottage_cheese",
-   "recipes": 54
+   "recipes": 99
   },
   {
-   "ingredient": "meat",
-   "recipes": 52
+   "ingredient": "hoisin",
+   "recipes": 97
   },
   {
    "ingredient": "american_cheese",
-   "recipes": 50
+   "recipes": 84
   },
   {
-   "ingredient": "swiss_cheese",
-   "recipes": 46
+   "ingredient": "turkey",
+   "recipes": 78
   },
   {
    "ingredient": "chili_sauce",
-   "recipes": 45
-  },
-  {
-   "ingredient": "balsamic",
-   "recipes": 43
-  },
-  {
-   "ingredient": "biscuit_mix",
-   "recipes": 43
+   "recipes": 66
   },
   {
    "ingredient": "pie_crust",
-   "recipes": 40
+   "recipes": 66
   },
   {
-   "ingredient": "white_wine_vinegar",
-   "recipes": 38
+   "ingredient": "swiss_cheese",
+   "recipes": 66
+  },
+  {
+   "ingredient": "balsamic",
+   "recipes": 65
   },
   {
    "ingredient": "italian_dressing",
-   "recipes": 36
-  },
-  {
-   "ingredient": "sauerkraut",
-   "recipes": 33
-  },
-  {
-   "ingredient": "hamburger_bun",
-   "recipes": 31
-  },
-  {
-   "ingredient": "ramen",
-   "recipes": 29
-  },
-  {
-   "ingredient": "almond_extract",
-   "recipes": 26
+   "recipes": 60
   },
   {
    "ingredient": "sambal_oelek",
+   "recipes": 60
+  },
+  {
+   "ingredient": "biscuit_mix",
+   "recipes": 56
+  },
+  {
+   "ingredient": "meat",
+   "recipes": 54
+  },
+  {
+   "ingredient": "white_wine_vinegar",
+   "recipes": 54
+  },
+  {
+   "ingredient": "sauerkraut",
+   "recipes": 48
+  },
+  {
+   "ingredient": "almond_extract",
+   "recipes": 46
+  },
+  {
+   "ingredient": "ramen",
+   "recipes": 43
+  },
+  {
+   "ingredient": "cornish_hen",
+   "recipes": 40
+  },
+  {
+   "ingredient": "hamburger_bun",
+   "recipes": 37
+  },
+  {
+   "ingredient": "tomato_soup",
+   "recipes": 37
+  },
+  {
+   "ingredient": "chorizo",
+   "recipes": 33
+  },
+  {
+   "ingredient": "enchilada_sauce",
+   "recipes": 32
+  },
+  {
+   "ingredient": "salad_dressing",
+   "recipes": 26
+  },
+  {
+   "ingredient": "chow_mein_noodles",
+   "recipes": 25
+  },
+  {
+   "ingredient": "hot_dog",
+   "recipes": 25
+  },
+  {
+   "ingredient": "tortilla_chips",
+   "recipes": 24
+  },
+  {
+   "ingredient": "capers",
+   "recipes": 23
+  },
+  {
+   "ingredient": "pepperoni",
+   "recipes": 23
+  },
+  {
+   "ingredient": "wasabi",
    "recipes": 23
   },
   {
    "ingredient": "baguette",
+   "recipes": 22
+  },
+  {
+   "ingredient": "refried_beans",
    "recipes": 21
   },
   {
-   "ingredient": "chow_mein_noodles",
+   "ingredient": "wonton_wrapper",
    "recipes": 21
-  },
-  {
-   "ingredient": "capers",
-   "recipes": 18
-  },
-  {
-   "ingredient": "hot_dog",
-   "recipes": 18
-  },
-  {
-   "ingredient": "chorizo",
-   "recipes": 16
-  },
-  {
-   "ingredient": "cornish_hen",
-   "recipes": 15
-  },
-  {
-   "ingredient": "pepperoni",
-   "recipes": 15
-  },
-  {
-   "ingredient": "enchilada_sauce",
-   "recipes": 14
-  },
-  {
-   "ingredient": "phyllo",
-   "recipes": 14
-  },
-  {
-   "ingredient": "salad_dressing",
-   "recipes": 14
-  },
-  {
-   "ingredient": "tomato_soup",
-   "recipes": 14
-  },
-  {
-   "ingredient": "croutons",
-   "recipes": 13
-  },
-  {
-   "ingredient": "goat_cheese",
-   "recipes": 13
-  },
-  {
-   "ingredient": "dinner_roll",
-   "recipes": 11
   },
   {
    "ingredient": "horseradish",
+   "recipes": 19
+  },
+  {
+   "ingredient": "marshmallow",
+   "recipes": 19
+  },
+  {
+   "ingredient": "goat_cheese",
+   "recipes": 18
+  },
+  {
+   "ingredient": "miso",
+   "recipes": 17
+  },
+  {
+   "ingredient": "broth",
+   "recipes": 16
+  },
+  {
+   "ingredient": "phyllo",
+   "recipes": 16
+  },
+  {
+   "ingredient": "croutons",
+   "recipes": 14
+  },
+  {
+   "ingredient": "chutney",
+   "recipes": 13
+  },
+  {
+   "ingredient": "chili_oil",
+   "recipes": 12
+  },
+  {
+   "ingredient": "dinner_roll",
+   "recipes": 12
+  },
+  {
+   "ingredient": "taco_sauce",
+   "recipes": 12
+  },
+  {
+   "ingredient": "cooked_chicken",
    "recipes": 11
   },
   {
@@ -223,35 +267,23 @@
    "recipes": 11
   },
   {
-   "ingredient": "cooked_chicken",
-   "recipes": 10
-  },
-  {
-   "ingredient": "refried_beans",
-   "recipes": 10
-  },
-  {
-   "ingredient": "tortilla_chips",
-   "recipes": 10
-  },
-  {
-   "ingredient": "chutney",
-   "recipes": 9
-  },
-  {
-   "ingredient": "wonton_wrapper",
-   "recipes": 9
-  },
-  {
    "ingredient": "blue_cheese",
+   "recipes": 10
+  },
+  {
+   "ingredient": "chipotle_in_adobo",
+   "recipes": 9
+  },
+  {
+   "ingredient": "lemon_extract",
+   "recipes": 9
+  },
+  {
+   "ingredient": "chicken_or_veg_broth",
    "recipes": 8
   },
   {
-   "ingredient": "broth",
-   "recipes": 8
-  },
-  {
-   "ingredient": "miso",
+   "ingredient": "ginger_garlic",
    "recipes": 8
   },
   {
@@ -259,7 +291,15 @@
    "recipes": 8
   },
   {
-   "ingredient": "wasabi",
+   "ingredient": "puff_pastry",
+   "recipes": 8
+  },
+  {
+   "ingredient": "sherry_vinegar",
+   "recipes": 8
+  },
+  {
+   "ingredient": "steak_sauce",
    "recipes": 8
   },
   {
@@ -267,27 +307,23 @@
    "recipes": 7
   },
   {
-   "ingredient": "lemon_extract",
+   "ingredient": "lamb_chop",
    "recipes": 7
   },
   {
-   "ingredient": "puff_pastry",
+   "ingredient": "ranch_dressing",
    "recipes": 7
   },
   {
-   "ingredient": "taco_sauce",
+   "ingredient": "relish",
    "recipes": 7
   },
   {
-   "ingredient": "chili_oil",
+   "ingredient": "butterscotch_chips",
    "recipes": 6
   },
   {
-   "ingredient": "ginger_garlic",
-   "recipes": 6
-  },
-  {
-   "ingredient": "marshmallow",
+   "ingredient": "fish_broth",
    "recipes": 6
   },
   {
@@ -295,39 +331,63 @@
    "recipes": 6
   },
   {
+   "ingredient": "rotel",
+   "recipes": 6
+  },
+  {
+   "ingredient": "stuffing_mix",
+   "recipes": 6
+  },
+  {
+   "ingredient": "tamari",
+   "recipes": 6
+  },
+  {
    "ingredient": "buttered_breadcrumbs",
    "recipes": 5
   },
   {
-   "ingredient": "butterscotch_chips",
+   "ingredient": "dark_chocolate",
    "recipes": 5
   },
   {
-   "ingredient": "chicken_or_veg_broth",
+   "ingredient": "duck",
    "recipes": 5
-  },
-  {
-   "ingredient": "lamb_chop",
-   "recipes": 5
-  },
-  {
-   "ingredient": "relish",
-   "recipes": 5
-  },
-  {
-   "ingredient": "sherry_vinegar",
-   "recipes": 5
-  },
-  {
-   "ingredient": "steak_sauce",
-   "recipes": 5
-  },
-  {
-   "ingredient": "fish_broth",
-   "recipes": 4
   },
   {
    "ingredient": "frozen_bread_dough",
+   "recipes": 5
+  },
+  {
+   "ingredient": "mayo_or_dressing",
+   "recipes": 5
+  },
+  {
+   "ingredient": "orange_extract",
+   "recipes": 5
+  },
+  {
+   "ingredient": "bean_sauce",
+   "recipes": 4
+  },
+  {
+   "ingredient": "celery_soup",
+   "recipes": 4
+  },
+  {
+   "ingredient": "cereal_rice",
+   "recipes": 4
+  },
+  {
+   "ingredient": "chipped_beef",
+   "recipes": 4
+  },
+  {
+   "ingredient": "english_muffin",
+   "recipes": 4
+  },
+  {
+   "ingredient": "fruit_pie_filling",
    "recipes": 4
   },
   {
@@ -335,35 +395,35 @@
    "recipes": 4
   },
   {
-   "ingredient": "orange_extract",
+   "ingredient": "liquid_smoke",
    "recipes": 4
   },
   {
-   "ingredient": "rotel",
+   "ingredient": "shortening_or_oil",
    "recipes": 4
   },
   {
-   "ingredient": "stuffing_mix",
+   "ingredient": "stir_fry_sauce",
    "recipes": 4
   },
   {
-   "ingredient": "bean_sauce",
-   "recipes": 3
+   "ingredient": "taco_shell",
+   "recipes": 4
   },
   {
-   "ingredient": "celery_soup",
-   "recipes": 3
+   "ingredient": "turkey_bacon",
+   "recipes": 4
   },
   {
-   "ingredient": "cereal_rice",
-   "recipes": 3
+   "ingredient": "vanilla_wafer",
+   "recipes": 4
   },
   {
-   "ingredient": "chipotle_in_adobo",
-   "recipes": 3
+   "ingredient": "white_chocolate",
+   "recipes": 4
   },
   {
-   "ingredient": "dark_chocolate",
+   "ingredient": "biscuit_dough",
    "recipes": 3
   },
   {
@@ -375,23 +435,7 @@
    "recipes": 3
   },
   {
-   "ingredient": "liquid_smoke",
-   "recipes": 3
-  },
-  {
-   "ingredient": "mayo_or_dressing",
-   "recipes": 3
-  },
-  {
-   "ingredient": "ranch_dressing",
-   "recipes": 3
-  },
-  {
-   "ingredient": "shortening_or_oil",
-   "recipes": 3
-  },
-  {
-   "ingredient": "biscuit_dough",
+   "ingredient": "almond_paste",
    "recipes": 2
   },
   {
@@ -403,11 +447,15 @@
    "recipes": 2
   },
   {
-   "ingredient": "chipped_beef",
+   "ingredient": "cheese_tortellini",
    "recipes": 2
   },
   {
    "ingredient": "coconut_extract",
+   "recipes": 2
+  },
+  {
+   "ingredient": "coconut_flavoring",
    "recipes": 2
   },
   {
@@ -423,7 +471,19 @@
    "recipes": 2
   },
   {
-   "ingredient": "duck",
+   "ingredient": "long_grain_wild_rice_mix",
+   "recipes": 2
+  },
+  {
+   "ingredient": "mint_extract",
+   "recipes": 2
+  },
+  {
+   "ingredient": "pickled_ginger",
+   "recipes": 2
+  },
+  {
+   "ingredient": "plum_sauce",
    "recipes": 2
   },
   {
@@ -435,23 +495,11 @@
    "recipes": 2
   },
   {
-   "ingredient": "white_chocolate",
-   "recipes": 2
-  },
-  {
-   "ingredient": "almond_paste",
-   "recipes": 1
-  },
-  {
    "ingredient": "apple_butter",
    "recipes": 1
   },
   {
    "ingredient": "beef_heart",
-   "recipes": 1
-  },
-  {
-   "ingredient": "cheese_tortellini",
    "recipes": 1
   },
   {
@@ -468,10 +516,6 @@
   },
   {
    "ingredient": "falafel",
-   "recipes": 1
-  },
-  {
-   "ingredient": "fruit_pie_filling",
    "recipes": 1
   },
   {
@@ -495,19 +539,11 @@
    "recipes": 1
   },
   {
-   "ingredient": "long_grain_wild_rice_mix",
-   "recipes": 1
-  },
-  {
    "ingredient": "mac_and_cheese",
    "recipes": 1
   },
   {
    "ingredient": "mincemeat",
-   "recipes": 1
-  },
-  {
-   "ingredient": "mint_extract",
    "recipes": 1
   },
   {
@@ -524,10 +560,6 @@
   },
   {
    "ingredient": "pate",
-   "recipes": 1
-  },
-  {
-   "ingredient": "plum_sauce",
    "recipes": 1
   },
   {
@@ -559,23 +591,11 @@
    "recipes": 1
   },
   {
-   "ingredient": "taco_shell",
-   "recipes": 1
-  },
-  {
    "ingredient": "tapai",
    "recipes": 1
   },
   {
    "ingredient": "tempeh_starter",
-   "recipes": 1
-  },
-  {
-   "ingredient": "turkey_bacon",
-   "recipes": 1
-  },
-  {
-   "ingredient": "vanilla_wafer",
    "recipes": 1
   },
   {
