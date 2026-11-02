@@ -75,6 +75,8 @@ through the OpenAI API and partly by Claude subagents with the same instructions
 ingredients are unchanged, no cuisine label is above 20%, and recipes.jsonl stays under 95,000,000 bytes. Counts, decisions and shortcuts are in the
 [v3 quality report](../../data-engineering/data/release/v3/quality_report.md); how to rebuild it is in
 `data-engineering/README.md`.
+Reviewed corrections of the added recipes' cuisine, course and servings, and withdrawals, go through
+`data-engineering/data/enrichment/v3-corrections.csv` (checked by `scripts/v3_corrections.py`, issue #408).
 
 Release v2.1 differs from v2 only in what the build checks (`data-engineering`,
 [quality report](../../data-engineering/data/release/v2.1/quality_report.md)):
