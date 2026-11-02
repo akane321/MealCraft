@@ -6,11 +6,11 @@ Machine: Intel64 Family 6 Model 198 Stepping 2, GenuineIntel (Windows). The code
 
 | Case | Report run (s) | Warm median (s) | Warm max (s) | Against the ADR-0079 guidance |
 |---|---:|---:|---:|---|
-| one-adult | 10.53 | 5.93 | 6.07 | within the guidance for a complex request |
-| four-with-vegetarian | 27.17 | 26.17 | 26.8 | within the guidance for a complex request |
-| six-tight-budget | 66.09 | 65.96 | 71.82 | over ~60 s |
-| two-no-oven-ten-days | 8.42 | 8.58 | 9.48 | within the guidance for a complex request |
-| seven-with-young-children | 44.71 | 44.34 | 45.07 | within the guidance for a complex request |
+| one-adult | 8.88 | 5.03 | 5.08 | within the guidance for a complex request |
+| four-with-vegetarian | 23.35 | 22.26 | 22.61 | within the guidance for a complex request |
+| six-tight-budget | 119.03 | 124.01 | 125.87 | over ~60 s |
+| two-no-oven-ten-days | 7.46 | 8.7 | 8.91 | within the guidance for a complex request |
+| seven-with-young-children | 36.06 | 35.94 | 40.89 | within the guidance for a complex request |
 
 Over ~60 s: six-tight-budget.
 
