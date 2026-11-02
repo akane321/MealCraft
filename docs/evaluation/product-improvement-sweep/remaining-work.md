@@ -34,7 +34,7 @@ sequential-swap test is locally verified and is not included in that CI run.
 | Independent near-duplicate labels and 21 swaps | Supplied review recorded; development rule and replacement gate implemented; product planning still uses title kinds | Independent validation beyond the fitted pairs; resolve unknown evidence and complete swap acceptance. Both independent previews and 21 sequential confirmed swaps are covered on a fixed developer catalog; this is not full-catalog acceptance |
 | Member-mean product objective | Implemented offline; product remains table-based by instruction | Separate product decision before adoption |
 | Global minimum and at most 5% gap | Matched fixed-catalog product references now cover up to 14 days and two trips; product remains heuristic | Broader catalog and observed-price comparisons; generated options and fixed packages do not prove global minimum |
-| Full parameter calibration | Parameter sweep uses single-dish developer cases; household comparison tests the current default | Composed-household parameter scan before selecting a new default |
+| Full parameter calibration | Single-dish width sweep and five-household step comparison exist; the latter uses one run per condition | Five composed households now have 0/50/200-step diagnostics; width/step combinations and repeated interleaved timing remain before any default change |
 | Fine-grained stage timing | Candidate generation, shopping, validation and objective instrumentation implemented | Use these inclusive, overlapping timings in further matched scans; they exclude LLM and live lookup |
 | Real-price evaluation | Both reports use fixture prices | Versioned observed-price snapshots, then matched comparison; fixture results cannot establish this criterion |
 | Mixed packages in product | Mixed shopping optimizer and validator exist offline | Agree the multi-package-per-ingredient/trip output contract with the shopping/retrieval owners, then connect and test it |
@@ -45,3 +45,5 @@ sequential-swap test is locally verified and is not included in that CI run.
 These reports do not close all of issue #310. A non-worsening weekly objective
 does not mean every quality measure or the checkout price improves. A faster
 setting alone is not grounds to reduce search breadth.
+
+Latest composed-household diagnostic: [0/50/200 steps](../composed-household-steps/README.md). All 15 runs passed their household checks; the six-person 200-step plan traded higher cost for more table dish kinds. No default was changed.
