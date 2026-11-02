@@ -27,27 +27,27 @@ One adult at the HPB defaults; 7 days, no budget.
 | Metric | Value |
 |---|---:|
 | Meals | 21 |
-| Dishes | 52 |
+| Dishes | 48 |
 | Distinct dishes (staples aside) | 42 |
-| Cuisine groups per lunch or dinner | 1.21 |
+| Cuisine groups per lunch or dinner | 1.43 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
 | Grocery lines by trip | {'None': 71} |
-| Purchase total (SGD) | 324.93 |
+| Purchase total (SGD) | 317.89 |
 
-Staples: Assyrian Rice.
+Staples: Assyrian Rice, Super Easy Naan Bread.
 
 Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Bibimbap Breakfast Bowl | Pizza Cheesy Chicken + Baby Spinach With Asian Style Dressing + Assyrian Rice (staple) | Jessica's Quesadillas + Avocado Salad + Chickpea, chorizo & spinach stew |
-| 2 Mon | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Bul-Ko-Kee (Korean Barbecue Beef) + Korean Bean Sprout Salad + Assyrian Rice (staple) | Teriyaki Fried Rice + Thai Carrots + Quick gazpacho |
-| 3 Tue | Quick Greek Yogurt Oatmeal In A Mug | Shrimp Teriyaki + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Broiled Scallops + Celery And Cabbage Slaw + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
-| 4 Wed | Sunrise Taco | Fresh Tuna Tacos + Marinated Cucumbers + Assyrian Rice (staple) | Ham And Cheese Quesadillas + Grilled Parmesan Tomatoes + Gazpacho |
-| 5 Thu | Curry Cheddar Scrambled Eggs | Spicy Beef And Vegetable Stir-Fry (Weight Watchers Recipe) + Szechuan Cucumbers + Assyrian Rice (staple) | Thai-Style Omelet (Khai Jiao) + A-Jaad (Thai Cucumber Cool Down) + Thai Hot And Sour Soup + Assyrian Rice (staple) |
-| 6 Fri | Tomato And Cheese Burrito Omelet | Lo Mein Like Evergreen + Black Bean Garlic Edamame | Soboro Beef + Buttery Mirin Mushrooms + Korean Dumpling Soup + Assyrian Rice (staple) |
-| 7 Sat | The Egyptian Eye | Primary Taco Meat + Green Beans In Golden Crumbs + Assyrian Rice (staple) | Salsa Chicken + Broccoli Salad + Welsh Rarebit I + Assyrian Rice (staple) |
+| 1 Sun | Bibimbap Breakfast Bowl | Korean Krunch Quesadilla + Baby Spinach With Asian Style Dressing | Bodega Ramen, Upgraded + Korean Bean Sprout Salad + Tofu, Miso, Seaweed And Spinach Soup |
+| 2 Mon | Quick Greek Yogurt Oatmeal In A Mug | Mexican Steak Wrap + Fresh Pesto And Tomato Salad | Jessica's Quesadillas + Avocado Salad + Welsh Rarebit I |
+| 3 Tue | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Cheesy Tuna Ramen + Spicy Korean Red Pepper Cucumbers | Chicken Laksa + Bok Choy Stir Fry + Quick Hot And Sour Soup |
+| 4 Wed | Sunrise Taco | Simple Mediterranean Grilled Chicken + Mediterranean Snow Peas + Assyrian Rice (staple) | Thai-Style Omelet (Khai Jiao) + Grilled Parmesan Tomatoes + Quick gazpacho + Assyrian Rice (staple) |
+| 5 Thu | Curry Cheddar Scrambled Eggs | Spicy Beef And Vegetable Stir-Fry (Weight Watchers Recipe) + Orange-Sesame Snow Peas + Assyrian Rice (staple) | Steak And Chicken Fajitas + Jim's Raita + Tomato And Strawberry Gazpacho + Assyrian Rice (staple) |
+| 6 Fri | Tomato And Cheese Burrito Omelet | Pizza Cheesy Chicken + Spanish Slaw + Super Easy Naan Bread (staple) | Lo Mein Like Evergreen + Wafu Salad (Japanese Style Onion Salad) + Simple Miso Soup |
+| 7 Sat | The Egyptian Eye | X-Traordinarily Easy Chicken Curry + Thai Pickles (Achat) + Assyrian Rice (staple) | Chinese Style Fried Rice + Gingered Zucchini + Dumplings For Soup |
 
 ## four-with-vegetarian
 
@@ -68,27 +68,27 @@ Two adults, a teen and a child, Ann vegetarian (her own diet, not the household'
 | Metric | Value |
 |---|---:|
 | Meals | 21 |
-| Dishes | 59 |
-| Distinct dishes (staples aside) | 51 |
-| Cuisine groups per lunch or dinner | 1.5 |
+| Dishes | 58 |
+| Distinct dishes (staples aside) | 48 |
+| Cuisine groups per lunch or dinner | 1.79 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 81} |
-| Purchase total (SGD) | 576.58 |
+| Grocery lines by trip | {'None': 86} |
+| Purchase total (SGD) | 490.67 |
 
-Staples: Assyrian Rice, Ramen With Peas And Parmesan.
+Staples: Assyrian Rice, Ramen With Peas And Parmesan, Super Easy Naan Bread.
 
 Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Fat Free Bean And Cheese Burrito + Shredded Carrot Salad | Jessica's Quesadillas + Pizza Cheesy Chicken + Avocado Salad + English Peas And Almonds + Quick gazpacho |
-| 2 Mon | Quick Greek Yogurt Oatmeal In A Mug | Mike's American Style Tostada + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Brazilian Garlic Shrimp + Chinese Salt And Pepper Tofu + Korean Bean Sprout Salad + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
-| 3 Tue | Bibimbap Breakfast Bowl | Spanish Omelette + Cucumber-Onion Salad + Assyrian Rice (staple) | Flank Steak Teriyaki + Marinated Teriyaki Tofu + Lettuce And Chive Salad, Korean Style (Mark Bittman) + Flax And Mango Cold Soup + Assyrian Rice (staple) |
-| 4 Wed | Sunrise Taco | Korean Barbecue Tofu + Japanese Style Cucumber Salad + Assyrian Rice (staple) | Chinese Fried Rice + Anitas Lemon Chicken + Grilled Parmesan Tomatoes + Hungarian Potato Soup |
-| 5 Thu | Curry Cheddar Scrambled Eggs | Quick Cheese Calzone (Low Calorie) + Broccoli Salad | Egg Bhurji + Sloppy Joes + Thai Carrots + Cheese-Potato Soup + Assyrian Rice (staple) |
-| 6 Fri | Mild Curry Omelet | Corn, Black Bean And Red Onion Quesadillas + Celery And Cabbage Slaw | Japanese Minced Beef + Teriyaki Tofu + Tsukemono (Japanese Pickles) + Korean Pumpkin Soup + Assyrian Rice (staple) |
-| 7 Sat | Greek Yogurt Pancakes | Spaghetti Roma + Spaghetti & Cole Slaw | Thai-Style Omelet (Khai Jiao) + Channa Masala (Chickpea Curry) + Grilled Zucchini + Jim's Raita + "Lite" Broccoli Soup + Ramen With Peas And Parmesan (staple) |
+| 1 Sun | Bibimbap Breakfast Bowl | Lo Mein Like Evergreen + Bok Choy Stir Fry | Jessica's Quesadillas + Pizza Cheesy Chicken + Tex Mex Salad + Avocado Salad + Quick gazpacho |
+| 2 Mon | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Chinese Salt And Pepper Tofu + Quick And Easy Bok Choy + Assyrian Rice (staple) | Slow Cooker Chicken Tikka Masala (Weight Watchers) + Chickpea Curry In A Hurry + Korean Bean Sprout Salad + Simple Miso Soup + Super Easy Naan Bread (staple) |
+| 3 Tue | Quick Greek Yogurt Oatmeal In A Mug | Quesadillas Casserole + Creamed English Peas | Sesame Ramen With Green Peas + Oriental Caprese + Cauliflower Rice Tabbouleh With Feta + Middle Eastern Tomato Soup |
+| 4 Wed | Sunrise Taco | Spanish Omelette + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Seared Tuna With Japanese Salsa + Quick And Dirty Egg Foo Yung + Grilled Parmesan Tomatoes + Gazpacho Soup + Super Easy Naan Bread (staple) |
+| 5 Thu | Curry Cheddar Scrambled Eggs | Dengaku + Classic Macaroni Salad + Assyrian Rice (staple) | Thai-Style Omelet (Khai Jiao) + Teriyaki Tofu + Jim's Raita + Thai Chicken Vegetable Soup + Assyrian Rice (staple) |
+| 6 Fri | Huevos Rancheros Light | Ramen Stir-Fry With Sesame, Shiitake, & Ginger + Daikon Radish Salad | Thai-Style Omelet (Khai Jiao) + Chinese Salt And Pepper Tofu + Korean Cabbage + Chilled Corn Soup With Adobo Swirl + Ramen With Peas And Parmesan (staple) |
+| 7 Sat | Try Mine 15 Minute Crepes! | Zesty Curried Coconut Ramen + Orange-Sesame Snow Peas | Jessica's Quesadillas + Cuban Black Bean Patties + Bacon Curry Coleslaw + Fried Green Tomatoes + Gazpacho Delight (Serves 10) |
 
 ## six-tight-budget
 
@@ -109,27 +109,27 @@ Six adults on a tight weekly budget (S$420, chosen once on developer runs); it p
 | Metric | Value |
 |---|---:|
 | Meals | 21 |
-| Dishes | 66 |
-| Distinct dishes (staples aside) | 54 |
-| Cuisine groups per lunch or dinner | 2.43 |
+| Dishes | 63 |
+| Distinct dishes (staples aside) | 56 |
+| Cuisine groups per lunch or dinner | 2.36 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 49} |
-| Purchase total (SGD) | 304.24 |
+| Grocery lines by trip | {'None': 34} |
+| Purchase total (SGD) | 163.72 |
 
-Staples: Assyrian Rice, Brazilian Rice, Holiday Couscous, Ramen With Peas And Parmesan, Super Easy Naan Bread.
+Staples: Assyrian Rice, Indian Restaurant Style Basmati Rice.
 
 Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Chinese Black Sesame Seed Porridge (Geema Woo) | Thai-Style Omelet (Khai Jiao) + Spicy Thai Cucumbers + Holiday Couscous (staple) | Mock Fried Rice + Chinese Salt And Pepper Tofu + Carrot And Spinach Stirfry + Kal Bi Korean Ribs + Kimchi And Tofu Soup |
-| 2 Mon | Cherry-Walnut Breakfast Couscous | Korean Barbecue Tofu + Avocado Salad + Assyrian Rice (staple) | Kimchi Fried Rice (Kimchi Bok Eum Bap) + Thai-Style Omelet (Khai Jiao) + Baby Spinach With Asian Style Dressing + Chinese Cucumber Salad + Quick gazpacho |
-| 3 Tue | Scottish Oatmeal (Rice Cooker) | Teriyaki Grilled Tofu + Stir-Fry Vegetables + Super Easy Naan Bread (staple) | Curry Grilled Chicken + Egg Bhurji + Korean Cucumber Salad + Korean Bean Sprout Salad + Chinese Egg Drop Soup + Assyrian Rice (staple) |
-| 4 Wed | Hash Brown Potatoes | Korean Barbecued Beef + Tangy Cole Slaw + Ramen With Peas And Parmesan (staple) | Slow Cooker Chicken Tikka Masala (Weight Watchers) + Egyptian Omelet (Eggah) + Ginger-Spiced Cucumbers + Italian Mushroom Grill + Instant Pot Chicken Pho + Brazilian Rice (staple) |
-| 5 Thu | Chinese Black Sesame Seed Porridge (Geema Woo) | Bento Chicken Teriyaki + Russian Carrot Salad (Korean-Style) + Assyrian Rice (staple) | Jamaican Rubbed Chops + Chicken Burgers + Korean Style Namasu + Sliced Cabbage Kimchi + Chicken Soup With Dumplings + Assyrian Rice (staple) |
-| 6 Fri | Irish Porridge | 10 Minute Szechuan Chicken + Lou's German Slaw + Super Easy Naan Bread (staple) | Kimchi Chahan (Fried Rice) + Miso Marinated Pork + Cucumber Namasu + Grilled Parmesan Tomatoes + Hearty Potato Soup |
-| 7 Sat | Quick Greek Yogurt Oatmeal In A Mug | Stir Fry Tomato And Eggs + Spicy Scallion, Kimchi-Style + Super Easy Naan Bread (staple) | Chinese Fried Rice + Vietnamese Pie] + Japanese Cucumber Salad (Sunomono) + Vietnamese Style Pickled Carrots + Korean Pumpkin Soup |
+| 1 Sun | Red Lentil Dosas | Egg Fried Rice + Korean Style Romaine | Chinese Sesame Chicken Kabobs + Basic Chinese Steamed Eggs + Avocado Salad + Yorkshire Salad + Quick gazpacho + Assyrian Rice (staple) |
+| 2 Mon | Quick Greek Yogurt Oatmeal In A Mug | Korean Barbecue Tofu + Vietnamese Style Pickled Carrots + Assyrian Rice (staple) | Chinese Fried Rice + Miso Chicken + Delicious Spring Onions With Chickpea Flour + Korean Bean Spouts + Hearty Potato Soup |
+| 3 Tue | Chinese Black Sesame Seed Porridge (Geema Woo) | Korean Fried Rice + Clifton's Cafeteria Cole Slaw | Kimchi Fried Rice (Kimchi Bok Eum Bap) + Tofu And Scallions + Korean Cucumber Salad + Spicy Scallion, Kimchi-Style + Irish Egg Drop Soup |
+| 4 Wed | Kona K's Scrambled Eggs & Rice | Szechuan Tofu And Red Bellpepper + Cool And Refreshing Asian Cucumber Salad + Assyrian Rice (staple) | 10 Minute Szechuan Chicken + Stir Fry Tomato And Eggs + Cucumber Namasu + Spicy Sweet And Sour Cabbage + Curried Red Lentil Soup + Indian Restaurant Style Basmati Rice (staple) |
+| 5 Thu | Roti Canai (Authentic Malaysian Recipe) | Bento Chicken Teriyaki + Izakaya Sakura Avocado Tofu Salad + Assyrian Rice (staple) | Hard Taco Shells + Thai-Style Omelet (Khai Jiao) + Japanese Cucumber Salad (Sunomono) + Curtido (El Salvadoran Cabbage Salad) + Arabic Lentil Soup (Shorbat Addas) |
+| 6 Fri | Irish Porridge | Chinese Salt And Pepper Tofu + Cantonese Family Stir Fried Vegetables + Assyrian Rice (staple) | Kimchi Chahan (Fried Rice) + Chicken Burgers + Crunchy Cabbage Salad With Miso-Ginger Dressing + Chilean Cucumber And Carrot Salad + Miso Soup With Shiitake Mushrooms And Tofu |
+| 7 Sat | Scottish Oatmeal (Rice Cooker) | Chicken Stir-Fry Whip Up + Spicy Thai Cucumbers + Assyrian Rice (staple) | Chinese Style Rice + Sesame Chicken Nuggets + German Cucumbers + Spicy Korean Kimchi + Simple Miso Soup |
 
 ## two-no-oven-ten-days
 
@@ -150,13 +150,13 @@ Two adults with no oven; 10 days, so two shopping trips (before day 1 and day 8)
 | Metric | Value |
 |---|---:|
 | Meals | 30 |
-| Dishes | 72 |
-| Distinct dishes (staples aside) | 59 |
-| Cuisine groups per lunch or dinner | 1.2 |
+| Dishes | 71 |
+| Distinct dishes (staples aside) | 60 |
+| Cuisine groups per lunch or dinner | 1.35 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'1': 68, '2': 44} |
-| Purchase total (SGD) | 603.3 |
+| Grocery lines by trip | {'1': 66, '2': 43} |
+| Purchase total (SGD) | 558.22 |
 
 Staples: Assyrian Rice.
 
@@ -164,16 +164,16 @@ Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Bibimbap Breakfast Bowl | Greek Grilled Cheese + Baby Spinach With Asian Style Dressing | Curry Tuna Fish Sandwiches + Avocado Salad + Low-Fat Low Sodium Potato Soup |
-| 2 Mon | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Bul-Ko-Kee (Korean Barbecue Beef) + Korean Bean Sprout Salad + Assyrian Rice (staple) | Primary Taco Meat + Summer Sauerkraut + Quick gazpacho + Assyrian Rice (staple) |
-| 3 Tue | Quick Greek Yogurt Oatmeal In A Mug | Fat Free Bean And Cheese Burrito + Thai Carrots | Thai Lamb With Chili And Mint + Jim's Raita + Low-Cal Tom Yum Goong Inspired Soup |
-| 4 Wed | Sunrise Taco | Grilled Cornish Hens + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Pork Burritos (Low-Fat Recipe) + Broccoli Salad + Welsh Rarebit I |
-| 5 Thu | Thai Omelette | Uncle Bill's Ahi Ahi Tuna + Spicy Korean Cucumbers + Assyrian Rice (staple) | Great Chicken + Celery And Cabbage Slaw + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
-| 6 Fri | Curry Cheddar Scrambled Eggs | Sesame Seared Tuna + Wafu Salad (Japanese Style Onion Salad) + Assyrian Rice (staple) | Teriyaki Ginger Pork Tenderloin + Buttery Mirin Mushrooms + Korean Dumpling Soup + Assyrian Rice (staple) |
-| 7 Sat | Banana Couscous | Lo Mein Like Evergreen + Fat-Free Vegie Stir-Fry | Thai-Style Omelet (Khai Jiao) + Italian Asparagus + Gazpacho + Assyrian Rice (staple) |
-| 8 Sun | Quick Breakfast Taco | Hunan Lamb Chops + Snow Pea And Walnut Stir Fry + Assyrian Rice (staple) | Grilled Asian Kabobs + Tomato And Cucumber Salad With Feta + Tomato Dumplings + Assyrian Rice (staple) |
-| 9 Mon | Kona K's Scrambled Eggs & Rice | Vietnamese Steak Sandwiches + Thai Carrot Salad | Shrimp Scampi + Broccoli Salad * + Chickpea, chorizo & spinach stew + Assyrian Rice (staple) |
-| 10 Tue | Mom's Kimchi Egg | Korean Krunch Quesadilla + Baby Spinach With Asian Style Dressing | Scallops Provencal + Tex-Mex Broccoli + Martha's Gazpacho + Assyrian Rice (staple) |
+| 1 Sun | Bibimbap Breakfast Bowl | Bodega Ramen, Upgraded + Baby Spinach With Asian Style Dressing | Microwaved Parmesan Chicken + Avocado Salad + Sour Cream Gazpacho + Assyrian Rice (staple) |
+| 2 Mon | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Top Ramen + Spicy Korean Red Pepper Cucumbers | Chinese Style Rice + Bok Choy Stir Fry + Dumplings For Soup |
+| 3 Tue | Quick Greek Yogurt Oatmeal In A Mug | Bul-Ko-Kee (Korean Barbecue Beef) + Korean Bean Sprout Salad + Assyrian Rice (staple) | Sesame Ramen With Green Peas + Thai Carrots + Tofu, Miso, Seaweed And Spinach Soup |
+| 4 Wed | Sunrise Taco | Beef Tacos + Fresh Pesto And Tomato Salad | Grilled Chicken Yakitori + Japanese Salad + Simple Miso Soup + Assyrian Rice (staple) |
+| 5 Thu | Feta Omelet | Fried Rice Omelet + Izakaya Sakura Avocado Tofu Salad | Quesadillas Casserole + Mediterranean Snow Peas + Quick gazpacho |
+| 6 Fri | Curry Cheddar Scrambled Eggs | Shoga-Yaki (Ginger Pork) + Mark Bittman's Tabbouleh + Assyrian Rice (staple) | Tuna Fish Taco Filling + Taco-Cucumber Salad + Tomato And Strawberry Gazpacho + Assyrian Rice (staple) |
+| 7 Sat | Spanish Scramble | Thai-Style Omelet (Khai Jiao) + Spicy Cucumber Quick Pickles + Assyrian Rice (staple) | Slow Cooker Chicken Tikka Masala (Weight Watchers) + Jim's Raita + Middle Eastern Tomato Soup + Assyrian Rice (staple) |
+| 8 Sun | Moroccan Fried Eggs With Cumin And Salt | Grilled Cornish Hens + French Vinaigrette Slaw + Assyrian Rice (staple) | Mushroom-Ginger Noodles + Japanese Cucumber Salad (Sunomono) + Oyster Stew |
+| 9 Mon | Ham And Cheese Omelet | Salmon Teriyaki With Asparagus + Japanese Cucumber Salad | Skirt Steak With Chimichurri Sauce + Puerto Rican Cabbage, Avocado, And Carrot Salad + Gazpacho (Spanish Cold Soup) + Assyrian Rice (staple) |
+| 10 Tue | Mom's Kimchi Egg | Stir-Fried Shrimp With Ginger And Mushrooms + Minty Tabbouleh Salad + Assyrian Rice (staple) | Tuna Kebabs + Spicy Scallion, Kimchi-Style + Miso Soup With Shiitake Mushrooms + Assyrian Rice (staple) |
 
 ## seven-with-young-children
 
@@ -194,25 +194,25 @@ Two adults, three toddlers and two children: seven at the table on about 4.8 por
 | Metric | Value |
 |---|---:|
 | Meals | 21 |
-| Dishes | 73 |
-| Distinct dishes (staples aside) | 61 |
-| Cuisine groups per lunch or dinner | 2 |
+| Dishes | 70 |
+| Distinct dishes (staples aside) | 60 |
+| Cuisine groups per lunch or dinner | 1.79 |
 | Meals with two deep-fried dishes | 0 |
 | Energy floor pass rate | 1.0 |
-| Grocery lines by trip | {'None': 80} |
-| Purchase total (SGD) | 690.42 |
+| Grocery lines by trip | {'None': 84} |
+| Purchase total (SGD) | 678.38 |
 
-Staples: Assyrian Rice, Brazilian Rice, Indian Restaurant Style Basmati Rice.
+Staples: Assyrian Rice, Brazilian Rice, Indian Restaurant Style Basmati Rice, Super Easy Naan Bread.
 
 Moves: none.
 
 | Day | Breakfast | Lunch | Dinner |
 |---|---|---|---|
-| 1 Sun | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Pizza Cheesy Chicken + Baby Spinach With Asian Style Dressing + Assyrian Rice (staple) | Jessica's Quesadillas + Thai-Style Omelet (Khai Jiao) + Thai Barbecued Salmon + Avocado Salad + Thai-Style Beet Salad + Quick gazpacho |
-| 2 Mon | Quick Greek Yogurt Oatmeal In A Mug | Bul-Ko-Kee (Korean Barbecue Beef) + Korean Bean Sprout Salad + Assyrian Rice (staple) | Lo Mein Like Evergreen + Grilled Chicken Yakitori + Broiled Tuna Teriyaki + French Vinaigrette Slaw + Parmesan Broiled Tomatoes + Gazpacho (Spanish Cold Soup) |
-| 3 Tue | Bibimbap Breakfast Bowl | Shrimp Teriyaki + Fresh Pesto And Tomato Salad + Assyrian Rice (staple) | Brazilian Garlic Shrimp + Korean Beef + Salsa Chicken + Italian Mushroom Grill + Japanese Cucumber Sesame Salad + Oyster Stew + Brazilian Rice (staple) |
-| 4 Wed | Sunrise Taco | Fresh Tuna Tacos + Marinated Cucumbers + Assyrian Rice (staple) | Primary Taco Meat + Pizza Cheesy Chicken + Thai-Style Omelet (Khai Jiao) + Grilled Parmesan Tomatoes + English Pea Salad + Thai Ginger Soup + Indian Restaurant Style Basmati Rice (staple) |
-| 5 Thu | Curry Cheddar Scrambled Eggs | Spicy Beef And Vegetable Stir-Fry (Weight Watchers Recipe) + Szechuan Cucumbers + Assyrian Rice (staple) | Vietnamese Garlic Beef + Coriander, Curry & Yogurt-Crusted Tofu + Teriyaki Chicken + Jim's Raita + Ginger-Spiced Cucumbers + Korean Dumpling Soup + Assyrian Rice (staple) |
-| 6 Fri | Tomato And Cheese Burrito Omelet | Greek Grilled Cheese + Broccoli Salad | Chinese Salt And Pepper Tofu + Easy Tandoori Chicken + Crock Pot Beef And Broccoli + Spicy Korean Red Pepper Cucumbers + Izakaya Sakura Avocado Tofu Salad + Chinese Egg Flower Soup + Assyrian Rice (staple) |
-| 7 Sat | The Egyptian Eye | Miso Beef + Buttery Mirin Mushrooms + Assyrian Rice (staple) | Easy Lemon Chicken And Rice + Lamb And Veggie Kebabs + Egg Bhurji + Italian Asparagus + Japanese Salad + Flax And Mango Cold Soup |
+| 1 Sun | Bibimbap Breakfast Bowl | Korean Krunch Quesadilla + Baby Spinach With Asian Style Dressing | Caribbean Barbecue + Pizza Cheesy Chicken + Scallops Scampi + Avocado Salad + Mediterranean Green Beans + Oyster Stew + Brazilian Rice (staple) |
+| 2 Mon | Easy 5 – Minute Nutella Champorado (Filipino-Style) | Mexican Steak Wrap + Fresh Pesto And Tomato Salad | Sesame Ramen With Green Peas + Braised Salmon With Soy And Ginger + Brazilian Garlic Shrimp + Celery And Cabbage Slaw + Salada De Cebola . Brazilian Onion Salad + Quick gazpacho |
+| 3 Tue | Quick Greek Yogurt Oatmeal In A Mug | Cheesy Tuna Ramen + Korean Bean Sprout Salad | Thai-Style Omelet (Khai Jiao) + Dynasty Thai Shrimp + Bul-Ko-Kee (Korean Barbecue Beef) + Cucumber Salad With Thai Vinaigrette Dressing + Spicy Cucumber Quick Pickles + Miso Soup With Shiitake Mushrooms And Tofu + Indian Restaurant Style Basmati Rice (staple) |
+| 4 Wed | Sunrise Taco | Simple Mediterranean Grilled Chicken + Mediterranean Snow Peas + Assyrian Rice (staple) | Broiled Tuna Teriyaki + Miso Beef + Pizza Cheesy Chicken + Grilled Parmesan Tomatoes + Cucumber Salad + Martha's Gazpacho + Assyrian Rice (staple) |
+| 5 Thu | Curry Cheddar Scrambled Eggs | Spicy Beef And Vegetable Stir-Fry (Weight Watchers Recipe) + Orange-Sesame Snow Peas + Assyrian Rice (staple) | Indonesian Fried Rice + Spanish Shredded Beef + Salsa Chicken + Thai Pickles (Achat) + English Pea Salad + Welsh Rarebit I |
+| 6 Fri | Tomato And Cheese Burrito Omelet | Pizza Cheesy Chicken + Spanish Slaw + Super Easy Naan Bread (staple) | Spicy Ramen + Coriander, Curry & Yogurt-Crusted Tofu + Teriyaki Chicken + Jim's Raita + Ginger-Spiced Cucumbers + Middle Eastern Tomato Soup |
+| 7 Sat | The Egyptian Eye | X-Traordinarily Easy Chicken Curry + Thai-Style Beet Salad + Assyrian Rice (staple) | Sesame Ramen With Green Peas + Mexican Chicken (Low-Fat) + Egg Bhurji + Quick Pickled Cucumbers + Indonesian Cucumber Salad + Sour Cream Gazpacho |
 
