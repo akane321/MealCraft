@@ -1,0 +1,379 @@
+{
+ "seed": 20261104,
+ "size": 60,
+ "release": "v3 (wave 2 new recipes, not in the first v3 build)",
+ "by_course": {
+  "baked_good": 4,
+  "breakfast": 3,
+  "dessert": 5,
+  "drink": 3,
+  "main": 22,
+  "salad": 4,
+  "sauce_condiment": 4,
+  "side": 6,
+  "snack_appetizer": 5,
+  "soup": 4
+ },
+ "recipes": [
+  {
+   "id": "RCP2_0104B799EFBB",
+   "title": "Baby Carrot Soup With Cilantro And Curry",
+   "course": "soup",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_01DE415A4C1C",
+   "title": "Budin (Puerto Rican Bread Pudding)",
+   "course": "dessert",
+   "servings": 10
+  },
+  {
+   "id": "RCP2_08B001A12341",
+   "title": "Szechuan Shrimp Stir-Fry",
+   "course": "main",
+   "servings": 2
+  },
+  {
+   "id": "RCP2_1083EC2B331C",
+   "title": "Kielbasa Scramble",
+   "course": "breakfast",
+   "servings": 2
+  },
+  {
+   "id": "RCP2_1168824F89D8",
+   "title": "Artisanal Mushroom Pizzas",
+   "course": "snack_appetizer",
+   "servings": 12
+  },
+  {
+   "id": "RCP2_15AD3817550A",
+   "title": "French Hot Chocolate",
+   "course": "drink",
+   "servings": 5
+  },
+  {
+   "id": "RCP2_23189FD43A0A",
+   "title": "Chicken Italian In Foil",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_25100CF90B30",
+   "title": "Baked Mediterranean Salmon",
+   "course": "main",
+   "servings": 2
+  },
+  {
+   "id": "RCP2_284D07BDA1EC",
+   "title": "Cherry Tomatoes And Olives",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_2EED024098BD",
+   "title": "Courgette And Mushroom Stir Fry",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_32117351B6E2",
+   "title": "Roast Leg Of Lamb - French Cooking At Home",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_352AA9547421",
+   "title": "Norwegian Skolebrod",
+   "course": "baked_good",
+   "servings": 24
+  },
+  {
+   "id": "RCP2_35943EFFDE87",
+   "title": "Lemon Couscous With Broccoli",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_42A25812D59B",
+   "title": "Colombo Curry",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_42C5FEF5C7AD",
+   "title": "Dulce De Leche Blondies",
+   "course": "dessert",
+   "servings": 24
+  },
+  {
+   "id": "RCP2_4D376325AF18",
+   "title": "Middle Eastern Lamb And Rice With Apricots",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_52867E3B4E55",
+   "title": "Sweet Hot Thai Garlic Sauce",
+   "course": "sauce_condiment",
+   "servings": 8
+  },
+  {
+   "id": "RCP2_5B25ACB2A0EA",
+   "title": "Rich Swedish Cream Dough",
+   "course": "baked_good",
+   "servings": 12
+  },
+  {
+   "id": "RCP2_5B562E59A896",
+   "title": "Crock Pot Falafel",
+   "course": "snack_appetizer",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_5C3B1F79330E",
+   "title": "Poulet De Provencal",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_5E6DEF77B85D",
+   "title": "Vegetable Risotto",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_6410D4304843",
+   "title": "Thai Peanut Stir-Fry Sauce",
+   "course": "sauce_condiment",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_65F8261A84D6",
+   "title": "Corn With Sweet Rice And Coconut Milk",
+   "course": "dessert",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_68679CAE3264",
+   "title": "Low Sodium Slow Cooker Chili",
+   "course": "main",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_74A3EDE1E4C7",
+   "title": "Cabbage With Green Peas",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_7A14B4D4A6DD",
+   "title": "French Steak",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_7AAD2C964D3B",
+   "title": "Salsa For Pupusas",
+   "course": "sauce_condiment",
+   "servings": 8
+  },
+  {
+   "id": "RCP2_7D138C54E5E2",
+   "title": "Moroccan Carrot Salad Recipe",
+   "course": "salad",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_82D803719791",
+   "title": "Tomato Masala Soup",
+   "course": "soup",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_83CC8ABE8656",
+   "title": "Sushi-Roll Rice Salad",
+   "course": "salad",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_88F113DC93BC",
+   "title": "Martha Stewart'S Shrimp Kabobs With Lemon And Cilantro",
+   "course": "snack_appetizer",
+   "servings": 8
+  },
+  {
+   "id": "RCP2_91DE0FFA4A4E",
+   "title": "Majadera (Lentil, Onion, And Rice Dish)",
+   "course": "main",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_9243F74EAE79",
+   "title": "Brazilian Hot Pepper And Lemon Sauce",
+   "course": "sauce_condiment",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_985810770495",
+   "title": "Weeknight Pork And Bean Sprouts Stir-Fry Recipe",
+   "course": "main",
+   "servings": 2
+  },
+  {
+   "id": "RCP2_A069CBEE6047",
+   "title": "Ginger Beef With Bok Choy",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_A2072DE96140",
+   "title": "Southwestern Spaghetti",
+   "course": "main",
+   "servings": 5
+  },
+  {
+   "id": "RCP2_A77421E0D1CB",
+   "title": "Italian Sausage Cheese Strata Recipe",
+   "course": "breakfast",
+   "servings": 8
+  },
+  {
+   "id": "RCP2_ABDAC33D155B",
+   "title": "Dulce De Leche Whipped Cream Cheese Frosting",
+   "course": "dessert",
+   "servings": 12
+  },
+  {
+   "id": "RCP2_AF7BD88B8BF2",
+   "title": "Rich Scottish Shortbread",
+   "course": "baked_good",
+   "servings": 24
+  },
+  {
+   "id": "RCP2_B05B4D5F2C82",
+   "title": "Spicy Summer Chicken Skewers",
+   "course": "main",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_B10CE2921F65",
+   "title": "Vegetable Paella (Very Healthy)",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_BF1172DCCD92",
+   "title": "Sour Cream Gazpacho",
+   "course": "soup",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_BF4ED144DAC8",
+   "title": "Tofu, Miso, Seaweed And Spinach Soup",
+   "course": "soup",
+   "servings": 1
+  },
+  {
+   "id": "RCP2_CCE2DCA36B45",
+   "title": "Crusty Cuban Bread",
+   "course": "baked_good",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_CDD3D793FBBA",
+   "title": "Sichuan Pea Shoots",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_CEB0ECF57E12",
+   "title": "Green Beans With Tahini And Garlic",
+   "course": "side",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_D050DB2A7F13",
+   "title": "Black Bean Wasabi Potato Salad",
+   "course": "salad",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_DAC4E2A64770",
+   "title": "Vegan Tempura Veggies",
+   "course": "snack_appetizer",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_DD2ACA223D77",
+   "title": "Chicken And Ham Cassoulet",
+   "course": "main",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_DD8AA9CBA7ED",
+   "title": "Spicy Tofu And Vegetable Stir-Fry",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_DF3FFB9FF2F0",
+   "title": "Caribbean Pineapple Chicken",
+   "course": "main",
+   "servings": 3
+  },
+  {
+   "id": "RCP2_E1AA47446933",
+   "title": "Wonton Cold Salad",
+   "course": "salad",
+   "servings": 2
+  },
+  {
+   "id": "RCP2_E5495B4DD3DF",
+   "title": "Brochettes Of Pork With Sage",
+   "course": "main",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_E5C1482B3C92",
+   "title": "Simple Kenyan Chai Tea",
+   "course": "drink",
+   "servings": 3
+  },
+  {
+   "id": "RCP2_E5E5A69C7CFB",
+   "title": "Coconut Tres Leches Cake",
+   "course": "dessert",
+   "servings": 12
+  },
+  {
+   "id": "RCP2_E86649B6F43D",
+   "title": "Mussels With Greek Yogurt, Capers, And Mint",
+   "course": "snack_appetizer",
+   "servings": 4
+  },
+  {
+   "id": "RCP2_E8F13AFE052D",
+   "title": "Aebleskiver",
+   "course": "breakfast",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_F9123819021C",
+   "title": "Ponche - Chilean Cranberry Punch",
+   "course": "drink",
+   "servings": 6
+  },
+  {
+   "id": "RCP2_F9E5FDCEA734",
+   "title": "Baked Chicken Stroganoff",
+   "course": "main",
+   "servings": 8
+  },
+  {
+   "id": "RCP2_FC070803C07F",
+   "title": "Eggplant, Lentil, And Bulgur Salad",
+   "course": "main",
+   "servings": 4
+  }
+ ]
+}

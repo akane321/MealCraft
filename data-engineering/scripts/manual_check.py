@@ -4,12 +4,17 @@ by course, and the reviewer's three checks on every recipe: complete, steps sens
     python -I -X utf8 data-engineering/scripts/manual_check.py draw               # sample.json and check.xlsx
     python -I -X utf8 data-engineering/scripts/manual_check.py score <filled.xlsx>    # report.md and report.json
     python -I -X utf8 data-engineering/scripts/manual_check.py draw --new         # data release v3's new recipes
+    python -I -X utf8 data-engineering/scripts/manual_check.py draw --wave 2      # v3's extra wave only (60)
+    python -I -X utf8 data-engineering/scripts/manual_check.py score --wave 2 <filled.xlsx> --with <wave-1 filled.xlsx>
 
 Nothing in the sheet is prefilled. Only rows the reviewer marked 是 count. A recipe is correct when all three checks
 are 对 and wrong when any is 错; each 错 counts under its check, so a recipe can count under more than one. A recipe
 with no 错 and some 看不出 is reported apart and counts neither way. The correct rate carries a Wilson 95% interval;
 the 03 plan's target is 95%. With --new (draw and score) the sample is drawn from the recipes of data release v3 that
 v2.2 does not have (issue #392), with seed 20261103, into manual-check-20261103/; the 2026-10-25 v2.2 sample stays.
+--new is wave 1, the first v3 build's new recipes. --wave 2 draws 60 of the extra wave added after it, with seed
+20261104, into manual-check-20261104/; its score with --with (wave 1's filled sheet) also reports each wave as a stratum
+and the correct rate weighted by the waves' sizes.
 Offline, with a Python that has openpyxl, from the repository root.
 """
 
@@ -27,10 +32,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from review_sampling import (  # noqa: E402
     CHECKED,
-    NEW_SEED,
     REPOSITORY,
+    WAVE_SEEDS,
     allocate,
     checked,
+    combined,
+    combined_lines,
     interval,
     new_recipes,
     percent,
@@ -40,8 +47,10 @@ from review_sampling import (  # noqa: E402
 
 OUT = REPOSITORY / "data-engineering/docs/manual-check-20261025"
 NEW_OUT = REPOSITORY / "data-engineering/docs/manual-check-20261103"
+WAVE_OUT = {1: NEW_OUT, 2: REPOSITORY / "data-engineering/docs/manual-check-20261104"}
 SEED = 20261025
 SIZE = 100
+WAVE_SIZE = {1: SIZE, 2: 60}
 MINIMUM = 3
 TARGET = 0.95
 SHEET = "抽检"
@@ -63,11 +72,11 @@ HEAD = (
 )
 
 
-def draw(version: str, recipes: list[dict], seed: int = SEED) -> dict:
+def draw(version: str, recipes: list[dict], seed: int = SEED, size: int = SIZE) -> dict:
     by_course = defaultdict(list)
     for recipe in recipes:
         by_course[recipe["course"]].append(recipe)
-    plan = allocate({course: len(members) for course, members in by_course.items()}, SIZE, MINIMUM)
+    plan = allocate({course: len(members) for course, members in by_course.items()}, size, MINIMUM)
     rng = random.Random(seed)
     picked = []
     for course, n in sorted(plan.items()):
@@ -102,7 +111,7 @@ def workbook(sample: dict, recipes: dict[str, dict]):
     notes = book.active
     notes.title = "说明"
     for text in (
-        "100 道人工抽检（03 方案 2.7）",
+        f"{sample['size']} 道人工抽检（03 方案 2.7）",
         "",
         f"这 {sample['size']} 道菜按固定种子 {sample['seed']} 从 release 里按类别分层抽出（每类至少 {MINIMUM} 道，"
         "其余按大小分）。",
@@ -240,6 +249,16 @@ def score(rows: list[dict], sample: dict) -> dict:
     }
 
 
+def by_wave(results: dict[int, dict], populations: dict[int, int]) -> dict:
+    """Each wave as a stratum (correct of checked) and the correct rate weighted by the waves' sizes."""
+    return combined(
+        [
+            {"name": f"wave {wave}", "population": populations[wave], "k": result["correct"], "n": result["checked"]}
+            for wave, result in sorted(results.items())
+        ]
+    )
+
+
 def markdown(result: dict, sample: dict, digest: str) -> str:
     rate = result["rate"]
     met = "n/a" if rate is None else ("met" if rate >= result["target"] else "not met")
@@ -282,6 +301,8 @@ def markdown(result: dict, sample: dict, digest: str) -> str:
     if result["refill"]:
         lines += ["", "## To refill", ""]
         lines += [f"- {row['id']} {row['title']}: {row['verdicts']}" for row in result["refill"]]
+    if "waves" in result:
+        lines += combined_lines(result["waves"], "correct rate", "Correct")
     return "\n".join(lines) + "\n"
 
 
@@ -291,13 +312,16 @@ def main() -> None:
     drawing = commands.add_parser("draw", help="draw sample.json and write check.xlsx")
     scoring = commands.add_parser("score", help="score the filled check.xlsx into report.md and report.json")
     scoring.add_argument("filled", type=Path)
+    scoring.add_argument("--with", dest="other", type=Path, help="wave 1's filled sheet, to report both waves")
     for command in (drawing, scoring):
         command.add_argument("--new", action="store_true", help="data release v3's new recipes only (issue #392)")
+        command.add_argument("--wave", type=int, choices=(1, 2), help="v3's new recipes of one wave (--new is wave 1)")
     args = parser.parse_args()
-    out = NEW_OUT if args.new else OUT
+    wave = args.wave or (1 if args.new else None)
+    out = WAVE_OUT[wave] if wave else OUT
     if args.command == "draw":
-        version, recipes = new_recipes() if args.new else release_recipes()
-        sample = draw(version, recipes, NEW_SEED if args.new else SEED)
+        version, recipes = new_recipes(wave=wave) if wave else release_recipes()
+        sample = draw(version, recipes, WAVE_SEEDS[wave] if wave else SEED, WAVE_SIZE[wave] if wave else SIZE)
         out.mkdir(parents=True, exist_ok=True)
         (out / "sample.json").write_text(
             json.dumps(sample, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
@@ -307,6 +331,12 @@ def main() -> None:
         return
     sample = json.loads((out / "sample.json").read_text(encoding="utf-8"))
     result = score(read_filled(args.filled), sample)
+    if args.other:
+        if wave != 2:
+            raise SystemExit("--with goes with --wave 2: it adds wave 1's filled sheet")
+        first = json.loads((WAVE_OUT[1] / "sample.json").read_text(encoding="utf-8"))
+        results = {1: score(read_filled(args.other), first), 2: result}
+        result["waves"] = by_wave(results, {n: len(new_recipes(wave=n)[1]) for n in (1, 2)})
     report = markdown(result, sample, hashlib.sha256(args.filled.read_bytes()).hexdigest())
     (out / "report.md").write_text(report, encoding="utf-8", newline="\n")
     (out / "report.json").write_text(
