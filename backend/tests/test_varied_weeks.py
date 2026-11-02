@@ -391,7 +391,7 @@ def test_varying_defers_to_the_explicit_diversity_policy():
 
 @pytest.fixture(scope="module")
 def product():
-    """A product database as compose seeds it: the curated catalog, then the release (v2.2)."""
+    """A product database as compose seeds it: the curated catalog, then the product release (v3 since 2026-11-02)."""
     root = repository_root()
     engine = create_engine("sqlite+pysqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
