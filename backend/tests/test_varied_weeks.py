@@ -434,6 +434,30 @@ def test_the_walkthrough_week_varies_within_its_budget(product):
     assert max(dishes.values()) <= 3, dishes
 
 
+@pytest.mark.parametrize(("size", "budget", "floor"), [(2, 100.0, 16), (4, 70.0, 12), (4, 60.0, 3)])
+def test_the_walkthrough_week_with_its_60_minute_cap_keeps_its_variety(product, size, budget, floor):
+    """The walkthrough's own cap (60 minutes), which the test above leaves out. Release v2.2 planned 16, 12 and 3
+    distinct dishes here. On v3, with the budget half of each kind ordered by cost as used, these fell to 14, 6 (the
+    demo's "Use S$70" week, one soup seven times) and a refusal. Ordered by cost as bought (`bought_first`), v3
+    plans 19, 12 and 8 (stage 6 probe, 2026-11-02)."""
+    request = WeeklyMealPlanRequest.model_validate(
+        {
+            "start_date": "2026-09-28",
+            "household_size": size,
+            "allergens": ["peanut"],
+            "excluded_ingredients": ["pork"],
+            "max_cooking_time_minutes": 60,
+            "weekly_budget_sgd": budget,
+            "plan_shape": {"meals": {"dinner": DINNER_WITH_SOUP}},
+            "pricing_mode": "fixture",
+        }
+    )
+    plan = build_meal_plan_service(product, 1).generate(request)
+    dishes = Counter(dish_family(dish.recipe.title) for dish in plan.days)
+    assert plan.grocery_estimate.purchase_total_sgd <= budget
+    assert len(dishes) >= floor, dishes
+
+
 # Breakfast, a lunch of a main and a vegetable dish and a dinner of a main and an optional vegetable dish:
 # 35 dish positions, the fewest the heavy-composition gate takes.
 THREE_MEALS_35 = {

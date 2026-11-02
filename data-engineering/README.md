@@ -75,8 +75,8 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 
 ## data release v3：v2.2 原样 + 新增菜谱（Knowledge ADR-0103 第 3 节，issue #390）
 
-"data release v3"是数据版本，不是名为 v3 的留出评测协议。这一版**还没有接入产品**：后端 `RELEASE_VERSION`
-仍是 v2.2，切换（标签、清真、嵌入、规划池报告、各处 v2.2 路径和测试）是之后单独的 PR。
+"data release v3"是数据版本，不是名为 v3 的留出评测协议。产品从这一版起读 v3（Knowledge ADR-0111）：后端
+`RELEASE_VERSION` 是 v3，导入 12,895 道里的 12,894 道（和 v2.2 一样跳过 `RCP2_5EFEFE98D566`）；v2.2 作为 v3 的冻结底本保留。
 
 构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：
 

@@ -1274,7 +1274,10 @@ def previous_answers(previous: dict, batch: str = LLM_BATCH) -> dict[str, dict]:
 
 
 def base_release_keys() -> set[str]:
-    """The recipe ids of the release before data release v3: their entries are not the v3 batch's to change."""
+    """The recipe ids of the release before data release v3: their entries are not the v3 batch's to change.
+
+    Only the paid `--llm` run reads this, and it runs on the host (data-engineering/README.md): compose mounts no
+    v2.2 directory, so inside the containers `--llm` stops here with FileNotFoundError."""
     path = release_dir().parent / V3_BASE_RELEASE / "recipes.jsonl"
     with path.open(encoding="utf-8") as handle:
         return {json.loads(line)["recipe_id"] for line in handle if line.strip()}

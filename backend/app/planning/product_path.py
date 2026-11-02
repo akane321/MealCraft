@@ -296,6 +296,20 @@ def cheap_first(recommendation) -> tuple[bool, float]:
     return second_store, dish_cost(recommendation)
 
 
+def bought_first(recommendation) -> tuple[bool, float]:
+    """A composed packet's budget order: as `cheap_first`, but by what the dish costs in whole packages.
+
+    Data release v3 added many dishes that are cheap as used and dear as bought (a soup of one mango and a dash of
+    rum). Ordered by use, they filled the cheap half of each kind: four people with a 60-minute cap were refused at
+    S$60 (planned on v2.2), and their S$70 week had 6 different dishes instead of 12. Ordered by what is bought, the
+    same requests plan with 8 and 12 different dishes (stage 6 probe, 2026-11-02; `test_varied_weeks`).
+
+    The cheapest-week search keeps the ranked packet (no budget), so the amount a refusal names did not move.
+    """
+    estimate = recommendation.grocery_estimate
+    return cheap_first(recommendation)[0], estimate.purchase_total_sgd if estimate is not None else 0.0
+
+
 class ProductPlanningError(WeeklyPlanSelectionError):
     def __init__(self, status, message, trace, *, problem=None):
         super().__init__(message)
@@ -399,7 +413,7 @@ def composed_packet(
             ranked = families_first(ranked)
             best = ranked[: limits[key] // 2]
             kept = {dish_family(r.recipe.title) for r in best}
-            best += families_first(sorted(ranked[len(best) :], key=cheap_first), kept)[: limits[key] - len(best)]
+            best += families_first(sorted(ranked[len(best) :], key=bought_first), kept)[: limits[key] - len(best)]
         chosen |= {r.recipe.id for r in best}
         chosen |= {r.recipe.id for r in _packet_covering(ranked, best, members, by_id, limits[key], cooked)}
     return [r for r in recommendations if r.recipe.id in chosen or (keep and r.recipe.slug in keep)], limits

@@ -75,8 +75,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      # The first release import runs before uvicorn starts and can take a minute.
-      start_period: 180s
+      # The release import runs before uvicorn starts. On SQLite, data release v3 took 23.9 s fresh and 58.9 s
+      # upgrading a v2.2 database in place (2026-11-02, not measured on Postgres); hosted runners are several times
+      # slower, so the grace period leaves room for the upgrade. A healthy backend is still reported at once.
+      start_period: 300s
 
   worker:
     build:

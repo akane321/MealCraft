@@ -22,17 +22,17 @@ remains the canonical cross-module contract.
 | State | Meaning |
 | --- | --- |
 | Verified baseline | Merged runtime behaviour supported by current code and tests |
-| Released data | A versioned release cut by the `data-engineering/` pipeline; release v2.2 is imported beside the curated catalog |
+| Released data | A versioned release cut by the `data-engineering/` pipeline; release v3 is imported beside the curated catalog |
 | Accepted target | The intended module responsibility and release contract |
 
 The curated runtime catalog is the compact one in `data/recipes/recipes.json` and
 `data/ingredients/ingredients.json`, loaded by `backend/app/data/catalog.py`.
 Held-out episodes, planning fixtures and tests name its slugs, so it stays as it is.
 
-Release v2.2 is loaded beside it by `python -m app.data.import_release_v2`
+Release v3 is loaded beside it by `python -m app.data.import_release_v2`
 (`backend/app/data/release_v2.py`), which compose runs after the curated import:
 
-- release recipes carry `release_version` (`v2.2`), `external_id` (the release
+- release recipes carry `release_version` (`v3`), `external_id` (the release
   `recipe_id`) and a slug `v2-<title>-<id suffix>`, plus the release-only fields
   course, meal types, difficulty, passive time, time and servings basis,
   recipe allergens, source/licence and video URL. Curated recipes leave all of
@@ -64,8 +64,9 @@ guard warnings and what this round leaves open are in the
 [v2.2 quality report](../../data-engineering/data/release/v2.2/quality_report.md) (last section).
 
 Data release v3 (Knowledge ADR-0103 section 3, issue #390; not the v3 held-out evaluation protocol) is built
-in `data-engineering/data/release/v3/` but **not imported yet**: the product still reads v2.2, and switching it
-is a separate change. v3 is every v2.2 record copied verbatim plus recipes added from the over-quota v2.1 set and
+in `data-engineering/data/release/v3/` and is the release the product imports (Knowledge ADR-0111): the importer
+loads 12,894 of its 12,895 recipes and skips `RCP2_5EFEFE98D566`, as it did on v2.2. v2.2 stays as v3's frozen
+base. v3 is every v2.2 record copied verbatim plus recipes added from the over-quota v2.1 set and
 from new RecipeNLG candidates enriched through the OpenAI API, with v2.2's 701 ingredients unchanged and no
 cuisine label above 20%. Counts, decisions and shortcuts are in the
 [v3 quality report](../../data-engineering/data/release/v3/quality_report.md); how to rebuild it is in

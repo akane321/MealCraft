@@ -1,6 +1,6 @@
 """Release v2.1 as the frozen facts of protocol v2-multidish (docs/evaluation/protocol-v2-multidish.md).
 
-The protocol stays on v2.1 (its developer labels were proven on it); the baselines read data release v3 through the
+The protocol stays on v2.1 (its developer labels were proven on it); the baselines read release v2.2 through the
 `release` argument (`app.evaluation.baseline_resources`).
 
 The v2 scorer and packets read the curated catalog's row shape. This projects

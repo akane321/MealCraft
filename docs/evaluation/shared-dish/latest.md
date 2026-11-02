@@ -19,7 +19,7 @@ Each household plans breakfast, lunch and dinner from 2027-01-03 (a Sunday) for 
 | `peanut-only-mei-avoids` | 3 | 9821 → 10422 | 9821 → 9821 | 25 → 25 | 21 → 21 | 72.42 → 72.42 | 1 → 1 | 240.06 → 274.06 | 1.434 → 1.388 | PASS |
 | `mixed-diets` | 3 | 1408 → 10422 | 1408 → 2995 | 23 → 23 | 21 → 20 | 67.32 → 64.07 | 1 → 1 | 142.17 → 154.02 | 1.445 → 1.431 | PASS |
 | `six-one-vegetarian` | 3 | 2995 → 10422 | 2995 → 2995 | 27 → 26 | 24 → 24 | 103.1 → 96.11 | 1 → 1 | 281.47 → 283.49 | 1.806 → 1.428 | PASS |
-| `tight-budget` | 3 | 2995 → 10422 | 2995 → 2995 | 25 → 23 | 21 → 20 | 71.4 → 65.86 | 1 → 1 | 118.71 → 115.99 | 1.266 → 1.349 | PASS |
+| `tight-budget` | 3 | 2995 → 10422 | 2995 → 2995 | 25 → 24 | 21 → 21 | 71.4 → 68.48 | 1 → 1 | 85.72 → 119.2 | 1.283 → 1.426 | PASS |
 
 Each cell reads `merged → shared`. **Servable recipes** are the tagged catalog recipes that may reach the table; **the narrowest member's own** is the smallest of the per-member counts, which is the one that says whether the most restricted person is well served. A household holding one member with no limits of their own makes every tagged recipe servable, which is the model working rather than a filter missing: it is the others who stop being narrowed by that member's diet. Neither count applies the planner's time, equipment or shelf-life filters or its per-role caps.
 
@@ -218,8 +218,8 @@ Four, one vegetarian, on a tight weekly budget for three days (S$120, chosen onc
 
 | Member | Energy attainment | Recipes they can eat (merged → shared) |
 |---|---:|---|
-| Ann | 1.349 | 2995 → 2995 |
-| Ben | 1.386 | 2995 → 10422 |
-| Kai | 1.387 | 2995 → 10422 |
-| Mei | 1.393 | 2995 → 10422 |
+| Ann | 1.426 | 2995 → 2995 |
+| Ben | 1.493 | 2995 → 10422 |
+| Kai | 1.494 | 2995 → 10422 |
+| Mei | 1.5 | 2995 → 10422 |
 

@@ -1,7 +1,8 @@
 """Every release directory the backend code reads is mounted into the backend and worker containers.
 
-The Dockerfile copies no release files, so a release the code names but compose does not mount
-exists on the host only: host pytest passes and the same tests fail inside the container.
+The Dockerfile copies only the product release's ingredients.jsonl (the planner's food groups), so a release the
+code names but compose does not mount exists on the host only: host pytest passes and the same tests fail inside
+the container.
 """
 
 from __future__ import annotations
