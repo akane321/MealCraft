@@ -19,17 +19,17 @@ Snapshots: `products/fairprice-v2-snapshot.json` `2cfd10e150fd38cb`, `products/c
 
 ## Recipes with every bought line priced
 
-| priced at | recipes | of 12894 |
+| priced at | recipes | of 18334 |
 | --- | ---: | ---: |
-| FairPrice alone | 10476 | 81.2% |
-| Either store | 11394 | 88.4% |
+| FairPrice alone | 15225 | 83.0% |
+| Either store | 16801 | 91.6% |
 
 ## Recipe lines priced
 
-| priced at | lines | of 109266 |
+| priced at | lines | of 159486 |
 | --- | ---: | ---: |
-| FairPrice alone | 106549 | 97.5% |
-| Either store | 107628 | 98.5% |
+| FairPrice alone | 156027 | 97.8% |
+| Either store | 157808 | 99.0% |
 
 ## The 20 most used ingredients still unpriced
 
@@ -37,23 +37,23 @@ Used by the most release recipes, priced at neither store.
 
 | ingredient | recipes |
 | --- | ---: |
-| allspice | 147 |
+| allspice | 151 |
 | dill | 110 |
+| mixed_nuts | 94 |
+| pie_crust | 90 |
 | turkey | 90 |
-| pie_crust | 88 |
-| mixed_nuts | 85 |
-| celery_seed | 77 |
-| biscuit_mix | 71 |
-| seasoned_salt | 67 |
+| celery_seed | 78 |
+| biscuit_mix | 72 |
+| seasoned_salt | 68 |
 | water_chestnut | 61 |
 | meat | 54 |
 | radish | 37 |
-| dried_onion_flakes | 33 |
+| dried_onion_flakes | 34 |
+| chow_mein_noodles | 30 |
 | spaghetti_squash | 30 |
 | mashed_potatoes | 29 |
-| chow_mein_noodles | 28 |
 | lime_zest | 27 |
 | orange_juice_conc | 26 |
 | coffee | 24 |
-| onion_salt | 23 |
+| onion_salt | 24 |
 | gochugaru | 22 |
