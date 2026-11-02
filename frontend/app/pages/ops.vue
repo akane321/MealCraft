@@ -15,33 +15,48 @@ onMounted(async () => {
   ready.value = true;
 });
 
+const initials = computed(() => (actor.value?.user.display_name ?? "?")
+  .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
+// Written out here (not in lib/ops.ts) so the icon bundle finds every name.
+const icons: Record<string, string> = {
+  overview: "i-lucide-layout-dashboard",
+  tasks: "i-lucide-list-checks",
+  debugging: "i-lucide-bug",
+  services: "i-lucide-server",
+  data: "i-lucide-database",
+  quality: "i-lucide-badge-check",
+  experiments: "i-lucide-flask-conical",
+  users: "i-lucide-users",
+};
+
 function active(path: string) {
   return path === "/ops" ? route.path === "/ops" || route.path === "/ops/" : route.path.startsWith(path);
 }
 </script>
 
 <template>
-  <div class="mc-surface ops-shell">
-    <nav class="ops-nav" aria-label="Console">
-      <NuxtLink class="ops-brand" to="/ops">
-        <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><circle cx="16" cy="18" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" fill="#c2553a" /></svg>
-        <span class="mc-serif">MealCraft</span>
-      </NuxtLink>
-      <p class="mc-eyebrow">Operations</p>
+  <div class="mc-surface mc-shell ops-shell">
+    <nav class="ops-nav sb" aria-label="Console">
+      <NuxtLink class="sb-brand" to="/ops"><ShellMark />MealCraft</NuxtLink>
+      <p class="sb-label">Operations</p>
       <ul>
         <li v-for="module in OPS_MODULES" :key="module.slug">
-          <NuxtLink :to="module.path" :class="{ active: active(module.path) }">
-            {{ module.label }}<span v-if="!module.ready" class="soon">soon</span>
+          <NuxtLink :to="module.path" class="sb-item" :class="{ on: active(module.path) }">
+            <UIcon :name="icons[module.slug] ?? 'i-lucide-circle'" />{{ module.label }}<UBadge v-if="!module.ready" class="soon" size="sm" color="neutral" variant="soft" label="soon" />
           </NuxtLink>
         </li>
+        <li><NuxtLink to="/" class="sb-item"><UIcon name="i-lucide-arrow-up-right" />Open the product</NuxtLink></li>
       </ul>
-      <div v-if="ready && actor" class="ops-account">
-        <span>{{ actor.user.display_name }}</span>
-        <NuxtLink to="/">Open the product</NuxtLink>
-        <button type="button" @click="logout">Sign out</button>
+      <div class="sb-fill" />
+      <div v-if="ready && actor" class="sb-user">
+        <span class="sb-avatar" aria-hidden="true">{{ initials }}</span>
+        <span class="sb-who"><b>{{ actor.user.display_name }}</b><small>Operations</small></span>
+        <UTooltip text="Sign out">
+          <UButton color="neutral" variant="ghost" size="sm" square class="sb-icon" icon="i-lucide-log-out" aria-label="Sign out" @click="logout" />
+        </UTooltip>
       </div>
     </nav>
-    <main class="ops-main">
+    <main class="ops-main mc-frame">
       <NuxtPage v-if="ready" />
       <p v-else class="ops-wait" aria-busy="true">Checking your account…</p>
     </main>
@@ -49,33 +64,25 @@ function active(path: string) {
 </template>
 
 <style scoped>
-.ops-shell { display: grid; grid-template-columns: 232px 1fr; }
-.ops-nav { display: flex; flex-direction: column; gap: 14px; padding: 22px 16px; border-right: 1px solid var(--line); background: var(--s1); overflow-y: auto; }
-.ops-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ivory); font-size: 20px; text-decoration: none; }
-.ops-nav .mc-eyebrow { margin: 10px 0 0 4px; }
+.ops-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.ops-nav { overflow-y: auto; }
 .ops-nav ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.ops-nav li a { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 10px; color: var(--t2); text-decoration: none; transition: background 160ms; }
-.ops-nav li a:hover { background: var(--s2); }
-.ops-nav li a.active { background: var(--s3); color: var(--ivory); box-shadow: inset 2px 0 0 var(--accent); }
-.soon { color: var(--t4); font-size: 12px; }
-.ops-account { display: grid; gap: 6px; margin-top: auto; padding: 14px 12px 0; border-top: 1px solid var(--line); color: var(--t3); font-size: 12.5px; }
-.ops-account span { color: var(--ivory); }
-.ops-account a, .ops-account button { justify-self: start; padding: 0; border: 0; background: none; color: var(--t2); font-size: 12.5px; text-decoration: none; }
-.ops-account a:hover, .ops-account button:hover { color: var(--accent); }
-.ops-main { min-width: 0; overflow-y: auto; padding: clamp(20px, 4vw, 40px); }
+.ops-nav .sb-label { margin-top: 6px; }
+.soon { margin-left: auto; }
+.ops-main { overflow-y: auto; padding: 28px 40px 40px; }
 .ops-wait { color: var(--t3); }
 </style>
 
 <style>
 /* Shared console building blocks for the pages under /ops. */
-.ops-page { display: grid; gap: 22px; max-width: 1180px; }
-.ops-page > header h1 { margin: 6px 0 4px; font-size: clamp(28px, 4vw, 38px); }
+.ops-page { display: grid; gap: 24px; max-width: 1180px; margin: 0 auto; }
+.ops-page > header h1 { margin: 4px 0 4px; color: var(--mc-strong, var(--ivory)); font-size: 22px; line-height: 28px; }
 .ops-page > header p { margin: 0; color: var(--t3); max-width: 70ch; }
-.ops-card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--s1); min-width: 0; }
-.ops-card h2 { margin: 0 0 14px; font-family: var(--serif); font-size: 19px; font-weight: 400; }
+.ops-card { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); min-width: 0; }
+.ops-card h2 { margin: 0 0 14px; color: var(--mc-strong, var(--ivory)); font-family: var(--serif); font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; }
 .ops-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 16px; }
 .ops-muted { color: var(--t3); }
 .ops-error { color: var(--warn); }
-.ops-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 12px; white-space: nowrap; }
-.ops-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--t3)); }
+.ops-badge { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.ops-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot, var(--t3)); }
 </style>
