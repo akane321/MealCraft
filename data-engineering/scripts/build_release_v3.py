@@ -8,18 +8,23 @@
 
 1. Every release v2.2 record is copied byte for byte (same ids, wording and fields), and `ingredients.jsonl` is v2.2's
    701 ingredients unchanged, so v3 adds no ingredient id.
-2. Added recipes come from two legs, both through the same `build_release_v2.build_recipe` rules and then the v2.2
+2. Added recipes come from three legs, all through the same `build_release_v2.build_recipe` rules and then the v2.2
    unit-weight corrections (`correct_release_v22.correct_recipe`, weighed against v2.2's ingredient forms):
    the built-but-over-quota v2.1 recipes (the v2 enrichment set rebuilt from `data/staging/v2_merged.*`), and the
-   new RecipeNLG candidates picked by `select_v3_candidates.py` and enriched by `enrich_v3_openai.py`.
+   new RecipeNLG candidates picked by `select_v3_candidates.py` and enriched by `enrich_v3_openai.py`, split into
+   wave 1 (`data/enrichment/v3_selected_wave1.csv`) and the extra wave 2 (owner 2026-11-02 ~14:45).
 3. An added recipe is not released when it uses an ingredient id outside v2.2, its cuisine is in no quota bucket
    (`international`, ADR-0034), an ingredient form is missing from v2.2, its per-serving energy is implausible after
    the correction, it is below the importer floor (2 ingredient lines and a step), or its lower-cased,
-   whitespace-normalised title is already in the release (v2.2 first, then the over-quota leg, then the new leg,
-   each in recipe_id order). A completeness-flagged recipe with no review verdict is dropped by the build, as before.
+   whitespace-normalised title is already in the release (v2.2 first, then the over-quota leg, then wave 1, then
+   wave 2, each in recipe_id order). A completeness-flagged recipe with no review verdict is dropped by the build, as before.
 4. No cuisine label is above 20% of the final release: over a label's room the added recipes a planner can use stay
-   first (main, side, soup, salad, breakfast, then the rest), ties by recipe_id; the room is recomputed from the
-   final total until it no longer moves.
+   first (main, side, soup, salad, breakfast, then the rest), ties by recipe_id; wave 2 only takes the room the
+   earlier legs leave, so the cap cuts wave 2 first; the room is recomputed from the final total until it no longer
+   moves.
+5. Every record of the first v3 build (2026-11-03: 12,895 recipes; the added ones' line sha256 are in
+   `data/enrichment/v3_first_build_lines.tsv`) stays byte for byte, and recipes.jsonl stays under 95,000,000 bytes
+   (GitHub refuses files over 100 MB); either failing stops the build.
 
 Every candidate not released is in `dropped.jsonl` with its reason. The manifest carries the sha256 of every input
 and a `fingerprint` over recipes.jsonl, ingredients.jsonl and the manifest itself without that field. Nothing reads
@@ -49,11 +54,15 @@ from v2_release_report import attribution  # noqa: E402
 RELEASE_VERSION = "v3"
 SCHEMA_VERSION = "mealcraft.recipe.v2"
 CREATED_AT = "2026-11-03T00:00:00+00:00"  # fixed, so a rerun writes the same bytes
-MINIMUM_RELEASED = 12000  # ADR-0103 section 3
+MINIMUM_RELEASED = 15500  # owner 2026-11-02 ~14:45: grow v3; floor under what wave 2 has enriched so far
+MAX_RECIPES_BYTES = 95_000_000  # GitHub refuses files over 100 MB
 RELEASES = ROOT / "data" / "release"
 V21, V22, OUT = RELEASES / "v2.1", RELEASES / "v2.2", RELEASES / RELEASE_VERSION
 STAGING = ROOT / "data" / "staging"
 PACKETS = ROOT / "enrichment-work"
+ENRICHMENT = ROOT / "data" / "enrichment"
+WAVE1_CSV = ENRICHMENT / "v3_selected_wave1.csv"
+FIRST_BUILD = ENRICHMENT / "v3_first_build_lines.tsv"  # recipe_id and line sha256 of the first build's added records
 STAGING_INPUTS = (
     "v2_enrich_set.jsonl",
     "v2_merged.recipes.jsonl",
@@ -86,6 +95,10 @@ CHANGE_NOTES = [
     "below the importer floor, or a title equal (lower-cased, whitespace-normalised) to one already in the release.",
     "No cuisine label is above 20% of the final total; over a label's room usable courses stay first (main, side, "
     "soup, salad, breakfast, then the rest), ties by recipe_id.",
+    "Wave 2 (owner 2026-11-02 ~14:45: grow v3 toward 19,000 recipes, medium quality is fine): more new candidates "
+    "picked by the same rules after the frozen wave-1 picks (v3_selected_wave1.csv). Titles are de-duplicated in the "
+    "order v2.2, over-quota, wave 1, wave 2, and wave 2 only takes the label room the earlier legs leave, so every "
+    "record of the first v3 build (12,895) stays byte for byte; recipes.jsonl must stay under 95,000,000 bytes.",
     "Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.",
     "Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point "
     "estimate, reported with Wilson 95% intervals.",
@@ -94,17 +107,17 @@ SHORTCUTS = [
     "No new completeness review: a flagged new recipe with no verdict is dropped, not reviewed.",
     "No new ingredients, prices, halal labels or hierarchy entries: candidates were limited to v2.2's priced ids.",
     "New recipes are enriched by one model pass (gpt-5.4-mini, low reasoning effort), not by sessions with an overlap "
-    "agreement check; the 19 recipes that failed validation twice are dropped, not fixed by hand.",
+    "agreement check; the {failed} recipes that failed validation twice are dropped, not fixed by hand.",
     "The near-twin guard is an exact title match after lower-casing and whitespace; near-identical recipes with "
     "different titles stay.",
-    "The release total is what passes the checks, not trimmed to the 12,400 target.",
+    "The release total is what passes the checks, not trimmed to a target.",
+    "{not_enriched} selected candidates were never enriched (the OpenAI account ran out of credit on 2026-11-02) and are "
+    "in dropped.jsonl as 'not enriched': rerun enrich_v3_openai.py (it skips finished recipes), then this build.",
     "ingredients.jsonl is v2.2's file byte for byte, so its recipe_occurrences count v2.2's recipes only.",
     "Composite substitutes are not built (no schema field).",
-    "The American label sits exactly at the 20% cap, with no headroom: after any withdrawal of a non-American recipe "
-    "re-run the build (or withdraw an American recipe too).",
     "The cuisine labels of the model-enriched recipes are unreviewed model output (some are debatable).",
-    "The added recipes have no recipe tags, embeddings or planner-pool report yet: the product switch to v3 is a "
-    "later step.",
+    "Wave 2's cuisine labels and course labels are unreviewed model output too; its human checks are the 2026-11-04 "
+    "draws (manual-check-20261104/, allergen-review-20261104/).",
 ]
 
 
@@ -168,14 +181,19 @@ def admit(recipe: dict, entries: dict, forms: dict) -> tuple[dict | None, str, l
     return corrected, "", changes
 
 
-def capped(base: collections.Counter, candidates: list[dict]) -> tuple[list[dict], int]:
-    """`cap_by_label` with the room taken from the final total: shrink it until it no longer moves."""
-    limit = int(CAP * (sum(base.values()) + len(candidates)))
+def capped(base: collections.Counter, tiers: list[list[dict]]) -> tuple[list[dict], int]:
+    """`cap_by_label` with the room taken from the final total: shrink it until it no longer moves. A later tier only
+    takes the room the earlier ones leave, so the cap cuts the last tier first."""
+    limit = int(CAP * (sum(base.values()) + sum(map(len, tiers))))
     while True:
-        kept, _ = cap_by_label(base, candidates, limit)
+        counts, kept = collections.Counter(base), []
+        for tier in tiers:
+            more, _ = cap_by_label(counts, tier, limit)
+            counts.update(r["cuisine"] for r in more)
+            kept += more
         settled = int(CAP * (sum(base.values()) + len(kept)))
         if settled == limit:
-            return kept, limit
+            return sorted(kept, key=lambda r: r["recipe_id"]), limit
         limit = settled
 
 
@@ -201,7 +219,9 @@ def choose(v22: list[dict], legs: list[tuple[str, list[dict]]], entries: dict):
             leg_of[out["recipe_id"]] = leg
             changes[out["recipe_id"]] = changed
             candidates.append(out)
-    kept, limit = capped(collections.Counter(r["cuisine"] for r in v22), candidates)
+    tiers = [[r for r in candidates if leg_of[r["recipe_id"]] != "extra"]]
+    tiers.append([r for r in candidates if leg_of[r["recipe_id"]] == "extra"])
+    kept, limit = capped(collections.Counter(r["cuisine"] for r in v22), tiers)
     total = len(v22) + len(kept)
     chosen = {r["recipe_id"] for r in kept}
     for recipe in candidates:
@@ -223,14 +243,17 @@ def legs_from_staging(staging: Path, packets: Path, rules: dict) -> tuple[dict, 
     v2_results = {r["candidate_id"]: r for r in read_jsonl(staging / "v2_merged.recipes.jsonl")}
     forms = {r["ingredient_id"]: r for r in read_jsonl(staging / "v2_merged.ingredients.jsonl")}
     new_set = {r["candidate_id"]: r for r in read_jsonl(staging / "v3_selected.jsonl")}
+    wave1 = {line.split(",")[0] for line in WAVE1_CSV.read_text(encoding="utf-8").splitlines()[1:]}
     for record in new_set.values():
         record["stated_durations"] = stated_durations(record["instructions"])  # what enrich_v3_openai showed
     new_results = {r["candidate_id"]: r for r in read_jsonl(staging / "v3_merged.recipes.jsonl")}
     failed = {r["candidate_id"]: "; ".join(r["errors"]) for r in read_jsonl(staging / "v3_enrich_failed.jsonl")}
     over, over_drops = rebuild(v2_set, v2_results, forms, rules, {})
     new, new_drops = rebuild(new_set, new_results, forms, rules, failed)
-    sizes = {"v2_enrichment_set": len(v2_set), "v3_selected": len(new_set)}
-    return sizes, [("over_quota", over), ("new", new)], over_drops + new_drops
+    first = [r for r in new if r["source"]["candidate_id"] in wave1]
+    extra = [r for r in new if r["source"]["candidate_id"] not in wave1]
+    sizes = {"v2_enrichment_set": len(v2_set), "v3_selected": len(new_set), "v3_selected_wave_1": len(wave1)}
+    return sizes, [("over_quota", over), ("new", first), ("extra", extra)], over_drops + new_drops
 
 
 def tally(values) -> dict:
@@ -245,20 +268,37 @@ def in_range(recipe: dict) -> bool:
     return build.ENERGY_PER_SERVING[0] <= recipe["nutrition"]["energy_kcal"] <= build.ENERGY_PER_SERVING[1]
 
 
-def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: dict, rules: dict, minimum: int) -> dict:
+def line_hashes(lines: list[str]) -> dict[str, str]:
+    """recipe_id -> sha256 of the line as written (no newline)."""
+    return {json.loads(line)["recipe_id"]: sha256(line.encode()) for line in lines}
+
+
+def read_first_build(path: Path = FIRST_BUILD) -> dict[str, str]:
+    rows = path.read_text(encoding="utf-8").splitlines()[1:]
+    return dict(row.split("	") for row in rows if row)
+
+
+def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: dict, rules: dict, limits: dict) -> dict:
     """The release checks; a failure stops the build. Returns what each check counted."""
     recipes = [json.loads(line) for line in lines]
     problems = []
     if not set(v22_lines) <= set(lines):
         problems.append("a v2.2 record is not byte-identical in v3")
+    hashes, first = line_hashes(lines), limits["first_build"]
+    changed = sorted(key for key, digest in first.items() if hashes.get(key) != digest)
+    if changed:
+        problems.append(f"{len(changed)} first-build records missing or changed, e.g. {changed[:3]}")
+    size = sum(len(line.encode()) + 1 for line in lines)
+    if size > limits["max_bytes"]:
+        problems.append(f"recipes.jsonl is {size} bytes > {limits['max_bytes']}")
     outside = {line["canonical_ingredient_id"] for r in recipes for line in r["ingredients"]} - set(entries)
     if outside:
         problems.append(f"ingredient ids outside v2.2: {sorted(outside)}")
     top, top_n = collections.Counter(r["cuisine"] for r in recipes).most_common(1)[0]
     if top_n > CAP * len(recipes):
         problems.append(f"cuisine {top} is {top_n} of {len(recipes)}")
-    if len(recipes) < minimum:
-        problems.append(f"released {len(recipes)} < {minimum}")
+    if len(recipes) < limits["minimum"]:
+        problems.append(f"released {len(recipes)} < {limits['minimum']}")
     if len({r["recipe_id"] for r in recipes}) != len(recipes):
         problems.append("duplicate recipe ids")
     failing = {
@@ -278,8 +318,11 @@ def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: d
         raise SystemExit("release v3 checks failed: " + "; ".join(problems))
     return {
         "v2_2_records_byte_identical": len(v22_lines),
+        "first_build_records_byte_identical": len(set(first) | {json.loads(line)["recipe_id"] for line in v22_lines}),
+        "recipes_bytes": size,
+        "max_bytes": limits["max_bytes"],
         "largest_label": {"cuisine": top, "recipes": top_n, "share": share(top_n, len(recipes))},
-        "released_at_least": minimum,
+        "released_at_least": limits["minimum"],
         "v2_2_energy_outside_range": sum(not in_range(json.loads(line)) for line in v22_lines),
     }
 
@@ -310,6 +353,8 @@ def assemble(
     build_drops: list[dict],
     inputs_sha256: dict,
     minimum: int = MINIMUM_RELEASED,
+    first_build: dict[str, str] | None = None,
+    max_bytes: int = MAX_RECIPES_BYTES,
 ) -> dict[str, bytes]:
     """Every file of data/release/v3 as bytes, from v2.2's records and ingredients and the built recipes of each leg."""
     v22 = [json.loads(line) for line in v22_lines]
@@ -328,7 +373,8 @@ def assemble(
     by_id.update({r["recipe_id"]: json.dumps(r, ensure_ascii=False, sort_keys=True) for r in added})
     lines = [by_id[key] for key in sorted(by_id)]
     recipes = [json.loads(line) for line in lines]
-    checks = verify(lines, v22_lines, added, entries, rules, minimum)
+    limits = {"minimum": minimum, "first_build": first_build or {}, "max_bytes": max_bytes}
+    checks = verify(lines, v22_lines, added, entries, rules, limits)
     enrichment_set = sizes["v2_enrichment_set"] + sizes["v3_selected"]
     if len(recipes) + len(drops) != enrichment_set:
         raise SystemExit(f"released {len(recipes)} + dropped {len(drops)} != enrichment set {enrichment_set}")
@@ -352,7 +398,9 @@ def assemble(
         ),
         "from_v2_2": len(v22),
         "added_over_quota": sum(leg == "over_quota" for leg in leg_of.values()),
-        "added_new": sum(leg == "new" for leg in leg_of.values()),
+        "added_new": sum(leg in ("new", "extra") for leg in leg_of.values()),
+        "added_new_wave_1": sum(leg == "new" for leg in leg_of.values()),
+        "added_new_wave_2": sum(leg == "extra" for leg in leg_of.values()),
         "model_enriched": sum(r["enrichment"]["by"].startswith("openai/") for r in recipes),
     }
     manifest = {
@@ -543,6 +591,9 @@ def main() -> int:
     rules = build.ingredient_rules()
     sizes, legs, build_drops = legs_from_staging(STAGING, PACKETS, rules)
     staging = {name: sha256((STAGING / name).read_bytes()) for name in STAGING_INPUTS}
+    committed = {
+        f"data/enrichment/{path.name}": sha256(path.read_bytes()) for path in (WAVE1_CSV, FIRST_BUILD)
+    }
     for part in ("A", "B", "C"):
         staging[f"enrichment-work/part-{part}/recipes.input.jsonl"] = sha256(
             (PACKETS / f"part-{part}" / "recipes.input.jsonl").read_bytes()
@@ -553,8 +604,10 @@ def main() -> int:
             n: sha256((V22 / n).read_bytes()) for n in ("recipes.jsonl", "ingredients.jsonl", "release_manifest.json")
         },
         "staging_sha256": staging,
+        "committed_sha256": committed,
     }
-    files = assemble(v22_lines, (V22 / "ingredients.jsonl").read_bytes(), rules, sizes, legs, build_drops, inputs)
+    ingredients = (V22 / "ingredients.jsonl").read_bytes()
+    files = assemble(v22_lines, ingredients, rules, sizes, legs, build_drops, inputs, first_build=read_first_build())
     args.out.mkdir(parents=True, exist_ok=True)
     for name, data in files.items():
         (args.out / name).write_bytes(data)
