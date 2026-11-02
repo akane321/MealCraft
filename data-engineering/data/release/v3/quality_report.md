@@ -9,106 +9,128 @@ held-out evaluation protocol. Decision: Knowledge ADR-0103 section 3 (issue #390
 | Part | Recipes |
 | --- | ---: |
 | From release v2.2, verbatim | 8968 |
-| Added: over-quota v2.1 recipes, rebuilt and corrected | 1694 |
-| Added: new RecipeNLG candidates, enriched by the OpenAI API | 2233 |
-| **Released** | **12895** |
+| Added: over-quota v2.1 recipes, rebuilt and corrected | 1867 |
+| Added: new RecipeNLG candidates, wave 1 | 2237 |
+| Added: new RecipeNLG candidates, wave 2 (the extra wave) | 5263 |
+| **Released** | **18335** |
 
-Candidates 14233 (v2 enrichment set 11971 + v3 selection
-2262); built by the rules 13920; not released
-1338, each in `dropped.jsonl` with its reason:
+Candidates 19512 (v2 enrichment set 11971 + v3 selection
+7541, of which wave 1 2262); built by the rules
+19187; not released
+1177, each in `dropped.jsonl` with its reason:
 
 | Reason | Candidates |
 | --- | ---: |
 | title already in the release | 582 |
+| cuisine not in a quota bucket | 221 |
 | reviewed incomplete | 220 |
-| cuisine not in a quota bucket | 218 |
-| cuisine label cap | 177 |
-| implausible energy # kcal per serving | 73 |
+| implausible energy # kcal per serving | 84 |
 | new ingredient id | 47 |
 | enrichment failed validation | 19 |
-| excluded by enricher | 1 |
+| excluded by enricher | 2 |
+| implausible energy after the unit-weight correction | 1 |
 | below the importer floor | 1 |
 
-## Cuisine labels (cap 20% of 12895 = 2579 recipes)
+## Cuisine labels (cap 20% of 18335 = 3667 recipes)
 
 | Cuisine | Recipes | Share |
 | --- | ---: | ---: |
-| `american` | 2579 | 20.0% |
-| `chinese` | 1250 | 9.7% |
-| `thai` | 736 | 5.7% |
-| `italian` | 716 | 5.6% |
-| `japanese` | 715 | 5.5% |
-| `indian` | 679 | 5.3% |
-| `korean` | 515 | 4.0% |
-| `mexican` | 435 | 3.4% |
-| `greek` | 415 | 3.2% |
-| `tex_mex` | 361 | 2.8% |
-| `filipino` | 355 | 2.8% |
-| `vietnamese` | 352 | 2.7% |
-| `french` | 348 | 2.7% |
-| `middle_eastern` | 336 | 2.6% |
-| `british_irish` | 335 | 2.6% |
-| `latin_american` | 323 | 2.5% |
-| `caribbean` | 317 | 2.5% |
-| `southern_us` | 289 | 2.2% |
-| `north_african` | 266 | 2.1% |
-| `eastern_european` | 250 | 1.9% |
-| `spanish_portuguese` | 242 | 1.9% |
-| `african` | 221 | 1.7% |
-| `german` | 214 | 1.7% |
-| `indonesian` | 204 | 1.6% |
-| `malaysian_singaporean` | 152 | 1.2% |
-| `scandinavian` | 144 | 1.1% |
-| `cajun_creole` | 77 | 0.6% |
-| `turkish` | 60 | 0.5% |
-| `dutch_belgian` | 9 | 0.1% |
+| `american` | 3188 | 17.4% |
+| `chinese` | 2017 | 11.0% |
+| `italian` | 1182 | 6.4% |
+| `japanese` | 1153 | 6.3% |
+| `indian` | 1136 | 6.2% |
+| `thai` | 951 | 5.2% |
+| `mexican` | 657 | 3.6% |
+| `greek` | 647 | 3.5% |
+| `tex_mex` | 615 | 3.4% |
+| `french` | 608 | 3.3% |
+| `middle_eastern` | 559 | 3.0% |
+| `british_irish` | 540 | 2.9% |
+| `latin_american` | 534 | 2.9% |
+| `korean` | 518 | 2.8% |
+| `north_african` | 447 | 2.4% |
+| `caribbean` | 434 | 2.4% |
+| `eastern_european` | 405 | 2.2% |
+| `spanish_portuguese` | 395 | 2.2% |
+| `filipino` | 364 | 2.0% |
+| `vietnamese` | 358 | 2.0% |
+| `german` | 307 | 1.7% |
+| `southern_us` | 307 | 1.7% |
+| `african` | 234 | 1.3% |
+| `scandinavian` | 220 | 1.2% |
+| `indonesian` | 208 | 1.1% |
+| `malaysian_singaporean` | 166 | 0.9% |
+| `turkish` | 88 | 0.5% |
+| `cajun_creole` | 85 | 0.5% |
+| `dutch_belgian` | 12 | 0.1% |
 
-Local Malaysian and Singaporean (`malaysian_singaporean`): 152 recipes, 43 of them added.
+Local Malaysian and Singaporean (`malaysian_singaporean`): 166 recipes, 57 of them added.
 
 ## Courses and sources
 
-By course: main 7007, side 1694, salad 743, dessert 737, breakfast 597, sauce_condiment 559, snack_appetizer 530, soup 444, baked_good 429, drink 155.
+By course: main 10243, side 2172, dessert 1071, salad 981, snack_appetizer 856, sauce_condiment 828, baked_good 689, breakfast 669, soup 622, drink 204.
 
-By source: RecipeNLG (Gathered) 12557, TheMealDB 241, Wikibooks Cookbook 97.
+By source: RecipeNLG (Gathered) 17994, TheMealDB 244, Wikibooks Cookbook 97.
 
 ## Enrichment and estimated fields
 
-Model-enriched (OpenAI API, `enrichment.by` starting `openai/`): 2233 of 12895 released recipes
-(17.3%); the others were enriched in agent sessions for release v2 (ADR-0030).
+Enriched by one model pass (the new RecipeNLG recipes): 7500 of 18335 released recipes
+(40.9%); the others were enriched in agent sessions for release v2 (ADR-0030). By source
+(`enrichment.by`):
+
+| Wave | Enriched by | Recipes |
+| --- | --- | ---: |
+| wave 1 | `openai/gpt-5.4-mini` | 2237 |
+| wave 2 | `openai/gpt-5.4-mini` | 2685 |
+| wave 2 | `claude/claude-sonnet-5-5` | 2578 |
+
+`openai/...` is the OpenAI API (`enrich_v3_openai.py`); `claude/claude-...` is a Claude subagent with the same
+instructions and validation (`enrich_v3_agents.py`).
 Estimated values carry their evidence and confidence per field in `enrichment` (ADR-0076).
 
 | Estimated | Whole release | Added recipes |
 | --- | ---: | ---: |
-| servings | 73.6% | 64.9% |
-| times | 52.3% | 63.3% |
-| ingredient amounts | 4.0% | 8.1% |
+| servings | 79.9% | 82.4% |
+| times | 56.0% | 64.2% |
+| ingredient amounts | 6.1% | 9.8% |
 
 ## Unit-weight corrections of the added recipes
 
 The v2.2 correction (`scripts/correct_release_v22.py`, owner 2026-10-23) applied to the added recipes:
-242 lines in 239 recipes, each in `corrections.jsonl` with its
+638 lines in 625 recipes, each in `corrections.jsonl` with its
 built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corrections.jsonl`).
 
 | Class | Lines |
 | --- | ---: |
-| `lasagna_sheet` | 8 |
-| `n_times_total` | 10 |
-| `pizza_crust` | 3 |
-| `red_pepper_alias` | 56 |
-| `stated_weight` | 69 |
-| `stated_weight+whole_bird_edible` | 15 |
-| `whole_bird` | 7 |
-| `whole_bird_edible` | 10 |
-| `whole_head` | 64 |
+| `lasagna_sheet` | 29 |
+| `n_times_total` | 18 |
+| `pizza_crust` | 9 |
+| `red_pepper_alias` | 145 |
+| `stated_weight` | 217 |
+| `stated_weight+whole_bird_edible` | 28 |
+| `whole_bird` | 38 |
+| `whole_bird_edible` | 35 |
+| `whole_head` | 119 |
 
 ## Checks
 
-All pass, or the build stops: every v2.2 record is byte-identical in v3 (8968);
-no ingredient id outside v2.2's 701; the largest label is `american` at
-2579 (20.0%); released 12895 >= 12000; every added recipe has
-at least two ingredient lines and a step, per-serving energy within
-10-3000 kcal, and allergens only from the rule table; released +
-not released = candidates.
+All pass, or the build stops:
+
+1. Every v2.2 record is byte-identical in v3 (8968).
+2. Every record of the first v3 build is present and byte-identical (by recipe_id and line sha256;
+   12895 records).
+3. recipes.jsonl is 92790359 bytes <= 95000000.
+4. No ingredient id outside v2.2's 701.
+5. No cuisine label above 20%: the largest is `american` at 3188
+   (17.4%).
+6. Released 18335 >= 18000.
+7. No duplicate recipe ids.
+8. Every added recipe has at least two ingredient lines and a step.
+9. Every added recipe's per-serving energy is within 10-3000 kcal.
+10. Every added recipe's allergens come only from the rule table.
+11. Released + not released = candidates.
+
 v2.2 records outside the energy range, kept verbatim: 0.
 
 ## Decisions
@@ -119,33 +141,35 @@ v2.2 records outside the energy range, kept verbatim: 0.
 4. New candidates are enriched by the OpenAI API (gpt-5.4-mini, reasoning effort low) with the v2 recipe field set, vocabulary, instructions and validation (enrich_v3_openai.py); this amends ADR-0030's choice of agent sessions. Their records say enrichment.by 'openai/gpt-5.4-mini'.
 5. Not released: an ingredient id outside v2.2, cuisine international (ADR-0034, not relabelled), a completeness-flagged recipe with no review verdict (no new completeness review), implausible energy after the correction, below the importer floor, or a title equal (lower-cased, whitespace-normalised) to one already in the release.
 6. No cuisine label is above 20% of the final total; over a label's room usable courses stay first (main, side, soup, salad, breakfast, then the rest), ties by recipe_id.
-7. Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.
-8. Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point estimate, reported with Wilson 95% intervals.
+7. Wave 2 (owner 2026-11-02 ~14:45: grow v3 toward 19,000 recipes, medium quality is fine): more new candidates picked by the same rules after the frozen wave-1 picks (v3_selected_wave1.csv), target 18,280 so recipes.jsonl stays under 95,000,000 bytes. Titles are de-duplicated in the order v2.2, over-quota, wave 1, wave 2, and wave 2 only takes the label room the earlier legs leave, so every record of the first v3 build (12,895) stays byte for byte.
+8. Wave 2 enrichment (owner 2026-11-02 ~16:10): part by the OpenAI API (gpt-5.4-mini, as wave 1) until that run stopped, the rest by Claude subagents (enrich_v3_agents.py: the OpenAI enricher's instructions, schema, input and validation); their records say enrichment.by 'claude/<model>'. The OpenAI API is not used for enrichment again.
+9. Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.
+10. Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point estimate, reported with Wilson 95% intervals.
 
 ## Shortcuts (for teammates to refine later)
 
 - No new completeness review: a flagged new recipe with no verdict is dropped, not reviewed.
 - No new ingredients, prices, halal labels or hierarchy entries: candidates were limited to v2.2's priced ids.
-- New recipes are enriched by one model pass (gpt-5.4-mini, low reasoning effort), not by sessions with an overlap agreement check; the 19 recipes that failed validation twice are dropped, not fixed by hand.
+- New recipes are enriched by one model pass (gpt-5.4-mini at low reasoning effort, or a Claude subagent for part of wave 2), not by sessions with an overlap agreement check; the 19 recipes that failed validation twice are dropped, not fixed by hand.
 - The near-twin guard is an exact title match after lower-casing and whitespace; near-identical recipes with different titles stay.
-- The release total is what passes the checks, not trimmed to the 12,400 target.
+- The release total is what passes the checks, not trimmed to a target.
+- 0 selected candidates were never enriched and are in dropped.jsonl as 'not enriched'.
 - ingredients.jsonl is v2.2's file byte for byte, so its recipe_occurrences count v2.2's recipes only.
 - Composite substitutes are not built (no schema field).
-- The American label sits exactly at the 20% cap, with no headroom: after any withdrawal of a non-American recipe re-run the build (or withdraw an American recipe too).
 - The cuisine labels of the model-enriched recipes are unreviewed model output (some are debatable).
-- The added recipes have no recipe tags, embeddings or planner-pool report yet: the product switch to v3 is a later step.
+- Wave 2's cuisine labels and course labels are unreviewed model output too; its human checks are the 2026-11-04 draws (manual-check-20261104/, allergen-review-20261104/).
 
 ## Files
 
 `fingerprint` (manifest) is the sha256 of the lines "<sha256>  <name>" for `recipes.jsonl`, `ingredients.jsonl` and
-`release_manifest.json` without its `fingerprint` field: `079d88f95965f61a0a97258771cc1f606fa697450709c0ed1ba1939747e7056c`.
+`release_manifest.json` without its `fingerprint` field: `fd33aba2ae946739c72462cd931076bc9c78a2059b8a89322df7c708159ece5f`.
 
 | File | sha256 |
 | --- | --- |
-| `recipes.jsonl` | `ba9d318d83465aba0f15ed1f9a7052aae77f5855feb58f2458f6bcecab2577e0` |
+| `recipes.jsonl` | `a9ad33595d0b1424cfbb8475d3d5f5635ec6d50e283e13e03bee093e3fff99a9` |
 | `ingredients.jsonl` | `4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e` |
-| `dropped.jsonl` | `3773bb8f630a3773aec5fcc12ba7b1da0e5584c80891b412dd655d6945519168` |
-| `corrections.jsonl` | `61c033f2cba25bab854ddc2a05b37f1ac5b992a8e5940b568d98ba1a86902c5b` |
-| `release_manifest.json` | `834ed106f8f8969efa9f7a5c5acf922a32ae73d1cea3bce75e20430fae32205d` |
-| `quality_summary.json` | `f96371b063aaccf5b94d8a9d90de6d754302054cecbbdc312907bd4ee32f3666` |
-| `ATTRIBUTION.md` | `5dc31ef87166a7315a18b7fee94967dc66ae41bc8637d5b80b4014ec8c1879fe` |
+| `dropped.jsonl` | `aff76094d068504a2f4902335c6264f700a318ad4b93c68b3dbdb0fd6056301a` |
+| `corrections.jsonl` | `1174d3e783fc434defaa3bdafe910bb3b7ea57605d4fa0f3ccdcf19bb5587df3` |
+| `release_manifest.json` | `56bf9296953c7d9889eb1fff85495ed69d21c032bc40c023aade12eb536a29e3` |
+| `quality_summary.json` | `3b1006d2d7e11581828fb39f6bd99eb40333de4ca0618f6fdadd52319426b28a` |
+| `ATTRIBUTION.md` | `ca9a6264ff9d53f71bf01a37905a18a267a274337712b1d13fcb9a7ebb115f0f` |

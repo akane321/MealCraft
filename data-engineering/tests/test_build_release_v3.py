@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 import unittest
@@ -63,18 +64,23 @@ def recipe(number: int, cuisine: str, course: str = "main", title: str | None = 
     }
 
 
-def inputs(v22: list[dict], over: list[dict], new: list[dict], drops: tuple = ()) -> tuple:
+def inputs(v22: list[dict], over: list[dict], new: list[dict], drops: tuple = (), extra: tuple = ()) -> tuple:
     # v2.2 lines are kept as written, not re-serialised: a key order json.dumps(sort_keys=True) would change.
     lines = [json.dumps(dict(reversed(list(r.items()))), ensure_ascii=False) for r in v22]
     ingredients = "".join(json.dumps(e, sort_keys=True) + "\n" for e in ENTRIES.values()).encode()
     rebuilt = {r["recipe_id"] for r in v22} | {r["recipe_id"] for r in over}  # the v2 set holds v2.2's candidates
-    sizes = {"v2_enrichment_set": len(rebuilt) + len(drops), "v3_selected": len(new)}
+    sizes = {
+        "v2_enrichment_set": len(rebuilt) + len(drops),
+        "v3_selected": len(new) + len(extra),
+        "v3_selected_wave_1": len(new),
+    }
     build_drops = [v3.drop({"candidate_id": c, "title": "t"}, "reviewed incomplete: milk") for c in drops]
-    return lines, ingredients, RULES, sizes, [("over_quota", over), ("new", new)], build_drops, {}
+    legs = [("over_quota", over), ("new", new), ("extra", list(extra))]
+    return lines, ingredients, RULES, sizes, legs, build_drops, {}
 
 
-def assemble(*args) -> dict[str, bytes]:
-    return v3.assemble(*copy.deepcopy(args), minimum=0)
+def assemble(*args, **options) -> dict[str, bytes]:
+    return v3.assemble(*copy.deepcopy(args), **{"minimum": 0, **options})
 
 
 def released(files: dict[str, bytes]) -> dict[str, dict]:
@@ -134,6 +140,33 @@ class BuildReleaseV3Test(unittest.TestCase):
         self.assertIn("RCP2_000000000022", recipes)
         self.assertEqual(dropped(files)["recipenlg:20"], "cuisine label cap: american held at 3 of 17 recipes (20%)")
 
+    def test_the_label_cap_cuts_the_extra_wave_before_wave_1(self) -> None:
+        new = [recipe(20, "american", "dessert")]
+        extra = [recipe(21, "american"), recipe(22, "american")] + [recipe(n, OTHER[n - 12]) for n in range(23, 28)]
+        files = assemble(*inputs(V22, [], new, extra=extra))
+        recipes = released(files)
+        self.assertIn("RCP2_000000000020", recipes)  # a wave-1 dessert stays over an extra-wave main
+        self.assertIn("RCP2_000000000021", recipes)
+        self.assertEqual(dropped(files)["recipenlg:22"], "cuisine label cap: american held at 3 of 17 recipes (20%)")
+        counts = json.loads(files["release_manifest.json"])["counts"]
+        self.assertEqual((counts["added_new_wave_1"], counts["added_new_wave_2"]), (1, 6))
+        self.assertEqual(counts["enriched_by_wave_2"], {"openai/gpt-5.4-mini": 6})
+
+    def test_a_changed_or_missing_first_build_record_stops_the_build(self) -> None:
+        args = inputs(V22, [recipe(20, "chinese")], [])
+        line = released(assemble(*args))["RCP2_000000000020"]
+        digest = hashlib.sha256(json.dumps(line, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+        assemble(*args, first_build={"RCP2_000000000020": digest})
+        with self.assertRaises(SystemExit):
+            assemble(*args, first_build={"RCP2_000000000020": "0" * 64})
+        with self.assertRaises(SystemExit):
+            assemble(*args, first_build={"RCP2_000000000099": digest})
+
+    def test_recipes_over_the_byte_limit_stop_the_build(self) -> None:
+        args = inputs(V22, [recipe(20, "chinese")], [])
+        with self.assertRaises(SystemExit):
+            assemble(*args, max_bytes=1000)
+
     def test_the_build_is_deterministic_and_the_fingerprint_covers_the_manifest(self) -> None:
         args = inputs(V22, [recipe(20, "chinese"), recipe(21, "american", "side")], [recipe(22, "thai")])
         first, second = assemble(*args), assemble(*args)
@@ -158,6 +191,26 @@ class BuildReleaseV3Test(unittest.TestCase):
         wrong["ingredients"][0]["allergens"] = []
         with self.assertRaises(SystemExit):
             assemble(*inputs(V22, [wrong], []))
+
+
+class CommittedReleaseV3Test(unittest.TestCase):
+    def test_every_first_build_record_is_byte_identical(self) -> None:
+        # The first v3 build (12,895) = v2.2's records + the added lines in v3_first_build_lines.tsv.
+        def hashes(path: Path) -> dict[str, str]:
+            lines = path.read_text(encoding="utf-8").splitlines()
+            return {json.loads(line)["recipe_id"]: hashlib.sha256(line.encode()).hexdigest() for line in lines}
+
+        old = {**hashes(v3.V22 / "recipes.jsonl"), **v3.read_first_build()}
+        self.assertEqual(len(old), 12895)
+        current = hashes(v3.OUT / "recipes.jsonl")
+        self.assertEqual({key: current.get(key) for key in old}, old)
+
+    def test_the_committed_counts(self) -> None:
+        counts = json.loads((v3.OUT / "release_manifest.json").read_text(encoding="utf-8"))["counts"]
+        parts = ("released_recipes", "from_v2_2", "added_over_quota", "added_new_wave_1", "added_new_wave_2")
+        self.assertEqual([counts[k] for k in parts], [18335, 8968, 1867, 2237, 5263])
+        self.assertEqual(counts["enriched_by_wave_2"], {"openai/gpt-5.4-mini": 2685, "claude/claude-sonnet-5-5": 2578})
+        self.assertLessEqual((v3.OUT / "recipes.jsonl").stat().st_size, v3.MAX_RECIPES_BYTES)
 
 
 if __name__ == "__main__":
