@@ -92,7 +92,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 <template>
   <section class="convos" aria-label="Your plans">
     <label class="search">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+      <UIcon name="i-lucide-search" aria-hidden="true" />
       <input id="plan-search" v-model="query" type="search" placeholder="Search plans" aria-label="Search plans" autocomplete="off">
     </label>
     <p v-if="!filtered.length" class="empty mc-small">{{ query ? "No plan matches." : "Your plans will appear here." }}</p>
@@ -113,11 +113,12 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
               @blur="saveRename(item)"
             >
             <button v-else type="button" class="open" :title="titleOf(item)" :aria-current="item.id === currentId ? 'true' : undefined" @click="emit('open', item)">
+              <UIcon name="i-lucide-message-circle" class="ic" aria-hidden="true" />
               <span class="t"><svg v-if="item.pinned_at" class="pin" viewBox="0 0 24 24" aria-label="Pinned"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" /></svg>{{ titleOf(item) }}</span>
               <span class="s" :class="statusOf(item).tone">{{ statusOf(item).label }}</span>
             </button>
             <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="menuFor = menuFor === item.id ? null : item.id">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="18" cy="12" r="1.6" /></svg>
+              <UIcon name="i-lucide-ellipsis" aria-hidden="true" />
             </button>
             <div v-if="menuFor === item.id" class="row-menu mc-card" role="menu">
               <button type="button" role="menuitem" @click="startRename(item)">Rename</button>
@@ -133,32 +134,35 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 </template>
 
 <style scoped>
-.convos { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
-.search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border: 1px solid var(--c-line); border-radius: 10px; background: #fff; }
-.search svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--c-muted); stroke-width: 2; stroke-linecap: round; }
-.search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: var(--c-ink); }
-.empty { margin: 4px 10px; color: var(--c-muted); }
-.groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
-h3 { margin: 0; padding: 0 10px 4px; }
-ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.row { position: relative; display: flex; align-items: center; border-radius: 10px; }
-.row:hover, .row:focus-within { background: rgba(42, 42, 72, 0.05); }
-.row.on { background: #fff; box-shadow: 0 0 0 1px var(--c-line); }
-.open { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; padding: 6px 4px 6px 10px; border: 0; background: transparent; color: var(--c-neutral-text); text-align: left; }
-.row.on .open { color: var(--c-ink); }
-.t { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row.on .t { font-weight: 800; }
-.pin { width: 13px; height: 13px; flex: none; fill: none; stroke: var(--c-coral); stroke-width: 2; stroke-linejoin: round; }
-.s { font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.s.week { color: var(--c-green-text); font-weight: 800; }
+.convos { min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.search { flex: none; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid #ededf0; border-radius: 10px; background: #fff; }
+.search .iconify { width: 15px; height: 15px; flex: none; color: #a1a1aa; }
+.search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font: inherit; font-size: 13.5px; color: #18181b; }
+.search input::placeholder { color: #a1a1aa; }
+.search:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12); }
+.empty { margin: 4px 10px; color: #a1a1aa; }
+.groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; -webkit-mask-image: linear-gradient(#000 calc(100% - 6px), transparent); mask-image: linear-gradient(#000 calc(100% - 6px), transparent); }
+h3 { margin: 0; padding: 0 10px 2px; font-size: 11px; line-height: 14px; font-weight: 500; color: #a1a1aa; }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.row { position: relative; display: flex; align-items: center; border: 1px solid #ededf0; border-radius: 10px; background: #fff; transition: border-color 150ms, box-shadow 150ms; }
+.row:hover, .row:focus-within { border-color: #e1e1e5; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); }
+.row.on { border-color: #ddd6fe; }
+.open { min-width: 0; flex: 1; display: grid; grid-template-columns: 15px minmax(0, 1fr); column-gap: 8px; align-items: center; padding: 6px 2px 6px 10px; border: 0; background: transparent; color: #27272a; text-align: left; }
+.ic { grid-row: 1 / span 2; width: 15px; height: 15px; color: #71717a; }
+.row.on .ic { color: #8b5cf6; }
+.t { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; font-size: 13.5px; line-height: 18px; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; }
+.row.on .t { color: #0f0f12; }
+.pin { width: 12px; height: 12px; flex: none; fill: none; stroke: #a1a1aa; stroke-width: 2; stroke-linejoin: round; }
+.s { font-size: 11.5px; line-height: 14px; color: #a1a1aa; }
+.s.week { color: var(--c-green-text); font-weight: 500; }
 .s.gone { font-style: italic; }
-.more { flex: none; width: 28px; height: 28px; margin-right: 4px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; opacity: 0; }
+.more { flex: none; width: 24px; height: 24px; margin-right: 4px; display: grid; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #71717a; opacity: 0; }
 .row:hover .more, .row:focus-within .more, .row.on .more, .more[aria-expanded="true"] { opacity: 1; }
-.more:hover { background: rgba(42, 42, 72, 0.08); }
-.more svg { width: 18px; height: 18px; fill: var(--c-ink); }
-.row-menu { position: absolute; z-index: 20; top: 34px; right: 4px; min-width: 150px; padding: 4px; display: grid; }
-.row-menu button { padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--c-ink); font: inherit; font-size: 14px; text-align: left; }
-.row-menu button:hover, .row-menu button:focus-visible { background: rgba(42, 42, 72, 0.06); }
-.row-menu .danger { color: var(--c-coral); }
-.rename { flex: 1; min-width: 0; margin: 4px; padding: 6px 8px; border: 1px solid var(--c-coral); border-radius: 8px; font: inherit; font-size: 14px; }
+.more:hover { background: #f4f4f5; color: #18181b; }
+.more .iconify { width: 16px; height: 16px; }
+.row-menu { position: absolute; z-index: 20; top: 36px; right: 0; min-width: 160px; padding: 4px; display: grid; border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -12px rgba(16, 16, 20, 0.16); }
+.row-menu button { height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #27272a; font: inherit; font-size: 13.5px; text-align: left; }
+.row-menu button:hover, .row-menu button:focus-visible { background: #f4f4f5; }
+.row-menu .danger { color: #b42318; }
+.rename { flex: 1; min-width: 0; margin: 3px; height: 30px; padding: 0 8px; border: 1px solid #a78bfa; border-radius: 8px; outline: 0; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15); font: inherit; font-size: 13.5px; }
 </style>

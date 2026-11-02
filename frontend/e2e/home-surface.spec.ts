@@ -1617,7 +1617,8 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing se
   await expect(workspace.getByRole("button", { name: "Send" })).toBeDisabled();
   await expect(page.getByRole("button", { name: /New plan/ })).toBeEnabled();
   await composer.press("Enter");
-  await conversation.getByRole("button", { name: "A high-protein week" }).click();
+  // The starter cards sit under the prompt box, in the chat but outside the conversation itself.
+  await workspace.getByRole("button", { name: "A high-protein week" }).click();
   expect(answered).toBe(false);
 
   // Once the week is back, the words reach conversation 51, once.
