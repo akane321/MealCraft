@@ -2,7 +2,7 @@
 import { formatPlanDate } from "~/lib/meal-plan-format";
 import type { ServerClock } from "~/plugins/server-today";
 
-const { actor, load, logout } = useAuth();
+const { load } = useAuth();
 const route = useRoute();
 // A simulated day (SIMULATED_TODAY, debugging and demos) is always visible, so it is never mistaken for today.
 const clock = useState<ServerClock | null>("server-clock");
@@ -53,25 +53,12 @@ onMounted(load);
           <NuxtPage />
         </div>
       </div>
-      <template v-else>
-        <header v-if="route.path !== '/' && !route.path.startsWith('/ops')" class="app-header">
-          <div class="page-width header-content">
-            <NuxtLink class="brand-name" to="/">
-              <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><circle cx="16" cy="18" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" fill="#c2553a" /></svg>MealCraft
-            </NuxtLink>
-            <nav class="primary-nav" aria-label="Primary navigation">
-              <NuxtLink to="/">Back to my plan</NuxtLink>
-              <NuxtLink to="/browse">Recipes</NuxtLink>
-              <NuxtLink to="/history">Past plans</NuxtLink>
-              <button v-if="actor" class="nav-auth" type="button" @click="logout">
-                Sign out {{ actor.user.display_name }}
-              </button>
-              <NuxtLink v-else to="/login">Sign in</NuxtLink>
-            </nav>
-          </div>
-        </header>
+      <!-- Sign-in: the same tinted page with the mark; the home surface and the console (/ops) draw their own. -->
+      <div v-else-if="route.path.startsWith('/login')" class="mc-shell mc-page auth-shell">
+        <NuxtLink to="/" class="sb-brand auth-brand"><ShellMark />MealCraft</NuxtLink>
         <NuxtPage />
-      </template>
+      </div>
+      <NuxtPage v-else />
     </div>
   </UApp>
 </template>
@@ -85,4 +72,6 @@ onMounted(load);
 /* The profile's sticky column sticks inside the panel, not the window. */
 .product-frame :deep(.profile-sidebar) { top: 72px; max-height: calc(100vh - 104px); }
 .product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
+.auth-shell { min-height: 100vh; padding: 12px 18px 48px; }
+.auth-brand { width: fit-content; }
 </style>

@@ -85,8 +85,8 @@ function packLabel(size: number | null, unit: string | null) {
 <template>
   <main class="page-width browse">
     <section class="head">
-      <p class="eyebrow">Browse</p>
-      <h1>Everything the planner can choose from.</h1>
+      <h1>Everything the planner can choose from</h1>
+      <p class="mc-sub">Open a recipe for its steps, or look up what a grocery costs at FairPrice.</p>
       <div class="tabs mc-segmented" role="tablist" aria-label="What to browse">
         <button type="button" role="tab" :aria-selected="tab === 'recipes'" @click="tab = 'recipes'">Recipes</button>
         <button type="button" role="tab" :aria-selected="tab === 'products'" @click="tab = 'products'">Groceries</button>
@@ -154,35 +154,34 @@ function packLabel(size: number | null, unit: string | null) {
 
 <style scoped>
 .browse { padding-block: 28px 48px; }
-.head h1 { margin: 0 0 16px; }
 .tabs { display: inline-flex; gap: 2px; }
 .tabs button { border: 0; background: transparent; cursor: pointer; font: inherit; }
 .tabs button[aria-selected="true"] { background: #fff; }
-.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0 16px; }
-.search { flex: 0 1 360px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 12px; background: #fff; }
-.search:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0; }
+.search { flex: 0 1 320px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.search:focus-within { border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .search .iconify { width: 16px; height: 16px; flex: none; color: #a1a1aa; }
 .search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--mc-strong); font: inherit; }
 .search input::placeholder { color: #a1a1aa; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { height: 30px; padding: 0 12px; border: 1px solid #ececef; border-radius: 999px; background: #fff; color: #52525b; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; }
+.chip { height: 32px; padding: 0 12px; border: 1px solid #ececef; border-radius: 999px; background: #fff; color: #52525b; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; }
 .chip:hover { border-color: #d4d4d8; }
 .chip[aria-pressed="true"] { border-color: #18181b; background: #18181b; color: #fff; }
 .live { display: flex; gap: 6px; align-items: center; color: var(--t2); font-size: 13px; }
 .notice { color: var(--t3); }
-.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 14px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); transition: border-color 150ms, box-shadow 150ms; }
+.cards { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); transition: border-color 150ms, box-shadow 150ms; }
 .card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: 0 6px 20px -12px rgba(16, 16, 20, 0.15); }
 .card .icon { margin-bottom: 8px; }
 .card .title { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
 .card small { color: #71717a; font-size: 12.5px; }
 .more { margin-top: 18px; }
 .products { width: 100%; border-collapse: collapse; font-size: 14px; }
-.products th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
-.products td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.products th { text-align: left; font-size: 12px; font-weight: 500; color: #71717a; padding: 8px 10px; border-bottom: 1px solid #ececef; }
+.products td { padding: 10px; border-bottom: 1px solid #f0f0f2; color: #27272a; vertical-align: top; }
 .products td small { display: block; color: var(--t3); font-size: 12px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .products .out td { color: var(--t3); }
-.products a { color: var(--accent); }
+.products a { color: #6d28d9; font-weight: 500; }
 .source { margin-top: 10px; color: var(--muted); font-size: 12px; }
 </style>

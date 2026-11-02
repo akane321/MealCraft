@@ -421,7 +421,7 @@ onMounted(async () => {
           <article v-for="(member, index) in members" :key="index" class="member-card">
             <div class="member-card-header">
               <strong>Member {{ index + 1 }}</strong>
-              <button type="button" class="text-button danger-text" :disabled="members.length === 1" @click="removeMember(index)">Remove</button>
+              <button type="button" class="text-button danger-text" :disabled="members.length === 1" @click="removeMember(index)"><UIcon name="i-lucide-trash-2" aria-hidden="true" />Remove</button>
             </div>
             <div class="member-core-fields">
               <label><span>Name</span><input v-model="member.name" type="text" maxlength="80" required></label>
@@ -679,7 +679,7 @@ onMounted(async () => {
         </section>
 
         <section class="profile-planning-card">
-          <p class="form-kicker">Plan your meals</p>
+          <h2>Plan your meals</h2>
           <div class="plan-when">
             <label><span>Starts</span><input v-model="form.planningStartDate" type="date" required></label>
             <label>

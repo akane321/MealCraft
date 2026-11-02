@@ -50,7 +50,6 @@ async function submit() {
       </div>
 
       <template v-if="audience === 'household'">
-        <p class="eyebrow">Private household workspace</p>
         <h1>{{ mode === "login" ? "Welcome back" : "Create your MealCraft account" }}</h1>
         <p>Your plans, household profile and Assistant history stay inside your household.</p>
 
@@ -60,7 +59,6 @@ async function submit() {
         </div>
       </template>
       <template v-else>
-        <p class="eyebrow">Operations console</p>
         <h1>Administrator sign in</h1>
         <p>Administrator accounts are set up by the team. Sign in to watch runs, check services and debug plans.</p>
         <div class="auth-spacer" />
@@ -103,27 +101,28 @@ async function submit() {
 </template>
 
 <style scoped>
-.auth-page { display: grid; place-items: start center; }
-.auth-card { width: min(520px, 100%); padding: clamp(24px, 5vw, 38px); border: 1px solid var(--border); border-radius: 20px; background: var(--s1); }
-.auth-card h1 { margin: 6px 0 10px; font-size: 34px; }
-.auth-card > p { color: var(--muted); line-height: 1.5; }
-.audience { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 26px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--ink); }
-.audience button { padding: 9px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; }
-.audience button.active { background: var(--s3); color: var(--ivory); font-weight: 600; }
-.eyebrow { margin: 0; color: var(--accent) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; }
-.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 28px 0 22px; border-bottom: 1px solid var(--border); }
-.auth-tabs button { padding: 12px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
-.auth-tabs button.active { box-shadow: inset 0 -2px 0 var(--accent); color: var(--ivory); font-weight: 600; }
-.auth-spacer { height: 12px; }
-form { display: grid; gap: 18px; }
-label, .field { display: grid; gap: 8px; color: var(--t2); font-size: 13px; font-weight: 500; }
+/* One white card on the tinted page: a segmented audience switch, plain fields, a dark pill to sign in. */
+.auth-page { display: grid; place-items: start center; padding-block: 56px 0; }
+.auth-card { width: min(440px, 100%); padding: 28px 32px 32px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.auth-card h1 { margin: 0 0 6px; color: var(--mc-strong); font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em; }
+.auth-card > p { margin: 0; color: #71717a; font-size: 14px; line-height: 20px; }
+.audience { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 24px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.audience button { height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.audience button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 20px 0; border-bottom: 1px solid #f0f0f2; }
+.auth-tabs button { height: 40px; border: 0; background: transparent; color: #71717a; font-size: 14px; font-weight: 500; cursor: pointer; }
+.auth-tabs button.active { box-shadow: inset 0 -2px 0 #18181b; color: var(--mc-strong); }
+.auth-spacer { height: 20px; }
+form { display: grid; gap: 16px; }
+label, .field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; }
-.switch { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 500; cursor: pointer; }
+.switch { padding: 0; border: 0; background: none; color: #6d28d9; font: inherit; font-weight: 500; cursor: pointer; }
 .switch:hover { text-decoration: underline; }
-input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; }
-input:focus { outline: none; border-color: var(--accent); }
-.auth-submit { padding: 13px 18px; border: 0; border-radius: 999px; color: var(--ink); background: var(--ivory); font-weight: 600; cursor: pointer; }
-.auth-submit:disabled { opacity: .6; cursor: wait; }
-.auth-error { margin: 0 0 18px; color: var(--danger) !important; line-height: 1.5; }
+input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; color: #18181b; font: inherit; font-size: 14px; font-weight: 400; box-shadow: var(--mc-shadow-xs); transition: border-color 150ms, box-shadow 150ms; }
+input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+.auth-submit { height: 40px; margin-top: 4px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.auth-submit:hover:not(:disabled) { background: #27272a; }
+.auth-submit:disabled { opacity: 0.6; cursor: wait; }
+.auth-error { margin: 16px 0 0; color: #b42318 !important; font-size: 13px; line-height: 1.5; }
 form .auth-error { margin: 0; }
 </style>
