@@ -413,10 +413,7 @@ def composed_packet(
             # The cheapest are often one dish many times ("Chinese Fried Rice", "Basic Fried Rice"): one of
             # each family comes first. (Without a budget the packet stays as ranked: reordered by family, a
             # week of per-day bands, mdw-dev-007, kept 17 distinct dishes of 28 instead of 24.)
-            # The ranked half is FairPrice's dishes first too: a store that only adds options (RedMart's dill made
-            # four salads priceable) must not make the four-person week S$20 dearer by taking the places of dishes
-            # that cost less in whole packages.
-            ranked = sorted(families_first(ranked), key=buys_at_second_store)
+            ranked = families_first(ranked)
             best = ranked[: limits[key] // 2]
             kept = {dish_family(r.recipe.title) for r in best}
             best += families_first(sorted(ranked[len(best) :], key=bought_first), kept)[: limits[key] - len(best)]
@@ -777,7 +774,7 @@ class ProductPlanningEngine:
                     ),
                     composition=meal_roles,
                     locked_roles=kept_roles,
-                    min_energy_kcal=floor_share * floor_kcal if floor_share else None,
+                    min_energy_kcal=round(floor_share * floor_kcal, 1) if floor_share else None,
                     trip=trip,
                     days_after_shopping=since_trip,
                     # The shared-dish model (ADR-0071 section 1): who is at this meal, and each one's own limits.
