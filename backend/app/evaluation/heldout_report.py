@@ -149,7 +149,48 @@ def _check_manifest(records: list[CaseOutcome], expected: ExpectedManifest) -> N
         raise ValueError("the number of voided cases differs from the expected number")
 
 
-def aggregate(records: Iterable[CaseOutcome], expected: ExpectedManifest | None = None) -> dict:
+def _withhold_small(system: dict, minimum: int) -> dict:
+    """Withhold what could identify a question (ADR-0100 item 5).
+
+    Hiding one small cell is not enough while the language and source totals stay: a reader subtracts the cells that
+    remain from them. So when any category-language-source cell has fewer than `minimum` remaining cases, the system
+    gets no cross cells at all, only the one-dimensional totals and the overall total, and the one-dimensional totals
+    show their remaining count alone (their status and void counts would locate the small cell's outcomes, for
+    example a status found only in one language). A one-dimensional total under
+    the minimum is withheld too; when a dimension then has exactly one withheld value, the smallest other value of that
+    dimension goes with it, because the overall total minus the shown values would give the withheld one back. If the
+    overall total is under the minimum, only "withheld" is shown. A withheld value is replaced as a whole, so none of
+    its counts or rates is published. Voided cases do not count. This lowers the risk of identifying a question; it is
+    not a proof that none is possible, so the sealed side still reviews the real counts before a report leaves it.
+    """
+    small = f"fewer than {minimum} remaining cases"
+    if system["overall"]["remaining_n"] < minimum:
+        return {"overall": {"withheld": small}}
+    if not any(summary["remaining_n"] < minimum for summary in system["cells"].values()):
+        return system
+    system["cells"] = {"withheld": f"a cell has {small}"}
+    for part in ("by_category", "by_language", "by_source"):
+        totals = system[part]
+        low = [name for name, summary in totals.items() if summary["remaining_n"] < minimum]
+        if len(low) == 1:
+            others = [name for name in totals if name != low[0]]
+            nearest = min(others, key=lambda name: (totals[name]["remaining_n"], name))
+            totals[nearest] = {"withheld": "withheld so the overall total cannot give back the small value beside it"}
+        for name in low:
+            totals[name] = {"withheld": small}
+        # Status and void counts of a group would show where the small cell's outcomes sit (a status found only in
+        # one language, say), so the groups keep their remaining count alone; the overall total keeps everything.
+        for name, summary in totals.items():
+            if "withheld" not in summary:
+                totals[name] = {"remaining_n": summary["remaining_n"]}
+    return system
+
+
+def aggregate(
+    records: Iterable[CaseOutcome], expected: ExpectedManifest | None = None, *, min_cell_n: int | None = None
+) -> dict:
+    if min_cell_n is not None and (isinstance(min_cell_n, bool) or not isinstance(min_cell_n, int) or min_cell_n < 1):
+        raise ValueError("the minimum cell size is a positive whole number")
     records = list(records)
     if not records:
         raise ValueError("no outcomes")
@@ -176,6 +217,8 @@ def aggregate(records: Iterable[CaseOutcome], expected: ExpectedManifest | None 
             "by_source": group(runs, lambda r: r.source),
             "cells": group(runs, lambda r: f"{r.category}|{r.language}|{r.source}"),
         }
+        if min_cell_n is not None:
+            systems[system_id] = _withhold_small(systems[system_id], min_cell_n)
     return {
         "note": "Counts only. Timeouts, errors and missing outputs stay in the denominator and are never successes.",
         "systems": systems,
