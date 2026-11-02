@@ -56,7 +56,7 @@ def slot_members(
         floor = None
         if energy_floor_share:
             need = member.daily_energy_kcal or member.servings * adult
-            floor = round(energy_floor_share * need, 1)
+            floor = energy_floor_share * need
         members.append(
             PlanningSlotMember(
                 name=member.name,
