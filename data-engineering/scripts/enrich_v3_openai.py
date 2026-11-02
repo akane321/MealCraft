@@ -274,12 +274,16 @@ def write_summary() -> dict:
     """What the staging logs say about the run so far, to the committed summary (the logs are git-ignored)."""
     results, failed, calls = existing(MERGED), existing(FAILED), existing(USAGE)
     done = {r["candidate_id"] for r in results}
+    # Failed rows without "by" are this script's; enrich_v3_agents.py writes "by" on its own.
+    last_failed = {r["candidate_id"]: r.get("by", f"openai/{MODEL}") for r in failed if r["candidate_id"] not in done}
     summary = {
         "model": sorted({r["enriched_by"] for r in results}),
         "selected": len(read_jsonl(SELECTED)),
         "enriched": len(done),
+        "enriched_by": dict(sorted(collections.Counter(r["enriched_by"] for r in results).items())),
         "excluded_by_enricher": sum("exclude" in r for r in results),
-        "failed_validation_twice": len({r["candidate_id"] for r in failed} - done),
+        "failed_validation_twice": len(last_failed),
+        "failed_last_by": dict(sorted(collections.Counter(last_failed.values()).items())),
         "calls": len(calls),
         "calls_rejected_by_validation": sum(c["status"] == "rejected" for c in calls),
         "prompt_tokens": sum(c["prompt_tokens"] for c in calls),
