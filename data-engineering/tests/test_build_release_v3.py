@@ -202,6 +202,9 @@ class CommittedReleaseV3Test(unittest.TestCase):
 
         old = {**hashes(v3.V22 / "recipes.jsonl"), **v3.read_first_build()}
         self.assertEqual(len(old), 12895)
+        # The recipes a reviewed row corrects (data/enrichment/v3-corrections.csv) are the only exceptions.
+        corrected = {row["recipe_id"] for row in v3.reviewed.read_table() if row["field"] != "withdraw"}
+        old = {key: digest for key, digest in old.items() if key not in corrected}
         current = hashes(v3.OUT / "recipes.jsonl")
         self.assertEqual({key: current.get(key) for key in old}, old)
 
