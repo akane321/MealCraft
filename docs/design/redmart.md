@@ -87,9 +87,10 @@ list.
     with no mapped entry.
   - In live mode a store's products are refreshed by its own live search (limit 40 for RedMart), one search per
     query the reviewed products were captured with, until every reviewed id is seen. Only reviewed ids are kept; one
-    no search returns is gone from the shelf.
-  - A store that cannot be read live (a failure or a challenge, and no cached answer) keeps its reviewed snapshot
-    prices, with a warning: it is not a store with nothing, so no later store fills the line in its place.
+    no search returns is gone from the shelf, but only when every query was read.
+  - When a query cannot be read live (a failure or a challenge, and no cached answer), the reviewed products no
+    search returned keep their snapshot prices, with a warning: a store that cannot be read is not a store with
+    nothing, so no later store fills the line in its place.
 - **Live search.** `ProductSearchService.search(..., retailer="redmart")` has its own provider, lookup budget,
   failure counter and cache source. Its chain is live, then cache, then nothing.
   - RedMart is asked nothing more in a request after its first failure (`REDMART_FAILURE_LIMIT = 1`; the other
