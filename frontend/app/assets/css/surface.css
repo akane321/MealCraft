@@ -45,15 +45,18 @@
 .mc-surface *, .mc-overlay *, .mc-sheet-overlay * { scrollbar-width: thin; scrollbar-color: #d6cfc0 transparent; }
 .mc-surface ::-webkit-scrollbar, .mc-overlay ::-webkit-scrollbar { width: 8px; height: 8px; }
 .mc-surface ::-webkit-scrollbar-thumb, .mc-overlay ::-webkit-scrollbar-thumb { background: #d6cfc0; border-radius: 8px; }
-.mc-surface button:active:not(:disabled), .mc-overlay button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-.mc-surface button, .mc-overlay button { transition: background 150ms, border-color 150ms, color 150ms, transform 80ms; }
 
 .mc-surface { position: fixed; inset: 0; overflow: clip; background: var(--ink); }
 .mc-surface[data-view="landing"] { background: #2a2a48; }
 
+/* In the base layer, so Nuxt UI's utility classes can override them. */
+@layer base {
+.mc-surface button:active:not(:disabled), .mc-overlay button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+.mc-surface button, .mc-overlay button { transition: background 150ms, border-color 150ms, color 150ms, transform 80ms; }
 .mc-surface button, .mc-overlay button, .mc-sheet-overlay button { font-family: inherit; color: inherit; cursor: pointer; }
 .mc-surface button:disabled, .mc-overlay button:disabled { cursor: default; opacity: 0.55; }
 .mc-surface :focus-visible, .mc-overlay :focus-visible, .mc-sheet-overlay :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
 
 /* One copy for every component that needs to label something for screen readers. */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

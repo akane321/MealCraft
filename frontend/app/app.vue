@@ -17,6 +17,8 @@ useHead({
   link: [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito:wght@500;600;700;800&display=swap" },
+    // The product and the console use Inter; the landing keeps the two fonts above.
+    { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" },
   ],
 });
 
@@ -24,6 +26,7 @@ onMounted(load);
 </script>
 
 <template>
+  <UApp>
   <div class="app-shell">
     <p v-if="simulatedLabel" class="simulated-clock" role="status">Simulated date: {{ simulatedLabel }} · for debugging</p>
     <!-- The home surface and the console (/ops) draw their own navigation. -->
@@ -47,6 +50,7 @@ onMounted(load);
 
     <NuxtPage />
   </div>
+  </UApp>
 </template>
 
 <style scoped>

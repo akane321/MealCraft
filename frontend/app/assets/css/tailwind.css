@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, "Noto Sans SC", sans-serif;
+}
+
+/* Landing guard: Preflight (layer base) must not change the logged-out landing.
+   Unlayered with zero specificity, so any rule of the landing's own still wins. */
+:where(.landing) svg { vertical-align: baseline; }
+:where(.film) video, :where(.landing) video { display: inline; max-width: none; vertical-align: baseline; }
+:where(.landing) input { padding: 1px 2px; }
+:where(.landing) button { padding: 1px 6px; appearance: auto; }
+:where(.landing) ::placeholder { opacity: revert-layer; }
+body { color: var(--ivory); }
