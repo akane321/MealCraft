@@ -45,9 +45,9 @@ services:
       - ./backend/alembic:/app/alembic
       - ./backend/tests:/app/tests
       - ./data:/app/data:ro
-      # Release v2.2 recipes, loaded beside the curated catalog; the importer skips
-      # them when the recorded digest already matches.
-      - ./data-engineering/data/release/v2.2:/app/data-engineering/data/release/v2.2:ro
+      # Data release v3 recipes (since 2026-11-02; v2.2 before), loaded beside the curated catalog; the
+      # importer skips them when the recorded digest already matches.
+      - ./data-engineering/data/release/v3:/app/data-engineering/data/release/v3:ro
       # Release v2.1 stays mounted: protocol v2-multidish and the v3 meal/day/week
       # runner read it as frozen facts (app.evaluation.release_catalog).
       - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
@@ -75,7 +75,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-      # The first release v2 import runs before uvicorn starts and can take a minute.
+      # The first release import runs before uvicorn starts and can take a minute.
       start_period: 180s
 
   worker:
@@ -89,7 +89,7 @@ services:
     volumes:
       - ./backend/app:/app/app
       - ./data:/app/data:ro
-      - ./data-engineering/data/release/v2.2:/app/data-engineering/data/release/v2.2:ro
+      - ./data-engineering/data/release/v3:/app/data-engineering/data/release/v3:ro
       - ./data-engineering/data/release/v2.1:/app/data-engineering/data/release/v2.1:ro
     depends_on:
       backend:

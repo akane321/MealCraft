@@ -39,7 +39,8 @@ def test_every_release_the_backend_reads_is_mounted():
         for path in (root / "backend/app").rglob("*.py")
         for version in RELEASE_DIR.findall(path.read_text(encoding="utf-8"))
     }
-    assert "v2.1" in named and "v2.2" in named
+    # v2.1: the frozen protocol facts (app.evaluation.release_catalog); v3: the product release since 2026-11-02.
+    assert "v2.1" in named and "v3" in named
     services = _services(compose_file.read_text(encoding="utf-8"))
     for service in ("backend", "worker"):
         mounted = {

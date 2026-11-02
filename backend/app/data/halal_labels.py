@@ -2,7 +2,7 @@
 
     uv run --project backend python -m app.data.halal_labels      # from the repository root, offline, deterministic
 
-One label per catalog ingredient: the release v2.2 ingredients plus the curated ones. The first rule that applies
+One label per catalog ingredient: the product release's ingredients plus the curated ones. The first rule that applies
 decides, so a reviewer can audit by `source`:
 
 1. `rule:pork`: the pork family of the ingredient hierarchy (pork and all that is a variety of, or made from, it).

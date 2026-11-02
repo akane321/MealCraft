@@ -13,7 +13,7 @@ from pydantic import SecretStr
 from app.core.paths import repository_root
 from app.evaluation import pure_llm_baseline as runner
 from app.evaluation.baseline_output import BaselineAnswer
-from app.evaluation.baseline_resources import _ingredient_facts, load_resources
+from app.evaluation.baseline_resources import RELEASE, _ingredient_facts, load_resources
 
 DEV_EPISODE = repository_root() / "data/evaluation/dev/v2-multidish/episodes/md-dev-001.json"
 
@@ -161,7 +161,7 @@ def test_main_live_writes_records_reports_and_resumes(tmp_path):
     assert scored["validation"]["strict_passed"] is False
     report = json.loads(output.with_suffix(".report.json").read_text(encoding="utf-8"))
     assert report["fingerprint"] == runner.freeze_fingerprint()
-    assert report["release_version"] == "v2.2"
+    assert report["release_version"] == "v3"  # data release v3 since 2026-11-02 (baseline_resources.RELEASE)
     assert report["allow_heldout"] is False
     assert report["spend"]["usd"] == pytest.approx(2 * (1000 * 0.75 + 500 * 4.5) / 1e6)
     assert report["run_date"]
@@ -236,7 +236,7 @@ def test_request_shape_with_a_mocked_client(monkeypatch):
 
 def test_load_resources_reads_the_frozen_data():
     loaded = resources()
-    assert loaded.release_version == "v2.2"
+    assert loaded.release_version == "v3"  # data release v3 since 2026-11-02 (baseline_resources.RELEASE)
     assert loaded.checked_allergens == {
         "dairy", "egg", "fish", "gluten", "peanut", "sesame", "shellfish", "soy", "tree_nut",
     }  # fmt: skip
@@ -254,7 +254,7 @@ def test_load_resources_reads_the_frozen_data():
 
 
 def test_ingredient_facts_keep_unknown_and_add_curated_allergens(tmp_path):
-    release = tmp_path / "data-engineering/data/release/v2.2"
+    release = tmp_path / RELEASE
     release.mkdir(parents=True)
     nutrition = {"energy_kcal": 1, "protein_g": 1, "carbohydrate_g": 1, "fat_g": 1, "sodium_mg": 1, "sugar_g": 1}
     rows = [
