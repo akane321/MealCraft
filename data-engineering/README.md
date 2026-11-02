@@ -76,7 +76,9 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 ## data release v3：v2.2 原样 + 新增菜谱（Knowledge ADR-0103 第 3 节，issue #390）
 
 "data release v3"是数据版本，不是名为 v3 的留出评测协议。产品从这一版起读 v3（Knowledge ADR-0111）：后端
-`RELEASE_VERSION` 是 v3，导入 12,895 道里的 12,894 道（和 v2.2 一样跳过 `RCP2_5EFEFE98D566`）；v2.2 作为 v3 的冻结底本保留。
+`RELEASE_VERSION` 是 v3；v2.2 作为 v3 的冻结底本保留。v3 现在是 18,335 道（2026-11-02 加了第 2 波，见下），recipes.jsonl
+92,790,359 字节；第一次 v3 构建的 12,895 道逐字节不变。导入器和 v2.2 一样跳过 `RCP2_5EFEFE98D566`（第一次构建导入
+12,894 道；18,335 道的导入还没重跑）。
 
 构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：
 
@@ -84,10 +86,15 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 python scripts/select_v3_candidates.py      # 第 1 步：从 v2_pool.jsonl 挑新候选 -> staging v3_selected.jsonl（约 25 秒）；
                                             # 第 1 波 2,262 道冻结在 data/enrichment/v3_selected_wave1.csv，第 2 波只加不删
 python scripts/enrich_v3_openai.py --env-file ../.env --workers 8 --max-usd 25   # 第 2 步：OpenAI API 富化，可断点续跑
+                                            # （第 1 波和第 2 波的前 2,693 道；之后不再用 OpenAI 富化）
+python scripts/enrich_v3_agents.py export   # 第 2 步其余：第 2 波剩下的交给 Claude 子代理，同一套说明和校验；
+python scripts/enrich_v3_agents.py import   #   子代理答案写回 staging，enrichment.by 是 claude/<model>
 python scripts/build_release_v3.py          # 第 3 步：写 data/release/v3/（约 15 秒）
 python scripts/build_release_v3.py --out DIR   # 同样的文件写到 DIR；两次运行逐字节相同
 python -I -X utf8 scripts/manual_check.py draw --new     # 新增菜谱的 100 道人工抽检样本 -> docs/manual-check-20261103/
 python -I -X utf8 scripts/allergen_review.py draw --new  # 新增菜谱的 50 道过敏原复核样本 -> docs/allergen-review-20261103/
+python -I -X utf8 scripts/manual_check.py draw --wave 2     # 只抽第 2 波：60 道 -> docs/manual-check-20261104/
+python -I -X utf8 scripts/allergen_review.py draw --wave 2  # 只抽第 2 波：30 道 -> docs/allergen-review-20261104/
 PYTHONPATH=src python -m unittest discover -s tests -p "test_build_release_v3.py"
 ```
 
@@ -105,14 +112,23 @@ ingredients.jsonl 和去掉该字段的 manifest。
   v2.1 构建过但超配额没发布的菜谱，和 v2 从未选中、每行都已映射到 701 个食材、每个食材都能按规划器规则定价、
   分诊菜系不属于美国桶的 RecipeNLG 新候选（主菜优先）；
 - 新候选用 OpenAI API（`gpt-5.4-mini`，推理强度 low）按 v2 同样的字段、词表、说明和校验富化，修订了 ADR-0030 用会话富化的做法；
+  第 2 波一部分由 OpenAI API 富化，其余由 Claude 子代理（`enrich_v3_agents.py`，同样的说明、输入和校验）富化，
+  `quality_report.md` 按波和来源分别计数；没富化或两次校验都没过的不发布（`dropped.jsonl` 里写原因）；
 - 不发布：用到 v2.2 以外食材 id 的、菜系 `international` 的（ADR-0034，不改标）、完整性标记了但没有复核结论的
   （不做新的完整性复核）、修正后每份热量不合理的、低于导入下限（2 行食材和 1 个步骤）的、标题（小写、空白归一）
-  和已发布菜谱重复的（顺序：v2.2，再超配额，再新候选，各按 recipe_id）；
+  和已发布菜谱重复的（顺序：v2.2，再超配额，再第 1 波，再第 2 波，各按 recipe_id）；
 - 任何一个菜系标签不超过最终总数的 20%：超出时先留规划器能用的类别（main、side、soup、salad、breakfast，其余在后），
-  同类按 recipe_id；名额按最终总数反复重算到不再变化；
-- 总数是通过全部检查的数量，没有裁到 12,400；组合替代品（"half-and-half = 牛奶 + 奶油"）这一版不做，schema 没有字段。
+  同类按 recipe_id；名额按最终总数反复重算到不再变化；第 2 波只用前面几部分剩下的名额，上限卡住时先砍第 2 波；
+- 第 2 波（owner 2026-11-02 约 14:45，目标约 18,300 道）：第一次 v3 构建的 12,895 道必须逐字节不变、一道不少
+  （它新增的 3,927 道的行 sha256 在 `data/enrichment/v3_first_build_lines.tsv`），recipes.jsonl 不能超过
+  95,000,000 字节（GitHub 拒收 100 MB 以上的文件），发布数不低于 18,000；任何一项不满足构建就停。
+  这次 v3：v2.2 原样 8,968 + 超配额 1,867 + 第 1 波 2,237 + 第 2 波 5,263 = 18,335 道。总数变大后美国菜不再顶到
+  20% 上限，所以第一次构建时被上限挡下的 173 道超配额菜谱和 4 道第 1 波菜谱这次也进来了；
+- 总数是通过全部检查的数量，没有裁到目标；组合替代品（"half-and-half = 牛奶 + 奶油"）这一版不做，schema 没有字段。
 
-每个没有发布的候选都在 `dropped.jsonl` 里，带原因。新增菜谱的人工抽检和过敏原复核只抽新增菜谱（种子 20261103），
+每个没有发布的候选都在 `dropped.jsonl` 里，带原因。新增菜谱的人工抽检和过敏原复核只抽新增菜谱：第一次构建的新增菜谱
+用种子 20261103（`*-20261103/`，已发给复核人，不再重抽），第 2 波另抽一批，种子 20261104（`*-20261104/`）；
+`score --wave 2 --with <第 1 波交回的表>` 按层给 Wilson 区间，再按菜谱数加权合并两波。
 "至少 95%"按点估计读，同时报告 Wilson 区间（issue #392）。
 
 ## 规划器可用池报告（每次发布、改价格或改标签之后重跑）

@@ -64,11 +64,14 @@ guard warnings and what this round leaves open are in the
 [v2.2 quality report](../../data-engineering/data/release/v2.2/quality_report.md) (last section).
 
 Data release v3 (Knowledge ADR-0103 section 3, issue #390; not the v3 held-out evaluation protocol) is built
-in `data-engineering/data/release/v3/` and is the release the product imports (Knowledge ADR-0111): the importer
-loads 12,894 of its 12,895 recipes and skips `RCP2_5EFEFE98D566`, as it did on v2.2. v2.2 stays as v3's frozen
-base. v3 is every v2.2 record copied verbatim plus recipes added from the over-quota v2.1 set and
-from new RecipeNLG candidates enriched through the OpenAI API, with v2.2's 701 ingredients unchanged and no
-cuisine label above 20%. Counts, decisions and shortcuts are in the
+in `data-engineering/data/release/v3/` and is the release the product imports (Knowledge ADR-0111). It holds
+18,335 recipes: the first v3 build's 12,895, byte for byte, plus a second wave of new RecipeNLG candidates added
+on 2026-11-02 (owner: grow the recipe count, medium quality is fine). The importer skips `RCP2_5EFEFE98D566`, as
+it did on v2.2 (it loaded 12,894 of the first build; the 18,335-recipe import is not yet re-run). v2.2 stays as
+v3's frozen base. v3 is every v2.2 record copied verbatim (8,968) plus recipes added from the over-quota v2.1 set
+(1,867) and from new RecipeNLG candidates: wave 1 (2,237) enriched through the OpenAI API, wave 2 (5,263) partly
+through the OpenAI API and partly by Claude subagents with the same instructions and checks. v2.2's 701
+ingredients are unchanged, no cuisine label is above 20%, and recipes.jsonl stays under 95,000,000 bytes. Counts, decisions and shortcuts are in the
 [v3 quality report](../../data-engineering/data/release/v3/quality_report.md); how to rebuild it is in
 `data-engineering/README.md`.
 

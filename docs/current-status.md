@@ -348,7 +348,7 @@ path, and they do not replace a fresh independent final comparison.
 - 24 offline Agent fixtures;
 - 36 bilingual scope developer cases and 12 typed grounding developer cases;
 - two fully covered, leakage-resistant matched-information Evaluation v2 developer packets;
-- 30 curated recipes and 34 normalized ingredients in the recorded catalog, plus 12,894 release v3 recipes imported beside them (slugs prefixed `v2-`).
+- 30 curated recipes and 34 normalized ingredients in the recorded catalog, plus release v3's recipes imported beside them (slugs prefixed `v2-`): 12,894 from the first v3 build; v3 now holds 18,335 (a second wave added 2026-11-02), whose import is not yet re-run.
 
 ### Archived held-out v2 authoring progress
 
