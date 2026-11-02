@@ -62,7 +62,7 @@ Available endpoints:
 - POST /api/ops/data/recipes/{recipe_id}/restore
 - GET /api/ops/data/ingredients
 - PATCH /api/ops/data/ingredients/{ingredient_id}
-- GET /api/ops/data/mappings?retailer={fairprice|cold_storage}
+- GET /api/ops/data/mappings?retailer={fairprice|cold_storage|redmart}
 - GET /api/ops/data-quality
 - GET /api/ops/data-quality/dropped?reason={reason}&offset={offset}&limit={limit}
 - PUT /api/ops/data/mappings/{ingredient}
@@ -75,7 +75,7 @@ Available endpoints:
 - POST /api/ingredient-substitutions/suggest
 - POST /api/ingredient-substitutions/review
 - POST /api/recommendations/recipes
-- GET /api/products/search?q={query}&live={boolean}&refresh={boolean}&retailer={fairprice|cold_storage}
+- GET /api/products/search?q={query}&live={boolean}&refresh={boolean}&retailer={fairprice|cold_storage|redmart}
 - POST /api/plans/generate
 - GET /api/plans
 - GET /api/plans/{plan_id}
@@ -624,6 +624,10 @@ given sample prices.
 budget and failure counter. Its chain is live, then cache, then nothing: there are no Cold Storage fixtures, and
 offline Cold Storage prices come only from its reviewed snapshot (`data/products/cold-storage-v1-snapshot.json`).
 Product ids are `cs-<id>`; Cold Storage products never carry `halal_certified` ([Cold Storage](design/cold-storage.md)).
+`retailer=redmart` searches RedMart, Lazada Singapore's own grocery store, the same way: live, then cache, then
+nothing, with offline prices only from `data/products/redmart-v1-snapshot.json`. Product ids are `rm-<itemId>`, and
+other Lazada sellers are never returned ([RedMart](design/redmart.md)). Any other `retailer` value is refused with
+422; hand-recorded prices have no search ([prices recorded by hand](design/manual-prices.md)).
 
 Every product response also carries a retrieval trace with requested source,
 provider used, `live`/`cache`/`fixture` mode, `success`/`no_match`/`degraded` status,
@@ -816,11 +820,14 @@ FairPrice cart or ordered, with a `stale` flag when the list changed after it wa
 person's own cart, and record that the person checked out; MealCraft never calls FairPrice's cart itself. Shapes and
 rules are in [FairPrice cart](design/fairprice-cart.md).
 
-Each grocery line carries `retailer` (`fairprice`, `cold_storage`, or `null` with no product). FairPrice comes first;
-Cold Storage prices only a line FairPrice has no in-stock product for, never one it is merely cheaper for, and never a
-line a halal household needs a Halal-marked product for. The totals and budget count both stores. `prepare` takes only
-FairPrice lines; its response adds `other_stores` (`[{retailer, lines, purchase_total_sgd}]`), which the cart panel adds
-to its budget figure ([Cold Storage](design/cold-storage.md)).
+Each grocery line carries `retailer` (`fairprice`, `cold_storage`, `redmart`, the platform of a hand-recorded price
+(`shopee`, `lazada`, `amazon`, `redmart` or `other`), or `null` with no product). FairPrice comes first, then Cold
+Storage, then RedMart, then prices recorded by hand: a later source prices only a line every earlier one has no
+in-stock product for, never one it is merely cheaper for, and never a line a halal household needs a Halal-marked
+product for. The totals and budget count every store. `prepare` takes only FairPrice lines; its response adds
+`other_stores` (`[{retailer, lines, purchase_total_sgd}]`, one entry per other store or platform), which the cart panel
+adds to its budget figure ([Cold Storage](design/cold-storage.md), [RedMart](design/redmart.md),
+[prices recorded by hand](design/manual-prices.md)).
 
 ## Meal Check-in and Nutrition Dashboard
 

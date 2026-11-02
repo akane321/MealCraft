@@ -1,42 +1,50 @@
 {
  "ingredients": {
   "total": 699,
-  "fairprice": 519,
-  "combined": 562,
-  "fairprice_share": 0.7425,
-  "combined_share": 0.804,
+  "fairprice": 505,
+  "combined": 549,
+  "fairprice_share": 0.7225,
+  "combined_share": 0.7854,
   "released": 701,
   "not_purchased": [
    "ice",
    "water"
   ],
-  "cold_storage_only": 43,
-  "cold_storage_only_share": 0.0615,
+  "cold_storage_only": 39,
+  "cold_storage_only_share": 0.0558,
+  "redmart_only": 5,
+  "redmart_only_share": 0.0072,
+  "manual_only": 0,
+  "manual_only_share": 0.0,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 12894,
-  "fairprice": 10476,
-  "combined": 11394,
-  "fairprice_share": 0.8125,
-  "combined_share": 0.8837
+  "fairprice": 9699,
+  "combined": 10631,
+  "fairprice_share": 0.7522,
+  "combined_share": 0.8245
  },
  "lines": {
   "total": 109266,
-  "fairprice": 106549,
-  "combined": 107628,
-  "fairprice_share": 0.9751,
-  "combined_share": 0.985
+  "fairprice": 105565,
+  "combined": 106778,
+  "fairprice_share": 0.9661,
+  "combined_share": 0.9772
  },
  "unpriced": [
   {
-   "ingredient": "allspice",
-   "recipes": 147
+   "ingredient": "basil",
+   "recipes": 510
   },
   {
-   "ingredient": "dill",
-   "recipes": 110
+   "ingredient": "mustard",
+   "recipes": 205
+  },
+  {
+   "ingredient": "allspice",
+   "recipes": 147
   },
   {
    "ingredient": "turkey",
@@ -63,6 +71,10 @@
    "recipes": 67
   },
   {
+   "ingredient": "msg",
+   "recipes": 64
+  },
+  {
    "ingredient": "water_chestnut",
    "recipes": 61
   },
@@ -71,8 +83,20 @@
    "recipes": 54
   },
   {
+   "ingredient": "sesame_tahini",
+   "recipes": 51
+  },
+  {
+   "ingredient": "kaffir_lime_leaf",
+   "recipes": 39
+  },
+  {
    "ingredient": "radish",
    "recipes": 37
+  },
+  {
+   "ingredient": "enchilada_sauce",
+   "recipes": 34
   },
   {
    "ingredient": "dried_onion_flakes",
@@ -89,30 +113,11 @@
   {
    "ingredient": "chow_mein_noodles",
    "recipes": 28
-  },
-  {
-   "ingredient": "lime_zest",
-   "recipes": 27
-  },
-  {
-   "ingredient": "orange_juice_conc",
-   "recipes": 26
-  },
-  {
-   "ingredient": "coffee",
-   "recipes": 24
-  },
-  {
-   "ingredient": "onion_salt",
-   "recipes": 23
-  },
-  {
-   "ingredient": "gochugaru",
-   "recipes": 22
   }
  ],
  "sources": {
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
-  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358"
+  "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358",
+  "products/redmart-v1-snapshot.json": "a63f7c3ba676f967"
  }
 }

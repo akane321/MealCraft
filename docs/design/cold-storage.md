@@ -105,8 +105,9 @@ The data-engineering side mirrors `capture_fairprice_snapshot.py` and `fairprice
      `mapped`, and no FairPrice product in stock. Cold Storage is skipped when the line needs certification for a
      halal household, and when the ingredient has no mapped Cold Storage entry.
   3. Cold Storage takes the cheapest in-stock product for the quantity, by the same cost function. In live mode
-     the products are first refreshed by a live Cold Storage search of the entry's first query, as the FairPrice
-     release branch does. Only reviewed ids are kept.
+     the products are first refreshed by live Cold Storage searches of the queries they were captured with, until
+     every reviewed id is seen (`docs/design/redmart.md`). Only reviewed ids are kept. When Cold Storage cannot be
+     read live, its reviewed snapshot prices stand in.
   4. A FairPrice product in stock always wins, whatever it costs.
 - **The budget half of the candidate packet.** With a budget, half of each kind's places go to the cheapest of the
   rest. They are ordered by `product_path.cheap_first`: dishes FairPrice alone supplies come first, then cost as
@@ -160,7 +161,7 @@ opens with a `> Scope:` line.
 
 - **Ingredient level, the target.** It counts the v2.2 release ingredients that are bought, excluding
   `not_purchased` ones. It reports how many have a price at FairPrice, at Cold Storage only, and in either. The
-  target is 90% combined.
+  target is 90% combined. A mapping counts only with a product in stock (2026-11-02; the planner buys no other).
 - **Recipe level.** It counts the recipes whose every bought line is priced, at FairPrice alone and combined.
 - **Line level.** It counts the recipe lines that are priced, at FairPrice alone and combined.
 

@@ -623,14 +623,23 @@ def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_se
         assert confirmed.plan.grocery_estimate.purchase_total_sgd == fresh.grocery.purchase_total_sgd <= 70
 
 
-def test_the_walkthrough_week_found_boring_swaps_its_repeats_within_its_budget(walked):
+def test_the_walkthrough_week_found_boring_swaps_its_repeats_or_says_what_a_swap_would_take(walked):
     plan = walked["plan"]
     served = Counter(dish_family(dish.recipe.title) for dish in plan.days)
     assert max(served.values()) > 1, served  # the walkthrough's week repeats a dish
     with kept_for(300), walked["factory"]() as session:
         answered = agent(session).reply(walked["session_id"], "the dishes are boring")
     preview = answered.pending_replan
-    assert preview is not None, answered.messages[-1].content
+    # v3 with RedMart (2026-11-02): the week is S$95.29 and repeats Microwave Spaghetti; no other main fits, the
+    # closest needs S$1.58 more. Without RedMart: S$97.50, Ramen Korean-Style swapped at -S$0.46. A swap that fits is
+    # still checked in test_a_week_found_boring_has_its_repeated_dishes_swapped_within_its_budget.
+    if preview is None:
+        assert re.fullmatch(
+            r"No different dish fits in place of the repeated ones: the closest swap I found needs S\$\d+\.\d\d more "
+            r"than the S\$100\.00 the week can spend\. I can swap a dish anyway\.",
+            answered.messages[-1].content,
+        ), answered.messages[-1].content
+        return
     assert answered.messages[-1].content.startswith("For more variety: ")
     change = preview.shape_change
     assert {dish_family(dish.recipe_title) for dish in change.added}.isdisjoint(served)

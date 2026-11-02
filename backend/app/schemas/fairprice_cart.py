@@ -7,8 +7,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.schemas.catalog_tags import Retailer
-from app.schemas.product import GroceryLineEstimate
+from app.schemas.product import GroceryLineEstimate, Retailer
 
 LineStatus = Literal["ready", "out_of_stock", "not_found", "no_product", "not_bought"]
 ResultStatus = Literal["added", "out_of_stock", "reduced", "failed"]
@@ -35,8 +34,8 @@ class FairPriceCartLine(BaseModel):
 
 
 class OtherStoreTrip(BaseModel):
-    """The bought lines of one trip that another store sells; they stay on the list with links
-    (docs/design/cold-storage.md)."""
+    """The bought lines of one trip that one other store or platform sells (Cold Storage, RedMart, Shopee, ...); they
+    stay on the list with links (docs/design/cold-storage.md, redmart.md, manual-prices.md)."""
 
     retailer: Retailer
     lines: int

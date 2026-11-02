@@ -228,7 +228,7 @@ class OperationRun(Base):
     product_snapshot_version: Mapped[str | None] = mapped_column(String(120), nullable=True)
     policy_version: Mapped[str | None] = mapped_column(String(120), nullable=True)
     algorithm_version: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    provider_mode: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    provider_mode: Mapped[str | None] = mapped_column(String(64), nullable=True)
     job_payload: Mapped[dict] = mapped_column(JSON, default=dict, server_default=text("'{}'"))
     idempotency_key: Mapped[str | None] = mapped_column(String(120), nullable=True)
     attempt_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")

@@ -58,15 +58,29 @@ export function groceryGroups(items: GroceryLineEstimate[]): Array<{ name: strin
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** The store a line is bought at: its own `retailer`, else its product's source (FairPrice unless it says Cold Storage). */
+/** The stores in the order a list shows them (and the backend fills gaps): FairPrice, Cold Storage, RedMart, then the platforms prices were recorded at by hand. */
+export const STORE_ORDER = ["fairprice", "cold_storage", "redmart", "shopee", "lazada", "amazon", "other"] as const;
+
+/** The store a line is bought at: its own `retailer`, else its product's source (FairPrice unless it says another store). */
 export function lineRetailer(line: GroceryLineEstimate): Retailer {
-  return (line.retailer ?? (line.product?.source === "cold_storage" ? "cold_storage" : "fairprice"));
+  const source = line.product?.source;
+  return line.retailer ?? (source === "cold_storage" || source === "redmart" ? source : source === "manual" ? "other" : "fairprice");
 }
 
-export const RETAILER_NAME: Record<Retailer, string> = { fairprice: "FairPrice", cold_storage: "Cold Storage" };
+/** A store's name on the list; RedMart is Lazada's grocery store. */
+export const RETAILER_NAME: Record<Retailer, string> = {
+  fairprice: "FairPrice", cold_storage: "Cold Storage", redmart: "RedMart (Lazada)", shopee: "Shopee", lazada: "Lazada", amazon: "Amazon", other: "Other shop",
+};
+/** The short name for price labels and notes. */
+export const RETAILER_SHORT: Record<Retailer, string> = {
+  fairprice: "FairPrice", cold_storage: "Cold Storage", redmart: "RedMart", shopee: "Shopee", lazada: "Lazada", amazon: "Amazon", other: "Other shop",
+};
 
-/** True when some line is bought at Cold Storage: only then does a list show its stores apart. */
+/** True when some line is bought at Cold Storage. */
 export const hasColdStorage = (items: GroceryLineEstimate[]): boolean => items.some(line => lineRetailer(line) === "cold_storage");
+
+/** True when some line is bought away from FairPrice: only then does a list show its stores apart. */
+export const hasOtherStore = (items: GroceryLineEstimate[]): boolean => items.some(line => lineRetailer(line) !== "fairprice");
 
 export interface GroceryStore {
   retailer: Retailer;
@@ -74,9 +88,9 @@ export interface GroceryStore {
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
 }
 
-/** A trip's lines by store, FairPrice first and then Cold Storage, each as groceryGroups; a store with nothing to buy is left out. */
+/** A trip's lines by store (STORE_ORDER), each as groceryGroups; a store with nothing to buy is left out. */
 export function groceryStores(items: GroceryLineEstimate[]): GroceryStore[] {
-  return (["fairprice", "cold_storage"] as const)
+  return STORE_ORDER
     .map(retailer => ({ retailer, name: RETAILER_NAME[retailer], groups: groceryGroups(items.filter(line => lineRetailer(line) === retailer)) }))
     .filter(store => store.groups.length);
 }
@@ -87,7 +101,7 @@ export interface GroceryTrip {
   /** "Shop before day 8"; null for a plan's only trip. */
   label: string | null;
   groups: Array<{ name: string; lines: GroceryLineEstimate[] }>;
-  /** The same lines by store; one FairPrice entry when no line is Cold Storage's. */
+  /** The same lines by store; one FairPrice entry when no line is at another store. */
   stores: GroceryStore[];
 }
 
@@ -174,7 +188,7 @@ export function basicsNote(estimate: WeeklyGroceryEstimate): string | null {
 }
 
 /** "A", "A and B", "A, B and C". */
-const andList = (words: string[]): string => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
+export const andList = (words: string[]): string => (words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1)}`);
 
 export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const checked = priceCheckLine(estimate);
@@ -182,14 +196,17 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
   const lines = priced(estimate);
   const samples = priceCounts(estimate).sample;
   if (!lines.length || samples === lines.length) return "Sample prices";
-  // The stores whose prices are shown (FairPrice alone unless a line is Cold Storage's).
-  const stores = (["fairprice", "cold_storage"] as const).filter(store => lines.some(line => lineRetailer(line) === store && priceKind(line) !== "sample"));
-  const names = stores.length ? stores.map(store => RETAILER_NAME[store]) : [RETAILER_NAME.fairprice];
+  // The stores whose prices are shown (FairPrice alone unless a line is at another store).
+  const stores = STORE_ORDER.filter(store => lines.some(line => lineRetailer(line) === store && priceKind(line) !== "sample"));
+  const names = stores.length ? stores.map(store => RETAILER_SHORT[store]) : [RETAILER_SHORT.fairprice];
   if (samples) return `${andList([...names, "sample"])} prices — source shown on each item`;
   const fetched = lines.map(line => line.evidence?.fetched_at ?? line.product!.fetched_at).sort()[0]!;
-  const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `${andList(names)} prices from ${date}`;
+  return `${andList(names)} prices from ${shortDate(fetched)}`;
 }
+
+/** A date in Singapore, as "29 Oct", whatever the time zone of the machine showing it. */
+export const shortDate = (iso: string): string =>
+  new Date(iso).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
 
 /** An observation's date is never replaced by the time a later price check was attempted. */
 export function groceryPriceLabel(line: GroceryLineEstimate): string {
@@ -198,10 +215,11 @@ export function groceryPriceLabel(line: GroceryLineEstimate): string {
   const source = evidence?.price_source ?? evidence?.mode;
   if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
   const kind = priceKind(line);
-  const date = new Date(evidence?.fetched_at ?? line.product.fetched_at).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
+  const date = shortDate(evidence?.fetched_at ?? line.product.fetched_at);
+  if (line.product.source === "manual") return `Price recorded by hand on ${date}`; // observed on a person's visit; never checked live
   const base = kind === "sample"
     ? "Sample price"
-    : lineRetailer(line) === "cold_storage" ? `${RETAILER_NAME.cold_storage} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
+    : lineRetailer(line) !== "fairprice" ? `${RETAILER_SHORT[lineRetailer(line)]} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
   switch (evidence?.lookup_status) {
     case "timeout": return `${base} · not checked live in time`;
     case "selected_product_not_returned": return `${base} · selected product not found`;
@@ -231,8 +249,7 @@ export function productSourceLabel(result: ProductSearchResponse): string {
   if (!result.cached) return "FairPrice prices now";
   const fetched = result.items.map(item => item.fetched_at).sort()[0];
   if (!fetched) return `Saved FairPrice prices${missed}`;
-  const date = new Date(fetched).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
-  return `FairPrice prices from ${date}${missed}`;
+  return `FairPrice prices from ${shortDate(fetched)}${missed}`;
 }
 
 /** Per-person nutrition averaged over the dinners that still count (skipped ones don't). */

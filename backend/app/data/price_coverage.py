@@ -1,11 +1,12 @@
-"""Price coverage: how much of the release the two stores can price (docs/design/cold-storage.md, "Price coverage").
+"""Price coverage: how much of the release the three stores can price (docs/design/cold-storage.md, "Price coverage";
+docs/design/redmart.md).
 
     uv run --project backend python -m app.data.price_coverage      # from the repository root, offline, deterministic
 
-Counts by ingredient first (the target is 90% of the bought release ingredients priced at either store), then by
-recipe (every bought line priced) and by recipe line. FairPrice is the main store; Cold Storage counts only for what
-FairPrice does not price. Writes `docs/evaluation/price-coverage/latest.md` and `latest.json`; both are generated,
-do not edit them.
+Counts by ingredient first (the target is 90% of the bought release ingredients priced at any store), then by
+recipe (every bought line priced) and by recipe line. FairPrice is the main store; each later layer (Cold Storage,
+RedMart, then the prices recorded by hand) counts only for what the earlier ones do not price. Writes
+`docs/evaluation/price-coverage/latest.md` and `latest.json`; both are generated, do not edit them.
 """
 
 from __future__ import annotations
@@ -23,7 +24,13 @@ from app.data.planning_pool import load, table
 from app.data.release_v2 import normalized_name, release_dir
 from app.db.base import Base
 from app.planning.grocery_estimator import release_products
-from app.planning.retailers import COLD_STORAGE_SNAPSHOT_FILE, cold_storage_products
+from app.planning.retailers import (
+    COLD_STORAGE_SNAPSHOT_FILE,
+    MANUAL_SNAPSHOT_FILE,
+    REDMART_SNAPSHOT_FILE,
+    cold_storage_products,
+    store_products,
+)
 
 REPORT_DIRECTORY = "docs/evaluation/price-coverage"
 FAIRPRICE_SNAPSHOT_FILE = "products/fairprice-v2-snapshot.json"
@@ -32,28 +39,46 @@ LISTED_UNPRICED = 20
 NOT_PURCHASED = "not_purchased"
 SCOPE = (
     "the release ingredients that are bought (water and ice, which are not purchased, are left out), and the release "
-    "recipes made of them; priced from the reviewed FairPrice and Cold Storage mappings, Cold Storage only where "
-    "FairPrice has no product."
+    "recipes made of them; priced from the reviewed FairPrice, Cold Storage and RedMart mappings and the prices "
+    "recorded by hand, each later layer only where the earlier ones have no product."
 )
 
 
 def priced(mapping: dict[str, dict]) -> set[str]:
-    return {name for name, entry in mapping.items() if entry["status"] == "mapped" and entry.get("products")}
+    """Ingredients a mapping can fill: mapped, with a product in stock (the planner buys no other), so one whose only
+    products are out of stock counts for the next layer, or as unpriced."""
+    return {
+        name
+        for name, entry in mapping.items()
+        if entry["status"] == "mapped" and any(product.get("in_stock", True) for product in entry.get("products", ()))
+    }
 
 
 def share(count: int, whole: int) -> float:
     return round(count / whole, 4) if whole else 0.0
 
 
-def report(recipes: list, ingredients: set[str], fairprice: dict[str, dict], cold_storage: dict[str, dict]) -> dict:
+def report(
+    recipes: list,
+    ingredients: set[str],
+    fairprice: dict[str, dict],
+    cold_storage: dict[str, dict],
+    redmart: dict[str, dict],
+    manual: dict[str, dict] | None = None,
+) -> dict:
     """Coverage of `ingredients` (release names) and of the release `recipes` (shared, with a release version)."""
     skipped = {
-        name for mapping in (fairprice, cold_storage) for name, e in mapping.items() if e["status"] == NOT_PURCHASED
+        name
+        for mapping in (fairprice, cold_storage, redmart, manual or {})
+        for name, e in mapping.items()
+        if e["status"] == NOT_PURCHASED
     }
     bought = ingredients - skipped
     at_fairprice = priced(fairprice) & bought
     at_cold_storage = (priced(cold_storage) & bought) - at_fairprice
-    combined = at_fairprice | at_cold_storage
+    at_redmart = (priced(redmart) & bought) - at_fairprice - at_cold_storage
+    at_manual = (priced(manual or {}) & bought) - at_fairprice - at_cold_storage - at_redmart
+    combined = at_fairprice | at_cold_storage | at_redmart | at_manual
 
     release = [r for r in recipes if r.release_version is not None and r.owner_household_id is None]
     lines_total = lines_fairprice = lines_combined = recipes_fairprice = recipes_combined = 0
@@ -84,6 +109,10 @@ def report(recipes: list, ingredients: set[str], fairprice: dict[str, dict], col
             "not_purchased": sorted(ingredients & skipped),
             "cold_storage_only": len(at_cold_storage),
             "cold_storage_only_share": share(len(at_cold_storage), len(bought)),
+            "redmart_only": len(at_redmart),
+            "redmart_only_share": share(len(at_redmart), len(bought)),
+            "manual_only": len(at_manual),
+            "manual_only_share": share(len(at_manual), len(bought)),
             "target": TARGET,
             "target_met": share(len(combined), len(bought)) >= TARGET,
         },
@@ -128,7 +157,9 @@ def markdown(result: dict) -> str:
                     ingredients["cold_storage_only"],
                     percent(ingredients["cold_storage_only_share"]),
                 ),
-                ("Either store", ingredients["combined"], percent(ingredients["combined_share"])),
+                ("RedMart only", ingredients["redmart_only"], percent(ingredients["redmart_only_share"])),
+                ("Recorded by hand only", ingredients["manual_only"], percent(ingredients["manual_only_share"])),
+                ("Any store", ingredients["combined"], percent(ingredients["combined_share"])),
             ],
             ("priced at", "ingredients", f"of {ingredients['total']}"),
         ),
@@ -138,7 +169,7 @@ def markdown(result: dict) -> str:
         *table(
             [
                 ("FairPrice alone", recipes["fairprice"], percent(recipes["fairprice_share"])),
-                ("Either store", recipes["combined"], percent(recipes["combined_share"])),
+                ("Any store", recipes["combined"], percent(recipes["combined_share"])),
             ],
             ("priced at", "recipes", f"of {recipes['total']}"),
         ),
@@ -148,14 +179,14 @@ def markdown(result: dict) -> str:
         *table(
             [
                 ("FairPrice alone", lines["fairprice"], percent(lines["fairprice_share"])),
-                ("Either store", lines["combined"], percent(lines["combined_share"])),
+                ("Any store", lines["combined"], percent(lines["combined_share"])),
             ],
             ("priced at", "lines", f"of {lines['total']}"),
         ),
         "",
         f"## The {LISTED_UNPRICED} most used ingredients still unpriced",
         "",
-        "Used by the most release recipes, priced at neither store.",
+        "Used by the most release recipes, priced at no store.",
         "",
         *table([(row["ingredient"], row["recipes"]) for row in result["unpriced"]], ("ingredient", "recipes")),
     ]
@@ -181,9 +212,17 @@ def main() -> None:
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         recipes, _ = load(session)
-        result = report(recipes, release_ingredients(), release_products(), cold_storage_products())
+        result = report(
+            recipes,
+            release_ingredients(),
+            release_products(),
+            cold_storage_products(),
+            store_products("redmart"),
+            store_products("manual"),
+        )
     # Of the committed text, a Windows checkout's CRLF hashed as the repository's LF (as halal_pool does).
-    result["sources"] = {name: sha256(name) for name in (FAIRPRICE_SNAPSHOT_FILE, COLD_STORAGE_SNAPSHOT_FILE)}
+    snapshots = (FAIRPRICE_SNAPSHOT_FILE, COLD_STORAGE_SNAPSHOT_FILE, REDMART_SNAPSHOT_FILE, MANUAL_SNAPSHOT_FILE)
+    result["sources"] = {name: digest for name in snapshots if (digest := sha256(name)) is not None}  # those present
     directory = repository_root() / REPORT_DIRECTORY
     write(result, directory)
     combined = result["ingredients"]

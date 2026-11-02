@@ -1,0 +1,221 @@
+{
+ "snapshot_version": "redmart-v1",
+ "source": "redmart",
+ "fetched_from": "2026-10-31T13:04:43+00:00",
+ "fetched_to": "2026-10-31T13:16:47+00:00",
+ "min_confidence": 0.6,
+ "ingredients": {
+  "coffee": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "rm-360990357",
+     "name": "[EXTRA 50G] NESCAFE Gold Pure Soluble Coffee 200g + 50G",
+     "brand": "Nescafé Gold",
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 200g + 50G extra = 250g soluble (instant) coffee",
+     "price_sgd": 19.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i360990357.html",
+     "in_stock": true,
+     "query": "coffee",
+     "fetched_at": "2026-10-31T13:05:35+00:00"
+    },
+    {
+     "external_id": "rm-301194117",
+     "name": "RedMart Ground Coffee 250G",
+     "brand": "RedMart",
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 250G ground coffee",
+     "price_sgd": 6.84,
+     "product_url": "https://www.lazada.sg/products/pdp-i301194117.html",
+     "in_stock": true,
+     "query": "coffee",
+     "fetched_at": "2026-10-31T13:05:35+00:00"
+    },
+    {
+     "external_id": "rm-301142417",
+     "name": "Bushells Instant Coffee (200G)",
+     "brand": "Bushells",
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed 200G instant coffee",
+     "price_sgd": 11.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i301142417.html",
+     "in_stock": true,
+     "query": "coffee",
+     "fetched_at": "2026-10-31T13:05:35+00:00"
+    },
+    {
+     "external_id": "rm-2420262596",
+     "name": "[FREE 50G] Moccona Classic Medium Roast Intensity 5 Freeze Dried Instant Coffee 200G + 50G",
+     "brand": "Moccona",
+     "category": null,
+     "package_grams": 250,
+     "package_grams_basis": "printed 200G + 50G free = 250g freeze-dried instant coffee",
+     "price_sgd": 17.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i2420262596.html",
+     "in_stock": true,
+     "query": "coffee",
+     "fetched_at": "2026-10-31T13:05:35+00:00"
+    }
+   ]
+  },
+  "cooked_chicken": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "rm-3492000697",
+     "name": "CP Delight Cooked Tender Chicken Breast 950g - Frozen",
+     "brand": "CP",
+     "category": null,
+     "package_grams": 950,
+     "package_grams_basis": "printed 950g",
+     "price_sgd": 15.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i3492000697.html",
+     "in_stock": true,
+     "query": "cooked chicken",
+     "fetched_at": "2026-10-31T13:05:48+00:00"
+    }
+   ]
+  },
+  "dill": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "rm-1972204910",
+     "name": "Li'l Chef Dill 20G Herbs",
+     "brand": "Li'l Chef",
+     "category": null,
+     "package_grams": 20,
+     "package_grams_basis": "printed 20G dried dill herb",
+     "price_sgd": 4.02,
+     "product_url": "https://www.lazada.sg/products/pdp-i1972204910.html",
+     "in_stock": true,
+     "query": "dill",
+     "fetched_at": "2026-10-31T13:04:57+00:00"
+    }
+   ]
+  },
+  "gochugaru": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "rm-3239213803",
+     "name": "Hanguk Kitchen Korean Hae Cham Red Chilli Powder - Coarse 1kg",
+     "brand": "Hanguk Kitchen",
+     "category": null,
+     "package_grams": 1000,
+     "package_grams_basis": "printed 1kg",
+     "price_sgd": 17.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i3239213803.html",
+     "in_stock": true,
+     "query": "gochugaru",
+     "fetched_at": "2026-10-31T13:05:28+00:00"
+    },
+    {
+     "external_id": "rm-303560451",
+     "name": "Top Gourmet Korean Chili Powder 180 G",
+     "brand": "Top Gourmet",
+     "category": null,
+     "package_grams": 180,
+     "package_grams_basis": "printed 180 G",
+     "price_sgd": 5.5,
+     "product_url": "https://www.lazada.sg/products/pdp-i303560451.html",
+     "in_stock": true,
+     "query": "gochugaru",
+     "fetched_at": "2026-10-31T13:05:28+00:00"
+    },
+    {
+     "external_id": "rm-303574231",
+     "name": "Top Gourmet Korean Chili Powder 1 Kg",
+     "brand": "Top Gourmet",
+     "category": null,
+     "package_grams": 1000,
+     "package_grams_basis": "printed 1 Kg",
+     "price_sgd": 17.7,
+     "product_url": "https://www.lazada.sg/products/pdp-i303574231.html",
+     "in_stock": true,
+     "query": "korean chili powder",
+     "fetched_at": "2026-10-31T13:05:31+00:00"
+    },
+    {
+     "external_id": "rm-3522707605",
+     "name": "Daesang KOREAN HOT RED PEPPER POWDER (MILD SPICY) 200g",
+     "brand": "Daesang",
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed 200g",
+     "price_sgd": 17.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i3522707605.html",
+     "in_stock": true,
+     "query": "korean chili powder",
+     "fetched_at": "2026-10-31T13:05:31+00:00"
+    },
+    {
+     "external_id": "rm-3522805201",
+     "name": "Daesang KOREAN HOT RED PEPPER POWDER (SPICY) 200g",
+     "brand": "Daesang",
+     "category": null,
+     "package_grams": 200,
+     "package_grams_basis": "printed 200g",
+     "price_sgd": 17.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i3522805201.html",
+     "in_stock": true,
+     "query": "korean chili powder",
+     "fetched_at": "2026-10-31T13:05:31+00:00"
+    }
+   ]
+  },
+  "puff_pastry": {
+   "status": "mapped",
+   "review_status": "proposed",
+   "products": [
+    {
+     "external_id": "rm-462710378",
+     "name": "Monoprix Rolled Puff Pastry 230G",
+     "brand": "Monoprix",
+     "category": null,
+     "package_grams": 230,
+     "package_grams_basis": "printed 230G rolled puff pastry",
+     "price_sgd": 6.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i462710378.html",
+     "in_stock": true,
+     "query": "puff pastry",
+     "fetched_at": "2026-10-31T13:05:49+00:00"
+    },
+    {
+     "external_id": "rm-303354430",
+     "name": "Jus-Rol 2 Puff Pastry Sheets 2 X 320G [640G] - Frozen",
+     "brand": "Jus-Rol",
+     "category": null,
+     "package_grams": 640,
+     "package_grams_basis": "printed 2 sheets x 320G = 640G puff pastry",
+     "price_sgd": 11.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i303354430.html",
+     "in_stock": true,
+     "query": "puff pastry",
+     "fetched_at": "2026-10-31T13:05:49+00:00"
+    },
+    {
+     "external_id": "rm-3451362629",
+     "name": "Sainsbury's Ready Rolled Puff Pastry 320G",
+     "brand": "Sainsbury's",
+     "category": null,
+     "package_grams": 320,
+     "package_grams_basis": "printed 320G ready rolled puff pastry",
+     "price_sgd": 7.8,
+     "product_url": "https://www.lazada.sg/products/pdp-i3451362629.html",
+     "in_stock": true,
+     "query": "puff pastry",
+     "fetched_at": "2026-10-31T13:05:49+00:00"
+    }
+   ]
+  }
+ }
+}
