@@ -138,7 +138,9 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .drawer-head p { margin: 0; color: #71717a; font-size: 13px; line-height: 18px; }
 .ops-shell .drawer-actions { display: flex; align-items: center; gap: 8px; }
 .ops-shell .drawer :is(section, form) { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f2; }
-.ops-shell .drawer-head + :is(section, form) { margin-top: 0; padding-top: 0; border-top: 0; }
+.ops-shell .drawer-head + :is(section, form), .ops-shell .drawer > :is(.note, p[role="alert"]) + :is(section, form) { margin-top: 0; padding-top: 0; border-top: 0; }
+/* A drawer's own failure line: the soft red box. */
+.ops-shell .drawer > p.ops-error[role="alert"] { margin: 0 0 12px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 13px; }
 .ops-shell .drawer section p { margin: 0 0 8px; }
 .ops-shell .drawer section p:last-child { margin-bottom: 0; }
 .ops-shell .drawer h3 { margin: 0 0 12px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; letter-spacing: 0; text-transform: none; }
