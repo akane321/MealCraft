@@ -847,9 +847,14 @@ test("a failed current-week lookup shows an error and can be retried", async ({ 
   await expect(week.getByRole("alert")).toBeVisible();
   await expect(week.getByRole("heading", { name: "No plan yet" })).toHaveCount(0);
   failing = false;
+  // The column also hides while the retry is in flight, so wait for the retry's answer before checking the end state.
+  const retried = page.waitForResponse(response => response.url().endsWith("/api/plans") && response.ok());
   await week.getByRole("button", { name: "Try again" }).click();
+  await retried;
   // Loaded, with nothing planned yet: the welcome takes the whole panel and the error goes with the column.
   await expect(week).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Suggestions" })).toBeVisible();
 });
 
 test("Escape closes a sheet from anywhere and focus goes back to what opened it", async ({ page }) => {

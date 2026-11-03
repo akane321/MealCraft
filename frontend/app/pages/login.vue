@@ -13,7 +13,7 @@ const username = ref("");
 const signInWith = ref<"username" | "email">("username");
 const password = ref("");
 const displayName = ref("");
-const { actor, authenticate, errorMessage, isLoading } = useAuth();
+const { actor, authenticate, errorMessage, isLoading, logout } = useAuth();
 const requested = route.query.next;
 // Only same-site paths, so a crafted link cannot bounce the user elsewhere.
 const next = typeof requested === "string" && /^\/(?![/\\])/.test(requested) ? requested : "/";
@@ -67,7 +67,10 @@ async function submit() {
 
       <p v-if="notAdmin" class="auth-error mc-alert" role="alert">
         <UIcon name="i-lucide-circle-alert" aria-hidden="true" />
-        {{ actor?.user.display_name }} is signed in, but this account is not an administrator. Switch to Household to open your week, or sign out and use an administrator account.
+        <span>
+          {{ actor?.user.display_name }} is signed in, but this account is not an administrator. Switch to Household to open your week, or sign out and use an administrator account.
+          <button type="button" class="sign-out" @click="logout">Sign out</button>
+        </span>
       </p>
 
       <form @submit.prevent="submit">
@@ -120,7 +123,7 @@ async function submit() {
 .audience button:hover { color: #27272a; }
 .audience button.active { color: var(--mc-strong); box-shadow: inset 0 -2px 0 #18181b; }
 .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 18px 0; padding: 3px; border-radius: 10px; background: #f4f4f5; }
-.auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #52525b; font-size: 13px; font-weight: 500; cursor: pointer; }
 .auth-tabs button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
 .auth-spacer { height: 18px; }
 form { display: grid; gap: 14px; }
@@ -138,4 +141,5 @@ input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9f
 /* Above the form: left-aligned beside its icon (the card centres its other lines), with room before the fields. */
 .auth-card > .auth-error { margin: 16px 0 18px; text-align: left; }
 form .auth-error { margin: 0; }
+.sign-out { display: block; margin-top: 8px; padding: 0; border: 0; background: none; color: #b42318; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 </style>

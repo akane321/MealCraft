@@ -8,10 +8,11 @@ const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const on = (page: string) => ({ on: props.current === page });
 // Ctrl K is New plan on every product page (the home binds its own, which also clears the chat).
+// /?new=1 opens the home straight into a fresh conversation.
 function onKey(event: KeyboardEvent) {
   if (!props.brandButton && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
-    void navigateTo("/");
+    void navigateTo("/?new=1");
   }
 }
 onMounted(() => window.addEventListener("keydown", onKey));
@@ -25,7 +26,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     </button>
     <NuxtLink v-else to="/" class="sb-brand"><ShellMark />MealCraft</NuxtLink>
     <slot name="action">
-      <UButton to="/" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan<UKbd class="sb-kbd" value="Ctrl K" /></UButton>
+      <UButton to="/?new=1" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan<UKbd class="sb-kbd" value="Ctrl K" /></UButton>
     </slot>
     <nav class="pages" aria-label="Pages">
       <!-- On the plan itself this is not a link, so the nav holds only the pages that leave it. -->
@@ -66,5 +67,5 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
 <style scoped>
 .sb-signin { flex: 1; }
-.sb-hint { flex: none; margin: 4px 10px; color: #a1a1aa; font-size: 12.5px; line-height: 18px; }
+.sb-hint { flex: none; margin: 4px 10px; color: #52525b; font-size: 12.5px; line-height: 18px; }
 </style>

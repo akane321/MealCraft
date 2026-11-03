@@ -34,6 +34,8 @@ const nutrition = useNutritionDashboard();
 const household = useHouseholdProfile();
 
 const view = ref<"landing" | "app">("landing");
+// The shell look goes on the root only once the landing has faded out, so the leaving landing keeps its own type.
+const landingGone = ref(false);
 const draft = ref("");
 // A dish's button or a follow-up chip on a week the open conversation did not plan: its words and that week.
 const dishAction = ref<{ text: string; week: number } | null>(null);
@@ -262,7 +264,7 @@ async function requireAccount(): Promise<boolean> {
   return false;
 }
 
-async function enter() {
+async function enter(fresh = false) {
   if (!(await requireAccount())) return;
   view.value = "app";
   // Until the week and its conversations are back, a send could start a second conversation (see send).
@@ -278,6 +280,8 @@ async function enter() {
     if (version !== conversationVersion) return;
     if (!session.value) await agent.restore(current);
     if (version !== conversationVersion) return;
+    // New plan from another page: the list and the week are known, the conversation starts empty.
+    if (fresh) return newChat();
     const shown = session.value?.plan_id ?? current;
     if (shown) await loadPlan(shown);
     else planState.value = "empty";
@@ -578,6 +582,14 @@ watch(draft, (value) => {
 // Kept as it is typed, so a session that expires mid-sentence loses nothing.
 watch([draft, dishAction], saveDraft);
 
+// The sidebar's New plan on the other pages opens /?new=1: once signed in, straight into a fresh conversation.
+const route = useRoute();
+onMounted(() => watch(actor, (signedIn) => {
+  if (!signedIn || route.query.new !== "1") return;
+  void navigateTo("/", { replace: true });
+  void enter(true);
+}, { immediate: true }));
+
 onMounted(() => {
   window.addEventListener("keydown", onKey);
   try {
@@ -594,7 +606,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>
-  <div class="mc-surface" :class="{ 'mc-shell': view === 'app' }" :data-view="view">
+  <div class="mc-surface" :class="{ 'mc-shell': view === 'app' && landingGone }" :data-view="view">
     <svg width="0" height="0" class="defs" aria-hidden="true">
       <symbol id="mc-logo" viewBox="0 0 32 32"><circle cx="16" cy="18" r="10.5" /><path class="leaf" d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" /></symbol>
     </svg>
@@ -604,14 +616,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </video>
     </div>
 
-    <Transition name="landing">
+    <Transition name="landing" @after-leave="landingGone = true" @before-enter="landingGone = false">
       <section v-if="view === 'landing'" class="landing" aria-label="Home">
-        <ShellSimulated floating />
+        <ShellSimulated strip />
         <header class="topbar">
           <span class="brand"><svg aria-hidden="true"><use href="#mc-logo" /></svg><span class="mc-serif">MealCraft</span></span>
           <span class="spacer" />
           <NuxtLink v-if="!actor" to="/login?next=/" class="link">Sign in</NuxtLink>
-          <button type="button" class="cta" @click="enter">Let’s plan my week</button>
+          <button type="button" class="cta" @click="enter()">Let’s plan my week</button>
           <NuxtLink v-if="actor" to="/profile" class="avatar" :aria-label="`Household settings for ${actor.user.display_name}`">{{ initials }}</NuxtLink>
         </header>
         <div class="hero-block">
@@ -636,7 +648,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </section>
     </Transition>
 
-    <div v-if="view === 'app'" class="app" :class="{ 'no-panel': !panelShown }">
+    <div v-if="view === 'app'" class="app mc-shell" :class="{ 'no-panel': !panelShown }">
       <ShellSidebar current="plan" brand-button @brand="view = 'landing'">
         <template #action>
           <UButton color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus" title="Start a new plan" @click="newChat">
@@ -844,14 +856,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               :placeholder="readOnly ? `This ${labels.noun} was replaced. Open the current ${labels.noun} to make changes.` : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
             >
             <div class="composer-foot">
-              <!-- The household's own limits as the prompt's chips; each opens the household page. -->
-              <div v-if="isEmpty" class="tools">
+              <!-- The household's own limits as the prompt's chips; each opens the household page.
+                   A week open beside a fresh conversation shows its follow-ups instead. -->
+              <div v-if="isEmpty && !canChangeWeek" class="tools">
                 <NuxtLink v-for="chip in home.chips" :key="chip.label" to="/profile" class="tool" :class="{ alert: chip.alert }">
                   <UIcon :name="chip.alert ? 'i-lucide-shield-alert' : 'i-lucide-leaf'" />{{ chip.label }}
                 </NuxtLink>
                 <NuxtLink v-if="!home.chips.length" to="/profile" class="tool"><UIcon name="i-lucide-users" />Household</NuxtLink>
               </div>
-              <!-- In a conversation: what it plans for, then follow-ups for its week (one row, scrolling sideways). -->
+              <!-- In a conversation, or beside a week: what it plans for, then follow-ups for its week (one row, scrolling sideways). -->
               <div v-else class="after">
                 <span v-if="contextLabel" class="mc-chip context"><UIcon name="i-lucide-users" aria-hidden="true" />{{ contextLabel }}</span>
                 <template v-if="canChangeWeek">
@@ -1071,7 +1084,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .chat-head { height: 56px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 24px; border-bottom: 1px solid #f0f0f2; }
 .chat.is-empty .chat-head { border-color: transparent; background: transparent; }
 .chat-head h1 { min-width: 0; max-width: 60%; margin: 0; overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-.date { flex: none; color: #a1a1aa; font-size: 12.5px; }
+.date { flex: none; color: #71717a; font-size: 12.5px; }
 .thread { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px 8px; }
 .col { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .chat.is-empty .col { max-width: 760px; }
@@ -1171,7 +1184,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer:hover { border-color: #d4d4d8; }
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
 .composer input { height: 40px; font-size: 14.5px; font-weight: 400; color: #18181b; }
-.composer :focus-visible { outline: 0; }
+/* Only the field drops its ring (the card's focus glow marks it); chips and Send keep theirs, drawn inside the 28px row's clip. */
+.composer input:focus-visible { outline: 0; }
+.tool:focus-visible, .composer-foot .mc-suggest:focus-visible { outline-offset: -2px; }
 /* A replaced plan's composer only reads: flat, no focus ring, a grey send. */
 .composer.readonly, .composer.readonly:hover, .composer.readonly:focus-within { border-color: #ececef; background: #fafafa; box-shadow: none; }
 .composer.readonly .mc-send, .composer.readonly .mc-send:disabled { background: #e4e4e7; color: #a1a1aa; box-shadow: none; cursor: not-allowed; }
@@ -1194,7 +1209,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .mc-send:hover:not(:disabled) { background: #27272a; }
 .mc-send:disabled { background: #18181b; color: #fff; opacity: 1; cursor: not-allowed; }
 .mc-send:disabled :deep(.iconify) { opacity: 0.5; }
-.fine { max-width: 720px; margin: 8px auto 0; color: #a1a1aa; font-size: 12px; line-height: 16px; text-align: center; }
+.fine { max-width: 720px; margin: 8px auto 0; color: var(--c-muted); font-size: 12px; line-height: 16px; text-align: center; }
 .fine.foot { flex: none; margin: 0 auto; padding: 0 28px 14px; }
 .context { flex: none; }
 
@@ -1202,7 +1217,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .panel { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: #fcfcfd; border-left: 1px solid #f0f0f2; }
 .panel-head { height: 56px; flex: none; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f2; }
 .panel-title { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
-.tabs .c { color: #a1a1aa; }
+.tabs .c { color: #71717a; }
 .panel-body { flex: 1; min-height: 0; overflow: auto; }
 .panel-foot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; border-top: 1px solid #f0f0f2; background: #fff; }
 .spend { display: flex; align-items: baseline; gap: 8px; }

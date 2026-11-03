@@ -26,6 +26,10 @@ const BARS = {
   other: { icon: "i-lucide-layout-grid", label: "MealCraft" },
 } as const;
 
+// Product pages scroll inside the frame, not the window, so start each page at the top.
+const frame = ref<HTMLElement | null>(null);
+watch(() => route.path, () => frame.value?.scrollTo({ top: 0 }));
+
 onMounted(load);
 </script>
 
@@ -35,7 +39,7 @@ onMounted(load);
       <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
         <ShellSidebar :current="shellPage" />
-        <div class="mc-frame product-frame">
+        <div ref="frame" class="mc-frame product-frame">
           <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}<ShellSimulated /></div>
           <NuxtPage />
         </div>

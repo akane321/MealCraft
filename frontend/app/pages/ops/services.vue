@@ -66,7 +66,8 @@ async function check(name: OpsServiceName) {
           <span class="ops-badge" :class="service.configured ? 'success' : 'neutral'">{{ service.configured ? "Configured" : "Not configured" }}</span>
         </header>
         <!-- Non-breaking hyphens keep a model id such as gpt-5.4-mini on one line. -->
-        <p class="ops-muted mode">Mode: {{ service.mode.replaceAll("-", "‑") }}</p>
+        <!-- Lines break between words only, never at a model id's hyphens; the text stays as the server sent it. -->
+        <p class="ops-muted mode">Mode: <template v-for="(word, at) in service.mode.split(' ')" :key="at">{{ at ? " " : "" }}<span class="word">{{ word }}</span></template></p>
 
         <dl v-if="service.recent" class="recent">
           <div><dt>Runs</dt><dd class="mc-num">{{ service.recent.runs }}</dd></div>
@@ -102,6 +103,7 @@ async function check(name: OpsServiceName) {
 .service { display: grid; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) 220px; grid-template-areas: "head stats foot" "mode stats foot" "note note note" "result result result"; gap: 8px 24px; align-items: start; }
 .service > header { grid-area: head; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .service .mode { grid-area: mode; }
+.mode .word { white-space: nowrap; }
 .service .recent { grid-area: stats; }
 .service .svc-note { grid-area: note; max-width: 72ch; margin-top: 4px !important; color: #71717a; font-size: 13px !important; line-height: 20px !important; }
 .service .result { grid-area: result; }
@@ -115,7 +117,7 @@ async function check(name: OpsServiceName) {
 .recent dd.bad { color: #b42318; }
 .service footer { grid-area: foot; display: grid; gap: 8px; padding-left: 24px; border-left: 1px solid #f0f0f2; }
 .service footer .mc-pill { justify-self: start; }
-.cost { color: #a1a1aa; font-size: 12px !important; }
+.cost { color: #71717a; font-size: 12px !important; }
 /* The live check: soft red unless it answered. */
 .result { padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; }
 .result.ok { border-color: #abefc6; background: #ecfdf3; color: #067647; }

@@ -341,6 +341,17 @@ test("a conversation is renamed, pinned and deleted from its own menu; rows only
   await expect(rail.getByRole("navigation", { name: "Pages" }).getByRole("link")).toHaveCount(2);
   await expect(rail.locator(".convos .open", { hasText: "Dinners for two" })).toContainText("Current plan");
 
+  // From the keyboard: the menu takes focus, arrows move in it, Escape closes it and focus goes back to its button.
+  const options = rail.getByRole("button", { name: "Options for Lunch ideas" });
+  await options.focus();
+  await page.keyboard.press("Enter");
+  await expect(rail.getByRole("menuitem", { name: "Rename" })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(rail.getByRole("menuitem", { name: "Pin to top" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(rail.getByRole("menu")).toHaveCount(0);
+  await expect(options).toBeFocused();
+
   await rail.getByRole("button", { name: "Options for Lunch ideas" }).click();
   await rail.getByRole("menuitem", { name: "Rename" }).click();
   await rail.getByLabel("Rename plan").fill("Office lunches");
@@ -362,4 +373,17 @@ test("a conversation is renamed, pinned and deleted from its own menu; rows only
   await dialog.getByRole("button", { name: "Delete" }).click();
   await expect.poll(() => calls.at(-1)?.method).toBe("DELETE");
   await expect(rail.locator(".convos .open", { hasText: "Office lunches" })).toHaveCount(0);
+});
+
+test("New plan on another page opens the home on a fresh conversation, not the landing", async ({ page }) => {
+  await stub(page, { conversations: [conversation(100, "Dinners for two", 9001)], plans: [{ id: 9001, current: true }] });
+  await page.goto("/history");
+  await page.getByRole("complementary", { name: "Navigation" }).getByRole("link", { name: /New plan/ }).click();
+  await expect(page.getByRole("heading", { name: "New plan", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+  // The week's conversation is listed but not opened.
+  const rail = page.getByRole("complementary", { name: "Navigation" });
+  await expect(rail.locator(".convos .open", { hasText: "Dinners for two" })).toBeVisible();
+  await expect(rail.locator(".convos .row.on")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Let’s plan my week" })).toHaveCount(0);
 });

@@ -89,16 +89,37 @@ const removeMessage = computed(() => {
 });
 
 // The menu opens under its button, right-aligned, or above it when the window has no room below.
+// It renders after the list, so opening it moves focus into it; Escape closes it and returns focus to its button.
 const MENU_WIDTH = 160;
 const MENU_HEIGHT = 106;
+const menuEl = ref<HTMLElement | null>(null);
+let trigger: HTMLElement | null = null;
 function toggleMenu(item: AgentSession, event: MouseEvent) {
   if (menuFor.value === item.id) {
     menu.value = null;
     return;
   }
-  const box = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  trigger = event.currentTarget as HTMLElement;
+  const box = trigger.getBoundingClientRect();
   const below = box.bottom + 4;
   menu.value = { item, top: below + MENU_HEIGHT > window.innerHeight - 8 ? box.top - 4 - MENU_HEIGHT : below, left: box.right - MENU_WIDTH };
+  void nextTick(() => menuEl.value?.querySelector<HTMLElement>("[role=menuitem]")?.focus());
+}
+function closeMenu() {
+  menu.value = null;
+  trigger?.focus();
+}
+// Arrow keys move between the items, wrapping at either end.
+function moveFocus(step: number) {
+  const items = [...(menuEl.value?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
+  const at = items.indexOf(document.activeElement as HTMLElement);
+  items[(at + step + items.length) % items.length]?.focus();
+}
+// Focus leaving the menu (Tab, Shift+Tab) closes it.
+function onMenuFocusOut(event: FocusEvent) {
+  const next = event.relatedTarget as Node | null;
+  // Its own button is left alone: that click toggles the menu itself.
+  if (next !== trigger && !menuEl.value?.contains(next)) menu.value = null;
 }
 
 // A click anywhere else closes an open menu; so does scrolling the list it was opened from.
@@ -131,12 +152,12 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
                 @blur="saveRename(item)"
               >
             </span>
-            <button v-else type="button" class="open" :title="titleOf(item)" :aria-current="item.id === currentId ? 'true' : undefined" @click="emit('open', item)">
+            <button v-else type="button" class="open" :title="`${titleOf(item)} · ${statusOf(item).label}`" :aria-current="item.id === currentId ? 'true' : undefined" @click="emit('open', item)">
               <UIcon name="i-lucide-message-circle" class="ic" aria-hidden="true" />
               <svg v-if="item.pinned_at" class="pin" viewBox="0 0 24 24" aria-label="Pinned"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7" /></svg>
               <span class="t">{{ titleOf(item) }}</span>
-              <!-- One line a row: the status is a dot for the current plan, and read out for every row. -->
-              <span class="s" :class="statusOf(item).tone" :title="statusOf(item).label" aria-hidden="true" />
+              <!-- One line a row: the status is a dot for the current plan, in the row's tooltip, and read out for every row. -->
+              <span class="s" :class="statusOf(item).tone" aria-hidden="true" />
               <span class="visually-hidden">{{ statusOf(item).label }}</span>
             </button>
             <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="toggleMenu(item, $event)">
@@ -146,7 +167,18 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
         </ul>
       </section>
     </div>
-    <div v-if="menu" class="row-menu mc-card" role="menu" :aria-label="`Options for ${titleOf(menu.item)}`" :style="{ top: `${menu.top}px`, left: `${menu.left}px` }">
+    <div
+      v-if="menu"
+      ref="menuEl"
+      class="row-menu mc-card"
+      role="menu"
+      :aria-label="`Options for ${titleOf(menu.item)}`"
+      :style="{ top: `${menu.top}px`, left: `${menu.left}px` }"
+      @keydown.esc.prevent="closeMenu"
+      @keydown.down.prevent="moveFocus(1)"
+      @keydown.up.prevent="moveFocus(-1)"
+      @focusout="onMenuFocusOut"
+    >
       <button type="button" role="menuitem" @click="startRename(menu.item)">Rename</button>
       <button type="button" role="menuitem" @click="togglePin(menu.item)">{{ menu.item.pinned_at ? "Unpin" : "Pin to top" }}</button>
       <button type="button" role="menuitem" class="danger" @click="askRemove(menu.item)">Delete…</button>
@@ -157,10 +189,10 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 
 <style scoped>
 .convos { min-height: 0; display: flex; flex-direction: column; gap: 6px; }
-.empty { margin: 4px 10px; color: #a1a1aa; }
+.empty { margin: 4px 10px; color: #52525b; }
 /* The list scrolls under a soft fade, so a row cut at the foot reads as more to scroll, not a broken edge. */
 .groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 0; padding-bottom: 8px; -webkit-mask-image: linear-gradient(#000 calc(100% - 16px), transparent); mask-image: linear-gradient(#000 calc(100% - 16px), transparent); }
-.convos h3 { margin: 0; padding: 10px 10px 4px; color: #9a9aa3; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.convos h3 { margin: 0; padding: 10px 10px 4px; color: #52525b; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 .row { position: relative; display: flex; align-items: center; height: 36px; border: 1px solid transparent; border-radius: 10px; transition: background 150ms, border-color 150ms; }
 .row:hover, .row:focus-within { background: #efeff1; }
