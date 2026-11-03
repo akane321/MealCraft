@@ -179,3 +179,90 @@ def test_the_runner_refuses_a_heldout_path_and_an_unknown_arm(tmp_path):
 def test_the_fingerprint_names_the_arm_and_its_source():
     printed = strong_rule_baseline.fingerprint()
     assert printed["system_id"] == "strong-rule" and len(printed["runner_sha256"]) == 64
+
+
+# The RAG arm, with a fake embedder and a fake model: no network.
+
+
+class FakeChat:
+    def __init__(self, contents):
+        self.contents = list(contents)
+        self.calls = []
+        self.embed = lambda texts: [[1.0] * 256 for _ in texts]
+
+    def invoke(self, messages):
+        from types import SimpleNamespace
+
+        self.calls.append(messages)
+        return SimpleNamespace(
+            content=self.contents.pop(0), usage_metadata={"input_tokens": 5000, "output_tokens": 800}
+        )
+
+
+def rag_plan(reference: str) -> str:
+    return json.dumps(
+        {
+            "plan": {
+                "household_size": 2,
+                "meals": [
+                    {
+                        "date": "2026-09-28",
+                        "meal_type": "dinner",
+                        "dishes": [
+                            {"name": "From the list", "role": "main", "recipe_reference": reference, "servings": 2}
+                        ],
+                    }
+                ],
+                "total_cost_sgd": 9.0,
+            }
+        }
+    )
+
+
+def rag_context(chat, max_usd=5.0):
+    from app.evaluation.pure_llm_baseline import Budget
+
+    return baseline_arms.ArmContext(
+        resources=resources(), budget=Budget("gpt-5.4-mini", max_usd, 10_000_000), model=chat
+    )
+
+
+def test_rag_lists_candidates_and_fills_a_listed_dish_from_the_catalog():
+    from app.evaluation import rag_baseline
+
+    data = rag_baseline.catalog()
+    reference = next(key for key, row in data.recipes.items() if row["course"] == "main")
+    chat = FakeChat(["not json", rag_plan(reference)])  # one malformed answer is asked again once
+    context = rag_context(chat)
+    respond = rag_baseline.make_responder(context, sleep=lambda _: None)
+    output = respond("Two of us, dinner tonight.", (), "SHARED")
+    system = chat.calls[0][0][1]
+    assert system.startswith("SHARED\n\n") and "CANDIDATES" in system
+    assert len(system.split("CANDIDATES")[1].strip().splitlines()) > rag_baseline.PER_GROUP
+    dish = output.plan.meals[0].dishes[0]
+    assert dish.evidence["source"] == "catalog" and dish.evidence["ingredients"]
+    assert context.budget.calls == 3  # the embedding and two chat calls, all charged
+    response = baseline_arms.to_baseline_response(output, episode_id="e", system_id="rag")
+    assert response.plan.meals[0].slot_id == "mon-dinner"
+
+
+def test_rag_stops_before_a_call_its_cap_cannot_cover():
+    from app.evaluation import rag_baseline
+    from app.evaluation.pure_llm_baseline import BudgetExhausted
+
+    chat = FakeChat([])
+    respond = rag_baseline.make_responder(rag_context(chat, max_usd=0.001), sleep=lambda _: None)
+    with pytest.raises(BudgetExhausted):
+        respond("Two of us, dinner tonight.", (), "SHARED")
+    assert chat.calls == []
+
+
+def test_rag_dry_run_prints_a_worst_case_without_the_network(capsys, tmp_path):
+    argv = [
+        "--arm", "rag", "--episodes", str(DEV / "mdw-dev-001.json"), "--anchor-date", "2026-09-28",
+        "--output", str(tmp_path / "rag.jsonl"),
+    ]  # fmt: skip
+    assert baseline_arms.main(argv) == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["dry_run"] and printed["max_calls"] == 4 and 0 < printed["worst_case_usd"] < 1
+    assert not (tmp_path / "rag.jsonl").exists()

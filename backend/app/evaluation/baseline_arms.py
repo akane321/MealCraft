@@ -50,10 +50,12 @@ from app.evaluation.pure_llm_baseline import (
     DEFAULT_MAX_USD,
     Budget,
     BudgetExhausted,
+    Usage,
     _digest,
     _json,
     episode_id_of,
     load_episodes,
+    price_usd,
     read_records,
     score,
     summarise,
@@ -79,15 +81,15 @@ class Arm:
     # A fresh responder for one case (the harness's rule: one responder serves one case).
     responder: Callable[[ArmContext], Responder]
     # Dry run: (calls, input tokens, worst-case USD) for one case's user strings; None for an arm with no paid call.
-    estimate: Callable[[list[str], str], tuple[int, int, float]] | None = None
+    estimate: Callable[[list[str], str, str], tuple[int, int, float]] | None = None
     # A paid arm's model client, built only for a live run.
     model_factory: Callable[[str], Any] | None = None
 
 
 def arms() -> dict[str, Arm]:
-    from app.evaluation import strong_rule_baseline
+    from app.evaluation import rag_baseline, strong_rule_baseline
 
-    registry = [strong_rule_baseline.ARM]
+    registry = [strong_rule_baseline.ARM, rag_baseline.ARM]
     return {arm.system_id: arm for arm in registry}
 
 
@@ -249,7 +251,7 @@ def main(
     plan = [(episode, repeat) for repeat in range(args.repeats) for episode in episodes]
     if arm.paid and not args.live:
         instructions = ConversationHarness(config).instructions
-        estimates = [arm.estimate(episode_turns(episode), instructions) for episode, _ in plan]  # type: ignore[misc]
+        estimates = [arm.estimate(episode_turns(episode), instructions, args.model) for episode, _ in plan]  # type: ignore[misc]
         worst = sum(usd for _, _, usd in estimates)
         print(
             json.dumps(
@@ -336,6 +338,17 @@ def main(
     if budget and budget.stop_reason:
         print(f"stopped: {budget.stop_reason}", file=sys.stderr)
     return 0
+
+
+def affordable(budget: Budget, input_tokens: int, output_tokens: int) -> bool:
+    """Whether a call of this worst case fits what is left of both caps; sets the budget's stop reason if not."""
+    usage = Usage(input_tokens, output_tokens)
+    usd = price_usd(budget.model, usage)
+    if budget.spent_usd + usd > budget.max_usd:
+        budget.stop_reason = f"spend cap: US${budget.spent_usd:.4f} spent, next call could cost US${usd:.4f}"
+    elif budget.used_tokens + usage.total_tokens > budget.max_tokens:
+        budget.stop_reason = f"token cap: {budget.used_tokens} used, next call could use {usage.total_tokens}"
+    return budget.stop_reason is None
 
 
 def sha256_text(text: str | bytes) -> str:
