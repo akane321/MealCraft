@@ -2617,5 +2617,7 @@ test("a list with a Shopee line recorded by hand shows its own store section, li
   const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
   await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
   await expect(sheet.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
-  await expect(sheet.getByRole("link", { name: url })).toBeVisible();
+  // On screen the link reads "View at Shopee" (the raw address is kept for the printed list).
+  await expect(sheet.getByRole("link", { name: "View at Shopee" })).toHaveAttribute("href", url);
+  await expect(sheet.getByRole("link", { name: "View at Shopee" })).toBeVisible();
 });

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatPlanDate, todayIsoDate } from "~/lib/meal-plan-format";
-import { MEAL_LABEL, budgetGap, countWord, formatSgd, mealsByDay, perMealAndDay, shoppingTrips } from "~/lib/home-surface";
+import { MEAL_LABEL, budgetGap, budgetTone, countWord, formatSgd, mealsByDay, perMealAndDay, shoppingTrips } from "~/lib/home-surface";
 import type { PlannedMeal } from "~/lib/home-surface";
 import type { NutritionDashboardDay, WeeklyGroceryEstimate } from "~/types/meal-plan";
 
@@ -23,7 +23,7 @@ const perPlateLabel = computed(() => (averages.value && averages.value.mealsPerD
 // What is left of the budget (or how far over), shown beside the groceries total.
 const left = computed(() => {
   const gap = budgetGap(props.estimate);
-  return gap && { label: gap.over ? "Over" : "Left", value: gap.amount, over: gap.over };
+  return gap && { label: gap.over ? "Over" : "Left", value: gap.amount, tone: budgetTone(props.estimate) };
 });
 // A tight budget or few eligible dishes can bring a dinner back; say so rather than let it look like a slip.
 const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).size < props.days.length);
@@ -48,13 +48,13 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
       </div>
       <div class="figures">
         <div class="fig"><span class="k">Groceries</span><span class="v mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</span></div>
-        <div v-if="left" class="fig" :class="left.over ? 'over' : 'ok'"><span class="k">{{ left.label }}</span><span class="v mc-num">{{ left.value }}</span></div>
+        <div v-if="left" class="fig" :class="left.tone"><span class="k">{{ left.label }}</span><span class="v mc-num">{{ left.value }}</span></div>
         <div class="fig"><span class="k">Avg cook</span><span class="v mc-num">{{ avgCook }} min</span></div>
         <div v-if="!left" class="fig"><span class="k">{{ perPlateLabel }}</span><span class="v mc-num">{{ perPlate }} kcal</span></div>
       </div>
     </div>
     <!-- Seven tiles a row however short the plan (a one-day plan keeps a one-day tile); a longer plan takes a second row. -->
-    <div class="strip">
+    <div class="strip" :class="{ short: week.length <= 3 }" :style="week.length <= 3 ? { gridTemplateColumns: `repeat(${week.length}, minmax(120px, 160px))` } : undefined">
       <button
         v-for="day in week"
         :key="day.dayIndex"
@@ -98,10 +98,16 @@ h3 { margin: 0; }
 .fig { display: flex; flex-direction: column; align-items: flex-end; }
 .k { font-size: 11px; line-height: 16px; color: var(--c-muted); }
 .v { font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; white-space: nowrap; }
-.fig.ok .v { color: var(--c-green-text); }
-.fig.over .v { color: var(--c-amber-text); }
+/* The same reading as the plan column's footer: green ok, amber near the limit, red over. */
+.fig.ok .v { color: #067647; }
+.fig.near .v { color: #b54708; }
+.fig.over .v { color: #b42318; }
+.week-card { container-type: inline-size; }
 .strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid var(--c-line-soft); }
-.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 6px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
+/* A plan of three days or fewer keeps day-sized cells from the left, each closed by its rule. */
+.strip.short { justify-content: start; }
+.strip.short .tile:last-child { border-right: 1px solid var(--c-line-soft); }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px 4px 14px; border: 0; border-right: 1px solid var(--c-line-soft); background: #fff; color: var(--c-ink); text-align: center; }
 .tile:last-child, .tile:nth-child(7n) { border-right: 0; }
 .tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
@@ -124,7 +130,11 @@ h3 { margin: 0; }
 .again { left: -2px; top: -2px; stroke: var(--c-blue); stroke-width: 1.8; }
 .again path { fill: none; stroke-width: 2; }
 /* Two lines at most; the full name is the tooltip. */
-.n { min-height: 34px; width: 100%; padding: 0 2px; color: #27272a; font-size: 12.5px; line-height: 17px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.n { min-height: 32px; width: 100%; padding: 0; color: #27272a; font-size: 12.5px; line-height: 16px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* Beside the open plan column at 1280 a cell is about 90px: three lines, so a name says more than one word. */
+@container (max-width: 680px) {
+  .n { min-height: 48px; font-size: 12px; -webkit-line-clamp: 3; }
+}
 .more { white-space: nowrap; }
 .foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }

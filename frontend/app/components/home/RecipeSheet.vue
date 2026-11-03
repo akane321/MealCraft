@@ -35,8 +35,8 @@ useDialog(overlay, () => emit("close"));
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
     <section class="mc-panel panel">
-      <header>
-        <span v-if="recipe" class="icon"><HomeDishIcon :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="40" /></span>
+      <header class="mc-sheet-head">
+        <span v-if="recipe" class="icon"><HomeDishIcon :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="32" /></span>
         <div>
           <h2>{{ recipe?.title ?? "Recipe" }}</h2>
           <p v-if="recipe">{{ recipe.total_time_minutes }} min · serves {{ recipe.servings }} · {{ recipe.cuisine }}</p>
@@ -80,14 +80,12 @@ useDialog(overlay, () => emit("close"));
 
 <style scoped>
 .panel { width: min(920px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; }
-header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; border-bottom: 1px solid #f0f0f2; }
-header > div { flex-grow: 1; min-width: 0; }
-.icon { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: 12px; background: #fafafa; }
-h2 { margin: 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
-header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
-.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: stretch; padding: 20px 24px 24px; }
-.card { padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
-h3 { margin: 0 0 4px; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
+.icon { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px; background: #fafafa; }
+/* Two columns split by a thin rule, no cards inside the sheet. */
+.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: stretch; padding: 0; }
+.card { padding: 20px 24px 24px; }
+.card + .card { border-left: 1px solid #f0f0f2; }
+h3 { margin: 0 0 6px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .hint { margin: 0 0 8px; color: #71717a; font-size: 12px; line-height: 16px; }
 ul { list-style: none; margin: 0; padding: 0; }
 ul li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 12px; padding: 9px 0; border-top: 1px solid #f2f2f4; }

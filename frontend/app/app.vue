@@ -1,18 +1,6 @@
 <script setup lang="ts">
-import { formatPlanDate } from "~/lib/meal-plan-format";
-import type { ServerClock } from "~/plugins/server-today";
-
 const { load } = useAuth();
 const route = useRoute();
-// A simulated day (SIMULATED_TODAY, debugging and demos) is always visible, so it is never mistaken for today.
-const clock = useState<ServerClock | null>("server-clock");
-const simulatedLabel = computed(() => {
-  const value = clock.value?.simulated;
-  if (!value || !clock.value) return null;
-  const day = formatPlanDate(clock.value.today, { weekday: "short", day: "numeric", month: "short" });
-  return value.includes("T") ? `${day}, ${value.slice(11, 16)}` : day;
-});
-
 useHead({
   link: [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,17 +32,17 @@ onMounted(load);
 <template>
   <UApp>
     <div class="app-shell">
-      <p v-if="simulatedLabel" class="simulated-clock" role="status"><UIcon name="i-lucide-clock" aria-hidden="true" />Simulated date: {{ simulatedLabel }} · for debugging</p>
       <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
         <ShellSidebar :current="shellPage" />
         <div class="mc-frame product-frame">
-          <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}</div>
+          <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}<ShellSimulated /></div>
           <NuxtPage />
         </div>
       </div>
       <!-- Sign-in: a glowing page with one card (the mark is in the card); the home surface and the console (/ops) draw their own. -->
       <div v-else-if="route.path.startsWith('/login')" class="mc-shell mc-page auth-shell">
+        <ShellSimulated floating />
         <NuxtPage />
       </div>
       <NuxtPage v-else />
@@ -63,18 +51,13 @@ onMounted(load);
 </template>
 
 <style scoped>
-/* A small warning badge at the top centre, in the gap above the panel, so it never covers a title. */
-.simulated-clock { position: fixed; z-index: 1000; top: 4px; left: 50%; transform: translateX(-50%); height: 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 0 10px; border: 1px solid #fedf89; border-radius: 999px; background: #fffaeb; color: #b54708; font: 500 12px/16px var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); white-space: nowrap; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); pointer-events: none; }
-.simulated-clock .iconify { width: 12px; height: 12px; }
 /* Sidebar and the white panel, both the height of the window; the panel scrolls. */
 .product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .product-frame { height: calc(100vh - 16px); overflow-y: auto; }
-/* The profile's sticky column sticks inside the panel, not the window. */
-.product-frame :deep(.profile-sidebar) { top: 72px; max-height: calc(100vh - 104px); }
 .product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
 /* The home's pastel glow behind the sign-in card. */
 .auth-shell {
-  min-height: 100vh; padding: 12px 18px 48px;
+  min-height: 100vh; padding: 12px 18px;
   background:
     radial-gradient(560px 300px at 50% 8%, rgba(255, 226, 200, 0.7), transparent 70%),
     radial-gradient(420px 320px at 30% 40%, rgba(233, 213, 255, 0.45), transparent 70%),

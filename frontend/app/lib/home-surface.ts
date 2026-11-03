@@ -37,6 +37,14 @@ export function budgetGap(estimate: WeeklyGroceryEstimate): { amount: string; ov
   return { amount: formatSgd(Math.abs(gap)), over: gap < 0 };
 }
 
+/** How the spend sits against the budget: ok, near (95% or more) or over; one reading for every budget figure on the page. */
+export function budgetTone(estimate: WeeklyGroceryEstimate): "ok" | "near" | "over" | null {
+  const budget = estimate.weekly_budget_sgd;
+  if (!budget) return null;
+  const ratio = estimate.purchase_total_sgd / budget;
+  return ratio > 1 ? "over" : ratio >= 0.95 ? "near" : "ok";
+}
+
 export function packageLabel(line: GroceryLineEstimate): string {
   const size = line.product?.package_size;
   const unit = line.product?.package_unit ?? "";

@@ -28,16 +28,18 @@ onMounted(() => {
 });
 onBeforeUnmount(() => observer?.disconnect());
 const definition = computed(() => nutritionMetrics.find(item => item.key === metric.value)!);
+// The chart runs through the days in calendar order (a day's meals keep their order), so each day is labelled once.
+const ordered = computed(() => [...props.dashboard.days].sort((a, b) => a.planned_date.localeCompare(b.planned_date)));
 const chart = computed(() => {
-  const done = cumulativeNutritionValues(props.dashboard.days, metric.value, "completed");
-  const plan = cumulativeNutritionValues(props.dashboard.days, metric.value, "planned");
+  const done = cumulativeNutritionValues(ordered.value, metric.value, "completed");
+  const plan = cumulativeNutritionValues(ordered.value, metric.value, "planned");
   const max = Math.max(...done, ...plan, 1);
   const donePoints = chartPointCoordinates(done, width.value, 180, 24, max);
   const planPoints = chartPointCoordinates(plan, width.value, 180, 24, max);
   // One tick a day, under the day's first dish.
   const ticks = planPoints.flatMap((point, index) => {
-    const date = props.dashboard.days[index]?.planned_date;
-    return date && date !== props.dashboard.days[index - 1]?.planned_date ? [{ x: point.x, label: formatPlanDate(date, { weekday: "short" }) }] : [];
+    const date = ordered.value[index]?.planned_date;
+    return date && date !== ordered.value[index - 1]?.planned_date ? [{ x: point.x, label: formatPlanDate(date, { weekday: "short" }) }] : [];
   });
   return {
     done: lineSegments(donePoints),
@@ -74,7 +76,7 @@ useDialog(overlay, () => emit("close"));
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" aria-label="Nutrition details">
     <section class="mc-panel panel">
-      <header>
+      <header class="mc-sheet-head">
         <div>
           <h2>Nutrition</h2>
           <p>Per person · cooked dishes count as actual · general guidance, not medical advice</p>
@@ -148,10 +150,7 @@ useDialog(overlay, () => emit("close"));
 
 <style scoped>
 .panel { width: min(1040px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 0 24px 24px; }
-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; margin: 0 -24px; padding: 20px 24px; border-bottom: 1px solid #f0f0f2; background: #fff; }
-header > div { flex-grow: 1; }
-h2 { margin: 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
-header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
+.mc-sheet-head { margin: 0 -24px; }
 .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .metric { display: flex; flex-direction: column; gap: 2px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: #fff; text-align: left; color: #27272a; box-shadow: var(--mc-shadow-xs); }
 .metric:hover { border-color: #d4d4d8; }
@@ -175,15 +174,15 @@ header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; 
 .legend i.plan { border-top: 2px dashed #c4b5fd; }
 .table-card { border: 1px solid #ececef; border-radius: 12px; overflow-x: auto; }
 .days { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.days th { height: 36px; padding: 0 12px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }
-.days td { height: 44px; padding: 10px 12px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; line-height: 20px; text-align: right; }
+.days th { height: 36px; padding: 0 10px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }
+.days td { height: 44px; padding: 10px 10px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; line-height: 20px; text-align: right; }
 .days tbody tr:last-child td { border-bottom: 0; }
 .days tbody tr:hover td { background: #fafafb; }
 .days th:nth-child(-n+4), .days td:nth-child(-n+4) { text-align: left; }
 .days .nowrap { white-space: nowrap; }
 .days .dish { font-variant-numeric: normal; }
-.days .dish > span { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.days .dish > span { display: block; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .days tr.skipped td { color: #a1a1aa; }
 .days .actions { width: 1%; padding-block: 0; padding-right: 14px; white-space: nowrap; }
-.days .actions button { height: 28px; padding: 0 10px; margin-left: 4px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+.days .actions button { height: 28px; padding: 0 8px; margin-left: 2px; border-radius: 8px; font-size: 13px; font-weight: 500; }
 </style>

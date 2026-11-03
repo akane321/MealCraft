@@ -93,7 +93,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
             <span>{{ video.title }}</span>
           </span>
         </button>
-        <p v-else class="no-video">No how-to video for this dish yet.</p>
+        <p v-else class="no-video"><UIcon name="i-lucide-video-off" aria-hidden="true" />No how-to video for this dish yet.</p>
       </div>
 
       <div class="acts">
@@ -145,8 +145,11 @@ h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-
 .caption { min-width: 0; display: flex; flex-direction: column; }
 .caption small { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--c-muted); }
 .caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fafafa; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 10px; }
+/* A missing video is a caption, not an empty box. */
+.no-video { margin: 0; display: flex; align-items: center; gap: 6px; color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.no-video .iconify { width: 12px; height: 12px; flex: none; }
+.video:has(.no-video) { margin-top: 6px; }
+.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 12px; }
 /* Swap: an outline icon button, round like the pills beside it. */
 .swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #52525b; box-shadow: var(--mc-shadow-xs); }
 .swap:hover { border-color: #d4d4d8; background: #f7f7f8; color: #18181b; }
@@ -158,5 +161,8 @@ h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-
   .tonight { grid-template-columns: 48px minmax(0, 1fr); column-gap: 12px; }
   .big-icon { width: 48px; height: 48px; }
   h2 { font-size: 17px; line-height: 24px; }
+  /* Both pills and the round swap fit the card with its 16px padding clear on the right. */
+  .acts { gap: 6px; }
+  .tonight .acts .mc-btn.sm { padding: 0 10px; }
 }
 </style>

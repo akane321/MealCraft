@@ -7,6 +7,15 @@ const { actor, logout } = useAuth();
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
 const on = (page: string) => ({ on: props.current === page });
+// Ctrl K is New plan on every product page (the home binds its own, which also clears the chat).
+function onKey(event: KeyboardEvent) {
+  if (!props.brandButton && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+    event.preventDefault();
+    void navigateTo("/");
+  }
+}
+onMounted(() => window.addEventListener("keydown", onKey));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>
@@ -16,9 +25,8 @@ const on = (page: string) => ({ on: props.current === page });
     </button>
     <NuxtLink v-else to="/" class="sb-brand"><ShellMark />MealCraft</NuxtLink>
     <slot name="action">
-      <UButton to="/" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan</UButton>
+      <UButton to="/" color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus">New plan<UKbd class="sb-kbd" value="Ctrl K" /></UButton>
     </slot>
-    <slot name="search" />
     <nav class="pages" aria-label="Pages">
       <!-- On the plan itself this is not a link, so the nav holds only the pages that leave it. -->
       <span v-if="current === 'plan'" class="sb-item on" aria-current="page"><UIcon name="i-lucide-house" />My plan</span>

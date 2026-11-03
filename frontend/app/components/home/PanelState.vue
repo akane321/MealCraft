@@ -25,7 +25,8 @@ const emit = defineEmits<{ retry: [] }>();
       <span><span class="mc-tile" data-tone="rose"><UIcon name="i-lucide-circle-alert" /></span></span>
     </div>
     <h2 v-if="title" class="mc-serif">{{ title }}</h2>
-    <p>{{ errorText ?? "This couldn't be loaded." }}</p>
+    <!-- Without a heading the message itself is the title. -->
+    <p :class="{ lead: !title }">{{ errorText ?? "This couldn't be loaded." }}</p>
     <button type="button" class="mc-btn secondary sm" @click="emit('retry')">Try again</button>
   </div>
   <div v-else class="panel-state empty mc-empty">
@@ -45,6 +46,7 @@ const emit = defineEmits<{ retry: [] }>();
 .panel-state.empty h2, .panel-state.error h2 { margin: 16px 0 0; }
 .panel-state.empty p, .panel-state.error p { max-width: 300px; margin-top: 6px; color: #71717a; line-height: 20px; }
 .panel-state.error .mc-empty-art > span { background: #fff1f3; }
+.panel-state.error p.lead { margin-top: 16px; color: var(--mc-strong); font-size: 16px; line-height: 22px; font-weight: 600; }
 .panel-state.error button { margin-top: 16px; }
 
 .skeleton {

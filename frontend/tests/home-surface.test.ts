@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetTone, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -45,6 +45,10 @@ describe("grocery helpers", () => {
     expect(budgetGap(estimate)).toEqual({ amount: "S$7.40", over: false });
     expect(budgetGap({ ...estimate, purchase_total_sgd: 95.5 })).toEqual({ amount: "S$5.50", over: true });
     expect(budgetGap({ ...estimate, weekly_budget_sgd: null })).toBeNull();
+    expect(budgetTone(estimate)).toBe("ok");
+    expect(budgetTone({ ...estimate, purchase_total_sgd: 88 })).toBe("near");
+    expect(budgetTone({ ...estimate, purchase_total_sgd: 95.5 })).toBe("over");
+    expect(budgetTone({ ...estimate, weekly_budget_sgd: null })).toBeNull();
   });
 
   it("labels prices by the source actually used, not the mode asked for", () => {

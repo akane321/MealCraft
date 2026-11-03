@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { allergenLabel } from "~/lib/allergens";
 import { cartStateLabels } from "~/lib/fairprice-cart";
-import { budgetGap, budgetLine, changedMealWhen, followUpChips, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange, shoppingTrips } from "~/lib/home-surface";
+import { budgetGap, budgetLine, budgetTone, changedMealWhen, followUpChips, formatSgd, groceriesChange, groceryGroups, previewChoices, sameDishChange, shoppingTrips } from "~/lib/home-surface";
 import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, planLabels, planRange, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
@@ -142,15 +142,12 @@ const groceryCount = computed(() => groceryGroups(plan.value?.grocery_estimate.i
 const estimate = computed(() => plan.value?.grocery_estimate ?? null);
 // Where the FairPrice cart stands for each shopping trip: in the cart, ordered, or the list changed after it was sent.
 const cartStates = computed(() => cartStateLabels(plan.value?.fairprice_cart));
-// Budget bar: within (green), near at 95% or more (amber), over (red, the overage segment marked).
+// Budget bar: ink while ok, amber near the limit (95% or more), one solid red bar when over.
 const budgetBar = computed(() => {
-  const budget = estimate.value?.weekly_budget_sgd;
-  if (!budget) return null;
-  const total = estimate.value!.purchase_total_sgd;
-  const ratio = total / budget;
-  const state = ratio > 1 ? "over" : ratio >= 0.95 ? "near" : "within";
-  const span = Math.max(total, budget);
-  return { state, spent: Math.round(Math.min(total, budget) / span * 1000) / 10, over: state === "over" ? Math.round((total - budget) / span * 1000) / 10 : 0, percent: Math.round(ratio * 100) };
+  const state = estimate.value && budgetTone(estimate.value);
+  if (!state) return null;
+  const ratio = estimate.value!.purchase_total_sgd / estimate.value!.weekly_budget_sgd!;
+  return { state, spent: Math.round(Math.min(ratio, 1) * 1000) / 10, percent: Math.round(ratio * 100) };
 });
 // The footer's short budget note: "S$7.40 left" or "S$3.10 over" (the full sentence is its tooltip).
 const budgetGapLabel = computed(() => {
@@ -609,6 +606,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
     <Transition name="landing">
       <section v-if="view === 'landing'" class="landing" aria-label="Home">
+        <ShellSimulated floating />
         <header class="topbar">
           <span class="brand"><svg aria-hidden="true"><use href="#mc-logo" /></svg><span class="mc-serif">MealCraft</span></span>
           <span class="spacer" />
@@ -645,12 +643,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             New plan<UKbd class="sb-kbd" value="Ctrl K" />
           </UButton>
         </template>
-        <template #search>
-          <label class="sb-search">
-            <UIcon name="i-lucide-search" aria-hidden="true" />
-            <input id="plan-search" v-model="planQuery" type="search" placeholder="Search plans" aria-label="Search plans" autocomplete="off">
-          </label>
-        </template>
+        <!-- The search filters the list under it, so it sits with the list; the rows above stay as on every page. -->
+        <label class="sb-search">
+          <UIcon name="i-lucide-search" aria-hidden="true" />
+          <input id="plan-search" v-model="planQuery" type="search" placeholder="Search plans" aria-label="Search plans" autocomplete="off">
+        </label>
         <HomeConversationList
           v-model:query="planQuery"
           :items="recent"
@@ -679,6 +676,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <header class="chat-head">
           <h1 class="mc-heading" :title="title">{{ title }}</h1>
           <span v-if="plan" class="date">{{ rangeLabel }}</span>
+          <ShellSimulated />
           <span class="grow" />
           <UTooltip v-if="!isEmpty || planState === 'ready' || planState === 'error'" :text="panelOpen ? 'Hide plan' : 'Show plan'" :content="{ side: 'bottom', sideOffset: 6, collisionPadding: 8 }">
             <UButton
@@ -939,7 +937,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             </div>
             <div v-if="budgetBar" class="meter" :class="budgetBar.state" role="img" :aria-label="`${budgetBar.percent} percent of the ${labels.budgetName}${budgetBar.state === 'over' ? ', over budget' : ''}`">
               <i class="fill" :style="{ width: `${budgetBar.spent}%` }" />
-              <i v-if="budgetBar.over" class="overage" :style="{ width: `${budgetBar.over}%` }" />
             </div>
             <p v-if="tab === 'groceries' && cartStates.length" class="cart-states">
               <span v-for="state in cartStates" :key="state.key" class="mc-chip" :class="state.tone">{{ state.label }}</span>
@@ -999,7 +996,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
     <div v-if="plan" v-show="previewOpen" ref="preview" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview">
       <div class="sheet-frame">
-        <HomeShoppingSheet class="mc-print-sheet" :estimate="plan.grocery_estimate" :range-label="rangeLabel" :household-size="plan.household_size" />
+        <HomeShoppingSheet class="mc-print-sheet" :estimate="plan.grocery_estimate" :range-label="rangeLabel" :household-size="plan.household_size" @close="previewOpen = false" />
         <div class="sheet-actions">
           <button type="button" class="mc-btn secondary" @click="previewOpen = false">Back</button>
           <button type="button" class="mc-btn primary" @click="exportPdf">Export PDF</button>
@@ -1148,7 +1145,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .shape-days { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; color: var(--c-neutral-text); }
 .shape-days b { display: inline-block; min-width: 34px; color: var(--c-ink); font-weight: 600; }
 .delta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--c-line-soft); background: #fafafa; font-size: 13px; color: var(--c-neutral-text); }
-.delta .mc-chip { margin-left: auto; }
+/* The facts wrap inside their own box, so the budget badge keeps the same row. */
+.delta > span:first-child { flex: 1 1 240px; min-width: 0; }
+.delta .mc-chip { flex: none; margin-left: auto; }
 .delta .mc-chip.warn { background: #fffaeb; color: #b54708; }
 .caveat { margin: 0; }
 
@@ -1178,10 +1177,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer.readonly .mc-send, .composer.readonly .mc-send:disabled { background: #e4e4e7; color: #a1a1aa; box-shadow: none; cursor: not-allowed; }
 .composer.readonly .mc-send:disabled :deep(.iconify) { opacity: 1; }
 .composer-foot { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 32px; }
-/* The chips keep one row: a longer set scrolls sideways under a fade rather than wrap. */
+/* The chips keep one row: a chip that does not fit whole wraps to a hidden second row, so no chip is ever cut. */
 /* .after is scoped to the composer: the swap card has its own .tile-dish.after. */
-.tools, .composer-foot .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; padding-right: 8px; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
-.tools::-webkit-scrollbar, .composer-foot .after::-webkit-scrollbar { display: none; }
+.tools, .composer-foot .after { flex: 1; min-width: 0; height: 28px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; overflow: hidden; }
 .tools > *, .composer-foot .after > * { flex: none; }
 .composer-foot .after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
 .composer-foot .after .context .iconify { width: 14px; height: 14px; color: #71717a; }
@@ -1216,8 +1214,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .meter i { display: block; height: 100%; transition: width 600ms var(--ease); }
 .meter .fill { border-radius: 999px; background: #18181b; }
 .meter.near .fill { background: #f59e0b; }
-.meter.over .fill { border-radius: 999px 0 0 999px; background: #f59e0b; border-right: 2px solid #fff; }
-.meter .overage { background: #f04438; }
+.meter.over .fill { background: #f04438; }
 .foot-acts { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
 .foot-acts > button { flex: 1; }
 .foot-acts .icon-only { flex: none; width: 36px; padding: 0; justify-content: center; }

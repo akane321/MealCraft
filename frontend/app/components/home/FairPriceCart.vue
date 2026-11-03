@@ -390,9 +390,9 @@ const refreshAll = () => {
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" aria-labelledby="fp-title" @click.self="close">
     <section class="panel mc-panel">
-      <header>
+      <header class="mc-sheet-head">
         <div>
-          <h2 id="fp-title" class="mc-title">FairPrice cart</h2>
+          <h2 id="fp-title">FairPrice cart</h2>
           <p class="mc-small">{{ liveCart?.store?.name ?? "Your own FairPrice cart" }} · You check out and pay on FairPrice.</p>
           <p v-if="leaveNote" class="mc-small" role="status">{{ leaveNote }}</p>
         </div>
@@ -427,8 +427,9 @@ const refreshAll = () => {
             <button type="button" class="mc-btn primary sm" @click="openLogin">Log in to FairPrice</button>
             <button type="button" class="mc-btn secondary sm" :disabled="cartLoading" @click="loggedIn">I've logged in</button>
           </div>
-          <p v-if="loginNote" class="msg alert" role="alert">{{ loginNote }}</p>
         </section>
+        <!-- Beside the login box, not inside it: one box at a time. -->
+        <p v-if="setup === 'login' && loginNote" class="msg alert" role="alert">{{ loginNote }}</p>
 
         <p v-if="cartProblem" class="msg alert" role="alert">
           {{ cartProblem }}
@@ -643,19 +644,16 @@ const refreshAll = () => {
 
 <style scoped>
 .panel { width: min(760px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden; }
-header { min-height: 64px; flex: none; display: flex; align-items: center; gap: 4px; padding: 12px 16px 12px 24px; border-bottom: 1px solid #f0f0f2; }
-header > div { flex: 1; min-width: 0; }
-header h2 { margin: 0; color: #0f0f12; font-size: 18px; line-height: 24px; font-weight: 600; }
-header p { margin: 0; color: #71717a; font-size: 13px; line-height: 18px; }
+.mc-sheet-head { gap: 4px; }
 .mc-close:disabled { opacity: 0.4; cursor: default; }
 .body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 20px; overflow-y: auto; }
 .body p { margin: 0; }
-/* Setup: an info box with the paths as small code chips. */
-.setup { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid #d1e9ff; border-radius: 12px; background: #eff8ff; color: #175cd3; font-size: 13px; line-height: 20px; }
-.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; list-style: decimal; color: #1e3a5f; }
+/* Setup: an info box (a blue title, ink text) with the paths as small code chips. */
+.setup { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid #d1e9ff; border-radius: 12px; background: #eff8ff; color: #27272a; font-size: 13.5px; line-height: 20px; }
+.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; list-style: decimal; color: #27272a; }
 .setup li::marker { color: #175cd3; font-weight: 600; }
-.setup .mc-small, .setup .mc-label { color: #175cd3; }
-.setup .mc-label { font-size: 13px; font-weight: 600; }
+.setup .mc-small { color: #52525b; }
+.setup .mc-label { margin: 0; color: #175cd3; font-size: 13.5px; line-height: 20px; font-weight: 600; }
 .setup code { padding: 1px 6px; border: 1px solid #d1e9ff; border-radius: 6px; background: #fff; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .body code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
 .block { display: flex; flex-direction: column; gap: 10px; }

@@ -22,6 +22,13 @@ const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${lin
 const source = computed(() => priceSourceLabel(props.estimate));
 const basics = computed(() => basicsNote(props.estimate));
 const sourceTone = computed(() => priceTone(props.estimate));
+// Only the part of a price line that needs a look (a failed live check) is amber; the rest stays grey.
+const ATTENTION = / · (not checked live in time|selected product not found|product marked unavailable|current price could not be checked)$/;
+function priceParts(line: GroceryLineEstimate): [string, string | null] {
+  const label = groceryPriceLabel(line);
+  const at = label.search(ATTENTION);
+  return at > 0 ? [label.slice(0, at + 3), label.slice(at + 3)] : [label, null];
+}
 // Ticked items only matter while shopping; they are not saved.
 const got = ref(new Set<string>());
 
@@ -55,9 +62,10 @@ function toggle(name: string) {
                   <span v-if="line.product?.halal_certified" class="fresh" title="FairPrice lists this product as Halal">Halal-certified</span>
                   <a v-if="store.retailer !== 'fairprice' && line.product?.product_url" class="shop-link" :href="line.product.product_url" target="_blank" rel="noopener" @click.stop>View at {{ store.retailer === 'other' ? 'the shop' : RETAILER_SHORT[store.retailer] }}</a>
                 </span>
-                <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
+                <span class="s" :class="{ stale: isSavedPrice(line) }" :title="groceryPriceLabel(line)"><span :title="groceryPriceTimes(line)">{{ priceParts(line)[0] }}<em v-if="priceParts(line)[1]" class="attn">{{ priceParts(line)[1] }}</em></span></span>
               </span>
-              <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
+              <!-- The price, with the packs it buys under it, so the source line beside it can stay whole. -->
+              <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}<small>{{ packageLabel(line) }}</small></span>
             </label>
           </template>
         </template>
@@ -77,12 +85,17 @@ function toggle(name: string) {
 .source i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--c-dot); }
 .source i.ok { background: var(--c-green); }
 .source i.warn { background: var(--c-amber); }
-.source b { min-width: 0; overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.source i { align-self: flex-start; margin-top: 4px; }
+/* The whole note shows, on two lines if it needs them. */
+.source b { min-width: 0; font-weight: 500; }
 .list { padding: 4px 16px 12px; }
 .aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .aisle .mc-num { color: #a1a1aa; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
 .item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
+.item input { align-self: start; margin-top: 2px; }
+.item .c { align-self: start; display: flex; flex-direction: column; align-items: flex-end; line-height: 20px; }
+.item .c small { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 400; white-space: nowrap; }
 .what { display: flex; flex-direction: column; min-width: 0; }
 .p-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .p { min-width: 0; color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -93,9 +106,9 @@ function toggle(name: string) {
 .shop-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 .trip { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
 .trip .mc-num { font-size: 13px; font-weight: 600; }
-/* The price's source and date are the point of the line: two lines before any cut. */
-.s { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #71717a; font-size: 12px; line-height: 16px; }
-.s.stale { color: var(--c-amber-text); font-weight: 400; }
+/* One calm grey line (the full text is its tooltip); only a failed check is amber. */
+.s { overflow: hidden; color: #71717a; font-size: 12px; line-height: 16px; white-space: nowrap; text-overflow: ellipsis; }
+.s .attn { color: var(--c-amber-text); font-style: normal; }
 .c { flex: none; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
 .item:has(input:checked) .p { color: #a1a1aa; text-decoration: line-through; }
 .unmapped { margin: 0; color: #71717a; font-size: 12px; line-height: 16px; }

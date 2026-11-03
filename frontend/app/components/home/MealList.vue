@@ -81,18 +81,9 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
                 <!-- Who at this meal cannot eat this dish: the meal's other dishes cover them (ADR-0071). -->
                 <span v-if="dish.not_for?.length" class="not-for" :title="`${dish.not_for.join(', ')} cannot eat this dish; other dishes at this meal are for them`">Not for {{ dish.not_for.join(", ") }}</span>
               </span>
-              <!-- Facts true of the dish, never why it was chosen; a tag opens the dish's facts. -->
-              <span v-if="dish.reasons?.length" class="reasons">
-                <button
-                  v-for="reason in dish.reasons"
-                  :key="reason.code"
-                  type="button"
-                  class="reason"
-                  :aria-expanded="factsOpen === dish.entry_id"
-                  @click="toggleFacts(dish.entry_id)"
-                >
-                  {{ reason.label }}
-                </button>
+              <!-- Facts true of the dish, never why it was chosen; a tag opens the dish's facts. Without a meta line they get their own row. -->
+              <span v-if="dish.reasons?.length && !(index === 0 || dish.is_locked)" class="reasons">
+                <button v-for="reason in dish.reasons" :key="reason.code" type="button" class="reason" :aria-expanded="factsOpen === dish.entry_id" @click="toggleFacts(dish.entry_id)">{{ reason.label }}</button>
               </span>
               <!-- The meta line: time and energy for a one-dish meal, then the meal's state (a one-dish count says nothing). -->
               <span v-if="index === 0 || dish.is_locked" class="rest">
@@ -103,6 +94,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
                   {{ chip(meal).label }}
                 </span>
                 <span v-if="dish.is_locked" class="kept">Kept as is</span>
+                <button v-for="reason in dish.reasons ?? []" :key="reason.code" type="button" class="reason" :aria-expanded="factsOpen === dish.entry_id" @click="toggleFacts(dish.entry_id)">{{ reason.label }}</button>
               </span>
               <span v-if="factsOpen === dish.entry_id" :id="`facts-${dish.entry_id}`" class="facts" role="region" :aria-label="`Facts about ${dish.recipe.title}`">
                 <span class="facts-head">Dish facts</span>
@@ -174,7 +166,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .dish.side .name { font-size: 13px; font-weight: 500; }
 .name:hover { color: #6d28d9; }
-.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; font-size: 12.5px; line-height: 18px; color: var(--c-muted); }
+.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 2px; font-size: 12.5px; line-height: 18px; color: var(--c-muted); }
 .rest .when { white-space: nowrap; }
 .kept { color: var(--c-green-text); font-weight: 500; }
 .ok-tick { color: var(--c-green); }
@@ -193,7 +185,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
 .reason { height: 20px; padding: 0 8px; border: 0; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
 .reason:hover { background: #e9e9ec; color: #18181b; }
-.reason[aria-expanded="true"] { background: #ede9fe; color: #6d28d9; }
+.reason[aria-expanded="true"] { background: #e4e4e7; color: #18181b; }
 .facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; padding: 8px 12px; border: 1px solid #f0f0f2; border-radius: 10px; background: #fafafa; color: #27272a; font-size: 12px; line-height: 18px; }
 .facts-head { flex-basis: 100%; color: #9a9aa3; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
 .fact b { font-weight: 500; }

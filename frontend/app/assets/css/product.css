@@ -140,13 +140,23 @@
 .mc-shell .mc-close { width: 32px; height: 32px; flex: none; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
 .mc-shell .mc-close:hover { background: #f4f4f5; color: #18181b; }
 .mc-shell .mc-close .iconify { width: 18px; height: 18px; }
+/* One header for every sheet: a 18/600 title, a muted line under it, icon buttons at the right (close last). */
+.mc-shell .mc-sheet-head { position: sticky; top: 0; z-index: 2; flex: none; display: flex; align-items: center; gap: 12px; min-height: 64px; margin: 0; padding: 12px 16px 12px 24px; border-bottom: 1px solid #f0f0f2; background: #fff; }
+.mc-shell .mc-sheet-head > div { flex: 1; min-width: 0; }
+.mc-shell .mc-sheet-head h2 { margin: 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.mc-shell .mc-sheet-head p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
 
 /* Danger, disabled and busy buttons. Busy keeps the ink pill and shows a spinner. */
 .mc-shell .mc-btn.danger { border-color: #fecaca; background: #fef2f2; color: #b42318; }
 .mc-shell .mc-btn.danger:hover:not(:disabled) { background: #fee4e2; }
-/* Disabled keeps each variant's own look, faded, so the action row keeps its order of importance. */
-.mc-shell :is(.mc-btn, .mc-pill, .mc-primary, .primary-button, .secondary-button):disabled:not([aria-busy="true"]) { opacity: 0.4; cursor: not-allowed; }
-.mc-shell .mc-btn.danger:disabled:not([aria-busy="true"]) { opacity: 0.45; }
+/* Disabled: a light, flat control that still reads (like the disabled send button), never a faded ink pill.
+   Solid pills go light grey with a thin ring; outline pills go flat; ghost and danger keep their shape. */
+.mc-shell :is(.mc-btn, .mc-pill, .mc-primary, .primary-button, .secondary-button, .mc-suggest):disabled:not([aria-busy="true"]) { opacity: 1; cursor: not-allowed; }
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-primary, .primary-button):disabled:not([aria-busy="true"]) { border-color: transparent; background: #f4f4f5; color: #a1a1aa !important; box-shadow: inset 0 0 0 1px #e4e4e7; }
+.mc-shell :is(.mc-btn.secondary, .mc-pill, .secondary-button, .mc-suggest):disabled:not([aria-busy="true"]) { border-color: #ececef; background: #fafafa; color: #a1a1aa; box-shadow: none; }
+.mc-shell :is(.mc-btn.quiet, .text-button):disabled { background: transparent; color: #a1a1aa; }
+.mc-shell :is(.mc-btn.danger, .mc-pill.danger):disabled:not([aria-busy="true"]) { border-color: #f2dcd9; background: #fafafa; color: #d0a5a0; }
+.mc-shell :is(.mc-btn, .mc-pill, .secondary-button):disabled :is(.iconify, svg) { color: inherit; }
 .mc-shell .mc-btn[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .mc-shell .mc-spin { width: 14px; height: 14px; flex: none; animation: mc-spin 900ms linear infinite; }
 @keyframes mc-spin { to { transform: rotate(360deg); } }
@@ -216,8 +226,8 @@
 .sb-new { width: 100%; height: 36px; margin: 6px 0 8px; justify-content: flex-start; border-radius: 10px; background: #fff; color: var(--mc-strong); font-size: 14px; font-weight: 500; box-shadow: inset 0 0 0 1px #e4e4e7, 0 1px 2px rgba(16, 16, 20, 0.05); }
 .sb-new:hover { background: #fafafa; }
 .sb-new .sb-kbd { margin-left: auto; height: 18px; padding: 0 4px; border-radius: 4px; background: #fff; color: #71717a; font-size: 11px; box-shadow: inset 0 0 0 1px #e4e4e7; }
-/* Search sits under New plan, above the pages (home only). */
-.sb-search { flex: none; display: flex; align-items: center; gap: 8px; height: 34px; margin: 0 0 8px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; }
+/* Search sits on top of the recent plans it filters (home only), so the rows above never move between pages. */
+.sb-search { flex: none; display: flex; align-items: center; gap: 8px; height: 34px; margin: 0 0 6px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; }
 .sb-search .iconify { width: 14px; height: 14px; flex: none; color: #a1a1aa; }
 .sb-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #18181b; font: inherit; font-size: 13.5px; }
 .sb-search input::placeholder { color: #a1a1aa; }
@@ -255,6 +265,8 @@
 /* The 56px bar at the top of the white panel: a dim icon and the page's name. */
 .mc-bar { height: 56px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid #f0f0f2; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
 .mc-bar .iconify { width: 16px; height: 16px; color: #a1a1aa; }
+/* A section scrolled into view stops below the sticky bar, not under it. */
+.product-frame { scroll-padding-top: 72px; }
 
 /* Error box of the product pages and sign-in: a soft red box led by a circle-alert icon. */
 .mc-shell .mc-alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
@@ -328,9 +340,12 @@
 .product-frame .member-card-header { padding-bottom: 12px; border-bottom-color: #f0f0f2; }
 .product-frame .member-card-header strong { color: var(--mc-strong); font-size: 14px; font-weight: 600; }
 .product-frame .version-badge { padding: 2px 8px; background: #ecfdf3; color: #067647; font-size: 12px; font-weight: 500; }
-.product-frame .profile-sidebar { display: flex; flex-direction: column; gap: 16px; border: 0; }
+/* The side column runs the form's full height; only "Plan your meals" sticks, the cards under it scroll with the page. */
+.product-frame .profile-sidebar { align-self: stretch; display: flex; flex-direction: column; gap: 16px; border: 0; }
 .product-frame .profile-sidebar > section { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
-.product-frame .profile-sidebar h2 { font-size: 18px; line-height: 24px; }
+.product-frame .profile-planning-card { position: sticky; top: 72px; z-index: 2; }
+/* Every card title in both columns is the one 16/22 heading. */
+.product-frame .profile-sidebar h2 { font-size: 16px; line-height: 22px; }
 .product-frame .profile-sidebar > section > p { margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; }
 /* The summary's long explanation stays three lines; its full text is in the form above. */
 .product-frame .profile-summary-card > p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 18px; }
@@ -341,6 +356,8 @@
 .product-frame .profile-summary-list dt { color: #71717a; font-size: 13px; line-height: 18px; }
 .product-frame .profile-summary-list dd { color: #27272a; font-size: 13px; line-height: 18px; font-weight: 500; }
 .product-frame .profile-planning-card .primary-button { width: 100%; margin-top: 16px; }
+/* The two stacked full-width buttons share one height. */
+.product-frame .profile-planning-card .profile-replan-button { height: 40px; min-height: 40px; margin-top: 8px; font-size: 14px; }
 .product-frame .profile-planning-card .primary-button + .field-help { margin-top: 8px; }
 .product-frame .profile-planning-card .plan-when { margin-top: 14px; }
 .product-frame .profile-save-button { width: auto; min-width: 0; margin-top: 20px; padding-inline: 18px; }
@@ -383,8 +400,10 @@
 .product-frame .technical-links button:hover { background: #f7f7f8; text-decoration: none; }
 /* Status rows: the name left, the badge at the right edge; the prices note sits under its label. */
 .product-frame .status-row { grid-template-columns: minmax(0, 1fr) auto; }
-.product-frame .status-row:has(.prices) { grid-template-columns: minmax(0, 1fr); row-gap: 2px; padding-block: 10px; }
-.product-frame .status-row .prices { font-size: 12px; line-height: 16px; }
+.product-frame .status-row:has(.prices) { grid-template-columns: minmax(0, 1fr); row-gap: 2px; padding-block: 14px; }
+.product-frame .status-row .prices { max-width: 640px; font-size: 12px; line-height: 16px; }
+/* One readable width for the list and the card under it, so a label and its badge stay close. */
+.product-frame :is(.status-panel, .technical-details) { max-width: 760px; }
 /* The administrator card: title, the key/value list, then the links in one row. */
 .product-frame .technical-details.admin { grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .product-frame .technical-details.admin .technical-links { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
