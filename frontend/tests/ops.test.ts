@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { TASK_STATUSES, compareMetrics, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, singaporeMidnight, splitNames, statusColor, statusesIn } from "../app/lib/ops";
+import { TASK_STATUSES, compareMetrics, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, isConsoleAccount, isJobCancellable, jobIdempotencyKey, linePath, mayManageJobs, niceMax, packageGrams, parseTaskKey, singaporeMidnight, splitNames, statusColor, statusesIn, statusTone } from "../app/lib/ops";
 
 describe("ops console slice 2 helpers", () => {
   it("lists changed fields first and compares values, not references", () => {
@@ -130,6 +130,12 @@ describe("ops console helpers", () => {
     for (const statuses of [AGENT_STATUSES, PLANNING_STATUSES]) {
       expect(new Set(statuses.map(statusColor)).size).toBe(statuses.length);
     }
+  });
+
+  it("gives each badge a tone by status family, neutral for anything unknown", () => {
+    expect(["succeeded", "failed", "degraded", "running"].map(statusTone)).toEqual(["success", "error", "warning", "info"]);
+    expect(statusTone("cancelled")).toBe("neutral");
+    expect(statusTone("something_new")).toBe("neutral");
   });
 
   it("filters and shows times in Singapore whatever the browser's zone", () => {

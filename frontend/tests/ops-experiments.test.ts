@@ -115,10 +115,13 @@ describe("experiments page", () => {
 
   it("styles its evidence drawer as an overlay and does not claim every switch reaches requests", () => {
     const source = readFileSync(new URL("../app/pages/ops/experiments.vue", import.meta.url), "utf8");
-    const style = source.slice(source.indexOf("<style scoped>"));
-    // Scoped styles of tasks.vue and users.vue never reach this page; it needs its own.
-    expect(style).toMatch(/\.drawer-scrim \{[^}]*position: fixed/);
-    expect(style).toMatch(/\.drawer \{[^}]*overflow-y: auto/);
+    // The drawer is the shared console drawer: ops.vue's unscoped style, which reaches every console page.
+    const shell = readFileSync(new URL("../app/pages/ops.vue", import.meta.url), "utf8");
+    const shared = shell.slice(shell.indexOf("<style>"));
+    expect(source).toContain('class="drawer-scrim"');
+    expect(source).toContain('<aside class="drawer"');
+    expect(shared).toMatch(/\.ops-shell \.drawer-scrim \{[^}]*position: fixed/);
+    expect(shared).toMatch(/\.ops-shell \.drawer \{[^}]*overflow-y: auto/);
     expect(source).not.toContain("and new requests pick it up");
     expect(source).toContain("Only switches marked “Used by the product” reach new requests");
   });

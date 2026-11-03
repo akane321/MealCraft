@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
+import { formatSeconds, formatValue, formatWhen, humanKey, statusTone } from "~/lib/ops";
 import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentExecution, experimentGates, experimentHeadline, presetBreakdown, queuesRun, spendsOpenAI } from "~/lib/ops-experiments";
 import type { OpsEvaluation, OpsEvaluationName, OpsExperiment, OpsExperimentComparison, OpsExperimentDetail, OpsRuntimeSetting, OpsSettingChange } from "~/types/ops";
 
@@ -257,7 +257,6 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Experiments &amp; configuration</p>
       <h1 class="mc-serif">Switches, evaluations and A/B comparisons</h1>
       <p>Each switch starts at the server's default, and a change is recorded with who made it and what it was before. Only switches marked “Used by the product” reach new requests; the others are stored until the planner reads them. Evaluations run only the developer sets; held-out sets are never offered here.</p>
     </header>
@@ -275,7 +274,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
               <p class="ops-muted">{{ setting.meaning }}</p>
               <p class="tags">
                 <span class="mc-chip">{{ setting.overridden ? "Changed here" : "Server default" }}</span>
-                <span class="mc-chip" :class="{ alert: !setting.wired }">{{ setting.wired ? "Used by the product" : "Stored only, not read yet" }}</span>
+                <span class="mc-chip" :class="{ warn: !setting.wired }">{{ setting.wired ? "Used by the product" : "Stored only, not read yet" }}</span>
               </p>
             </div>
             <div class="how">
@@ -285,6 +284,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
               <input v-else :id="`set-${setting.key}`" v-model="drafts[setting.key]" type="number" :min="setting.minimum ?? undefined" :max="setting.maximum ?? undefined" :step="setting.integer ? 1 : 'any'">
               <button type="button" class="mc-primary" :disabled="!draftChanges(setting, drafts[setting.key])" @click="ask(setting)">Change</button>
               <button v-if="setting.overridden" type="button" class="mc-pill" @click="ask(setting, true)">Use default</button>
+              <span v-else aria-hidden="true" />
             </div>
           </li>
         </ul>
@@ -308,7 +308,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       </table>
     </section>
 
-    <div class="ops-grid">
+    <!-- One column: the form full width, then the comparison in its own full-width card. -->
+    <div class="ops-stack">
       <form class="ops-card run-form" aria-labelledby="run-title" @submit.prevent="askExperiment">
         <h2 id="run-title">Run an evaluation</h2>
         <label>Evaluation
@@ -321,18 +322,20 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
           <span class="mc-chip">{{ experimentExecution(chosen, runParser) }}</span>
         </p>
         <template v-if="isPlanningExperiment">
-          <label v-if="isComponentExperiment">Repeats
-            <input v-model.number="form.repeats" type="number" min="1" max="20">
-          </label>
-          <label>Beam width
-            <input v-model.number="form.width" type="number" min="1" max="1000">
-          </label>
-          <label>Maximum expansions
-            <input v-model.number="form.maxExpansions" type="number" min="1" max="1000000">
-          </label>
-          <label v-if="isComponentExperiment">Repair rounds
-            <input v-model.number="form.repairRounds" type="number" min="0" max="10">
-          </label>
+          <div class="num-fields">
+            <label v-if="isComponentExperiment">Repeats
+              <input v-model.number="form.repeats" type="number" min="1" max="20">
+            </label>
+            <label>Beam width
+              <input v-model.number="form.width" type="number" min="1" max="1000">
+            </label>
+            <label>Maximum expansions
+              <input v-model.number="form.maxExpansions" type="number" min="1" max="1000000">
+            </label>
+            <label v-if="isComponentExperiment">Repair rounds
+              <input v-model.number="form.repairRounds" type="number" min="0" max="10">
+            </label>
+          </div>
           <p class="ops-muted small">The fixed developer fixture is used. Held-out data and paid models are unavailable here.</p>
         </template>
         <label v-else-if="form.evaluation === 'developer-planning'">Planner
@@ -351,7 +354,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
         </label>
         <label>Name (optional) <input v-model="form.label" maxlength="80" placeholder="e.g. before the budget change"></label>
         <p v-if="runError" class="ops-error" role="alert">{{ runError }}</p>
-        <button type="submit" class="mc-primary" :disabled="running || !evaluations.length">{{ running ? "Running…" : "Run evaluation" }}</button>
+        <button type="submit" class="mc-primary" :disabled="running || !evaluations.length" :aria-busy="running">{{ running ? "Running…" : "Run evaluation" }}</button>
       </form>
 
       <section class="ops-card" aria-labelledby="ab-title">
@@ -372,8 +375,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <tbody>
               <tr v-for="row in evidenceRows" :key="row.label">
                 <th>{{ row.label }}</th>
-                <td>{{ formatValue(row.a) }}</td>
-                <td>{{ formatValue(row.b) }}</td>
+                <td :title="formatValue(row.a)">{{ formatValue(row.a) }}</td>
+                <td :title="formatValue(row.b)">{{ formatValue(row.b) }}</td>
                 <td>{{ evidenceMatch(row) }}</td>
               </tr>
             </tbody>
@@ -398,7 +401,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
           <p v-if="!failureRows.length" class="ops-muted small">Neither record contains aggregated failure mechanisms.</p>
           <table v-else class="metrics">
             <thead><tr><th>Mechanism</th><th>A count</th><th>B count</th></tr></thead>
-            <tbody><tr v-for="row in failureRows" :key="row.key"><th>{{ humanKey(row.key) }}</th><td>{{ formatValue(row.before) }}</td><td>{{ formatValue(row.after) }}</td></tr></tbody>
+            <tbody><tr v-for="row in failureRows" :key="row.key"><th>{{ humanKey(row.key) }}</th><td class="mc-num">{{ formatValue(row.before) }}</td><td class="mc-num">{{ formatValue(row.after) }}</td></tr></tbody>
           </table>
           <h3>Case changes</h3>
           <p v-if="!comparison?.case_differences" class="ops-muted small">One or both runs stored no case-level report, so case changes cannot be compared.</p>
@@ -429,19 +432,18 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       <p v-if="experimentsFailed" class="ops-error" role="alert">The results couldn't be loaded.</p>
       <p v-else-if="!experiments" class="ops-muted" aria-busy="true">Loading…</p>
       <p v-else-if="!experiments.length" class="ops-muted">No evaluation has been run yet.</p>
-      <table v-else>
-        <thead><tr><th>A</th><th>B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th>Time</th><th>When</th><th>Evidence</th></tr></thead>
+      <table v-else class="results">
+        <thead><tr><th class="pick" title="Choose run A, then run B, to compare them">A · B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
         <tbody>
           <tr v-for="run in experiments" :key="run.id">
-            <td><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"></td>
-            <td><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
-            <td>#{{ run.id }} {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></td>
-            <td><span class="ops-badge" :style="{ '--dot': statusColor(run.status) }">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
-            <td>{{ experimentHeadline(run) }}</td>
-            <td>{{ experimentGates(run) }}</td>
+            <td class="pick"><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
+            <td class="run-name"><span :title="`#${run.id} ${evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation}${run.label ? ` · ${run.label}` : ''}`"><b>#{{ run.id }}</b> {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></span></td>
+            <td class="nowrap"><span class="ops-badge" :class="statusTone(run.status)">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
+            <td class="headline"><span :title="experimentHeadline(run)">{{ experimentHeadline(run) }}</span></td>
+            <td class="gates">{{ experimentGates(run) }}</td>
             <td class="mc-num">{{ formatSeconds(run.duration_seconds) }}</td>
-            <td class="ops-muted">{{ formatWhen(run.created_at) }}</td>
-            <td><button type="button" class="mc-pill" @click="openExperiment(run)">Open</button></td>
+            <td class="ops-muted nowrap">{{ formatWhen(run.created_at) }}</td>
+            <td><button type="button" class="mc-pill sm" @click="openExperiment(run)">Open</button></td>
           </tr>
         </tbody>
       </table>
@@ -474,13 +476,13 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <p class="mc-eyebrow">Experiment #{{ selectedExperimentId }}</p>
             <h2 id="experiment-detail-title" class="mc-serif">{{ selectedExperiment?.label ?? selectedExperiment?.evaluation ?? "Loading evidence…" }}</h2>
           </div>
-          <button type="button" class="mc-pill" @click="closeExperiment">Close</button>
+          <button type="button" class="mc-close" aria-label="Close" @click="closeExperiment"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
         </header>
         <p v-if="detailFailed" class="ops-error" role="alert">This experiment evidence couldn't be loaded.</p>
         <p v-else-if="detailLoading || !selectedExperiment" class="ops-muted" aria-busy="true">Loading recorded evidence…</p>
         <template v-else>
           <div class="chips">
-            <span class="ops-badge" :style="{ '--dot': statusColor(selectedExperiment.status) }">{{ humanKey(selectedExperiment.status) }}</span>
+            <span class="ops-badge" :class="statusTone(selectedExperiment.status)">{{ humanKey(selectedExperiment.status) }}</span>
             <span class="mc-chip" :class="{ alert: !selectedExperiment.reproducibility.complete }">{{ selectedExperiment.reproducibility.complete ? "Reproducibility complete" : "Conditions incomplete" }}</span>
             <span class="mc-chip">{{ humanKey(selectedExperiment.reproducibility.claim_scope) }}</span>
             <span v-if="selectedExperiment.passed !== null" class="mc-chip" :class="{ alert: !selectedExperiment.passed }">{{ selectedExperiment.passed ? "Gates passed" : "Gates not passed" }}</span>
@@ -519,7 +521,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <h3 id="detail-reproduce">Reproducibility</h3>
             <OpsFields :data="selectedExperiment.conditions" />
             <p v-if="selectedExperiment.reproducibility.missing.length" class="ops-error">Missing: {{ selectedExperiment.reproducibility.missing.join(", ") }}</p>
-            <ul class="ops-muted small"><li v-for="warning in selectedExperiment.reproducibility.warnings" :key="warning">{{ warning }}</li></ul>
+            <ul class="ops-muted small bullets"><li v-for="warning in selectedExperiment.reproducibility.warnings" :key="warning">{{ warning }}</li></ul>
           </section>
           <section aria-labelledby="detail-failures">
             <h3 id="detail-failures">Failed cases</h3>
@@ -545,51 +547,76 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 
 <style scoped>
 .switches { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.switches li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.switches li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 0; border-bottom: 1px solid #f0f0f2; }
 .switches li:last-child { border-bottom: 0; }
 .what { flex: 1 1 320px; min-width: 0; }
-.what label { color: var(--ivory); font-size: 14px; }
+.what label { color: #18181b; font-size: 14px; font-weight: 500; }
 .what p { margin: 4px 0 0; font-size: 12.5px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.how { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-select, input:not([type="radio"]) { padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; font-size: 13px; }
+/* The controls in fixed columns, so every select starts at the same x and nothing moves when "Use default" shows. */
+.how { display: grid; grid-template-columns: 150px auto 104px; align-items: center; justify-items: start; gap: 8px; }
 .how select, .how input { width: 150px; }
-.small { font-size: 12px; }
-.table-card { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { padding: 10px 12px; border-bottom: 1px solid var(--line-2); color: var(--t3); font-weight: 500; text-align: left; white-space: nowrap; }
-td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.ops-stack { display: grid; gap: 16px; }
+/* Tables run edge to edge under the card's title. */
+.ops-card.table-card > h2 { margin: 0; padding: 16px 20px; }
+.ops-card.table-card > p { margin: 0; padding: 0 20px 16px; }
+.results-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+.results-head h2 { margin: 0; }
 td p { margin: 4px 0 0; }
 .run-form { display: grid; gap: 12px; align-content: start; }
-.run-form label { display: grid; gap: 6px; color: var(--t3); font-size: 12px; }
+.run-form label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .run-form p { margin: 0; }
 .run-form .mc-primary { justify-self: start; }
-.results-head { display: flex; align-items: center; justify-content: space-between; }
-.results-head h2 { margin: 0; }
-h3 { margin: 16px 0 8px; color: var(--t2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.num-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+/* Results: one line a cell; the full run name and headline are tooltips. */
+.nowrap, .ops-shell main td.mc-num { white-space: nowrap; }
+.results :is(th, td) { padding-inline: 10px !important; }
+.results :is(th, td):first-child { padding-left: 16px !important; }
+.pick { width: 64px; white-space: nowrap; }
+.pick input { vertical-align: middle; }
+.pick input + input { margin-left: 10px; }
+.results :is(th, td):last-child { padding-right: 14px !important; }
+/* The run's name on two lines at most; the headline and gates in a smaller grey, wrapping; the full text is in the tooltips. */
+.run-name { min-width: 220px; }
+.run-name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.run-name b { font-weight: 600; }
+.headline > span { display: -webkit-box; max-width: 260px; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.headline, .gates { color: #52525b; font-size: 13px; line-height: 18px; }
+.gates { min-width: 96px; }
+h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
+/* Bulleted lists (the reset stylesheet drops list markers). */
+.config-diff, .comparison-blocked ul, .bullets { list-style: disc; }
+:is(.config-diff, .comparison-blocked ul, .bullets) li::marker { color: #a1a1aa; }
+.bullets { margin: 8px 0 0; padding-left: 18px; }
 .config-diff { margin: 0; padding-left: 18px; font-size: 13px; }
-.config-diff b { color: var(--accent); font-weight: 500; }
-.metrics { margin-top: 14px; }
-.metrics tbody th { color: var(--t2); font-weight: 400; white-space: normal; }
-.moved { color: var(--accent); }
-.comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 12px; border-radius: 10px; font-size: 12px; }
-.comparison-ready { border: 1px solid color-mix(in srgb, var(--sage) 45%, transparent); background: color-mix(in srgb, var(--sage) 10%, transparent); color: var(--sage); }
-.comparison-blocked { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--t2); }
+.config-diff b { color: #0f0f12; font-weight: 600; }
+/* The comparison tables sit in half a page: smaller cells than the full-width tables. */
+.metrics { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.metrics th, .metrics td { height: auto; padding: 8px 10px; font-size: 13px; line-height: 18px; }
+.metrics thead th { height: 32px; padding-block: 0; }
+.metrics tbody th { color: #52525b; font-weight: 400; white-space: normal; }
+.metrics td.mc-num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Number headings sit over their numbers, in equal narrow columns, so A, B and B − A read side by side. */
+.metrics:not(.evidence-table, .case-changes) thead th:not(:first-child) { text-align: right; }
+.metrics:not(.evidence-table, .case-changes) :is(thead th:not(:first-child), td.mc-num) { width: 96px; }
+/* A moved figure is data, not a link: ink and bold. */
+.moved { color: #0f0f12; font-weight: 600; }
+.comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 14px; border: 1px solid; border-radius: 12px; font-size: 13px; line-height: 18px; }
+.comparison-ready { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+.comparison-blocked { border-color: #fecdca; background: #fef3f2; color: #b42318; }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
-.evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
+.evidence-table td { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.evidence-table td:last-child { font-family: inherit; font-size: 13px; }
+.metrics thead th { white-space: nowrap; }
 /* Five columns in half a page: headings and the humanized failure codes wrap at spaces rather than push the card wider; a status stays whole. */
 .case-changes th, .case-changes td { padding: 9px 8px; }
 .case-changes thead th { white-space: normal; }
 .case-changes td:nth-child(-n+3) { white-space: nowrap; }
-/* The drawer's overlay; each ops page styles its own (tasks.vue, users.vue, data.vue). */
-.drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
-.drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }
-.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.drawer-head h2 { margin: 6px 0 0; font-size: 24px; font-weight: 300; }
-.drawer .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-.drawer section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
-.drawer h3 { margin: 0 0 12px; }
+/* The drawer itself is the shared console drawer in ops.vue. */
+.drawer-head + .chips { margin-bottom: 4px; }
 .preset-table { overflow-x: auto; }
 .preset-table td { min-width: 96px; font-size: 12px; }
-.drawer pre { max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.drawer details { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; }
+.drawer summary { padding: 9px 12px; color: #27272a; cursor: pointer; font-size: 13px; font-weight: 500; }
+.drawer details pre, .drawer details .ops-fields { margin: 0 12px 12px; }
 </style>
