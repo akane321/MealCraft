@@ -1,0 +1,325 @@
+{
+ "sampled": 60,
+ "checked": 48,
+ "correct": 28,
+ "rate": 0.583,
+ "wilson95": [
+  0.443,
+  0.712
+ ],
+ "target": 0.95,
+ "unsure": [
+  {
+   "id": "RCP2_01DE415A4C1C",
+   "title": "Budin (Puerto Rican Bread Pudding)",
+   "note": "AI辅助真人复核（真人已确认）：面包453.6 g加淡奶1008 g等全部放入9×5英寸面包模，容量可能不足；需核模具深度、可装体积及10份定义。"
+  },
+  {
+   "id": "RCP2_15AD3817550A",
+   "title": "French Hot Chocolate",
+   "note": "AI辅助真人复核（真人已确认）：牛奶仅写desired amount，721.9 g为估量；浓巧克力底实际产量与5杯各取3汤匙的分配需核。"
+  },
+  {
+   "id": "RCP2_4D376325AF18",
+   "title": "Middle Eastern Lamb And Rice With Apricots",
+   "note": "AI辅助真人复核（真人已确认）：米饭与炖羊肉分层烘烤流程完整；dried apricot映射普通apricot 130 g，需核干果杯重和营养条目。"
+  },
+  {
+   "id": "RCP2_7AAD2C964D3B",
+   "title": "Salsa For Pupusas",
+   "note": "AI辅助真人复核（真人已确认）：4个serrano chilies被计180 g，疑沿用普通辣椒单重；清单完整，但椒种和重量需核实。"
+  },
+  {
+   "id": "RCP2_9243F74EAE79",
+   "title": "Brazilian Hot Pepper And Lemon Sauce",
+   "note": "AI辅助真人复核（真人已确认）：2–3个habanero/serrano/jalapeno通用计112.5 g，不同椒种大小差异大，需核实际净重。"
+  },
+  {
+   "id": "RCP2_A77421E0D1CB",
+   "title": "Italian Sausage Cheese Strata Recipe",
+   "note": "AI辅助真人复核（真人已确认）：清单含pepper to taste，但蛋奶液步骤仅提盐，红椒又单独出现，需明确黑胡椒何时加入；8份量合理。"
+  },
+  {
+   "id": "RCP2_ABDAC33D155B",
+   "title": "Dulce De Leche Whipped Cream Cheese Frosting",
+   "note": "AI辅助真人复核（真人已确认）：dulce de leche映射为泛称caramel，乳制焦糖与糖果并非必然同物；作为12份糖霜的用量可行，营养条目待核。"
+  },
+  {
+   "id": "RCP2_D050DB2A7F13",
+   "title": "Black Bean Wasabi Potato Salad",
+   "note": "AI辅助真人复核（真人已确认）：原文为low-fat mayonnaise却映射通用mayonnaise，所报44.2 g脂肪/份需核是否按低脂产品计值。"
+  },
+  {
+   "id": "RCP2_DD2ACA223D77",
+   "title": "Chicken And Ham Cassoulet",
+   "note": "AI辅助真人复核（真人已确认）：dried navy beans映射white beans，453.6 g干豆的营养是否用了熟豆条目无法由表内确认；须核干湿口径。"
+  },
+  {
+   "id": "RCP2_E1AA47446933",
+   "title": "Wonton Cold Salad",
+   "note": "AI辅助真人复核（真人已确认）：整橙取皮和汁后弃果肉却按orange 140 g计，需核每份营养是否只计实际使用部分；面皮煮熟冷却步骤完整。"
+  },
+  {
+   "id": "RCP2_E86649B6F43D",
+   "title": "Mussels With Greek Yogurt, Capers, And Mint",
+   "note": "AI辅助真人复核（真人已确认）：1.25 lb带壳贻贝计567 g，成品去壳装盘，需核营养是否按净肉量而非带壳重量计。"
+  },
+  {
+   "id": "RCP2_E8F13AFE052D",
+   "title": "Aebleskiver",
+   "note": "AI辅助真人复核（真人已确认）：杯孔抹油总量与实际吸收量未给，6份也未说明每份几颗；需确认327.6 kcal所用炸油留存与份定义。"
+  }
+ ],
+ "unchecked": 0,
+ "refill": [],
+ "errors_by_check": {
+  "菜谱完整": {
+   "recipes": 10,
+   "share_of_errors": 0.476
+  },
+  "步骤合理": {
+   "recipes": 4,
+   "share_of_errors": 0.19
+  },
+  "份量正常": {
+   "recipes": 7,
+   "share_of_errors": 0.333
+  }
+ },
+ "by_course": {
+  "baked_good": {
+   "checked": 4,
+   "correct": 1
+  },
+  "breakfast": {
+   "checked": 1,
+   "correct": 1
+  },
+  "dessert": {
+   "checked": 3,
+   "correct": 2
+  },
+  "drink": {
+   "checked": 2,
+   "correct": 1
+  },
+  "main": {
+   "checked": 20,
+   "correct": 9
+  },
+  "salad": {
+   "checked": 2,
+   "correct": 1
+  },
+  "sauce_condiment": {
+   "checked": 2,
+   "correct": 2
+  },
+  "side": {
+   "checked": 6,
+   "correct": 6
+  },
+  "snack_appetizer": {
+   "checked": 4,
+   "correct": 1
+  },
+  "soup": {
+   "checked": 4,
+   "correct": 4
+  }
+ },
+ "problems": [
+  {
+   "id": "RCP2_08B001A12341",
+   "title": "Szechuan Shrimp Stir-Fry",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1只混合前8项，之后未交代第9项ground red pepper的用途，清单与步骤不完全对应。"
+  },
+  {
+   "id": "RCP2_1168824F89D8",
+   "title": "Artisanal Mushroom Pizzas",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：9英寸饼底裁成3英寸小圆，余下边角不使用却按3张整饼1020 g计营养；金针菇仅放在烤好披萨上，需明确预熟状态。"
+  },
+  {
+   "id": "RCP2_25100CF90B30",
+   "title": "Baked Mediterranean Salmon",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1仅混合前8项，清单第9项pepper之后未使用；三文鱼配油橄榄分2份虽偏丰盛但配方支持。"
+  },
+  {
+   "id": "RCP2_32117351B6E2",
+   "title": "Roast Leg Of Lamb - French Cooking At Home",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：整羊腿估1500 g加土豆1065 g及大量橄榄油仅分4份，每份1446.5 kcal、脂肪105 g明显偏大；需核份数及带骨可食量。"
+  },
+  {
+   "id": "RCP2_352AA9547421",
+   "title": "Norwegian Skolebrod",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1用油涂发酵碗，清单缺该油量；面团明确分24个小包，但157.4 kcal未必包含涂油。"
+  },
+  {
+   "id": "RCP2_42A25812D59B",
+   "title": "Colombo Curry",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：fenugreek 2 tsp重复列两次，步骤仅提一次；14 oz鸡汤罐头却计236.6 g，规格与重量不符，须核配方和营养。"
+  },
+  {
+   "id": "RCP2_5B25ACB2A0EA",
+   "title": "Rich Swedish Cream Dough",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤只到酵母与奶油蛋黄混合，面粉、糖、盐和黄油均未使用，也无成团、发酵、整形或烤制步骤。"
+  },
+  {
+   "id": "RCP2_5B562E59A896",
+   "title": "Crock Pot Falafel",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤9需pita或corn tortilla、番茄、黄瓜和ranch dressing，清单均未列；全套成品营养无法确认。"
+  },
+  {
+   "id": "RCP2_5E6DEF77B85D",
+   "title": "Vegetable Risotto",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤4另加1/2杯水，清单未列；步骤5只写Cook more，未给时长或米熟判据。"
+  },
+  {
+   "id": "RCP2_68679CAE3264",
+   "title": "Low Sodium Slow Cooker Chili",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1用1 tbsp油炒洋葱，清单缺油；香料分次按口味加入，营养按全部用量还是实际用量不明。"
+  },
+  {
+   "id": "RCP2_7A14B4D4A6DD",
+   "title": "French Steak",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：1 cup beef bouillon处于炖牛肉液体语境，却映射成bouillon cube 150 g，误把高汤当浓缩块，营养和盐量需重算。"
+  },
+  {
+   "id": "RCP2_7D138C54E5E2",
+   "title": "Moroccan Carrot Salad Recipe",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1明确用盐水煮胡萝卜，清单未列盐；其余拌香料油醋并腌渍的顺序可行。"
+  },
+  {
+   "id": "RCP2_985810770495",
+   "title": "Weeknight Pork And Bean Sprouts Stir-Fry Recipe",
+   "failed": [
+    "菜谱完整",
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤3需配白米饭，清单缺米饭；3个small dried red chiles却计135 g，明显把小干椒当普通鲜椒。"
+  },
+  {
+   "id": "RCP2_A2072DE96140",
+   "title": "Southwestern Spaghetti",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：6个small zucchini原文已注明总重约1 lb，却换算1176 g，明显偏离原文总重，份量与营养需重算。"
+  },
+  {
+   "id": "RCP2_B10CE2921F65",
+   "title": "Vegetable Paella (Very Healthy)",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤2明确另加4 tbsp水炒蔬菜，清单未列水；糙米先预煮再合焖，4份大份蔬菜饭量可接受。"
+  },
+  {
+   "id": "RCP2_CCE2DCA36B45",
+   "title": "Crusty Cuban Bread",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：烤盘需涂油并撒cornmeal，清单均未列；盐1 tbsp对3杯面粉偏多，需核原文，但不据此改动份数。"
+  },
+  {
+   "id": "RCP2_DAC4E2A64770",
+   "title": "Vegan Tempura Veggies",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：10根baby carrots被换算610 g，相当于普通胡萝卜单重；且整根小胡萝卜只炸1–2分钟，需补预熟或嫩度判据。"
+  },
+  {
+   "id": "RCP2_E5E5A69C7CFB",
+   "title": "Coconut Tres Leches Cake",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤2明确用黄油涂烤盘，清单缺黄油；蛋糕、浸奶和奶油顶料顺序完整，热量未含该油量。"
+  },
+  {
+   "id": "RCP2_F9123819021C",
+   "title": "Ponche - Chilean Cranberry Punch",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤4需冰块，清单未列冰；果汁煮香料冷却过滤后分6杯，热量和饮品量可接受。"
+  },
+  {
+   "id": "RCP2_F9E5FDCEA734",
+   "title": "Baked Chicken Stroganoff",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤最后只写Bake 30 minutes，缺烤箱温度；cooked noodles映射egg noodles且带质量单位，需核熟面营养口径。"
+  }
+ ],
+ "waves": {
+  "strata": [
+   {
+    "name": "wave 1",
+    "population": 3927,
+    "k": 43,
+    "n": 75,
+    "rate": 0.573,
+    "wilson95": [
+     0.461,
+     0.679
+    ]
+   },
+   {
+    "name": "wave 2",
+    "population": 5263,
+    "k": 28,
+    "n": 48,
+    "rate": 0.583,
+    "wilson95": [
+     0.443,
+     0.712
+    ]
+   }
+  ],
+  "weighted": 0.579,
+  "cover": {
+   "recipes": 9190,
+   "of": 9190
+  }
+ }
+}

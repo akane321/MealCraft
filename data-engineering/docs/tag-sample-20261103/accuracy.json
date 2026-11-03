@@ -1,0 +1,423 @@
+{
+  "groups": {
+    "table": {
+      "rows": 95,
+      "checked": 95,
+      "agree": 50,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.526
+    },
+    "all": {
+      "rows": 95,
+      "checked": 95,
+      "agree": 50,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.526
+    }
+  },
+  "fields": {
+    "meal_role": {
+      "rows": 40,
+      "checked": 40,
+      "agree": 15,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.375
+    },
+    "contains_staple": {
+      "rows": 40,
+      "checked": 40,
+      "agree": 25,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.625
+    },
+    "protein_sources": {
+      "rows": 15,
+      "checked": 15,
+      "agree": 10,
+      "unchecked": 0,
+      "checked_without_value": 0,
+      "unrecognized": 0,
+      "accuracy": 0.667
+    }
+  },
+  "differ": [
+    {
+      "id": "RCP2_05426F648B01",
+      "title": "Pirishki",
+      "field": "meal_role",
+      "value": "dessert",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_244D8C7CC69D",
+      "title": "Baked Grits Souffle",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_244D8C7CC69D",
+      "title": "Baked Grits Souffle",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_3BBE43E93A1B",
+      "title": "Baked Beans",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_3BBE43E93A1B",
+      "title": "Baked Beans",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_3BBE43E93A1B",
+      "title": "Baked Beans",
+      "field": "protein_sources",
+      "value": [
+        "legume",
+        "pork"
+      ],
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_3F150B2A9B44",
+      "title": "Luchi",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_3F150B2A9B44",
+      "title": "Luchi",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_418ABCCF343C",
+      "title": "Baked Eggplant Parmigiana",
+      "field": "meal_role",
+      "value": null,
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_418ABCCF343C",
+      "title": "Baked Eggplant Parmigiana",
+      "field": "contains_staple",
+      "value": null,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_4CB46715223E",
+      "title": "Fruit Curry",
+      "field": "meal_role",
+      "value": null,
+      "checked": true,
+      "batch_value": "dessert"
+    },
+    {
+      "id": "RCP2_4CB46715223E",
+      "title": "Fruit Curry",
+      "field": "contains_staple",
+      "value": null,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_4CB46715223E",
+      "title": "Fruit Curry",
+      "field": "protein_sources",
+      "value": null,
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_4DBEB5DF75A6",
+      "title": "Spiced Apples",
+      "field": "meal_role",
+      "value": "sauce",
+      "checked": true,
+      "batch_value": "dessert"
+    },
+    {
+      "id": "RCP2_55D610F7F931",
+      "title": "Garden Kabobs",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "checked": true,
+      "batch_value": "staple"
+    },
+    {
+      "id": "RCP2_5BB20EB1E32E",
+      "title": "Sauteed Peppers",
+      "field": "meal_role",
+      "value": "vegetable",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_607381EA69EE",
+      "title": "Bhatura",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_607381EA69EE",
+      "title": "Bhatura",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_639FAA64235E",
+      "title": "Saloon \"Hard Track\" Pilot Crackers",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_639FAA64235E",
+      "title": "Saloon \"Hard Track\" Pilot Crackers",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_6BBA70AC5E9E",
+      "title": "Grammie Bea'S Herbed Dumplings",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "soup"
+    },
+    {
+      "id": "RCP2_6BBA70AC5E9E",
+      "title": "Grammie Bea'S Herbed Dumplings",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_7160598B0E84",
+      "title": "Spicy Rice And Vegetables",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "one_bowl"
+    },
+    {
+      "id": "RCP2_87C0C08CAA11",
+      "title": "French Wafers",
+      "field": "meal_role",
+      "value": "dessert",
+      "checked": true,
+      "batch_value": "snack"
+    },
+    {
+      "id": "RCP2_882366890116",
+      "title": "Indiana Baked Beans",
+      "field": "meal_role",
+      "value": null,
+      "checked": true,
+      "batch_value": "soup"
+    },
+    {
+      "id": "RCP2_882366890116",
+      "title": "Indiana Baked Beans",
+      "field": "contains_staple",
+      "value": null,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_98EA656F2225",
+      "title": "Sour Cream Cornbread",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "one_bowl"
+    },
+    {
+      "id": "RCP2_98EA656F2225",
+      "title": "Sour Cream Cornbread",
+      "field": "contains_staple",
+      "value": false,
+      "checked": true,
+      "batch_value": true
+    },
+    {
+      "id": "RCP2_A6801EDDEF8F",
+      "title": "Halloumi Cheese Kebabs",
+      "field": "meal_role",
+      "value": "one_bowl",
+      "checked": true,
+      "batch_value": "staple"
+    },
+    {
+      "id": "RCP2_BA21C876BBC1",
+      "title": "Hargadon'S Brown Soda Bread",
+      "field": "meal_role",
+      "value": "breakfast",
+      "checked": true,
+      "batch_value": "one_bowl"
+    },
+    {
+      "id": "RCP2_BA21C876BBC1",
+      "title": "Hargadon'S Brown Soda Bread",
+      "field": "contains_staple",
+      "value": false,
+      "checked": true,
+      "batch_value": true
+    },
+    {
+      "id": "RCP2_BDC0CEA53793",
+      "title": "Texas Style Baked Beans",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_BDC0CEA53793",
+      "title": "Texas Style Baked Beans",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_BDC0CEA53793",
+      "title": "Texas Style Baked Beans",
+      "field": "protein_sources",
+      "value": [
+        "legume"
+      ],
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_CA5CC81FBE31",
+      "title": "Easy Brazilian Feijao",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "sauce"
+    },
+    {
+      "id": "RCP2_CA5CC81FBE31",
+      "title": "Easy Brazilian Feijao",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_CA5CC81FBE31",
+      "title": "Easy Brazilian Feijao",
+      "field": "protein_sources",
+      "value": [
+        "legume"
+      ],
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_D0D00E0BE51C",
+      "title": "Apple Bean Bake",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "dessert"
+    },
+    {
+      "id": "RCP2_D0D00E0BE51C",
+      "title": "Apple Bean Bake",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    },
+    {
+      "id": "RCP2_D0D00E0BE51C",
+      "title": "Apple Bean Bake",
+      "field": "protein_sources",
+      "value": [
+        "legume"
+      ],
+      "checked": true,
+      "batch_value": []
+    },
+    {
+      "id": "RCP2_D475737AA6A4",
+      "title": "Kimchi Stuffing",
+      "field": "meal_role",
+      "value": "sauce",
+      "checked": true,
+      "batch_value": "breakfast"
+    },
+    {
+      "id": "RCP2_D5A2E336A0A4",
+      "title": "Golden Cornbread",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "breakfast"
+    },
+    {
+      "id": "RCP2_F1B3BFFB4BCE",
+      "title": "Double Cornbread",
+      "field": "meal_role",
+      "value": "snack",
+      "checked": true,
+      "batch_value": "breakfast"
+    },
+    {
+      "id": "RCP2_F1D4C2B4A839",
+      "title": "Swedish Cardamom Braids",
+      "field": "meal_role",
+      "value": "staple",
+      "checked": true,
+      "batch_value": "breakfast"
+    },
+    {
+      "id": "RCP2_F1D4C2B4A839",
+      "title": "Swedish Cardamom Braids",
+      "field": "contains_staple",
+      "value": true,
+      "checked": true,
+      "batch_value": false
+    }
+  ],
+  "unrecognized": []
+}

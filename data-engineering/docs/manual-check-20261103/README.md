@@ -8,6 +8,8 @@
 
 - `sample.json`：抽样记录。固定种子 20261103，从 v3 新增菜谱里按类别分层抽 100 道（每类至少 3 道，其余按类别大小分）。
 - `check.xlsx`：发给复核人的空表，黄色几栏（三项判断、问题说明、已亲自核对）什么都没有预填。
+- `check-filled.xlsx`：复核人交回的表。
+- `report.md`、`report.json`：由评分脚本生成的复核结果，不要手改。
 
 `sample.json` 和 `check.xlsx` 由 `python -I -X utf8 data-engineering/scripts/manual_check.py draw --new` 生成（仓库根目录，
 离线，需要 openpyxl）。复核人交回后，把表存为 `check-filled.xlsx`，用

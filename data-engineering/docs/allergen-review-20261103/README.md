@@ -13,6 +13,8 @@
 
 - `sample.json`：抽样记录。固定种子 20261103，从 v3 新增菜谱里抽 50 道。
 - `review.xlsx`：发给复核人的空表，"你确认的过敏原""备注""已亲自核对"几栏是空的。
+- `review-filled.xlsx`：复核人交回的表。
+- `report.md`、`report.json`：由评分脚本生成的复核结果，不要手改。
 
 `sample.json` 和 `review.xlsx` 由 `python -I -X utf8 data-engineering/scripts/allergen_review.py draw --new` 生成（仓库根目录，
 离线，需要 openpyxl）。复核人交回后，把表存为 `review-filled.xlsx`，用
