@@ -88,8 +88,8 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
     <h1>Every plan you made, as it ended up</h1>
     <p class="mc-sub">Open a plan to see what was on each day and what got cooked.</p>
 
-    <p v-if="loading" class="notice">Loading your plans…</p>
-    <p v-if="error" class="notice" role="alert">{{ error }}</p>
+    <p v-if="loading" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your plans…</p>
+    <p v-if="error" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ error }}</p>
     <div v-if="!loading && !error && !weeks.length" class="mc-empty">
       <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-calendar-days" /></span></span></div>
       <h2>No plans yet</h2>
@@ -101,7 +101,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
       <!-- Planning the same days again replaces a week (backend `current`): it stays listed, marked, under the newer one. -->
       <li v-for="week in weeks" :key="week.id" class="week" :class="{ replaced: week.current === false }">
         <button type="button" class="remove" :aria-label="`Delete the plan for ${planRange(week.start_date, week.end_date)}`" title="Delete this plan" @click="removing = week">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" /></svg>
+          <UIcon name="i-lucide-trash-2" aria-hidden="true" />
         </button>
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
           <span class="mc-tile" data-tone="violet" aria-hidden="true"><UIcon name="i-lucide-calendar-days" /></span>
@@ -151,31 +151,33 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 
 <style scoped>
 .history { padding-block: 28px 48px; }
-.notice { color: #71717a; }
+.mc-loading, .mc-alert { margin: 0 0 16px; }
 .mc-empty .first { min-height: 36px; height: 36px; margin-top: 16px; padding: 0 16px; font-size: 13px; }
 .weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .week { position: relative; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); overflow: hidden; transition: border-color 150ms; }
 .week:hover { border-color: #e1e1e5; }
 .remove { position: absolute; z-index: 1; top: 18px; right: 44px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #a1a1aa; }
 .remove:hover, .remove:focus-visible { background: #fef3f2; color: #b42318; }
-.remove svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.remove .iconify { width: 16px; height: 16px; }
 .summary { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .summary:hover, .summary:focus-visible { background: #fafafa; }
 .summary .mc-tile { width: 32px; height: 32px; border-radius: 9px; }
 .summary .mc-tile > * { width: 16px; height: 16px; }
 .text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-right: 44px; }
 .when { display: inline-flex; align-items: baseline; gap: 10px; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
-.tag { padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; }
+.tag { align-self: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; line-height: 20px; font-weight: 500; letter-spacing: 0; }
 .week.replaced .when { color: #71717a; }
 .meta { color: #71717a; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
 .chev { flex: none; width: 16px; height: 16px; color: #a1a1aa; transition: transform 150ms; }
 .summary[aria-expanded="true"] .chev { transform: rotate(90deg); }
-.days { display: grid; gap: 8px; padding: 12px 16px 16px 60px; border-top: 1px solid #f0f0f2; }
-.day { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: baseline; }
-.day b { color: #71717a; font-size: 12px; font-weight: 600; }
-.meals p { margin: 0 0 4px; font-size: 14px; }
-.meal { display: inline-block; min-width: 70px; color: #a1a1aa; font-size: 12px; }
-.dish { display: inline-flex; gap: 6px; align-items: center; padding: 0; border: 0; background: transparent; color: #27272a; font: inherit; cursor: pointer; }
-.dish:hover { color: #6d28d9; }
+/* The days of an opened plan: weekday, then one line per meal, a thin rule between days. */
+.days { display: grid; padding: 4px 16px 8px 60px; border-top: 1px solid #f0f0f2; }
+.day { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; }
+.day + .day { border-top: 1px solid #f2f2f4; }
+.day b { color: #52525b; font-size: 13px; line-height: 20px; font-weight: 600; }
+.meals p { margin: 0; font-size: 14px; line-height: 28px; color: #a1a1aa; }
+.meal { display: inline-block; min-width: 76px; color: #a1a1aa; font-size: 12px; vertical-align: middle; }
+.dish { display: inline-flex; gap: 6px; align-items: center; vertical-align: middle; padding: 0; border: 0; background: transparent; color: #27272a; font: inherit; font-weight: 400; cursor: pointer; transition: color 120ms; }
+.dish:hover, .dish:focus-visible { color: #7c3aed; }
 .dish.skipped { color: #a1a1aa; text-decoration: line-through; }
 </style>
