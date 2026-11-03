@@ -98,7 +98,7 @@
   font-feature-settings: "cv11";
   -webkit-font-smoothing: antialiased;
 }
-.mc-shell *, .mc-shell .mc-overlay * { scrollbar-color: #d4d4d8 transparent; }
+.mc-shell * { scrollbar-color: #d4d4d8 transparent; }
 .mc-shell ::-webkit-scrollbar-thumb { background: #d4d4d8; }
 .mc-shell :focus-visible { outline: 2px solid rgba(139, 92, 246, 0.55); outline-offset: 2px; }
 
@@ -190,8 +190,6 @@
 [data-tone="rose"] { --tile: #ff2d5e; --tile-light: #ff7a9a; }
 [data-tone="orange"] { --tile: #e5602c; --tile-light: #ff9a6b; }
 [data-tone="green"] { --tile: #12b76a; --tile-light: #5ee0a0; }
-[data-tone="blue"] { --tile: #3463f1; --tile-light: #7c9bff; }
-[data-tone="pink"] { --tile: #ec2f8d; --tile-light: #f472b6; }
 
 /* Stat card: tile on top, label left and value right, a faint tint in the corner. */
 .mc-stat { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: 104px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: radial-gradient(260px 120px at 90% 0%, color-mix(in srgb, var(--tile) 18%, transparent), transparent 70%), #fff; box-shadow: var(--mc-shadow-sm); }
@@ -277,7 +275,6 @@
 
 /* Product pages inside the panel: one content width, a 22px title, no eyebrow labels. */
 .product-frame .page-width { width: min(100% - 80px, 1080px); }
-.product-frame .eyebrow { display: none; }
 .product-frame .profile-page { padding-block: 28px 48px; }
 .product-frame .profile-hero { display: block; margin-bottom: 24px; }
 .product-frame .profile-hero > p { max-width: 760px; margin: 0; color: #71717a; font-size: 14px; line-height: 1.55; }
@@ -285,7 +282,6 @@
 
 /* Product page subtitle and section titles: plain ink, no eyebrow labels. */
 .mc-shell .product-frame main h1 + .mc-sub { margin: -10px 0 20px; color: #71717a; font-size: 14px; line-height: 20px; }
-.product-frame .form-kicker { display: none; }
 .product-frame .profile-section-heading h2, .product-frame .profile-form-section h2, .product-frame .profile-sidebar h2 { color: var(--mc-strong); font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -0.01em; }
 
 /* Form fields: white, 36px, a 1px zinc border and a soft violet ring on focus. Native selects get a line chevron. */
