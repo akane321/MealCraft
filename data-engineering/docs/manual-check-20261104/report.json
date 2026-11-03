@@ -7,6 +7,15 @@
   0.443,
   0.712
  ],
+ "correct_over_sampled": {
+  "correct": 28,
+  "sampled": 60,
+  "rate": 0.467,
+  "wilson95": [
+   0.346,
+   0.591
+  ]
+ },
  "target": 0.95,
  "unsure": [
   {
@@ -320,6 +329,22 @@
   "cover": {
    "recipes": 9190,
    "of": 9190
+  },
+  "agree": 71,
+  "checked": 123,
+  "unweighted": 0.577,
+  "wilson95_unweighted": [
+   0.489,
+   0.661
+  ],
+  "correct_over_sampled": {
+   "correct": 71,
+   "sampled": 160,
+   "rate": 0.444,
+   "wilson95": [
+    0.369,
+    0.521
+   ]
   }
  }
 }

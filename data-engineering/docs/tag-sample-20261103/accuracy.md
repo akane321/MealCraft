@@ -1,17 +1,17 @@
 # Sample accuracy of recipe-tags-v1/llm-v3-20261103
 
-Filled sample: SHA-256 `9123cf17ff95c5e9514c94da0a73e874c64a7255a269585ce1f5fafc9ee0a343`; drawn: `sample.json` (40 recipes, seed 20261103). Only rows marked 是 (checked in person) count; a value this script cannot read counts neither way and is listed for the reviewer to fill again.
+Filled sample: SHA-256 `9123cf17ff95c5e9514c94da0a73e874c64a7255a269585ce1f5fafc9ee0a343`; drawn: `sample.json` (40 recipes, seed 20261103). This sample draws 40 recipes from the 116-recipe model-completed `llm-v3-20261103` batch, not all v3 tags. AI assisted with the initial comparison and draft discrepancy notes; a human reviewer checked each source recipe and tag, entered/confirmed the value, and marked the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from the determinate denominator, while the all-checked result remains shown.
 
-| Stratum | Rows | Checked | Agree | Accuracy | Unchecked | Checked, no value | Unrecognized, refill |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 表导入层 (`table`) | 95 | 95 | 50 | 52.6% | 0 | 0 | 0 |
-| 合计 (`all`) | 95 | 95 | 50 | 52.6% | 0 | 0 | 0 |
+| Stratum | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | Unrecognized, refill |
+| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| 模型补全层（llm） (`table`) | 95 | 95 | 50 | 52.6% | 42.7%–62.4% | 88 | 50 | 56.8% | 46.4%–66.7% | 0 | 0 | 0 |
+| 合计 (`all`) | 95 | 95 | 50 | 52.6% | 42.7%–62.4% | 88 | 50 | 56.8% | 46.4%–66.7% | 0 | 0 | 0 |
 
-| Field | Rows | Checked | Agree | Accuracy | Unchecked | Checked, no value | Unrecognized, refill |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `meal_role` | 40 | 40 | 15 | 37.5% | 0 | 0 | 0 |
-| `contains_staple` | 40 | 40 | 25 | 62.5% | 0 | 0 | 0 |
-| `protein_sources` | 15 | 15 | 10 | 66.7% | 0 | 0 | 0 |
+| Field | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | Unrecognized, refill |
+| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| `meal_role` | 40 | 40 | 15 | 37.5% | 24.2%–53.0% | 37 | 15 | 40.5% | 26.3%–56.5% | 0 | 0 | 0 |
+| `contains_staple` | 40 | 40 | 25 | 62.5% | 47.0%–75.8% | 37 | 25 | 67.6% | 51.5%–80.4% | 0 | 0 | 0 |
+| `protein_sources` | 15 | 15 | 10 | 66.7% | 41.7%–84.8% | 14 | 10 | 71.4% | 45.4%–88.3% | 0 | 0 | 0 |
 
 无法识别，请重填: 0 rows.
 

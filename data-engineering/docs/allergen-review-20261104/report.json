@@ -474,6 +474,13 @@
   "cover": {
    "recipes": 9190,
    "of": 9190
-  }
+  },
+  "agree": 68,
+  "checked": 72,
+  "unweighted": 0.944,
+  "wilson95_unweighted": [
+   0.866,
+   0.978
+  ]
  }
 }

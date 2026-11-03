@@ -30,11 +30,12 @@ from import_review_table import (  # noqa: E402
     shown,
     valid,
 )
+from review_sampling import interval, wilson  # noqa: E402
 
 SAMPLE = OUT.parent / "sample.json"
 GROUPS = ("table", "rule_decided", *RULE_STRATA, "all")
 LABELS = {
-    "table": "表导入层",
+    "table": "模型补全层（llm）",
     "rule_decided": "规则已定层",
     "rule_equals_model": "规则已定：规则值等于模型原值",
     "rule_differs_from_model": "规则已定：规则值不同于模型原值",
@@ -44,7 +45,9 @@ COUNTS = ("rows", "checked", "agree", "unchecked", "checked_without_value", "unr
 
 
 def tally() -> dict:
-    return dict.fromkeys(COUNTS, 0)
+    counts = dict.fromkeys(COUNTS, 0)
+    counts.update({"determinate_checked": 0, "determinate_agree": 0})
+    return counts
 
 
 def accuracy(rows: list[dict], sample: dict) -> dict:
@@ -81,10 +84,21 @@ def accuracy(rows: list[dict], sample: dict) -> dict:
             counts[outcome] += 1
             if outcome == "checked" and same_value(batch_value, value):
                 counts["agree"] += 1
+            if outcome == "checked" and value is not None:
+                counts["determinate_checked"] += 1
+                if same_value(batch_value, value):
+                    counts["determinate_agree"] += 1
         if outcome == "checked" and not same_value(batch_value, value):
             differ.append({**row, "batch_value": batch_value, "value": value})
     for counts in [*groups.values(), *fields.values()]:
         counts["accuracy"] = round(counts["agree"] / counts["checked"], 3) if counts["checked"] else None
+        counts["wilson95"] = wilson(counts["agree"], counts["checked"])
+        counts["determinate_accuracy"] = (
+            round(counts["determinate_agree"] / counts["determinate_checked"], 3)
+            if counts["determinate_checked"]
+            else None
+        )
+        counts["determinate_wilson95"] = wilson(counts["determinate_agree"], counts["determinate_checked"])
     return {
         "groups": {name: counts for name, counts in groups.items() if counts["rows"]},
         "fields": {name: counts for name, counts in fields.items() if counts["rows"]},
@@ -115,14 +129,17 @@ def read_filled(path: Path) -> list[dict]:
 def table(title: str, counted: dict, label) -> list[str]:
     lines = [
         "",
-        f"| {title} | Rows | Checked | Agree | Accuracy | Unchecked | Checked, no value | Unrecognized, refill |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        f"| {title} | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | Unrecognized, refill |",
+        "| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |",
     ]
     for name, c in counted.items():
         share = "n/a" if c["accuracy"] is None else f"{c['accuracy']:.1%}"
+        determinate_share = "n/a" if c["determinate_accuracy"] is None else f"{c['determinate_accuracy']:.1%}"
         lines.append(
-            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} | {c['unchecked']} "
-            f"| {c['checked_without_value']} | {c['unrecognized']} |"
+            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} | {interval(c['wilson95'])} "
+            f"| {c['determinate_checked']} | {c['determinate_agree']} | "
+            f"{determinate_share} "
+            f"| {interval(c['determinate_wilson95'])} | {c['unchecked']} | {c['checked_without_value']} | {c['unrecognized']} |"
         )
     return lines
 
@@ -132,8 +149,11 @@ def markdown(result: dict, path: Path, sample: dict) -> str:
         f"# Sample accuracy of {sample['batch']}",
         "",
         f"Filled sample: SHA-256 `{hashlib.sha256(path.read_bytes()).hexdigest()}`; drawn: `sample.json` "
-        f"({sample['size']} recipes, seed {sample['seed']}). Only rows marked 是 (checked in person) count; a value "
-        "this script cannot read counts neither way and is listed for the reviewer to fill again.",
+        f"({sample['size']} recipes, seed {sample['seed']}). This sample draws {sample['size']} recipes from the 116-recipe "
+        "model-completed `llm-v3-20261103` batch, not all v3 tags. AI assisted with the initial comparison and draft "
+        "discrepancy notes; a human reviewer checked each source recipe and tag, entered/confirmed the value, and marked "
+        "the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from "
+        "the determinate denominator, while the all-checked result remains shown.",
     ]
     lines += table("Stratum", result["groups"], lambda name: f"{LABELS[name]} (`{name}`)")
     lines += table("Field", result["fields"], lambda name: f"`{name}`")

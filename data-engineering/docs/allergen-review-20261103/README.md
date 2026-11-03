@@ -12,8 +12,8 @@
 ## 文件
 
 - `sample.json`：抽样记录。固定种子 20261103，从 v3 新增菜谱里抽 50 道。
-- `review.xlsx`：发给复核人的空表，"你确认的过敏原""备注""已亲自核对"几栏是空的。
-- `review-filled.xlsx`：复核人交回的表。
+- `review.xlsx`：发给复核人的空白模板。
+- `review-filled.xlsx`：AI 辅助起草问题备注后的复核表；本轮没有 AI 过敏原候选。真人逐道查看食材和步骤、填写确认的过敏原并标记亲自核对。只有真人确认行计入评分；AI 不作为独立复核人。
 - `report.md`、`report.json`：由评分脚本生成的复核结果，不要手改。
 
 `sample.json` 和 `review.xlsx` 由 `python -I -X utf8 data-engineering/scripts/allergen_review.py draw --new` 生成（仓库根目录，

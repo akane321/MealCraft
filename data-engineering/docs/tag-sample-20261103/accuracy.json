@@ -7,7 +7,18 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "accuracy": 0.526
+      "determinate_checked": 88,
+      "determinate_agree": 50,
+      "accuracy": 0.526,
+      "wilson95": [
+        0.427,
+        0.624
+      ],
+      "determinate_accuracy": 0.568,
+      "determinate_wilson95": [
+        0.464,
+        0.667
+      ]
     },
     "all": {
       "rows": 95,
@@ -16,7 +27,18 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "accuracy": 0.526
+      "determinate_checked": 88,
+      "determinate_agree": 50,
+      "accuracy": 0.526,
+      "wilson95": [
+        0.427,
+        0.624
+      ],
+      "determinate_accuracy": 0.568,
+      "determinate_wilson95": [
+        0.464,
+        0.667
+      ]
     }
   },
   "fields": {
@@ -27,7 +49,18 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "accuracy": 0.375
+      "determinate_checked": 37,
+      "determinate_agree": 15,
+      "accuracy": 0.375,
+      "wilson95": [
+        0.242,
+        0.53
+      ],
+      "determinate_accuracy": 0.405,
+      "determinate_wilson95": [
+        0.263,
+        0.565
+      ]
     },
     "contains_staple": {
       "rows": 40,
@@ -36,7 +69,18 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "accuracy": 0.625
+      "determinate_checked": 37,
+      "determinate_agree": 25,
+      "accuracy": 0.625,
+      "wilson95": [
+        0.47,
+        0.758
+      ],
+      "determinate_accuracy": 0.676,
+      "determinate_wilson95": [
+        0.515,
+        0.804
+      ]
     },
     "protein_sources": {
       "rows": 15,
@@ -45,7 +89,18 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "accuracy": 0.667
+      "determinate_checked": 14,
+      "determinate_agree": 10,
+      "accuracy": 0.667,
+      "wilson95": [
+        0.417,
+        0.848
+      ],
+      "determinate_accuracy": 0.714,
+      "determinate_wilson95": [
+        0.454,
+        0.883
+      ]
     }
   },
   "differ": [

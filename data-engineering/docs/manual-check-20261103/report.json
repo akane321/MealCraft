@@ -7,6 +7,15 @@
   0.461,
   0.679
  ],
+ "correct_over_sampled": {
+  "correct": 43,
+  "sampled": 100,
+  "rate": 0.43,
+  "wilson95": [
+   0.337,
+   0.528
+  ]
+ },
  "target": 0.95,
  "unsure": [
   {
