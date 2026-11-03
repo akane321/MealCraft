@@ -106,7 +106,7 @@ footer p { margin: 4px 0; }
   .on-paper { display: none; }
   h2 { margin: 2px 0 12px; color: #0f0f12; font-family: var(--sans); font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; }
   h2.trip { margin: 20px 0 0; font-size: 16px; line-height: 22px; }
-  h3 { margin: 18px 0 4px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  h3 { margin: 18px 0 4px; color: #71717a; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
   /* A store is a heading with its total; a rule above each store after the first. */
   h2.store { margin: 16px 0 0; padding-top: 0; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; letter-spacing: 0; }
   h2.store span { font-variant-numeric: tabular-nums; }

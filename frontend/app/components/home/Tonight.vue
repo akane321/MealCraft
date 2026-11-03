@@ -146,7 +146,7 @@ h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-
 .caption small { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--c-muted); }
 .caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* A missing video is a caption, not an empty box. */
-.no-video { margin: 0; display: flex; align-items: center; gap: 6px; color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.no-video { margin: 0; display: flex; align-items: center; gap: 6px; color: #71717a; font-size: 12px; line-height: 16px; }
 .no-video .iconify { width: 12px; height: 12px; flex: none; }
 .video:has(.no-video) { margin-top: 6px; }
 .acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 12px; }

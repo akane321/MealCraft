@@ -53,18 +53,19 @@ function shortDay(day: string) {
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; --sage: #8b5cf6; --accent: #c4b5fd; --danger: #f87171; --c-green: #ddd6fe; --c-blue: #a5b4fc; }
+/* Each line is at least 3:1 on the white card. */
+.ops-chart { margin: 0; --sage: #8b5cf6; --accent: #c026d3; --danger: #f87171; --c-green: #c026d3; --c-blue: #6366f1; }
 .gap { stroke: #d4d4d8; stroke-width: 1.5; stroke-dasharray: 3 4; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
 .axis { stroke: #ececef; }
 .grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
-.tick { fill: #a1a1aa; font-size: 11px; }
+.tick { fill: #71717a; font-size: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; border-radius: 50%; }
 .legend .gap-key { width: 14px; height: 0; border-radius: 0; border-top: 1.5px dashed #d4d4d8; }
 /* No data: the note sits in the middle of the plot, with no tick or legend. */
 .ops-chart { position: relative; }
-.empty-note { position: absolute; left: 0; right: 0; top: 34%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; color: #a1a1aa; font-size: 13px; text-align: center; }
+.empty-note { position: absolute; left: 0; right: 0; top: 34%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; color: #71717a; font-size: 13px; text-align: center; }
 .empty-note .iconify { width: 18px; height: 18px; }
 </style>

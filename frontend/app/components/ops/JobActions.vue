@@ -252,7 +252,7 @@ const confirmation = computed(() => {
 .ops-error { margin: 0; }
 .job-table { overflow-x: auto; border: 1px solid #ececef; border-radius: 12px; }
 td b { display: block; color: #18181b; font-weight: 500; }
-.trace { display: block; max-width: 300px; overflow: hidden; color: #a1a1aa; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
+.trace { display: block; max-width: 300px; overflow: hidden; color: #71717a; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
 /* Sentence case like the tasks table (the text itself stays as stored); the code is a grey note, the badge has the colour. */
 .cap { display: inline-block; }
 .cap::first-letter { text-transform: uppercase; }

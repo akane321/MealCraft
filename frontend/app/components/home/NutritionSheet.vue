@@ -156,22 +156,22 @@ useDialog(overlay, () => emit("close"));
 .metric:hover { border-color: #d4d4d8; }
 .metric span { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
 .metric strong { color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.metric small { color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.metric small { color: #71717a; font-size: 12px; line-height: 16px; }
 .metric.active { border-color: #c4b5fd; background: #f5f3ff; }
 .chart { margin: 0; padding: 14px 16px; border: 1px solid #ececef; border-radius: 12px; }
 .chart figcaption { color: #71717a; font-size: 12px; font-weight: 500; }
 .chart svg { display: block; width: 100%; height: 180px; margin-top: 8px; overflow: visible; }
-.chart .axis { fill: #a1a1aa; font-size: 11px; }
+.chart .axis { fill: #71717a; font-size: 11px; }
 .chart .grid { stroke: #f0f0f2; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .chart polyline { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .chart .done { stroke: #8b5cf6; }
-.chart .plan { stroke: #c4b5fd; stroke-dasharray: 6 5; }
+.chart .plan { stroke: #8b5cf6; stroke-dasharray: 6 5; }
 .chart .plan-dot { fill: #fff; stroke: #8b5cf6; stroke-width: 2; }
 .chart .done-dot { fill: #8b5cf6; stroke: none; }
-.legend { margin: 6px 0 0; display: flex; gap: 16px; color: #a1a1aa; font-size: 11px; }
+.legend { margin: 6px 0 0; display: flex; gap: 16px; color: #71717a; font-size: 11px; }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 18px; height: 0; border-top: 2px solid #8b5cf6; }
-.legend i.plan { border-top: 2px dashed #c4b5fd; }
+.legend i.plan { border-top: 2px dashed #8b5cf6; }
 .table-card { border: 1px solid #ececef; border-radius: 12px; overflow-x: auto; }
 .days { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .days th { height: 36px; padding: 0 10px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }

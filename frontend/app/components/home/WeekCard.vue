@@ -114,7 +114,7 @@ h3 { margin: 0; }
 .tile.skipped { opacity: 0.5; }
 .tile.today { background: #fafaff; }
 .d { padding: 2px 8px; border-radius: 999px; font-size: 11px; line-height: 16px; font-weight: 600; color: #52525b; letter-spacing: 0.02em; }
-.d span { color: #a1a1aa; font-weight: 500; }
+.d span { color: #71717a; font-weight: 500; }
 .today .d { background: #f5f3ff; color: #6d28d9; }
 .today .d span { color: #8b5cf6; }
 .meals { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; justify-content: center; }

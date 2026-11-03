@@ -125,9 +125,9 @@ function chooseDay(value: number) {
 <style scoped>
 /* The day picker is a light track; the chosen day is a raised white segment. */
 .days { width: fit-content; max-width: calc(100% - 32px); display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 96px); gap: 2px; margin: 14px 16px 6px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
-.days button { min-width: 0; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #71717a !important; font-size: 13px; line-height: 16px; font-weight: 500; }
+.days button { min-width: 0; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #52525b !important; font-size: 13px; line-height: 16px; font-weight: 500; }
 .days button:hover { color: #18181b !important; }
-.days button span { color: #a1a1aa; font-size: 12px; font-weight: 400; }
+.days button span { color: #71717a; font-size: 12px; font-weight: 400; }
 .days button[aria-pressed="true"] { background: #fff; color: #0f0f12 !important; box-shadow: var(--mc-shadow-xs); }
 .body { display: flex; flex-direction: column; gap: 14px; padding: 10px 16px 16px; }
 .big { display: flex; align-items: baseline; gap: 8px; min-width: 0; }

@@ -85,12 +85,12 @@ useDialog(overlay, () => emit("close"));
 .body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: stretch; padding: 0; }
 .card { padding: 20px 24px 24px; }
 .card + .card { border-left: 1px solid #f0f0f2; }
-h3 { margin: 0 0 6px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+h3 { margin: 0 0 6px; color: #71717a; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .hint { margin: 0 0 8px; color: #71717a; font-size: 12px; line-height: 16px; }
 ul { list-style: none; margin: 0; padding: 0; }
 ul li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 12px; padding: 9px 0; border-top: 1px solid #f2f2f4; }
 .name { color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; }
-.name small { color: #a1a1aa; font-size: 12px; font-weight: 400; }
+.name small { color: #71717a; font-size: 12px; font-weight: 400; }
 .qty { color: #52525b; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .allergen { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: #fef3f2; color: #b42318; font-size: 12px; font-weight: 500; }
 ol { counter-reset: step; margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }

@@ -234,7 +234,7 @@ const dishTotal = (list: MealRole[]) => (isStructured(list) ? plannedRoles(list,
 .optional { display: flex; gap: 6px; align-items: center; color: #71717a; font-size: 12.5px; white-space: nowrap; }
 /* Not "hidden": Tailwind's .hidden is display:none and would collapse the grid cell. */
 .optional.is-hidden { visibility: hidden; }
-.remove { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #a1a1aa; cursor: pointer; }
+.remove { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; cursor: pointer; }
 .remove:hover { background: #fef3f2; color: #b42318; }
 .remove .iconify { width: 16px; height: 16px; }
 .add { display: flex; gap: 8px; margin-top: 10px; }

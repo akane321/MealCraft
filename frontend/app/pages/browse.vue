@@ -177,7 +177,7 @@ function packLabel(size: number | null, unit: string | null) {
 .search:focus-within { border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .search .iconify { width: 16px; height: 16px; flex: none; color: #a1a1aa; }
 .search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--mc-strong); font: inherit; }
-.search input::placeholder { color: #a1a1aa; }
+.search input::placeholder { color: #71717a; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { height: 32px; padding: 0 12px; border: 1px solid #ececef; border-radius: 999px; background: #fff; color: #52525b; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; }
 .chip:hover { border-color: #d4d4d8; }
@@ -216,5 +216,5 @@ function packLabel(size: number | null, unit: string | null) {
 .products .stock { display: inline-flex !important; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #fffaeb; color: #b54708 !important; font-weight: 500; }
 .products a { color: #6d28d9; font-size: 13px; font-weight: 500; text-decoration: none; }
 .products a:hover { text-decoration: underline; }
-.source { margin: 10px 0 0; color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.source { margin: 10px 0 0; color: #71717a; font-size: 12px; line-height: 16px; }
 </style>

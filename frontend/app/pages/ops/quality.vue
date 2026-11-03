@@ -330,7 +330,7 @@ onMounted(retryAll);
 .nutrition-stats dt { color: #52525b; font-size: 13px; line-height: 18px; }
 .nutrition-stats dd { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .review-number { margin: 0 0 4px; color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; }
-.review-number.missing { color: #a1a1aa; font-size: 14px; line-height: 20px; font-weight: 400; }
+.review-number.missing { color: #71717a; font-size: 14px; line-height: 20px; font-weight: 400; }
 .distribution-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .distribution-grid h3 { margin: 0 0 12px; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
 .distribution-grid ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }

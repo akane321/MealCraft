@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RETAILER_SHORT, basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, hasOtherStore, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
+import { RETAILER_SHORT, basicsNote, formatSgd, groceryPriceLabel, groceryPriceParts, groceryPriceTimes, groceryTrips, hasOtherStore, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -23,11 +23,9 @@ const source = computed(() => priceSourceLabel(props.estimate));
 const basics = computed(() => basicsNote(props.estimate));
 const sourceTone = computed(() => priceTone(props.estimate));
 // Only the part of a price line that needs a look (a failed live check) is amber; the rest stays grey.
-const ATTENTION = / · (not checked live in time|selected product not found|product marked unavailable|current price could not be checked)$/;
 function priceParts(line: GroceryLineEstimate): [string, string | null] {
-  const label = groceryPriceLabel(line);
-  const at = label.search(ATTENTION);
-  return at > 0 ? [label.slice(0, at + 3), label.slice(at + 3)] : [label, null];
+  const [base, note] = groceryPriceParts(line);
+  return note ? [`${base} · `, note] : [base, null];
 }
 // Ticked items only matter while shopping; they are not saved.
 const got = ref(new Set<string>());
@@ -89,8 +87,8 @@ function toggle(name: string) {
 /* The whole note shows, on two lines if it needs them. */
 .source b { min-width: 0; font-weight: 500; }
 .list { padding: 4px 16px 12px; }
-.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
-.aisle .mc-num { color: #a1a1aa; font-size: 12px; font-weight: 400; letter-spacing: 0; }
+.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #71717a; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.aisle .mc-num { color: #71717a; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
 .item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
 .item input { align-self: start; margin-top: 2px; }

@@ -99,7 +99,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-muted { color: var(--t3); }
 .ops-error { color: var(--warn); }
 .ops-badge { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.ops-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot, currentColor); }
+.ops-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 /* Status badges: the soft pairs, so done, failed, needs a look and in flight read apart at a glance. */
 .ops-badge.success { background: #ecfdf3; color: #067647; }
 .ops-badge.error { background: #fef3f2; color: #b42318; }
@@ -141,7 +141,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell :is(.table-card, .table-wrap, .job-table) .mc-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ops-shell .table-card .link { padding: 0; border: 0; background: none; color: #18181b; font-weight: 500; text-align: left; }
 .ops-shell .table-card .link:hover { color: #6d28d9; }
-.ops-shell .table-card .sub { display: block; color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.ops-shell .table-card .sub { display: block; color: #71717a; font-size: 12px; line-height: 16px; }
 .ops-shell .pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #f2f2f4; }
 .ops-shell .pager span { margin-right: auto; font-size: 12.5px; }
 
@@ -167,7 +167,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .drawer pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fafafa; color: #3f3f46; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ops-shell .rows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
 .ops-shell .rows li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 8px 12px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; }
-.ops-shell .rows .sub { display: block; color: #a1a1aa; font-size: 12px; }
+.ops-shell .rows .sub { display: block; color: #71717a; font-size: 12px; }
 /* Disclosures: a Lucide chevron that turns when open, never the browser's triangle. */
 .ops-shell details > summary { display: flex; align-items: center; gap: 8px; list-style: none; }
 .ops-shell details > summary::-webkit-details-marker { display: none; }
@@ -177,7 +177,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .rows.prod-rows li { display: grid; grid-template-columns: minmax(0, 1fr) 88px 104px; gap: 12px; }
 .ops-shell .rows.prod-rows .mc-num { text-align: right; font-variant-numeric: tabular-nums; }
 .ops-shell .rows.prod-rows button { justify-self: end; }
-.ops-shell .empty-cell { color: #a1a1aa; }
+.ops-shell .empty-cell { color: #71717a; }
 .ops-shell .ops-badge.allergen { margin: 0 4px 2px 0; }
 .ops-shell .ops-badge.allergen::before { display: none; }
 /* Saved: the soft green box, with room before the section under it. */

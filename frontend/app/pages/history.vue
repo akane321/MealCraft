@@ -160,11 +160,13 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 .weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .week { position: relative; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); overflow: hidden; transition: border-color 150ms; }
 .week:hover { border-color: #e1e1e5; }
-.remove { position: absolute; z-index: 1; top: 18px; right: 44px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #a1a1aa; }
+.remove { position: absolute; z-index: 1; top: 18px; right: 44px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
 .remove:hover, .remove:focus-visible { background: #fef3f2; color: #b42318; }
 .remove .iconify { width: 16px; height: 16px; }
 .summary { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .summary:hover, .summary:focus-visible { background: #fafafa; }
+/* The card clips its edges, so the focus ring sits inside the row. */
+.summary:focus-visible { outline-offset: -2px; border-radius: 12px; }
 .summary .mc-tile { width: 32px; height: 32px; border-radius: 9px; }
 .summary .mc-tile > * { width: 16px; height: 16px; }
 .text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-right: 44px; }
@@ -180,7 +182,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 .day { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; }
 .day + .day { border-top: 1px solid #f2f2f4; }
 .day b { color: #52525b; font-size: 13px; line-height: 20px; font-weight: 600; }
-.meals p { margin: 0; font-size: 14px; line-height: 28px; color: #a1a1aa; }
+.meals p { margin: 0; font-size: 14px; line-height: 28px; color: #71717a; }
 .meal { display: inline-block; min-width: 76px; color: #71717a; font-size: 12px; font-weight: 500; vertical-align: middle; }
 /* Cooked: the soft green tag of the plan column. */
 .cooked { display: inline-flex; align-items: center; gap: 3px; height: 20px; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: #ecfdf3; vertical-align: middle; color: #067647; font-size: 11.5px; line-height: 20px; font-weight: 500; }

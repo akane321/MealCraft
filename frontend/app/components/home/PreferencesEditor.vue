@@ -68,7 +68,7 @@ fieldset .mc-small { margin: 6px 0 0; font-size: 12px; line-height: 16px; }
 .pick { position: relative; height: 28px; display: inline-flex; align-items: center; padding: 0 10px; border: 1px solid #e8e8eb; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 12.5px; font-weight: 500; cursor: pointer; }
 .pick:hover { background: #f7f7f8; }
 .pick:has(input:checked) { border-color: #c4b5fd; background: #f5f3ff; color: #6d28d9; }
-.pick:has(input:focus-visible) { outline: 2px solid rgba(139, 92, 246, 0.55); outline-offset: 2px; }
+.pick:has(input:focus-visible) { outline: 2px solid #7c3aed; outline-offset: 2px; }
 .flavor-row > .remove { justify-self: start; height: 28px; margin-left: 52px; padding: 0 8px; border-radius: 8px; color: #71717a; }
 select { appearance: none; width: 160px; height: 32px; padding: 0 30px 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px; color: #18181b; font: inherit; font-size: 13px; cursor: pointer; }
 select:focus-visible { outline: 0; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }

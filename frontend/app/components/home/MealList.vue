@@ -148,10 +148,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .row { display: grid; grid-template-columns: 36px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
 /* With several meals a day the day is the heading and the meal a caption over the dish: no first column. */
 .row.named { grid-template-columns: 32px minmax(0, 1fr); }
-.meal-cap { color: #9a9aa3; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.meal-cap { color: #71717a; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .d { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
 .d b { color: #71717a; font-weight: 600; }
-.d span { color: #a1a1aa; }
+.d span { color: #71717a; }
 .dishes { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .dish { min-width: 0; display: flex; flex-direction: column; }
 .title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -175,7 +175,8 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.6; transition: opacity 120ms var(--ease); }
 .feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; }
 .row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
-.acts button, .feedback button { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+/* Dark enough that the dimmed icons still reach 3:1 on the plan column. */
+.acts button, .feedback button { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #3f3f46; }
 .acts button .iconify, .feedback button .iconify { width: 16px; height: 16px; }
 .acts button:hover, .feedback button:hover { background: #f4f4f5; color: var(--mc-strong); }
 .feedback button[aria-pressed="true"] { background: #f5f3ff; color: #6d28d9; }
@@ -187,7 +188,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .reason:hover { background: #e9e9ec; color: #18181b; }
 .reason[aria-expanded="true"] { background: #e4e4e7; color: #18181b; }
 .facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; padding: 8px 12px; border: 1px solid #f0f0f2; border-radius: 10px; background: #fafafa; color: #27272a; font-size: 12px; line-height: 18px; }
-.facts-head { flex-basis: 100%; color: #9a9aa3; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.facts-head { flex-basis: 100%; color: #71717a; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
 .fact b { font-weight: 500; }
 .feedback-error { margin: 8px 16px 0; color: #b42318; font-size: 12px; font-weight: 500; }
 </style>
