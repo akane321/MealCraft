@@ -11,29 +11,13 @@
   --ivory: var(--c-ink);
   --t2: var(--c-neutral-text);
   --t3: var(--c-muted);
-  --t4: var(--c-muted);
   --accent: var(--c-coral);
-  --accent-fill: var(--c-coral);
-  --blue: var(--c-blue);
   --sage: var(--c-green-text);
-  --green: var(--c-green);
   --warn: var(--c-allergy-text);
   --warn-soft: var(--c-allergy-bg);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --serif: var(--font-display);
   --sans: var(--font-body);
-
-  /* Older names the sheets still use. */
-  --mc-base: var(--ink);
-  --mc-ivory: var(--ivory);
-  --mc-text-2: var(--t2);
-  --mc-text-3: var(--t3);
-  --mc-accent: var(--accent);
-  --mc-accent-fill: var(--accent-fill);
-  --mc-sage: var(--sage);
-  --mc-line: var(--line-2);
-  --mc-ease: var(--ease);
-  --mc-serif: var(--serif);
 
   color: var(--ivory);
   font: 600 14px/20px var(--sans);
