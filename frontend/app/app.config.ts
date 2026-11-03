@@ -14,11 +14,11 @@ export default defineAppConfig({
       },
     },
     kbd: { base: "rounded-[5px] normal-case bg-[#F4F4F5] ring-1 ring-inset ring-[#E4E4E7] text-[#71717A]" },
-    tooltip: { slots: { content: "bg-[#18181B] text-white ring-0 rounded-md shadow-md text-xs font-medium px-2 py-1" } },
+    tooltip: { slots: { content: "bg-[#18181B] text-white ring-0 rounded-[6px] shadow-md text-xs font-medium px-2 py-1" } },
     // Not used yet: themed so a first use already matches the product.
-    dropdownMenu: { slots: { content: "rounded-xl ring-1 ring-[#ECECEF] shadow-md p-1 bg-white text-[#27272A]", item: "h-8 items-center rounded-lg text-[13.5px] text-[#27272A]" } },
-    popover: { slots: { content: "rounded-xl ring-1 ring-[#ECECEF] shadow-md p-1 bg-white text-[#27272A]" } },
-    modal: { slots: { overlay: "bg-[rgba(15,15,18,.32)] backdrop-blur-[2px]", content: "rounded-2xl ring-1 ring-[#ECECEF] shadow-md bg-white text-[#27272A]" } },
-    toast: { slots: { root: "rounded-xl ring-1 ring-[#ECECEF] shadow-md bg-white text-[#27272A]" } },
+    dropdownMenu: { slots: { content: "rounded-[12px] ring-1 ring-[#ECECEF] shadow-md p-1 bg-white text-[#27272A]", item: "h-8 items-center rounded-[8px] before:rounded-[8px] text-[13.5px] text-[#27272A]" } },
+    popover: { slots: { content: "rounded-[12px] ring-1 ring-[#ECECEF] shadow-md p-1 bg-white text-[#27272A]" } },
+    modal: { slots: { overlay: "bg-[rgba(15,15,18,.32)] backdrop-blur-[2px]", content: "rounded-[16px] ring-1 ring-[#ECECEF] shadow-md bg-white text-[#27272A]" } },
+    toast: { slots: { root: "rounded-[12px] ring-1 ring-[#ECECEF] shadow-md bg-white text-[#27272A]" } },
   },
 });
