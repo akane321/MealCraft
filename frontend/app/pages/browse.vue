@@ -108,7 +108,9 @@ function packLabel(size: number | null, unit: string | null) {
       <p v-else-if="loadingRecipes && !recipes.length" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading recipes…</p>
       <div v-else-if="!loadingRecipes && !recipes.length" class="mc-empty">
         <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-search-x" /></span></span></div>
-        <h2>No recipe matches that. Try fewer words.</h2>
+        <h2>No recipe matches that</h2>
+        <p>Try fewer words.</p>
+        <button v-if="query" type="button" class="secondary-button clear" @click="query = ''">Clear search</button>
       </div>
       <ul class="cards">
         <!-- While the first page loads, grey cards hold the grid's place. -->
@@ -134,7 +136,7 @@ function packLabel(size: number | null, unit: string | null) {
           <input v-model="productQuery" type="search" placeholder="Search FairPrice, e.g. chicken breast" autocomplete="off" minlength="2">
         </label>
         <label class="live"><input v-model="live" type="checkbox"> Ask FairPrice now</label>
-        <button type="submit" class="secondary-button" :disabled="loadingProducts || productQuery.trim().length < 2">{{ loadingProducts ? "Searching…" : "Search" }}</button>
+        <button type="submit" class="primary-button" :disabled="loadingProducts || productQuery.trim().length < 2">{{ loadingProducts ? "Searching…" : "Search" }}</button>
       </form>
       <p v-if="productError" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ productError }}</p>
       <p v-if="products && !products.items.length" class="notice">FairPrice has nothing for “{{ products.query }}”.</p>
@@ -150,7 +152,7 @@ function packLabel(size: number | null, unit: string | null) {
             <tr v-for="item in products.items" :key="item.external_id" :class="{ out: !item.in_stock }">
               <td>{{ item.name }}<small v-if="item.brand">{{ item.brand }}</small></td>
               <td class="num">{{ packLabel(item.package_size, item.package_unit) }}</td>
-              <td class="num">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock" class="stock">Out of stock</small></td>
+              <td class="num"><span class="price">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock" class="stock">Out of stock</small></span></td>
               <td><a :href="item.product_url" target="_blank" rel="noopener">FairPrice</a></td>
             </tr>
           </tbody>
@@ -184,7 +186,7 @@ function packLabel(size: number | null, unit: string | null) {
 .notice { color: #71717a; font-size: 14px; }
 .cards { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
 .card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: var(--mc-shadow-sm); transition: border-color 160ms, box-shadow 160ms, transform 160ms; }
-.card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: var(--mc-shadow-md); transform: translateY(-1px); }
+.card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -12px rgba(16, 16, 20, 0.16); transform: translateY(-1px); }
 @media (prefers-reduced-motion: reduce) { .card:hover, .card:focus-visible { transform: none; } }
 .card .icon { margin-bottom: 6px; }
 .card .title { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
@@ -196,20 +198,22 @@ function packLabel(size: number | null, unit: string | null) {
 .skeleton-card b + b { width: 45%; }
 @keyframes mc-pulse { 50% { opacity: 0.55; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-card { animation: none; } }
-/* The search button matches the 36px field. */
-.controls .secondary-button { min-height: 36px; height: 36px; padding: 0 16px; font-size: 14px; }
+/* The search button is the form's dark pill, as tall as the 36px field. */
+.controls .primary-button { min-height: 36px; height: 36px; padding: 0 16px; font-size: 14px; }
+.mc-empty .clear { margin-top: 16px; }
 .mc-alert, .mc-loading { margin: 0 0 16px; }
 /* Products: the spec table in a white card with a tinted header row. */
 .table-card { border: 1px solid #ececef; border-radius: 12px; background: #fff; overflow: hidden; }
 .products { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
 .products th { height: 36px; padding: 0 14px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: left; }
-.products td { padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; vertical-align: top; }
+.products td { padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; vertical-align: middle; }
+.products .price { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .products tbody tr:last-child td { border-bottom: 0; }
 .products tbody tr:hover td { background: #fafafb; }
 .products td small { display: block; color: #71717a; font-size: 12px; line-height: 16px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .products .out td { color: #71717a; }
-.products .stock { display: inline-flex !important; align-items: center; height: 20px; margin-top: 4px; padding: 0 8px; border-radius: 999px; background: #fffaeb; color: #b54708 !important; font-weight: 500; }
+.products .stock { display: inline-flex !important; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #fffaeb; color: #b54708 !important; font-weight: 500; }
 .products a { color: #6d28d9; font-size: 13px; font-weight: 500; text-decoration: none; }
 .products a:hover { text-decoration: underline; }
 .source { margin: 10px 0 0; color: #a1a1aa; font-size: 12px; line-height: 16px; }

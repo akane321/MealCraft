@@ -89,6 +89,10 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
     <p class="mc-sub">Open a plan to see what was on each day and what got cooked.</p>
 
     <p v-if="loading" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your plans…</p>
+    <!-- The shape of the plan rows while they load, as the recipes page shows its cards. -->
+    <div v-if="loading" class="skeletons" aria-hidden="true">
+      <span v-for="n in 4" :key="n" class="skel"><i class="tile" /><span><i /><i /></span></span>
+    </div>
     <p v-if="error" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ error }}</p>
     <div v-if="!loading && !error && !weeks.length" class="mc-empty">
       <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-calendar-days" /></span></span></div>
@@ -127,6 +131,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
                   <button type="button" class="dish" :class="dish.status" @click="openSlug = dish.recipe.slug">
                     <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
                   </button>
+                  <span v-if="dish.status === 'completed'" class="cooked"><UIcon name="i-lucide-check" aria-hidden="true" />Cooked</span>
                 </template>
               </p>
             </div>
@@ -176,7 +181,17 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 .day + .day { border-top: 1px solid #f2f2f4; }
 .day b { color: #52525b; font-size: 13px; line-height: 20px; font-weight: 600; }
 .meals p { margin: 0; font-size: 14px; line-height: 28px; color: #a1a1aa; }
-.meal { display: inline-block; min-width: 76px; color: #a1a1aa; font-size: 12px; vertical-align: middle; }
+.meal { display: inline-block; min-width: 76px; color: #71717a; font-size: 12px; font-weight: 500; vertical-align: middle; }
+/* Cooked: the soft green tag of the plan column. */
+.cooked { display: inline-flex; align-items: center; gap: 3px; height: 20px; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: #ecfdf3; vertical-align: middle; color: #067647; font-size: 11.5px; line-height: 20px; font-weight: 500; }
+.cooked .iconify { width: 12px; height: 12px; }
+/* Loading rows: a tile and two bars in the plan row's shape. */
+.skeletons { display: grid; gap: 8px; }
+.skel { display: flex; align-items: center; gap: 12px; height: 66px; padding: 0 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
+.skel .tile { width: 32px; height: 32px; flex: none; border-radius: 9px; background: #f4f4f5; }
+.skel > span { flex: 1; display: grid; gap: 8px; }
+.skel > span > i { display: block; width: 40%; height: 10px; border-radius: 999px; background: #f4f4f5; }
+.skel > span > i + i { width: 60%; }
 .dish { display: inline-flex; gap: 6px; align-items: center; vertical-align: middle; padding: 0; border: 0; background: transparent; color: #27272a; font: inherit; font-weight: 400; cursor: pointer; transition: color 120ms; }
 .dish:hover, .dish:focus-visible { color: #7c3aed; }
 .dish.skipped { color: #a1a1aa; text-decoration: line-through; }

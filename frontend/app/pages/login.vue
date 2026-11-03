@@ -51,7 +51,7 @@ async function submit() {
       </div>
 
       <template v-if="audience === 'household'">
-        <h1>{{ mode === "login" ? "Welcome back" : "Create your MealCraft account" }}</h1>
+        <h1 :class="{ long: mode === 'register' }">{{ mode === "login" ? "Welcome back" : "Create your MealCraft account" }}</h1>
         <p>Your plans, household profile and Assistant history stay inside your household.</p>
 
         <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
@@ -104,24 +104,26 @@ async function submit() {
 </template>
 
 <style scoped>
-/* One white card on the tinted page: a segmented audience switch, plain fields, a dark pill to sign in. */
-.auth-page { display: grid; place-items: start center; padding-block: 48px 0; }
-.auth-card { width: min(400px, 100%); padding: 28px 32px 32px; border: 1px solid #ececef; border-radius: 20px; background: #fff; box-shadow: var(--mc-shadow-md); }
+/* One white card, centred on the tinted page: a quiet audience switch, plain fields, a dark pill to sign in. */
+.auth-page { min-height: calc(100vh - 24px); display: grid; place-items: center; padding-block: 16px; }
+.auth-card { width: min(420px, 100%); padding: 28px 32px; border: 1px solid #ececef; border-radius: 20px; background: #fff; box-shadow: var(--mc-shadow-md); }
 /* The brand tile and wordmark head the card. */
-.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
 .auth-brand .sb-mark { width: 40px; height: 40px; border-radius: 11px; }
 .auth-brand .sb-mark :deep(svg) { width: 24px; height: 27px; }
 .auth-card h1 { margin: 0 0 6px; text-align: center; color: var(--mc-strong); font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em; }
+.auth-card h1.long { font-size: 20px; }
 .auth-card > p { margin: 0; text-align: center; color: #71717a; font-size: 14px; line-height: 20px; }
-/* Both switches are the one segmented control: the audience a small one at the top, Sign in / Register full width. */
-.audience, .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
-.audience { width: fit-content; margin: 0 auto 20px; }
-.auth-tabs { margin: 20px 0; }
-.audience button, .auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
-.audience button { height: 28px; font-size: 12.5px; }
-.audience button.active, .auth-tabs button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
-.auth-spacer { height: 20px; }
-form { display: grid; gap: 16px; }
+/* The audience is a quiet text switch (an underline marks the choice); Sign in / Register is the one segmented control. */
+.audience { display: flex; justify-content: center; gap: 20px; margin: 0 0 18px; }
+.audience button { height: 28px; padding: 0 2px; border: 0; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.audience button:hover { color: #27272a; }
+.audience button.active { color: var(--mc-strong); box-shadow: inset 0 -2px 0 #18181b; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 18px 0; padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.auth-tabs button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
+.auth-spacer { height: 18px; }
+form { display: grid; gap: 14px; }
 label, .field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; }
 .switch { padding: 0; border: 0; background: none; color: #6d28d9; font: inherit; font-weight: 500; cursor: pointer; }
@@ -132,6 +134,8 @@ input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9f
 .auth-submit:hover:not(:disabled) { background: #27272a; }
 /* In flight: the same ink pill with a spinner, never the disabled grey. */
 .auth-submit:disabled { cursor: progress; }
-.auth-error { margin: 16px 0; color: #b42318 !important; }
+.auth-error { margin: 4px 0 16px; color: #b42318 !important; }
+/* Above the form: left-aligned beside its icon (the card centres its other lines), with room before the fields. */
+.auth-card > .auth-error { margin: 16px 0 18px; text-align: left; }
 form .auth-error { margin: 0; }
 </style>

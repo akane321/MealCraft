@@ -371,10 +371,14 @@ function buildPayload(): HouseholdProfileInput {
   };
 }
 
+// The save bar says how the last save went, beside its button (the notice at the top may be out of view).
+const justSaved = ref(false);
 async function saveProfile() {
   saveNotice.value = null;
+  justSaved.value = false;
   const saved = await save(buildPayload());
   if (saved) {
+    justSaved.value = true;
     saveNotice.value = "Saved. New weeks will follow these details.";
     hydrateFromCurrent();
   }
@@ -654,10 +658,15 @@ onMounted(async () => {
           </div>
         </section>
 
-        <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12 || orphanRules" :aria-busy="isSaving || undefined">
-          <UIcon v-if="isSaving" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
-          {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
-        </button>
+        <!-- The save button rides along the bottom of the panel, with how the last save went beside it. -->
+        <div class="save-bar">
+          <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12 || orphanRules" :aria-busy="isSaving || undefined">
+            <UIcon v-if="isSaving" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
+            {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
+          </button>
+          <span v-if="errorMessage && !isSaving" class="save-status bad"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />Not saved. The reason is at the top of the page.</span>
+          <span v-else-if="justSaved && saveNotice" class="save-status ok"><UIcon name="i-lucide-circle-check" aria-hidden="true" />Saved</span>
+        </div>
         <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a meal, guests included.</p>
         <p v-if="orphanRules" class="inline-error">A "who's home" rule names someone who is no longer a member. Remove it to save.</p>
 
@@ -780,4 +789,11 @@ onMounted(async () => {
 .changes .mc-chip { background: #f4f4f5; color: #52525b; }
 /* The long price choice takes two columns, so it reads whole at 1280. */
 .prices-field { grid-column: span 2; }
+/* The save bar: sticks to the foot of the panel while the form scrolls. */
+.save-bar { position: sticky; bottom: 16px; z-index: 3; display: flex; align-items: center; gap: 12px; margin-top: 24px; padding: 8px 8px 8px 8px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.product-frame .save-bar .profile-save-button { margin-top: 0; }
+.save-status { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; line-height: 18px; font-weight: 500; }
+.save-status .iconify { width: 16px; height: 16px; flex: none; }
+.save-status.ok { color: #067647; }
+.save-status.bad { color: #b42318; }
 </style>

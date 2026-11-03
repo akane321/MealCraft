@@ -8,22 +8,23 @@ const ME = {
   household_role: "owner",
 };
 
-// The sticky sidebar is capped at the window and scrolls inside itself: the button is in view once the sidebar
-// alone is scrolled to its end, at both desktop sizes (ADR-0010).
+// "Plan your meals" sticks in the panel while the page scrolls (the cards under it scroll with the page): with the
+// panel scrolled to the top and to the very end, the button is whole on screen below the 56px bar, at both
+// desktop sizes (ADR-0010).
 async function expectSidebarReaches(page: Page, name: string) {
-  const aside = page.locator(".profile-sidebar");
+  const frame = page.locator(".product-frame");
   for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
-    const box = await aside.evaluate((el) => {
-      el.scrollTop = el.scrollHeight;
-      const rect = el.getBoundingClientRect();
-      return { top: rect.top, bottom: rect.bottom, height: rect.height };
-    });
-    expect(box.height).toBeLessThanOrEqual(viewport.height - 40);
-    const button = (await page.getByRole("button", { name }).boundingBox())!;
-    expect(button.y).toBeGreaterThanOrEqual(box.top);
-    expect(button.y + button.height).toBeLessThanOrEqual(box.bottom);
-    await aside.evaluate((el) => { el.scrollTop = 0; });
+    for (const end of [false, true]) {
+      const bar = await frame.evaluate((el, toEnd) => {
+        el.scrollTop = toEnd ? el.scrollHeight : 0;
+        return el.querySelector(".mc-bar")!.getBoundingClientRect().bottom;
+      }, end);
+      const button = (await page.getByRole("button", { name }).boundingBox())!;
+      expect(button.y).toBeGreaterThanOrEqual(bar);
+      expect(button.y + button.height).toBeLessThanOrEqual(viewport.height - 8);
+    }
+    await frame.evaluate((el) => { el.scrollTop = 0; });
   }
   await page.setViewportSize({ width: 1280, height: 720 });
 }
