@@ -16,8 +16,8 @@
   --ui-bg-inverted: #18181b;
 }
 
-.mc-shell {
-  /* The design tokens of main.css, with the new values. */
+.mc-shell, .mc-shell :is(.mc-overlay, .mc-sheet-overlay) {
+  /* The design tokens of main.css, with the new values. Overlays repeat them: surface.css sets the old ones there. */
   --c-ink: #18181b;
   --c-coral: #7c3aed;
   --c-coral-hover: #6d28d9;
@@ -148,6 +148,37 @@
 .mc-shell .mc-segmented { padding: 3px; border-radius: 10px; background: #f4f4f5; }
 .mc-shell .mc-segmented > button { height: 28px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #71717a !important; }
 .mc-shell .mc-segmented > button[aria-selected="true"] { color: var(--mc-strong) !important; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
+
+/* Overlays: a light scrim; sheets, dialogs and drawers share one white panel. */
+/* The token block above already gives overlays the 400 Inter body; the font shorthand reset tabular numbers. */
+.mc-shell :is(.mc-overlay, .mc-sheet-overlay) { font-variant-numeric: tabular-nums; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.mc-shell .mc-panel { border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.mc-shell .mc-close { width: 32px; height: 32px; flex: none; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+.mc-shell .mc-close:hover { background: #f4f4f5; color: #18181b; }
+.mc-shell .mc-close .iconify { width: 18px; height: 18px; }
+
+/* Danger, disabled and busy buttons. Busy keeps the ink pill and shows a spinner. */
+.mc-shell .mc-btn.danger { border-color: #fecaca; background: #fef2f2; color: #b42318; }
+.mc-shell .mc-btn.danger:hover:not(:disabled) { background: #fee4e2; }
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-btn.secondary, .mc-btn.danger):disabled:not([aria-busy="true"]) { opacity: 1; border-color: transparent; background: #f4f4f5; color: #a1a1aa !important; box-shadow: inset 0 0 0 1px #e4e4e7; cursor: not-allowed; }
+.mc-shell .mc-btn[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
+.mc-shell .mc-spin { width: 14px; height: 14px; flex: none; animation: mc-spin 900ms linear infinite; }
+@keyframes mc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mc-shell .mc-spin { animation: none; } }
+
+/* Checkbox, radio and the search clear button. */
+.mc-shell input[type="checkbox"], .mc-shell input[type="radio"] { appearance: none; flex: none; width: 16px; height: 16px; margin: 0; border: 1px solid #d4d4d8; background: #fff; cursor: pointer; transition: background 120ms, border-color 120ms; }
+.mc-shell input[type="checkbox"] { border-radius: 4px; }
+.mc-shell input[type="checkbox"]:checked {
+  border-color: #7c3aed; background: #7c3aed url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
+}
+.mc-shell input[type="radio"] { border-radius: 50%; }
+.mc-shell input[type="radio"]:checked { border: 5px solid #7c3aed; }
+.mc-shell :is(input[type="checkbox"], input[type="radio"]):disabled { opacity: 0.4; cursor: default; }
+.mc-shell input[type="search"]::-webkit-search-cancel-button {
+  appearance: none; width: 14px; height: 14px; cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / 14px;
+}
 
 /* Icon tiles: a white glyph on a light-to-base gradient. */
 /* The tone comes from a [data-tone] on the tile or on its card; violet by default. */
