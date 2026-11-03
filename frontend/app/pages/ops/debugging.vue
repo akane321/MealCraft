@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { REPLAY_FIELD_LABELS as fieldLabel, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
+import { REPLAY_FIELD_LABELS as fieldLabel, describeOverrides, diffFields, dishRows, formatSeconds, formatValue, formatWhen, humanKey, statusTone } from "~/lib/ops";
 import type { OpsReplay, OpsReplaySummary } from "~/types/ops";
 
 const config = useRuntimeConfig();
@@ -99,7 +99,7 @@ async function runAgain() {
         <h2 id="replays-title">Recent replays</h2>
         <p v-if="listFailed" class="ops-error" role="alert">The replay list couldn't be loaded.</p>
         <p v-else-if="!replays" class="ops-muted" aria-busy="true">Loading…</p>
-        <p v-else-if="!replays.length" class="ops-muted">No replays yet. Open a task and choose Replay.</p>
+        <div v-else-if="!replays.length" class="ops-empty-state"><div class="mc-empty-art" aria-hidden="true"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-inbox" /></span></span></div><p class="t">No replays yet.</p><p class="h">Open a task and choose Replay.</p></div>
         <ul v-else>
           <li v-for="item in replays" :key="item.id">
             <button type="button" :class="{ current: item.id === selectedId }" @click="open(item.id)">
@@ -112,7 +112,7 @@ async function runAgain() {
       </section>
 
       <section class="ops-card compare" aria-labelledby="compare-title">
-        <p v-if="selectedId === null" class="ops-muted">Pick a replay to see the stored result beside the new one.</p>
+        <div v-if="selectedId === null" class="ops-empty-state"><div class="mc-empty-art" aria-hidden="true"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-git-compare" /></span></span></div><p class="h">Pick a replay to see the stored result beside the new one.</p></div>
         <p v-else-if="replayFailed" class="ops-error" role="alert">This replay couldn't be loaded.</p>
         <p v-else-if="!replay" class="ops-muted" aria-busy="true">Loading the replay…</p>
         <template v-else>
@@ -123,8 +123,8 @@ async function runAgain() {
             <tbody>
               <tr>
                 <th>Result</th>
-                <td><span class="ops-badge" :style="{ '--dot': statusColor(replay.original?.status ?? '') }">{{ humanKey(replay.original?.status ?? "unknown") }}</span></td>
-                <td><span class="ops-badge" :style="{ '--dot': statusColor(replay.replay.status) }">{{ humanKey(replay.replay.status) }}</span></td>
+                <td><span class="ops-badge" :class="statusTone(replay.original?.status ?? '')">{{ humanKey(replay.original?.status ?? "unknown") }}</span></td>
+                <td><span class="ops-badge" :class="statusTone(replay.replay.status)">{{ humanKey(replay.replay.status) }}</span></td>
               </tr>
               <template v-if="replay.kind === 'planning'">
                 <tr><th>Evidence</th><td>{{ humanKey(replay.original?.evidence ?? "—") }}</td><td>{{ humanKey(replay.replay.evidence ?? "—") }}</td></tr>
@@ -213,13 +213,16 @@ table.side th, table.side td { height: auto; padding: 8px 12px; overflow-wrap: a
 table.side thead th { height: 36px; padding-block: 0; }
 table.side tbody th { width: 26%; }
 table.side tr.changed td { background: #fffaeb; }
-table.side tr.changed td:last-child { color: #6d28d9; font-weight: 500; }
+table.side tr.changed td:last-child { color: #0f0f12; font-weight: 600; }
 blockquote { margin: 0; padding: 10px 14px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; color: #27272a; }
 .overrides { display: grid; gap: 10px; margin-top: 24px; padding-top: 4px; border-top: 1px solid #f0f0f2; }
 .overrides h3 { margin-bottom: 0; }
 .overrides p { margin: 0; }
-.fields { display: flex; flex-wrap: wrap; gap: 12px; }
+.fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .fields label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
-.fields select, .fields input { min-width: 150px; }
+.fields select, .fields input { width: 100%; min-width: 0; }
+/* A select left on its default ("As stored") reads like the inputs' placeholder. */
+.fields select:has(> option[value=""]:checked) { color: #a1a1aa; }
+.fields select option { color: #18181b; }
 .overrides .mc-primary { justify-self: start; }
 </style>

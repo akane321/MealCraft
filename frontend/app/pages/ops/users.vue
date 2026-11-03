@@ -167,7 +167,7 @@ async function confirmRemoval() {
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading accounts…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted ops-empty">No account matches.</p>
+    <div v-else-if="!page.items.length" class="ops-card ops-empty-state"><div class="mc-empty-art" aria-hidden="true"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-users" /></span></span></div><p class="t">No account matches.</p></div>
     <section v-else class="ops-card table-card" aria-label="Accounts">
       <table>
         <thead><tr><th>Account</th><th>Household</th><th class="mc-num">Conversations</th><th class="mc-num">Plans</th><th>Console</th><th>Last seen</th></tr></thead>
@@ -177,7 +177,7 @@ async function confirmRemoval() {
             <td>{{ user.households.map(item => item.name).join(", ") || "—" }}</td>
             <td class="mc-num">{{ user.conversations }}</td>
             <td class="mc-num">{{ user.plans }}</td>
-            <td>{{ user.system_role === "ordinary_user" ? "—" : humanKey(user.system_role) }}</td>
+            <td><span v-if="user.system_role !== 'ordinary_user'" class="role-badge">{{ humanKey(user.system_role) }}</span><template v-else>—</template></td>
             <td class="ops-muted">{{ formatWhen(user.last_seen_at) }}</td>
           </tr>
         </tbody>
@@ -219,7 +219,7 @@ async function confirmRemoval() {
             <div v-for="household in detail.households" :key="household.id" class="household">
               <p><b>{{ household.name }}</b> <span class="ops-muted">· {{ humanKey(household.role) }} · {{ household.members }} {{ household.members === 1 ? "member" : "members" }}</span></p>
               <dl v-if="household.profile" class="profile">
-                <template v-for="(value, key) in household.profile" :key="key"><dt>{{ humanKey(String(key)) }}</dt><dd>{{ formatValue(value) }}</dd></template>
+                <template v-for="(value, key) in household.profile" :key="key"><dt>{{ humanKey(String(key)).replace(/ sgd$/i, " (S$)") }}</dt><dd>{{ String(key).endsWith("_sgd") && typeof value === "number" ? `S$${value}` : formatValue(value) }}</dd></template>
               </dl>
               <p v-else class="ops-muted small">No household profile saved.</p>
             </div>
@@ -229,7 +229,7 @@ async function confirmRemoval() {
             <h3>Conversations ({{ detail.conversations }})</h3>
             <p v-if="!detail.recent_conversations.length" class="ops-muted">None.</p>
             <ul v-else class="rows">
-              <li v-for="item in detail.recent_conversations" :key="item.id"><span>“{{ item.title || item.first_message || "…" }}”</span><span class="ops-muted">{{ humanKey(item.status) }} · {{ item.messages }} messages · {{ formatWhen(item.created_at) }}</span><button type="button" class="mc-pill sm row-delete" :aria-label="`Delete conversation ${item.title || item.first_message || item.id}`" @click="single = { kind: 'conversations', id: item.id, label: `“${item.title || item.first_message || '…'}”` }">Delete</button></li>
+              <li v-for="item in detail.recent_conversations" :key="item.id"><span>“{{ item.title || item.first_message || "…" }}”</span><span class="ops-muted">{{ humanKey(item.status) }} · {{ item.messages }} messages · {{ formatWhen(item.created_at) }}</span><button type="button" class="mc-pill sm row-delete danger" :aria-label="`Delete conversation ${item.title || item.first_message || item.id}`" @click="single = { kind: 'conversations', id: item.id, label: `“${item.title || item.first_message || '…'}”` }">Delete</button></li>
             </ul>
           </section>
 
@@ -237,15 +237,15 @@ async function confirmRemoval() {
             <h3>Plans ({{ detail.plans }})</h3>
             <p v-if="!detail.recent_plans.length" class="ops-muted">None.</p>
             <ul v-else class="rows">
-              <li v-for="plan in detail.recent_plans" :key="plan.id"><span>Week of {{ plan.start_date }} for {{ plan.household_size }}</span><span class="ops-muted mc-num">S${{ plan.total_sgd.toFixed(2) }} · {{ formatWhen(plan.created_at) }}</span><button type="button" class="mc-pill sm row-delete" :aria-label="`Delete the week of ${plan.start_date}`" @click="single = { kind: 'plans', id: plan.id, label: `the week of ${plan.start_date}` }">Delete</button></li>
+              <li v-for="plan in detail.recent_plans" :key="plan.id"><span>Week of {{ plan.start_date }} for {{ plan.household_size }}</span><span class="ops-muted mc-num">S${{ plan.total_sgd.toFixed(2) }} · {{ formatWhen(plan.created_at) }}</span><button type="button" class="mc-pill sm row-delete danger" :aria-label="`Delete the week of ${plan.start_date}`" @click="single = { kind: 'plans', id: plan.id, label: `the week of ${plan.start_date}` }">Delete</button></li>
             </ul>
           </section>
 
           <section class="danger-zone">
             <h3>Delete</h3>
             <div class="actions">
-              <button type="button" class="mc-pill" :disabled="!detail.conversations" @click="pending = 'conversations'">Delete conversations</button>
-              <button type="button" class="mc-pill" :disabled="!detail.plans" @click="pending = 'plans'">Delete plans</button>
+              <button type="button" class="mc-pill danger" :disabled="!detail.conversations" @click="pending = 'conversations'">Delete conversations</button>
+              <button type="button" class="mc-pill danger" :disabled="!detail.plans" @click="pending = 'plans'">Delete plans</button>
               <button type="button" class="mc-pill danger" :disabled="isMe" @click="pending = 'account'">Delete account</button>
             </div>
           </section>
@@ -280,6 +280,10 @@ async function confirmRemoval() {
 <style scoped>
 .search { display: grid; gap: 6px; max-width: 420px; color: #71717a; font-size: 12px; font-weight: 500; }
 .row-delete { margin-left: auto; }
+/* A per-row delete: a quiet red text button that tints on hover. */
+.row-delete.danger { border-color: transparent !important; background: transparent !important; }
+.row-delete.danger:hover:not(:disabled) { background: #fef3f2 !important; }
+.role-badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: #f5f3ff; color: #6d28d9; font-size: 12px; font-weight: 500; }
 .household p { margin: 0 0 8px; }
 .profile { display: grid; grid-template-columns: minmax(120px, 34%) 1fr; gap: 6px 14px; margin: 0 0 14px; font-size: 13px; }
 .profile dt { color: #71717a; }

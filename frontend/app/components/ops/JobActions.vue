@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatWhen, isJobCancellable, jobIdempotencyKey, mayManageJobs, statusColor } from "~/lib/ops";
+import { formatWhen, isJobCancellable, jobIdempotencyKey, mayManageJobs, statusTone } from "~/lib/ops";
 import type { OpsCatalogSource, OpsJob, OpsJobCancellation, OpsRunCollection, OpsRunSummary } from "~/types/ops";
 
 const POLL_INTERVAL_MS = 2_000;
@@ -201,7 +201,7 @@ const confirmation = computed(() => {
               <span class="trace" :title="job.trace_id">{{ job.trace_id }}</span>
             </td>
             <td>
-              <span class="ops-badge" :style="{ '--dot': statusColor(cancellingId === job.id ? 'cancelled' : job.status) }">
+              <span class="ops-badge" :class="statusTone(cancellingId === job.id ? 'cancelled' : job.status)">
                 {{ cancellingId === job.id ? "Cancellation requested" : job.status.replaceAll("_", " ") }}
               </span>
               <span v-if="job.error_code" class="error-code">{{ job.error_code }}</span>
@@ -246,8 +246,8 @@ const confirmation = computed(() => {
 .queue-form { display: flex; align-items: end; gap: 12px; }
 .queue-form label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .queue-form select { min-width: 220px; }
-.read-only-note, .empty-jobs { margin: 0; padding: 12px 14px; border: 1px dashed #e4e4e7; border-radius: 12px; color: #71717a; font-size: 13px; }
-.empty-jobs { text-align: center; }
+.read-only-note, .empty-jobs { margin: 0; padding: 12px 14px; border-radius: 10px; background: #fafafa; color: #71717a; font-size: 13px; }
+.empty-jobs { min-height: 44px; display: flex; align-items: center; justify-content: center; padding-block: 0; }
 .ops-success { margin: 0; padding: 10px 14px; border: 1px solid #abefc6; border-radius: 12px; background: #ecfdf3; color: #067647; font-size: 13px; }
 .ops-error { margin: 0; }
 .job-table { overflow-x: auto; border: 1px solid #ececef; border-radius: 12px; }

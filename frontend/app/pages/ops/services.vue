@@ -63,9 +63,9 @@ async function check(name: OpsServiceName) {
       <section v-for="service in services" :key="service.name" class="ops-card service" :aria-labelledby="`svc-${service.name}`">
         <header>
           <h2 :id="`svc-${service.name}`">{{ service.label }}</h2>
-          <span class="ops-badge" :style="{ '--dot': service.configured ? 'var(--sage)' : 'var(--t4)' }">{{ service.configured ? "Configured" : "Not configured" }}</span>
+          <span class="ops-badge" :class="service.configured ? 'success' : 'neutral'">{{ service.configured ? "Configured" : "Not configured" }}</span>
         </header>
-        <p class="ops-muted">Mode: {{ service.mode }}</p>
+        <p class="ops-muted mode">Mode: {{ service.mode }}</p>
 
         <dl v-if="service.recent" class="recent">
           <div><dt>Runs</dt><dd class="mc-num">{{ service.recent.runs }}</dd></div>
@@ -73,7 +73,7 @@ async function check(name: OpsServiceName) {
           <div><dt>Failures</dt><dd class="mc-num" :class="{ bad: service.recent.failures }">{{ service.recent.failures }}</dd></div>
           <div><dt>Fallbacks</dt><dd class="mc-num" :class="{ bad: service.recent.fallbacks }">{{ service.recent.fallbacks }}</dd></div>
         </dl>
-        <p v-if="service.note" class="ops-muted">{{ service.note }}</p>
+        <p v-if="service.note" class="ops-muted svc-note">{{ service.note }}</p>
 
         <footer>
           <button type="button" class="mc-primary" :disabled="checking !== null" :aria-busy="checking === service.name" @click="check(service.name)">
@@ -94,18 +94,22 @@ async function check(name: OpsServiceName) {
 </template>
 
 <style scoped>
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
-.service { display: flex; flex-direction: column; gap: 12px; }
-.service > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+/* One full-width row a service: name and mode, the recent figures, then the live check. */
+.cards { display: grid; gap: 12px; }
+.service { display: grid; grid-template-columns: 220px minmax(0, 1fr) 240px; grid-template-rows: auto auto 1fr; grid-template-areas: "head stats foot" "mode stats foot" ". note foot"; gap: 8px 24px; align-items: start; }
+.service > header { grid-area: head; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.service .mode { grid-area: mode; }
+.service .recent { grid-area: stats; }
+.service .svc-note { grid-area: note; max-width: 640px; }
 .service h2 { margin: 0; }
 .service p { margin: 0; font-size: 13px; line-height: 1.55; }
-/* Recent numbers as small stat tiles. */
-.recent { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 8px; margin: 0; }
-.recent div { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; }
-.recent dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
-.recent dd { margin: 4px 0 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Recent numbers: four light tiles, label over value. */
+.recent { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.recent div { display: flex; flex-direction: column; padding: 10px 12px; border-radius: 10px; background: #fafafa; }
+.recent dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
+.recent dd { margin: 2px 0 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .recent dd.bad { color: #b42318; }
-.service footer { display: grid; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f0f0f2; }
+.service footer { grid-area: foot; display: grid; gap: 8px; padding-left: 24px; border-left: 1px solid #f0f0f2; }
 .service footer .mc-primary { justify-self: start; }
 .cost { color: #a1a1aa; font-size: 12px !important; }
 /* The live check: soft red unless it answered. */

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { humanKey } from "~/lib/ops";
+import { formatWhen, humanKey } from "~/lib/ops";
 
 // A stored record as label/value rows; nested values fall back to formatted JSON so nothing is hidden.
 defineProps<{ data: Record<string, unknown> }>();
+
+// "weekly_budget_sgd" reads "Weekly budget (S$)"; a stored timestamp reads like the tables' dates.
+const label = (key: string) => humanKey(key).replace(/ sgd$/i, " (S$)");
+const isTime = (value: unknown): value is string => typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value);
 
 function isPlain(value: unknown) {
   return value === null || ["string", "number", "boolean"].includes(typeof value);
@@ -12,8 +16,9 @@ function isPlain(value: unknown) {
 <template>
   <dl class="ops-fields">
     <template v-for="(value, key) in data" :key="key">
-      <dt>{{ humanKey(String(key)) }}</dt>
-      <dd v-if="isPlain(value)" :class="{ mono: typeof value === 'string' && /^[0-9a-f]{16,}$/.test(value) }">{{ value === null || value === "" ? "—" : value }}</dd>
+      <dt>{{ label(String(key)) }}</dt>
+      <dd v-if="isTime(value)" :title="value">{{ formatWhen(value) }}</dd>
+      <dd v-else-if="isPlain(value)" :class="{ mono: typeof value === 'string' && /^[0-9a-f]{16,}$/.test(value) }">{{ value === null || value === "" ? "—" : value }}</dd>
       <dd v-else><pre>{{ JSON.stringify(value, null, 2) }}</pre></dd>
     </template>
   </dl>

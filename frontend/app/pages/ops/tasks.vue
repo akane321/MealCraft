@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TASK_STATUSES, formatSeconds, formatWhen, humanKey, parseTaskKey, singaporeMidnight, statusColor } from "~/lib/ops";
+import { TASK_STATUSES, formatSeconds, formatWhen, humanKey, parseTaskKey, singaporeMidnight, statusTone } from "~/lib/ops";
 import type { OpsReplay, OpsTaskCollection, OpsTaskDetail, OpsTaskSummary } from "~/types/ops";
 
 const PAGE = 25;
@@ -135,7 +135,7 @@ const validation = computed(() => {
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading tasks…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted ops-empty">No tasks match these filters.</p>
+    <div v-else-if="!page.items.length" class="ops-card ops-empty-state"><div class="mc-empty-art" aria-hidden="true"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-inbox" /></span></span></div><p class="t">No tasks match these filters.</p></div>
     <section v-else class="ops-card table-card" aria-label="Tasks">
       <table>
         <thead>
@@ -144,7 +144,7 @@ const validation = computed(() => {
         <tbody>
           <tr v-for="task in page.items" :key="`${task.kind}-${task.id}`" :class="{ current: selected?.kind === task.kind && selected?.id === task.id }">
             <td><button type="button" class="link" @click="open(task)">{{ task.label }}</button></td>
-            <td><span class="ops-badge" :style="{ '--dot': statusColor(task.status) }">{{ humanKey(task.status) }}</span></td>
+            <td><span class="ops-badge" :class="statusTone(task.status)">{{ humanKey(task.status) }}</span></td>
             <td class="ops-muted">{{ task.provider_mode ?? "—" }}</td>
             <td class="mc-num">{{ formatSeconds(task.duration_seconds) }}</td>
             <td class="ops-muted">{{ formatWhen(task.created_at) }}</td>
@@ -175,7 +175,7 @@ const validation = computed(() => {
         <p v-if="detailFailed" class="ops-error" role="alert">This task couldn't be loaded. It may have been removed.</p>
         <template v-else-if="detail">
           <div class="chips">
-            <span class="ops-badge" :style="{ '--dot': statusColor(detail.summary.status) }">{{ humanKey(detail.summary.status) }}</span>
+            <span class="ops-badge" :class="statusTone(detail.summary.status)">{{ humanKey(detail.summary.status) }}</span>
             <span class="mc-chip">Source <b>{{ detail.summary.provider_mode ?? "—" }}</b></span>
             <span class="mc-chip">Time <b>{{ formatSeconds(detail.summary.duration_seconds) }}</b></span>
             <span v-if="detail.summary.error_code" class="mc-chip alert">{{ detail.summary.error_code }}</span>

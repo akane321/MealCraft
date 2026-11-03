@@ -101,7 +101,7 @@ async function save() {
             <td><button type="button" class="link" @click="open(item)">{{ item.display_name }}</button><span class="ops-muted sub">{{ item.normalized_name }}</span></td>
             <td>{{ item.zh_names.join("、") || "—" }}</td>
             <td>{{ item.aliases.join(", ") || "—" }}</td>
-            <td>{{ item.allergens.join(", ") || "—" }}</td>
+            <td><span v-for="allergen in item.allergens" :key="allergen" class="ops-badge error allergen">{{ allergen }}</span><template v-if="!item.allergens.length">—</template></td>
             <td class="mc-num">{{ item.recipes }}</td>
           </tr>
         </tbody>
@@ -138,7 +138,7 @@ async function save() {
 
         <section>
           <h3>Allergens</h3>
-          <div v-if="selected.allergens.length" class="chips"><span v-for="item in selected.allergens" :key="item" class="chip">{{ item }}</span></div>
+          <div v-if="selected.allergens.length" class="chips"><span v-for="item in selected.allergens" :key="item" class="ops-badge error allergen">{{ item }}</span></div>
           <p v-else class="ops-muted">None.</p>
           <p class="ops-muted small">Allergens are derived by rule and cannot be edited here. They change in their own reviewed files (data/ingredients/allergen-vocabulary.json and app/data/allergens.py).</p>
         </section>

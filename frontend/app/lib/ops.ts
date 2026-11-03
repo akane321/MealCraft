@@ -63,6 +63,19 @@ export function statusColor(status: string) {
   return COLORS[status] ?? "var(--t3)";
 }
 
+// A badge's soft colour pair: done, failed, needs a look, in flight; anything else is neutral.
+const TONES: Record<string, "success" | "error" | "warning" | "info"> = {
+  succeeded: "success", committed: "success", preview_ready: "success", feasible: "success", passed: "success", available: "success",
+  failed: "error", infeasible: "error",
+  degraded: "warning", needs_clarification: "warning",
+  running: "info", queued: "info", ready_for_confirmation: "info",
+};
+
+/** The badge tone of a status: success, error, warning, info or neutral. */
+export function statusTone(status: string) {
+  return TONES[status] ?? "neutral";
+}
+
 /** Statuses seen in a window, good ones first, so stacked bars keep a stable order. */
 export function statusesIn(days: OpsDayPoint[], pick: (day: OpsDayPoint) => Record<string, number>) {
   const rank = (status: string) => (GOOD.has(status) ? 0 : WARN.has(status) ? 2 : BAD.has(status) ? 3 : 1);

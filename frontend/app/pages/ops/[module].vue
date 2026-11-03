@@ -9,7 +9,7 @@ const module = computed(() => OPS_MODULES.find(item => item.slug === route.param
 <template>
   <div class="ops-page">
     <header class="mc-empty">
-      <div class="mc-empty-art"><span><span class="mc-tile" data-tone="amber"><UIcon name="i-lucide-construction" /></span></span></div>
+      <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-construction" /></span></span></div>
       <h1>{{ module ? `${module.label} is coming in the next slice` : "There is no such part of the console" }}</h1>
       <p>{{ module?.blurb ?? "Pick a section from the list on the left." }}</p>
       <p v-if="module">Nothing here works yet. Overview, Tasks and Services are ready to use.</p>

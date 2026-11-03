@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatSeconds, formatValue, formatWhen, humanKey, statusColor } from "~/lib/ops";
+import { formatSeconds, formatValue, formatWhen, humanKey, statusTone } from "~/lib/ops";
 import { caseEvidence, categoryRows, currentParserLabel, draftChanges, evidenceMatch, experimentConfirmMessage, experimentExecution, experimentGates, experimentHeadline, presetBreakdown, queuesRun, spendsOpenAI } from "~/lib/ops-experiments";
 import type { OpsEvaluation, OpsEvaluationName, OpsExperiment, OpsExperimentComparison, OpsExperimentDetail, OpsRuntimeSetting, OpsSettingChange } from "~/types/ops";
 
@@ -274,7 +274,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
               <p class="ops-muted">{{ setting.meaning }}</p>
               <p class="tags">
                 <span class="mc-chip">{{ setting.overridden ? "Changed here" : "Server default" }}</span>
-                <span class="mc-chip" :class="{ alert: !setting.wired }">{{ setting.wired ? "Used by the product" : "Stored only, not read yet" }}</span>
+                <span class="mc-chip" :class="{ warn: !setting.wired }">{{ setting.wired ? "Used by the product" : "Stored only, not read yet" }}</span>
               </p>
             </div>
             <div class="how">
@@ -307,7 +307,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       </table>
     </section>
 
-    <div class="ops-grid">
+    <!-- One column: the form full width, then the comparison in its own full-width card. -->
+    <div class="ops-stack">
       <form class="ops-card run-form" aria-labelledby="run-title" @submit.prevent="askExperiment">
         <h2 id="run-title">Run an evaluation</h2>
         <label>Evaluation
@@ -320,18 +321,20 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
           <span class="mc-chip">{{ experimentExecution(chosen, runParser) }}</span>
         </p>
         <template v-if="isPlanningExperiment">
-          <label v-if="isComponentExperiment">Repeats
-            <input v-model.number="form.repeats" type="number" min="1" max="20">
-          </label>
-          <label>Beam width
-            <input v-model.number="form.width" type="number" min="1" max="1000">
-          </label>
-          <label>Maximum expansions
-            <input v-model.number="form.maxExpansions" type="number" min="1" max="1000000">
-          </label>
-          <label v-if="isComponentExperiment">Repair rounds
-            <input v-model.number="form.repairRounds" type="number" min="0" max="10">
-          </label>
+          <div class="num-fields">
+            <label v-if="isComponentExperiment">Repeats
+              <input v-model.number="form.repeats" type="number" min="1" max="20">
+            </label>
+            <label>Beam width
+              <input v-model.number="form.width" type="number" min="1" max="1000">
+            </label>
+            <label>Maximum expansions
+              <input v-model.number="form.maxExpansions" type="number" min="1" max="1000000">
+            </label>
+            <label v-if="isComponentExperiment">Repair rounds
+              <input v-model.number="form.repairRounds" type="number" min="0" max="10">
+            </label>
+          </div>
           <p class="ops-muted small">The fixed developer fixture is used. Held-out data and paid models are unavailable here.</p>
         </template>
         <label v-else-if="form.evaluation === 'developer-planning'">Planner
@@ -371,8 +374,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <tbody>
               <tr v-for="row in evidenceRows" :key="row.label">
                 <th>{{ row.label }}</th>
-                <td>{{ formatValue(row.a) }}</td>
-                <td>{{ formatValue(row.b) }}</td>
+                <td :title="formatValue(row.a)">{{ formatValue(row.a) }}</td>
+                <td :title="formatValue(row.b)">{{ formatValue(row.b) }}</td>
                 <td>{{ evidenceMatch(row) }}</td>
               </tr>
             </tbody>
@@ -428,18 +431,17 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       <p v-if="experimentsFailed" class="ops-error" role="alert">The results couldn't be loaded.</p>
       <p v-else-if="!experiments" class="ops-muted" aria-busy="true">Loading…</p>
       <p v-else-if="!experiments.length" class="ops-muted">No evaluation has been run yet.</p>
-      <table v-else>
-        <thead><tr><th>A</th><th>B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
+      <table v-else class="results">
+        <thead><tr><th class="pick">A · B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
         <tbody>
           <tr v-for="run in experiments" :key="run.id">
-            <td><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"></td>
-            <td><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
-            <td>#{{ run.id }} {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></td>
-            <td><span class="ops-badge" :style="{ '--dot': statusColor(run.status) }">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
-            <td>{{ experimentHeadline(run) }}</td>
-            <td>{{ experimentGates(run) }}</td>
+            <td class="pick"><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
+            <td class="run-name"><span :title="`#${run.id} ${evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation}${run.label ? ` · ${run.label}` : ''}`"><b>#{{ run.id }}</b> {{ evaluations.find(item => item.name === run.evaluation)?.label ?? run.evaluation }}<span v-if="run.label" class="ops-muted"> · {{ run.label }}</span></span></td>
+            <td class="nowrap"><span class="ops-badge" :class="statusTone(run.status)">{{ humanKey(run.status) }}</span><p v-if="run.error" class="ops-error small">{{ run.error }}</p></td>
+            <td class="headline"><span :title="experimentHeadline(run)">{{ experimentHeadline(run) }}</span></td>
+            <td class="gates">{{ experimentGates(run) }}</td>
             <td class="mc-num">{{ formatSeconds(run.duration_seconds) }}</td>
-            <td class="ops-muted">{{ formatWhen(run.created_at) }}</td>
+            <td class="ops-muted nowrap">{{ formatWhen(run.created_at) }}</td>
             <td><button type="button" class="mc-pill sm" @click="openExperiment(run)">Open</button></td>
           </tr>
         </tbody>
@@ -479,7 +481,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
         <p v-else-if="detailLoading || !selectedExperiment" class="ops-muted" aria-busy="true">Loading recorded evidence…</p>
         <template v-else>
           <div class="chips">
-            <span class="ops-badge" :style="{ '--dot': statusColor(selectedExperiment.status) }">{{ humanKey(selectedExperiment.status) }}</span>
+            <span class="ops-badge" :class="statusTone(selectedExperiment.status)">{{ humanKey(selectedExperiment.status) }}</span>
             <span class="mc-chip" :class="{ alert: !selectedExperiment.reproducibility.complete }">{{ selectedExperiment.reproducibility.complete ? "Reproducibility complete" : "Conditions incomplete" }}</span>
             <span class="mc-chip">{{ humanKey(selectedExperiment.reproducibility.claim_scope) }}</span>
             <span v-if="selectedExperiment.passed !== null" class="mc-chip" :class="{ alert: !selectedExperiment.passed }">{{ selectedExperiment.passed ? "Gates passed" : "Gates not passed" }}</span>
@@ -553,8 +555,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 .how { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .how select, .how input { width: 150px; }
 .small { font-size: 12px; }
-/* Cards keep their own height: the A/B card is not stretched to the form beside it. */
-.ops-grid { align-items: start; }
+.ops-stack { display: grid; gap: 16px; }
 /* Tables run edge to edge under the card's title. */
 .ops-card.table-card > h2 { margin: 0; padding: 16px 20px; }
 .ops-card.table-card > p { margin: 0; padding: 0 20px 16px; }
@@ -565,27 +566,43 @@ td p { margin: 4px 0 0; }
 .run-form label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .run-form p { margin: 0; }
 .run-form .mc-primary { justify-self: start; }
+.num-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+/* Results: one line a cell; the full run name and headline are tooltips. */
+.nowrap, .ops-shell main td.mc-num { white-space: nowrap; }
+.results :is(th, td) { padding-inline: 10px !important; }
+.results :is(th, td):first-child { padding-left: 16px !important; }
+.pick { width: 64px; white-space: nowrap; }
+.pick input { vertical-align: middle; }
+.pick input + input { margin-left: 14px; }
+/* The run's name on one line, the headline on two at most; both whole in their tooltip. */
+.run-name > span { display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.run-name b { font-weight: 600; }
+.headline > span { display: -webkit-box; max-width: 260px; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gates { min-width: 96px; }
 h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
 .config-diff { margin: 0; padding-left: 18px; font-size: 13px; }
-.config-diff b { color: #6d28d9; font-weight: 500; }
+.config-diff b { color: #0f0f12; font-weight: 600; }
 /* The comparison tables sit in half a page: smaller cells than the full-width tables. */
 .metrics { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; }
 .metrics th, .metrics td { height: auto; padding: 8px 10px; font-size: 13px; line-height: 18px; }
 .metrics thead th { height: 32px; padding-block: 0; }
 .metrics tbody th { color: #52525b; font-weight: 400; white-space: normal; }
 .metrics td.mc-num { text-align: right; font-variant-numeric: tabular-nums; }
-.moved { color: #6d28d9; font-weight: 500; }
+/* A moved figure is data, not a link: ink and bold. */
+.moved { color: #0f0f12; font-weight: 600; }
 .comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 14px; border: 1px solid; border-radius: 12px; font-size: 13px; line-height: 18px; }
 .comparison-ready { border-color: #abefc6; background: #ecfdf3; color: #067647; }
 .comparison-blocked { border-color: #fecdca; background: #fef3f2; color: #b42318; }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
-.evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
+.evidence-table td { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.evidence-table td:last-child { font-family: inherit; font-size: 13px; }
+.metrics thead th { white-space: nowrap; }
 /* Five columns in half a page: headings and the humanized failure codes wrap at spaces rather than push the card wider; a status stays whole. */
 .case-changes th, .case-changes td { padding: 9px 8px; }
 .case-changes thead th { white-space: normal; }
 .case-changes td:nth-child(-n+3) { white-space: nowrap; }
 /* The drawer's overlay, with the same values as the shared console drawer in ops.vue. */
-.drawer-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.drawer-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); }
 .drawer { position: fixed; top: 8px; right: 8px; bottom: 8px; width: min(640px, calc(100vw - 16px)); overflow-y: auto; padding: 0 24px 24px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
 .drawer-head + .chips { margin-bottom: 4px; }
 .drawer h3 { margin: 0 0 12px; }

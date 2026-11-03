@@ -30,7 +30,7 @@ function shortDay(day: string) {
     <svg :viewBox="`-4 -12 ${WIDTH + 8} ${HEIGHT + 32}`" role="img" :aria-label="label">
       <line x1="0" :y1="HEIGHT" :x2="WIDTH" :y2="HEIGHT" class="axis" />
       <line x1="0" y1="0" :x2="WIDTH" y2="0" class="grid" />
-      <text x="0" y="-2" class="tick">{{ formatSeconds(max) }}</text>
+      <text v-if="!empty" x="0" y="-2" class="tick">{{ formatSeconds(max) }}</text>
       <g v-for="item in series" :key="item.name">
         <line v-for="gap in bridges(item.values)" :key="gap.from.index" :x1="gap.from.index * step" :y1="y(gap.from.value)" :x2="gap.to.index * step" :y2="y(gap.to.value)" class="gap" />
         <path :d="linePath(item.values, max, WIDTH, HEIGHT)" fill="none" :stroke="item.color" stroke-width="2" stroke-linejoin="round" />
@@ -44,12 +44,10 @@ function shortDay(day: string) {
         <text v-if="index === 0 || index === days.length - 1 || index === Math.floor(days.length / 2)" :x="index * step" :y="HEIGHT + 16" class="tick" text-anchor="middle">{{ shortDay(day) }}</text>
       </template>
     </svg>
-    <figcaption class="legend">
-      <template v-if="empty">No timed planning runs in these two weeks.</template>
-      <template v-else>
-        <span v-for="item in series" :key="item.name"><i :style="{ background: item.color }" />{{ item.name }}</span>
-        <span v-if="gapped"><i class="gap-key" />no timed runs</span>
-      </template>
+    <figcaption v-if="empty" class="empty-note"><UIcon name="i-lucide-chart-no-axes-column" aria-hidden="true" />No timed planning runs in these two weeks.</figcaption>
+    <figcaption v-else class="legend">
+      <span v-for="item in series" :key="item.name"><i :style="{ background: item.color }" />{{ item.name }}</span>
+      <span v-if="gapped"><i class="gap-key" />no timed runs</span>
     </figcaption>
   </figure>
 </template>
@@ -65,4 +63,8 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 8px; height: 8px; border-radius: 50%; }
 .legend .gap-key { width: 14px; height: 0; border-radius: 0; border-top: 1.5px dashed #d4d4d8; }
+/* No data: the note sits in the middle of the plot, with no tick or legend. */
+.ops-chart { position: relative; }
+.empty-note { position: absolute; left: 0; right: 0; top: 34%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; color: #a1a1aa; font-size: 13px; text-align: center; }
+.empty-note .iconify { width: 18px; height: 18px; }
 </style>

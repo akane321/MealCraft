@@ -171,7 +171,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
             <td>{{ recipe.meal_types?.join(", ") || "—" }}</td>
             <td>{{ recipe.dietary_tags.join(", ") || "—" }}</td>
             <td>{{ recipe.release_version ? `Release ${recipe.release_version}` : "Curated" }}</td>
-            <td><span class="ops-badge" :style="{ '--dot': recipe.withdrawn ? 'var(--warn)' : 'var(--sage)' }">{{ recipe.withdrawn ? "Withdrawn" : "Plannable" }}</span></td>
+            <td><span class="ops-badge" :class="recipe.withdrawn ? 'error' : 'success'">{{ recipe.withdrawn ? "Withdrawn" : "Plannable" }}</span></td>
           </tr>
         </tbody>
       </table>

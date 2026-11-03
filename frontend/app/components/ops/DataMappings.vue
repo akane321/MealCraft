@@ -182,8 +182,12 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
               <td class="mc-num">S${{ cheapest(item)!.price_sgd.toFixed(2) }}</td>
               <td class="mc-num">{{ cheapest(item)!.package_grams }} g</td>
             </template>
-            <td v-else colspan="3" class="ops-muted">{{ humanKey(item.status) }}</td>
-            <td>{{ item.review_status ? humanKey(item.review_status) : "—" }}</td>
+            <template v-else>
+              <td><span class="ops-badge neutral">{{ humanKey(item.status) }}</span></td>
+              <td class="mc-num empty-cell">—</td>
+              <td class="mc-num empty-cell">—</td>
+            </template>
+            <td><span v-if="item.review_status" class="ops-badge" :class="item.review_status === 'reviewed' ? 'success' : item.review_status === 'proposed' ? 'warning' : 'neutral'">{{ humanKey(item.review_status) }}</span><template v-else>—</template></td>
             <td>{{ item.source === "console" ? "Console" : "Snapshot" }}</td>
           </tr>
         </tbody>
@@ -212,7 +216,7 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
         <section>
           <h3>Products ({{ selected.products.length }})</h3>
           <p v-if="!selected.products.length" class="ops-muted">None.</p>
-          <ul v-else class="rows">
+          <ul v-else class="rows prod-rows">
             <li v-for="product in selected.products" :key="product.external_id">
               <span><a :href="product.product_url" target="_blank" rel="noopener">{{ product.name }}</a><span class="ops-muted sub">{{ product.package_grams }} g · {{ product.package_grams_basis ?? "—" }}{{ product.in_stock ? "" : " · out of stock" }}</span></span>
               <span class="mc-num">S${{ product.price_sgd.toFixed(2) }}</span>
@@ -229,7 +233,7 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
           <fieldset><label><input v-model="search.live" type="checkbox"> Live {{ storeName }} (otherwise {{ filters.retailer !== "fairprice" ? "only saved searches, often nothing" : "the stored fixture" }})</label></fieldset>
           <button type="submit" class="mc-pill" :disabled="searching || search.q.trim().length < 2" :aria-busy="searching">{{ searching ? "Searching…" : "Search" }}</button>
           <p v-if="results && !results.length" class="ops-muted">Nothing found.</p>
-          <ul v-else-if="results" class="rows" aria-label="Search results">
+          <ul v-else-if="results" class="rows prod-rows" aria-label="Search results">
             <li v-for="product in results" :key="product.external_id">
               <span>{{ product.name }}<span class="ops-muted sub">{{ product.package_size ?? "?" }} {{ product.package_unit ?? "" }}{{ product.in_stock ? "" : " · out of stock" }}</span></span>
               <span class="mc-num">S${{ product.price_sgd.toFixed(2) }}</span>

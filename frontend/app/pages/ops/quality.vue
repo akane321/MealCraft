@@ -137,7 +137,7 @@ onMounted(retryAll);
           <h2 id="release-title">{{ summary.release_version }}</h2>
           <p class="ops-muted">Schema {{ summary.schema_version ?? "unavailable" }} · generated {{ formatWhen(summary.generated_at) }}</p>
         </div>
-        <span class="ops-badge" :style="{ '--dot': summary.status === 'available' ? 'var(--sage)' : 'var(--warn)' }">
+        <span class="ops-badge" :class="summary.status === 'available' ? 'success' : 'warning'">
           {{ summary.status === "available" ? "Available" : "Degraded" }}
         </span>
       </section>
@@ -161,9 +161,10 @@ onMounted(retryAll);
           <p v-if="!summary.coverage" class="ops-muted">Coverage is unavailable from this release.</p>
         </div>
         <div v-if="summary.coverage" class="metric-grid">
-          <article class="ops-card metric"><span>Recipes</span><strong class="mc-num">{{ summary.coverage.released_recipes.toLocaleString() }}</strong></article>
-          <article class="ops-card metric"><span>Ingredients</span><strong class="mc-num">{{ summary.coverage.released_ingredients.toLocaleString() }}</strong></article>
-          <article class="ops-card metric"><span>Every release field</span><strong class="mc-num">{{ summary.coverage.recipes_with_every_field.toLocaleString() }}</strong><small>of {{ summary.coverage.released_recipes.toLocaleString() }} recipes</small></article>
+          <!-- The overview's stat cards: a tile, then the label and the value on one baseline. -->
+          <article class="metric mc-stat" data-tone="violet"><span class="mc-tile" aria-hidden="true"><UIcon name="i-lucide-book-open" /></span><span class="mc-stat-row"><span class="mc-stat-label">Recipes</span><strong class="mc-stat-value">{{ summary.coverage.released_recipes.toLocaleString() }}</strong></span></article>
+          <article class="metric mc-stat" data-tone="green"><span class="mc-tile" aria-hidden="true"><UIcon name="i-lucide-carrot" /></span><span class="mc-stat-row"><span class="mc-stat-label">Ingredients</span><strong class="mc-stat-value">{{ summary.coverage.released_ingredients.toLocaleString() }}</strong></span></article>
+          <article class="metric mc-stat" data-tone="sky"><span class="mc-tile" aria-hidden="true"><UIcon name="i-lucide-list-checks" /></span><span class="mc-stat-row"><span class="mc-stat-label">Every release field</span><strong class="mc-stat-value">{{ summary.coverage.recipes_with_every_field.toLocaleString() }}</strong></span><small class="mc-stat-note">of {{ summary.coverage.released_recipes.toLocaleString() }} recipes</small></article>
         </div>
       </section>
 
@@ -257,7 +258,7 @@ onMounted(retryAll);
               <thead><tr><th>Candidate</th><th>Title</th><th>Reason</th></tr></thead>
               <tbody>
                 <tr v-for="item in dropped.items" :key="item.candidate_id">
-                  <td class="mc-num">{{ item.candidate_id }}</td>
+                  <td class="cand">{{ item.candidate_id }}</td>
                   <td>{{ item.title }}</td>
                   <td><span class="reason-pill">{{ qualityReasonLabel(item.reason) }}</span></td>
                 </tr>
@@ -309,11 +310,9 @@ onMounted(retryAll);
 .section-heading { margin-bottom: 10px; }
 /* Coverage numbers as stat cards. */
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.metric { display: flex; flex-direction: column; gap: 6px; padding: 16px; box-shadow: var(--mc-shadow-sm); }
-.metric span { color: #52525b; font-size: 13px; line-height: 18px; font-weight: 500; }
-.metric strong { color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; }
-.metric small { color: #a1a1aa; font-size: 12px; line-height: 16px; }
-.evidence-grid { align-items: start; }
+/* Three equal cards in one row. */
+.evidence-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+.mc-stat .mc-stat-note { margin-top: -10px; }
 .intro { margin: -5px 0 16px; font-size: 12.5px; line-height: 1.5; }
 .share-list, .nutrition-stats { display: grid; gap: 13px; margin: 0; }
 .share-list div { display: grid; gap: 6px; }
@@ -321,10 +320,12 @@ onMounted(retryAll);
 .share-list dt b { color: #27272a; font-weight: 500; }
 .share-list dd { height: 6px; margin: 0; overflow: hidden; border-radius: 999px; background: #f0f0f2; }
 .share-list dd span { display: block; height: 100%; border-radius: inherit; background: #f59e0b; }
-.nutrition-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.nutrition-stats div { min-width: 0; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; }
-.nutrition-stats dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
-.nutrition-stats dd { margin: 4px 0 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; white-space: nowrap; }
+/* Nutrition: label and value rows. */
+.nutrition-stats { gap: 0; }
+.nutrition-stats div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f2f2f4; }
+.nutrition-stats div:last-child { border-bottom: 0; }
+.nutrition-stats dt { color: #52525b; font-size: 13px; line-height: 18px; }
+.nutrition-stats dd { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .review-number { margin: 4px 0 4px; color: var(--mc-strong); font-size: 30px; line-height: 36px; font-weight: 600; }
 .distribution-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .distribution-grid h3 { margin: 0 0 12px; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
@@ -354,6 +355,7 @@ onMounted(retryAll);
 .dropped-warning { display: grid; gap: 3px; padding: 12px 20px; border-top: 1px solid #fedf89; background: #fffaeb; color: #b54708; font-size: 12.5px; }
 .table-wrap { overflow-x: auto; border-top: 1px solid #f0f0f2; }
 td:first-child { white-space: nowrap; }
+.cand { color: #52525b; font: 12.5px/20px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: left; }
 .artifacts > p { margin: -6px 0 14px; font-size: 12.5px; }
 .artifacts .table-wrap { margin: 0 -20px -20px; }
 .artifacts code { color: #52525b; font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; }
