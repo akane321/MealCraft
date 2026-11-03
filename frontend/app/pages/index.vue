@@ -1039,6 +1039,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .topbar { height: 72px; padding: 0 40px; display: flex; align-items: center; gap: 18px; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: var(--c-ink); }
 .landing .brand { color: #fff; }
+.landing :is(.brand, .link, .hero, .lede, .starters .mc-pill, .trust) { text-shadow: 0 1px 12px rgba(14, 12, 10, 0.4); }
 .brand svg { width: 26px; height: 26px; }
 .brand > span { font-size: 22px; line-height: 28px; letter-spacing: -0.3px; }
 .spacer { flex: 1; }
