@@ -111,6 +111,8 @@ function packLabel(size: number | null, unit: string | null) {
         <h2>No recipe matches that. Try fewer words.</h2>
       </div>
       <ul class="cards">
+        <!-- While the first page loads, grey cards hold the grid's place. -->
+        <li v-for="n in (loadingRecipes && !recipes.length && !recipeError ? 8 : 0)" :key="`skeleton-${n}`" class="skeleton-card" aria-hidden="true"><i /><b /><b /></li>
         <li v-for="recipe in recipes" :key="recipe.id">
           <button type="button" class="card" @click="openSlug = recipe.slug">
             <HomeDishIcon class="icon" :title="recipe.title" :course="recipe.course ?? recipe.meal_type" :size="44" />
@@ -136,14 +138,19 @@ function packLabel(size: number | null, unit: string | null) {
       </form>
       <p v-if="productError" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ productError }}</p>
       <p v-if="products && !products.items.length" class="notice">FairPrice has nothing for “{{ products.query }}”.</p>
+      <div v-if="!products && !loadingProducts && !productError" class="mc-empty">
+        <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-shopping-basket" /></span></span></div>
+        <h2>Look up a grocery</h2>
+        <p>Search a grocery to see its FairPrice price.</p>
+      </div>
       <div v-if="products?.items.length" class="table-card">
         <table class="products">
-          <thead><tr><th>Product</th><th>Pack</th><th class="num">Price</th><th /></tr></thead>
+          <thead><tr><th>Product</th><th class="num">Pack</th><th class="num">Price</th><th><span class="visually-hidden">Shop</span></th></tr></thead>
           <tbody>
             <tr v-for="item in products.items" :key="item.external_id" :class="{ out: !item.in_stock }">
               <td>{{ item.name }}<small v-if="item.brand">{{ item.brand }}</small></td>
-              <td>{{ packLabel(item.package_size, item.package_unit) }}</td>
-              <td class="num">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock">Out of stock</small></td>
+              <td class="num">{{ packLabel(item.package_size, item.package_unit) }}</td>
+              <td class="num">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock" class="stock">Out of stock</small></td>
               <td><a :href="item.product_url" target="_blank" rel="noopener">FairPrice</a></td>
             </tr>
           </tbody>
@@ -176,13 +183,19 @@ function packLabel(size: number | null, unit: string | null) {
 .live { display: flex; gap: 6px; align-items: center; color: var(--t2); font-size: 13px; }
 .notice { color: #71717a; font-size: 14px; }
 .cards { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: var(--mc-shadow-xs); transition: border-color 160ms, box-shadow 160ms, transform 160ms; }
+.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: var(--mc-shadow-sm); transition: border-color 160ms, box-shadow 160ms, transform 160ms; }
 .card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: var(--mc-shadow-md); transform: translateY(-1px); }
 @media (prefers-reduced-motion: reduce) { .card:hover, .card:focus-visible { transform: none; } }
-.card .icon { margin-bottom: 8px; }
+.card .icon { margin-bottom: 6px; }
 .card .title { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
 .card small { color: #71717a; font-size: 12.5px; }
 .more { margin-top: 18px; }
+.skeleton-card { height: 132px; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: #fff; animation: mc-pulse 1.4s ease-in-out infinite; }
+.skeleton-card i { width: 40px; height: 40px; border-radius: 50%; background: #f4f4f5; }
+.skeleton-card b { width: 70%; height: 12px; border-radius: 6px; background: #f4f4f5; }
+.skeleton-card b + b { width: 45%; }
+@keyframes mc-pulse { 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-card { animation: none; } }
 /* The search button matches the 36px field. */
 .controls .secondary-button { min-height: 36px; height: 36px; padding: 0 16px; font-size: 14px; }
 .mc-alert, .mc-loading { margin: 0 0 16px; }
@@ -195,8 +208,9 @@ function packLabel(size: number | null, unit: string | null) {
 .products tbody tr:hover td { background: #fafafb; }
 .products td small { display: block; color: #71717a; font-size: 12px; line-height: 16px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.products .out td { color: #a1a1aa; }
-.products a { color: #7c3aed; font-size: 13px; font-weight: 500; text-decoration: none; }
+.products .out td { color: #71717a; }
+.products .stock { display: inline-flex !important; align-items: center; height: 20px; margin-top: 4px; padding: 0 8px; border-radius: 999px; background: #fffaeb; color: #b54708 !important; font-weight: 500; }
+.products a { color: #6d28d9; font-size: 13px; font-weight: 500; text-decoration: none; }
 .products a:hover { text-decoration: underline; }
 .source { margin: 10px 0 0; color: #a1a1aa; font-size: 12px; line-height: 16px; }
 </style>

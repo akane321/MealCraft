@@ -44,6 +44,7 @@ async function submit() {
 <template>
   <main class="page-width main-content auth-page">
     <section class="auth-card">
+      <NuxtLink to="/" class="auth-brand"><ShellMark />MealCraft</NuxtLink>
       <div class="audience" role="radiogroup" aria-label="Sign in as">
         <button type="button" role="radio" :aria-checked="audience === 'household'" :class="{ active: audience === 'household' }" @click="choose('household')">Household</button>
         <button type="button" role="radio" :aria-checked="audience === 'admin'" :class="{ active: audience === 'admin' }" @click="choose('admin')">Administrator</button>
@@ -104,16 +105,21 @@ async function submit() {
 
 <style scoped>
 /* One white card on the tinted page: a segmented audience switch, plain fields, a dark pill to sign in. */
-.auth-page { display: grid; place-items: start center; padding-block: 56px 0; }
-.auth-card { width: min(440px, 100%); padding: 28px 32px 32px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
-.auth-card h1 { margin: 0 0 6px; color: var(--mc-strong); font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em; }
-.auth-card > p { margin: 0; color: #71717a; font-size: 14px; line-height: 20px; }
-.audience { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 24px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
-.audience button { height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
-.audience button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
-.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 20px 0; border-bottom: 1px solid #f0f0f2; }
-.auth-tabs button { height: 40px; border: 0; background: transparent; color: #71717a; font-size: 14px; font-weight: 500; cursor: pointer; }
-.auth-tabs button.active { box-shadow: inset 0 -2px 0 #18181b; color: var(--mc-strong); }
+.auth-page { display: grid; place-items: start center; padding-block: 48px 0; }
+.auth-card { width: min(400px, 100%); padding: 28px 32px 32px; border: 1px solid #ececef; border-radius: 20px; background: #fff; box-shadow: var(--mc-shadow-md); }
+/* The brand tile and wordmark head the card. */
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
+.auth-brand .sb-mark { width: 40px; height: 40px; border-radius: 11px; }
+.auth-brand .sb-mark :deep(svg) { width: 24px; height: 27px; }
+.auth-card h1 { margin: 0 0 6px; text-align: center; color: var(--mc-strong); font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em; }
+.auth-card > p { margin: 0; text-align: center; color: #71717a; font-size: 14px; line-height: 20px; }
+/* Both switches are the one segmented control: the audience a small one at the top, Sign in / Register full width. */
+.audience, .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.audience { width: fit-content; margin: 0 auto 20px; }
+.auth-tabs { margin: 20px 0; }
+.audience button, .auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.audience button { height: 28px; font-size: 12.5px; }
+.audience button.active, .auth-tabs button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
 .auth-spacer { height: 20px; }
 form { display: grid; gap: 16px; }
 label, .field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
@@ -122,10 +128,10 @@ label, .field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-w
 .switch:hover { text-decoration: underline; }
 input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; color: #18181b; font: inherit; font-size: 14px; font-weight: 400; box-shadow: var(--mc-shadow-xs); transition: border-color 150ms, box-shadow 150ms; }
 input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
-.auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; margin-top: 4px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; margin-top: 4px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .auth-submit:hover:not(:disabled) { background: #27272a; }
 /* In flight: the same ink pill with a spinner, never the disabled grey. */
 .auth-submit:disabled { cursor: progress; }
-.auth-error { margin: 16px 0 0; color: #b42318 !important; }
+.auth-error { margin: 16px 0; color: #b42318 !important; }
 form .auth-error { margin: 0; }
 </style>

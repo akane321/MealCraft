@@ -106,12 +106,11 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
           <span class="mc-tile" data-tone="violet" aria-hidden="true"><UIcon name="i-lucide-calendar-days" /></span>
           <span class="text">
-          <span class="when">{{ planRange(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
+          <span class="when">{{ planRange(week.start_date, week.end_date) }}<span v-if="week.within_weekly_budget === false" class="tag warn">Over budget</span><span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
           <span class="meta">
             <template v-if="week.day_count">{{ daysLabel(week.day_count) }} · </template>planned {{ plannedAt(week.created_at) }} ·
             {{ week.household_size }} {{ week.household_size === 1 ? "person" : "people" }} ·
             groceries {{ formatSgd(week.purchase_total_sgd) }}
-            <template v-if="week.within_weekly_budget === false"> · over budget</template>
             <template v-if="details[week.id]"> · {{ cooked(details[week.id]!) }} of {{ details[week.id]!.days.length }} dishes cooked</template>
           </span>
           </span>
@@ -152,7 +151,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 <style scoped>
 .history { padding-block: 28px 48px; }
 .mc-loading, .mc-alert { margin: 0 0 16px; }
-.mc-empty .first { min-height: 36px; height: 36px; margin-top: 16px; padding: 0 16px; font-size: 13px; }
+.mc-empty .first { width: auto; min-height: 32px; height: 32px; align-self: center; margin-top: 16px; padding: 0 14px; font-size: 13px; }
 .weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .week { position: relative; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); overflow: hidden; transition: border-color 150ms; }
 .week:hover { border-color: #e1e1e5; }
@@ -166,6 +165,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 .text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-right: 44px; }
 .when { display: inline-flex; align-items: baseline; gap: 10px; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
 .tag { align-self: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; line-height: 20px; font-weight: 500; letter-spacing: 0; }
+.tag.warn { background: #fffaeb; color: #b54708; }
 .week.replaced .when { color: #71717a; }
 .meta { color: #71717a; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
 .chev { flex: none; width: 16px; height: 16px; color: #a1a1aa; transition: transform 150ms; }

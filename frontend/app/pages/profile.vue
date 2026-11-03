@@ -137,6 +137,24 @@ const pantryItems = ref<AvailableIngredientInput[]>([
   { normalized_name: "", quantity: null, unit: null },
 ]);
 const saveNotice = ref<string | null>(null);
+// What changed since the last plan, in words (the API sends the constraint's key).
+const CHANGE_LABELS: Record<string, string> = {
+  weekly_budget_sgd: "Weekly budget (S$)",
+  budget_per_meal_sgd: "Budget per meal (S$)",
+  requires_halal: "Halal only",
+  household_size: "Who's eating",
+  allergens: "Allergies",
+  excluded_ingredients: "Foods to avoid",
+  dietary_preferences: "Diet",
+  health_preferences: "Health goals",
+  max_cooking_time_minutes: "Longest cooking time",
+  nutrition_targets: "Nutrition goals",
+  max_sodium_mg_per_meal: "Sodium limit",
+  available_ingredients: "Already at home",
+  pricing_mode: "Prices",
+  max_uses_per_recipe: "Repeats",
+};
+const sentenceCase = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 // Which meals each day plans and each one's dishes (ADR-0046).
 const planShape = ref<PlanShape>(structuredClone(DEFAULT_SHAPE));
 // Equipment the kitchen lacks (layer 08): a dish that needs it is never planned. Empty: all at home.
@@ -161,6 +179,13 @@ const {
   replanLatest,
   save,
 } = useHouseholdProfile();
+// A refusal shows where the household is looking: the notice scrolls into view.
+const errorBox = ref<HTMLElement | null>(null);
+watch(errorMessage, async (message) => {
+  if (!message) return;
+  await nextTick();
+  errorBox.value?.scrollIntoView({ block: "center" });
+});
 
 // The dishes marked "Never again" (ADR-0087): the place to undo one that has left every week. A viewer only reads it.
 const config = useRuntimeConfig();
@@ -385,7 +410,7 @@ onMounted(async () => {
     </section>
 
     <div v-if="isLoading" class="notice-panel mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your household…</div>
-    <div v-if="errorMessage" class="notice-panel error-notice mc-alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</div>
+    <div v-if="errorMessage" ref="errorBox" class="notice-panel error-notice mc-alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</div>
     <div v-if="saveNotice" class="notice-panel success-notice"><UIcon name="i-lucide-circle-check" aria-hidden="true" />{{ saveNotice }}</div>
 
     <form class="profile-layout" @submit.prevent="saveProfile">
@@ -414,7 +439,7 @@ onMounted(async () => {
             <div>
               <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ formatPortions(draftSummary.planningHouseholdSize) }} {{ draftSummary.planningHouseholdSize === 1 ? "portion" : "portions" }} a meal</h2>
             </div>
-            <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add person</button>
+            <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember"><UIcon name="i-lucide-plus" aria-hidden="true" />Add person</button>
           </div>
 
           <div class="member-list">
@@ -518,7 +543,7 @@ onMounted(async () => {
             <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" placeholder="No limit"></label>
             <label><span>Budget per meal</span><input v-model.number="form.budgetPerMealSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
             <label><span>Budget per week</span><input v-model.number="form.weeklyBudgetSgd" type="number" min="0.01" step="0.01" placeholder="Optional S$"></label>
-            <label>
+            <label class="prices-field">
               <span>Prices</span>
               <select v-model="form.pricingMode">
                 <option value="fixture">Sample prices (stay the same)</option>
@@ -616,7 +641,7 @@ onMounted(async () => {
         <section class="profile-form-section">
           <div class="profile-section-heading compact-heading">
             <div><h2>Already at home</h2></div>
-            <button class="secondary-button" type="button" @click="addPantryItem">+ Add ingredient</button>
+            <button class="secondary-button" type="button" @click="addPantryItem"><UIcon name="i-lucide-plus" aria-hidden="true" />Add ingredient</button>
           </div>
           <p class="field-help">With an amount, it comes off the shopping list. Without one, dishes that use it are just more likely.</p>
           <div class="weekly-pantry-list">
@@ -654,6 +679,40 @@ onMounted(async () => {
       </section>
 
       <aside class="profile-sidebar">
+        <!-- The action first, then its result, then the summary, so a short window still shows the button. -->
+        <section class="profile-planning-card">
+          <h2>Plan your meals</h2>
+          <div class="plan-when">
+            <label><span>Starts</span><input v-model="form.planningStartDate" type="date" required></label>
+            <label>
+              <span>Days to plan</span>
+              <select v-model.number="dayCount">
+                <option v-for="days in DAY_OPTIONS" :key="days" :value="days">{{ days }} {{ days === 1 ? "day" : "days" }}{{ days === 7 ? " (a week)" : "" }}</option>
+              </select>
+            </label>
+          </div>
+          <p v-if="dayCount > 7" class="field-help">Two shopping trips: before day 1 and before day 8. Fresh meat, fish and greens are used within 3 days of the trip they're bought on.</p>
+          <button class="primary-button" type="button" :disabled="!current || isPlanning" :aria-busy="isPlanning || undefined" @click="generateFromProfile">
+            <UIcon v-if="isPlanning" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
+            {{ isPlanning ? "Planning…" : planWord }}
+          </button>
+          <p v-if="!current" class="field-help plan-reason"><UIcon name="i-lucide-info" aria-hidden="true" />Save your household first, then plan.</p>
+          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take a few minutes to plan.</p>
+          <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
+            Replan with these details
+          </button>
+          <p class="field-help">Replanning keeps the old plan in your history and notes what changed. Save your changes first.</p>
+        </section>
+
+        <section v-if="planResult" class="profile-change-card">
+          <span class="mc-tile" data-tone="green" aria-hidden="true"><UIcon name="i-lucide-check" /></span>
+          <h2>Your plan is ready</h2>
+          <p v-if="planResult.constraint_changes.length">What changed since the last plan:</p>
+          <ul v-if="planResult.constraint_changes.length" class="changes">
+            <li v-for="change in planResult.constraint_changes" :key="change.field" class="mc-chip">{{ CHANGE_LABELS[change.field] ?? sentenceCase(change.field.replaceAll("_", " ")) }}</li>
+          </ul>
+          <NuxtLink class="see-plan" to="/">See the plan<UIcon name="i-lucide-arrow-right" aria-hidden="true" /></NuxtLink>
+        </section>
         <section class="profile-summary-card">
           <h2>{{ formatPortions(homePortions) }} {{ homePortions === 1 ? "portion" : "portions" }} a meal</h2>
           <span v-if="current?.current.requires_halal" class="version-badge halal-chip">Halal</span>
@@ -677,39 +736,6 @@ onMounted(async () => {
           </dl>
         </section>
 
-        <section class="profile-planning-card">
-          <h2>Plan your meals</h2>
-          <div class="plan-when">
-            <label><span>Starts</span><input v-model="form.planningStartDate" type="date" required></label>
-            <label>
-              <span>Days to plan</span>
-              <select v-model.number="dayCount">
-                <option v-for="days in DAY_OPTIONS" :key="days" :value="days">{{ days }} {{ days === 1 ? "day" : "days" }}{{ days === 7 ? " (a week)" : "" }}</option>
-              </select>
-            </label>
-          </div>
-          <p v-if="dayCount > 7" class="field-help">Two shopping trips: before day 1 and before day 8. Fresh meat, fish and greens are used within 3 days of the trip they're bought on.</p>
-          <button class="primary-button" type="button" :disabled="!current || isPlanning" :aria-busy="isPlanning || undefined" @click="generateFromProfile">
-            <UIcon v-if="isPlanning" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
-            {{ isPlanning ? "Planning…" : planWord }}
-          </button>
-          <p v-if="!current" class="field-help">Save your household first, then plan.</p>
-          <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take a few minutes to plan.</p>
-          <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
-            Replan with these details
-          </button>
-          <p class="field-help">Replanning keeps the old plan in your history and notes what changed. Save your changes first.</p>
-        </section>
-
-        <section v-if="planResult" class="profile-change-card">
-          <span class="mc-tile" data-tone="green" aria-hidden="true"><UIcon name="i-lucide-check" /></span>
-          <h2>Your plan is ready</h2>
-          <p v-if="planResult.constraint_changes.length">What changed since the last plan:</p>
-          <ul v-if="planResult.constraint_changes.length">
-            <li v-for="change in planResult.constraint_changes" :key="change.field">{{ change.field.replaceAll("_", " ") }}</li>
-          </ul>
-          <NuxtLink class="see-plan" to="/">See the plan<UIcon name="i-lucide-arrow-right" aria-hidden="true" /></NuxtLink>
-        </section>
       </aside>
     </form>
   </main>
@@ -748,4 +774,10 @@ onMounted(async () => {
 .basics-group[open] > summary .chev { transform: rotate(90deg); }
 .basics-group > .choice-grid { margin-top: 10px; }
 .plan-when { display: grid; gap: 12px; }
+.plan-reason { display: flex; align-items: flex-start; gap: 6px; font-size: 12px !important; line-height: 16px !important; }
+.plan-reason .iconify { width: 14px; height: 14px; flex: none; margin-top: 1px; color: #a1a1aa; }
+.changes { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; list-style: none; }
+.changes .mc-chip { background: #f4f4f5; color: #52525b; }
+/* The long price choice takes two columns, so it reads whole at 1280. */
+.prices-field { grid-column: span 2; }
 </style>

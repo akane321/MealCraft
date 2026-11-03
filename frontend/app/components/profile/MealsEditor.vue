@@ -37,9 +37,9 @@ const HINT: Record<string, string> = {
   "One-bowl dish": "A dish that is a meal in one bowl, its rice or noodles included",
 };
 const ADD: { kind: DishKind; label: string }[] = [
-  { kind: "main", label: "+ Protein main" },
-  { kind: "vegetable", label: "+ Vegetable" },
-  { kind: "soup", label: "+ Soup" },
+  { kind: "main", label: "Protein main" },
+  { kind: "vegetable", label: "Vegetable" },
+  { kind: "soup", label: "Soup" },
 ];
 // Plain copies: structuredClone throws on Vue's reactive proxies.
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -189,11 +189,11 @@ const dishTotal = (list: MealRole[]) => (isStructured(list) ? plannedRoles(list,
         </ol>
         <div v-if="roles(meal)!.length < maxDishes(roles(meal)!)" class="add">
           <template v-if="meal === 'breakfast' && isStructured(roles(meal))">
-            <button type="button" class="secondary-button" @click="addDish(meal, 'main')">+ Breakfast dish</button>
+            <button type="button" class="secondary-button" @click="addDish(meal, 'main')"><UIcon name="i-lucide-plus" aria-hidden="true" />Breakfast dish</button>
           </template>
           <template v-else>
-            <button v-for="option in ADD" :key="option.kind" type="button" class="secondary-button" @click="addDish(meal, option.kind)">{{ option.label }}</button>
-            <button v-if="isStructured(roles(meal)) && !roles(meal)!.some(item => item.role_id === 'staple')" type="button" class="secondary-button" @click="addDish(meal, 'staple')">+ Staple</button>
+            <button v-for="option in ADD" :key="option.kind" type="button" class="secondary-button" @click="addDish(meal, option.kind)"><UIcon name="i-lucide-plus" aria-hidden="true" />{{ option.label }}</button>
+            <button v-if="isStructured(roles(meal)) && !roles(meal)!.some(item => item.role_id === 'staple')" type="button" class="secondary-button" @click="addDish(meal, 'staple')"><UIcon name="i-lucide-plus" aria-hidden="true" />Staple</button>
           </template>
         </div>
       </template>

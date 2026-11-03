@@ -51,8 +51,8 @@ test("a new household starts with the recommended full day, its dinner growing w
   await expect(page.getByText("Staple", { exact: true }).first()).toHaveAttribute("title", /Rice by default/);
 
   // Three at the table: the dinner takes a second protein main.
-  await page.getByRole("button", { name: "+ Add person" }).click();
-  await page.getByRole("button", { name: "+ Add person" }).click();
+  await page.getByRole("button", { name: "Add person" }).click();
+  await page.getByRole("button", { name: "Add person" }).click();
   await expect(page.getByText("Dinner for 3 at the table:")).toBeVisible();
   await expect(page.getByText("2 protein mains, 1 vegetable dish, soup and a staple")).toBeVisible();
   await expectSidebarReaches(page, "Plan this week");
