@@ -129,7 +129,9 @@ def read_filled(path: Path) -> list[dict]:
 def table(title: str, counted: dict, label) -> list[str]:
     lines = [
         "",
-        f"| {title} | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | Unrecognized, refill |",
+        f"| {title} | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | "
+        "Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | "
+        "Unrecognized, refill |",
         "| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |",
     ]
     for name, c in counted.items():
@@ -139,7 +141,8 @@ def table(title: str, counted: dict, label) -> list[str]:
             f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} | {interval(c['wilson95'])} "
             f"| {c['determinate_checked']} | {c['determinate_agree']} | "
             f"{determinate_share} "
-            f"| {interval(c['determinate_wilson95'])} | {c['unchecked']} | {c['checked_without_value']} | {c['unrecognized']} |"
+            f"| {interval(c['determinate_wilson95'])} | {c['unchecked']} | "
+            f"{c['checked_without_value']} | {c['unrecognized']} |"
         )
     return lines
 
@@ -149,9 +152,11 @@ def markdown(result: dict, path: Path, sample: dict) -> str:
         f"# Sample accuracy of {sample['batch']}",
         "",
         f"Filled sample: SHA-256 `{hashlib.sha256(path.read_bytes()).hexdigest()}`; drawn: `sample.json` "
-        f"({sample['size']} recipes, seed {sample['seed']}). This sample draws {sample['size']} recipes from the 116-recipe "
+        f"({sample['size']} recipes, seed {sample['seed']}). This sample draws {sample['size']} recipes "
+        "from the 116-recipe "
         "model-completed `llm-v3-20261103` batch, not all v3 tags. AI assisted with the initial comparison and draft "
-        "discrepancy notes; a human reviewer checked each source recipe and tag, entered/confirmed the value, and marked "
+        "discrepancy notes; a human reviewer checked each source recipe and tag, "
+        "entered/confirmed the value, and marked "
         "the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from "
         "the determinate denominator, while the all-checked result remains shown.",
     ]
