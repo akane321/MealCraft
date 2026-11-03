@@ -65,7 +65,7 @@ onMounted(load);
 
 <style scoped>
 /* A thin strip along the top edge, where every page leaves room, so it never covers a title. */
-.simulated-clock { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; margin: 0; padding: 1px 12px; background: #2b2a33; color: #ffd76a; font-size: 11px; line-height: 16px; font-weight: 800; text-align: center; pointer-events: none; }
+.simulated-clock { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; height: 16px; margin: 0; padding: 0 12px; border-bottom: 1px solid #fedf89; background: #fffaeb; color: #b54708; font: 500 11px/15px var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); text-align: center; pointer-events: none; }
 /* Sidebar and the white panel, both the height of the window; the panel scrolls. */
 .product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .product-frame { height: calc(100vh - 16px); overflow-y: auto; }

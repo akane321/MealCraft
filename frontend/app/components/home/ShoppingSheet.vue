@@ -82,6 +82,25 @@ footer { margin-top: 24px; padding-top: 12px; border-top: 1.5px solid #1d1b16; f
 footer p { margin: 4px 0; }
 .sum { display: flex; justify-content: space-between; align-items: baseline; color: #1d1b16; font-size: 14px; }
 .sum strong { font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 24px; font-weight: 700; }
+/* On screen the sheet is a plain white panel; print keeps the paper look above. */
+@media screen {
+  .sheet { padding: 24px 28px; background: #fff; color: #27272a; font-family: var(--sans); }
+  header p { color: #71717a; font-size: 13px; }
+  h2 { margin: 2px 0 12px; color: #0f0f12; font-family: var(--sans); font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; }
+  h2.trip { margin: 20px 0 0; font-size: 16px; line-height: 22px; }
+  h2.store, h3 { margin: 18px 0 4px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  h2.store span { font-variant-numeric: tabular-nums; }
+  li { min-height: 40px; border-top: 1px solid #f2f2f4; font-size: 14px; line-height: 20px; }
+  .box { width: 14px; height: 14px; border: 1px solid #d4d4d8; border-radius: 4px; }
+  .name { color: #18181b; font-weight: 500; }
+  .name small, .pack { color: #71717a; font-size: 12px; font-weight: 400; }
+  .name a { color: #6d28d9; text-decoration: none; }
+  .price { color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .unpriced { color: #52525b; }
+  footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ececef; color: #71717a; }
+  .sum { color: #18181b; }
+  .sum strong { font-family: var(--sans); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+}
 @media print {
   section { break-inside: avoid; }
   h3 { break-after: avoid; }

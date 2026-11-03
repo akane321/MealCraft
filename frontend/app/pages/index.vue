@@ -729,10 +729,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <HomePreferencesEditor v-else :value="copyPlanningPreferences(constraints?.planning_preferences)" :disabled="isLoading" @save="savePreferences" @cancel="editingPreferences = false" />
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading || editingPreferences || !canGiveFeedback" @click="agent.confirm()">
-                  {{ labels.isWeek ? (isLoading ? "Planning your week…" : "Plan my week") : (isLoading ? "Making your plan…" : "Make this plan") }}
+                <button type="button" class="mc-btn primary" :disabled="isLoading || editingPreferences || !canGiveFeedback" :aria-busy="isLoading || undefined" @click="agent.confirm()">
+                  <UIcon v-if="isLoading" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />{{ labels.isWeek ? (isLoading ? "Planning your week…" : "Plan my week") : (isLoading ? "Making your plan…" : "Make this plan") }}
                 </button>
-                <p v-if="isLoading" class="mc-small foot-note" role="status">A large household on a tight budget can take a few minutes to plan.</p>
+                <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 
@@ -755,15 +755,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
               @open-recipe="recipeSlug = $event"
             />
 
-            <div v-if="readOnly" class="card mc-card mc-rise" :aria-label="`A replaced ${labels.noun}`">
-              <div class="card-body"><p>You planned these days again, so this plan was replaced. It stays here to read; changes go to your current plan.</p></div>
+            <div v-if="readOnly" class="card mc-card notice mc-rise" :aria-label="`A replaced ${labels.noun}`">
+              <div class="card-body"><span class="mc-tile" data-tone="amber" aria-hidden="true"><UIcon name="i-lucide-history" /></span><p>You planned these days again, so this plan was replaced. It stays here to read; changes go to your current plan.</p></div>
               <div class="card-foot">
                 <button type="button" class="mc-btn primary" @click="openCurrentWeek">Open the current {{ labels.noun }}</button>
               </div>
             </div>
 
-            <div v-else-if="weekEnded && plan && !isLoading" class="card mc-card mc-rise">
-              <div class="card-body"><p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me what you'd like next and I'll plan a new one.</p></div>
+            <div v-else-if="weekEnded && plan && !isLoading" class="card mc-card notice mc-rise">
+              <div class="card-body"><span class="mc-tile" data-tone="sky" aria-hidden="true"><UIcon name="i-lucide-calendar-check" /></span><p>This plan ended on {{ formatPlanDate(plan.end_date, { weekday: "long", day: "numeric", month: "short" }) }}. Tell me what you'd like next and I'll plan a new one.</p></div>
             </div>
 
             <article v-if="session?.pending_replan && shapePreview" class="swap-card mc-card mc-rise" aria-label="Proposed change to your meals">
@@ -825,11 +825,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
             </article>
 
             <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat mc-small">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
-            <div v-if="stamp" class="stamp" role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>Change made</div>
+            <div v-if="stamp" class="stamp" role="status"><UIcon name="i-lucide-check" aria-hidden="true" />Change made</div>
             <div v-if="pending" class="me mc-rise">{{ pending }}</div>
             <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
-            <p v-if="pending" class="mc-small wait" role="status">Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
-            <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
+            <p v-if="pending" class="mc-small wait wait-note" role="status"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
+            <p v-if="errorMessage" class="send-error" role="alert">{{ errorMessage }}</p>
           </div>
         </section>
 
@@ -995,10 +995,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
     <div v-if="plan" v-show="previewOpen" ref="preview" class="mc-sheet-overlay" role="dialog" aria-modal="true" aria-label="Shopping list preview">
       <div class="sheet-frame">
         <HomeShoppingSheet class="mc-print-sheet" :estimate="plan.grocery_estimate" :range-label="rangeLabel" :household-size="plan.household_size" />
-      </div>
-      <div class="sheet-actions">
-        <button type="button" class="mc-btn secondary" @click="previewOpen = false">Back</button>
-        <button type="button" class="mc-btn primary" @click="exportPdf">Export PDF</button>
+        <div class="sheet-actions">
+          <button type="button" class="mc-btn secondary" @click="previewOpen = false">Back</button>
+          <button type="button" class="mc-btn primary" @click="exportPdf">Export PDF</button>
+        </div>
       </div>
     </div>
     <div class="mc-grain" aria-hidden="true" />
@@ -1085,6 +1085,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .card-body p { margin: 0; }
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--c-line-soft); }
 .card-foot .foot-note { flex-basis: 100%; margin: 0; }
+.wait-note { display: flex; align-items: flex-start; gap: 8px; color: #71717a; font-size: 13px; line-height: 20px; }
+.wait-note .mc-spin { margin-top: 3px; color: #a1a1aa; }
+/* Notices (a replaced or ended plan): a white card with a small tile beside the copy. */
+.notice { border-radius: 14px; }
+.notice .card-body { flex-direction: row; align-items: flex-start; gap: 12px; padding: 14px 16px; }
+.notice .mc-tile { width: 28px; height: 28px; border-radius: 8px; }
+.notice .mc-tile > * { width: 16px; height: 16px; }
+.notice .card-body p { padding-top: 4px; color: #27272a; }
 
 /* Empty plan: a centred greeting, the prompt box and the starter cards, over soft glows. */
 .chat.is-empty { overflow-y: auto; }
@@ -1116,11 +1124,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .to { font-family: var(--font-display); font-weight: 600; font-size: 16px; line-height: 22px; color: var(--mc-strong); }
 .tiles { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); align-items: center; gap: 8px; padding: 4px 16px 14px; }
 .tiles.single { grid-template-columns: minmax(0, 1fr); }
-.tile-dish { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: 600; }
+.tile-dish { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px; border: 1px solid #ececef; border-radius: 12px; text-align: center; color: #18181b; font-size: 13px; font-weight: 500; }
 .tile-dish.before { background: #fafafa; }
 .tiles:not(.single) .tile-dish.before { opacity: 0.75; }
 .tile-dish.before s { color: var(--c-muted); }
-.tile-dish.after { background: var(--c-ok-bg); box-shadow: inset 0 0 0 1.5px var(--c-green); }
+.tile-dish.after { border-color: #abefc6; background: #f6fef9; }
 .arrow { width: 24px; height: 24px; fill: none; stroke: #a1a1aa; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .shape-body { display: flex; align-items: center; gap: 16px; padding: 4px 16px 14px; }
 .plates { display: flex; align-items: center; flex: none; }
@@ -1129,17 +1137,20 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .shape-days b { display: inline-block; min-width: 34px; color: var(--c-ink); font-weight: 600; }
 .delta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--c-line-soft); background: #fafafa; font-size: 13px; color: var(--c-neutral-text); }
 .delta .mc-chip { margin-left: auto; }
+.delta .mc-chip.warn { background: #fffaeb; color: #b54708; }
 .caveat { margin: 0; }
 
-.stamp { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--c-ok-bg); color: var(--c-green-text); font-size: 12.5px; font-weight: 500; animation: mc-rise 420ms var(--ease) both; }
-.stamp svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.stamp { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--c-ok-bg); color: var(--c-green-text); font-size: 12.5px; font-weight: 500; animation: mc-rise 420ms var(--ease) both; }
+.stamp .iconify { width: 14px; height: 14px; }
 .typing { display: flex; gap: 5px; padding: 8px 0; }
 .wait { margin: -12px 0 0; }
 .typing span { width: 6px; height: 6px; border-radius: 999px; background: #a1a1aa; animation: mc-dot 1.2s ease-in-out infinite; }
 .typing span:nth-child(2) { animation-delay: 150ms; }
 .typing span:nth-child(3) { animation-delay: 300ms; }
 @keyframes mc-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-.error { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--c-allergy-bg); color: var(--c-allergy-text); font-size: 13px; }
+/* Named apart from PanelState's .error root, which this scoped rule would also reach. */
+.send-error { margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
+.send-error::before { content: ""; width: 16px; height: 16px; flex: none; margin-top: 2px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d92d20' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") no-repeat center / 16px; }
 
 /* Composer: one rounded card, the message on top and a row of chips with a round dark send below. */
 .composer-wrap { position: relative; flex: none; padding: 0 28px 10px; }
@@ -1152,12 +1163,13 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer :focus-visible { outline: 0; }
 .composer-foot { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 32px; }
 /* The chips keep one row: a longer set scrolls sideways under a fade rather than wrap. */
-.tools, .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
-.after { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
-.tools::-webkit-scrollbar, .after::-webkit-scrollbar { display: none; }
-.tools > *, .after > * { flex: none; }
-.after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
-.after .context .iconify { width: 14px; height: 14px; color: #71717a; }
+/* .after is scoped to the composer: the swap card has its own .tile-dish.after. */
+.tools, .composer-foot .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.composer-foot .after { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+.tools::-webkit-scrollbar, .composer-foot .after::-webkit-scrollbar { display: none; }
+.tools > *, .composer-foot .after > * { flex: none; }
+.composer-foot .after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
+.composer-foot .after .context .iconify { width: 14px; height: 14px; color: #71717a; }
 .chat.is-empty .composer { max-width: 760px; min-height: 112px; padding: 14px 12px 12px 16px; border-radius: 18px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -16px rgba(16, 16, 20, 0.14); }
 .chat.is-empty .composer input { height: 44px; }
 .tool { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
@@ -1194,8 +1206,9 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 
 /* Shopping list preview */
-.mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; background: rgba(42, 42, 72, 0.45); animation: mc-rise 420ms var(--ease) both; }
-.sheet-frame { width: min(680px, 100%); max-height: calc(100vh - 160px); overflow-y: auto; border-radius: 6px; box-shadow: 0 8px 30px rgba(42, 42, 72, 0.25); }
-.sheet-actions { display: flex; gap: 10px; }
-.sheet-actions button { min-width: 140px; }
+.mc-sheet-overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; animation: mc-rise 420ms var(--ease) both; }
+/* One white panel: the list scrolls, Back and Export PDF stay at its foot. */
+.sheet-frame { width: min(680px, 100%); max-height: calc(100vh - 64px); overflow-y: auto; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.sheet-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid #f0f0f2; background: #fff; }
+@media print { .sheet-actions { display: none; } }
 </style>
