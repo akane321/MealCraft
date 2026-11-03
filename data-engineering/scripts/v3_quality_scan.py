@@ -793,7 +793,7 @@ CAVEATS = """\
 - Counts are pattern matches, not defect rates. A recipe can match and still be correct, and a wrong recipe can match nothing.
 - The trivial patterns P1b (salt), P1c (pepper), P1d (greasing fat) and P4c (juice or zest at whole-fruit weight) are not defects by themselves: the missing amount is tiny. Benign water (P1a2 cooking-medium water, P1f2 ice bath) is not a defect either. P8c (oven, no time) often has a doneness cue instead. That is why the core union leaves them out.
 - Precision was only eyeballed on small samples by one reader when the rules were written; this tool does not measure it.
-- In an earlier comparison against the human manual check (PR #421) about 30% of the recipes humans called correct were also hit, mostly by water, serve-with and greasing patterns. That comparison was made outside this tool and is not recomputed here.
+- In an earlier comparison against the 2026-10-25 manual check of release v2.2 (`data-engineering/docs/manual-check-20261025/`) about 30% of the recipes humans called correct were also hit, mostly by water, serve-with and greasing patterns. That comparison was made outside this tool and is not recomputed here.
 - Hits are a worklist, not a verdict: read the evidence before changing a recipe.
 - The planning-pool gates (price, completeness, meal role) need the backend and are not computed here, so there is no plannable column.
 """
