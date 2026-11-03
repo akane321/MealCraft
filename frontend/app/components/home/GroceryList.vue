@@ -72,29 +72,30 @@ function toggle(name: string) {
 </template>
 
 <style scoped>
-.source { position: sticky; top: 0; z-index: 1; margin: 0; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--c-line-soft); background: #fff; font-size: 12px; line-height: 16px; }
+.source { position: sticky; top: 0; z-index: 1; margin: 0; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--c-line-soft); background: #fff; color: #52525b; font-size: 12.5px; line-height: 16px; }
 .source i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--c-dot); }
 .source i.ok { background: var(--c-green); }
 .source i.warn { background: var(--c-amber); }
-.source b { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.source b { min-width: 0; overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .list { padding: 4px 16px 12px; }
-.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
+.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.aisle .mc-num { color: #a1a1aa; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
 .item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 2px 0; cursor: pointer; }
 .what { display: flex; flex-direction: column; min-width: 0; }
-.item input { appearance: none; width: 16px; height: 16px; margin: 0; border-radius: 5px; border: 1px solid var(--c-border); background: #fff; display: grid; place-items: center; cursor: pointer; }
-.item input:checked { background: var(--c-green); border-color: var(--c-green); }
-.item input:checked::after { content: ""; width: 7px; height: 4px; border: solid #fff; border-width: 0 0 2px 2px; transform: rotate(-45deg) translate(1px, -1px); }
 .p-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.p { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fresh { flex: none; padding: 0 6px; border-radius: 999px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 11px; line-height: 16px; font-weight: 700; }
-.store { margin: 8px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
-.shop-link { flex: none; font-size: 11px; line-height: 16px; font-weight: 700; color: var(--c-info-text); text-decoration: underline; }
-.trip { margin: 10px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
-.s { font-size: 12px; line-height: 16px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.s.stale { color: var(--c-amber-text); }
-.c { font-weight: 800; }
-.item:has(input:checked) .p { color: var(--c-muted); text-decoration: line-through; }
-.unmapped { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.basics { margin: 12px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }
+.p { min-width: 0; color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fresh { flex: none; padding: 0 6px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11px; line-height: 16px; font-weight: 500; }
+.store { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
+.store .mc-num { font-size: 13px; font-weight: 600; }
+.shop-link { flex: none; color: #7c3aed; font-size: 12px; line-height: 16px; font-weight: 500; text-decoration: none; }
+.shop-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.trip { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
+.trip .mc-num { font-size: 13px; font-weight: 600; }
+.s { color: #71717a; font-size: 12px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s.stale { color: var(--c-amber-text); font-weight: 400; }
+.c { color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
+.item:has(input:checked) .p { color: #a1a1aa; text-decoration: line-through; }
+.unmapped { margin: 0; color: #71717a; font-size: 12px; line-height: 16px; }
+.basics { margin: 12px 0 0; padding: 8px 10px; border: 1px solid #d1e9ff; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }
 </style>

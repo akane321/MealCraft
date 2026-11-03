@@ -81,6 +81,20 @@ const removeMessage = computed(() => {
   return item.plan_id ? `${base} The plan it made stays in Past plans.` : base;
 });
 
+// A row near the foot of the list opens its menu upward, so the scrolling list never cuts it off.
+const MENU_HEIGHT = 112;
+const menuUp = ref(false);
+function toggleMenu(item: AgentSession, event: MouseEvent) {
+  if (menuFor.value === item.id) {
+    menuFor.value = null;
+    return;
+  }
+  const row = (event.currentTarget as HTMLElement).closest(".row");
+  const list = row?.closest(".groups");
+  menuUp.value = Boolean(row && list && list.getBoundingClientRect().bottom - row.getBoundingClientRect().bottom < MENU_HEIGHT);
+  menuFor.value = item.id;
+}
+
 // A click anywhere else closes an open menu.
 function onDocument(event: MouseEvent) {
   if (!(event.target as HTMLElement).closest(".row-menu, .more")) menuFor.value = null;
@@ -116,10 +130,10 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
               <span class="s" :class="statusOf(item).tone" :title="statusOf(item).label" aria-hidden="true" />
               <span class="visually-hidden">{{ statusOf(item).label }}</span>
             </button>
-            <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="menuFor = menuFor === item.id ? null : item.id">
+            <button type="button" class="more" :aria-label="`Options for ${titleOf(item)}`" aria-haspopup="menu" :aria-expanded="menuFor === item.id" @click.stop="toggleMenu(item, $event)">
               <UIcon name="i-lucide-ellipsis" aria-hidden="true" />
             </button>
-            <div v-if="menuFor === item.id" class="row-menu mc-card" role="menu">
+            <div v-if="menuFor === item.id" class="row-menu mc-card" :class="{ up: menuUp }" role="menu">
               <button type="button" role="menuitem" @click="startRename(item)">Rename</button>
               <button type="button" role="menuitem" @click="togglePin(item)">{{ item.pinned_at ? "Unpin" : "Pin to top" }}</button>
               <button type="button" role="menuitem" class="danger" @click="askRemove(item)">Delete…</button>
@@ -135,8 +149,8 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocument));
 <style scoped>
 .convos { min-height: 0; display: flex; flex-direction: column; gap: 6px; }
 .empty { margin: 4px 10px; color: #a1a1aa; }
-.groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; -webkit-mask-image: linear-gradient(#000 calc(100% - 6px), transparent); mask-image: linear-gradient(#000 calc(100% - 6px), transparent); }
-h3 { margin: 0; padding: 0 10px 2px; font-size: 11px; line-height: 14px; font-weight: 500; color: #a1a1aa; }
+.groups { min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 0; -webkit-mask-image: linear-gradient(#000 calc(100% - 6px), transparent); mask-image: linear-gradient(#000 calc(100% - 6px), transparent); }
+.convos h3 { margin: 0; padding: 10px 10px 4px; color: #9a9aa3; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 .row { position: relative; display: flex; align-items: center; height: 36px; border: 1px solid transparent; border-radius: 10px; transition: background 150ms, border-color 150ms; }
 .row:hover, .row:focus-within { background: #efeff1; }
@@ -153,9 +167,11 @@ ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-colum
 .row:hover .more, .row:focus-within .more, .more[aria-expanded="true"] { opacity: 1; }
 .more:hover { background: #f4f4f5; color: #18181b; }
 .more .iconify { width: 16px; height: 16px; }
-.row-menu { position: absolute; z-index: 20; top: 36px; right: 0; min-width: 160px; padding: 4px; display: grid; border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -12px rgba(16, 16, 20, 0.16); }
+.row-menu { position: absolute; z-index: 20; top: 36px; right: 0; min-width: 160px; padding: 4px; display: grid; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.row-menu.up { top: auto; bottom: 100%; }
 .row-menu button { height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #27272a; font: inherit; font-size: 13.5px; text-align: left; }
 .row-menu button:hover, .row-menu button:focus-visible { background: #f4f4f5; }
 .row-menu .danger { color: #b42318; }
+.row-menu .danger:hover, .row-menu .danger:focus-visible { background: #fef3f2; }
 .rename { flex: 1; min-width: 0; margin: 3px; height: 30px; padding: 0 8px; border: 1px solid #a78bfa; border-radius: 8px; outline: 0; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15); font: inherit; font-size: 13.5px; }
 </style>

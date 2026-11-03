@@ -31,10 +31,10 @@ const titleCase = (value: string) => value[0]!.toUpperCase() + value.slice(1);
           <select v-model="boost.flavor" :aria-label="`Flavour ${index + 1}`"><option v-for="flavor in flavors" :key="flavor" :value="flavor">{{ titleCase(flavor) }}</option></select>
         </label>
         <label>Days for flavour {{ index + 1 }}
-          <select v-model="boost.weekdays" :aria-label="`Days for flavour ${index + 1}`" multiple size="3"><option v-for="day in days" :key="day" :value="day">{{ titleCase(day) }}</option></select>
+          <select v-model="boost.weekdays" :aria-label="`Days for flavour ${index + 1}`" multiple size="4"><option v-for="day in days" :key="day" :value="day">{{ titleCase(day) }}</option></select>
         </label>
         <label>Meals for flavour {{ index + 1 }}
-          <select v-model="boost.meal_types" :aria-label="`Meals for flavour ${index + 1}`" multiple size="3"><option v-for="meal in meals" :key="meal" :value="meal">{{ titleCase(meal) }}</option></select>
+          <select v-model="boost.meal_types" :aria-label="`Meals for flavour ${index + 1}`" multiple size="4"><option v-for="meal in meals" :key="meal" :value="meal">{{ titleCase(meal) }}</option></select>
         </label>
         <button type="button" class="mc-btn secondary sm" :aria-label="`Remove flavour ${index + 1}`" @click="draft.flavor_boosts.splice(index, 1)">Remove</button>
       </div>
@@ -49,11 +49,19 @@ const titleCase = (value: string) => value[0]!.toUpperCase() + value.slice(1);
 </template>
 
 <style scoped>
-.preference-editor { display: grid; gap: 12px; margin-top: 12px; }
-fieldset { border: 1px solid #deded5; border-radius: 8px; padding: 12px; }
-legend { font-weight: 600; padding: 0 4px; }
-fieldset > label { display: inline-flex; align-items: center; gap: 5px; margin: 4px 12px 4px 0; }
-.flavor-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin-bottom: 12px; }
-.flavor-row label { display: grid; gap: 5px; font-size: .85rem; }
-select { padding: 5px; border: 1px solid #deded5; border-radius: 4px; background: white; font: inherit; }
+.preference-editor { display: grid; gap: 12px; margin-top: 4px; }
+fieldset { margin: 0; padding: 12px 16px 14px; border: 1px solid #ececef; border-radius: 12px; }
+legend { padding: 0 4px; margin-left: -4px; color: #0f0f12; font-size: 13px; line-height: 18px; font-weight: 600; }
+fieldset > label { display: inline-flex; align-items: center; gap: 8px; margin: 4px 16px 4px 0; color: #27272a; font-size: 14px; }
+fieldset .mc-small { margin: 6px 0 0; font-size: 12px; line-height: 16px; }
+/* Each label gets two lines above its field, so the three fields start level; Remove sits at the foot. */
+.flavor-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: start; gap: 10px; margin-bottom: 12px; }
+.flavor-row label { display: grid; grid-template-rows: 32px auto; align-items: end; gap: 4px; min-width: 0; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.flavor-row > button { align-self: end; }
+select { width: 100%; height: 32px; padding: 0 8px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; color: #18181b; font: inherit; font-size: 13px; }
+select[multiple] { height: auto; padding: 4px; overflow-y: auto; }
+select[multiple] option { padding: 3px 8px; border-radius: 6px; }
+select[multiple] option:checked { background: #f5f3ff linear-gradient(#f5f3ff, #f5f3ff); color: #6d28d9; }
+select:focus-visible { outline: 0; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+fieldset:disabled { opacity: 0.6; }
 </style>
