@@ -143,7 +143,7 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
 </script>
 
 <template>
-  <div class="ops-page">
+  <div class="data-pane">
     <div class="filters">
       <label class="grow">Search ingredient or product <input v-model="filters.q" type="search" placeholder="e.g. agar or Swallow"></label>
       <label>Store
@@ -163,17 +163,17 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
         </select>
       </label>
     </div>
-    <p class="ops-muted small">The reviewed snapshot keeps no per-product match score: every mapping in it passed review at 0.6 confidence or more, so the review status is shown instead.</p>
+    <p class="data-note">The reviewed snapshot keeps no per-product match score: every mapping in it passed review at 0.6 confidence or more, so the review status is shown instead.</p>
 
     <div v-if="listFailed" class="ops-card" role="alert">
       <p class="ops-error">The mapping list couldn't be loaded.</p>
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading mappings…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted">No mapping matches.</p>
+    <p v-else-if="!page.items.length" class="ops-card ops-muted ops-empty">No mapping matches.</p>
     <section v-else class="ops-card table-card" aria-label="Product mappings">
       <table>
-        <thead><tr><th>Ingredient</th><th>Product</th><th>Price</th><th>Package</th><th>Review</th><th>Source</th></tr></thead>
+        <thead><tr><th>Ingredient</th><th>Product</th><th class="mc-num">Price</th><th class="mc-num">Package</th><th>Review</th><th>Source</th></tr></thead>
         <tbody>
           <tr v-for="item in page.items" :key="item.ingredient" :class="{ current: item.ingredient === selected?.ingredient }">
             <td><button type="button" class="link" @click="open(item)">{{ item.display_name ?? item.ingredient }}</button><span class="ops-muted sub">{{ item.ingredient }}</span></td>
@@ -182,8 +182,12 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
               <td class="mc-num">S${{ cheapest(item)!.price_sgd.toFixed(2) }}</td>
               <td class="mc-num">{{ cheapest(item)!.package_grams }} g</td>
             </template>
-            <td v-else colspan="3" class="ops-muted">{{ humanKey(item.status) }}</td>
-            <td>{{ item.review_status ? humanKey(item.review_status) : "—" }}</td>
+            <template v-else>
+              <td><span class="ops-badge neutral">{{ humanKey(item.status) }}</span></td>
+              <td class="mc-num empty-cell">—</td>
+              <td class="mc-num empty-cell">—</td>
+            </template>
+            <td><span v-if="item.review_status" class="ops-badge" :class="item.review_status === 'reviewed' ? 'success' : item.review_status === 'proposed' ? 'warning' : 'neutral'">{{ humanKey(item.review_status) }}</span><template v-else>—</template></td>
             <td>{{ item.source === "console" ? "Console" : "Snapshot" }}</td>
           </tr>
         </tbody>
@@ -203,37 +207,39 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
             <h2 id="mapping-title" class="mc-serif">{{ selected.display_name ?? selected.ingredient }}</h2>
             <p class="ops-muted">{{ selected.ingredient }} · {{ humanKey(selected.status) }} · {{ selected.source === "console" ? "changed in the console" : "reviewed snapshot" }}</p>
           </div>
-          <button type="button" class="mc-pill" @click="selected = null">Close</button>
+          <button type="button" class="mc-close" aria-label="Close" @click="selected = null"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
         </header>
 
         <p v-if="message" class="note" role="status">{{ message }}</p>
         <p v-if="failure" class="ops-error" role="alert">{{ failure }}</p>
 
         <section>
-          <h3>Products ({{ selected.products.length }})</h3>
+          <div class="sec-head">
+            <h3>Products ({{ selected.products.length }})</h3>
+            <button v-if="selected.status !== 'removed'" type="button" class="mc-pill sm danger" @click="pending = 'remove'">Remove mapping</button>
+          </div>
           <p v-if="!selected.products.length" class="ops-muted">None.</p>
-          <ul v-else class="rows">
+          <ul v-else class="rows prod-rows">
             <li v-for="product in selected.products" :key="product.external_id">
               <span><a :href="product.product_url" target="_blank" rel="noopener">{{ product.name }}</a><span class="ops-muted sub">{{ product.package_grams }} g · {{ product.package_grams_basis ?? "—" }}{{ product.in_stock ? "" : " · out of stock" }}</span></span>
               <span class="mc-num">S${{ product.price_sgd.toFixed(2) }}</span>
-              <button v-if="selected.products.length > 1" type="button" class="mc-pill" @click="pickCurrent(product)">Use only this</button>
+              <button v-if="selected.products.length > 1" type="button" class="mc-pill sm" @click="pickCurrent(product)">Use only this</button>
             </li>
           </ul>
           <p class="ops-muted small">The estimator buys the in-stock product that costs least for the quantity a recipe needs.</p>
-          <div v-if="selected.status !== 'removed'" class="actions"><button type="button" class="mc-pill danger" @click="pending = 'remove'">Remove mapping</button></div>
         </section>
 
         <form class="edit" @submit.prevent="find">
           <h3>Change the product</h3>
           <label>Search {{ storeName }} <input v-model="search.q" required minlength="2" maxlength="100"></label>
           <fieldset><label><input v-model="search.live" type="checkbox"> Live {{ storeName }} (otherwise {{ filters.retailer !== "fairprice" ? "only saved searches, often nothing" : "the stored fixture" }})</label></fieldset>
-          <button type="submit" class="mc-pill" :disabled="searching || search.q.trim().length < 2">{{ searching ? "Searching…" : "Search" }}</button>
+          <button type="submit" class="mc-pill" :disabled="searching || search.q.trim().length < 2" :aria-busy="searching">{{ searching ? "Searching…" : "Search" }}</button>
           <p v-if="results && !results.length" class="ops-muted">Nothing found.</p>
-          <ul v-else-if="results" class="rows" aria-label="Search results">
+          <ul v-else-if="results" class="rows prod-rows" aria-label="Search results">
             <li v-for="product in results" :key="product.external_id">
               <span>{{ product.name }}<span class="ops-muted sub">{{ product.package_size ?? "?" }} {{ product.package_unit ?? "" }}{{ product.in_stock ? "" : " · out of stock" }}</span></span>
               <span class="mc-num">S${{ product.price_sgd.toFixed(2) }}</span>
-              <button type="button" class="mc-pill" @click="pickResult(product)">Use</button>
+              <button type="button" class="mc-pill sm" @click="pickResult(product)">Use</button>
             </li>
           </ul>
         </form>

@@ -37,6 +37,14 @@ export function budgetGap(estimate: WeeklyGroceryEstimate): { amount: string; ov
   return { amount: formatSgd(Math.abs(gap)), over: gap < 0 };
 }
 
+/** How the spend sits against the budget: ok, near (95% or more) or over; one reading for every budget figure on the page. */
+export function budgetTone(estimate: WeeklyGroceryEstimate): "ok" | "near" | "over" | null {
+  const budget = estimate.weekly_budget_sgd;
+  if (!budget) return null;
+  const ratio = estimate.purchase_total_sgd / budget;
+  return ratio > 1 ? "over" : ratio >= 0.95 ? "near" : "ok";
+}
+
 export function packageLabel(line: GroceryLineEstimate): string {
   const size = line.product?.package_size;
   const unit = line.product?.package_unit ?? "";
@@ -208,27 +216,35 @@ export function priceSourceLabel(estimate: WeeklyGroceryEstimate): string {
 export const shortDate = (iso: string): string =>
   new Date(iso).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "Asia/Singapore" });
 
-/** An observation's date is never replaced by the time a later price check was attempted. */
-export function groceryPriceLabel(line: GroceryLineEstimate): string {
-  if (!line.product) return line.packages_required > 0 ? "Not priced" : "Not bought · no price needed";
+// What a failed live check adds to a price line.
+const LOOKUP_NOTES: Record<string, string> = {
+  timeout: "not checked live in time",
+  selected_product_not_returned: "selected product not found",
+  out_of_stock: "product marked unavailable",
+  provider_error: "current price could not be checked",
+  schema_drift: "current price could not be checked",
+  invalid_price: "current price could not be checked",
+};
+
+/** A price line as its plain part and, after a failed live check, the part that needs a look. */
+export function groceryPriceParts(line: GroceryLineEstimate): [string, string | null] {
+  if (!line.product) return [line.packages_required > 0 ? "Not priced" : "Not bought · no price needed", null];
   const evidence = line.evidence;
   const source = evidence?.price_source ?? evidence?.mode;
-  if (source === "no_external_product") return "Sample price · no matching FairPrice product; not checked";
+  if (source === "no_external_product") return ["Sample price · no matching FairPrice product; not checked", null];
   const kind = priceKind(line);
   const date = shortDate(evidence?.fetched_at ?? line.product.fetched_at);
-  if (line.product.source === "manual") return `Price recorded by hand on ${date}`; // observed on a person's visit; never checked live
+  if (line.product.source === "manual") return [`Price recorded by hand on ${date}`, null]; // observed on a person's visit; never checked live
   const base = kind === "sample"
     ? "Sample price"
     : lineRetailer(line) !== "fairprice" ? `${RETAILER_SHORT[lineRetailer(line)]} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
-  switch (evidence?.lookup_status) {
-    case "timeout": return `${base} · not checked live in time`;
-    case "selected_product_not_returned": return `${base} · selected product not found`;
-    case "out_of_stock": return `${base} · product marked unavailable`;
-    case "provider_error":
-    case "schema_drift":
-    case "invalid_price": return `${base} · current price could not be checked`;
-    default: return base;
-  }
+  return [base, LOOKUP_NOTES[evidence?.lookup_status ?? ""] ?? null];
+}
+
+/** An observation's date is never replaced by the time a later price check was attempted. */
+export function groceryPriceLabel(line: GroceryLineEstimate): string {
+  const [base, note] = groceryPriceParts(line);
+  return note ? `${base} · ${note}` : base;
 }
 
 export function groceryPriceTimes(line: GroceryLineEstimate): string | undefined {

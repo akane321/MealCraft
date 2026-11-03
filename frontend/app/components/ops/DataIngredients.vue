@@ -82,7 +82,7 @@ async function save() {
 </script>
 
 <template>
-  <div class="ops-page">
+  <div class="data-pane">
     <div class="filters">
       <label class="grow">Search any name, Chinese name or alias <input v-model="search" type="search" placeholder="e.g. spring onion or 葱"></label>
     </div>
@@ -92,16 +92,16 @@ async function save() {
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading ingredients…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted">No ingredient matches.</p>
+    <p v-else-if="!page.items.length" class="ops-card ops-muted ops-empty">No ingredient matches.</p>
     <section v-else class="ops-card table-card" aria-label="Ingredients">
       <table>
-        <thead><tr><th>Ingredient</th><th>Chinese names</th><th>Aliases</th><th>Allergens</th><th>Recipes</th></tr></thead>
+        <thead><tr><th>Ingredient</th><th>Chinese names</th><th>Aliases</th><th>Allergens</th><th class="mc-num">Recipes</th></tr></thead>
         <tbody>
           <tr v-for="item in page.items" :key="item.id" :class="{ current: item.id === selected?.id }">
             <td><button type="button" class="link" @click="open(item)">{{ item.display_name }}</button><span class="ops-muted sub">{{ item.normalized_name }}</span></td>
             <td>{{ item.zh_names.join("、") || "—" }}</td>
             <td>{{ item.aliases.join(", ") || "—" }}</td>
-            <td>{{ item.allergens.join(", ") || "—" }}</td>
+            <td><span v-for="allergen in item.allergens" :key="allergen" class="ops-badge error allergen">{{ allergen }}</span><template v-if="!item.allergens.length">—</template></td>
             <td class="mc-num">{{ item.recipes }}</td>
           </tr>
         </tbody>
@@ -121,7 +121,7 @@ async function save() {
             <h2 id="ingredient-title" class="mc-serif">{{ selected.display_name }}</h2>
             <p class="ops-muted">{{ selected.normalized_name }} · in {{ selected.recipes }} {{ selected.recipes === 1 ? "recipe" : "recipes" }}</p>
           </div>
-          <button type="button" class="mc-pill" @click="selected = null">Close</button>
+          <button type="button" class="mc-close" aria-label="Close" @click="selected = null"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
         </header>
 
         <p v-if="message" class="note" role="status">{{ message }}</p>
@@ -133,12 +133,12 @@ async function save() {
           <label>Chinese names, one per line <textarea v-model="edit.zh" rows="3" /></label>
           <label>Other names (aliases), one per line <textarea v-model="edit.aliases" rows="3" /></label>
           <p class="ops-muted small">The assistant matches these names exactly when a household uses them.</p>
-          <button type="submit" class="mc-primary" :disabled="!changed || saving">{{ saving ? "Saving…" : "Save changes" }}</button>
+          <button type="submit" class="mc-primary" :disabled="!changed || saving" :aria-busy="saving">{{ saving ? "Saving…" : "Save changes" }}</button>
         </form>
 
         <section>
           <h3>Allergens</h3>
-          <div v-if="selected.allergens.length" class="chips"><span v-for="item in selected.allergens" :key="item" class="chip">{{ item }}</span></div>
+          <div v-if="selected.allergens.length" class="chips"><span v-for="item in selected.allergens" :key="item" class="ops-badge error allergen">{{ item }}</span></div>
           <p v-else class="ops-muted">None.</p>
           <p class="ops-muted small">Allergens are derived by rule and cannot be edited here. They change in their own reviewed files (data/ingredients/allergen-vocabulary.json and app/data/allergens.py).</p>
         </section>

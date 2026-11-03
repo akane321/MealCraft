@@ -14,17 +14,28 @@ const HEIGHT = 150;
 const totals = computed(() => props.days.map((_, index) => props.series.reduce((sum, item) => sum + (item.values[index] ?? 0), 0)));
 const max = computed(() => niceMax(Math.max(0, ...totals.value)));
 const slot = computed(() => WIDTH / Math.max(props.days.length, 1));
+// Bars a little over half their day's width, at most 18 units, centred in their day.
+const barWidth = computed(() => Math.min(slot.value * 0.55, 18));
 
+// Nothing to draw: no series, or every day at zero.
+const empty = computed(() => totals.value.every(total => !total));
+// Stacked segments sit flush; only the top one of a day gets rounded top corners.
 const bars = computed(() => props.days.flatMap((day, index) => {
   let top = HEIGHT;
-  return props.series.flatMap((item) => {
+  const segments = props.series.flatMap((item) => {
     const value = item.values[index] ?? 0;
     if (!value) return [];
     const height = (value / max.value) * HEIGHT;
     top -= height;
-    return [{ key: `${day}-${item.name}`, x: index * slot.value + slot.value * 0.18, y: top, width: slot.value * 0.64, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
+    const x = index * slot.value + (slot.value - barWidth.value) / 2;
+    return [{ key: `${day}-${item.name}`, x, y: top, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
   });
+  return segments.map((bar, at) => ({ ...bar, d: barPath(bar.x, bar.y, barWidth.value, bar.height, at === segments.length - 1 ? 3 : 0) }));
 }));
+function barPath(x: number, y: number, w: number, h: number, radius: number) {
+  const r = Math.min(radius, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
 
 function shortDay(day: string) {
   return new Date(`${day}T00:00:00`).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
@@ -36,28 +47,34 @@ function shortDay(day: string) {
     <svg :viewBox="`0 -12 ${WIDTH} ${HEIGHT + 32}`" role="img" :aria-label="label">
       <line x1="0" :y1="HEIGHT" :x2="WIDTH" :y2="HEIGHT" class="axis" />
       <line x1="0" y1="0" :x2="WIDTH" y2="0" class="grid" />
-      <text x="0" y="-2" class="tick">{{ max }}</text>
-      <rect v-for="bar in bars" :key="bar.key" :x="bar.x" :y="bar.y" :width="bar.width" :height="bar.height" :fill="bar.color" rx="2">
+      <text v-if="!empty" x="0" y="-2" class="tick">{{ max }}</text>
+      <path v-for="bar in bars" :key="bar.key" :d="bar.d" :fill="bar.color">
         <title>{{ bar.title }}</title>
-      </rect>
+      </path>
       <template v-for="(day, index) in days" :key="day">
         <text v-if="index === 0 || index === days.length - 1 || index === Math.floor(days.length / 2)" :x="index * slot + slot / 2" :y="HEIGHT + 16" class="tick" text-anchor="middle">{{ shortDay(day) }}</text>
       </template>
     </svg>
-    <figcaption v-if="series.length" class="legend">
+    <figcaption v-if="!empty" class="legend">
       <span v-for="item in series" :key="item.name"><i :style="{ background: item.color }" />{{ item.name.replaceAll("_", " ") }}</span>
     </figcaption>
-    <figcaption v-else class="legend">Nothing recorded in these two weeks.</figcaption>
+    <figcaption v-else class="empty-note"><UIcon name="i-lucide-chart-no-axes-column" aria-hidden="true" />Nothing recorded in these two weeks.</figcaption>
   </figure>
 </template>
 
 <style scoped>
-.ops-chart { margin: 0; }
+/* Calm series: violet for counts, violet, fuchsia and indigo for the good statuses, red only for failures.
+   Each shade is at least 3:1 on the white card. */
+.ops-chart { margin: 0; --sage: #6d28d9; --accent: #8b5cf6; --danger: #f87171; --c-green: #c026d3; --c-blue: #6366f1; }
 svg { display: block; width: 100%; height: auto; overflow: visible; }
-.axis { stroke: var(--border); }
-.grid { stroke: rgba(42, 42, 72, 0.1); stroke-dasharray: 3 4; }
-.tick { fill: var(--t3); font-size: 12px; }
+.axis { stroke: #ececef; }
+.grid { stroke: #f0f0f2; stroke-dasharray: 3 4; }
+.tick { fill: #71717a; font-size: 12px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--t3); font-size: 12px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 9px; height: 9px; border-radius: 2px; }
+.legend i { width: 8px; height: 8px; border-radius: 50%; }
+/* No data: the note sits in the middle of the plot, with no tick or legend. */
+.ops-chart { position: relative; }
+.empty-note { position: absolute; left: 0; right: 0; top: 34%; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; color: #71717a; font-size: 13px; text-align: center; }
+.empty-note .iconify { width: 18px; height: 18px; }
 </style>

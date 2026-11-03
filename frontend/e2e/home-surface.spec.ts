@@ -30,8 +30,9 @@ test("confirmation preferences really save, cancel and undo without changing har
   await editor.getByLabel("More vegetables", { exact: true }).check();
   await editor.getByLabel("Breakfast", { exact: true }).check();
   await editor.getByRole("button", { name: "Add flavour", exact: true }).click();
-  await editor.getByLabel("Days for flavour 1", { exact: true }).selectOption(["friday"]);
-  await editor.getByLabel("Meals for flavour 1", { exact: true }).selectOption(["dinner"]);
+  // Days and meals are toggle chips in a named group (they were multi-selects).
+  await editor.getByRole("group", { name: "Days for flavour 1", exact: true }).getByLabel("Fri", { exact: true }).check();
+  await editor.getByRole("group", { name: "Meals for flavour 1", exact: true }).getByLabel("Dinner", { exact: true }).check();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/preferences-edit.png` });
   await editor.getByRole("button", { name: "Save preferences", exact: true }).click();
   await expect(editor).toHaveCount(0);
@@ -665,19 +666,36 @@ test("a dish's reason tag opens its facts, labelled as facts, at both desktop wi
 });
 
 for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
-  test(`week overview and composer have room at ${viewport.width}`, async ({ page }) => {
+  test(`day list and composer have room at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
     await page.setViewportSize(viewport);
-    const overview = page.getByRole("list", { name: "Plan overview" });
-    await expect(overview.getByRole("listitem")).toHaveCount(7);
-    const body = await page.getByRole("tabpanel").boundingBox();
-    const last = await overview.getByRole("listitem").last().boundingBox();
-    expect(last!.y + last!.height).toBeLessThanOrEqual(body!.y + body!.height);
+    const panel = page.getByRole("complementary", { name: "This plan" });
+    const days = panel.getByRole("list", { name: "Plan days" });
+    await expect(days.locator(":scope > li")).toHaveCount(7);
+    // The panel body scrolls: the first and the last day can each be brought fully into it.
+    const tabpanel = panel.getByRole("tabpanel");
+    for (const row of [days.locator(":scope > li").first(), days.locator(":scope > li").last()]) {
+      await row.scrollIntoViewIfNeeded();
+      const body = await tabpanel.boundingBox();
+      const box = await row.boundingBox();
+      expect(box!.y).toBeGreaterThanOrEqual(body!.y - 0.5);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(body!.y + body!.height + 0.5);
+    }
+    // The list never runs under the budget footer.
+    const body = await tabpanel.boundingBox();
+    const foot = await panel.locator(".panel-foot").boundingBox();
+    expect(body!.y + body!.height).toBeLessThanOrEqual(foot!.y + 0.5);
     const context = await page.locator(".composer-wrap .context").boundingBox();
     const input = await page.getByLabel("Message MealCraft").boundingBox();
+    const composer = await page.locator(".composer-wrap .composer").boundingBox();
     expect(context).not.toBeNull();
-    expect(context!.y + context!.height).toBeLessThanOrEqual(input!.y);
-    await expect(overview.locator("[title]").first()).toHaveAttribute("title", /Lemon Herb Chicken Rice Bowl/);
+    // The chip sits in the composer's bottom row: under the message, never over it, and inside the box.
+    expect(context!.y).toBeGreaterThanOrEqual(input!.y + input!.height);
+    expect(context!.y + context!.height).toBeLessThanOrEqual(composer!.y + composer!.height);
+    // The composer and the day list sit side by side, never over each other.
+    const aside = await panel.boundingBox();
+    expect(composer!.x + composer!.width).toBeLessThanOrEqual(aside!.x);
+    await expect(days.locator("button.name").first()).toHaveAttribute("title", /Lemon Herb Chicken Rice Bowl/);
   });
   test(`dish actions stay on one row at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
@@ -829,8 +847,14 @@ test("a failed current-week lookup shows an error and can be retried", async ({ 
   await expect(week.getByRole("alert")).toBeVisible();
   await expect(week.getByRole("heading", { name: "No plan yet" })).toHaveCount(0);
   failing = false;
+  // The column also hides while the retry is in flight, so wait for the retry's answer before checking the end state.
+  const retried = page.waitForResponse(response => response.url().endsWith("/api/plans") && response.ok());
   await week.getByRole("button", { name: "Try again" }).click();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  await retried;
+  // Loaded, with nothing planned yet: the welcome takes the whole panel and the error goes with the column.
+  await expect(week).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Suggestions" })).toBeVisible();
 });
 
 test("Escape closes a sheet from anywhere and focus goes back to what opened it", async ({ page }) => {
@@ -1020,7 +1044,8 @@ test("reopening the app opens the conversation that planned the week, not the ne
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("I plan meals and shopping.")).toBeHidden();
   await expect(week.getByText("Tofu Brown Rice Stir-fry")).toBeHidden();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  // A new plan with nothing planned yet is one wide welcome: no plan column.
+  await expect(week).toHaveCount(0);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/17-new-plan-beside-week.png` });
 });
 
@@ -1143,7 +1168,8 @@ test("a new conversation stays empty until its previous week is explicitly reope
   // New plan clears the old week; reopening its conversation restores the dish actions.
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(week.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  // A new plan with nothing planned yet is one wide welcome: no plan column.
+  await expect(week).toHaveCount(0);
   await expect(week.getByRole("button", { name: "Swap", exact: true })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await week.getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Swap" }).click();
@@ -1522,7 +1548,7 @@ test("a dish's words sent from the landing after a reload go to the conversation
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 
@@ -1596,7 +1622,7 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing se
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeVisible();
   await page.getByRole("button", { name: /New plan/ }).click();
   await expect(conversation.getByText("Seven dinners for S$82.60")).toBeHidden();
-  await expect(page.getByRole("heading", { name: "No plan yet" })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "This plan" })).toHaveCount(0);
   await page.getByRole("complementary", { name: "Navigation" }).getByRole("button", { name: /^Dinners for two this week/ }).click();
   await page.getByRole("complementary", { name: "This plan" }).getByRole("group", { name: "Change Tofu Brown Rice Stir-fry" }).getByRole("button", { name: "Skip" }).click();
 
@@ -1617,7 +1643,8 @@ for (const way of ["Open my week", "Enter in the landing box"]) test(`nothing se
   await expect(workspace.getByRole("button", { name: "Send" })).toBeDisabled();
   await expect(page.getByRole("button", { name: /New plan/ })).toBeEnabled();
   await composer.press("Enter");
-  await conversation.getByRole("button", { name: "A high-protein week" }).click();
+  // The starter cards sit under the prompt box, in the chat but outside the conversation itself.
+  await workspace.getByRole("button", { name: "A high-protein week" }).click();
   expect(answered).toBe(false);
 
   // Once the week is back, the words reach conversation 51, once.
@@ -2128,9 +2155,12 @@ async function openFairPriceCart(page: Page) {
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
   await page.getByRole("tab", { name: /Groceries/ }).click();
-  // The footer button sits with Preview list and Export PDF.
+  // The footer button sits with Preview list and Export PDF (an icon button now, named by its aria-label).
   const footer = page.locator(".foot-acts");
-  await expect(footer.getByRole("button")).toHaveText(["FairPrice cart", "Preview list", "Export PDF"]);
+  await expect(footer.getByRole("button")).toHaveCount(3);
+  await expect(footer.getByRole("button").nth(0)).toHaveText("FairPrice cart");
+  await expect(footer.getByRole("button").nth(1)).toHaveText("Preview list");
+  await expect(footer.getByRole("button").nth(2)).toHaveAccessibleName("Export PDF");
   await footer.getByRole("button", { name: "FairPrice cart", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "FairPrice cart" });
   return {
@@ -2152,7 +2182,7 @@ test("the FairPrice cart panel shows the real cart, adds only what is missing, c
   await expect(panel.getByText("FairPrice PFC", { exact: false })).toBeVisible();
   const chicken = rowOf("Kee Song Fresh Chicken");
   await expect(chicken.locator("img")).toHaveAttribute("src", /^data:image\/svg/);
-  await expect(chicken.locator("img")).toHaveJSProperty("width", 64);
+  await expect(chicken.locator("img")).toHaveJSProperty("width", 56);
   await expect(chicken.getByText("500g", { exact: true })).toBeVisible();
   await expect(chicken.locator(".unit b")).toHaveText("S$10.95");
   await expect(chicken.locator("s")).toHaveText("S$12.95");
@@ -2422,7 +2452,7 @@ test("a one-dinner plan reads as one dinner, one date and a plan budget, with ch
 
   // The panel and the nutrition pages fit one day: one picker button, and a single point drawn as a dot.
   await expect(panel.getByRole("tab", { name: "Plan", exact: true })).toBeVisible();
-  await expect(panel.getByRole("list", { name: "Plan overview" }).getByRole("listitem")).toHaveCount(1);
+  await expect(panel.getByRole("list", { name: "Plan days" }).locator(":scope > li")).toHaveCount(1);
   await page.waitForTimeout(600);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/20-short-plan.png` });
   await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
@@ -2592,5 +2622,7 @@ test("a list with a Shopee line recorded by hand shows its own store section, li
   const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
   await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
   await expect(sheet.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
-  await expect(sheet.getByRole("link", { name: url })).toBeVisible();
+  // On screen the link reads "View at Shopee" (the raw address is kept for the printed list).
+  await expect(sheet.getByRole("link", { name: "View at Shopee" })).toHaveAttribute("href", url);
+  await expect(sheet.getByRole("link", { name: "View at Shopee" })).toBeVisible();
 });

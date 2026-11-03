@@ -3,7 +3,6 @@
   color-scheme: light;
   /* Legacy names on the home surface, mapped onto the design tokens in main.css. */
   --ink: var(--c-white);
-  --s1: var(--c-canvas);
   --s2: var(--c-rail);
   --s3: var(--c-neutral);
   --line: var(--c-line-soft);
@@ -11,29 +10,12 @@
   --ivory: var(--c-ink);
   --t2: var(--c-neutral-text);
   --t3: var(--c-muted);
-  --t4: var(--c-muted);
   --accent: var(--c-coral);
-  --accent-fill: var(--c-coral);
-  --blue: var(--c-blue);
   --sage: var(--c-green-text);
-  --green: var(--c-green);
   --warn: var(--c-allergy-text);
-  --warn-soft: var(--c-allergy-bg);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --serif: var(--font-display);
   --sans: var(--font-body);
-
-  /* Older names the sheets still use. */
-  --mc-base: var(--ink);
-  --mc-ivory: var(--ivory);
-  --mc-text-2: var(--t2);
-  --mc-text-3: var(--t3);
-  --mc-accent: var(--accent);
-  --mc-accent-fill: var(--accent-fill);
-  --mc-sage: var(--sage);
-  --mc-line: var(--line-2);
-  --mc-ease: var(--ease);
-  --mc-serif: var(--serif);
 
   color: var(--ivory);
   font: 600 14px/20px var(--sans);
@@ -42,18 +24,19 @@
 
 /* Numbers line up (prices, kcal, times); thin scrollbars; press feedback. */
 .mc-surface, .mc-overlay, .mc-sheet-overlay { font-variant-numeric: tabular-nums; }
-.mc-surface *, .mc-overlay *, .mc-sheet-overlay * { scrollbar-width: thin; scrollbar-color: #d6cfc0 transparent; }
+.mc-surface *, .mc-overlay *, .mc-sheet-overlay * { scrollbar-width: thin; }
 .mc-surface ::-webkit-scrollbar, .mc-overlay ::-webkit-scrollbar { width: 8px; height: 8px; }
-.mc-surface ::-webkit-scrollbar-thumb, .mc-overlay ::-webkit-scrollbar-thumb { background: #d6cfc0; border-radius: 8px; }
-.mc-surface button:active:not(:disabled), .mc-overlay button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
-.mc-surface button, .mc-overlay button { transition: background 150ms, border-color 150ms, color 150ms, transform 80ms; }
 
 .mc-surface { position: fixed; inset: 0; overflow: clip; background: var(--ink); }
 .mc-surface[data-view="landing"] { background: #2a2a48; }
 
+/* In the base layer, so Nuxt UI's utility classes can override them. */
+@layer base {
+.mc-surface button:active:not(:disabled), .mc-overlay button:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+.mc-surface button, .mc-overlay button { transition: background 150ms, border-color 150ms, color 150ms, transform 80ms; }
 .mc-surface button, .mc-overlay button, .mc-sheet-overlay button { font-family: inherit; color: inherit; cursor: pointer; }
 .mc-surface button:disabled, .mc-overlay button:disabled { cursor: default; opacity: 0.55; }
-.mc-surface :focus-visible, .mc-overlay :focus-visible, .mc-sheet-overlay :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
 
 /* One copy for every component that needs to label something for screen readers. */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -102,10 +85,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
-/* Cards and sheets. */
-.mc-frost { background: var(--s1); border: 1px solid var(--line); }
-.mc-ribbed { background: var(--s1); border: 1px solid var(--line-2); border-radius: 18px; overflow: clip; box-shadow: 0 1px 0 var(--line-2); }
 
 .mc-overlay {
   position: fixed;
