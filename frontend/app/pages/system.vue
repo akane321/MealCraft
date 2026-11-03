@@ -38,15 +38,8 @@ watch(actor, (signedIn) => {
         <div v-for="service in services" :key="service.name" class="status-row" role="row">
           <span class="service-name" role="cell">{{ service.name }}</span>
           <span :class="['service-state', { unavailable: !service.healthy }]" role="cell">
-            <svg v-if="service.healthy" aria-hidden="true" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" />
-              <path d="m8.5 12 2.2 2.2 4.8-5" />
-            </svg>
-            <svg v-else aria-hidden="true" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7.5v5" />
-              <path d="M12 16.5h.01" />
-            </svg>
+            <UIcon v-if="service.healthy" name="i-lucide-circle-check" aria-hidden="true" />
+            <UIcon v-else name="i-lucide-circle-alert" aria-hidden="true" />
             {{ status === "pending" ? "Checking" : service.state }}
           </span>
         </div>
@@ -55,32 +48,33 @@ watch(actor, (signedIn) => {
           <span class="prices" role="cell">{{ prices }}</span>
         </div>
       </div>
-
-      <div v-if="isAdmin || !healthy" class="technical-details">
-        <div v-if="isAdmin" class="detail-copy">
-          <h2>For administrators</h2>
-          <dl>
-            <div>
-              <dt>API version</dt>
-              <dd>{{ data?.info.version ?? "—" }}</dd>
-            </div>
-            <div>
-              <dt>Environment</dt>
-              <dd>{{ data?.info.environment ?? "—" }}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <nav class="technical-links" :aria-label="isAdmin ? 'Administrator links' : 'Check again'">
-          <template v-if="isAdmin">
-            <NuxtLink to="/ops">Operations console</NuxtLink>
-            <a :href="apiDocumentationUrl" target="_blank" rel="noreferrer">API documentation</a>
-            <a :href="healthCheckUrl" target="_blank" rel="noreferrer">Raw health check</a>
-          </template>
-          <button v-if="!healthy" type="button" @click="refresh()">Check again</button>
-        </nav>
-      </div>
     </section>
+
+    <!-- A card of its own below the status card; for a household it is only the Check again button. -->
+    <div v-if="isAdmin || !healthy" class="technical-details" :class="{ admin: isAdmin }">
+      <div v-if="isAdmin" class="detail-copy">
+        <h2>For administrators</h2>
+        <dl>
+          <div>
+            <dt>API version</dt>
+            <dd>{{ data?.info.version ?? "—" }}</dd>
+          </div>
+          <div>
+            <dt>Environment</dt>
+            <dd>{{ data?.info.environment ?? "—" }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <nav class="technical-links" :aria-label="isAdmin ? 'Administrator links' : 'Check again'">
+        <template v-if="isAdmin">
+          <NuxtLink to="/ops">Operations console</NuxtLink>
+          <a :href="apiDocumentationUrl" target="_blank" rel="noreferrer">API documentation</a>
+          <a :href="healthCheckUrl" target="_blank" rel="noreferrer">Raw health check</a>
+        </template>
+        <button v-if="!healthy" type="button" @click="refresh()">Check again</button>
+      </nav>
+    </div>
   </main>
 </template>
 
