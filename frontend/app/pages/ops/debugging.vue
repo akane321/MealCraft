@@ -90,7 +90,6 @@ async function runAgain() {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Debugging</p>
       <h1 class="mc-serif">Replay a task and compare</h1>
       <p>A replay sends a stored conversation turn or planning run through today's code, with the settings you choose. Nothing is saved to anyone's household. Start one from a task in <NuxtLink to="/ops/tasks">Tasks</NuxtLink>.</p>
     </header>
@@ -188,7 +187,7 @@ async function runAgain() {
               </label>
             </div>
             <p v-if="runError" class="ops-error" role="alert">{{ runError }}</p>
-            <button type="submit" class="mc-primary" :disabled="running">{{ running ? "Replaying…" : "Replay with these settings" }}</button>
+            <button type="submit" class="mc-primary" :disabled="running" :aria-busy="running">{{ running ? "Replaying…" : "Replay with these settings" }}</button>
           </form>
         </template>
       </section>
@@ -197,30 +196,30 @@ async function runAgain() {
 </template>
 
 <style scoped>
-header a { color: var(--accent); }
+header a { color: #6d28d9; text-decoration: none; }
+header a:hover { text-decoration: underline; }
 .debug-grid { display: grid; grid-template-columns: minmax(240px, 300px) 1fr; gap: 16px; align-items: start; }
-.replay-list ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.replay-list button { display: grid; gap: 2px; width: 100%; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; background: none; color: var(--ivory); text-align: left; }
-.replay-list button:hover { background: var(--s2); }
-.replay-list button.current { border-color: var(--line-2); background: var(--s3); box-shadow: inset 2px 0 0 var(--accent); }
+/* Recent replays: white row cards; the open one in violet-50. */
+.replay-list ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.replay-list button { display: grid; gap: 2px; width: 100%; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; color: #18181b; font-weight: 500; text-align: left; cursor: pointer; }
+.replay-list button:hover { border-color: #e4e4e7; background: #fafafa; }
+.replay-list button.current { border-color: #ddd6fe; background: #faf8ff; }
+.replay-list .small { font-weight: 400; }
 .small { font-size: 12px; }
-.compare h3 { margin: 22px 0 10px; color: var(--t2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-table.side { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-table.side th, table.side td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
-table.side thead th { color: var(--t3); font-weight: 500; }
-table.side tbody th { width: 26%; color: var(--t3); font-weight: 400; }
-table.side tr.changed td { background: rgba(232, 144, 111, 0.1); }
-table.side tr.changed td:last-child { color: var(--accent); }
-blockquote { margin: 0; padding: 10px 14px; border-left: 2px solid var(--accent); border-radius: 0 10px 10px 0; background: var(--s2); color: var(--ivory); }
-.overrides { display: grid; gap: 10px; margin-top: 26px; padding-top: 6px; border-top: 1px solid var(--line); }
+.compare h3 { margin: 22px 0 10px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
+/* Stored and replayed side by side, in the shared table look; a changed row is amber. */
+table.side { border: 1px solid #ececef; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 13px; table-layout: fixed; }
+table.side th, table.side td { height: auto; padding: 8px 12px; overflow-wrap: anywhere; }
+table.side thead th { height: 36px; padding-block: 0; }
+table.side tbody th { width: 26%; }
+table.side tr.changed td { background: #fffaeb; }
+table.side tr.changed td:last-child { color: #6d28d9; font-weight: 500; }
+blockquote { margin: 0; padding: 10px 14px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; color: #27272a; }
+.overrides { display: grid; gap: 10px; margin-top: 24px; padding-top: 4px; border-top: 1px solid #f0f0f2; }
 .overrides h3 { margin-bottom: 0; }
 .overrides p { margin: 0; }
 .fields { display: flex; flex-wrap: wrap; gap: 12px; }
-.fields label { display: grid; gap: 6px; color: var(--t3); font-size: 12px; }
-.fields select, .fields input { min-width: 150px; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; font-size: 13px; }
+.fields label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
+.fields select, .fields input { min-width: 150px; }
 .overrides .mc-primary { justify-self: start; }
-
-@media (max-width: 900px) {
-  .debug-grid { grid-template-columns: 1fr; }
-}
 </style>

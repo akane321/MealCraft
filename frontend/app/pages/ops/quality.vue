@@ -120,7 +120,6 @@ onMounted(retryAll);
 <template>
   <div class="ops-page quality-page">
     <header>
-      <p class="mc-eyebrow">Data quality</p>
       <h1 class="mc-serif">What is in this release—and how it got there</h1>
       <p>Coverage, inferred values and dropped candidates come from the registered release build. This page never reads an operator-supplied path.</p>
     </header>
@@ -279,7 +278,7 @@ onMounted(retryAll);
         <p v-if="!summary.artifacts.length" class="ops-muted">No readable release artifacts were recorded.</p>
         <div v-else class="table-wrap">
           <table>
-            <thead><tr><th>Artifact</th><th>SHA-256</th><th>Size</th><th>Updated</th></tr></thead>
+            <thead><tr><th>Artifact</th><th>SHA-256</th><th class="mc-num">Size</th><th>Updated</th></tr></thead>
             <tbody>
               <tr v-for="artifact in summary.artifacts" :key="artifact.name">
                 <td>{{ artifact.name }}</td>
@@ -301,66 +300,61 @@ onMounted(retryAll);
 .release-head h2, .section-heading h2 { margin: 2px 0 4px; }
 .release-head p, .section-heading p, .dropped-card header p { margin: 0; }
 .release-head .ops-badge { margin-top: 3px; }
-.issues { border-color: rgba(217, 165, 90, 0.4); background: rgba(217, 165, 90, 0.07); }
+/* Release issues: the amber warning pair. */
+.issues { border-color: #fedf89; background: #fffaeb; box-shadow: none; }
 .issues p { margin: -6px 0 12px; font-size: 13px; }
 .issues ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.issues li { display: grid; gap: 2px; padding: 9px 12px; border-radius: 10px; background: var(--s2); font-size: 13px; }
-.issues li span { color: var(--t3); }
+.issues li { display: grid; gap: 2px; padding: 9px 12px; border: 1px solid #fef0c7; border-radius: 10px; background: #fff; font-size: 13px; }
+.issues li span { color: #71717a; }
 .section-heading { margin-bottom: 10px; }
+/* Coverage numbers as stat cards. */
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.metric { display: grid; gap: 5px; padding: 16px; }
-.metric span, .metric small { color: var(--t3); font-size: 12px; }
-.metric strong { font-family: var(--serif); font-size: 30px; font-weight: 300; }
-.evidence-grid { align-items: stretch; }
-.evidence-grid > .ops-card { min-height: 205px; }
+.metric { display: flex; flex-direction: column; gap: 6px; padding: 16px; box-shadow: var(--mc-shadow-sm); }
+.metric span { color: #52525b; font-size: 13px; line-height: 18px; font-weight: 500; }
+.metric strong { color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; }
+.metric small { color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.evidence-grid { align-items: start; }
 .intro { margin: -5px 0 16px; font-size: 12.5px; line-height: 1.5; }
 .share-list, .nutrition-stats { display: grid; gap: 13px; margin: 0; }
 .share-list div { display: grid; gap: 6px; }
-.share-list dt { display: flex; justify-content: space-between; gap: 12px; color: var(--t2); font-size: 13px; }
-.share-list dd { height: 7px; margin: 0; overflow: hidden; border-radius: 999px; background: var(--s3); }
-.share-list dd span { display: block; height: 100%; border-radius: inherit; background: #d9a55a; }
-.nutrition-stats { grid-template-columns: repeat(3, 1fr); }
-.nutrition-stats div { padding: 11px; border-radius: 10px; background: var(--s2); }
-.nutrition-stats dt { color: var(--t3); font-size: 12px; }
-.nutrition-stats dd { margin: 4px 0 0; font-family: var(--serif); font-size: 22px; }
-.review-number { margin: 24px 0 5px; font-family: var(--serif); font-size: 42px; }
+.share-list dt { display: flex; justify-content: space-between; gap: 12px; color: #52525b; font-size: 13px; }
+.share-list dt b { color: #27272a; font-weight: 500; }
+.share-list dd { height: 6px; margin: 0; overflow: hidden; border-radius: 999px; background: #f0f0f2; }
+.share-list dd span { display: block; height: 100%; border-radius: inherit; background: #f59e0b; }
+.nutrition-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.nutrition-stats div { min-width: 0; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; }
+.nutrition-stats dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.nutrition-stats dd { margin: 4px 0 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; white-space: nowrap; }
+.review-number { margin: 4px 0 4px; color: var(--mc-strong); font-size: 30px; line-height: 36px; font-weight: 600; }
 .distribution-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.distribution-grid h3 { margin: 0 0 12px; color: var(--t2); font-size: 13px; }
-.distribution-grid ol { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
-.distribution-grid li { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(70px, 1fr) auto; align-items: center; gap: 9px; font-size: 12.5px; }
-.distribution-grid .bar { height: 5px; overflow: hidden; border-radius: 999px; background: var(--s3); }
-.distribution-grid .bar i { display: block; height: 100%; border-radius: inherit; background: var(--sage); }
+.distribution-grid h3 { margin: 0 0 12px; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.distribution-grid ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.distribution-grid li { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(70px, 1fr) auto; align-items: center; gap: 10px; color: #27272a; font-size: 13px; }
+.distribution-grid li b { font-weight: 500; }
+.distribution-grid .bar { height: 6px; overflow: hidden; border-radius: 999px; background: #f0f0f2; }
+.distribution-grid .bar i { display: block; height: 100%; border-radius: inherit; background: #8b5cf6; }
 .dropped-card { padding: 0; overflow: hidden; }
 .dropped-card > header { padding: 20px; }
 .dropped-card > header h2 { margin-bottom: 5px; }
-.dropped-card label { display: grid; flex: 0 0 220px; grid-template-columns: minmax(0, 1fr); gap: 5px; color: var(--t3); font-size: 12px; }
+.dropped-card label { display: grid; flex: 0 0 220px; grid-template-columns: minmax(0, 1fr); gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .dropped-card select { width: 100%; min-width: 0; }
-select { padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 9px; background: var(--s2); color: var(--ivory); font: inherit; }
 /* One column a step, so a step never wraps away from the arrow before it: the arrow sits in the gap, not in the text. */
-.funnel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px 30px; margin: 0; padding: 0 20px 14px; list-style: none; color: var(--t2); font-size: 12.5px; }
+.funnel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px 30px; margin: 0; padding: 0 20px 14px; list-style: none; color: #52525b; font-size: 12.5px; }
 .funnel li { position: relative; }
-.funnel li + li::before { position: absolute; top: 0; left: -22px; color: var(--t3); content: "→"; }
-.funnel b { display: block; }
-.funnel small { display: block; margin-top: 2px; color: var(--t3); }
+.funnel li + li::before { position: absolute; top: 0; left: -22px; color: #a1a1aa; content: "→"; }
+.funnel b { display: block; color: var(--mc-strong); font-size: 14px; font-weight: 600; }
+.funnel small { display: block; margin-top: 2px; color: #a1a1aa; }
 .reason-counts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; }
-.reason-counts span, .reason-pill { padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--t2); font-size: 12px; }
-.inline-error, .empty { margin: 0; padding: 18px 20px; border-top: 1px solid var(--line); }
-.inline-error p { margin: 0 0 10px; }
-.dropped-warning { display: grid; gap: 3px; padding: 12px 20px; border-top: 1px solid rgba(217, 165, 90, 0.3); background: rgba(217, 165, 90, 0.08); color: var(--t2); font-size: 12.5px; }
-.table-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-th { padding: 10px 14px; border-bottom: 1px solid var(--line-2); color: var(--t3); font-weight: 500; text-align: left; white-space: nowrap; }
-td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.reason-counts span, .reason-pill { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.reason-counts b { color: #27272a; font-weight: 600; }
+.inline-error, .empty { margin: 0; padding: 18px 20px; border-top: 1px solid #f0f0f2; }
+.inline-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fef3f2; }
+.inline-error p { margin: 0; color: #b42318; }
+.empty { color: #71717a; text-align: center; }
+.dropped-warning { display: grid; gap: 3px; padding: 12px 20px; border-top: 1px solid #fedf89; background: #fffaeb; color: #b54708; font-size: 12.5px; }
+.table-wrap { overflow-x: auto; border-top: 1px solid #f0f0f2; }
 td:first-child { white-space: nowrap; }
-.pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 16px; }
-.pager span { margin-right: auto; font-size: 12px; }
 .artifacts > p { margin: -6px 0 14px; font-size: 12.5px; }
 .artifacts .table-wrap { margin: 0 -20px -20px; }
-.artifacts code { color: var(--t2); }
-button:disabled { cursor: not-allowed; opacity: 0.45; }
-
-@media (max-width: 1080px) {
-  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .distribution-grid { grid-template-columns: 1fr; }
-}
+.artifacts code { color: #52525b; font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; }
 </style>

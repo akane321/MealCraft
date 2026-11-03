@@ -49,7 +49,6 @@ async function check(name: OpsServiceName) {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Services</p>
       <h1 class="mc-serif">Outside services</h1>
       <p>Keys stay in the server environment; the console only says whether one is set. Recent numbers come from runs stored in the last week.</p>
     </header>
@@ -77,11 +76,11 @@ async function check(name: OpsServiceName) {
         <p v-if="service.note" class="ops-muted">{{ service.note }}</p>
 
         <footer>
-          <button type="button" class="mc-primary" :disabled="checking !== null" @click="check(service.name)">
+          <button type="button" class="mc-primary" :disabled="checking !== null" :aria-busy="checking === service.name" @click="check(service.name)">
             {{ checking === service.name ? "Checking…" : "Run live check" }}
           </button>
           <p class="ops-muted cost">{{ CHECK_COST[service.name] }}</p>
-          <p v-if="results[service.name] === 'failed'" class="ops-error" role="status">The check itself couldn't be run.</p>
+          <p v-if="results[service.name] === 'failed'" class="result" role="status">The check itself couldn't be run.</p>
           <p v-else-if="outcome(service.name)" class="result" :class="{ ok: outcome(service.name)!.ok }" role="status">
             <template v-if="outcome(service.name)!.ok">Answered in {{ outcome(service.name)!.latency_ms }} ms.</template>
             <template v-else>Failed ({{ humanKey(outcome(service.name)!.error_kind ?? "error") }}) after {{ outcome(service.name)!.latency_ms }} ms.</template>
@@ -100,15 +99,17 @@ async function check(name: OpsServiceName) {
 .service > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .service h2 { margin: 0; }
 .service p { margin: 0; font-size: 13px; line-height: 1.55; }
+/* Recent numbers as small stat tiles. */
 .recent { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 8px; margin: 0; }
-.recent div { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: var(--s2); }
-.recent dt { color: var(--t3); font-size: 12px; }
-.recent dd { margin: 2px 0 0; font-family: var(--serif); font-size: 24px; font-weight: 300; }
-.recent dd.bad { color: var(--warn); }
-.service footer { display: grid; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); }
+.recent div { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; }
+.recent dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.recent dd { margin: 4px 0 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.recent dd.bad { color: #b42318; }
+.service footer { display: grid; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f0f0f2; }
 .service footer .mc-primary { justify-self: start; }
-.cost { font-size: 12px !important; }
-.result { padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); color: var(--ivory); }
-.result.ok { background: rgba(169, 183, 154, 0.12); }
-.result span { display: block; margin-top: 2px; font-size: 12px; }
+.cost { color: #a1a1aa; font-size: 12px !important; }
+/* The live check: soft red unless it answered. */
+.result { padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; }
+.result.ok { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+.result span { display: block; margin-top: 2px; color: inherit; font-size: 12px; opacity: 0.8; }
 </style>

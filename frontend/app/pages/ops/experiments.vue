@@ -257,7 +257,6 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Experiments &amp; configuration</p>
       <h1 class="mc-serif">Switches, evaluations and A/B comparisons</h1>
       <p>Each switch starts at the server's default, and a change is recorded with who made it and what it was before. Only switches marked “Used by the product” reach new requests; the others are stored until the planner reads them. Evaluations run only the developer sets; held-out sets are never offered here.</p>
     </header>
@@ -351,7 +350,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
         </label>
         <label>Name (optional) <input v-model="form.label" maxlength="80" placeholder="e.g. before the budget change"></label>
         <p v-if="runError" class="ops-error" role="alert">{{ runError }}</p>
-        <button type="submit" class="mc-primary" :disabled="running || !evaluations.length">{{ running ? "Running…" : "Run evaluation" }}</button>
+        <button type="submit" class="mc-primary" :disabled="running || !evaluations.length" :aria-busy="running">{{ running ? "Running…" : "Run evaluation" }}</button>
       </form>
 
       <section class="ops-card" aria-labelledby="ab-title">
@@ -430,7 +429,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       <p v-else-if="!experiments" class="ops-muted" aria-busy="true">Loading…</p>
       <p v-else-if="!experiments.length" class="ops-muted">No evaluation has been run yet.</p>
       <table v-else>
-        <thead><tr><th>A</th><th>B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th>Time</th><th>When</th><th>Evidence</th></tr></thead>
+        <thead><tr><th>A</th><th>B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
         <tbody>
           <tr v-for="run in experiments" :key="run.id">
             <td><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"></td>
@@ -441,7 +440,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <td>{{ experimentGates(run) }}</td>
             <td class="mc-num">{{ formatSeconds(run.duration_seconds) }}</td>
             <td class="ops-muted">{{ formatWhen(run.created_at) }}</td>
-            <td><button type="button" class="mc-pill" @click="openExperiment(run)">Open</button></td>
+            <td><button type="button" class="mc-pill sm" @click="openExperiment(run)">Open</button></td>
           </tr>
         </tbody>
       </table>
@@ -474,7 +473,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <p class="mc-eyebrow">Experiment #{{ selectedExperimentId }}</p>
             <h2 id="experiment-detail-title" class="mc-serif">{{ selectedExperiment?.label ?? selectedExperiment?.evaluation ?? "Loading evidence…" }}</h2>
           </div>
-          <button type="button" class="mc-pill" @click="closeExperiment">Close</button>
+          <button type="button" class="mc-close" aria-label="Close" @click="closeExperiment"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
         </header>
         <p v-if="detailFailed" class="ops-error" role="alert">This experiment evidence couldn't be loaded.</p>
         <p v-else-if="detailLoading || !selectedExperiment" class="ops-muted" aria-busy="true">Loading recorded evidence…</p>
@@ -545,51 +544,54 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 
 <style scoped>
 .switches { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.switches li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.switches li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 0; border-bottom: 1px solid #f0f0f2; }
 .switches li:last-child { border-bottom: 0; }
 .what { flex: 1 1 320px; min-width: 0; }
-.what label { color: var(--ivory); font-size: 14px; }
+.what label { color: #18181b; font-size: 14px; font-weight: 500; }
 .what p { margin: 4px 0 0; font-size: 12.5px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .how { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-select, input:not([type="radio"]) { padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; font-size: 13px; }
 .how select, .how input { width: 150px; }
 .small { font-size: 12px; }
-.table-card { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { padding: 10px 12px; border-bottom: 1px solid var(--line-2); color: var(--t3); font-weight: 500; text-align: left; white-space: nowrap; }
-td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+/* Cards keep their own height: the A/B card is not stretched to the form beside it. */
+.ops-grid { align-items: start; }
+/* Tables run edge to edge under the card's title. */
+.ops-card.table-card > h2 { margin: 0; padding: 16px 20px; }
+.ops-card.table-card > p { margin: 0; padding: 0 20px 16px; }
+.results-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+.results-head h2 { margin: 0; }
 td p { margin: 4px 0 0; }
 .run-form { display: grid; gap: 12px; align-content: start; }
-.run-form label { display: grid; gap: 6px; color: var(--t3); font-size: 12px; }
+.run-form label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .run-form p { margin: 0; }
 .run-form .mc-primary { justify-self: start; }
-.results-head { display: flex; align-items: center; justify-content: space-between; }
-.results-head h2 { margin: 0; }
-h3 { margin: 16px 0 8px; color: var(--t2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
 .config-diff { margin: 0; padding-left: 18px; font-size: 13px; }
-.config-diff b { color: var(--accent); font-weight: 500; }
-.metrics { margin-top: 14px; }
-.metrics tbody th { color: var(--t2); font-weight: 400; white-space: normal; }
-.moved { color: var(--accent); }
-.comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 12px; border-radius: 10px; font-size: 12px; }
-.comparison-ready { border: 1px solid color-mix(in srgb, var(--sage) 45%, transparent); background: color-mix(in srgb, var(--sage) 10%, transparent); color: var(--sage); }
-.comparison-blocked { border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); color: var(--t2); }
+.config-diff b { color: #6d28d9; font-weight: 500; }
+/* The comparison tables sit in half a page: smaller cells than the full-width tables. */
+.metrics { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.metrics th, .metrics td { height: auto; padding: 8px 10px; font-size: 13px; line-height: 18px; }
+.metrics thead th { height: 32px; padding-block: 0; }
+.metrics tbody th { color: #52525b; font-weight: 400; white-space: normal; }
+.metrics td.mc-num { text-align: right; font-variant-numeric: tabular-nums; }
+.moved { color: #6d28d9; font-weight: 500; }
+.comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 14px; border: 1px solid; border-radius: 12px; font-size: 13px; line-height: 18px; }
+.comparison-ready { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+.comparison-blocked { border-color: #fecdca; background: #fef3f2; color: #b42318; }
 .comparison-blocked ul { margin: 6px 0 0; padding-left: 18px; }
 .evidence-table td { max-width: 180px; overflow-wrap: anywhere; }
 /* Five columns in half a page: headings and the humanized failure codes wrap at spaces rather than push the card wider; a status stays whole. */
 .case-changes th, .case-changes td { padding: 9px 8px; }
 .case-changes thead th { white-space: normal; }
 .case-changes td:nth-child(-n+3) { white-space: nowrap; }
-/* The drawer's overlay; each ops page styles its own (tasks.vue, users.vue, data.vue). */
-.drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
-.drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }
-.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.drawer-head h2 { margin: 6px 0 0; font-size: 24px; font-weight: 300; }
-.drawer .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-.drawer section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+/* The drawer's overlay, with the same values as the shared console drawer in ops.vue. */
+.drawer-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.drawer { position: fixed; top: 8px; right: 8px; bottom: 8px; width: min(640px, calc(100vw - 16px)); overflow-y: auto; padding: 0 24px 24px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.drawer-head + .chips { margin-bottom: 4px; }
 .drawer h3 { margin: 0 0 12px; }
 .preset-table { overflow-x: auto; }
 .preset-table td { min-width: 96px; font-size: 12px; }
-.drawer pre { max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.drawer details { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; }
+.drawer summary { padding: 9px 12px; color: #27272a; cursor: pointer; font-size: 13px; font-weight: 500; }
+.drawer details pre, .drawer details .ops-fields { margin: 0 12px 12px; }
 </style>

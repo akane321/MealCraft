@@ -58,7 +58,6 @@ const failures = computed(() => Object.entries(overview.value?.runs.failures_las
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Overview</p>
       <h1 class="mc-serif">The last two weeks</h1>
       <p>Counts come from stored runs only; a day with nothing recorded shows as empty, not as zero failures.</p>
     </header>
