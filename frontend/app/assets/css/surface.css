@@ -88,10 +88,6 @@
   stroke-linejoin: round;
 }
 
-/* Cards and sheets. */
-.mc-frost { background: var(--s1); border: 1px solid var(--line); }
-.mc-ribbed { background: var(--s1); border: 1px solid var(--line-2); border-radius: 18px; overflow: clip; box-shadow: 0 1px 0 var(--line-2); }
-
 .mc-overlay {
   position: fixed;
   inset: 0;

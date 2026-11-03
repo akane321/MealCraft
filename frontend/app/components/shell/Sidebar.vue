@@ -3,7 +3,6 @@
 // The home surface fills the slots; the other product pages get the same rows, so only the current item moves.
 const props = defineProps<{ current?: "plan" | "browse" | "history" | "profile" | "system" | "other" | null; brandButton?: boolean }>();
 const emit = defineEmits<{ brand: [] }>();
-const slots = useSlots();
 const { actor, logout } = useAuth();
 const initials = computed(() => (actor.value?.user.display_name ?? "?")
   .split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0]!.toUpperCase()).join(""));
@@ -27,12 +26,13 @@ const on = (page: string) => ({ on: props.current === page });
       <NuxtLink to="/browse" class="sb-item" :class="on('browse')"><UIcon name="i-lucide-book-open" />Recipes &amp; groceries</NuxtLink>
       <NuxtLink to="/history" class="sb-item" :class="on('history')"><UIcon name="i-lucide-calendar-clock" />Past plans</NuxtLink>
     </nav>
-    <template v-if="slots.default">
-      <div class="sb-sep" />
-      <p class="sb-label">Recent plans</p>
-      <slot />
-    </template>
-    <div v-else class="sb-fill" />
+    <!-- The same section on every page, so the sidebar keeps its shape; the list itself lives on My plan. -->
+    <div class="sb-sep" />
+    <p class="sb-label">Recent plans</p>
+    <slot>
+      <p class="sb-hint">Open My plan to see your recent plans.</p>
+      <div class="sb-fill" />
+    </slot>
     <slot name="card">
       <div class="home-card">
         <b>Your household</b>
@@ -58,4 +58,5 @@ const on = (page: string) => ({ on: props.current === page });
 
 <style scoped>
 .sb-signin { flex: 1; }
+.sb-hint { flex: none; margin: 4px 10px; color: #a1a1aa; font-size: 12.5px; line-height: 18px; }
 </style>

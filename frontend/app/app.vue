@@ -44,7 +44,7 @@ onMounted(load);
 <template>
   <UApp>
     <div class="app-shell">
-      <p v-if="simulatedLabel" class="simulated-clock" role="status">Simulated date: {{ simulatedLabel }} · for debugging</p>
+      <p v-if="simulatedLabel" class="simulated-clock" role="status"><UIcon name="i-lucide-clock" aria-hidden="true" />Simulated date: {{ simulatedLabel }} · for debugging</p>
       <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
         <ShellSidebar :current="shellPage" />
@@ -53,9 +53,8 @@ onMounted(load);
           <NuxtPage />
         </div>
       </div>
-      <!-- Sign-in: the same tinted page with the mark; the home surface and the console (/ops) draw their own. -->
+      <!-- Sign-in: a glowing page with one card (the mark is in the card); the home surface and the console (/ops) draw their own. -->
       <div v-else-if="route.path.startsWith('/login')" class="mc-shell mc-page auth-shell">
-        <NuxtLink to="/" class="sb-brand auth-brand"><ShellMark />MealCraft</NuxtLink>
         <NuxtPage />
       </div>
       <NuxtPage v-else />
@@ -64,14 +63,23 @@ onMounted(load);
 </template>
 
 <style scoped>
-/* A thin strip along the top edge, where every page leaves room, so it never covers a title. */
-.simulated-clock { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; height: 16px; margin: 0; padding: 0 12px; border-bottom: 1px solid #fedf89; background: #fffaeb; color: #b54708; font: 500 11px/15px var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); text-align: center; pointer-events: none; }
+/* A small warning badge at the top centre, in the gap above the panel, so it never covers a title. */
+.simulated-clock { position: fixed; z-index: 1000; top: 4px; left: 50%; transform: translateX(-50%); height: 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 0 10px; border: 1px solid #fedf89; border-radius: 999px; background: #fffaeb; color: #b54708; font: 500 12px/16px var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif); white-space: nowrap; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); pointer-events: none; }
+.simulated-clock .iconify { width: 12px; height: 12px; }
 /* Sidebar and the white panel, both the height of the window; the panel scrolls. */
 .product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .product-frame { height: calc(100vh - 16px); overflow-y: auto; }
 /* The profile's sticky column sticks inside the panel, not the window. */
 .product-frame :deep(.profile-sidebar) { top: 72px; max-height: calc(100vh - 104px); }
 .product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
-.auth-shell { min-height: 100vh; padding: 12px 18px 48px; }
-.auth-brand { width: fit-content; }
+/* The home's pastel glow behind the sign-in card. */
+.auth-shell {
+  min-height: 100vh; padding: 12px 18px 48px;
+  background:
+    radial-gradient(560px 300px at 50% 8%, rgba(255, 226, 200, 0.7), transparent 70%),
+    radial-gradient(420px 320px at 30% 40%, rgba(233, 213, 255, 0.45), transparent 70%),
+    radial-gradient(460px 240px at 55% 70%, rgba(255, 240, 166, 0.45), transparent 70%),
+    radial-gradient(400px 300px at 75% 45%, rgba(255, 211, 230, 0.4), transparent 70%),
+    #f5f5f7;
+}
 </style>

@@ -30,7 +30,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </template>
 
 <style scoped>
-.scrim { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.scrim { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(15, 15, 18, 0.32); }
 .box { width: min(440px, 100%); padding: 24px; }
 h2 { margin: 0 0 6px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; }
 p { margin: 0; color: #71717a; font-size: 14px; line-height: 20px; }

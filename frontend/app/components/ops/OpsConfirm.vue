@@ -26,7 +26,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </template>
 
 <style scoped>
-.confirm-scrim { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.confirm-scrim { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px; background: rgba(15, 15, 18, 0.32); }
 .confirm { width: min(440px, 100%); padding: 24px; animation: mc-rise 240ms var(--ease, ease-out) both; }
 .confirm h2 { margin: 0 0 6px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
 .confirm p { margin: 0; color: #71717a; font-size: 14px; line-height: 20px; }

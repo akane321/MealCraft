@@ -133,7 +133,9 @@
 
 /* Overlays: a light scrim; sheets, dialogs and drawers share one white panel. */
 /* The token block above already gives overlays the 400 Inter body; the font shorthand reset tabular numbers. */
-.mc-shell :is(.mc-overlay, .mc-sheet-overlay) { font-variant-numeric: tabular-nums; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.mc-shell :is(.mc-overlay, .mc-sheet-overlay) { font-variant-numeric: tabular-nums; background: rgba(15, 15, 18, 0.32); }
+/* A confirm over a drawer: the drawer's scrim already dims the page, so this one adds little. */
+.mc-shell:has(.drawer-scrim) .confirm-scrim { background: rgba(15, 15, 18, 0.12); }
 .mc-shell .mc-panel { border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
 .mc-shell .mc-close { width: 32px; height: 32px; flex: none; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
 .mc-shell .mc-close:hover { background: #f4f4f5; color: #18181b; }
@@ -142,7 +144,9 @@
 /* Danger, disabled and busy buttons. Busy keeps the ink pill and shows a spinner. */
 .mc-shell .mc-btn.danger { border-color: #fecaca; background: #fef2f2; color: #b42318; }
 .mc-shell .mc-btn.danger:hover:not(:disabled) { background: #fee4e2; }
-.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-btn.secondary, .mc-btn.danger):disabled:not([aria-busy="true"]) { opacity: 1; border-color: transparent; background: #f4f4f5; color: #a1a1aa !important; box-shadow: inset 0 0 0 1px #e4e4e7; cursor: not-allowed; }
+/* Disabled keeps each variant's own look, faded, so the action row keeps its order of importance. */
+.mc-shell :is(.mc-btn, .mc-pill, .mc-primary, .primary-button, .secondary-button):disabled:not([aria-busy="true"]) { opacity: 0.4; cursor: not-allowed; }
+.mc-shell .mc-btn.danger:disabled:not([aria-busy="true"]) { opacity: 0.45; }
 .mc-shell .mc-btn[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .mc-shell .mc-spin { width: 14px; height: 14px; flex: none; animation: mc-spin 900ms linear infinite; }
 @keyframes mc-spin { to { transform: rotate(360deg); } }
@@ -218,6 +222,8 @@
 .sb-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #18181b; font: inherit; font-size: 13.5px; }
 .sb-search input::placeholder { color: #a1a1aa; }
 .sb-search:focus-within { border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+/* The wrapper draws the one focus ring. */
+.mc-shell :is(.sb-search input, .convos .rename):focus-visible { outline: none; }
 .sb-item { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 8px; color: #3f3f46; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none; transition: background 150ms; }
 .sb-item > .iconify, .sb-item > svg { width: 18px; height: 18px; flex: none; color: #52525b; }
 .sb-item:hover { background: #efeff1; }
@@ -226,6 +232,8 @@
 .sb-sep { flex: none; height: 1px; margin: 10px 6px 4px; background: #e8e8eb; }
 .sb-label { margin: 0; padding: 12px 10px 6px; color: #a1a1aa; font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .sb-fill { flex: 1 1 auto; }
+/* Only the conversation list gives or takes height, so the rows above it never move between states. */
+.sb > :is(.sb-brand, .sb-new, .sb-search, .pages, .sb-sep, .sb-label, .sb-item) { flex: none; }
 .sb-user { flex: none; display: flex; align-items: center; gap: 10px; height: 48px; margin-top: 8px; padding: 0 6px 0 8px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
 .sb-avatar { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #ede9fe; color: #6d28d9; font-size: 11px; font-weight: 600; }
 .sb-who { min-width: 0; flex: 1; display: flex; flex-direction: column; }
@@ -241,7 +249,7 @@
 .home-card .chips .mc-chip:not(.alert) { background: #fff; box-shadow: inset 0 0 0 1px #ece6f7; }
 .home-link { display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; margin-top: 10px; border: 1px solid #ececef; border-radius: 10px; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; text-decoration: none; }
 .home-link:hover { background: #fafafa; border-color: #d4d4d8; }
-.home-link[aria-current="page"] { border-color: #ddd6fe; color: var(--mc-strong); }
+.home-link[aria-current="page"] { border-color: #ddd6fe; background: #f5f3ff; color: #5b21b6; }
 .home-link .iconify { width: 14px; height: 14px; }
 
 /* The 56px bar at the top of the white panel: a dim icon and the page's name. */
@@ -294,14 +302,12 @@
 
 /* Buttons: dark pill for the main action, white outline pill, a quiet ghost for removing. */
 .product-frame :is(.primary-button, .secondary-button) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-family: var(--sans); text-decoration: none; transition: background 150ms, border-color 150ms; }
-.product-frame .primary-button { min-height: 40px; height: 40px; border: 0; background: #18181b; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.product-frame .primary-button { min-height: 40px; height: 40px; padding: 0 18px; border: 0; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .product-frame .primary-button:hover:not(:disabled) { background: #27272a; }
-/* Disabled (not busy) is the shell's flat grey; busy keeps the ink pill with a spinner. */
-.product-frame .primary-button:disabled:not([aria-busy="true"]) { opacity: 1; background: #f4f4f5; color: #a1a1aa; box-shadow: inset 0 0 0 1px #e4e4e7; cursor: not-allowed; }
+/* Disabled (not busy) is the shell's faded pill; busy keeps the ink pill with a spinner. */
 .product-frame .primary-button[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .product-frame .secondary-button { min-height: 32px; height: 32px; padding: 0 12px; border: 1px solid #e4e4e7; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
 .product-frame .secondary-button:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
-.product-frame .secondary-button:disabled { opacity: 0.5; cursor: default; }
 .product-frame .profile-page .text-button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 8px; color: #71717a; font-size: 13px; font-weight: 500; }
 .product-frame .profile-page .text-button .iconify { width: 16px; height: 16px; }
 .product-frame .profile-page .text-button:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
@@ -325,7 +331,11 @@
 .product-frame .profile-sidebar { display: flex; flex-direction: column; gap: 16px; border: 0; }
 .product-frame .profile-sidebar > section { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
 .product-frame .profile-sidebar h2 { font-size: 18px; line-height: 24px; }
-.product-frame .profile-sidebar > section > p:not(.form-kicker) { margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; }
+.product-frame .profile-sidebar > section > p { margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; }
+/* The summary's long explanation stays three lines; its full text is in the form above. */
+.product-frame .profile-summary-card > p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 18px; }
+.product-frame .secondary-button .iconify { width: 14px; height: 14px; flex: none; color: #71717a; }
+.product-frame .profile-page select { text-overflow: ellipsis; }
 .product-frame .profile-summary-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
 .product-frame .profile-summary-list div { grid-template-columns: 140px minmax(0, 1fr); padding: 0; border: 0; }
 .product-frame .profile-summary-list dt { color: #71717a; font-size: 13px; line-height: 18px; }
@@ -333,7 +343,7 @@
 .product-frame .profile-planning-card .primary-button { width: 100%; margin-top: 16px; }
 .product-frame .profile-planning-card .primary-button + .field-help { margin-top: 8px; }
 .product-frame .profile-planning-card .plan-when { margin-top: 14px; }
-.product-frame .profile-save-button { width: auto; min-width: 200px; margin-top: 20px; padding-inline: 20px; }
+.product-frame .profile-save-button { width: auto; min-width: 0; margin-top: 20px; padding-inline: 18px; }
 .product-frame .profile-main > [aria-labelledby="never-again-title"] { margin-top: 32px; }
 /* Plan ready: a green check tile, the changes, then a violet link to the plan. */
 .product-frame .profile-change-card > .mc-tile { width: 32px; height: 32px; margin-bottom: 12px; border-radius: 9px; }
@@ -371,10 +381,18 @@
 .product-frame .technical-links a { color: #6d28d9; font-size: 14px; font-weight: 500; }
 .product-frame .technical-links button { height: 32px; padding: 0 14px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
 .product-frame .technical-links button:hover { background: #f7f7f8; text-decoration: none; }
+/* Status rows: the name left, the badge at the right edge; the prices note sits under its label. */
+.product-frame .status-row { grid-template-columns: minmax(0, 1fr) auto; }
+.product-frame .status-row:has(.prices) { grid-template-columns: minmax(0, 1fr); row-gap: 2px; padding-block: 10px; }
+.product-frame .status-row .prices { font-size: 12px; line-height: 16px; }
+/* The administrator card: title, the key/value list, then the links in one row. */
+.product-frame .technical-details.admin { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.product-frame .technical-details.admin .technical-links { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
+.product-frame .technical-details.admin .technical-links a { font-size: 13.5px; }
 
 /* Console forms: the same white fields, violet focus ring and line chevron as the product. */
 .mc-shell.ops-shell main :is(select, textarea, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input:not([type])) {
-  border: 1px solid #e4e4e7; border-radius: 10px; background-color: #fff; color: #18181b; box-shadow: var(--mc-shadow-xs);
+  border: 1px solid #e4e4e7; border-radius: 10px; background-color: #fff; color: #18181b; font-size: 14px; box-shadow: var(--mc-shadow-xs);
 }
 .mc-shell.ops-shell main :is(select, textarea, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input:not([type])):focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .mc-shell.ops-shell main select {
