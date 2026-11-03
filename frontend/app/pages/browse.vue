@@ -104,8 +104,12 @@ function packLabel(size: number | null, unit: string | null) {
           <button v-for="item in COURSES" :key="item.label" type="button" class="chip" :aria-pressed="course === item.id" @click="course = item.id">{{ item.label }}</button>
         </div>
       </div>
-      <p v-if="recipeError" class="notice" role="alert">{{ recipeError }}</p>
-      <p v-else-if="!loadingRecipes && !recipes.length" class="notice">No recipe matches that. Try fewer words.</p>
+      <p v-if="recipeError" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ recipeError }}</p>
+      <p v-else-if="loadingRecipes && !recipes.length" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading recipes…</p>
+      <div v-else-if="!loadingRecipes && !recipes.length" class="mc-empty">
+        <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-search-x" /></span></span></div>
+        <h2>No recipe matches that. Try fewer words.</h2>
+      </div>
       <ul class="cards">
         <li v-for="recipe in recipes" :key="recipe.id">
           <button type="button" class="card" @click="openSlug = recipe.slug">
@@ -130,19 +134,21 @@ function packLabel(size: number | null, unit: string | null) {
         <label class="live"><input v-model="live" type="checkbox"> Ask FairPrice now</label>
         <button type="submit" class="secondary-button" :disabled="loadingProducts || productQuery.trim().length < 2">{{ loadingProducts ? "Searching…" : "Search" }}</button>
       </form>
-      <p v-if="productError" class="notice" role="alert">{{ productError }}</p>
+      <p v-if="productError" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ productError }}</p>
       <p v-if="products && !products.items.length" class="notice">FairPrice has nothing for “{{ products.query }}”.</p>
-      <table v-if="products?.items.length" class="products">
-        <thead><tr><th>Product</th><th>Pack</th><th class="num">Price</th><th /></tr></thead>
-        <tbody>
-          <tr v-for="item in products.items" :key="item.external_id" :class="{ out: !item.in_stock }">
-            <td>{{ item.name }}<small v-if="item.brand">{{ item.brand }}</small></td>
-            <td>{{ packLabel(item.package_size, item.package_unit) }}</td>
-            <td class="num">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock">Out of stock</small></td>
-            <td><a :href="item.product_url" target="_blank" rel="noopener">FairPrice</a></td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-if="products?.items.length" class="table-card">
+        <table class="products">
+          <thead><tr><th>Product</th><th>Pack</th><th class="num">Price</th><th /></tr></thead>
+          <tbody>
+            <tr v-for="item in products.items" :key="item.external_id" :class="{ out: !item.in_stock }">
+              <td>{{ item.name }}<small v-if="item.brand">{{ item.brand }}</small></td>
+              <td>{{ packLabel(item.package_size, item.package_unit) }}</td>
+              <td class="num">{{ formatSgd(item.price_sgd) }}<small v-if="!item.in_stock">Out of stock</small></td>
+              <td><a :href="item.product_url" target="_blank" rel="noopener">FairPrice</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p v-if="products?.items.length" class="source">
         {{ productSourceLabel(products) }}
       </p>
@@ -168,20 +174,29 @@ function packLabel(size: number | null, unit: string | null) {
 .chip:hover { border-color: #d4d4d8; }
 .chip[aria-pressed="true"] { border-color: #18181b; background: #18181b; color: #fff; }
 .live { display: flex; gap: 6px; align-items: center; color: var(--t2); font-size: 13px; }
-.notice { color: var(--t3); }
+.notice { color: #71717a; font-size: 14px; }
 .cards { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); transition: border-color 150ms, box-shadow 150ms; }
-.card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: 0 6px 20px -12px rgba(16, 16, 20, 0.15); }
+.card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: var(--mc-shadow-xs); transition: border-color 160ms, box-shadow 160ms, transform 160ms; }
+.card:hover, .card:focus-visible { border-color: #e1e1e5; box-shadow: var(--mc-shadow-md); transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .card:hover, .card:focus-visible { transform: none; } }
 .card .icon { margin-bottom: 8px; }
 .card .title { color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
 .card small { color: #71717a; font-size: 12.5px; }
 .more { margin-top: 18px; }
-.products { width: 100%; border-collapse: collapse; font-size: 14px; }
-.products th { text-align: left; font-size: 12px; font-weight: 500; color: #71717a; padding: 8px 10px; border-bottom: 1px solid #ececef; }
-.products td { padding: 10px; border-bottom: 1px solid #f0f0f2; color: #27272a; vertical-align: top; }
-.products td small { display: block; color: var(--t3); font-size: 12px; }
+/* The search button matches the 36px field. */
+.controls .secondary-button { min-height: 36px; height: 36px; padding: 0 16px; font-size: 14px; }
+.mc-alert, .mc-loading { margin: 0 0 16px; }
+/* Products: the spec table in a white card with a tinted header row. */
+.table-card { border: 1px solid #ececef; border-radius: 12px; background: #fff; overflow: hidden; }
+.products { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.products th { height: 36px; padding: 0 14px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: left; }
+.products td { padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; vertical-align: top; }
+.products tbody tr:last-child td { border-bottom: 0; }
+.products tbody tr:hover td { background: #fafafb; }
+.products td small { display: block; color: #71717a; font-size: 12px; line-height: 16px; }
 .products .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.products .out td { color: var(--t3); }
-.products a { color: #6d28d9; font-weight: 500; }
-.source { margin-top: 10px; color: var(--muted); font-size: 12px; }
+.products .out td { color: #a1a1aa; }
+.products a { color: #7c3aed; font-size: 13px; font-weight: 500; text-decoration: none; }
+.products a:hover { text-decoration: underline; }
+.source { margin: 10px 0 0; color: #a1a1aa; font-size: 12px; line-height: 16px; }
 </style>
