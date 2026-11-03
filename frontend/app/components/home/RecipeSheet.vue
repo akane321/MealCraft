@@ -34,15 +34,15 @@ useDialog(overlay, () => emit("close"));
 
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
-    <section class="mc-ribbed panel">
+    <section class="mc-panel panel">
       <header>
-        <HomeDishIcon v-if="recipe" :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="44" />
+        <span v-if="recipe" class="icon"><HomeDishIcon :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="40" /></span>
         <div>
-          <h2 class="mc-serif">{{ recipe?.title ?? "Recipe" }}</h2>
+          <h2>{{ recipe?.title ?? "Recipe" }}</h2>
           <p v-if="recipe">{{ recipe.total_time_minutes }} min · serves {{ recipe.servings }} · {{ recipe.cuisine }}</p>
         </div>
-        <button type="button" class="mc-pill close" aria-label="Close recipe" @click="emit('close')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button type="button" class="mc-close" aria-label="Close recipe" @click="emit('close')">
+          <UIcon name="i-lucide-x" aria-hidden="true" />
         </button>
       </header>
 
@@ -56,7 +56,7 @@ useDialog(overlay, () => emit("close"));
         @retry="load(slug)"
       />
       <div v-else class="body">
-        <section class="mc-frost card" aria-label="Ingredients">
+        <section class="card" aria-label="Ingredients">
           <h3>Ingredients</h3>
           <p class="hint">Quantities serve {{ recipe.servings }}. Allergens come from ingredient data; check product labels.</p>
           <ul>
@@ -67,7 +67,7 @@ useDialog(overlay, () => emit("close"));
             </li>
           </ul>
         </section>
-        <section class="mc-frost card" aria-label="Steps">
+        <section class="card" aria-label="Steps">
           <h3>Steps</h3>
           <ol>
             <li v-for="step in recipe.steps" :key="step.step_number">{{ step.instruction }}</li>
@@ -79,22 +79,23 @@ useDialog(overlay, () => emit("close"));
 </template>
 
 <style scoped>
-.panel { width: min(920px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-header { display: flex; align-items: flex-start; gap: 12px; }
-header > div { flex-grow: 1; }
-h2 { margin: 0; font-size: 28px; }
-header p { margin: 4px 0 0; font-size: 12px; color: var(--mc-text-3); }
-.close { width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; }
-svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-.note { margin: 12px 0; font-size: 14px; color: var(--mc-text-2); }
-.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 14px; align-items: start; }
-.card { padding: 16px; border-radius: 18px; }
-h3 { margin: 0 0 6px; font-size: 14px; }
-.hint { margin: 0 0 8px; font-size: 12px; color: var(--mc-text-3); }
+.panel { width: min(920px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; border-bottom: 1px solid #f0f0f2; }
+header > div { flex-grow: 1; min-width: 0; }
+.icon { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: 12px; background: #fafafa; }
+h2 { margin: 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
+header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
+.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: start; padding: 20px 24px 24px; }
+.card { padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
+h3 { margin: 0 0 4px; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
+.hint { margin: 0 0 8px; color: #71717a; font-size: 12px; line-height: 16px; }
 ul { list-style: none; margin: 0; padding: 0; }
-ul li { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 13px; }
-.name small { color: var(--mc-text-3); }
-.qty { color: var(--mc-text-2); }
-.allergen { grid-column: 1 / -1; font-size: 12px; font-weight: 700; color: var(--warn); }
-ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.55; }
+ul li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 12px; padding: 9px 0; border-top: 1px solid #f2f2f4; }
+.name { color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; }
+.name small { color: #a1a1aa; font-size: 12px; font-weight: 400; }
+.qty { color: #52525b; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.allergen { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: #fef3f2; color: #b42318; font-size: 12px; font-weight: 500; }
+ol { counter-reset: step; margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+ol li { counter-increment: step; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; color: #27272a; font-size: 14px; line-height: 22px; }
+ol li::before { content: counter(step); width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: #f4f4f5; color: #52525b; font-size: 12px; line-height: 1; font-weight: 600; }
 </style>

@@ -20,10 +20,13 @@ const emit = defineEmits<{ retry: [] }>();
     <p class="visually-hidden">Loading</p>
     <span v-for="row in rows ?? 4" :key="row" class="skeleton" aria-hidden="true" />
   </div>
-  <div v-else-if="state === 'error'" class="panel-state error" role="alert">
+  <div v-else-if="state === 'error'" class="panel-state error mc-empty" role="alert">
+    <div class="mc-empty-art" aria-hidden="true">
+      <span><span class="mc-tile" data-tone="rose"><UIcon name="i-lucide-circle-alert" /></span></span>
+    </div>
     <h2 v-if="title" class="mc-serif">{{ title }}</h2>
     <p>{{ errorText ?? "This couldn't be loaded." }}</p>
-    <button type="button" class="mc-btn secondary" @click="emit('retry')">Try again</button>
+    <button type="button" class="mc-btn secondary sm" @click="emit('retry')">Try again</button>
   </div>
   <div v-else class="panel-state empty mc-empty">
     <div class="mc-empty-art" aria-hidden="true">
@@ -35,24 +38,21 @@ const emit = defineEmits<{ retry: [] }>();
 </template>
 
 <style scoped>
-.panel-state { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; color: var(--c-muted); font-size: 14px; }
-.panel-state h2 { margin: 0 0 4px; font-size: 16px; line-height: 22px; font-weight: 600; color: var(--c-ink); }
+.panel-state { display: flex; flex-direction: column; gap: 10px; padding: 20px 16px; color: var(--c-muted); font-size: 14px; }
+.panel-state h2 { margin: 0 0 4px; font-size: 16px; line-height: 22px; font-weight: 600; color: var(--mc-strong); }
 .panel-state p { margin: 0; }
-.panel-state.empty { gap: 0; margin-top: 12vh; padding: 24px; }
-.panel-state.empty h2 { margin: 16px 0 0; }
-.panel-state.empty p { max-width: 300px; margin-top: 6px; color: #71717a; }
-.panel-state.error { gap: 14px; align-items: flex-start; color: var(--mc-text-2); }
-.panel-state.error p { margin: 0; line-height: 1.6; }
+.panel-state.empty, .panel-state.error { gap: 0; margin-top: 12vh; padding: 24px; }
+.panel-state.empty h2, .panel-state.error h2 { margin: 16px 0 0; }
+.panel-state.empty p, .panel-state.error p { max-width: 300px; margin-top: 6px; color: #71717a; line-height: 20px; }
+.panel-state.error .mc-empty-art > span { background: #fff1f3; }
+.panel-state.error button { margin-top: 16px; }
 
 .skeleton {
   height: 54px;
-  border-radius: 12px;
-  border: 1px solid var(--c-line);
-  background:
-    linear-gradient(100deg, transparent 20%, rgba(42, 42, 72, 0.06) 40%, transparent 60%)
-    rgba(42, 42, 72, 0.02);
+  border-radius: 8px;
+  background: linear-gradient(100deg, #f4f4f5 30%, #fafafa 50%, #f4f4f5 70%);
   background-size: 260% 100%;
-  animation: mc-shimmer 1400ms var(--mc-ease) infinite;
+  animation: mc-shimmer 1400ms var(--ease) infinite;
 }
 .skeleton:first-of-type { height: 128px; }
 

@@ -58,14 +58,14 @@ useDialog(overlay, () => emit("close"));
 
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" aria-label="Nutrition details">
-    <section class="mc-ribbed panel">
+    <section class="mc-panel panel">
       <header>
         <div>
-          <h2 class="mc-serif">Nutrition</h2>
+          <h2>Nutrition</h2>
           <p>Per person · cooked dishes count as actual · general guidance, not medical advice</p>
         </div>
-        <button type="button" class="mc-pill close" aria-label="Close nutrition details" @click="emit('close')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button type="button" class="mc-close" aria-label="Close nutrition details" @click="emit('close')">
+          <UIcon name="i-lucide-x" aria-hidden="true" />
         </button>
       </header>
 
@@ -74,20 +74,21 @@ useDialog(overlay, () => emit("close"));
           v-for="item in nutritionMetrics"
           :key="item.key"
           type="button"
-          class="mc-frost metric"
+          class="metric"
           :class="{ active: metric === item.key }"
           :aria-pressed="metric === item.key"
           @click="metric = item.key"
         >
           <span>{{ item.label }}</span>
-          <strong class="mc-serif">{{ Math.round(dashboard.completed_nutrition_per_person[item.key]).toLocaleString("en-SG") }} {{ item.unit }}</strong>
+          <strong>{{ Math.round(dashboard.completed_nutrition_per_person[item.key]).toLocaleString("en-SG") }} {{ item.unit }}</strong>
           <small>of {{ Math.round(dashboard.planned_nutrition_per_person[item.key]).toLocaleString("en-SG") }} planned<template v-if="progress(item.key) !== null"> · {{ progress(item.key) }}%</template></small>
         </button>
       </div>
 
-      <figure class="mc-frost chart">
+      <figure class="chart">
         <figcaption>Cumulative {{ definition.label.toLowerCase() }} ({{ definition.unit }}), up to {{ chart.max.toLocaleString("en-SG") }}</figcaption>
         <svg viewBox="0 0 640 180" role="img" :aria-label="`Cumulative ${definition.label}: cooked against the current plan`">
+          <line v-for="y in [24, 68, 112, 156]" :key="`g${y}`" x1="0" x2="640" :y1="y" :y2="y" class="grid" />
           <polyline v-for="(points, index) in chart.plan" :key="`p${index}`" :points="points" class="plan" />
           <polyline v-for="(points, index) in chart.done" :key="`d${index}`" :points="points" class="done" />
           <circle v-for="(point, index) in chart.planDots" :key="`pd${index}`" :cx="point.x" :cy="point.y" r="5" class="plan-dot" />
@@ -96,7 +97,8 @@ useDialog(overlay, () => emit("close"));
         <p class="legend"><span><i class="done" />Cooked</span><span><i class="plan" />Current plan</span></p>
       </figure>
 
-      <table class="mc-frost days">
+      <div class="table-card">
+      <table class="days">
         <caption class="visually-hidden">Nutrition per dish</caption>
         <thead>
           <tr>
@@ -114,51 +116,54 @@ useDialog(overlay, () => emit("close"));
             <td v-for="item in nutritionMetrics" :key="item.key">{{ Math.round(day.nutrition_per_person[item.key]) }}</td>
             <td v-if="!readonly" class="actions">
               <template v-if="day.status === 'planned'">
-                <button type="button" class="mc-pill" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'completed')">Cooked</button>
-                <button type="button" class="mc-pill" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'skipped')">Skip</button>
+                <button type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'completed')">Cooked</button>
+                <button type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'skipped')">Skip</button>
               </template>
-              <button v-else type="button" class="mc-pill" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'planned')">Undo</button>
+              <button v-else type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'planned')">Undo</button>
             </td>
           </tr>
         </tbody>
       </table>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped>
-.panel { width: min(1040px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-header { display: flex; align-items: flex-start; gap: 12px; }
+.panel { width: min(1040px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 0 24px 24px; }
+header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; margin: 0 -24px; padding: 20px 24px; border-bottom: 1px solid #f0f0f2; background: #fff; }
 header > div { flex-grow: 1; }
-h2 { margin: 0; font-size: 26px; }
-header p { margin: 4px 0 0; font-size: 12px; color: var(--mc-text-3); }
-.close { width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; }
-svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-.close svg { width: 16px; height: 16px; }
+h2 { margin: 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
+header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
 .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.metric { padding: 12px; border-radius: 16px; text-align: left; display: flex; flex-direction: column; gap: 2px; color: var(--mc-ivory); }
-.metric span { font-size: 12px; color: var(--mc-text-2); }
-.metric strong { font-size: 20px; }
-.metric small { font-size: 12px; color: var(--mc-text-3); }
-.metric.active { outline: 1.5px solid var(--mc-accent); }
-.chart { margin: 0; padding: 14px 16px; border-radius: 18px; }
-.chart figcaption { font-size: 12px; color: var(--mc-text-2); }
-.chart svg { width: 100%; height: 180px; }
-.chart polyline { stroke-width: 2.5; }
-.chart .done { stroke: var(--mc-ivory); }
-.chart .plan { stroke: var(--mc-text-3); stroke-dasharray: 6 5; }
-.chart .plan-dot { fill: none; stroke: var(--mc-text-3); stroke-width: 2; }
-.chart .done-dot { fill: var(--mc-ivory); stroke: none; }
-.legend { margin: 0; display: flex; gap: 16px; font-size: 12px; color: var(--mc-text-3); }
+.metric { display: flex; flex-direction: column; gap: 2px; padding: 14px; border: 1px solid #ececef; border-radius: 12px; background: #fff; text-align: left; color: #27272a; box-shadow: var(--mc-shadow-xs); }
+.metric:hover { border-color: #d4d4d8; }
+.metric span { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+.metric strong { color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.metric small { color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.metric.active { border-color: #c4b5fd; background: #f5f3ff; }
+.chart { margin: 0; padding: 14px 16px; border: 1px solid #ececef; border-radius: 12px; }
+.chart figcaption { color: #71717a; font-size: 12px; font-weight: 500; }
+.chart svg { width: 100%; height: 180px; overflow: visible; }
+.chart .grid { stroke: #f0f0f2; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.chart polyline { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.chart .done { stroke: #8b5cf6; }
+.chart .plan { stroke: #c4b5fd; stroke-dasharray: 6 5; }
+.chart .plan-dot { fill: #fff; stroke: #8b5cf6; stroke-width: 2; }
+.chart .done-dot { fill: #8b5cf6; stroke: none; }
+.legend { margin: 6px 0 0; display: flex; gap: 16px; color: #a1a1aa; font-size: 11px; }
 .legend span { display: flex; align-items: center; gap: 6px; }
-.legend i { width: 18px; height: 0; border-top: 2.5px solid var(--mc-ivory); }
-.legend i.plan { border-top: 2.5px dashed var(--mc-text-3); }
-.days { width: 100%; border-collapse: collapse; border-radius: 18px; overflow: hidden; font-size: 12px; }
-.days th, .days td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.legend i { width: 18px; height: 0; border-top: 2px solid #8b5cf6; }
+.legend i.plan { border-top: 2px dashed #c4b5fd; }
+.table-card { border: 1px solid #ececef; border-radius: 12px; overflow: hidden; }
+.days { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.days th { height: 36px; padding: 0 14px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }
+.days td { height: 44px; padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; line-height: 20px; text-align: right; }
+.days tbody tr:last-child td { border-bottom: 0; }
+.days tbody tr:hover td { background: #fafafb; }
 .days th:nth-child(-n+4), .days td:nth-child(-n+4) { text-align: left; }
-.days th { font-weight: 600; color: var(--mc-text-3); }
 .days .dish { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.days tr.skipped td { color: var(--mc-text-3); }
-.days .actions { white-space: nowrap; }
-.days .actions button { min-height: 32px; padding: 0 12px; margin-left: 6px; font-size: 12px; }
+.days tr.skipped td { color: #a1a1aa; }
+.days .actions { padding-block: 0; white-space: nowrap; }
+.days .actions button { height: 28px; padding: 0 10px; margin-left: 6px; font-size: 12.5px; font-weight: 500; }
 </style>

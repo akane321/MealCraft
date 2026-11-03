@@ -47,6 +47,7 @@ function kcal(event: MealPlanReplanEvent) {
   </div>
   <details v-if="applied.length" class="changes">
     <summary>
+      <UIcon name="i-lucide-chevron-right" class="chev" aria-hidden="true" />
       <span>Changes</span>
       <span class="count">{{ applied.length }}</span>
     </summary>
@@ -71,41 +72,22 @@ function kcal(event: MealPlanReplanEvent) {
 </template>
 
 <style scoped>
-.latest { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); background: var(--c-canvas); font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.latest strong { font-weight: 800; color: var(--c-ink); }
+.latest { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); background: #fafafa; color: #27272a; font-size: 13px; line-height: 18px; }
+.latest strong { color: #71717a; font-size: 12px; font-weight: 500; }
 .changes { flex-shrink: 0; max-height: 160px; overflow: auto; padding: 10px 16px; border-bottom: 1px solid var(--c-line-soft); }
-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 800;
-  color: var(--c-muted);
-}
+summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; color: #52525b; font-size: 13px; line-height: 18px; font-weight: 500; }
 summary::-webkit-details-marker { display: none; }
-summary::before { content: "▸"; font-size: 12px; transition: transform 200ms var(--mc-ease); }
-.changes[open] summary::before { transform: rotate(90deg); }
-.count {
-  margin-left: auto;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: var(--c-neutral);
-  color: var(--c-neutral-text);
-  font-size: 12px;
-}
-ol { margin: 12px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
-.swap { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 13px; color: var(--mc-text-2); }
-.swap s { color: var(--mc-text-3); }
-.swap strong { font-family: var(--mc-serif); font-weight: 700; color: var(--mc-ivory); }
-.meta { margin: 3px 0 0; font-size: 12px; color: var(--mc-text-3); }
+.chev { width: 14px; height: 14px; flex: none; color: #a1a1aa; transition: transform 200ms var(--ease); }
+.changes[open] .chev { transform: rotate(90deg); }
+.count { margin-left: auto; height: 20px; display: inline-flex; align-items: center; padding: 0 7px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+ol { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.swap { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; color: #52525b; font-size: 13px; }
+.swap s { color: #a1a1aa; }
+.swap strong { color: #18181b; font-weight: 500; }
+.meta { margin: 2px 0 0; color: #71717a; font-size: 12px; }
 .reason { font-style: italic; }
 
 @media (prefers-reduced-motion: reduce) {
-  summary::before { transition: none; }
+  .chev { transition: none; }
 }
 </style>
