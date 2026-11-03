@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatWhen, isJobCancellable, jobIdempotencyKey, mayManageJobs, statusColor } from "~/lib/ops";
+import { formatWhen, isJobCancellable, jobIdempotencyKey, mayManageJobs, statusTone } from "~/lib/ops";
 import type { OpsCatalogSource, OpsJob, OpsJobCancellation, OpsRunCollection, OpsRunSummary } from "~/types/ops";
 
 const POLL_INTERVAL_MS = 2_000;
@@ -170,7 +170,7 @@ const confirmation = computed(() => {
         <h2 id="job-actions-title">Catalog jobs</h2>
         <p class="ops-muted">Queue a named import and watch the separate worker claim it. Only recorded job types and sources are accepted.</p>
       </div>
-      <button type="button" class="mc-pill" :disabled="refreshing" @click="loadJobs">
+      <button type="button" class="mc-pill" :disabled="refreshing" :aria-busy="refreshing" @click="loadJobs">
         {{ refreshing ? "Refreshing…" : "Refresh" }}
       </button>
     </div>
@@ -193,7 +193,7 @@ const confirmation = computed(() => {
     <p v-else-if="!jobs.length" class="empty-jobs ops-muted">No catalog job has been recorded yet.</p>
     <div v-else class="job-table">
       <table>
-        <thead><tr><th>Job</th><th>Status</th><th>Attempts</th><th>Queued</th><th>Action</th></tr></thead>
+        <thead><tr><th>Job</th><th>Status</th><th class="mc-num">Attempts</th><th>Queued</th><th>Action</th></tr></thead>
         <tbody>
           <tr v-for="job in jobs" :key="job.id">
             <td>
@@ -201,8 +201,8 @@ const confirmation = computed(() => {
               <span class="trace" :title="job.trace_id">{{ job.trace_id }}</span>
             </td>
             <td>
-              <span class="ops-badge" :style="{ '--dot': statusColor(cancellingId === job.id ? 'cancelled' : job.status) }">
-                {{ cancellingId === job.id ? "Cancellation requested" : job.status.replaceAll("_", " ") }}
+              <span class="ops-badge" :class="statusTone(cancellingId === job.id ? 'cancelled' : job.status)">
+                <span class="cap">{{ cancellingId === job.id ? "Cancellation requested" : job.status.replaceAll("_", " ") }}</span>
               </span>
               <span v-if="job.error_code" class="error-code">{{ job.error_code }}</span>
             </td>
@@ -212,7 +212,7 @@ const confirmation = computed(() => {
               <button
                 v-if="canManage && isJobCancellable(job.status)"
                 type="button"
-                class="mc-pill cancel-job"
+                class="mc-pill sm danger cancel-job"
                 :disabled="acting"
                 :aria-label="`Cancel job ${job.id}`"
                 @click="openCancelConfirmation(job)"
@@ -240,21 +240,23 @@ const confirmation = computed(() => {
 <style scoped>
 .job-actions { display: grid; gap: 16px; }
 .job-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-.job-heading h2 { margin: 5px 0 6px; }
+.job-heading h2 { margin: 4px 0 4px; }
 .job-heading p { margin: 0; max-width: 72ch; font-size: 13px; line-height: 1.5; }
-.queue-form { display: flex; align-items: end; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--s2); }
-.queue-form label { display: grid; gap: 6px; color: var(--t3); font-size: 12px; }
-.queue-form select { min-width: 210px; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s1); color: var(--ivory); }
-.read-only-note, .empty-jobs { margin: 0; padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--s2); font-size: 13px; }
-.ops-success { margin: 0; color: var(--sage); }
+/* The queue form is an inline row, not a card in the card. */
+.queue-form { display: flex; align-items: end; gap: 12px; }
+.queue-form label { display: grid; gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
+.queue-form select { min-width: 220px; }
+.read-only-note, .empty-jobs { margin: 0; padding: 12px 14px; border-radius: 10px; background: #fafafa; color: #71717a; font-size: 13px; }
+.empty-jobs { min-height: 44px; display: flex; align-items: center; justify-content: center; padding-block: 0; }
+.ops-success { margin: 0; padding: 10px 14px; border: 1px solid #abefc6; border-radius: 12px; background: #ecfdf3; color: #067647; font-size: 13px; }
 .ops-error { margin: 0; }
-.job-table { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { padding: 10px 12px; border-bottom: 1px solid var(--line-2); color: var(--t3); font-weight: 500; text-align: left; white-space: nowrap; }
-td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-tbody tr:last-child td { border-bottom: 0; }
-td b { display: block; font-weight: 550; }
-.trace { display: block; max-width: 300px; overflow: hidden; color: var(--t3); font-family: ui-monospace, monospace; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.error-code { display: block; margin-top: 4px; color: var(--warn); font-size: 12px; }
-.cancel-job { color: var(--warn); }
+.job-table { overflow-x: auto; border: 1px solid #ececef; border-radius: 12px; }
+td b { display: block; color: #18181b; font-weight: 500; }
+.trace { display: block; max-width: 300px; overflow: hidden; color: #71717a; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
+/* Sentence case like the tasks table (the text itself stays as stored); the code is a grey note, the badge has the colour. */
+.cap { display: inline-block; }
+.cap::first-letter { text-transform: uppercase; }
+.error-code { display: block; margin-top: 4px; color: #71717a; font: 12px/16px ui-monospace, SFMono-Regular, Consolas, monospace; }
+.job-table td { vertical-align: middle; }
+.job-table td.mc-num { color: #27272a; }
 </style>

@@ -138,7 +138,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
 </script>
 
 <template>
-  <div class="ops-page">
+  <div class="data-pane">
     <div class="filters">
       <label class="grow">Search title or slug <input v-model="filters.q" type="search" placeholder="e.g. laksa"></label>
       <label>Course
@@ -160,7 +160,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading recipes…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted">No recipe matches.</p>
+    <p v-else-if="!page.items.length" class="ops-card ops-muted ops-empty">No recipe matches.</p>
     <section v-else class="ops-card table-card" aria-label="Recipes">
       <table>
         <thead><tr><th>Recipe</th><th>Course</th><th>Meal types</th><th>Dietary tags</th><th>Source</th><th>Planning</th></tr></thead>
@@ -171,7 +171,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
             <td>{{ recipe.meal_types?.join(", ") || "—" }}</td>
             <td>{{ recipe.dietary_tags.join(", ") || "—" }}</td>
             <td>{{ recipe.release_version ? `Release ${recipe.release_version}` : "Curated" }}</td>
-            <td><span class="ops-badge" :style="{ '--dot': recipe.withdrawn ? 'var(--warn)' : 'var(--sage)' }">{{ recipe.withdrawn ? "Withdrawn" : "Plannable" }}</span></td>
+            <td><span class="ops-badge" :class="recipe.withdrawn ? 'error' : 'success'">{{ recipe.withdrawn ? "Withdrawn" : "Plannable" }}</span></td>
           </tr>
         </tbody>
       </table>
@@ -190,7 +190,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
             <h2 id="recipe-title" class="mc-serif">{{ detail?.title ?? "Loading…" }}</h2>
             <p v-if="detail" class="ops-muted">{{ detail.slug }} · {{ detail.cuisine }} · serves {{ detail.servings }} · {{ detail.prep_time_minutes + detail.cook_time_minutes }} min</p>
           </div>
-          <button type="button" class="mc-pill" @click="close">Close</button>
+          <button type="button" class="mc-close" aria-label="Close" @click="close"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
         </header>
 
         <p v-if="detailFailed" class="ops-error" role="alert">This recipe couldn't be loaded.</p>
@@ -212,7 +212,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
               <legend>Dietary tags</legend>
               <label v-for="item in DATA_TAGS" :key="item"><input v-model="edit.tags" type="checkbox" :value="item"> {{ item }}</label>
             </fieldset>
-            <button type="submit" class="mc-primary" :disabled="!changed || saving">{{ saving ? "Saving…" : "Save changes" }}</button>
+            <button type="submit" class="mc-primary" :disabled="!changed || saving" :aria-busy="saving">{{ saving ? "Saving…" : "Save changes" }}</button>
           </form>
 
           <section>
@@ -224,7 +224,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
             </template>
             <template v-else>
               <p class="ops-muted small">A withdrawn recipe stays browsable but is never planned.</p>
-              <label class="edit">Reason <textarea v-model="reason" rows="2" maxlength="500" placeholder="e.g. pet food, not a dinner" /></label>
+              <label class="field">Reason <textarea v-model="reason" rows="2" maxlength="500" placeholder="e.g. pet food, not a dinner" /></label>
               <div class="actions"><button type="button" class="mc-pill danger" :disabled="!reason.trim()" @click="pending = 'withdraw'">Withdraw</button></div>
             </template>
           </section>
@@ -268,5 +268,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
 </template>
 
 <style scoped>
-.steps { display: grid; gap: 8px; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
+/* Numbered steps (the reset stylesheet drops list markers). */
+.steps { display: grid; gap: 8px; margin: 0; padding-left: 20px; list-style: decimal; font-size: 13px; line-height: 1.5; }
+.steps li::marker { color: #a1a1aa; font-variant-numeric: tabular-nums; }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RETAILER_SHORT, basicsNote, formatSgd, groceryPriceLabel, groceryPriceTimes, groceryTrips, hasOtherStore, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
+import { RETAILER_SHORT, basicsNote, formatSgd, groceryPriceLabel, groceryPriceParts, groceryPriceTimes, groceryTrips, hasOtherStore, isSavedPrice, lineRetailer, packageLabel, priceSourceLabel, priceTone } from "~/lib/home-surface";
 import type { WeeklyGroceryEstimate } from "~/types/meal-plan";
 import type { GroceryLineEstimate } from "~/types/recommendation";
 
@@ -22,6 +22,11 @@ const lineKey = (line: GroceryLineEstimate) => `${line.shopping_trip ?? 1}:${lin
 const source = computed(() => priceSourceLabel(props.estimate));
 const basics = computed(() => basicsNote(props.estimate));
 const sourceTone = computed(() => priceTone(props.estimate));
+// Only the part of a price line that needs a look (a failed live check) is amber; the rest stays grey.
+function priceParts(line: GroceryLineEstimate): [string, string | null] {
+  const [base, note] = groceryPriceParts(line);
+  return note ? [`${base} · `, note] : [base, null];
+}
 // Ticked items only matter while shopping; they are not saved.
 const got = ref(new Set<string>());
 
@@ -44,7 +49,8 @@ function toggle(name: string) {
         <template v-for="store in trip.stores" :key="store.retailer">
           <h3 v-if="byStore" class="store">{{ store.name }}<span class="mc-num">{{ formatSgd(store.sum) }}</span></h3>
           <template v-for="group in store.groups" :key="group.name">
-            <h3 class="aisle">{{ group.name }}<span class="rule" /><span class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
+            <!-- A store's only aisle does not repeat the store's subtotal. -->
+            <h3 class="aisle">{{ group.name }}<span class="rule" /><span v-if="!byStore || store.groups.length > 1" class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
             <label v-for="line in group.lines" :key="lineKey(line)" class="item">
               <input type="checkbox" :checked="got.has(lineKey(line))" @change="toggle(lineKey(line))">
               <span class="what">
@@ -54,9 +60,10 @@ function toggle(name: string) {
                   <span v-if="line.product?.halal_certified" class="fresh" title="FairPrice lists this product as Halal">Halal-certified</span>
                   <a v-if="store.retailer !== 'fairprice' && line.product?.product_url" class="shop-link" :href="line.product.product_url" target="_blank" rel="noopener" @click.stop>View at {{ store.retailer === 'other' ? 'the shop' : RETAILER_SHORT[store.retailer] }}</a>
                 </span>
-                <span class="s" :class="{ stale: isSavedPrice(line) }">{{ packageLabel(line) }} · <span :title="groceryPriceTimes(line)">{{ groceryPriceLabel(line) }}</span></span>
+                <span class="s" :class="{ stale: isSavedPrice(line) }" :title="groceryPriceLabel(line)"><span :title="groceryPriceTimes(line)">{{ priceParts(line)[0] }}<em v-if="priceParts(line)[1]" class="attn">{{ priceParts(line)[1] }}</em></span></span>
               </span>
-              <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}</span>
+              <!-- The price, with the packs it buys under it, so the source line beside it can stay whole. -->
+              <span class="c mc-num">{{ formatSgd(line.purchase_cost_sgd) }}<small>{{ packageLabel(line) }}</small></span>
             </label>
           </template>
         </template>
@@ -72,29 +79,36 @@ function toggle(name: string) {
 </template>
 
 <style scoped>
-.source { position: sticky; top: 0; z-index: 1; margin: 0; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--c-line-soft); background: #fff; font-size: 12px; line-height: 16px; }
+.source { position: sticky; top: 0; z-index: 1; margin: 0; display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--c-line-soft); background: #fff; color: #52525b; font-size: 12.5px; line-height: 16px; }
 .source i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--c-dot); }
 .source i.ok { background: var(--c-green); }
 .source i.warn { background: var(--c-amber); }
-.source b { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.source i { align-self: flex-start; margin-top: 4px; }
+/* The whole note shows, on two lines if it needs them. */
+.source b { min-width: 0; font-weight: 500; }
 .list { padding: 4px 16px 12px; }
-.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
+.aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #71717a; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.aisle .mc-num { color: #71717a; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
-.item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 2px 0; cursor: pointer; }
+.item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
+.item input { align-self: start; margin-top: 2px; }
+.item .c { align-self: start; display: flex; flex-direction: column; align-items: flex-end; line-height: 20px; }
+.item .c small { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 400; white-space: nowrap; }
 .what { display: flex; flex-direction: column; min-width: 0; }
-.item input { appearance: none; width: 16px; height: 16px; margin: 0; border-radius: 5px; border: 1px solid var(--c-border); background: #fff; display: grid; place-items: center; cursor: pointer; }
-.item input:checked { background: var(--c-green); border-color: var(--c-green); }
-.item input:checked::after { content: ""; width: 7px; height: 4px; border: solid #fff; border-width: 0 0 2px 2px; transform: rotate(-45deg) translate(1px, -1px); }
 .p-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.p { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fresh { flex: none; padding: 0 6px; border-radius: 999px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 11px; line-height: 16px; font-weight: 700; }
-.store { margin: 8px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
-.shop-link { flex: none; font-size: 11px; line-height: 16px; font-weight: 700; color: var(--c-info-text); text-decoration: underline; }
-.trip { margin: 10px 0 0; display: flex; align-items: center; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 800; color: var(--c-ink); }
-.s { font-size: 12px; line-height: 16px; color: var(--c-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.s.stale { color: var(--c-amber-text); }
-.c { font-weight: 800; }
-.item:has(input:checked) .p { color: var(--c-muted); text-decoration: line-through; }
-.unmapped { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.basics { margin: 12px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }
+.p { min-width: 0; color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fresh { flex: none; padding: 0 6px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11px; line-height: 16px; font-weight: 500; }
+.store { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
+.store .mc-num { font-size: 13px; font-weight: 600; }
+.shop-link { flex: none; color: #6d28d9; font-size: 12px; line-height: 16px; font-weight: 500; text-decoration: none; }
+.shop-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.trip { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
+.trip .mc-num { font-size: 13px; font-weight: 600; }
+/* One calm grey line (the full text is its tooltip); only a failed check is amber. */
+.s { overflow: hidden; color: #71717a; font-size: 12px; line-height: 16px; white-space: nowrap; text-overflow: ellipsis; }
+.s .attn { color: var(--c-amber-text); font-style: normal; }
+.c { flex: none; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
+.item:has(input:checked) .p { color: #a1a1aa; text-decoration: line-through; }
+.unmapped { margin: 0; color: #71717a; font-size: 12px; line-height: 16px; }
+.basics { margin: 12px 0 0; padding: 8px 10px; border: 1px solid #d1e9ff; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }
 </style>

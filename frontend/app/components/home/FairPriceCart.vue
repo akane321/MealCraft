@@ -389,18 +389,18 @@ const refreshAll = () => {
 
 <template>
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" aria-labelledby="fp-title" @click.self="close">
-    <section class="panel mc-card">
-      <header>
+    <section class="panel mc-panel">
+      <header class="mc-sheet-head">
         <div>
-          <h2 id="fp-title" class="mc-title">FairPrice cart</h2>
+          <h2 id="fp-title">FairPrice cart</h2>
           <p class="mc-small">{{ liveCart?.store?.name ?? "Your own FairPrice cart" }} · You check out and pay on FairPrice.</p>
           <p v-if="leaveNote" class="mc-small" role="status">{{ leaveNote }}</p>
         </div>
-        <button type="button" class="icon mc-btn quiet" aria-label="Refresh" :disabled="cartLoading || adding || rowBusy" @click="refreshAll">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" /></svg>
+        <button type="button" class="mc-close" aria-label="Refresh" :disabled="cartLoading || adding || rowBusy" @click="refreshAll">
+          <UIcon name="i-lucide-refresh-cw" aria-hidden="true" />
         </button>
-        <button type="button" class="icon mc-btn quiet" aria-label="Close" @click="close">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button type="button" class="mc-close" aria-label="Close" @click="close">
+          <UIcon name="i-lucide-x" aria-hidden="true" />
         </button>
       </header>
 
@@ -427,8 +427,9 @@ const refreshAll = () => {
             <button type="button" class="mc-btn primary sm" @click="openLogin">Log in to FairPrice</button>
             <button type="button" class="mc-btn secondary sm" :disabled="cartLoading" @click="loggedIn">I've logged in</button>
           </div>
-          <p v-if="loginNote" class="msg alert" role="alert">{{ loginNote }}</p>
         </section>
+        <!-- Beside the login box, not inside it: one box at a time. -->
+        <p v-if="setup === 'login' && loginNote" class="msg alert" role="alert">{{ loginNote }}</p>
 
         <p v-if="cartProblem" class="msg alert" role="alert">
           {{ cartProblem }}
@@ -503,7 +504,7 @@ const refreshAll = () => {
             </p>
 
             <div v-if="ready.length" class="acts">
-              <button v-if="adding" type="button" class="mc-btn primary" disabled>Adding to your cart…</button>
+              <button v-if="adding" type="button" class="mc-btn primary" disabled aria-busy="true"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Adding to your cart…</button>
               <template v-else-if="toAdd.length">
                 <button type="button" class="mc-btn primary" :disabled="!canAdd" @click="add()">Add all to cart</button>
                 <span v-if="canAdd" class="mc-small">{{ toAdd.length }} {{ toAdd.length === 1 ? "item" : "items" }} not in your cart yet</span>
@@ -522,11 +523,11 @@ const refreshAll = () => {
             <p class="mc-small">Nothing is removed from your cart unless you remove it here, and nothing is bought. Your plan stays as it is.</p>
 
             <details v-if="(setup === 'missing' || addProblem) && links.length" class="links" open>
-              <summary>Add them yourself ({{ links.length }})</summary>
+              <summary><UIcon name="i-lucide-chevron-right" class="chev" aria-hidden="true" />Add them yourself ({{ links.length }})</summary>
               <ul class="lines">
                 <li v-for="line in links" :key="line.line_key">
                   <span class="what"><b>{{ line.ingredient_display_name }}</b><small>{{ line.quantity }} × {{ line.product_name }}</small></span>
-                  <a class="mc-btn quiet sm" :href="line.product_url!" target="_blank" rel="noopener">Open</a>
+                  <a class="mc-btn quiet sm" :href="line.product_url!" target="_blank" rel="noopener">Open<UIcon name="i-lucide-arrow-up-right" class="open-ic" aria-hidden="true" /></a>
                 </li>
               </ul>
             </details>
@@ -555,7 +556,7 @@ const refreshAll = () => {
                   <s v-if="isDiscounted(item)" class="mc-num">{{ sgdOrDash(item.unit_mrp_sgd) }}</s>
                 </span>
                 <span v-if="planIds.has(item.cart_item_id) || item.note || isLocked(item) || !item.is_checked" class="tags">
-                  <span v-if="planIds.has(item.cart_item_id)" class="mc-chip info">From this plan</span>
+                  <span v-if="planIds.has(item.cart_item_id)" class="mc-chip plan">From this plan</span>
                   <span v-if="isLocked(item)" class="mc-chip ok">Free</span>
                   <span v-if="!item.is_checked" class="mc-chip warn">Not selected for checkout</span>
                   <span v-if="item.note" class="mc-chip warn">{{ item.note }}</span>
@@ -597,7 +598,7 @@ const refreshAll = () => {
                   <span v-if="rowError[item.cart_item_id]" class="msg alert" role="alert">{{ rowError[item.cart_item_id] }}</span>
                 </div>
                 <div class="side">
-                  <button type="button" class="mc-btn secondary sm" :disabled="removing[item.cart_item_id]" :aria-label="`Remove ${item.name}`" @click="remove(item.cart_item_id)">
+                  <button type="button" class="mc-btn quiet xs" :disabled="removing[item.cart_item_id]" :aria-label="`Remove ${item.name}`" @click="remove(item.cart_item_id)">
                     {{ removing[item.cart_item_id] ? "Removing…" : "Remove" }}
                   </button>
                 </div>
@@ -642,74 +643,91 @@ const refreshAll = () => {
 </template>
 
 <style scoped>
-.panel { width: min(760px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; }
-header { display: flex; align-items: flex-start; gap: 8px; padding: 18px 20px 12px; border-bottom: 1px solid var(--c-line-soft); }
-header > div { flex: 1; min-width: 0; }
-header h2 { margin: 0 0 2px; }
-header p { margin: 0; }
-.icon { width: 36px; height: 36px; padding: 0; }
-.icon svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; padding: 14px 20px 16px; overflow-y: auto; }
+.panel { width: min(760px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden; }
+.mc-sheet-head { gap: 4px; }
+.mc-close:disabled { opacity: 0.4; cursor: default; }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 20px; overflow-y: auto; }
 .body p { margin: 0; }
-.setup { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--c-info-bg); color: var(--c-info-text); }
-.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 13px; line-height: 18px; }
-.setup code, .body code { font-size: 12px; }
-.setup .mc-small, .setup .mc-label { color: var(--c-info-text); }
+/* Setup: an info box (a blue title, ink text) with the paths as small code chips. */
+.setup { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid #d1e9ff; border-radius: 12px; background: #eff8ff; color: #27272a; font-size: 13.5px; line-height: 20px; }
+.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; list-style: decimal; color: #27272a; }
+.setup li::marker { color: #175cd3; font-weight: 600; }
+.setup .mc-small { color: #52525b; }
+.setup .mc-label { margin: 0; color: #175cd3; font-size: 13.5px; line-height: 20px; font-weight: 600; }
+.setup code { padding: 1px 6px; border: 1px solid #d1e9ff; border-radius: 6px; background: #fff; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.body code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
 .block { display: flex; flex-direction: column; gap: 10px; }
 .block-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.block-head h3, h4 { margin: 0; }
-.lead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; font-weight: 800; }
-.note { color: var(--c-neutral-text); line-height: 1.5; }
-.msg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 18px; }
-.msg.warn { background: var(--c-warn-bg); color: var(--c-amber-text); font-weight: 700; }
-.msg.alert { background: var(--c-allergy-bg); color: var(--c-allergy-text); }
+.block-head h3 { margin: 0; color: #0f0f12; font-size: 15px; line-height: 20px; font-weight: 600; }
+h4 { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+h4::after { content: ""; flex: 1; height: 1px; background: #f0f0f2; }
+.lead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: #27272a; font-size: 14px; font-weight: 500; }
+.note { color: #52525b; font-size: 13px; line-height: 20px; }
+.msg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 20px; }
+.msg.warn { border: 1px solid #fedf89; background: #fffaeb; color: #b54708; font-weight: 500; }
+.msg.alert { border: 1px solid #fecdca; background: #fef3f2; color: #b42318; }
+.msg.alert::before { content: ""; width: 16px; height: 16px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d92d20' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") no-repeat center / 16px; }
 .lines { list-style: none; margin: 0; padding: 0; }
-.lines li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 0; border-top: 1px solid var(--c-line-soft); }
+.lines li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 0; border-top: 1px solid #f2f2f4; }
+.lines li:first-child { border-top: 0; }
 .what { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.what b { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.what small { font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.lines li.warn .what small { color: var(--c-amber-text); }
-.lines li.bad .what small { color: var(--c-allergy-text); }
-.price { flex: none; font-size: 13px; font-weight: 800; }
-.price.up { color: var(--c-amber-text); }
-.price.down { color: var(--c-green-text); }
+.what b { color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.what small { color: #71717a; font-size: 12px; line-height: 16px; }
+.lines li.warn .what small { color: #b54708; }
+.lines li.bad .what small { color: #b42318; font-weight: 500; }
+.price { flex: none; color: #27272a; font-size: 13px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.price.up { color: #b54708; }
+.price.down { color: #067647; }
 .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
-.again { flex: 1 1 100%; font-size: 13px; color: var(--c-amber-text); font-weight: 700; }
-.done { margin: 0; font-size: 13px; font-weight: 800; color: var(--c-green-text); }
-.links summary { cursor: pointer; font-size: 13px; font-weight: 800; }
+.again { flex: 1 1 100%; color: #b54708; font-size: 13px; font-weight: 500; }
+.done { margin: 0; color: #067647; font-size: 13px; font-weight: 500; }
+.links summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; color: #27272a; font-size: 13px; font-weight: 500; }
+.links summary::-webkit-details-marker { display: none; }
+.links .chev { width: 14px; height: 14px; color: #a1a1aa; transition: transform 150ms; }
+.links[open] .chev { transform: rotate(90deg); }
+.links .open-ic { width: 14px; height: 14px; }
+/* Cart rows: a square image, name and unit, the quantity stepper and the line total on the right. */
 .rows { list-style: none; margin: 0; padding: 0; }
-.row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 12px 0; border-top: 1px solid var(--c-line-soft); transition: opacity 150ms; }
+.row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 12px 0; border-top: 1px solid #f2f2f4; transition: opacity 150ms; }
+.rows > .row:first-child { border-top: 0; }
 .row.saving { opacity: 0.7; }
-.row.off .name { color: var(--c-muted); }
-.thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--c-neutral); }
-.thumb img { display: block; width: 64px; height: 64px; object-fit: cover; }
-.ph { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; color: var(--c-muted); }
-.ph svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.row.off .name { color: #71717a; }
+.thumb { width: 56px; height: 56px; border-radius: 10px; overflow: hidden; background: #f4f4f5; }
+.thumb img { display: block; width: 56px; height: 56px; object-fit: cover; }
+.ph { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; color: #a1a1aa; }
+.ph svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.name { font-weight: 800; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.info .mc-small { font-size: 12px; line-height: 16px; }
+.name { color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .unit { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
-.unit b.sale { color: var(--c-coral); }
-.unit s { font-size: 12px; color: var(--c-muted); }
+.unit b { color: #18181b; font-weight: 600; }
+.unit s { color: #a1a1aa; font-size: 12px; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.tags .mc-chip.plan { background: #f4f4f5; color: #52525b; }
 .side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 112px; }
-.stepper { display: inline-flex; align-items: center; height: 32px; border: 1px solid var(--c-border); border-radius: 999px; background: #fff; }
-.stepper button { width: 32px; height: 30px; border: 0; background: transparent; border-radius: 999px; font-size: 18px; line-height: 1; font-weight: 700; }
-.stepper button:hover:not(:disabled) { background: var(--c-neutral); }
-.stepper output { min-width: 28px; text-align: center; font-weight: 800; }
-.total { font-size: 15px; }
-.total.muted { color: var(--c-muted); font-weight: 600; }
-.mc-btn.xs { height: 30px; padding: 0 10px; font-size: 12px; border-radius: 8px; color: var(--c-muted); }
-.summary { display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; padding: 12px 20px 16px; border-top: 1px solid var(--c-line); background: var(--c-rail); }
-.summary dl { margin: 0; flex: 1; max-width: 300px; display: grid; gap: 2px; font-size: 13px; }
+.stepper { display: inline-flex; align-items: center; height: 32px; padding: 0 1px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.stepper button { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px; background: transparent; color: #52525b; font-size: 16px; line-height: 1; font-weight: 500; }
+.stepper button:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
+.stepper button:disabled { opacity: 0.4; }
+.stepper output { min-width: 26px; color: #18181b; font-size: 13px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; }
+.total { color: #18181b; font-size: 15px; font-weight: 600; }
+.total.muted { color: #71717a; font-weight: 500; }
+.side .mc-btn.xs { height: 28px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; box-shadow: none; color: #52525b; font-size: 13px; font-weight: 500; }
+.side .mc-btn.xs:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
+.side .mc-btn.xs:hover { background: #fef3f2; color: #b42318; }
+/* Footer: the totals on the left, checkout on the right. */
+.summary { flex: none; display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; padding: 16px 24px; border-top: 1px solid #f0f0f2; background: #fafafa; }
+.summary dl { margin: 0; flex: 1; max-width: 300px; display: grid; gap: 2px; color: #52525b; font-size: 13px; line-height: 20px; }
 .summary dl > div { display: flex; justify-content: space-between; gap: 12px; }
-.summary dt { color: var(--c-neutral-text); }
-.summary dd { margin: 0; display: inline-flex; gap: 6px; font-weight: 700; }
-.summary dd s { color: var(--c-muted); font-weight: 600; }
-.summary dd .free { color: var(--c-green-text); }
-.summary .save dd { color: var(--c-green-text); }
-.summary .grand { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--c-line); font-size: 16px; }
-.summary .grand dt { color: var(--c-ink); font-weight: 800; }
-.summary .grand dd { font-weight: 800; }
-.go { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 220px; text-align: center; }
+.summary dt { color: #52525b; }
+.summary dd { margin: 0; display: inline-flex; gap: 6px; color: #27272a; font-weight: 500; font-variant-numeric: tabular-nums; }
+.summary dd s { color: #a1a1aa; font-weight: 400; }
+.summary dd .free { color: #067647; }
+.summary .save dd { color: #067647; }
+.summary .grand { margin-top: 4px; padding-top: 6px; border-top: 1px solid #ececef; font-size: 15px; line-height: 22px; }
+.summary .grand dt, .summary .grand dd { color: #0f0f12; font-weight: 600; }
+.go { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 240px; text-align: center; }
+.go .mc-btn { height: 40px; justify-content: center; }
 .go p { margin: 0; }
+.go .mc-small { color: #71717a; font-size: 12px; }
 </style>

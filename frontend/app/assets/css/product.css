@@ -1,0 +1,422 @@
+/* Product and console look (style spec v1): zinc neutrals on a tinted page, one white panel, dark pill
+   actions, violet only for focus, links and the current item. Everything sits under .mc-shell, so the
+   landing never sees it. */
+
+:root {
+  --ui-radius: 0.625rem;
+  --ui-text: #27272a;
+  --ui-text-highlighted: #0f0f12;
+  --ui-text-muted: #71717a;
+  --ui-text-dimmed: #a1a1aa;
+  --ui-text-toned: #52525b;
+  --ui-border: #ececef;
+  --ui-border-accented: #e4e4e7;
+  --ui-bg-elevated: #f4f4f5;
+  --ui-bg-accented: #e9e9ec;
+  --ui-bg-inverted: #18181b;
+}
+
+.mc-shell, .mc-shell :is(.mc-overlay, .mc-sheet-overlay) {
+  /* The design tokens of main.css, with the new values. Overlays repeat them: surface.css sets the old ones there. */
+  --c-ink: #18181b;
+  --c-coral: #7c3aed;
+  --c-coral-hover: #6d28d9;
+  --c-green: #12b76a;
+  --c-green-text: #067647;
+  --c-amber: #f59e0b;
+  --c-amber-text: #b54708;
+  --c-white: #ffffff;
+  --c-canvas: #fafafa;
+  --c-rail: #f5f5f7;
+  --c-line: #ececef;
+  --c-line-soft: #f0f0f2;
+  --c-border: #e4e4e7;
+  --c-neutral: #f4f4f5;
+  --c-neutral-text: #52525b;
+  --c-muted: #71717a;
+  --c-dot: #d4d4d8;
+  --c-tonight-border: #ececef;
+  --c-allergy-bg: #fef3f2;
+  --c-allergy-text: #b42318;
+  --c-ok-bg: #ecfdf3;
+  --c-warn-bg: #fffaeb;
+  --c-info-bg: #eff8ff;
+  --c-info-text: #175cd3;
+  --c-blue: #6d28d9;
+  --font-display: Inter, ui-sans-serif, system-ui, "Noto Sans SC", sans-serif;
+  --font-body: Inter, ui-sans-serif, system-ui, "Noto Sans SC", sans-serif;
+
+  /* Older names, re-declared here because :root resolved them to the old values. */
+  --ink: var(--c-white);
+  --s2: var(--c-rail);
+  --s3: var(--c-neutral);
+  --line: var(--c-line-soft);
+  --line-2: var(--c-line);
+  --ivory: var(--c-ink);
+  --t2: var(--c-neutral-text);
+  --t3: var(--c-muted);
+  --accent: var(--c-coral);
+  --sage: var(--c-green);
+  --warn: var(--c-allergy-text);
+  --serif: var(--font-display);
+  --sans: var(--font-body);
+  --border: var(--c-line);
+  --muted: var(--t3);
+  --danger: var(--c-allergy-text);
+
+  /* New tokens. */
+  --mc-page: #f5f5f7;
+  --mc-strong: #0f0f12;
+  --mc-shadow-xs: 0 1px 2px rgba(16, 16, 20, 0.05);
+  --mc-shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.04), 0 2px 8px -2px rgba(16, 16, 20, 0.06);
+  --mc-shadow-md: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -12px rgba(16, 16, 20, 0.16);
+
+  color: var(--ui-text);
+  font: 400 14px/20px var(--sans);
+  font-feature-settings: "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+.mc-shell * { scrollbar-color: #d4d4d8 transparent; }
+.mc-shell ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+.mc-shell :focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
+
+/* Page and the one white panel. */
+.mc-page { background: radial-gradient(900px 420px at 100% 0%, rgba(233, 213, 255, 0.35), transparent 70%) fixed, var(--mc-page); }
+/* The home's root: keyed on the view, not .mc-shell, which it gets only after the landing has left. */
+.mc-surface[data-view="app"] { background: radial-gradient(900px 420px at 100% 0%, rgba(233, 213, 255, 0.35), transparent 70%), #f5f5f7; }
+.mc-frame {
+  min-width: 0;
+  min-height: 0;
+  margin: 8px 8px 8px 0;
+  border: 1px solid #ececef;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(16, 16, 20, 0.04), 0 16px 40px -24px rgba(16, 16, 20, 0.12);
+  overflow: hidden;
+}
+
+/* Type. */
+.mc-shell .mc-serif, .mc-shell .mc-heading, .mc-shell .mc-title, .mc-shell .mc-display, .mc-shell h1, .mc-shell h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.015em; }
+.mc-shell .mc-heading { font-size: 15px; line-height: 20px; color: var(--mc-strong); }
+.mc-shell .mc-title { font-size: 20px; line-height: 26px; color: var(--mc-strong); }
+.mc-shell .mc-display { font-size: 26px; line-height: 32px; color: var(--mc-strong); }
+.mc-shell .mc-eyebrow, .mc-shell .mc-label { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--c-muted); }
+.mc-shell .mc-small { color: var(--c-muted); }
+
+/* Buttons: dark pill for the one action, white outline pill, ghost. */
+.mc-shell .mc-btn { height: 36px; padding: 0 16px; border-radius: 999px; font-family: var(--sans); font-size: 14px; font-weight: 500; }
+.mc-shell .mc-btn.primary, .mc-shell .mc-btn.strong { padding: 0 16px; background: #18181b; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.mc-shell .mc-btn.primary:hover:not(:disabled), .mc-shell .mc-btn.strong:hover:not(:disabled) { background: #27272a; }
+.mc-shell .mc-btn.secondary { border-color: #e4e4e7; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.mc-shell .mc-btn.secondary:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
+.mc-shell .mc-btn.quiet { color: #52525b; }
+.mc-shell .mc-btn.quiet:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
+.mc-shell .mc-btn.sm { height: 32px; padding: 0 12px; border-radius: 999px; font-size: 13px; }
+.mc-shell .mc-btn svg { stroke-width: 2; }
+.mc-shell .mc-pill { min-height: 34px; padding: 0 14px; border-color: #e4e4e7; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
+.mc-shell .mc-pill:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
+.mc-shell .mc-primary { min-height: 34px; border: 0; border-radius: 999px; background: #18181b; font-size: 13px; font-weight: 500; }
+.mc-shell .mc-primary:hover:not(:disabled) { background: #27272a; }
+.mc-shell .mc-suggest { height: 28px; padding: 0 12px; border-color: #e8e8eb; font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: #3f3f46; }
+.mc-shell .mc-suggest:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
+
+/* Chips, cards, tabs. */
+.mc-shell .mc-chip { height: 22px; padding: 0 8px; font-size: 12px; font-weight: 500; }
+.mc-shell .mc-chip b { font-weight: 600; }
+.mc-shell .mc-card { border-color: #ececef; border-radius: 14px; box-shadow: var(--mc-shadow-xs); }
+.mc-shell .mc-segmented { padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.mc-shell .mc-segmented > button { height: 28px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #52525b !important; }
+.mc-shell .mc-segmented > button[aria-selected="true"] { color: var(--mc-strong) !important; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
+
+/* Overlays: a light scrim; sheets, dialogs and drawers share one white panel. */
+/* The token block above already gives overlays the 400 Inter body; the font shorthand reset tabular numbers. */
+.mc-shell :is(.mc-overlay, .mc-sheet-overlay) { font-variant-numeric: tabular-nums; background: rgba(15, 15, 18, 0.32); }
+/* A confirm over a drawer: the drawer's scrim already dims the page, so this one adds little. */
+.mc-shell:has(.drawer-scrim) .confirm-scrim { background: rgba(15, 15, 18, 0.12); }
+.mc-shell .mc-panel { border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+.mc-shell .mc-close { width: 32px; height: 32px; flex: none; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+.mc-shell .mc-close:hover { background: #f4f4f5; color: #18181b; }
+.mc-shell .mc-close .iconify { width: 18px; height: 18px; }
+/* One header for every sheet: a 18/600 title, a muted line under it, icon buttons at the right (close last). */
+.mc-shell .mc-sheet-head { position: sticky; top: 0; z-index: 2; flex: none; display: flex; align-items: center; gap: 12px; min-height: 64px; margin: 0; padding: 12px 16px 12px 24px; border-bottom: 1px solid #f0f0f2; background: #fff; }
+.mc-shell .mc-sheet-head > div { flex: 1; min-width: 0; }
+.mc-shell .mc-sheet-head h2 { margin: 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.mc-shell .mc-sheet-head p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
+
+/* Danger, disabled and busy buttons. Busy keeps the ink pill and shows a spinner. */
+.mc-shell .mc-btn.danger { border-color: #fecaca; background: #fef2f2; color: #b42318; }
+.mc-shell .mc-btn.danger:hover:not(:disabled) { background: #fee4e2; }
+/* Disabled: a light, flat control that still reads (like the disabled send button), never a faded ink pill.
+   Solid pills go light grey with a thin ring; outline pills go flat; ghost and danger keep their shape. */
+.mc-shell :is(.mc-btn, .mc-pill, .mc-primary, .primary-button, .secondary-button, .mc-suggest):disabled:not([aria-busy="true"]) { opacity: 1; cursor: not-allowed; }
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-primary, .primary-button):disabled:not([aria-busy="true"]) { border-color: transparent; background: #f4f4f5; color: #a1a1aa !important; box-shadow: inset 0 0 0 1px #e4e4e7; }
+.mc-shell :is(.mc-btn.secondary, .mc-pill, .secondary-button, .mc-suggest):disabled:not([aria-busy="true"]) { border-color: #ececef; background: #fafafa; color: #a1a1aa; box-shadow: none; }
+.mc-shell :is(.mc-btn.quiet, .text-button):disabled { background: transparent; color: #a1a1aa; }
+.mc-shell :is(.mc-btn.danger, .mc-pill.danger):disabled:not([aria-busy="true"]) { border-color: #f2dcd9; background: #fafafa; color: #d0a5a0; }
+.mc-shell :is(.mc-btn, .mc-pill, .secondary-button):disabled :is(.iconify, svg) { color: inherit; }
+.mc-shell .mc-btn[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
+.mc-shell .mc-spin { width: 14px; height: 14px; flex: none; animation: mc-spin 900ms linear infinite; }
+@keyframes mc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mc-shell .mc-spin { animation: none; } }
+
+/* Checkbox, radio and the search clear button. */
+.mc-shell input[type="checkbox"], .mc-shell input[type="radio"] { appearance: none; flex: none; width: 16px; height: 16px; margin: 0; border: 1px solid #d4d4d8; background: #fff; cursor: pointer; transition: background 120ms, border-color 120ms; }
+.mc-shell input[type="checkbox"] { border-radius: 4px; }
+.mc-shell input[type="checkbox"]:checked {
+  border-color: #7c3aed; background: #7c3aed url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
+}
+.mc-shell input[type="radio"] { border-radius: 50%; }
+.mc-shell input[type="radio"]:checked { border: 5px solid #7c3aed; }
+.mc-shell :is(input[type="checkbox"], input[type="radio"]):disabled { opacity: 0.4; cursor: default; }
+.mc-shell input[type="search"]::-webkit-search-cancel-button {
+  appearance: none; width: 14px; height: 14px; cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") no-repeat center / 14px;
+}
+
+/* Icon tiles: a white glyph on a light-to-base gradient. */
+/* The tone comes from a [data-tone] on the tile or on its card; violet by default. */
+.mc-tile { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--tile-light, #c084fc), var(--tile, #9b5cff)); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 6px -2px color-mix(in srgb, var(--tile, #9b5cff) 60%, transparent); }
+.mc-tile > * { width: 18px; height: 18px; }
+[data-tone="violet"] { --tile: #9b5cff; --tile-light: #c084fc; }
+[data-tone="sky"] { --tile: #38b2f0; --tile-light: #7dd3fc; }
+[data-tone="amber"] { --tile: #ffae00; --tile-light: #ffd15c; }
+[data-tone="rose"] { --tile: #ff2d5e; --tile-light: #ff7a9a; }
+[data-tone="orange"] { --tile: #e5602c; --tile-light: #ff9a6b; }
+[data-tone="green"] { --tile: #12b76a; --tile-light: #5ee0a0; }
+
+/* Stat card: tile on top, label left and value right, a faint tint in the corner. */
+.mc-stat { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: 104px; padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: radial-gradient(260px 120px at 90% 0%, color-mix(in srgb, var(--tile) 18%, transparent), transparent 70%), #fff; box-shadow: var(--mc-shadow-sm); }
+.mc-stat .mc-tile { width: 30px; height: 30px; border-radius: 9px; }
+.mc-stat .mc-tile > * { width: 16px; height: 16px; }
+.mc-stat-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: auto; }
+.mc-stat-label { color: #52525b; font-size: 13px; line-height: 18px; font-weight: 500; }
+.mc-stat-value { color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mc-stat-note { margin-top: -10px; color: #71717a; font-size: 12px; line-height: 16px; }
+
+/* Greeting and the pastel glows of the empty home. */
+.mc-greet { display: inline-block; color: #9333ea; background: linear-gradient(90deg, #9333ea 0%, #c026d3 50%, #db2777 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+@media (forced-colors: active) { .mc-greet { -webkit-text-fill-color: currentColor; background: none; } }
+.mc-glow {
+  background:
+    radial-gradient(620px 320px at 50% 0%, rgba(252, 224, 196, 0.55), transparent 70%),
+    radial-gradient(420px 220px at 50% 52%, rgba(249, 231, 146, 0.38), transparent 70%),
+    radial-gradient(480px 360px at 18% 40%, rgba(233, 213, 255, 0.4), transparent 70%),
+    radial-gradient(420px 320px at 72% 38%, rgba(253, 205, 225, 0.22), transparent 70%),
+    #fff;
+}
+
+/* Empty state: dotted grid, a lilac circle, a violet tile. */
+.mc-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 16px; }
+.mc-empty-art { position: relative; width: 240px; height: 120px; display: grid; place-items: center; }
+.mc-empty-art::before { content: ""; position: absolute; inset: 0; background: radial-gradient(#e4e4e7 1px, transparent 1.2px) 0 0 / 16px 16px; -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent); mask-image: radial-gradient(closest-side, #000 40%, transparent); }
+.mc-empty-art > span { position: relative; width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: #f5f0ff; }
+.mc-empty-art .mc-tile { width: 40px; height: 40px; border-radius: 12px; }
+.mc-empty-art .mc-tile > * { width: 20px; height: 20px; }
+.mc-empty h2 { margin: 16px 0 0; color: var(--mc-strong); font-size: 16px; line-height: 22px; }
+.mc-empty p { max-width: 380px; margin: 6px 0 0; color: #71717a; font-size: 14px; line-height: 20px; }
+
+/* Sidebar: flat on the page, no card of its own. */
+.sb { display: flex; flex-direction: column; gap: 2px; min-height: 0; min-width: 0; padding: 12px 12px 12px; }
+.sb-brand { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px; border: 0; background: none; color: var(--mc-strong); font: 600 15px/20px var(--sans); letter-spacing: -0.01em; text-decoration: none; text-align: left; cursor: pointer; }
+.sb-mark { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 8px; background: linear-gradient(135deg, #2a2a31, #0f0f12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.2); }
+.sb-mark svg { width: 17px; height: 20px; }
+.sb-new { width: 100%; height: 36px; margin: 6px 0 8px; justify-content: flex-start; border-radius: 10px; background: #fff; color: var(--mc-strong); font-size: 14px; font-weight: 500; box-shadow: inset 0 0 0 1px #e4e4e7, 0 1px 2px rgba(16, 16, 20, 0.05); }
+.sb-new:hover { background: #fafafa; }
+.sb-new .sb-kbd { margin-left: auto; height: 18px; padding: 0 4px; border-radius: 4px; background: #fff; color: #71717a; font-size: 11px; box-shadow: inset 0 0 0 1px #e4e4e7; }
+/* Search sits on top of the recent plans it filters (home only), so the rows above never move between pages. */
+.sb-search { flex: none; display: flex; align-items: center; gap: 8px; height: 34px; margin: 0 0 6px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; }
+.sb-search .iconify { width: 14px; height: 14px; flex: none; color: #a1a1aa; }
+.sb-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #18181b; font: inherit; font-size: 13.5px; }
+.sb-search input::placeholder { color: #71717a; }
+.sb-search:focus-within { border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+/* The wrapper draws the one focus ring. */
+.mc-shell :is(.sb-search input, .convos .rename):focus-visible { outline: none; }
+.sb-item { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 8px; color: #3f3f46; font-size: 14px; line-height: 20px; font-weight: 500; text-decoration: none; transition: background 150ms; }
+.sb-item > .iconify, .sb-item > svg { width: 18px; height: 18px; flex: none; color: #52525b; }
+.sb-item:hover { background: #efeff1; }
+.sb-item.on { background: #e9e9ec; color: var(--mc-strong); font-weight: 600; }
+.sb-item.on > .iconify { color: #18181b; }
+.sb-sep { flex: none; height: 1px; margin: 10px 6px 4px; background: #e8e8eb; }
+.sb-label { margin: 0; padding: 12px 10px 6px; color: #52525b; font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.sb-fill { flex: 1 1 auto; }
+/* Only the conversation list gives or takes height, so the rows above it never move between states. */
+.sb > :is(.sb-brand, .sb-new, .sb-search, .pages, .sb-sep, .sb-label, .sb-item) { flex: none; }
+.sb-user { flex: none; display: flex; align-items: center; gap: 10px; height: 48px; margin-top: 8px; padding: 0 6px 0 8px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
+.sb-avatar { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #ede9fe; color: #6d28d9; font-size: 11px; font-weight: 600; }
+.sb-who { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.sb-who b { overflow: hidden; color: var(--mc-strong); font-size: 13px; line-height: 17px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.sb-who small { color: #52525b; font-size: 12px; line-height: 15px; }
+.sb-icon { color: #71717a; }
+
+/* The household card at the foot of the product sidebar (the references' highlighted card, real content only). */
+.home-card { flex: none; display: flex; flex-direction: column; gap: 2px; margin-top: 10px; padding: 14px; border: 1px solid #ede4fa; border-radius: 14px; background: linear-gradient(#ffffff80 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, #ffffff80 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(180deg, #f3e8ff 0%, #fbf7ff 45%, #fff 100%); }
+.home-card b { overflow: hidden; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.home-card small { color: #71717a; font-size: 12.5px; line-height: 17px; }
+.home-card .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.home-card .chips .mc-chip:not(.alert) { background: #fff; box-shadow: inset 0 0 0 1px #ece6f7; }
+.home-link { display: flex; align-items: center; justify-content: center; gap: 6px; height: 32px; margin-top: 10px; border: 1px solid #ececef; border-radius: 10px; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; text-decoration: none; }
+.home-link:hover { background: #fafafa; border-color: #d4d4d8; }
+.home-link[aria-current="page"] { border-color: #ddd6fe; background: #f5f3ff; color: #5b21b6; }
+.home-link .iconify { width: 14px; height: 14px; }
+
+/* The 56px bar at the top of the white panel: a dim icon and the page's name. */
+.mc-bar { height: 56px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid #f0f0f2; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
+.mc-bar .iconify { width: 16px; height: 16px; color: #a1a1aa; }
+/* A section scrolled into view stops below the sticky bar, not under it. */
+.product-frame { scroll-padding-top: 72px; }
+
+/* Error box of the product pages and sign-in: a soft red box led by a circle-alert icon. */
+.mc-shell .mc-alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
+.mc-shell .mc-alert > .iconify { width: 16px; height: 16px; flex: none; margin-top: 2px; color: #d92d20; }
+/* A loading line: a spinner, then the words. */
+.mc-shell .mc-loading { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 14px; line-height: 20px; }
+.mc-shell .mc-loading .mc-spin { width: 16px; height: 16px; }
+
+/* Product pages inside the panel: one content width, a 22px title, no eyebrow labels. */
+.product-frame .page-width { width: min(100% - 80px, 1080px); }
+.product-frame .profile-page { padding-block: 28px 48px; }
+.product-frame .profile-hero { display: block; margin-bottom: 24px; }
+.product-frame .profile-hero > p { max-width: 760px; margin: 0; color: #71717a; font-size: 14px; line-height: 1.55; }
+.mc-shell .product-frame main h1 { margin: 0 0 16px; color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; }
+
+/* Product page subtitle and section titles: plain ink, no eyebrow labels. */
+.mc-shell .product-frame main h1 + .mc-sub { margin: -10px 0 20px; color: #71717a; font-size: 14px; line-height: 20px; }
+.product-frame .profile-section-heading h2, .product-frame .profile-form-section h2, .product-frame .profile-sidebar h2 { color: var(--mc-strong); font-size: 16px; line-height: 22px; font-weight: 600; letter-spacing: -0.01em; }
+
+/* Form fields: white, 36px, a 1px zinc border and a soft violet ring on focus. Native selects get a line chevron. */
+.product-frame .profile-page :is(input[type="text"], input[type="number"], input[type="date"], input[type="search"], select) {
+  width: 100%; min-height: 0; height: 36px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px;
+  background-color: #fff; color: #18181b; font-size: 14px; outline: none; box-shadow: var(--mc-shadow-xs);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.product-frame .profile-page :is(select, input[type="date"]) {
+  position: relative; appearance: none; padding-right: 34px; cursor: pointer;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+}
+.product-frame .profile-page input[type="date"] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E"); }
+.product-frame .profile-page input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 0; width: 36px; height: 100%; opacity: 0; cursor: pointer; }
+.product-frame .profile-page :is(input, select):hover:not(:disabled):not(:focus) { border-color: #d4d4d8; }
+.product-frame .profile-page :is(input, select):focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+.product-frame .profile-page input::placeholder { color: #71717a; }
+.product-frame .profile-page :is(.profile-main, .profile-planning-card) label > span:first-child,
+.product-frame .profile-page .member-constraint-group > p, .product-frame .profile-page .rule-title { color: #3f3f46; font-size: 13px; font-weight: 500; }
+.product-frame .profile-page .field-help { color: #71717a; font-size: 13px; line-height: 1.55; }
+
+/* Choice chips keep a thin border; a plain one is a row. The checkbox itself is the shell's global one. */
+.product-frame .profile-page .choice-card { min-height: 32px; padding: 0 12px; gap: 8px !important; border-color: #e4e4e7; background: #fff; }
+.product-frame .profile-page .choice-card > span { color: #27272a !important; font-size: 13px !important; font-weight: 500; }
+.product-frame .profile-page .choice-card:has(input:checked) { border-color: #c4b5fd; background: #faf8ff; }
+.product-frame .profile-page .choice-card.plain { min-height: 24px; padding: 0; border: 0; background: none; }
+.product-frame .profile-page .choice-card.plain > span { font-size: 14px !important; }
+
+/* Buttons: dark pill for the main action, white outline pill, a quiet ghost for removing. */
+.product-frame :is(.primary-button, .secondary-button) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-family: var(--sans); text-decoration: none; transition: background 150ms, border-color 150ms; }
+.product-frame .primary-button { min-height: 40px; height: 40px; padding: 0 18px; border: 0; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.product-frame .primary-button:hover:not(:disabled) { background: #27272a; }
+/* Disabled (not busy) is the shell's faded pill; busy keeps the ink pill with a spinner. */
+.product-frame .primary-button[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
+.product-frame .secondary-button { min-height: 32px; height: 32px; padding: 0 12px; border: 1px solid #e4e4e7; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
+.product-frame .secondary-button:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
+.product-frame .profile-page .text-button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 8px; color: #71717a; font-size: 13px; font-weight: 500; }
+.product-frame .profile-page .text-button .iconify { width: 16px; height: 16px; }
+.product-frame .profile-page .text-button:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
+.product-frame .profile-page .text-button.danger-text:hover:not(:disabled) { background: #fef3f2; color: #b42318; }
+.product-frame .profile-page .remove-button { width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 10px; background: transparent; color: #71717a; box-shadow: none; }
+.product-frame .profile-page .remove-button .iconify { width: 16px; height: 16px; }
+.product-frame .profile-page .remove-button:hover { background: #fef3f2; color: #b42318; }
+
+/* Profile layout: the form column of white cards, then the sticky side cards. */
+.product-frame .profile-layout { gap: 24px; border: 0; }
+.product-frame .profile-main { padding: 0; border: 0; }
+.product-frame .profile-name-field { margin-top: 16px; }
+.product-frame .profile-form-section { margin-top: 16px; padding: 24px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .profile-main > .profile-form-section:first-child { margin-top: 0; }
+.product-frame .member-heading { margin: 0; padding: 0; border: 0; }
+.product-frame .profile-form-section > h2 + .field-help { margin-top: 4px; }
+.product-frame .member-card { gap: 16px; padding: 20px; border-color: #f0f0f2; border-radius: 10px; background: #fcfcfd; box-shadow: none; }
+.product-frame .member-card-header { padding-bottom: 12px; border-bottom-color: #f0f0f2; }
+.product-frame .member-card-header strong { color: var(--mc-strong); font-size: 14px; font-weight: 600; }
+.product-frame .version-badge { padding: 2px 8px; background: #ecfdf3; color: #067647; font-size: 12px; font-weight: 500; }
+/* The side column runs the form's full height; only "Plan your meals" sticks, the cards under it scroll with the page. */
+.product-frame .profile-sidebar { align-self: stretch; display: flex; flex-direction: column; gap: 16px; border: 0; }
+.product-frame .profile-sidebar > section { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .profile-planning-card { position: sticky; top: 72px; z-index: 2; }
+/* Every card title in both columns is the one 16/22 heading. */
+.product-frame .profile-sidebar > section > p { margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; }
+/* The summary's long explanation stays three lines; its full text is in the form above. */
+.product-frame .profile-summary-card > p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 18px; }
+.product-frame .secondary-button .iconify { width: 14px; height: 14px; flex: none; color: #71717a; }
+.product-frame .profile-page select { text-overflow: ellipsis; }
+.product-frame .profile-summary-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
+.product-frame .profile-summary-list div { grid-template-columns: 140px minmax(0, 1fr); padding: 0; border: 0; }
+.product-frame .profile-summary-list dt { color: #71717a; font-size: 13px; line-height: 18px; }
+.product-frame .profile-summary-list dd { color: #27272a; font-size: 13px; line-height: 18px; font-weight: 500; }
+.product-frame .profile-planning-card .primary-button { width: 100%; margin-top: 16px; }
+/* The two stacked full-width buttons share one height. */
+.product-frame .profile-planning-card .profile-replan-button { height: 40px; min-height: 40px; margin-top: 8px; font-size: 14px; }
+.product-frame .profile-planning-card .primary-button + .field-help { margin-top: 8px; }
+.product-frame .profile-planning-card .plan-when { margin-top: 14px; }
+.product-frame .profile-save-button { width: auto; min-width: 0; margin-top: 20px; padding-inline: 18px; }
+.product-frame .profile-main > [aria-labelledby="never-again-title"] { margin-top: 32px; }
+/* Plan ready: a green check tile, the changes, then a violet link to the plan. */
+.product-frame .profile-change-card > .mc-tile { width: 32px; height: 32px; margin-bottom: 12px; border-radius: 9px; }
+.product-frame .profile-change-card > .mc-tile > * { width: 16px; height: 16px; }
+.product-frame .profile-change-card ul { margin: 10px 0 0; color: #52525b; font-size: 13px; }
+.product-frame .see-plan { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; color: #7c3aed; font-size: 13.5px; font-weight: 500; text-decoration: none; }
+.product-frame .see-plan:hover { color: #6d28d9; text-decoration: underline; }
+.product-frame .see-plan .iconify { width: 14px; height: 14px; }
+/* Notices above the form: loading line, soft red error, soft green saved. */
+.product-frame .notice-panel { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; padding: 10px 14px; border: 1px solid #ececef; border-radius: 12px; font-size: 14px; line-height: 20px; }
+.product-frame .notice-panel > .iconify { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.product-frame .error-notice { border-color: #fecdca; background: #fef3f2; color: #b42318; }
+.product-frame .error-notice > .iconify { color: #d92d20; }
+.product-frame .success-notice { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+
+/* Status page: a subtitle, then one card of rows with a soft status badge. */
+.product-frame .main-content { padding-block: 28px 48px; }
+.product-frame .intro { margin-bottom: 20px; }
+.product-frame .intro p { margin: -10px 0 0; color: #71717a; font-size: 14px; line-height: 20px; }
+.product-frame .status-panel { border-color: #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .status-table { padding-inline: 20px; }
+.product-frame .service-name { color: #18181b; font-size: 14px; font-weight: 500; }
+.product-frame .service-state { gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: 999px; background: #ecfdf3; color: #067647; font-size: 13px; font-weight: 500; }
+.product-frame .service-state.unavailable { background: #fef3f2; color: #b42318; }
+.product-frame .service-state .iconify { width: 15px; height: 15px; }
+.product-frame .status-panel .prices { color: #71717a; }
+/* Administrators get a second card below; a household only sees Check again under the status card. */
+.product-frame .technical-details { margin-top: 16px; padding: 0; gap: 24px; }
+.product-frame .technical-details.admin { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .technical-details h2 { margin-bottom: 12px; color: var(--mc-strong); font-size: 15px; font-weight: 600; }
+.product-frame .technical-details dl div { grid-template-columns: 140px 1fr; font-size: 14px; }
+.product-frame .technical-links { gap: 10px; }
+.product-frame .technical-links a { color: #6d28d9; font-size: 14px; font-weight: 500; }
+.product-frame .technical-links button { height: 32px; padding: 0 14px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
+.product-frame .technical-links button:hover { background: #f7f7f8; text-decoration: none; }
+/* Status rows: the name left, the badge at the right edge; the prices note sits under its label. */
+.product-frame .status-row { min-height: 56px; grid-template-columns: minmax(0, 1fr) auto; border-bottom-color: #f0f0f2; }
+.product-frame .status-row:has(.prices) { grid-template-columns: minmax(0, 1fr); row-gap: 2px; padding-block: 14px; }
+.product-frame .status-row .prices { max-width: 640px; font-size: 12px; line-height: 16px; }
+/* One readable width for the list and the card under it, so a label and its badge stay close. */
+.product-frame :is(.status-panel, .technical-details) { max-width: 760px; }
+/* The administrator card: title, the key/value list, then the links in one row. */
+.product-frame .technical-details.admin .technical-links { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
+.product-frame .technical-details.admin .technical-links a { font-size: 13.5px; }
+
+/* Console forms: the same white fields, violet focus ring and line chevron as the product. */
+.mc-shell.ops-shell main :is(select, textarea, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input:not([type])) {
+  border: 1px solid #e4e4e7; border-radius: 10px; background-color: #fff; color: #18181b; font-size: 14px; box-shadow: var(--mc-shadow-xs);
+}
+.mc-shell.ops-shell main :is(select, textarea, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input:not([type])):focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+.mc-shell.ops-shell main select {
+  appearance: none; padding-right: 34px; cursor: pointer;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+}
+.mc-shell.ops-shell main input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.45; cursor: pointer; }
+/* One field size; :where keeps it below the select's chevron padding. */
+.ops-shell main :where(select, input[type="text"], input[type="number"], input[type="date"], input[type="search"], input[type="email"], input:not([type])) { height: 36px; padding: 0 12px; font: inherit; font-size: 14px; }
+.ops-shell main :where(textarea) { padding: 8px 12px; font: inherit; font-size: 14px; line-height: 20px; resize: vertical; }
+
+/* Inputs never take a label's weight. */
+.product-frame .profile-page :is(input, select) { font-weight: 400; }
+/* Age, sex, activity and goal two a row, so each choice reads whole. */
+.product-frame .profile-page .member-basis { grid-template-columns: repeat(2, minmax(0, 1fr)); }

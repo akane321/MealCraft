@@ -1,55 +1,72 @@
 <script setup lang="ts">
-import { formatPlanDate } from "~/lib/meal-plan-format";
-import type { ServerClock } from "~/plugins/server-today";
-
-const { actor, load, logout } = useAuth();
+const { load } = useAuth();
 const route = useRoute();
-// A simulated day (SIMULATED_TODAY, debugging and demos) is always visible, so it is never mistaken for today.
-const clock = useState<ServerClock | null>("server-clock");
-const simulatedLabel = computed(() => {
-  const value = clock.value?.simulated;
-  if (!value || !clock.value) return null;
-  const day = formatPlanDate(clock.value.today, { weekday: "short", day: "numeric", month: "short" });
-  return value.includes("T") ? `${day}, ${value.slice(11, 16)}` : day;
-});
-
 useHead({
   link: [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito:wght@500;600;700;800&display=swap" },
+    // The product and the console use Inter. No bold face: every heavier weight there renders at 600.
+    { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" },
   ],
 });
+
+// Which product page shows in the sidebar shell (null: the page draws its own frame).
+const shellPage = computed(() => {
+  const path = route.path;
+  if (path === "/" || path.startsWith("/ops") || path.startsWith("/login")) return null;
+  const page = path.split("/")[1];
+  return page === "browse" || page === "history" || page === "profile" || page === "system" ? page : "other";
+});
+// The panel's top bar: the page's icon and name (icon names literal so the icon bundle finds them).
+const BARS = {
+  browse: { icon: "i-lucide-book-open", label: "Recipes & groceries" },
+  history: { icon: "i-lucide-calendar-clock", label: "Past plans" },
+  profile: { icon: "i-lucide-users", label: "Household" },
+  system: { icon: "i-lucide-activity", label: "Status" },
+  other: { icon: "i-lucide-layout-grid", label: "MealCraft" },
+} as const;
+
+// Product pages scroll inside the frame, not the window, so start each page at the top.
+const frame = ref<HTMLElement | null>(null);
+watch(() => route.path, () => frame.value?.scrollTo({ top: 0 }));
 
 onMounted(load);
 </script>
 
 <template>
-  <div class="app-shell">
-    <p v-if="simulatedLabel" class="simulated-clock" role="status">Simulated date: {{ simulatedLabel }} · for debugging</p>
-    <!-- The home surface and the console (/ops) draw their own navigation. -->
-    <header v-if="route.path !== '/' && !route.path.startsWith('/ops')" class="app-header">
-      <div class="page-width header-content">
-        <NuxtLink class="brand-name" to="/">
-          <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><circle cx="16" cy="18" r="10.5" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" fill="#c2553a" /></svg>MealCraft
-        </NuxtLink>
-        <!-- The week happens on the home surface; these pages lead back to it and to each other. -->
-        <nav class="primary-nav" aria-label="Primary navigation">
-          <NuxtLink to="/">Back to my plan</NuxtLink>
-          <NuxtLink to="/browse">Recipes</NuxtLink>
-          <NuxtLink to="/history">Past plans</NuxtLink>
-          <button v-if="actor" class="nav-auth" type="button" @click="logout">
-            Sign out {{ actor.user.display_name }}
-          </button>
-          <NuxtLink v-else to="/login">Sign in</NuxtLink>
-        </nav>
+  <UApp>
+    <div class="app-shell">
+      <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
+      <div v-if="shellPage" class="mc-shell mc-page product-shell">
+        <ShellSidebar :current="shellPage" />
+        <div ref="frame" class="mc-frame product-frame">
+          <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}<ShellSimulated /></div>
+          <NuxtPage />
+        </div>
       </div>
-    </header>
-
-    <NuxtPage />
-  </div>
+      <!-- Sign-in: a glowing page with one card (the mark is in the card); the home surface and the console (/ops) draw their own. -->
+      <div v-else-if="route.path.startsWith('/login')" class="mc-shell mc-page auth-shell">
+        <ShellSimulated floating />
+        <NuxtPage />
+      </div>
+      <NuxtPage v-else />
+    </div>
+  </UApp>
 </template>
 
 <style scoped>
-/* A thin strip along the top edge, where every page leaves room, so it never covers a title. */
-.simulated-clock { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; margin: 0; padding: 1px 12px; background: #2b2a33; color: #ffd76a; font-size: 11px; line-height: 16px; font-weight: 800; text-align: center; pointer-events: none; }
+/* Sidebar and the white panel, both the height of the window; the panel scrolls. */
+.product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
+.product-frame { height: calc(100vh - 16px); overflow-y: auto; }
+.product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
+/* The home's pastel glow behind the sign-in card. */
+.auth-shell {
+  min-height: 100vh; padding: 12px 18px;
+  background:
+    radial-gradient(560px 300px at 50% 8%, rgba(255, 226, 200, 0.7), transparent 70%),
+    radial-gradient(420px 320px at 30% 40%, rgba(233, 213, 255, 0.45), transparent 70%),
+    radial-gradient(460px 240px at 55% 70%, rgba(255, 240, 166, 0.45), transparent 70%),
+    radial-gradient(400px 300px at 75% 45%, rgba(255, 211, 230, 0.4), transparent 70%),
+    #f5f5f7;
+}
 </style>

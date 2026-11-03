@@ -93,7 +93,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
             <span>{{ video.title }}</span>
           </span>
         </button>
-        <p v-else class="no-video">No how-to video for this dish yet.</p>
+        <p v-else class="no-video"><UIcon name="i-lucide-video-off" aria-hidden="true" />No how-to video for this dish yet.</p>
       </div>
 
       <div class="acts">
@@ -107,7 +107,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
         >
           {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark cooked" }}
         </button>
-        <button v-if="!readonly" type="button" class="mc-btn quiet sm" @click="emit('swap', tonight.day)">Swap</button>
+        <UTooltip v-if="!readonly" text="Swap this dish">
+          <button type="button" class="swap" aria-label="Swap" @click="emit('swap', tonight.day)"><UIcon name="i-lucide-repeat" aria-hidden="true" /></button>
+        </UTooltip>
       </div>
   </section>
   <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
@@ -120,18 +122,18 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 </template>
 
 <style scoped>
-.tonight { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; margin: 16px 16px 4px; padding: 16px; border-radius: 16px; background: var(--c-tonight); }
+.tonight { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; margin: 16px 16px 4px; padding: 16px; border: 1px solid #ececef; border-radius: 14px; background: radial-gradient(260px 140px at 100% 0%, rgba(253, 205, 225, 0.45), transparent 70%), #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04); }
 .big-icon { grid-row: 1; align-self: start; }
 .head { grid-column: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .video, .acts { grid-column: 1 / -1; }
 .quiet .head { grid-column: 1 / -1; }
-.kicker { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-amber-text); }
-h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 26px; }
+.kicker { font-size: 12px; line-height: 16px; font-weight: 500; color: #71717a; }
+h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; text-wrap: balance; }
 .with { margin: 0; font-size: 13px; color: var(--c-neutral-text); }
 .dish-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: var(--c-tonight-border); text-underline-offset: 3px; }
 .dish-link:hover { color: var(--c-ink); text-decoration-color: var(--c-coral); }
 .meta { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.meta .done { color: var(--c-green-text); font-weight: 800; }
+.meta .done { color: var(--c-green-text); font-weight: 500; }
 .video { margin-top: 10px; }
 .video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; display: block; }
 .poster { width: 100%; padding: 6px; border: 0; border-radius: 12px; background: #fff; display: flex; align-items: center; gap: 10px; text-align: left; color: var(--c-ink); }
@@ -139,12 +141,28 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 2
 .thumb { position: relative; width: 88px; height: 50px; flex: none; border-radius: 8px; overflow: hidden; background: linear-gradient(135deg, #7a3e1e, #d98b3a 55%, #f3d08a) center / cover; }
 .play { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); display: flex; align-items: center; justify-content: center; }
 .play svg { width: 10px; height: 10px; fill: var(--c-ink); }
-.len { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; line-height: 14px; font-weight: 800; }
+.len { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; line-height: 14px; font-weight: 500; }
 .caption { min-width: 0; display: flex; flex-direction: column; }
-.caption small { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
-.caption span { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.caption small { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--c-muted); }
+.caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A missing video is a caption, not an empty box. */
+.no-video { margin: 0; display: flex; align-items: center; gap: 6px; color: #71717a; font-size: 12px; line-height: 16px; }
+.no-video .iconify { width: 12px; height: 12px; flex: none; }
+.video:has(.no-video) { margin-top: 6px; }
+.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 12px; }
+/* Swap: an outline icon button, round like the pills beside it. */
+.swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #52525b; box-shadow: var(--mc-shadow-xs); }
+.swap:hover { border-color: #d4d4d8; background: #f7f7f8; color: #18181b; }
+.swap .iconify { width: 16px; height: 16px; }
 .acts .cooked { border-color: var(--c-tonight-border); }
-.quiet { background: var(--c-canvas); }
+.quiet { background: #fafafa; }
+/* The 340px column at 1280: a smaller icon and title, so the name keeps whole words together. */
+@media (max-width: 1359px) {
+  .tonight { grid-template-columns: 48px minmax(0, 1fr); column-gap: 12px; }
+  .big-icon { width: 48px; height: 48px; }
+  h2 { font-size: 17px; line-height: 24px; }
+  /* Both pills and the round swap fit the card with its 16px padding clear on the right. */
+  .acts { gap: 6px; }
+  .tonight .acts .mc-btn.sm { padding: 0 10px; }
+}
 </style>

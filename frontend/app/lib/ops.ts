@@ -44,7 +44,7 @@ const BAD = new Set(["failed"]);
 const WARN = new Set(["degraded", "cancelled"]);
 
 // A hue per family (done, waiting on the household, degraded, failed, in flight) and a shade per status, so the
-// statuses of one stacked chart stay apart and every badge matches its bar. succeeded is a planning run's,
+// statuses of one stacked chart stay apart (charts only: badges use statusTone below). succeeded is a planning run's,
 // committed a turn's: they never share a chart.
 const COLORS: Record<string, string> = {
   succeeded: "var(--sage)",
@@ -61,6 +61,19 @@ const COLORS: Record<string, string> = {
 
 export function statusColor(status: string) {
   return COLORS[status] ?? "var(--t3)";
+}
+
+// A badge's soft colour pair: done, failed, needs a look, in flight; anything else is neutral.
+const TONES: Record<string, "success" | "error" | "warning" | "info"> = {
+  succeeded: "success", committed: "success", preview_ready: "success", feasible: "success", passed: "success", available: "success",
+  failed: "error", infeasible: "error",
+  degraded: "warning", needs_clarification: "warning",
+  running: "info", queued: "info", ready_for_confirmation: "info",
+};
+
+/** The badge tone of a status: success, error, warning, info or neutral. */
+export function statusTone(status: string) {
+  return TONES[status] ?? "neutral";
 }
 
 /** Statuses seen in a window, good ones first, so stacked bars keep a stable order. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { budgetGap, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
+import { budgetGap, budgetTone, budgetLine, changedMealWhen, conversationForPlan, dishFacts, followUpChips, groceriesChange, groceryGroups, groceryPriceLabel, groceryPriceParts, groceryPriceTimes, groceryTrips, isSavedPrice, isStapleDish, nextFeedback, packageLabel, perDinner, previewChoices, priceCounts, priceSourceLabel, priceTone, productSourceLabel, sameDishChange, shoppingTrips, tonightEntry } from "../app/lib/home-surface";
 import type { MealPlanEntrySnapshot, MealPlanShapeChange, NutritionDashboardDay, WeeklyGroceryEstimate } from "../app/types/meal-plan";
 import type { GroceryLineEstimate, ProductSearchResponse } from "../app/types/recommendation";
 
@@ -45,6 +45,10 @@ describe("grocery helpers", () => {
     expect(budgetGap(estimate)).toEqual({ amount: "S$7.40", over: false });
     expect(budgetGap({ ...estimate, purchase_total_sgd: 95.5 })).toEqual({ amount: "S$5.50", over: true });
     expect(budgetGap({ ...estimate, weekly_budget_sgd: null })).toBeNull();
+    expect(budgetTone(estimate)).toBe("ok");
+    expect(budgetTone({ ...estimate, purchase_total_sgd: 88 })).toBe("near");
+    expect(budgetTone({ ...estimate, purchase_total_sgd: 95.5 })).toBe("over");
+    expect(budgetTone({ ...estimate, weekly_budget_sgd: null })).toBeNull();
   });
 
   it("labels prices by the source actually used, not the mode asked for", () => {
@@ -67,6 +71,9 @@ describe("grocery helpers", () => {
     expect(groceryPriceTimes(item)).not.toContain("check attempted");
     const saved = { ...item, product: { ...item.product!, source: "fairprice" as const }, evidence: { ...item.evidence, source: "release_snapshot" as const, mode: "snapshot" as const, price_source: "snapshot" as const, lookup_status: "timeout" as const, checked_at: "2026-10-07T08:00:00Z" } };
     expect(groceryPriceLabel(saved)).toBe("Saved FairPrice price · 14 Sept · not checked live in time");
+    // The amber part of the line is the failed check alone.
+    expect(groceryPriceParts(saved)).toEqual(["Saved FairPrice price · 14 Sept", "not checked live in time"]);
+    expect(groceryPriceParts(line("Cucumber", 2.2, "Vegetables", 1, "fixture"))).toEqual(["Sample price", null]);
     expect(groceryPriceTimes(saved)).toMatch(/Price observed:.*14.*9.*2026.*check attempted:.*7.*10.*2026/);
     expect(groceryPriceLabel({ ...saved, evidence: { ...saved.evidence, lookup_status: "out_of_stock" } })).toContain("product marked unavailable");
     // The reviewed snapshot is stored as a "fixture" product; after a timeout it is still a saved FairPrice price.

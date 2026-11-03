@@ -5,9 +5,11 @@ const polling = { usePolling: pollForChanges, interval: 300 };
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-31",
-  css: ["~/assets/css/main.css", "~/assets/css/surface.css"],
+  css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css", "~/assets/css/product.css"],
   devtools: { enabled: true },
-  modules: ["@nuxt/eslint"],
+  // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
+  icon: { clientBundle: { scan: true }, fallbackToApi: false },
+  modules: ["@nuxt/eslint", "@nuxt/ui"],
   runtimeConfig: {
     apiBase: "http://backend:8000",
     public: {
@@ -16,6 +18,9 @@ export default defineNuxtConfig({
       fairpriceCartExtensionId: "iogncfhaaajiccdgdnncocllpojhdepm",
     },
   },
+  // Light only; fonts come from the Google Fonts links in app.vue. Only the components the app uses get theme
+  // files, so the global stylesheet carries no utilities for the rest.
+  ui: { colorMode: false, fonts: false, experimental: { componentDetection: true } },
   typescript: {
     strict: true,
   },

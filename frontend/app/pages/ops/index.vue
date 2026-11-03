@@ -40,10 +40,10 @@ const tiles = computed(() => {
   const planningFailed = sum(day => day.planning_runs.failed ?? 0);
   const agentFailed = sum(day => (day.agent_runs.failed ?? 0) + (day.agent_runs.degraded ?? 0));
   return [
-    { label: "Conversations", value: sum(day => day.agent_sessions), note: "started in 14 days" },
-    { label: "Assistant turns", value: sum(day => count(day.agent_runs)), note: `${agentFailed} failed or degraded` },
-    { label: "Planning runs", value: planning, note: `${planningFailed} failed` },
-    { label: "In flight now", value: (overview.value?.runs.queued ?? 0) + (overview.value?.runs.running ?? 0), note: "turns and jobs queued or running" },
+    { label: "Conversations", value: sum(day => day.agent_sessions), note: "started in 14 days", icon: "i-lucide-message-circle", tone: "violet" },
+    { label: "Assistant turns", value: sum(day => count(day.agent_runs)), note: `${agentFailed} failed or degraded`, icon: "i-lucide-bot", tone: "sky" },
+    { label: "Planning runs", value: planning, note: `${planningFailed} failed`, icon: "i-lucide-calendar-check", tone: "green" },
+    { label: "In flight now", value: (overview.value?.runs.queued ?? 0) + (overview.value?.runs.running ?? 0), note: "turns and jobs queued or running", icon: "i-lucide-activity", tone: "amber" },
   ];
 });
 
@@ -58,7 +58,6 @@ const failures = computed(() => Object.entries(overview.value?.runs.failures_las
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Overview</p>
       <h1 class="mc-serif">The last two weeks</h1>
       <p>Counts come from stored runs only; a day with nothing recorded shows as empty, not as zero failures.</p>
     </header>
@@ -71,10 +70,10 @@ const failures = computed(() => Object.entries(overview.value?.runs.failures_las
 
     <template v-else>
       <section class="tiles" aria-label="Totals">
-        <div v-for="tile in tiles" :key="tile.label" class="ops-card tile">
-          <span class="ops-muted">{{ tile.label }}</span>
-          <strong class="mc-serif mc-num">{{ tile.value }}</strong>
-          <span class="ops-muted">{{ tile.note }}</span>
+        <div v-for="tile in tiles" :key="tile.label" class="mc-stat" :data-tone="tile.tone">
+          <span class="mc-tile"><UIcon :name="tile.icon" /></span>
+          <span class="mc-stat-row"><span class="mc-stat-label">{{ tile.label }}</span><strong class="mc-stat-value">{{ tile.value }}</strong></span>
+          <span class="mc-stat-note">{{ tile.note }}</span>
         </div>
       </section>
 
@@ -135,12 +134,10 @@ const failures = computed(() => Object.entries(overview.value?.runs.failures_las
 </template>
 
 <style scoped>
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-.tile { display: grid; gap: 4px; font-size: 12.5px; }
-.tile strong { font-size: 36px; line-height: 1.1; color: var(--ivory); }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .modes { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
 .modes li { display: grid; grid-template-columns: minmax(90px, 30%) 1fr auto; align-items: center; gap: 12px; }
-.meter { height: 8px; border-radius: 999px; background: var(--s3); overflow: hidden; }
+.meter { height: 6px; border-radius: 999px; background: #f0f0f2; overflow: hidden; }
 .meter i { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .versions { margin: 16px 0 0; font-size: 12.5px; line-height: 1.6; }
 </style>
