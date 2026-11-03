@@ -81,7 +81,7 @@ const removeMessage = computed(() => {
   return item.plan_id ? `${base} The plan it made stays in Past plans.` : base;
 });
 
-// A row near the foot of the list opens its menu upward, so the scrolling list never cuts it off.
+// A row near the foot of a long list opens its menu upward, so the scrolling list never cuts it off.
 const MENU_HEIGHT = 112;
 const menuUp = ref(false);
 function toggleMenu(item: AgentSession, event: MouseEvent) {
@@ -91,7 +91,12 @@ function toggleMenu(item: AgentSession, event: MouseEvent) {
   }
   const row = (event.currentTarget as HTMLElement).closest(".row");
   const list = row?.closest(".groups");
-  menuUp.value = Boolean(row && list && list.getBoundingClientRect().bottom - row.getBoundingClientRect().bottom < MENU_HEIGHT);
+  if (row && list) {
+    const box = row.getBoundingClientRect();
+    const area = list.getBoundingClientRect();
+    // Only when it fits above: a short list keeps the menu below, where the list scrolls to it.
+    menuUp.value = area.bottom - box.bottom < MENU_HEIGHT && box.top - area.top >= MENU_HEIGHT;
+  }
   menuFor.value = item.id;
 }
 

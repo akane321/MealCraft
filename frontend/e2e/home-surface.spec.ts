@@ -2173,7 +2173,7 @@ test("the FairPrice cart panel shows the real cart, adds only what is missing, c
   await expect(panel.getByText("FairPrice PFC", { exact: false })).toBeVisible();
   const chicken = rowOf("Kee Song Fresh Chicken");
   await expect(chicken.locator("img")).toHaveAttribute("src", /^data:image\/svg/);
-  await expect(chicken.locator("img")).toHaveJSProperty("width", 64);
+  await expect(chicken.locator("img")).toHaveJSProperty("width", 56);
   await expect(chicken.getByText("500g", { exact: true })).toBeVisible();
   await expect(chicken.locator(".unit b")).toHaveText("S$10.95");
   await expect(chicken.locator("s")).toHaveText("S$12.95");
