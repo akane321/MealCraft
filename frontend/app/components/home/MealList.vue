@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatPlanDate, planDayName, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
+import { formatPlanDate, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { FEEDBACK_BUTTONS, MEAL_LABEL, dishFacts, isStapleDish, mealsByDay, nextFeedback, nextMeal, type PlannedMeal } from "~/lib/home-surface";
 import type { FeedbackKind, NutritionDashboardDay } from "~/types/meal-plan";
 
@@ -23,16 +23,11 @@ const factsOpen = ref<number | null>(null);
 const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
 const week = computed(() => mealsByDay(props.days));
-// Past seven days a weekday repeats, so the overview names the date too.
+// Past seven days a weekday repeats, so an action names the date too.
 const numbered = computed(() => week.value.length > 7);
 const next = computed(() => nextMeal(props.days, todayIsoDate()));
 // A dinner-only week reads as before, one row a day; with several meals each day gets a heading.
 const severalMeals = computed(() => week.value.some(day => day.meals.length > 1));
-// The overview line of a day of several meals names each meal's main (in meal order), as the whole day of a full
-// structure cannot fit one line; each main is shortened in proportion, so the dinner's stays in view at 1280. Its
-// tooltip lists every dish.
-const dayText = (day: { meals: PlannedMeal[] }) => day.meals.map(meal => `${MEAL_LABEL[meal.mealType]}: ${meal.dishes.map(dish => dish.recipe.title).join(", ")}`).join("; ");
-
 const STATE: Record<string, string> = { completed: "Cooked", skipped: "Skipped", partial: "Part cooked" };
 const CHIP_TONE: Record<string, string> = { next: "warn", tomorrow: "info", completed: "ok" };
 const tomorrow = computed(() => {
@@ -61,19 +56,8 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 
 <template>
   <div>
-    <!-- The whole plan at a glance, one line a day, above the rows that change each dish. -->
-    <p class="overview-head">At a glance</p>
-    <ol class="overview" :class="{ numbered }" aria-label="Plan overview">
-      <li v-for="day in week" :key="day.dayIndex">
-        <span>{{ planDayName(day.date, "short", numbered) }}</span>
-        <span v-if="day.meals.length > 1" class="overview-dishes overview-mains" :title="dayText(day)">
-          <span v-for="meal in day.meals" :key="meal.key">{{ meal.dishes[0]!.recipe.title }}</span>
-        </span>
-        <span v-else class="overview-dishes" :title="dayText(day)">{{ dayText(day) }}</span>
-      </li>
-    </ol>
     <p v-if="feedbackError" class="feedback-error" role="alert">{{ feedbackError }}</p>
-    <ol class="days">
+    <ol class="days" aria-label="Plan days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
         <p v-if="severalMeals" class="day-head mc-label">
           {{ formatPlanDate(day.date, { weekday: "long" }) }} {{ formatPlanDate(day.date, { day: "numeric", month: "short" }) }}
@@ -168,17 +152,6 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 </template>
 
 <style scoped>
-/* At a glance: a small titled card, one quiet line a day. */
-.overview-head { margin: 12px 16px 0; padding: 10px 12px 4px; border: 1px solid #ececef; border-bottom: 0; border-radius: 12px 12px 0 0; background: #fff; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
-.overview { list-style: none; margin: 0 16px 4px; padding: 0 12px 8px; border: 1px solid #ececef; border-top: 0; border-radius: 0 0 12px 12px; background: #fff; }
-.overview li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; font-size: 12.5px; line-height: 22px; }
-.overview li > span:first-child { color: #71717a; font-weight: 500; }
-.overview.numbered li { grid-template-columns: 56px minmax(0, 1fr); }
-.overview-dishes { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #27272a; }
-/* Each meal's main shrinks in proportion to its length, so the last (dinner) never falls off the line. */
-.overview-mains { display: flex; min-width: 0; }
-.overview-mains > span { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.overview-mains > span + span::before { content: " · "; white-space: pre; }
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
 .row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
@@ -191,8 +164,8 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .dish { min-width: 0; display: flex; flex-direction: column; }
 .title-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .title-line .name { flex: 0 1 auto; min-width: 0; }
-.not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
-.role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 700; }
+.not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 500; }
+.role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 500; }
 .title-line .mc-chip { flex: none; margin-left: auto; }
 .title-line .mc-chip.warn { background: #f5f3ff; color: #6d28d9; }
 .title-line .mc-chip.info { background: #f4f4f5; color: #52525b; }
@@ -200,7 +173,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .dish.side .name { font-size: 13px; font-weight: 500; }
 .name:hover { color: #6d28d9; }
 .rest { font-size: 12.5px; line-height: 18px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kept { color: var(--c-green-text); font-weight: 800; }
+.kept { color: var(--c-green-text); font-weight: 500; }
 .ok-tick { color: var(--c-green); }
 /* A dish's changes and its feedback: small ghost icon buttons, dim until the row is pointed at or focused. */
 .act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 4px 0 0 -5px; }
@@ -211,14 +184,15 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .acts button .iconify, .feedback button .iconify { width: 16px; height: 16px; }
 .acts button:hover, .feedback button:hover { background: #f4f4f5; color: var(--mc-strong); }
 .feedback button[aria-pressed="true"] { background: #f5f3ff; color: #6d28d9; }
-.feedback button:disabled { opacity: 0.6; }
+.feedback button:disabled { opacity: 0.5; }
 .never { font-size: 12px; line-height: 24px; color: var(--c-muted); font-weight: 500; white-space: nowrap; }
 .never button { padding: 0; border: 0; background: none; color: #6d28d9; font: inherit; font-weight: 600; }
 .reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
-.reason { height: 20px; padding: 0 8px; border: 1px solid var(--c-line); border-radius: 999px; background: none; color: var(--c-muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
-.reason:hover, .reason[aria-expanded="true"] { border-color: var(--c-ink); color: var(--c-ink); }
-.facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; padding: 6px 10px; border-radius: 8px; background: var(--c-canvas); font-size: 12px; line-height: 18px; }
-.facts-head { flex-basis: 100%; color: var(--c-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
-.fact b { font-weight: 800; }
-.feedback-error { margin: 8px 16px 0; color: var(--c-coral); font-size: 12px; font-weight: 700; }
+.reason { height: 20px; padding: 0 8px; border: 0; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.reason:hover { background: #e9e9ec; color: #18181b; }
+.reason[aria-expanded="true"] { background: #ede9fe; color: #6d28d9; }
+.facts { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 6px; padding: 8px 12px; border: 1px solid #f0f0f2; border-radius: 10px; background: #fafafa; color: #27272a; font-size: 12px; line-height: 18px; }
+.facts-head { flex-basis: 100%; color: #9a9aa3; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.fact b { font-weight: 500; }
+.feedback-error { margin: 8px 16px 0; color: #b42318; font-size: 12px; font-weight: 500; }
 </style>

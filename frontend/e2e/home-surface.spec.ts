@@ -665,14 +665,25 @@ test("a dish's reason tag opens its facts, labelled as facts, at both desktop wi
 });
 
 for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
-  test(`week overview and composer have room at ${viewport.width}`, async ({ page }) => {
+  test(`day list and composer have room at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
     await page.setViewportSize(viewport);
-    const overview = page.getByRole("list", { name: "Plan overview" });
-    await expect(overview.getByRole("listitem")).toHaveCount(7);
-    const body = await page.getByRole("tabpanel").boundingBox();
-    const last = await overview.getByRole("listitem").last().boundingBox();
-    expect(last!.y + last!.height).toBeLessThanOrEqual(body!.y + body!.height);
+    const panel = page.getByRole("complementary", { name: "This plan" });
+    const days = panel.getByRole("list", { name: "Plan days" });
+    await expect(days.locator(":scope > li")).toHaveCount(7);
+    // The panel body scrolls: the first and the last day can each be brought fully into it.
+    const tabpanel = panel.getByRole("tabpanel");
+    for (const row of [days.locator(":scope > li").first(), days.locator(":scope > li").last()]) {
+      await row.scrollIntoViewIfNeeded();
+      const body = await tabpanel.boundingBox();
+      const box = await row.boundingBox();
+      expect(box!.y).toBeGreaterThanOrEqual(body!.y - 0.5);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(body!.y + body!.height + 0.5);
+    }
+    // The list never runs under the budget footer.
+    const body = await tabpanel.boundingBox();
+    const foot = await panel.locator(".panel-foot").boundingBox();
+    expect(body!.y + body!.height).toBeLessThanOrEqual(foot!.y + 0.5);
     const context = await page.locator(".composer-wrap .context").boundingBox();
     const input = await page.getByLabel("Message MealCraft").boundingBox();
     const composer = await page.locator(".composer-wrap .composer").boundingBox();
@@ -680,7 +691,10 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
     // The chip sits in the composer's bottom row: under the message, never over it, and inside the box.
     expect(context!.y).toBeGreaterThanOrEqual(input!.y + input!.height);
     expect(context!.y + context!.height).toBeLessThanOrEqual(composer!.y + composer!.height);
-    await expect(overview.locator("[title]").first()).toHaveAttribute("title", /Lemon Herb Chicken Rice Bowl/);
+    // The composer and the day list sit side by side, never over each other.
+    const aside = await panel.boundingBox();
+    expect(composer!.x + composer!.width).toBeLessThanOrEqual(aside!.x);
+    await expect(days.locator("button.name").first()).toHaveAttribute("title", /Lemon Herb Chicken Rice Bowl/);
   });
   test(`dish actions stay on one row at ${viewport.width}`, async ({ page }) => {
     await planWeek(page);
@@ -2429,7 +2443,7 @@ test("a one-dinner plan reads as one dinner, one date and a plan budget, with ch
 
   // The panel and the nutrition pages fit one day: one picker button, and a single point drawn as a dot.
   await expect(panel.getByRole("tab", { name: "Plan", exact: true })).toBeVisible();
-  await expect(panel.getByRole("list", { name: "Plan overview" }).getByRole("listitem")).toHaveCount(1);
+  await expect(panel.getByRole("list", { name: "Plan days" }).locator(":scope > li")).toHaveCount(1);
   await page.waitForTimeout(600);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/20-short-plan.png` });
   await panel.getByRole("tab", { name: "Nutrition", exact: true }).click();
