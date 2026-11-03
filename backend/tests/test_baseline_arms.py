@@ -1,0 +1,181 @@
+"""The conversation-protocol baseline runner and the strong-rule arm, offline only (no model, no network)."""
+
+import json
+from datetime import date, datetime
+from functools import cache
+
+import pytest
+
+from app.core import clock
+from app.core.paths import repository_root
+from app.evaluation import baseline_arms, strong_rule_baseline
+from app.evaluation.baseline_resources import load_resources
+from app.evaluation.conversation_adapter import PlanDish, PlanMeal, PlanOutput, UnifiedOutput
+
+DEV = repository_root() / "data/evaluation/dev/v3-meal-day-week/episodes"
+MONDAY_NOON = datetime(2026, 9, 28, 12, tzinfo=clock.SINGAPORE)
+
+
+@cache
+def resources():
+    return load_resources()
+
+
+def dev(name: str) -> dict:
+    return json.loads((DEV / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def test_turns_are_the_users_own_strings_only():
+    episode = {
+        "scenario": {
+            "user_request": "And no pork.",
+            "conversation_history": [
+                {"role": "user", "content": "Two of us, dinners."},
+                {"role": "assistant", "content": "Sure."},
+            ],
+            "household_profile": {"household_size": 2},
+        },
+        "gold": {"class": "plan"},
+    }
+    assert baseline_arms.episode_turns(episode) == ["Two of us, dinners.", "And no pork."]
+
+
+def test_a_plan_becomes_the_ingredient_level_answer_with_weekday_slots():
+    dish = PlanDish(
+        name="Chicken rice",
+        role="main",
+        servings=2,
+        evidence={
+            "ingredients": [{"name": "chicken", "quantity_g": 300}],
+            "steps": ["Cook."],
+            "cooking_time_minutes": 30,
+        },
+    )
+    output = UnifiedOutput(plan=PlanOutput(meals=[PlanMeal(date=date(2026, 9, 29), meal_type="dinner", dishes=[dish])]))
+    response = baseline_arms.to_baseline_response(output, episode_id="e1", system_id="arm")
+    assert response.status == "plan"
+    assert response.plan.meals[0].slot_id == "tue-dinner"
+    assert response.plan.meals[0].dishes[0].ingredients[0].quantity_g == 300
+
+
+def test_a_dish_without_ingredient_evidence_is_an_invalid_output_not_a_plan():
+    output = UnifiedOutput(
+        plan=PlanOutput(meals=[PlanMeal(date=date(2026, 9, 29), meal_type="dinner", dishes=[PlanDish(name="Soup")])])
+    )
+    with pytest.raises(ValueError):
+        baseline_arms.to_baseline_response(output, episode_id="e1", system_id="arm")
+
+
+def test_no_plan_is_a_clarification_or_infeasible():
+    asked = baseline_arms.to_baseline_response(
+        UnifiedOutput(clarification=["How many?"]), episode_id="e", system_id="a"
+    )
+    refused = baseline_arms.to_baseline_response(UnifiedOutput(refusal="No."), episode_id="e", system_id="a")
+    assert (asked.status, refused.status) == ("clarification", "infeasible")
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (
+            "Two of us. Plan breakfast and dinner every day this week: one breakfast dish, and dinner with a main "
+            "and a vegetable when it fits.",
+            {"breakfast": ("main",), "dinner": ("main", "vegetable")},
+        ),
+        (
+            "四口之家。午餐一道菜就够了，晚餐要一荤一素一汤。",
+            {"lunch": ("main",), "dinner": ("main", "vegetable", "soup")},
+        ),
+        (
+            "Six of us and we eat big dinners: two different meat dishes, a vegetable dish and a soup every night.",
+            {"dinner": ("main", "main-2", "vegetable", "soup")},
+        ),
+        ("Two of us, three meals a day.", {"breakfast": ("main",), "lunch": ("main",), "dinner": ("main",)}),
+        ("Plan something for us.", {"dinner": ("main",)}),
+    ],
+)
+def test_meals_and_dishes_are_read_by_keyword_rules(text, expected):
+    assert strong_rule_baseline.read_meals(text, None) == expected
+
+
+def test_the_request_is_read_with_the_rule_parser():
+    request = strong_rule_baseline.read_request(
+        ["Three of us, one is allergic to eggs. Breakfast, lunch and dinner every day, no pork."], MONDAY_NOON
+    )
+    assert request.household_size == 3
+    assert "egg" in request.allergens
+    assert {"pork", "bacon"} <= request.excluded
+    assert (request.start, request.days) == (date(2026, 9, 28), 7)
+    assert strong_rule_baseline.read_request(["四口之家，晚餐一荤一素。"], MONDAY_NOON).household_size == 4
+    assert strong_rule_baseline.read_request(["Just me, dinners."], MONDAY_NOON).household_size == 1
+
+
+def test_a_missing_household_size_is_asked_for():
+    output = strong_rule_baseline.respond_to(["Plan dinners."], MONDAY_NOON, resources(), repository_root())
+    assert output.plan is None and output.clarification == [strong_rule_baseline.CLARIFY_SIZE]
+
+
+def test_the_strong_rule_plan_keeps_its_rules():
+    request = strong_rule_baseline.read_request(
+        [
+            "Three of us, one is allergic to eggs. Dinner with a main and a vegetable, no pork. Please don't serve "
+            "any dish twice."
+        ],
+        MONDAY_NOON,
+    )
+    output = strong_rule_baseline.plan(request, resources(), repository_root())
+    facts = resources().ingredient_facts
+    dishes = [dish for meal in output.plan.meals for dish in meal.dishes]
+    assert len(output.plan.meals) == 7 and all(len(meal.dishes) == 2 for meal in output.plan.meals)
+    names = [dish.recipe_reference for dish in dishes]
+    assert len(names) == len(set(names))  # no repeats when the user says so
+    by_name = {name: key for key, name in resources().names.items()}
+    for dish in dishes:
+        for line in dish.evidence["ingredients"]:
+            key = by_name[line["name"]]
+            assert key not in request.excluded
+            assert "egg" not in (facts[key].allergens or ())
+
+
+def test_the_runner_scores_the_strong_rule_arm_on_development_episodes(tmp_path, capsys):
+    episodes = tmp_path / "episodes"
+    episodes.mkdir()
+    for name in ("mdw-dev-005", "mdw-dev-010"):
+        (episodes / f"{name}.json").write_text(json.dumps(dev(name), ensure_ascii=False), encoding="utf-8")
+    output = tmp_path / "strong-rule.jsonl"
+    argv = ["--arm", "strong-rule", "--episodes", str(episodes), "--anchor-date", "2026-09-28", "--output", str(output)]
+    assert baseline_arms.main(argv, resource_loader=resources) == 0
+    records = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert [row["episode_id"] for row in records] == ["mdw-dev-005", "mdw-dev-010"]
+    assert all(row["valid_output"] and row["cost_usd"] == 0.0 for row in records)
+    assert all(row["scored"]["dishes"][0]["mappings"] for row in records)
+    assert records[1]["scored"]["allergen_safe"] is True
+    report = json.loads(output.with_suffix(".report.json").read_text(encoding="utf-8"))
+    assert report["answered"] == 2 and report["anchor_date"] == "2026-09-28"
+    # A rerun into the same output skips what is answered and keeps the records byte for byte.
+    before = output.read_bytes()
+    assert baseline_arms.main(argv, resource_loader=resources) == 0
+    assert output.read_bytes() == before
+
+
+def test_the_runner_refuses_a_heldout_path_and_an_unknown_arm(tmp_path):
+    with pytest.raises(SystemExit):
+        baseline_arms.main(["--arm", "nope", "--fingerprint"])
+    with pytest.raises(SystemExit):
+        baseline_arms.main(
+            [
+                "--arm",
+                "strong-rule",
+                "--episodes",
+                str(tmp_path / "heldout"),
+                "--anchor-date",
+                "2026-09-28",
+                "--output",
+                str(tmp_path / "out.jsonl"),
+            ]
+        )
+
+
+def test_the_fingerprint_names_the_arm_and_its_source():
+    printed = strong_rule_baseline.fingerprint()
+    assert printed["system_id"] == "strong-rule" and len(printed["runner_sha256"]) == 64
