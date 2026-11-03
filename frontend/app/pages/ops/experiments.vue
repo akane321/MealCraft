@@ -284,6 +284,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
               <input v-else :id="`set-${setting.key}`" v-model="drafts[setting.key]" type="number" :min="setting.minimum ?? undefined" :max="setting.maximum ?? undefined" :step="setting.integer ? 1 : 'any'">
               <button type="button" class="mc-primary" :disabled="!draftChanges(setting, drafts[setting.key])" @click="ask(setting)">Change</button>
               <button v-if="setting.overridden" type="button" class="mc-pill" @click="ask(setting, true)">Use default</button>
+              <span v-else aria-hidden="true" />
             </div>
           </li>
         </ul>
@@ -400,7 +401,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
           <p v-if="!failureRows.length" class="ops-muted small">Neither record contains aggregated failure mechanisms.</p>
           <table v-else class="metrics">
             <thead><tr><th>Mechanism</th><th>A count</th><th>B count</th></tr></thead>
-            <tbody><tr v-for="row in failureRows" :key="row.key"><th>{{ humanKey(row.key) }}</th><td>{{ formatValue(row.before) }}</td><td>{{ formatValue(row.after) }}</td></tr></tbody>
+            <tbody><tr v-for="row in failureRows" :key="row.key"><th>{{ humanKey(row.key) }}</th><td class="mc-num">{{ formatValue(row.before) }}</td><td class="mc-num">{{ formatValue(row.after) }}</td></tr></tbody>
           </table>
           <h3>Case changes</h3>
           <p v-if="!comparison?.case_differences" class="ops-muted small">One or both runs stored no case-level report, so case changes cannot be compared.</p>
@@ -432,7 +433,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
       <p v-else-if="!experiments" class="ops-muted" aria-busy="true">Loading…</p>
       <p v-else-if="!experiments.length" class="ops-muted">No evaluation has been run yet.</p>
       <table v-else class="results">
-        <thead><tr><th class="pick">A · B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
+        <thead><tr><th class="pick" title="Choose run A, then run B, to compare them">A · B</th><th>Run</th><th>Status</th><th>Headline</th><th>Gates</th><th class="mc-num">Time</th><th>When</th><th>Evidence</th></tr></thead>
         <tbody>
           <tr v-for="run in experiments" :key="run.id">
             <td class="pick"><input v-model="pickA" type="radio" name="pick-a" :value="run.id" :aria-label="`Use run ${run.id} as A`"><input v-model="pickB" type="radio" name="pick-b" :value="run.id" :aria-label="`Use run ${run.id} as B`"></td>
@@ -520,7 +521,7 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
             <h3 id="detail-reproduce">Reproducibility</h3>
             <OpsFields :data="selectedExperiment.conditions" />
             <p v-if="selectedExperiment.reproducibility.missing.length" class="ops-error">Missing: {{ selectedExperiment.reproducibility.missing.join(", ") }}</p>
-            <ul class="ops-muted small"><li v-for="warning in selectedExperiment.reproducibility.warnings" :key="warning">{{ warning }}</li></ul>
+            <ul class="ops-muted small bullets"><li v-for="warning in selectedExperiment.reproducibility.warnings" :key="warning">{{ warning }}</li></ul>
           </section>
           <section aria-labelledby="detail-failures">
             <h3 id="detail-failures">Failed cases</h3>
@@ -552,7 +553,8 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 .what label { color: #18181b; font-size: 14px; font-weight: 500; }
 .what p { margin: 4px 0 0; font-size: 12.5px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.how { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* The controls in fixed columns, so every select starts at the same x and nothing moves when "Use default" shows. */
+.how { display: grid; grid-template-columns: 150px auto 104px; align-items: center; justify-items: start; gap: 8px; }
 .how select, .how input { width: 150px; }
 .small { font-size: 12px; }
 .ops-stack { display: grid; gap: 16px; }
@@ -573,13 +575,20 @@ td p { margin: 4px 0 0; }
 .results :is(th, td):first-child { padding-left: 16px !important; }
 .pick { width: 64px; white-space: nowrap; }
 .pick input { vertical-align: middle; }
-.pick input + input { margin-left: 14px; }
-/* The run's name on one line, the headline on two at most; both whole in their tooltip. */
-.run-name > span { display: block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick input + input { margin-left: 10px; }
+.results :is(th, td):last-child { padding-right: 14px !important; }
+/* The run's name on two lines at most; the headline and gates in a smaller grey, wrapping; the full text is in the tooltips. */
+.run-name { min-width: 220px; }
+.run-name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .run-name b { font-weight: 600; }
 .headline > span { display: -webkit-box; max-width: 260px; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.headline, .gates { color: #52525b; font-size: 13px; line-height: 18px; }
 .gates { min-width: 96px; }
 h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
+/* Bulleted lists (the reset stylesheet drops list markers). */
+.config-diff, .comparison-blocked ul, .bullets { list-style: disc; }
+:is(.config-diff, .comparison-blocked ul, .bullets) li::marker { color: #a1a1aa; }
+.bullets { margin: 8px 0 0; padding-left: 18px; }
 .config-diff { margin: 0; padding-left: 18px; font-size: 13px; }
 .config-diff b { color: #0f0f12; font-weight: 600; }
 /* The comparison tables sit in half a page: smaller cells than the full-width tables. */
@@ -588,6 +597,9 @@ h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 
 .metrics thead th { height: 32px; padding-block: 0; }
 .metrics tbody th { color: #52525b; font-weight: 400; white-space: normal; }
 .metrics td.mc-num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Number headings sit over their numbers, in equal narrow columns, so A, B and B − A read side by side. */
+.metrics:not(.evidence-table, .case-changes) thead th:not(:first-child) { text-align: right; }
+.metrics:not(.evidence-table, .case-changes) :is(thead th:not(:first-child), td.mc-num) { width: 96px; }
 /* A moved figure is data, not a link: ink and bold. */
 .moved { color: #0f0f12; font-weight: 600; }
 .comparison-ready, .comparison-blocked { margin: 12px 0; padding: 10px 14px; border: 1px solid; border-radius: 12px; font-size: 13px; line-height: 18px; }

@@ -14,21 +14,28 @@ const HEIGHT = 150;
 const totals = computed(() => props.days.map((_, index) => props.series.reduce((sum, item) => sum + (item.values[index] ?? 0), 0)));
 const max = computed(() => niceMax(Math.max(0, ...totals.value)));
 const slot = computed(() => WIDTH / Math.max(props.days.length, 1));
-// Thin bars, at most 8 units wide, centred in their day.
-const barWidth = computed(() => Math.min(slot.value * 0.5, 8));
+// Bars a little over half their day's width, at most 18 units, centred in their day.
+const barWidth = computed(() => Math.min(slot.value * 0.55, 18));
 
 // Nothing to draw: no series, or every day at zero.
 const empty = computed(() => totals.value.every(total => !total));
+// Stacked segments sit flush; only the top one of a day gets rounded top corners.
 const bars = computed(() => props.days.flatMap((day, index) => {
   let top = HEIGHT;
-  return props.series.flatMap((item) => {
+  const segments = props.series.flatMap((item) => {
     const value = item.values[index] ?? 0;
     if (!value) return [];
     const height = (value / max.value) * HEIGHT;
     top -= height;
-    return [{ key: `${day}-${item.name}`, x: index * slot.value + (slot.value - barWidth.value) / 2, y: top, width: barWidth.value, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
+    const x = index * slot.value + (slot.value - barWidth.value) / 2;
+    return [{ key: `${day}-${item.name}`, x, y: top, height, color: item.color, title: `${shortDay(day)}: ${value} ${item.name.replaceAll("_", " ")}` }];
   });
+  return segments.map((bar, at) => ({ ...bar, d: barPath(bar.x, bar.y, barWidth.value, bar.height, at === segments.length - 1 ? 3 : 0) }));
 }));
+function barPath(x: number, y: number, w: number, h: number, radius: number) {
+  const r = Math.min(radius, w / 2, h);
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
 
 function shortDay(day: string) {
   return new Date(`${day}T00:00:00`).toLocaleDateString("en-SG", { day: "numeric", month: "short" });
@@ -41,9 +48,9 @@ function shortDay(day: string) {
       <line x1="0" :y1="HEIGHT" :x2="WIDTH" :y2="HEIGHT" class="axis" />
       <line x1="0" y1="0" :x2="WIDTH" y2="0" class="grid" />
       <text v-if="!empty" x="0" y="-2" class="tick">{{ max }}</text>
-      <rect v-for="bar in bars" :key="bar.key" :x="bar.x" :y="bar.y" :width="bar.width" :height="bar.height" :fill="bar.color" rx="3">
+      <path v-for="bar in bars" :key="bar.key" :d="bar.d" :fill="bar.color">
         <title>{{ bar.title }}</title>
-      </rect>
+      </path>
       <template v-for="(day, index) in days" :key="day">
         <text v-if="index === 0 || index === days.length - 1 || index === Math.floor(days.length / 2)" :x="index * slot + slot / 2" :y="HEIGHT + 16" class="tick" text-anchor="middle">{{ shortDay(day) }}</text>
       </template>

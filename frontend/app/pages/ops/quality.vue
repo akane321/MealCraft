@@ -158,8 +158,9 @@ onMounted(retryAll);
             <p class="mc-eyebrow">Coverage</p>
             <h2 id="coverage-title" class="mc-serif">Released records</h2>
           </div>
-          <p v-if="!summary.coverage" class="ops-muted">Coverage is unavailable from this release.</p>
         </div>
+        <!-- Where the cards would be: a dashed box with the reason. -->
+        <p v-if="!summary.coverage" class="unavailable">Coverage is unavailable from this release.</p>
         <div v-if="summary.coverage" class="metric-grid">
           <!-- The overview's stat cards: a tile, then the label and the value on one baseline. -->
           <article class="metric mc-stat" data-tone="violet"><span class="mc-tile" aria-hidden="true"><UIcon name="i-lucide-book-open" /></span><span class="mc-stat-row"><span class="mc-stat-label">Recipes</span><strong class="mc-stat-value">{{ summary.coverage.released_recipes.toLocaleString() }}</strong></span></article>
@@ -193,7 +194,7 @@ onMounted(retryAll);
 
         <section class="ops-card" aria-labelledby="review-title">
           <h2 id="review-title">Human review</h2>
-          <p class="review-number mc-num">{{ summary.allergen_rules_pending_human === null ? "—" : summary.allergen_rules_pending_human.toLocaleString() }}</p>
+          <p class="review-number mc-num" :class="{ missing: summary.allergen_rules_pending_human === null }">{{ summary.allergen_rules_pending_human === null ? "—" : summary.allergen_rules_pending_human.toLocaleString() }}</p>
           <p class="ops-muted">Allergen rules still awaiting human confirmation.</p>
         </section>
       </div>
@@ -308,10 +309,12 @@ onMounted(retryAll);
 .issues li { display: grid; gap: 2px; padding: 9px 12px; border: 1px solid #fef0c7; border-radius: 10px; background: #fff; font-size: 13px; }
 .issues li span { color: #71717a; }
 .section-heading { margin-bottom: 10px; }
-/* Coverage numbers as stat cards. */
+/* Coverage numbers as stat cards; a card without a caption keeps an empty caption row, so the values share one baseline. */
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-/* Three equal cards in one row. */
-.evidence-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+.metric-grid .mc-stat:not(:has(.mc-stat-note))::after { content: ""; height: 16px; margin-top: -10px; }
+.unavailable { display: grid; place-items: center; min-height: 104px; margin: 0; border: 1px dashed #e4e4e7; border-radius: 12px; color: #71717a; font-size: 14px; }
+/* Three cards in one row, each as tall as its own content. */
+.evidence-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
 .mc-stat .mc-stat-note { margin-top: -10px; }
 .intro { margin: -5px 0 16px; font-size: 12.5px; line-height: 1.5; }
 .share-list, .nutrition-stats { display: grid; gap: 13px; margin: 0; }
@@ -319,14 +322,15 @@ onMounted(retryAll);
 .share-list dt { display: flex; justify-content: space-between; gap: 12px; color: #52525b; font-size: 13px; }
 .share-list dt b { color: #27272a; font-weight: 500; }
 .share-list dd { height: 6px; margin: 0; overflow: hidden; border-radius: 999px; background: #f0f0f2; }
-.share-list dd span { display: block; height: 100%; border-radius: inherit; background: #f59e0b; }
+.share-list dd span { display: block; height: 100%; border-radius: inherit; background: #8b5cf6; }
 /* Nutrition: label and value rows. */
 .nutrition-stats { gap: 0; }
 .nutrition-stats div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f2f2f4; }
 .nutrition-stats div:last-child { border-bottom: 0; }
 .nutrition-stats dt { color: #52525b; font-size: 13px; line-height: 18px; }
 .nutrition-stats dd { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.review-number { margin: 4px 0 4px; color: var(--mc-strong); font-size: 30px; line-height: 36px; font-weight: 600; }
+.review-number { margin: 0 0 4px; color: var(--mc-strong); font-size: 22px; line-height: 28px; font-weight: 600; }
+.review-number.missing { color: #a1a1aa; font-size: 14px; line-height: 20px; font-weight: 400; }
 .distribution-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .distribution-grid h3 { margin: 0 0 12px; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
 .distribution-grid ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
@@ -340,11 +344,12 @@ onMounted(retryAll);
 .dropped-card label { display: grid; flex: 0 0 220px; grid-template-columns: minmax(0, 1fr); gap: 6px; color: #71717a; font-size: 12px; font-weight: 500; }
 .dropped-card select { width: 100%; min-width: 0; }
 /* One column a step, so a step never wraps away from the arrow before it: the arrow sits in the gap, not in the text. */
-.funnel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px 30px; margin: 0; padding: 0 20px 14px; list-style: none; color: #52525b; font-size: 12.5px; }
+.funnel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px 30px; margin: 0; padding: 0 20px 14px; list-style: none; color: #71717a; font-size: 12.5px; line-height: 18px; }
 .funnel li { position: relative; }
-.funnel li + li::before { position: absolute; top: 0; left: -22px; color: #a1a1aa; content: "→"; }
-.funnel b { display: block; color: var(--mc-strong); font-size: 14px; font-weight: 600; }
-.funnel small { display: block; margin-top: 2px; color: #a1a1aa; }
+/* A Lucide arrow in the gap, centred on the number line. */
+.funnel li + li::before { position: absolute; top: 5px; left: -22px; width: 14px; height: 14px; background: #d4d4d8; content: ""; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E") no-repeat center / 14px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E") no-repeat center / 14px; }
+.funnel b { display: block; color: var(--mc-strong); font-size: 16px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.funnel small { display: block; margin-top: 2px; color: #71717a; font-size: 12px; line-height: 16px; }
 .reason-counts { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; }
 .reason-counts span, .reason-pill { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .reason-counts b { color: #27272a; font-weight: 600; }

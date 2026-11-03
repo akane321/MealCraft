@@ -214,7 +214,10 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
         <p v-if="failure" class="ops-error" role="alert">{{ failure }}</p>
 
         <section>
-          <h3>Products ({{ selected.products.length }})</h3>
+          <div class="sec-head">
+            <h3>Products ({{ selected.products.length }})</h3>
+            <button v-if="selected.status !== 'removed'" type="button" class="mc-pill sm danger" @click="pending = 'remove'">Remove mapping</button>
+          </div>
           <p v-if="!selected.products.length" class="ops-muted">None.</p>
           <ul v-else class="rows prod-rows">
             <li v-for="product in selected.products" :key="product.external_id">
@@ -224,7 +227,6 @@ const cheapest = (mapping: OpsProductMapping) => mapping.products.reduce<OpsMapp
             </li>
           </ul>
           <p class="ops-muted small">The estimator buys the in-stock product that costs least for the quantity a recipe needs.</p>
-          <div v-if="selected.status !== 'removed'" class="actions"><button type="button" class="mc-pill danger" @click="pending = 'remove'">Remove mapping</button></div>
         </section>
 
         <form class="edit" @submit.prevent="find">

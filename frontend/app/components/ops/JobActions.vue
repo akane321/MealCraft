@@ -202,7 +202,7 @@ const confirmation = computed(() => {
             </td>
             <td>
               <span class="ops-badge" :class="statusTone(cancellingId === job.id ? 'cancelled' : job.status)">
-                {{ cancellingId === job.id ? "Cancellation requested" : job.status.replaceAll("_", " ") }}
+                <span class="cap">{{ cancellingId === job.id ? "Cancellation requested" : job.status.replaceAll("_", " ") }}</span>
               </span>
               <span v-if="job.error_code" class="error-code">{{ job.error_code }}</span>
             </td>
@@ -253,7 +253,10 @@ const confirmation = computed(() => {
 .job-table { overflow-x: auto; border: 1px solid #ececef; border-radius: 12px; }
 td b { display: block; color: #18181b; font-weight: 500; }
 .trace { display: block; max-width: 300px; overflow: hidden; color: #a1a1aa; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
-.error-code { display: block; margin-top: 4px; color: #b42318; font-size: 12px; }
+/* Sentence case like the tasks table (the text itself stays as stored); the code is a grey note, the badge has the colour. */
+.cap { display: inline-block; }
+.cap::first-letter { text-transform: uppercase; }
+.error-code { display: block; margin-top: 4px; color: #71717a; font: 12px/16px ui-monospace, SFMono-Regular, Consolas, monospace; }
 .job-table td { vertical-align: middle; }
 .job-table td.mc-num { color: #27272a; }
 </style>

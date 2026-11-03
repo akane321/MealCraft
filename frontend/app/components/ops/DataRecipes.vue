@@ -224,7 +224,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
             </template>
             <template v-else>
               <p class="ops-muted small">A withdrawn recipe stays browsable but is never planned.</p>
-              <label class="edit">Reason <textarea v-model="reason" rows="2" maxlength="500" placeholder="e.g. pet food, not a dinner" /></label>
+              <label class="field">Reason <textarea v-model="reason" rows="2" maxlength="500" placeholder="e.g. pet food, not a dinner" /></label>
               <div class="actions"><button type="button" class="mc-pill danger" :disabled="!reason.trim()" @click="pending = 'withdraw'">Withdraw</button></div>
             </template>
           </section>
@@ -268,5 +268,7 @@ const amount = (item: OpsRecipeDetail["ingredients"][number]) => [item.quantity,
 </template>
 
 <style scoped>
-.steps { display: grid; gap: 8px; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
+/* Numbered steps (the reset stylesheet drops list markers). */
+.steps { display: grid; gap: 8px; margin: 0; padding-left: 20px; list-style: decimal; font-size: 13px; line-height: 1.5; }
+.steps li::marker { color: #a1a1aa; font-variant-numeric: tabular-nums; }
 </style>

@@ -199,6 +199,10 @@ async function runAgain() {
 header a { color: #6d28d9; text-decoration: none; }
 header a:hover { text-decoration: underline; }
 .debug-grid { display: grid; grid-template-columns: minmax(240px, 300px) 1fr; gap: 16px; align-items: start; }
+/* With nothing picked, both cards share one height and their empty states sit in the middle. */
+.debug-grid:has(.compare > .ops-empty-state) { align-items: stretch; }
+.debug-grid .ops-card:has(> .ops-empty-state) { display: flex; flex-direction: column; }
+.debug-grid .ops-card > .ops-empty-state { margin-block: auto; }
 /* Recent replays: white row cards; the open one in violet-50. */
 .replay-list ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .replay-list button { display: grid; gap: 2px; width: 100%; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; color: #18181b; font-weight: 500; text-align: left; cursor: pointer; }

@@ -126,7 +126,7 @@ const validation = computed(() => {
         </select>
       </label>
       <label>Since
-        <input v-model="since" type="date">
+        <input v-model="since" type="date" :class="{ empty: !since }">
       </label>
     </form>
 
@@ -227,7 +227,7 @@ const validation = computed(() => {
 
           <section v-if="detail.warnings.length" aria-labelledby="sec-warnings">
             <h3 id="sec-warnings">Warnings</h3>
-            <ul><li v-for="(warning, index) in detail.warnings" :key="index">{{ warning }}</li></ul>
+            <ul class="warnings"><li v-for="(warning, index) in detail.warnings" :key="index">{{ warning }}</li></ul>
           </section>
         </template>
         <p v-else class="ops-muted" aria-busy="true">Loading the task…</p>
@@ -237,8 +237,12 @@ const validation = computed(() => {
 </template>
 
 <style scoped>
-.filters { display: flex; flex-wrap: wrap; gap: 12px; }
-.filters :is(select, input) { min-width: 180px; }
+/* Three filters of one width; an empty date reads as a placeholder. */
+.filters { display: grid; grid-template-columns: repeat(3, 200px); gap: 12px; }
+.filters :is(select, input) { width: 100%; }
+.filters input.empty::-webkit-datetime-edit { color: #a1a1aa; }
+.warnings { margin: 0; padding-left: 18px; list-style: disc; font-size: 13px; }
+.warnings li::marker { color: #a1a1aa; }
 .drawer-head + .chips { margin-bottom: 4px; }
 .conversation { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; }
 .conversation li { padding: 9px 12px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; }

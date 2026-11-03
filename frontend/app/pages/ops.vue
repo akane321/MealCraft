@@ -57,9 +57,11 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
           <UButton color="neutral" variant="ghost" size="sm" square class="sb-icon" icon="i-lucide-log-out" aria-label="Sign out" @click="logout" />
         </UTooltip>
       </div>
+      <!-- While the account is checked, the user row keeps its place, so nothing above it jumps. -->
+      <div v-else class="sb-user user-wait" aria-hidden="true"><i class="dot" /><span><i /><i /></span></div>
     </nav>
     <main class="ops-main mc-frame">
-      <div class="mc-bar"><UIcon :name="icons[current?.slug ?? ''] ?? 'i-lucide-layout-dashboard'" />{{ current?.label ?? "Operations" }}</div>
+      <div class="mc-bar"><UIcon :name="icons[current?.slug ?? ''] ?? 'i-lucide-compass'" />{{ current?.label ?? "Operations" }}<ShellSimulated /></div>
       <div class="ops-body">
         <NuxtPage v-if="ready" />
         <p v-else class="ops-wait mc-loading" aria-busy="true"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Checking your account…</p>
@@ -80,6 +82,10 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .product-link { flex: none; margin-top: 8px; padding-top: 0; border-top: 0; color: #71717a; font-size: 13px; box-shadow: 0 -9px 0 -8px #f0f0f2; }
 .product-link > .iconify { width: 16px; height: 16px; color: #a1a1aa; }
 .ops-wait { justify-content: center; min-height: 240px; }
+.user-wait .dot { width: 28px; height: 28px; flex: none; border-radius: 50%; background: #f4f4f5; }
+.user-wait > span { display: grid; gap: 6px; }
+.user-wait > span > i { display: block; width: 88px; height: 8px; border-radius: 999px; background: #f4f4f5; }
+.user-wait > span > i + i { width: 56px; }
 </style>
 
 <style>
@@ -109,8 +115,8 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .ops-card[role="alert"] > p { flex: 1; margin: 0; color: #b42318; font-size: 14px; }
 /* Nothing yet or nothing matched: the dotted art, a violet tile, a title and help. */
 .ops-shell .ops-empty-state { display: flex; flex-direction: column; align-items: center; padding: 28px 20px; text-align: center; }
-.ops-shell .ops-empty-state .t { margin: 12px 0 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
-.ops-shell .ops-empty-state .h { max-width: 360px; margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
+.ops-shell .ops-empty-state .t { margin: 12px 0 0; color: var(--mc-strong); font-size: 16px; line-height: 22px; font-weight: 600; }
+.ops-shell .ops-empty-state .h { max-width: 360px; margin: 6px 0 0; color: #71717a; font-size: 14px; line-height: 20px; }
 .ops-shell .ops-empty-state .t + .h { margin-top: 4px; }
 /* Nothing matched: a quiet centred line in the card. */
 .ops-shell .ops-card.ops-empty { padding: 32px 20px; color: #71717a; text-align: center; }
@@ -119,6 +125,8 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell :is(.mc-primary, .mc-pill)[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .ops-shell :is(.mc-primary, .mc-pill).danger { border: 1px solid #fecaca; background: #fef2f2; color: #b42318 !important; box-shadow: none; }
 .ops-shell :is(.mc-primary, .mc-pill).danger:hover:not(:disabled) { background: #fee4e2; }
+/* Danger, disabled: still there, plainly unavailable. */
+.ops-shell :is(.mc-primary, .mc-pill).danger:disabled:not([aria-busy="true"]) { border-color: #f2dcd9; background: #fafafa; color: #d0a5a0 !important; opacity: 1; }
 .ops-shell .mc-pill.sm { min-height: 28px; height: 28px; padding: 0 10px; font-size: 12.5px; }
 
 /* Tables: a tinted 36px head, 44px rows, a hover tint and the open row in violet-50. */
@@ -172,8 +180,8 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .empty-cell { color: #a1a1aa; }
 .ops-shell .ops-badge.allergen { margin: 0 4px 2px 0; }
 .ops-shell .ops-badge.allergen::before { display: none; }
-/* Saved: the soft green box. */
-.ops-shell .note { margin: 0 0 12px; padding: 10px 14px; border: 1px solid #abefc6; border-radius: 12px; background: #ecfdf3; color: #067647; font-size: 13px; }
+/* Saved: the soft green box, with room before the section under it. */
+.ops-shell .note { margin: 0 0 20px; padding: 10px 14px; border: 1px solid #abefc6; border-radius: 12px; background: #ecfdf3; color: #067647; font-size: 13px; }
 .ops-shell .small { font-size: 12px; }
 .ops-shell .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .ops-shell .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -185,4 +193,11 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-shell .edit fieldset label, .ops-shell .edit label.check { display: flex; align-items: center; gap: 8px; color: #27272a; font-size: 13px; font-weight: 400; }
 .ops-shell .edit :is(.mc-primary, .mc-pill) { justify-self: start; }
 .ops-shell .edit p { margin: 0; }
+/* Heading to first field is the form's own 12px gap; help under a list of rows sits 10px below it. */
+.ops-shell .drawer .edit > h3 { margin-bottom: 0; }
+.ops-shell .drawer .rows + p { margin-top: 10px; }
+.ops-shell .drawer label.field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
+/* A section heading with its one small action at the right. */
+.ops-shell .drawer .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.ops-shell .drawer .sec-head h3 { margin: 0; }
 </style>
