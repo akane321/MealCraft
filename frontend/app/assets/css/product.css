@@ -268,6 +268,13 @@
 .mc-bar { height: 56px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 24px; border-bottom: 1px solid #f0f0f2; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
 .mc-bar .iconify { width: 16px; height: 16px; color: #a1a1aa; }
 
+/* Error box of the product pages and sign-in: a soft red box led by a circle-alert icon. */
+.mc-shell .mc-alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
+.mc-shell .mc-alert > .iconify { width: 16px; height: 16px; flex: none; margin-top: 2px; color: #d92d20; }
+/* A loading line: a spinner, then the words. */
+.mc-shell .mc-loading { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 14px; line-height: 20px; }
+.mc-shell .mc-loading .mc-spin { width: 16px; height: 16px; }
+
 /* Product pages inside the panel: one content width, a 22px title, no eyebrow labels. */
 .product-frame .page-width { width: min(100% - 80px, 1080px); }
 .product-frame .eyebrow { display: none; }
