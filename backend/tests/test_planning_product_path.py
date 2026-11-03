@@ -65,6 +65,20 @@ def test_real_request_persists_validated_snapshot_and_trace(recipe_client, monke
     assert recipe_client.get(f"/api/plans/{plan['id']}").json() == plan
 
 
+def test_local_improvement_can_be_disabled_only_by_an_explicit_engine_call(recipe_client, monkeypatch):
+    original = ProductPlanningEngine.plan
+
+    def without_improvement(self, *args, **kwargs):
+        kwargs["local_improvement"] = False
+        result = original(self, *args, **kwargs)
+        assert "local_improvement" not in result.trace
+        return result
+
+    monkeypatch.setattr(ProductPlanningEngine, "plan", without_improvement)
+    response = recipe_client.post("/api/plans/generate", json={"requires_halal": False, **REQUEST})
+    assert response.status_code == 201, response.text
+
+
 def test_search_limit_is_not_infeasibility_and_does_not_save_a_plan(recipe_client, monkeypatch):
     original = ProductPlanningEngine.__init__
 

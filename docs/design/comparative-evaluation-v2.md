@@ -618,3 +618,18 @@ success, human effort and causal attribution.
 Until v2 is implemented, public status and README metrics must continue to cite
 v1. When v2 becomes executable, release it as a new version rather than silently
 rewriting v1 data or reports.
+
+## Ablation condition interface
+
+Evaluation orchestration uses the six canonical single-component condition names in
+`backend/app/evaluation/ablation_conditions.py`: retrieval off, rule-only parser,
+independent final validator off, repair off, diversity off, and local improvement off.
+They are evaluation conditions only. Normal product requests keep every component on,
+and an unchecked final-gate draft is never persistable as a product plan.
+
+`backend/app/evaluation/unified_run.py` consumes that registry. One run enumerates the
+product/default condition, the selected registered baselines, and all six ablations in
+canonical order, then invokes each existing runner without interpreting its packet or
+duplicating its implementation. The manifest and result rows retain the stable
+`product/default`, `baseline/<system-id>`, and `ablation/<condition>` labels. A failed
+condition is recorded and does not silently prevent later conditions from running.

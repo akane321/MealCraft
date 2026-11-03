@@ -364,6 +364,7 @@ def test_experiments_run_developer_sets_under_a_recorded_configuration(console) 
     assert {item["name"] for item in listed["evaluations"]} == {
         "developer-planning",
         "agent-benchmark",
+        "planning-unified",
         "planning-components",
         "planning-final-gate",
         "planning-final-gate-composed",

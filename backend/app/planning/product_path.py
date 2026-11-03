@@ -509,6 +509,7 @@ class ProductPlanningEngine:
         dates=None,
         plan_days=None,
         plan_day_count=None,
+        local_improvement=True,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
@@ -1271,7 +1272,7 @@ class ProductPlanningEngine:
                 trace["uncovered_members"] = uncovered
                 trace["uncovered_members_by_rule"] = by_rule
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
-        if constraints.planner_strategy == "beam" and budget_is_hard:
+        if constraints.planner_strategy == "beam" and budget_is_hard and local_improvement:
             result, trace["local_improvement"] = improve_product_plan(
                 problem,
                 result,

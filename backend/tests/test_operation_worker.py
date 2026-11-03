@@ -11,6 +11,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.base import Base
+from app.evaluation.ablation_conditions import ABLATION_CONDITIONS
 from app.models.platform import OperationRun, User
 from app.models.recipe import Ingredient, Recipe
 from app.repositories.operation_jobs import OperationJobRepository
@@ -320,3 +321,59 @@ def test_planning_experiment_handler_records_complete_conditions_once(worker_dat
         assert second.artifact_references == before
         assert len(second.artifact_references) == 1
         assert "api_key" not in str(second.artifact_references).lower()
+
+
+def test_real_operations_worker_invokes_one_unified_matrix(worker_database, monkeypatch) -> None:
+    database_url, factory = worker_database
+    payload = {
+        "evaluation": "planning-unified",
+        "label": "Sprint 3 matrix",
+        "parameters": {"repeats": 1, "width": 8, "max_expansions": 100, "repair_rounds": 1},
+    }
+    run_id = _enqueue(factory, suffix="a-unified-evaluation", run_type="planning_experiment", payload=payload)
+    with factory() as session:
+        claim = OperationJobRepository(session).claim_next(
+            now=datetime.now(UTC), lease_duration=timedelta(seconds=60), max_attempts=3
+        )
+        session.commit()
+        assert claim is not None
+
+    captured = {}
+
+    def condition_runners(_root, _parameters):
+        def runner():
+            return {"ok": True}
+
+        return (
+            runner,
+            (("registered-a", runner), ("registered-b", runner)),
+            {condition: runner for condition in ABLATION_CONDITIONS},
+        )
+
+    def unified(*, product, baselines, ablations):
+        captured.update(product=product, baselines=baselines, ablations=ablations)
+        manifest = [
+            {"label": "product/default", "kind": "product"},
+            *({"label": f"baseline/{name}", "kind": "baseline"} for name, _ in baselines),
+            *({"label": f"ablation/{name}", "kind": "ablation"} for name in ablations),
+        ]
+        return {
+            "schema_version": "unified-evaluation-run-v1",
+            "manifest": manifest,
+            "results": [{"label": row["label"], "status": "completed"} for row in manifest],
+        }
+
+    monkeypatch.setattr("app.worker.planning_experiments._unified_condition_runners", condition_runners)
+    monkeypatch.setattr("app.worker.planning_experiments.run_unified_evaluation", unified)
+    run_planning_experiment_handler(
+        payload, database_url, HandlerContext(run_id=run_id, attempt_count=claim.attempt_count)
+    )
+
+    assert callable(captured["product"])
+    assert [name for name, _ in captured["baselines"]] == ["registered-a", "registered-b"]
+    assert tuple(captured["ablations"]) == ABLATION_CONDITIONS
+    with factory() as session:
+        report = session.get(OperationRun, run_id).artifact_references[0]["data"]["report"]
+    assert [row["kind"] for row in report["manifest"]].count("product") == 1
+    assert [row["kind"] for row in report["manifest"]].count("baseline") == 2
+    assert [row["kind"] for row in report["manifest"]].count("ablation") == 6
