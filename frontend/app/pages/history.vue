@@ -85,28 +85,40 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 
 <template>
   <main class="page-width history">
-    <p class="eyebrow">Past plans</p>
-    <h1>Every plan you made, as it ended up.</h1>
+    <h1>Every plan you made, as it ended up</h1>
+    <p class="mc-sub">Open a plan to see what was on each day and what got cooked.</p>
 
-    <p v-if="loading" class="notice">Loading your plans…</p>
-    <p v-if="error" class="notice" role="alert">{{ error }}</p>
-    <p v-if="!loading && !error && !weeks.length" class="notice">No plans yet. <NuxtLink to="/">Make your first one</NuxtLink>.</p>
+    <p v-if="loading" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your plans…</p>
+    <!-- The shape of the plan rows while they load, as the recipes page shows its cards. -->
+    <div v-if="loading" class="skeletons" aria-hidden="true">
+      <span v-for="n in 4" :key="n" class="skel"><i class="tile" /><span><i /><i /></span></span>
+    </div>
+    <p v-if="error" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ error }}</p>
+    <div v-if="!loading && !error && !weeks.length" class="mc-empty">
+      <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-calendar-days" /></span></span></div>
+      <h2>No plans yet</h2>
+      <p>Plans you make show up here, newest first.</p>
+      <NuxtLink to="/" class="primary-button first">Make your first one</NuxtLink>
+    </div>
 
     <ol class="weeks">
       <!-- Planning the same days again replaces a week (backend `current`): it stays listed, marked, under the newer one. -->
       <li v-for="week in weeks" :key="week.id" class="week" :class="{ replaced: week.current === false }">
         <button type="button" class="remove" :aria-label="`Delete the plan for ${planRange(week.start_date, week.end_date)}`" title="Delete this plan" @click="removing = week">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" /></svg>
+          <UIcon name="i-lucide-trash-2" aria-hidden="true" />
         </button>
         <button type="button" class="summary" :aria-expanded="open === week.id" @click="toggle(week.id)">
-          <span class="when mc-serif">{{ planRange(week.start_date, week.end_date) }}<span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
+          <span class="mc-tile" data-tone="violet" aria-hidden="true"><UIcon name="i-lucide-calendar-days" /></span>
+          <span class="text">
+          <span class="when">{{ planRange(week.start_date, week.end_date) }}<span v-if="week.within_weekly_budget === false" class="tag warn">Over budget</span><span v-if="week.current === false" class="tag">Replaced by a newer plan</span></span>
           <span class="meta">
             <template v-if="week.day_count">{{ daysLabel(week.day_count) }} · </template>planned {{ plannedAt(week.created_at) }} ·
             {{ week.household_size }} {{ week.household_size === 1 ? "person" : "people" }} ·
             groceries {{ formatSgd(week.purchase_total_sgd) }}
-            <template v-if="week.within_weekly_budget === false"> · over budget</template>
             <template v-if="details[week.id]"> · {{ cooked(details[week.id]!) }} of {{ details[week.id]!.days.length }} dishes cooked</template>
           </span>
+          </span>
+          <UIcon name="i-lucide-chevron-right" class="chev" aria-hidden="true" />
         </button>
         <div v-if="open === week.id && details[week.id]" class="days">
           <div v-for="day in byDay(details[week.id]!)" :key="day.date" class="day">
@@ -119,6 +131,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
                   <button type="button" class="dish" :class="dish.status" @click="openSlug = dish.recipe.slug">
                     <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
                   </button>
+                  <span v-if="dish.status === 'completed'" class="cooked"><UIcon name="i-lucide-check" aria-hidden="true" />Cooked</span>
                 </template>
               </p>
             </div>
@@ -141,27 +154,47 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
 </template>
 
 <style scoped>
-.history { padding-block: 32px 64px; }
-h1 { margin: 6px 0 22px; font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 4vw, 36px); text-wrap: balance; }
-.notice { color: var(--t3); }
-.weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.week { position: relative; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); overflow: hidden; }
-.remove { position: absolute; z-index: 1; top: 10px; right: 10px; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--t3); }
-.remove:hover, .remove:focus-visible { background: var(--s2); color: var(--c-coral); }
-.remove svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.summary { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; padding: 14px 52px 14px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.summary:hover, .summary:focus-visible { background: var(--s2); }
-.when { display: inline-flex; align-items: baseline; gap: 10px; font-size: 18px; }
-.tag { padding: 1px 8px; border: 1px solid var(--border); border-radius: 999px; font-family: Nunito, system-ui, sans-serif; font-size: 12px; color: var(--t3); }
-.week.replaced .when { color: var(--t3); }
-.meta { color: var(--t3); font-size: 13px; font-variant-numeric: tabular-nums; }
-.days { display: grid; gap: 8px; padding: 4px 16px 16px; }
-.day { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: baseline; }
-.day b { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-.meals p { margin: 0 0 4px; font-size: 14px; }
-.meal { display: inline-block; min-width: 70px; color: var(--t3); font-size: 12px; }
-.dish { display: inline-flex; gap: 6px; align-items: center; padding: 0; border: 0; background: transparent; color: var(--ivory); font: inherit; cursor: pointer; }
-.dish:hover { color: var(--accent); }
-.dish.skipped { color: var(--muted); text-decoration: line-through; }
-
+.history { padding-block: 28px 48px; }
+.mc-loading, .mc-alert { margin: 0 0 16px; }
+.mc-empty .first { width: auto; min-height: 32px; height: 32px; align-self: center; margin-top: 16px; padding: 0 14px; font-size: 13px; }
+.weeks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.week { position: relative; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); overflow: hidden; transition: border-color 150ms; }
+.week:hover { border-color: #e1e1e5; }
+.remove { position: absolute; z-index: 1; top: 18px; right: 44px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+.remove:hover, .remove:focus-visible { background: #fef3f2; color: #b42318; }
+.remove .iconify { width: 16px; height: 16px; }
+.summary { width: 100%; min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.summary:hover, .summary:focus-visible { background: #fafafa; }
+/* The card clips its edges, so the focus ring sits inside the row. */
+.summary:focus-visible { outline-offset: -2px; border-radius: 12px; }
+.summary .mc-tile { width: 32px; height: 32px; border-radius: 9px; }
+.summary .mc-tile > * { width: 16px; height: 16px; }
+.text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-right: 44px; }
+.when { display: inline-flex; align-items: baseline; gap: 10px; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
+.tag { align-self: center; height: 20px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; line-height: 20px; font-weight: 500; letter-spacing: 0; }
+.tag.warn { background: #fffaeb; color: #b54708; }
+.week.replaced .when { color: #71717a; }
+.meta { color: #71717a; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.chev { flex: none; width: 16px; height: 16px; color: #a1a1aa; transition: transform 150ms; }
+.summary[aria-expanded="true"] .chev { transform: rotate(90deg); }
+/* The days of an opened plan: weekday, then one line per meal, a thin rule between days. */
+.days { display: grid; padding: 4px 16px 8px 60px; border-top: 1px solid #f0f0f2; }
+.day { display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; }
+.day + .day { border-top: 1px solid #f2f2f4; }
+.day b { color: #52525b; font-size: 13px; line-height: 20px; font-weight: 600; }
+.meals p { margin: 0; font-size: 14px; line-height: 28px; color: #71717a; }
+.meal { display: inline-block; min-width: 76px; color: #71717a; font-size: 12px; font-weight: 500; vertical-align: middle; }
+/* Cooked: the soft green tag of the plan column. */
+.cooked { display: inline-flex; align-items: center; gap: 3px; height: 20px; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: #ecfdf3; vertical-align: middle; color: #067647; font-size: 11.5px; line-height: 20px; font-weight: 500; }
+.cooked .iconify { width: 12px; height: 12px; }
+/* Loading rows: a tile and two bars in the plan row's shape. */
+.skeletons { display: grid; gap: 8px; }
+.skel { display: flex; align-items: center; gap: 12px; height: 66px; padding: 0 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
+.skel .tile { width: 32px; height: 32px; flex: none; border-radius: 9px; background: #f4f4f5; }
+.skel > span { flex: 1; display: grid; gap: 8px; }
+.skel > span > i { display: block; width: 40%; height: 10px; border-radius: 999px; background: #f4f4f5; }
+.skel > span > i + i { width: 60%; }
+.dish { display: inline-flex; gap: 6px; align-items: center; vertical-align: middle; padding: 0; border: 0; background: transparent; color: #27272a; font: inherit; font-weight: 400; cursor: pointer; transition: color 120ms; }
+.dish:hover, .dish:focus-visible { color: #7c3aed; }
+.dish.skipped { color: #a1a1aa; text-decoration: line-through; }
 </style>

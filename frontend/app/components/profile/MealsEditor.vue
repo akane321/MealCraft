@@ -37,9 +37,9 @@ const HINT: Record<string, string> = {
   "One-bowl dish": "A dish that is a meal in one bowl, its rice or noodles included",
 };
 const ADD: { kind: DishKind; label: string }[] = [
-  { kind: "main", label: "+ Protein main" },
-  { kind: "vegetable", label: "+ Vegetable" },
-  { kind: "soup", label: "+ Soup" },
+  { kind: "main", label: "Protein main" },
+  { kind: "vegetable", label: "Vegetable" },
+  { kind: "soup", label: "Soup" },
 ];
 // Plain copies: structuredClone throws on Vue's reactive proxies.
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -180,20 +180,20 @@ const dishTotal = (list: MealRole[]) => (isStructured(list) ? plannedRoles(list,
                 {{ COURSE_LABEL[course] }}
               </button>
             </span>
-            <label class="optional" :class="{ hidden: fixedCore(meal, item) }">
+            <label class="optional" :class="{ 'is-hidden': fixedCore(meal, item) }">
               <input type="checkbox" :checked="!item.required" :disabled="fixedCore(meal, item)" @change="updateRole(meal, index, { required: !($event.target as HTMLInputElement).checked })"> if one fits
             </label>
-            <button v-if="removable(meal, roles(meal)!, index)" type="button" class="remove" :aria-label="`Remove ${dishLabel(item).toLowerCase()}`" @click="removeDish(meal, index)">×</button>
+            <button v-if="removable(meal, roles(meal)!, index)" type="button" class="remove" :aria-label="`Remove ${dishLabel(item).toLowerCase()}`" @click="removeDish(meal, index)"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
             <span v-else class="remove-space" aria-hidden="true" />
           </li>
         </ol>
         <div v-if="roles(meal)!.length < maxDishes(roles(meal)!)" class="add">
           <template v-if="meal === 'breakfast' && isStructured(roles(meal))">
-            <button type="button" class="secondary-button" @click="addDish(meal, 'main')">+ Breakfast dish</button>
+            <button type="button" class="secondary-button" @click="addDish(meal, 'main')"><UIcon name="i-lucide-plus" aria-hidden="true" />Breakfast dish</button>
           </template>
           <template v-else>
-            <button v-for="option in ADD" :key="option.kind" type="button" class="secondary-button" @click="addDish(meal, option.kind)">{{ option.label }}</button>
-            <button v-if="isStructured(roles(meal)) && !roles(meal)!.some(item => item.role_id === 'staple')" type="button" class="secondary-button" @click="addDish(meal, 'staple')">+ Staple</button>
+            <button v-for="option in ADD" :key="option.kind" type="button" class="secondary-button" @click="addDish(meal, option.kind)"><UIcon name="i-lucide-plus" aria-hidden="true" />{{ option.label }}</button>
+            <button v-if="isStructured(roles(meal)) && !roles(meal)!.some(item => item.role_id === 'staple')" type="button" class="secondary-button" @click="addDish(meal, 'staple')"><UIcon name="i-lucide-plus" aria-hidden="true" />Staple</button>
           </template>
         </div>
       </template>
@@ -202,35 +202,40 @@ const dishTotal = (list: MealRole[]) => (isStructured(list) ? plannedRoles(list,
 </template>
 
 <style scoped>
+/* White inner cards on the white profile card; violet marks the chosen preset and courses. */
 .meals { display: grid; gap: 12px; margin-top: 18px; }
-.recommend { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid rgba(169, 183, 154, 0.45); border-radius: 14px; background: rgba(169, 183, 154, 0.08); }
+.recommend { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid #ececef; border-radius: 10px; background: #fafafa; }
 .recommend > div { display: grid; gap: 4px; min-width: 0; }
-.recommend strong { font-size: 14px; color: var(--ivory); }
-.recommend small { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.recommend strong { color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
+.recommend small { color: #71717a; font-size: 12.5px; line-height: 18px; }
 .recommend button { flex: none; margin-left: auto; }
-.meal { padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--s1); }
-.meal.on { background: var(--s2); }
+.meal { padding: 14px 16px; border: 1px solid #ececef; border-radius: 10px; background: #fff; }
 .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.switch input { width: 16px; height: 16px; accent-color: var(--sage); }
-.title { font-family: var(--serif); font-size: 18px; }
-.switch small { margin-left: auto; color: var(--muted); font-size: 12px; }
+.title { color: #0f0f12; font-size: 15px; line-height: 20px; font-weight: 600; }
+.switch small { margin-left: auto; color: #71717a; font-size: 12px; }
 .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.preset { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--t2); font-size: 12px; cursor: pointer; }
-.preset[aria-checked="true"], .preset.custom { border-color: var(--accent); color: var(--ivory); background: rgba(232, 144, 111, 0.12); }
-.preset .tag { padding: 1px 6px; border-radius: 999px; background: rgba(169, 183, 154, 0.18); color: var(--sage); font-size: 11px; }
-.counts { margin: 10px 0 0; font-size: 13px; color: var(--t2); }
-.counts b { color: var(--ivory); font-weight: 600; }
-.dishes { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
-.dish { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto 26px; gap: 10px; align-items: center; }
+.preset { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 120ms, border-color 120ms; }
+.preset:hover { border-color: #d4d4d8; background: #f7f7f8; }
+.preset[aria-checked="true"], .preset.custom { border-color: #c4b5fd; background: #f5f3ff; color: #5b21b6; }
+.preset .tag { height: 18px; padding: 0 6px; border-radius: 999px; background: #ede9fe; color: #6d28d9; font-size: 11px; line-height: 18px; font-weight: 500; }
+.preset[aria-checked="true"] .tag { background: #fff; }
+.counts { margin: 10px 0 0; color: #52525b; font-size: 13px; line-height: 18px; }
+.counts b { color: #0f0f12; font-weight: 600; }
+.dishes { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+.dish { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto 28px; gap: 10px; align-items: center; min-height: 32px; }
 .dish.later { opacity: 0.55; }
-.dish-name { font-size: 13px; color: var(--ivory); }
+.dish-name { color: #27272a; font-size: 13.5px; font-weight: 500; }
 .courses { display: flex; flex-wrap: wrap; gap: 4px; }
-.course { padding: 3px 8px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
-.course[aria-pressed="true"] { border-color: rgba(169, 183, 154, 0.6); color: var(--ivory); background: rgba(169, 183, 154, 0.14); }
-.takes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
-.from { padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--t2); font-size: 11px; white-space: nowrap; }
-.optional { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.optional.hidden { visibility: hidden; }
-.remove { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 50%; background: transparent; color: var(--danger); cursor: pointer; }
+.course { height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: #71717a; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.course:hover { background: #f4f4f5; color: #27272a; }
+.course[aria-pressed="true"] { background: #f5f3ff; color: #6d28d9; }
+.takes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #71717a; font-size: 12.5px; }
+.from { height: 20px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11.5px; line-height: 20px; font-weight: 500; white-space: nowrap; }
+.optional { display: flex; gap: 6px; align-items: center; color: #71717a; font-size: 12.5px; white-space: nowrap; }
+/* Not "hidden": Tailwind's .hidden is display:none and would collapse the grid cell. */
+.optional.is-hidden { visibility: hidden; }
+.remove { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; cursor: pointer; }
+.remove:hover { background: #fef3f2; color: #b42318; }
+.remove .iconify { width: 16px; height: 16px; }
 .add { display: flex; gap: 8px; margin-top: 10px; }
 </style>

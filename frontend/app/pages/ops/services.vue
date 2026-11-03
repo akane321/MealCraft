@@ -49,7 +49,6 @@ async function check(name: OpsServiceName) {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Services</p>
       <h1 class="mc-serif">Outside services</h1>
       <p>Keys stay in the server environment; the console only says whether one is set. Recent numbers come from runs stored in the last week.</p>
     </header>
@@ -64,9 +63,11 @@ async function check(name: OpsServiceName) {
       <section v-for="service in services" :key="service.name" class="ops-card service" :aria-labelledby="`svc-${service.name}`">
         <header>
           <h2 :id="`svc-${service.name}`">{{ service.label }}</h2>
-          <span class="ops-badge" :style="{ '--dot': service.configured ? 'var(--sage)' : 'var(--t4)' }">{{ service.configured ? "Configured" : "Not configured" }}</span>
+          <span class="ops-badge" :class="service.configured ? 'success' : 'neutral'">{{ service.configured ? "Configured" : "Not configured" }}</span>
         </header>
-        <p class="ops-muted">Mode: {{ service.mode }}</p>
+        <!-- Non-breaking hyphens keep a model id such as gpt-5.4-mini on one line. -->
+        <!-- Lines break between words only, never at a model id's hyphens; the text stays as the server sent it. -->
+        <p class="ops-muted mode">Mode: <template v-for="(word, at) in service.mode.split(' ')" :key="at">{{ at ? " " : "" }}<span class="word">{{ word }}</span></template></p>
 
         <dl v-if="service.recent" class="recent">
           <div><dt>Runs</dt><dd class="mc-num">{{ service.recent.runs }}</dd></div>
@@ -74,41 +75,51 @@ async function check(name: OpsServiceName) {
           <div><dt>Failures</dt><dd class="mc-num" :class="{ bad: service.recent.failures }">{{ service.recent.failures }}</dd></div>
           <div><dt>Fallbacks</dt><dd class="mc-num" :class="{ bad: service.recent.fallbacks }">{{ service.recent.fallbacks }}</dd></div>
         </dl>
-        <p v-if="service.note" class="ops-muted">{{ service.note }}</p>
+        <p v-if="service.note" class="ops-muted svc-note">{{ service.note }}</p>
 
         <footer>
-          <button type="button" class="mc-primary" :disabled="checking !== null" @click="check(service.name)">
+          <button type="button" class="mc-pill sm" :disabled="checking !== null" :aria-busy="checking === service.name" @click="check(service.name)">
             {{ checking === service.name ? "Checking…" : "Run live check" }}
           </button>
           <p class="ops-muted cost">{{ CHECK_COST[service.name] }}</p>
-          <p v-if="results[service.name] === 'failed'" class="ops-error" role="status">The check itself couldn't be run.</p>
-          <p v-else-if="outcome(service.name)" class="result" :class="{ ok: outcome(service.name)!.ok }" role="status">
-            <template v-if="outcome(service.name)!.ok">Answered in {{ outcome(service.name)!.latency_ms }} ms.</template>
-            <template v-else>Failed ({{ humanKey(outcome(service.name)!.error_kind ?? "error") }}) after {{ outcome(service.name)!.latency_ms }} ms.</template>
-            {{ outcome(service.name)!.detail }}
-            <span class="ops-muted">{{ formatWhen(outcome(service.name)!.checked_at) }}</span>
-          </p>
         </footer>
+        <!-- The check's answer gets the card's whole width, under everything else. -->
+        <p v-if="results[service.name] === 'failed'" class="result" role="status">The check itself couldn't be run.</p>
+        <p v-else-if="outcome(service.name)" class="result" :class="{ ok: outcome(service.name)!.ok }" role="status">
+          <template v-if="outcome(service.name)!.ok">Answered in {{ outcome(service.name)!.latency_ms }} ms.</template>
+          <template v-else>Failed ({{ humanKey(outcome(service.name)!.error_kind ?? "error") }}) after {{ outcome(service.name)!.latency_ms }} ms.</template>
+          {{ outcome(service.name)!.detail }}
+          <span class="ops-muted">{{ formatWhen(outcome(service.name)!.checked_at) }}</span>
+        </p>
       </section>
     </div>
   </div>
 </template>
 
 <style scoped>
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
-.service { display: flex; flex-direction: column; gap: 12px; }
-.service > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+/* One full-width row a service: name and mode, the recent figures, then the live check. */
+.cards { display: grid; gap: 12px; }
+/* Name and mode, the figures, the check; the explanation and the check's answer run under them, full width. */
+.service { display: grid; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) 220px; grid-template-areas: "head stats foot" "mode stats foot" "note note note" "result result result"; gap: 8px 24px; align-items: start; }
+.service > header { grid-area: head; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.service .mode { grid-area: mode; }
+.mode .word { white-space: nowrap; }
+.service .recent { grid-area: stats; }
+.service .svc-note { grid-area: note; max-width: 72ch; margin-top: 4px !important; color: #71717a; font-size: 13px !important; line-height: 20px !important; }
+.service .result { grid-area: result; }
 .service h2 { margin: 0; }
 .service p { margin: 0; font-size: 13px; line-height: 1.55; }
-.recent { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 8px; margin: 0; }
-.recent div { display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: var(--s2); }
-.recent dt { color: var(--t3); font-size: 12px; }
-.recent dd { margin: 2px 0 0; font-family: var(--serif); font-size: 24px; font-weight: 300; }
-.recent dd.bad { color: var(--warn); }
-.service footer { display: grid; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); }
-.service footer .mc-primary { justify-self: start; }
-.cost { font-size: 12px !important; }
-.result { padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); color: var(--ivory); }
-.result.ok { background: rgba(169, 183, 154, 0.12); }
-.result span { display: block; margin-top: 2px; font-size: 12px; }
+/* Recent numbers: four light tiles, label over value. */
+.recent { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.recent div { display: flex; flex-direction: column; padding: 10px 12px; border-radius: 10px; background: #fafafa; }
+.recent dt { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
+.recent dd { margin: 2px 0 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.recent dd.bad { color: #b42318; }
+.service footer { grid-area: foot; display: grid; gap: 8px; padding-left: 24px; border-left: 1px solid #f0f0f2; }
+.service footer .mc-pill { justify-self: start; }
+.cost { color: #71717a; font-size: 12px !important; }
+/* The live check: soft red unless it answered. */
+.result { padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; }
+.result.ok { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+.result span { display: block; margin-top: 2px; color: inherit; font-size: 12px; opacity: 0.8; }
 </style>

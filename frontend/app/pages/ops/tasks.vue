@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TASK_STATUSES, formatSeconds, formatWhen, humanKey, parseTaskKey, singaporeMidnight, statusColor } from "~/lib/ops";
+import { TASK_STATUSES, formatSeconds, formatWhen, humanKey, parseTaskKey, singaporeMidnight, statusTone } from "~/lib/ops";
 import type { OpsReplay, OpsTaskCollection, OpsTaskDetail, OpsTaskSummary } from "~/types/ops";
 
 const PAGE = 25;
@@ -104,7 +104,6 @@ const validation = computed(() => {
 <template>
   <div class="ops-page">
     <header>
-      <p class="mc-eyebrow">Tasks</p>
       <h1 class="mc-serif">Conversation, planning, and recipe intake traces</h1>
       <p>Open a task to inspect what the assistant or intake pipeline did, what the validator decided, and how long each stage took.</p>
     </header>
@@ -127,7 +126,7 @@ const validation = computed(() => {
         </select>
       </label>
       <label>Since
-        <input v-model="since" type="date">
+        <input v-model="since" type="date" :class="{ empty: !since }">
       </label>
     </form>
 
@@ -136,16 +135,16 @@ const validation = computed(() => {
       <button type="button" class="mc-pill" @click="loadList">Try again</button>
     </div>
     <p v-else-if="!page" class="ops-muted" aria-busy="true">Loading tasks…</p>
-    <p v-else-if="!page.items.length" class="ops-card ops-muted">No tasks match these filters.</p>
+    <div v-else-if="!page.items.length" class="ops-card ops-empty-state"><div class="mc-empty-art" aria-hidden="true"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-inbox" /></span></span></div><p class="t">No tasks match these filters.</p></div>
     <section v-else class="ops-card table-card" aria-label="Tasks">
       <table>
         <thead>
-          <tr><th>Task</th><th>Status</th><th>Source</th><th>Time</th><th>When</th></tr>
+          <tr><th>Task</th><th>Status</th><th>Source</th><th class="mc-num">Time</th><th>When</th></tr>
         </thead>
         <tbody>
           <tr v-for="task in page.items" :key="`${task.kind}-${task.id}`" :class="{ current: selected?.kind === task.kind && selected?.id === task.id }">
-            <td><button type="button" class="task-link" @click="open(task)">{{ task.label }}</button></td>
-            <td><span class="ops-badge" :style="{ '--dot': statusColor(task.status) }">{{ humanKey(task.status) }}</span></td>
+            <td><button type="button" class="link" @click="open(task)">{{ task.label }}</button></td>
+            <td><span class="ops-badge" :class="statusTone(task.status)">{{ humanKey(task.status) }}</span></td>
             <td class="ops-muted">{{ task.provider_mode ?? "—" }}</td>
             <td class="mc-num">{{ formatSeconds(task.duration_seconds) }}</td>
             <td class="ops-muted">{{ formatWhen(task.created_at) }}</td>
@@ -167,8 +166,8 @@ const validation = computed(() => {
             <h2 id="task-title" class="mc-serif">{{ detail?.summary.label ?? "Loading…" }}</h2>
           </div>
           <div class="drawer-actions">
-            <button v-if="selected.kind !== 'intake'" type="button" class="mc-primary" :disabled="replaying || !detail" @click="replay">{{ replaying ? "Replaying…" : "Replay" }}</button>
-            <button type="button" class="mc-pill" @click="close">Close</button>
+            <button v-if="selected.kind !== 'intake'" type="button" class="mc-primary" :disabled="replaying || !detail" :aria-busy="replaying" @click="replay">{{ replaying ? "Replaying…" : "Replay" }}</button>
+            <button type="button" class="mc-close" aria-label="Close" @click="close"><UIcon name="i-lucide-x" aria-hidden="true" /></button>
           </div>
         </header>
         <p v-if="replayError" class="ops-error" role="alert">{{ replayError }}</p>
@@ -176,7 +175,7 @@ const validation = computed(() => {
         <p v-if="detailFailed" class="ops-error" role="alert">This task couldn't be loaded. It may have been removed.</p>
         <template v-else-if="detail">
           <div class="chips">
-            <span class="ops-badge" :style="{ '--dot': statusColor(detail.summary.status) }">{{ humanKey(detail.summary.status) }}</span>
+            <span class="ops-badge" :class="statusTone(detail.summary.status)">{{ humanKey(detail.summary.status) }}</span>
             <span class="mc-chip">Source <b>{{ detail.summary.provider_mode ?? "—" }}</b></span>
             <span class="mc-chip">Time <b>{{ formatSeconds(detail.summary.duration_seconds) }}</b></span>
             <span v-if="detail.summary.error_code" class="mc-chip alert">{{ detail.summary.error_code }}</span>
@@ -228,7 +227,7 @@ const validation = computed(() => {
 
           <section v-if="detail.warnings.length" aria-labelledby="sec-warnings">
             <h3 id="sec-warnings">Warnings</h3>
-            <ul><li v-for="(warning, index) in detail.warnings" :key="index">{{ warning }}</li></ul>
+            <ul class="warnings"><li v-for="(warning, index) in detail.warnings" :key="index">{{ warning }}</li></ul>
           </section>
         </template>
         <p v-else class="ops-muted" aria-busy="true">Loading the task…</p>
@@ -238,31 +237,18 @@ const validation = computed(() => {
 </template>
 
 <style scoped>
-.filters { display: flex; flex-wrap: wrap; gap: 14px; }
-.filters label { display: grid; gap: 6px; color: var(--t3); font-size: 12px; }
-.filters select, .filters input { min-width: 170px; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; font-size: 13px; }
-.table-card { padding: 0; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { padding: 12px 16px; border-bottom: 1px solid var(--line-2); color: var(--t3); font-weight: 500; text-align: left; white-space: nowrap; }
-td { padding: 10px 16px; border-bottom: 1px solid var(--line); }
-tr.current td { background: var(--s2); }
-.task-link { padding: 0; border: 0; background: none; color: var(--ivory); text-align: left; }
-.task-link:hover { color: var(--accent); }
-.pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 12px 16px; }
-.pager span { margin-right: auto; font-size: 12.5px; }
-.drawer-scrim { position: fixed; inset: 0; z-index: 30; display: flex; justify-content: flex-end; background: rgba(14, 12, 10, 0.6); }
-.drawer { width: min(720px, 100%); height: 100%; overflow-y: auto; padding: 24px; border-left: 1px solid var(--line-2); background: var(--s1); animation: mc-rise 320ms var(--ease) both; }
-.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.drawer-actions { display: flex; gap: 8px; }
-.drawer-head h2 { margin: 6px 0 0; font-size: 24px; font-weight: 300; }
-.drawer section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
-.drawer h3 { margin: 0 0 12px; color: var(--t2); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+/* Three filters of one width; an empty date reads as a placeholder. */
+.filters { display: grid; grid-template-columns: repeat(3, 200px); gap: 12px; }
+.filters :is(select, input) { width: 100%; }
+.filters input.empty::-webkit-datetime-edit { color: #a1a1aa; }
+.warnings { margin: 0; padding-left: 18px; list-style: disc; font-size: 13px; }
+.warnings li::marker { color: #a1a1aa; }
+.drawer-head + .chips { margin-bottom: 4px; }
 .conversation { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; }
-.conversation li { padding: 9px 12px; border-radius: 10px; background: var(--s2); }
-.conversation li.user { background: var(--s3); }
-.conversation b { display: block; margin-bottom: 2px; color: var(--t3); font-size: 12px; font-weight: 500; text-transform: uppercase; }
-details { margin-bottom: 6px; border: 1px solid var(--line); border-radius: 10px; }
-summary { padding: 9px 12px; color: var(--t2); cursor: pointer; font-size: 13px; }
-details pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px 12px; border-top: 1px solid var(--line); color: var(--t2); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.conversation li { padding: 9px 12px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; }
+.conversation li.user { border-color: #ede9fe; background: #faf8ff; }
+.conversation b { display: block; margin-bottom: 2px; color: #71717a; font-size: 12px; font-weight: 500; text-transform: capitalize; }
+details { margin-bottom: 6px; border: 1px solid #ececef; border-radius: 10px; }
+summary { padding: 9px 12px; color: #27272a; cursor: pointer; font-size: 13px; font-weight: 500; }
+.drawer details pre { border: 0; border-top: 1px solid #ececef; border-radius: 0 0 10px 10px; }
 </style>

@@ -27,9 +27,9 @@ const macros = computed(() => {
   const plan = totals.value.currentPlan;
   const energy = plan.protein_g * 4 + plan.carbohydrate_g * 4 + plan.fat_g * 9 || 1;
   return [
-    { name: "Protein", grams: plan.protein_g, share: plan.protein_g * 4 / energy, color: "var(--c-blue)" },
-    { name: "Carbs", grams: plan.carbohydrate_g, share: plan.carbohydrate_g * 4 / energy, color: "var(--c-amber)" },
-    { name: "Fat", grams: plan.fat_g, share: plan.fat_g * 9 / energy, color: "var(--c-coral)" },
+    { name: "Protein", grams: plan.protein_g, share: plan.protein_g * 4 / energy, color: "#8b5cf6" },
+    { name: "Carbs", grams: plan.carbohydrate_g, share: plan.carbohydrate_g * 4 / energy, color: "#38b2f0" },
+    { name: "Fat", grams: plan.fat_g, share: plan.fat_g * 9 / energy, color: "#12b76a" },
   ];
 });
 const scopeLabel = computed(() => {
@@ -65,16 +65,17 @@ function chooseDay(value: number) {
         </button>
       </div>
       <div class="body">
+        <!-- The meal pick has its own line, so the total's label keeps its width. -->
+        <label v-if="day.meals.length > 1" class="meal-pick">
+          <span class="visually-hidden">Meal</span>
+          <select v-model="selectedMeal" aria-label="Nutrition meal">
+            <option value="all">All meals</option>
+            <option v-for="item in day.meals" :key="item.key" :value="item.mealType">{{ MEAL_LABEL[item.mealType] }}</option>
+          </select>
+        </label>
         <div class="big">
           <span class="mc-display mc-num">{{ kcal(totals.currentPlan.calories_kcal) }}</span>
           <span class="what">kcal a person · {{ scopeLabel }}</span>
-          <label v-if="day.meals.length > 1" class="meal-pick">
-            <span class="visually-hidden">Meal</span>
-            <select v-model="selectedMeal" aria-label="Nutrition meal">
-              <option value="all">All meals</option>
-              <option v-for="item in day.meals" :key="item.key" :value="item.mealType">{{ MEAL_LABEL[item.mealType] }}</option>
-            </select>
-          </label>
         </div>
         <p class="mc-small actual">{{ kcal(totals.actual.calories_kcal) }} kcal eaten so far: actual counts cooked dishes only.<template v-if="notCounted">{{ ` ${notCounted} skipped ${notCounted === 1 ? "dish" : "dishes"} not counted.` }}</template></p>
         <div class="macros">
@@ -122,38 +123,42 @@ function chooseDay(value: number) {
 </template>
 
 <style scoped>
-.days { display: grid; grid-template-columns: repeat(auto-fit, minmax(48px, 96px)); gap: 4px; padding: 14px 16px 6px; }
-.days button { height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--c-rail); color: var(--c-ink) !important; font-size: 12px; line-height: 16px; font-weight: 800; }
-.days button span { font-weight: 700; color: var(--c-muted); }
-.days button[aria-pressed="true"] { background: var(--c-ink); color: #fff !important; }
-.days button[aria-pressed="true"] span { color: #c9c7da; }
+/* The day picker is a light track; the chosen day is a raised white segment. */
+.days { width: fit-content; max-width: calc(100% - 32px); display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 96px); gap: 2px; margin: 14px 16px 6px; padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.days button { min-width: 0; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #52525b !important; font-size: 13px; line-height: 16px; font-weight: 500; }
+.days button:hover { color: #18181b !important; }
+.days button span { color: #71717a; font-size: 12px; font-weight: 400; }
+.days button[aria-pressed="true"] { background: #fff; color: #0f0f12 !important; box-shadow: var(--mc-shadow-xs); }
 .body { display: flex; flex-direction: column; gap: 14px; padding: 10px 16px 16px; }
 .big { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .what { min-width: 0; font-size: 13px; color: var(--c-neutral-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meal-pick { margin-left: auto; align-self: center; }
-.meal-pick select { height: 30px; padding: 0 8px; border: 1px solid var(--c-border); border-radius: 10px; background: #fff; color: var(--c-ink); font: inherit; font-size: 12px; font-weight: 800; }
+.meal-pick { align-self: flex-start; margin-bottom: -6px; }
+.meal-pick select { appearance: none; height: 32px; padding: 0 30px 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px; color: #18181b; font: inherit; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); cursor: pointer; }
+.meal-pick select:focus-visible { outline: 0; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .actual { margin: -10px 0 0; }
 .macros { display: flex; flex-direction: column; gap: 10px; }
 .macro { display: grid; grid-template-columns: 76px minmax(0, 1fr) 56px; align-items: center; gap: 10px; }
-.name { font-size: 13px; font-weight: 800; }
-.bar { height: 10px; border-radius: 999px; background: var(--c-line-soft); overflow: hidden; }
+.name { color: #52525b; font-size: 13px; font-weight: 500; }
+.bar { height: 6px; border-radius: 999px; background: #f0f0f2; overflow: hidden; }
 .bar i { display: block; height: 100%; border-radius: 999px; }
-.g { text-align: right; font-weight: 800; }
-.six { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 16px; }
-.six th, .six td { padding: 5px 0; text-align: right; border-bottom: 1px solid var(--c-line-soft); }
+.g { color: #18181b; text-align: right; font-weight: 500; }
+.six { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.six th, .six td { padding: 5px 0; text-align: right; border-bottom: 1px solid #f2f2f4; }
+.six tbody tr:last-child :is(th, td) { border-bottom: 0; }
 .six th:first-child { text-align: left; }
-.six thead th { color: var(--c-muted); font-weight: 800; }
-.six tbody th { font-weight: 700; }
-.six td { font-weight: 800; }
-.dishes-head { height: 36px; display: flex; align-items: center; padding: 0 14px; background: var(--c-canvas); border-bottom: 1px solid var(--c-line-soft); font-size: 12px; font-weight: 800; color: var(--c-muted); }
-.dish { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 52px; padding: 6px 14px; border-bottom: 1px solid var(--c-line-soft); }
+.six thead th { border-bottom-color: #ececef; color: #71717a; font-size: 12px; font-weight: 500; }
+.six tbody th { color: #52525b; font-weight: 400; }
+.six td { color: #27272a; font-weight: 500; }
+.dishes { overflow: hidden; }
+.dishes-head { height: 36px; display: flex; align-items: center; padding: 0 14px; background: #fafafa; border-bottom: 1px solid #ececef; color: #71717a; font-size: 12px; font-weight: 500; }
+.dish { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 52px; padding: 6px 14px; border-bottom: 1px solid #f2f2f4; }
 .dish:last-child { border-bottom: 0; }
 .dish.skipped { opacity: 0.55; }
 .dish-name { display: flex; flex-direction: column; min-width: 0; }
-.dish-name b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dish-name b { color: #18181b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dish-name small { font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.kcal { font-weight: 800; }
+.kcal { color: #18181b; font-weight: 500; }
 .details { align-self: flex-start; }
 .body > p { margin: 0; }
-.body strong { color: var(--c-ink); font-weight: 800; }
+.body strong { color: #18181b; font-weight: 500; }
 </style>

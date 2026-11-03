@@ -13,7 +13,7 @@ const username = ref("");
 const signInWith = ref<"username" | "email">("username");
 const password = ref("");
 const displayName = ref("");
-const { actor, authenticate, errorMessage, isLoading } = useAuth();
+const { actor, authenticate, errorMessage, isLoading, logout } = useAuth();
 const requested = route.query.next;
 // Only same-site paths, so a crafted link cannot bounce the user elsewhere.
 const next = typeof requested === "string" && /^\/(?![/\\])/.test(requested) ? requested : "/";
@@ -44,14 +44,14 @@ async function submit() {
 <template>
   <main class="page-width main-content auth-page">
     <section class="auth-card">
+      <NuxtLink to="/" class="auth-brand"><ShellMark />MealCraft</NuxtLink>
       <div class="audience" role="radiogroup" aria-label="Sign in as">
         <button type="button" role="radio" :aria-checked="audience === 'household'" :class="{ active: audience === 'household' }" @click="choose('household')">Household</button>
         <button type="button" role="radio" :aria-checked="audience === 'admin'" :class="{ active: audience === 'admin' }" @click="choose('admin')">Administrator</button>
       </div>
 
       <template v-if="audience === 'household'">
-        <p class="eyebrow">Private household workspace</p>
-        <h1>{{ mode === "login" ? "Welcome back" : "Create your MealCraft account" }}</h1>
+        <h1 :class="{ long: mode === 'register' }">{{ mode === "login" ? "Welcome back" : "Create your MealCraft account" }}</h1>
         <p>Your plans, household profile and Assistant history stay inside your household.</p>
 
         <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
@@ -60,14 +60,17 @@ async function submit() {
         </div>
       </template>
       <template v-else>
-        <p class="eyebrow">Operations console</p>
         <h1>Administrator sign in</h1>
         <p>Administrator accounts are set up by the team. Sign in to watch runs, check services and debug plans.</p>
         <div class="auth-spacer" />
       </template>
 
-      <p v-if="notAdmin" class="auth-error" role="alert">
-        {{ actor?.user.display_name }} is signed in, but this account is not an administrator. Switch to Household to open your week, or sign out and use an administrator account.
+      <p v-if="notAdmin" class="auth-error mc-alert" role="alert">
+        <UIcon name="i-lucide-circle-alert" aria-hidden="true" />
+        <span>
+          {{ actor?.user.display_name }} is signed in, but this account is not an administrator. Switch to Household to open your week, or sign out and use an administrator account.
+          <button type="button" class="sign-out" @click="logout">Sign out</button>
+        </span>
       </p>
 
       <form @submit.prevent="submit">
@@ -93,8 +96,9 @@ async function submit() {
           Password
           <input v-model="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" type="password" required>
         </label>
-        <p v-if="errorMessage" class="auth-error" role="alert">{{ errorMessage }}</p>
-        <button class="auth-submit" type="submit" :disabled="isLoading">
+        <p v-if="errorMessage" class="auth-error mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</p>
+        <button class="auth-submit" type="submit" :disabled="isLoading" :aria-busy="isLoading || undefined">
+          <UIcon v-if="isLoading" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
           {{ isLoading ? "Please wait…" : mode === "register" ? "Create account" : audience === "admin" ? "Sign in to the console" : "Sign in" }}
         </button>
       </form>
@@ -103,27 +107,39 @@ async function submit() {
 </template>
 
 <style scoped>
-.auth-page { display: grid; place-items: start center; }
-.auth-card { width: min(520px, 100%); padding: clamp(24px, 5vw, 38px); border: 1px solid var(--border); border-radius: 20px; background: var(--s1); }
-.auth-card h1 { margin: 6px 0 10px; font-size: 34px; }
-.auth-card > p { color: var(--muted); line-height: 1.5; }
-.audience { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 26px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--ink); }
-.audience button { padding: 9px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 13px; cursor: pointer; }
-.audience button.active { background: var(--s3); color: var(--ivory); font-weight: 600; }
-.eyebrow { margin: 0; color: var(--accent) !important; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; }
-.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 28px 0 22px; border-bottom: 1px solid var(--border); }
-.auth-tabs button { padding: 12px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
-.auth-tabs button.active { box-shadow: inset 0 -2px 0 var(--accent); color: var(--ivory); font-weight: 600; }
-.auth-spacer { height: 12px; }
-form { display: grid; gap: 18px; }
-label, .field { display: grid; gap: 8px; color: var(--t2); font-size: 13px; font-weight: 500; }
+/* One white card, centred on the tinted page: a quiet audience switch, plain fields, a dark pill to sign in. */
+.auth-page { min-height: calc(100vh - 24px); display: grid; place-items: center; padding-block: 16px; }
+.auth-card { width: min(420px, 100%); padding: 28px 32px; border: 1px solid #ececef; border-radius: 20px; background: #fff; box-shadow: var(--mc-shadow-md); }
+/* The brand tile and wordmark head the card. */
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; color: var(--mc-strong); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; }
+.auth-brand .sb-mark { width: 40px; height: 40px; border-radius: 11px; }
+.auth-brand .sb-mark :deep(svg) { width: 24px; height: 27px; }
+.auth-card h1 { margin: 0 0 6px; text-align: center; color: var(--mc-strong); font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.02em; }
+.auth-card h1.long { font-size: 20px; }
+.auth-card > p { margin: 0; text-align: center; color: #71717a; font-size: 14px; line-height: 20px; }
+/* The audience is a quiet text switch (an underline marks the choice); Sign in / Register is the one segmented control. */
+.audience { display: flex; justify-content: center; gap: 20px; margin: 0 0 18px; }
+.audience button { height: 28px; padding: 0 2px; border: 0; background: transparent; color: #71717a; font-size: 13px; font-weight: 500; cursor: pointer; }
+.audience button:hover { color: #27272a; }
+.audience button.active { color: var(--mc-strong); box-shadow: inset 0 -2px 0 #18181b; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 18px 0; padding: 3px; border-radius: 10px; background: #f4f4f5; }
+.auth-tabs button { height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: #52525b; font-size: 13px; font-weight: 500; cursor: pointer; }
+.auth-tabs button.active { background: #fff; color: var(--mc-strong); box-shadow: var(--mc-shadow-xs); }
+.auth-spacer { height: 18px; }
+form { display: grid; gap: 14px; }
+label, .field { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; }
-.switch { padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 500; cursor: pointer; }
+.switch { padding: 0; border: 0; background: none; color: #6d28d9; font: inherit; font-weight: 500; cursor: pointer; }
 .switch:hover { text-decoration: underline; }
-input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--s2); color: var(--ivory); font: inherit; }
-input:focus { outline: none; border-color: var(--accent); }
-.auth-submit { padding: 13px 18px; border: 0; border-radius: 999px; color: var(--ink); background: var(--ivory); font-weight: 600; cursor: pointer; }
-.auth-submit:disabled { opacity: .6; cursor: wait; }
-.auth-error { margin: 0 0 18px; color: var(--danger) !important; line-height: 1.5; }
+input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; color: #18181b; font: inherit; font-size: 14px; font-weight: 400; box-shadow: var(--mc-shadow-xs); transition: border-color 150ms, box-shadow 150ms; }
+input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+.auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; margin-top: 4px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.auth-submit:hover:not(:disabled) { background: #27272a; }
+/* In flight: the same ink pill with a spinner, never the disabled grey. */
+.auth-submit:disabled { cursor: progress; }
+.auth-error { margin: 4px 0 16px; color: #b42318 !important; }
+/* Above the form: left-aligned beside its icon (the card centres its other lines), with room before the fields. */
+.auth-card > .auth-error { margin: 16px 0 18px; text-align: left; }
 form .auth-error { margin: 0; }
+.sign-out { display: block; margin-top: 8px; padding: 0; border: 0; background: none; color: #b42318; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
 </style>
