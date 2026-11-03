@@ -969,8 +969,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 /* Film entry */
 .film { position: absolute; inset: 0; transition: opacity 900ms var(--ease), transform 1200ms var(--ease), filter 900ms var(--ease); }
 .film video { width: 100%; height: 100%; object-fit: cover; }
-/* The film plays as supplied; only the left side, where the text sits, is shaded so white text reads on light frames. */
-.film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14, 12, 10, 0.62) 0%, rgba(14, 12, 10, 0.5) 32%, rgba(14, 12, 10, 0.25) 48%, rgba(14, 12, 10, 0) 62%), linear-gradient(180deg, rgba(14, 12, 10, 0.28) 0%, rgba(14, 12, 10, 0) 30%, rgba(14, 12, 10, 0.18) 55%, rgba(14, 12, 10, 0.6) 82%, rgba(14, 12, 10, 0.85) 100%); }
+.film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 12, 10, 0.28) 0%, rgba(14, 12, 10, 0) 30%, rgba(14, 12, 10, 0.18) 55%, rgba(14, 12, 10, 0.6) 82%, rgba(14, 12, 10, 0.85) 100%); }
 [data-view="app"] .film { opacity: 0; transform: scale(1.06); filter: blur(20px); }
 
 /* Landing (Main artboard): header 72, hero block at left 72 / top 170, trust row bottom-left. */
@@ -986,8 +985,6 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .brand > span { font-size: 22px; line-height: 28px; letter-spacing: -0.3px; }
 .spacer { flex: 1; }
 .link { padding: 10px 6px; font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; }
-/* Sign in sits right of the shaded side: a soft dark pill keeps it readable on light frames. */
-.landing .link { padding: 8px 14px; border-radius: 999px; background: rgba(14, 12, 10, 0.32); }
 .link:hover { color: #ffe27a; }
 .cta { padding: 10px 20px; border: 0; border-radius: 999px; background: #fff; color: #1b1b3a; font-size: 15px; font-weight: 800; }
 .cta:hover { background: #fff4d6; }
