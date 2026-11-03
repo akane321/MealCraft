@@ -307,15 +307,7 @@
 .product-frame .profile-page .member-constraint-group > p, .product-frame .profile-page .rule-title { color: #3f3f46; font-size: 13px; font-weight: 500; }
 .product-frame .profile-page .field-help { color: #71717a; font-size: 13px; line-height: 1.55; }
 
-/* Checkboxes: a 16px box that turns violet when ticked; a plain one is a row, a chip keeps a thin border. */
-.product-frame .profile-page input[type="checkbox"] {
-  appearance: none; flex: none; width: 16px; height: 16px; margin: 0; border: 1px solid #d4d4d8; border-radius: 4px; background: #fff; cursor: pointer;
-  transition: background 120ms, border-color 120ms;
-}
-.product-frame .profile-page input[type="checkbox"]:checked {
-  border-color: #7c3aed; background: #7c3aed url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
-}
-.product-frame .profile-page input[type="checkbox"]:disabled { opacity: 0.4; cursor: default; }
+/* Choice chips keep a thin border; a plain one is a row. The checkbox itself is the shell's global one. */
 .product-frame .profile-page .choice-card { min-height: 32px; padding: 0 12px; gap: 8px !important; border-color: #e4e4e7; background: #fff; }
 .product-frame .profile-page .choice-card > span { color: #27272a !important; font-size: 13px !important; font-weight: 500; }
 .product-frame .profile-page .choice-card:has(input:checked) { border-color: #c4b5fd; background: #faf8ff; }
@@ -326,56 +318,59 @@
 .product-frame :is(.primary-button, .secondary-button) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-family: var(--sans); text-decoration: none; transition: background 150ms, border-color 150ms; }
 .product-frame .primary-button { min-height: 40px; height: 40px; border: 0; background: #18181b; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .product-frame .primary-button:hover:not(:disabled) { background: #27272a; }
+/* Disabled (not busy) is the shell's flat grey; busy keeps the ink pill with a spinner. */
+.product-frame .primary-button:disabled:not([aria-busy="true"]) { opacity: 1; background: #f4f4f5; color: #a1a1aa; box-shadow: inset 0 0 0 1px #e4e4e7; cursor: not-allowed; }
+.product-frame .primary-button[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .product-frame .secondary-button { min-height: 32px; height: 32px; padding: 0 12px; border: 1px solid #e4e4e7; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
 .product-frame .secondary-button:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
 .product-frame .secondary-button:disabled { opacity: 0.5; cursor: default; }
-.product-frame .profile-page .text-button { height: 28px; padding: 0 8px; border-radius: 8px; color: #71717a; font-size: 13px; font-weight: 500; }
+.product-frame .profile-page .text-button { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 8px; color: #71717a; font-size: 13px; font-weight: 500; }
+.product-frame .profile-page .text-button .iconify { width: 16px; height: 16px; }
 .product-frame .profile-page .text-button:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
 .product-frame .profile-page .text-button.danger-text:hover:not(:disabled) { background: #fef3f2; color: #b42318; }
-.product-frame .profile-page .remove-button { width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: #a1a1aa; font-size: 18px; }
+.product-frame .profile-page .remove-button { width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 10px; background: transparent; color: #a1a1aa; box-shadow: none; }
+.product-frame .profile-page .remove-button .iconify { width: 16px; height: 16px; }
 .product-frame .profile-page .remove-button:hover { background: #fef3f2; color: #b42318; }
 
-/* Profile layout: the form column, then separate side cards. */
-.product-frame .profile-layout { gap: 32px; border: 0; }
+/* Profile layout: the form column of white cards, then the sticky side cards. */
+.product-frame .profile-layout { gap: 24px; border: 0; }
 .product-frame .profile-main { padding: 0; border: 0; }
 .product-frame .profile-name-field { margin-top: 16px; }
-.product-frame .member-heading, .product-frame .profile-form-section { margin-top: 32px; padding-top: 28px; border-top-color: #f0f0f2; }
-.product-frame .member-card { gap: 16px; padding: 20px; border-color: #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .profile-form-section { margin-top: 16px; padding: 24px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
+.product-frame .profile-main > .profile-form-section:first-child { margin-top: 0; }
+.product-frame .member-heading { margin: 0; padding: 0; border: 0; }
+.product-frame .profile-form-section > h2 + .field-help { margin-top: 4px; }
+.product-frame .member-card { gap: 16px; padding: 20px; border-color: #f0f0f2; border-radius: 10px; background: #fcfcfd; box-shadow: none; }
 .product-frame .member-card-header { padding-bottom: 12px; border-bottom-color: #f0f0f2; }
 .product-frame .member-card-header strong { color: var(--mc-strong); font-size: 14px; font-weight: 600; }
 .product-frame .version-badge { padding: 2px 8px; background: #ecfdf3; color: #067647; font-size: 12px; font-weight: 500; }
 .product-frame .profile-sidebar { display: flex; flex-direction: column; gap: 16px; border: 0; }
 .product-frame .profile-sidebar > section { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: var(--mc-shadow-xs); }
-.product-frame .profile-sidebar > section + section { border-top: 1px solid #ececef; }
 .product-frame .profile-sidebar h2 { font-size: 18px; line-height: 24px; }
 .product-frame .profile-sidebar > section > p:not(.form-kicker) { margin: 6px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; }
 .product-frame .profile-summary-list { display: grid; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f0f0f2; }
-.product-frame .profile-summary-list div { grid-template-columns: 112px minmax(0, 1fr); padding: 0; border: 0; }
+.product-frame .profile-summary-list div { grid-template-columns: 140px minmax(0, 1fr); padding: 0; border: 0; }
 .product-frame .profile-summary-list dt { color: #71717a; font-size: 13px; line-height: 18px; }
 .product-frame .profile-summary-list dd { color: #27272a; font-size: 13px; line-height: 18px; font-weight: 500; }
 .product-frame .profile-planning-card .primary-button { width: 100%; margin-top: 16px; }
-.product-frame .profile-save-button { width: auto; min-width: 200px; margin-top: 28px; padding-inline: 20px; }
-.product-frame .notice-panel { padding: 14px 16px; border-color: #ececef; border-radius: 12px; font-size: 14px; }
-.product-frame .success-notice { border-color: #abefc6; background: #ecfdf3; color: #067647; }
-
-/* Meals editor and the one-sentence rules, in the same calm neutrals. */
-.product-frame .meals .recommend { border-color: #ececef; background: #fafafa; }
-.product-frame .meals .recommend strong { color: var(--mc-strong); font-weight: 600; }
-.product-frame .meals .meal { border-color: #ececef; border-radius: 12px; background: #fff; }
-.product-frame .meals .meal .title { color: var(--mc-strong); font-size: 15px; font-weight: 600; }
-.product-frame .meals .preset { height: 30px; padding: 0 12px; border-color: #e4e4e7; background: #fff; color: #3f3f46; font-size: 13px; font-weight: 500; }
-.product-frame .meals .preset[aria-checked="true"], .product-frame .meals .preset.custom { border-color: #18181b; background: #18181b; color: #fff; }
-.product-frame .meals .preset .tag { background: #f5f3ff; color: #6d28d9; }
-.product-frame .meals .preset[aria-checked="true"] .tag { background: rgba(255, 255, 255, 0.16); color: #fff; }
-.product-frame .meals .course[aria-pressed="true"] { border-color: #c4b5fd; background: #faf8ff; color: #18181b; }
-.product-frame .meals .remove { border-color: #e4e4e7; color: #a1a1aa; }
-.product-frame .rule-sentence .saved li { border-color: #ececef; background: #fff; }
-.product-frame .rule-sentence .confirm { border-color: #ddd6fe; background: #faf8ff; }
-.product-frame .rule-sentence .add { border-color: #18181b; background: #18181b; color: #fff; }
-.product-frame .basics-group > summary { color: #27272a; font-weight: 500; }
-.product-frame .profile-page .text-button { display: inline-flex; align-items: center; gap: 6px; }
-.product-frame .profile-page .text-button .iconify { width: 16px; height: 16px; }
+.product-frame .profile-planning-card .primary-button + .field-help { margin-top: 8px; }
 .product-frame .profile-planning-card .plan-when { margin-top: 14px; }
+.product-frame .profile-save-button { width: auto; min-width: 200px; margin-top: 20px; padding-inline: 20px; }
+.product-frame .profile-main > [aria-labelledby="never-again-title"] { margin-top: 32px; }
+/* Plan ready: a green check tile, the changes, then a violet link to the plan. */
+.product-frame .profile-change-card > .mc-tile { width: 32px; height: 32px; margin-bottom: 12px; border-radius: 9px; }
+.product-frame .profile-change-card > .mc-tile > * { width: 16px; height: 16px; }
+.product-frame .profile-change-card ul { margin: 10px 0 0; color: #52525b; font-size: 13px; }
+.product-frame .see-plan { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; color: #7c3aed; font-size: 13.5px; font-weight: 500; text-decoration: none; }
+.product-frame .see-plan:hover { color: #6d28d9; text-decoration: underline; }
+.product-frame .see-plan .iconify { width: 14px; height: 14px; }
+/* Notices above the form: loading line, soft red error, soft green saved. */
+.product-frame .notice-panel { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; padding: 10px 14px; border: 1px solid #ececef; border-radius: 12px; font-size: 14px; line-height: 20px; }
+.product-frame .notice-panel > .iconify { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.product-frame .error-notice { border-color: #fecdca; background: #fef3f2; color: #b42318; }
+.product-frame .error-notice > .iconify { color: #d92d20; }
+.product-frame .success-notice { border-color: #abefc6; background: #ecfdf3; color: #067647; }
+.product-frame .basics-group > summary { color: #27272a; font-weight: 500; }
 
 /* Status page: a subtitle, then one card of rows with a soft status badge. */
 .product-frame .main-content { padding-block: 28px 48px; }
@@ -412,6 +407,5 @@
 
 /* Inputs never take a label's weight. */
 .product-frame .profile-page :is(input, select) { font-weight: 400; }
-.product-frame .profile-summary-list div { grid-template-columns: 140px minmax(0, 1fr); }
 /* Age, sex, activity and goal two a row, so each choice reads whole. */
 .product-frame .profile-page .member-basis { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -377,7 +377,6 @@ onMounted(async () => {
   <main class="page-width profile-page">
     <section class="profile-hero">
       <div>
-        <p class="eyebrow">Your household</p>
         <h1>Tell us once who's eating. Every week follows it.</h1>
       </div>
       <p>
@@ -385,135 +384,135 @@ onMounted(async () => {
       </p>
     </section>
 
-    <div v-if="isLoading" class="notice-panel">Loading your household…</div>
-    <div v-if="errorMessage" class="notice-panel error-notice">{{ errorMessage }}</div>
-    <div v-if="saveNotice" class="notice-panel success-notice">{{ saveNotice }}</div>
+    <div v-if="isLoading" class="notice-panel mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your household…</div>
+    <div v-if="errorMessage" class="notice-panel error-notice mc-alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</div>
+    <div v-if="saveNotice" class="notice-panel success-notice"><UIcon name="i-lucide-circle-check" aria-hidden="true" />{{ saveNotice }}</div>
 
     <form class="profile-layout" @submit.prevent="saveProfile">
       <section class="profile-main">
-        <div class="profile-section-heading">
-          <div>
-            <p class="form-kicker">Household</p>
-            <h2>{{ current ? current.name : "Set up your household" }}</h2>
+        <section class="profile-form-section">
+          <div class="profile-section-heading">
+            <div>
+              <h2>{{ current ? current.name : "Set up your household" }}</h2>
+            </div>
+            <span v-if="current" class="version-badge">Saved</span>
           </div>
-          <span v-if="current" class="version-badge">Saved</span>
-        </div>
 
-        <label class="profile-name-field">
-          <span>Household name</span>
-          <input v-model="form.name" type="text" maxlength="120" required>
-        </label>
+          <label class="profile-name-field">
+            <span>Household name</span>
+            <input v-model="form.name" type="text" maxlength="120" required>
+          </label>
 
-        <div class="halal-switch">
-          <label class="choice-card plain"><input v-model="requiresHalal" type="checkbox" role="switch"><span>Halal household</span></label>
-          <p class="field-help">Only halal dishes; meat only from products FairPrice marks Halal.</p>
-        </div>
-
-        <div class="profile-section-heading member-heading">
-          <div>
-            <p class="form-kicker">Who's eating</p>
-            <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ formatPortions(draftSummary.planningHouseholdSize) }} {{ draftSummary.planningHouseholdSize === 1 ? "portion" : "portions" }} a meal</h2>
+          <div class="halal-switch">
+            <label class="choice-card plain"><input v-model="requiresHalal" type="checkbox" role="switch"><span>Halal household</span></label>
+            <p class="field-help">Only halal dishes; meat only from products FairPrice marks Halal.</p>
           </div>
-          <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add person</button>
-        </div>
-
-        <div class="member-list">
-          <article v-for="(member, index) in members" :key="index" class="member-card">
-            <div class="member-card-header">
-              <strong>Member {{ index + 1 }}</strong>
-              <button type="button" class="text-button danger-text" :disabled="members.length === 1" @click="removeMember(index)"><UIcon name="i-lucide-trash-2" aria-hidden="true" />Remove</button>
-            </div>
-            <div class="member-core-fields">
-              <label><span>Name</span><input v-model="member.name" type="text" maxlength="80" required></label>
-              <label>
-                <span>Portions a meal</span>
-                <span class="portion-field">
-                  <select v-model="member.servingsMode" aria-label="How portions are set">
-                    <option value="auto">Auto{{ autoServings(member) === null ? "" : ` (${formatPortions(autoServings(member)!)})` }}, from age, sex and activity</option>
-                    <option value="set">A set number</option>
-                  </select>
-                  <input v-if="member.servingsMode === 'set'" v-model.number="member.servingsPerMeal" type="number" min="0.25" max="3" step="0.05" aria-label="Portions they eat" required>
-                </span>
-              </label>
-            </div>
-            <div class="profile-field-grid member-basis">
-              <label>
-                <span>Age group</span>
-                <select v-model="member.ageBand">
-                  <option value="">Not set (adult)</option>
-                  <option v-for="option in ageOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                </select>
-              </label>
-              <label>
-                <span>Sex</span>
-                <select v-model="member.sex">
-                  <option value="">Not set</option>
-                  <option value="female">Female</option>
-                  <option value="male">Male</option>
-                </select>
-              </label>
-              <label>
-                <span>Activity</span>
-                <select v-model="member.activity">
-                  <option value="">Moderate (not set)</option>
-                  <option v-for="option in activityOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                </select>
-              </label>
-              <label>
-                <span>Goal</span>
-                <select v-model="member.goal">
-                  <option value="">None</option>
-                  <option v-for="option in goalOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                </select>
-              </label>
-            </div>
-            <div class="member-presence">
-              <label class="choice-card plain"><input v-model="member.defaultPresent" type="checkbox"><span>Usually eats at home</span></label>
-              <p v-if="!member.defaultPresent" class="field-help">Occasional guest: joins only when a rule below says so.</p>
-              <p v-else-if="member.servingsMode === 'auto'" class="field-help">Auto portions follow HPB's energy need for this age group, sex and activity.</p>
-            </div>
-            <div class="member-constraint-group">
-              <p>Allergens</p>
-              <div class="choice-grid">
-                <label v-for="allergen in allergenOptions" :key="allergen" class="choice-card">
-                  <input v-model="member.allergens" type="checkbox" :value="allergen"><span>{{ allergenLabel(allergen) }}</span>
-                </label>
-              </div>
-              <div v-if="member.allergens.length" class="self-only-group">
-                <p class="field-help">An allergen is left out of every dish for everyone. Turn one of these on and only {{ memberName(member) }}'s dishes leave it out.</p>
-                <label v-for="allergen in member.allergens" :key="allergen" class="choice-card plain self-only">
-                  <input v-model="member.selfOnlyAllergens" type="checkbox" :value="allergen">
-                  <span>Only {{ memberName(member) }} avoids {{ allergenLabel(allergen) }}</span>
-                </label>
-                <p v-if="member.selfOnlyAllergens.length" class="inline-warning">
-                  Cooking in the same kitchen can cause cross-contact. Only turn this on if that is safe for {{ memberName(member) }}.
-                </p>
-              </div>
-            </div>
-            <div class="member-constraint-group">
-              <p>Diet</p>
-              <div class="choice-grid">
-                <label v-for="option in dietaryOptions" :key="option.value" class="choice-card">
-                  <input v-model="member.dietaryPreferences" type="checkbox" :value="option.value"><span>{{ option.label }}</span>
-                </label>
-              </div>
-            </div>
-            <label>
-              <span>Won't eat <small>separate with commas</small></span>
-              <input v-model="member.excludedIngredients" type="text" placeholder="mushroom, onion">
-            </label>
-          </article>
-        </div>
+        </section>
 
         <section class="profile-form-section">
-          <p class="form-kicker">Meals and dishes</p>
+          <div class="profile-section-heading member-heading">
+            <div>
+              <h2>{{ members.length }} {{ members.length === 1 ? "person" : "people" }}, {{ formatPortions(draftSummary.planningHouseholdSize) }} {{ draftSummary.planningHouseholdSize === 1 ? "portion" : "portions" }} a meal</h2>
+            </div>
+            <button class="secondary-button" type="button" :disabled="members.length >= 12" @click="addMember">+ Add person</button>
+          </div>
+
+          <div class="member-list">
+            <article v-for="(member, index) in members" :key="index" class="member-card">
+              <div class="member-card-header">
+                <strong>Member {{ index + 1 }}</strong>
+                <button type="button" class="text-button danger-text" :disabled="members.length === 1" @click="removeMember(index)"><UIcon name="i-lucide-trash-2" aria-hidden="true" />Remove</button>
+              </div>
+              <div class="member-core-fields">
+                <label><span>Name</span><input v-model="member.name" type="text" maxlength="80" required></label>
+                <label>
+                  <span>Portions a meal</span>
+                  <span class="portion-field">
+                    <select v-model="member.servingsMode" aria-label="How portions are set">
+                      <option value="auto">Auto{{ autoServings(member) === null ? "" : ` (${formatPortions(autoServings(member)!)})` }}, from age, sex and activity</option>
+                      <option value="set">A set number</option>
+                    </select>
+                    <input v-if="member.servingsMode === 'set'" v-model.number="member.servingsPerMeal" type="number" min="0.25" max="3" step="0.05" aria-label="Portions they eat" required>
+                  </span>
+                </label>
+              </div>
+              <div class="profile-field-grid member-basis">
+                <label>
+                  <span>Age group</span>
+                  <select v-model="member.ageBand">
+                    <option value="">Not set (adult)</option>
+                    <option v-for="option in ageOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Sex</span>
+                  <select v-model="member.sex">
+                    <option value="">Not set</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Activity</span>
+                  <select v-model="member.activity">
+                    <option value="">Moderate (not set)</option>
+                    <option v-for="option in activityOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Goal</span>
+                  <select v-model="member.goal">
+                    <option value="">None</option>
+                    <option v-for="option in goalOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                  </select>
+                </label>
+              </div>
+              <div class="member-presence">
+                <label class="choice-card plain"><input v-model="member.defaultPresent" type="checkbox"><span>Usually eats at home</span></label>
+                <p v-if="!member.defaultPresent" class="field-help">Occasional guest: joins only when a rule below says so.</p>
+                <p v-else-if="member.servingsMode === 'auto'" class="field-help">Auto portions follow HPB's energy need for this age group, sex and activity.</p>
+              </div>
+              <div class="member-constraint-group">
+                <p>Allergens</p>
+                <div class="choice-grid">
+                  <label v-for="allergen in allergenOptions" :key="allergen" class="choice-card">
+                    <input v-model="member.allergens" type="checkbox" :value="allergen"><span>{{ allergenLabel(allergen) }}</span>
+                  </label>
+                </div>
+                <div v-if="member.allergens.length" class="self-only-group">
+                  <p class="field-help">An allergen is left out of every dish for everyone. Turn one of these on and only {{ memberName(member) }}'s dishes leave it out.</p>
+                  <label v-for="allergen in member.allergens" :key="allergen" class="choice-card plain self-only">
+                    <input v-model="member.selfOnlyAllergens" type="checkbox" :value="allergen">
+                    <span>Only {{ memberName(member) }} avoids {{ allergenLabel(allergen) }}</span>
+                  </label>
+                  <p v-if="member.selfOnlyAllergens.length" class="inline-warning">
+                    Cooking in the same kitchen can cause cross-contact. Only turn this on if that is safe for {{ memberName(member) }}.
+                  </p>
+                </div>
+              </div>
+              <div class="member-constraint-group">
+                <p>Diet</p>
+                <div class="choice-grid">
+                  <label v-for="option in dietaryOptions" :key="option.value" class="choice-card">
+                    <input v-model="member.dietaryPreferences" type="checkbox" :value="option.value"><span>{{ option.label }}</span>
+                  </label>
+                </div>
+              </div>
+              <label>
+                <span>Won't eat <small>separate with commas</small></span>
+                <input v-model="member.excludedIngredients" type="text" placeholder="mushroom, onion">
+              </label>
+            </article>
+          </div>
+        </section>
+
+        <section class="profile-form-section">
           <h2>What each day plans</h2>
           <p class="field-help">{{ describeShape(planShape) }}. Dish counts follow who's home at each meal. A dish marked "if one fits" is the one a meal may leave out when the budget, time or dishes can't fit it. You can also change this in the chat for one week, e.g. "also plan lunch" or "add a soup on Friday".</p>
           <ProfileMealsEditor v-model="planShape" :people="tablePeople" />
         </section>
 
         <section class="profile-form-section">
-          <p class="form-kicker">Every week</p>
           <h2>Budget, cooking time and goals</h2>
           <div class="profile-field-grid">
             <label><span>Longest cooking time (min)</span><input v-model.number="form.maxCookingTimeMinutes" type="number" min="5" max="240" placeholder="No limit"></label>
@@ -568,7 +567,6 @@ onMounted(async () => {
         </section>
 
         <section class="profile-form-section">
-          <p class="form-kicker">Who's home and cooking time</p>
           <h2>Tell us in one sentence</h2>
           <p class="field-help">Write it the way you'd say it, in English or Chinese. We show what we understood before anything is added; added rules are kept when you save.</p>
           <ProfileRuleSentence v-model="presenceRules" kind="presence" :members="ruleMembers" />
@@ -576,7 +574,6 @@ onMounted(async () => {
         </section>
 
         <section class="profile-form-section">
-          <p class="form-kicker">Kitchen</p>
           <h2>Cooking equipment</h2>
           <p class="field-help">We assume a stove and a rice cooker. Tick what your kitchen doesn't have, and dishes that need it are never planned.</p>
           <div class="member-constraint-group">
@@ -590,15 +587,18 @@ onMounted(async () => {
         </section>
 
         <section v-if="reference?.basics.length" class="profile-form-section">
-          <p class="form-kicker">At home</p>
           <h2>Salt, rice, spices, sauces, flour and the like</h2>
           <p class="field-help">We assume these are in your kitchen and leave them off the shopping list. Open a group and tick anything you've run out of, and it's bought and priced again.</p>
           <div class="member-constraint-group">
             <p>Run out of <span class="basics-count">{{ missingBasics.length ? `${missingBasics.length} marked` : "none marked" }}</span></p>
-            <input v-model="basicsFilter" class="basics-filter" type="search" placeholder="Find an item, e.g. ketchup or cumin" aria-label="Find an item at home" autocomplete="off" @keydown.enter.prevent>
+            <span class="basics-filter">
+              <UIcon name="i-lucide-search" aria-hidden="true" />
+              <input v-model="basicsFilter" type="search" placeholder="Find an item, e.g. ketchup or cumin" aria-label="Find an item at home" autocomplete="off" @keydown.enter.prevent>
+            </span>
             <p v-if="!basicGroups.length" class="field-help">Nothing matches that.</p>
             <details v-for="group in basicGroups" :key="group.id" class="basics-group" :open="basicsFilter.trim() !== ''">
               <summary>
+                <UIcon name="i-lucide-chevron-right" class="chev" aria-hidden="true" />
                 <span>{{ group.label }}</span>
                 <small>{{ group.marked ? `${group.marked} marked · ` : "" }}{{ group.total }} items</small>
               </summary>
@@ -615,7 +615,7 @@ onMounted(async () => {
 
         <section class="profile-form-section">
           <div class="profile-section-heading compact-heading">
-            <div><p class="form-kicker">Pantry</p><h2>Already at home</h2></div>
+            <div><h2>Already at home</h2></div>
             <button class="secondary-button" type="button" @click="addPantryItem">+ Add ingredient</button>
           </div>
           <p class="field-help">With an amount, it comes off the shopping list. Without one, dishes that use it are just more likely.</p>
@@ -624,12 +624,13 @@ onMounted(async () => {
               <input v-model="item.normalized_name" type="text" aria-label="Ingredient" placeholder="brown rice">
               <input v-model.number="item.quantity" type="number" min="0.01" step="0.01" aria-label="Amount" placeholder="Amount">
               <input v-model="item.unit" type="text" :required="item.quantity !== null" aria-label="Unit" placeholder="g">
-              <button type="button" class="remove-button" :aria-label="`Remove pantry item ${index + 1}`" @click="removePantryItem(index)">×</button>
+              <button type="button" class="remove-button" :aria-label="`Remove pantry item ${index + 1}`" @click="removePantryItem(index)"><UIcon name="i-lucide-trash-2" aria-hidden="true" /></button>
             </div>
           </div>
         </section>
 
-        <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12 || orphanRules">
+        <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12 || orphanRules" :aria-busy="isSaving || undefined">
+          <UIcon v-if="isSaving" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
           {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
         </button>
         <p v-if="totalServings > 12" class="inline-error">MealCraft can plan for up to 12 portions a meal, guests included.</p>
@@ -637,7 +638,6 @@ onMounted(async () => {
 
         <!-- In the main column, not the sticky sidebar: there it pushed "Plan your meals" below a 720-pixel window. -->
         <section class="profile-form-section" aria-labelledby="never-again-title">
-          <p class="form-kicker">Never again</p>
           <h2 id="never-again-title">Dishes you never want again</h2>
           <p v-if="!neverAgain.length" class="field-help">None yet. Press "Never again" on a dish in your week and it is never planned again for anyone here.</p>
           <template v-else>
@@ -655,7 +655,6 @@ onMounted(async () => {
 
       <aside class="profile-sidebar">
         <section class="profile-summary-card">
-          <p class="form-kicker">At the table</p>
           <h2>{{ formatPortions(homePortions) }} {{ homePortions === 1 ? "portion" : "portions" }} a meal</h2>
           <span v-if="current?.current.requires_halal" class="version-badge halal-chip">Halal</span>
           <p>An allergen is left out for everyone, unless someone marks it "only I avoid it". A diet and the foods someone won't eat are that person's own: every meal still gives each person a main dish, a staple and a vegetable they can eat. Meals with someone away or a guest over are cooked for who's home.</p>
@@ -690,9 +689,11 @@ onMounted(async () => {
             </label>
           </div>
           <p v-if="dayCount > 7" class="field-help">Two shopping trips: before day 1 and before day 8. Fresh meat, fish and greens are used within 3 days of the trip they're bought on.</p>
-          <button class="primary-button" type="button" :disabled="!current || isPlanning" @click="generateFromProfile">
+          <button class="primary-button" type="button" :disabled="!current || isPlanning" :aria-busy="isPlanning || undefined" @click="generateFromProfile">
+            <UIcon v-if="isPlanning" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
             {{ isPlanning ? "Planning…" : planWord }}
           </button>
+          <p v-if="!current" class="field-help">Save your household first, then plan.</p>
           <p v-if="isPlanning" class="field-help" role="status">A large household on a tight budget can take a few minutes to plan.</p>
           <button v-if="hasCurrentPlan" class="secondary-button profile-replan-button" type="button" :disabled="isPlanning" @click="rebuildLatestPlan">
             Replan with these details
@@ -701,13 +702,13 @@ onMounted(async () => {
         </section>
 
         <section v-if="planResult" class="profile-change-card">
-          <p class="form-kicker">Done</p>
+          <span class="mc-tile" data-tone="green" aria-hidden="true"><UIcon name="i-lucide-check" /></span>
           <h2>Your plan is ready</h2>
           <p v-if="planResult.constraint_changes.length">What changed since the last plan:</p>
           <ul v-if="planResult.constraint_changes.length">
             <li v-for="change in planResult.constraint_changes" :key="change.field">{{ change.field.replaceAll("_", " ") }}</li>
           </ul>
-          <NuxtLink class="secondary-button" to="/">See the plan</NuxtLink>
+          <NuxtLink class="see-plan" to="/">See the plan<UIcon name="i-lucide-arrow-right" aria-hidden="true" /></NuxtLink>
         </section>
       </aside>
     </form>
@@ -717,25 +718,34 @@ onMounted(async () => {
 <style scoped>
 .halal-switch { display: grid; justify-items: start; gap: 6px; margin-top: 16px; }
 .halal-chip { display: inline-block; margin-bottom: 8px; }
-.never-list { margin: 14px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border); }
-.never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 8px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 650; }
+.never-list { margin: 14px 0 0; padding: 0; list-style: none; border: 1px solid #ececef; border-radius: 10px; overflow: hidden; }
+.never-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 6px 8px 6px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; font-weight: 500; }
+.never-list li:last-child { border-bottom: 0; }
 .never-list span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.never-list .secondary-button { flex: none; min-height: 0; padding: 4px 10px; font-size: 12px; }
+.never-list .secondary-button { flex: none; min-height: 28px; height: 28px; padding: 0 12px; font-size: 12.5px; }
 .portion-field { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 9px; }
 .portion-field:has(select:only-child) { grid-template-columns: minmax(0, 1fr); }
 .member-basis { margin-top: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .member-presence { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .choice-card.plain > span { text-transform: none; }
-.choice-card small { color: var(--muted); font-size: 12px; }
+.choice-card small { color: #71717a; font-size: 12px; }
 .sodium-limit { gap: 12px; }
 .sodium-limit > .choice-card { justify-self: start; }
 .sodium-field { max-width: 320px; }
 .basics-safety { margin-top: 12px; }
-.basics-count { margin-left: 6px; color: var(--muted); font-weight: 500; }
-.basics-filter { width: 100%; max-width: 360px; margin-bottom: 10px; }
-.basics-group { border-top: 1px solid var(--border); padding-block: 8px; }
-.basics-group:last-of-type { border-bottom: 1px solid var(--border); }
-.basics-group > summary { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; cursor: pointer; font-weight: 650; }
+.basics-count { margin-left: 6px; color: #71717a; font-weight: 400; }
+/* The filter field with a search icon inside its left edge. */
+.basics-filter { position: relative; display: block; width: 100%; max-width: 360px; margin-bottom: 6px; }
+.basics-filter .iconify { position: absolute; z-index: 1; left: 12px; top: 10px; width: 16px; height: 16px; color: #a1a1aa; pointer-events: none; }
+.profile-page .basics-filter input[type="search"] { padding-left: 36px; }
+.basics-group { border-top: 1px solid #f2f2f4; padding-block: 10px; }
+.basics-group:last-of-type { border-bottom: 1px solid #f2f2f4; }
+/* The group row: a chevron that turns when open, the name, the count on the right. */
+.basics-group > summary { display: flex; align-items: center; gap: 8px; list-style: none; color: #27272a; font-size: 14px; font-weight: 500; cursor: pointer; }
+.basics-group > summary::-webkit-details-marker { display: none; }
+.basics-group > summary > small { margin-left: auto; color: #71717a; font-size: 12.5px; font-weight: 400; }
+.basics-group > summary .chev { width: 14px; height: 14px; flex: none; color: #a1a1aa; transition: transform 150ms; }
+.basics-group[open] > summary .chev { transform: rotate(90deg); }
 .basics-group > .choice-grid { margin-top: 10px; }
 .plan-when { display: grid; gap: 12px; }
 </style>
