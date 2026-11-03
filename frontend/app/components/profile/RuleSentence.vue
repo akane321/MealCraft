@@ -101,7 +101,7 @@ function orphaned(rule: HouseholdRule) {
       </ul>
       <p v-if="draft.fellBack" class="field-help">Read with simple rules; check it carefully.</p>
       <div class="actions">
-        <button class="secondary-button add" type="button" @click="add">Add {{ draft.rules.length === 1 ? "this rule" : "these rules" }}</button>
+        <button class="primary-button add" type="button" @click="add">Add {{ draft.rules.length === 1 ? "this rule" : "these rules" }}</button>
         <button class="text-button" type="button" @click="draft = IDLE">Change the sentence</button>
       </div>
     </section>
@@ -113,17 +113,19 @@ function orphaned(rule: HouseholdRule) {
 
 <style scoped>
 .rule-sentence { display: grid; gap: 10px; margin-top: 20px; }
-.rule-title { margin: 0; color: var(--t2); font-size: 12px; font-weight: 650; }
+.rule-title { margin: 0; color: #3f3f46; font-size: 13px; font-weight: 500; }
 .saved, .confirm ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.saved li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--s2); font-size: 13px; }
-.saved small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
-.saved small.danger-text { color: var(--danger); }
-.ask { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 9px; align-items: center; }
+.saved li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fff; color: #27272a; font-size: 13.5px; }
+.saved small { display: block; margin-top: 2px; color: #71717a; font-size: 12px; }
+.saved small.danger-text { color: #b42318; }
+.ask { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
 .ask select { width: auto; min-width: 150px; }
-.confirm { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid rgba(79, 184, 110, 0.4); border-radius: 14px; background: var(--c-ok-bg); }
-.confirm li { font-size: 14px; font-weight: 650; color: var(--ivory); }
-.actions { display: flex; align-items: center; gap: 14px; }
-.add { border-color: var(--c-green); color: #fff; background: var(--c-green); }
-.issues { padding: 10px 14px; border-radius: 10px; color: var(--danger); background: var(--c-allergy-bg); font-size: 12px; line-height: 1.55; }
+.ask .secondary-button { height: 36px; min-height: 36px; padding: 0 14px; }
+/* What was read back: a violet-50 card, the rules in plain ink, then add (ink) or change (ghost). */
+.confirm { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid #ddd6fe; border-radius: 12px; background: #faf8ff; }
+.confirm li { color: #0f0f12; font-size: 14px; font-weight: 500; }
+.actions { display: flex; align-items: center; gap: 8px; }
+.actions .add { width: auto; min-height: 32px; height: 32px; margin: 0; padding: 0 14px; font-size: 13px; font-weight: 500; }
+.issues { display: grid; gap: 2px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 13px; line-height: 20px; }
 .issues p { margin: 0; }
 </style>
