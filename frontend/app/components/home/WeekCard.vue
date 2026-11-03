@@ -78,12 +78,13 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
         </span>
         <span class="n" :title="day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title">{{ day.meals[day.meals.length - 1]!.dishes[0]!.recipe.title }}</span>
         <!-- The name above is the day's last meal; with several meals, count them rather than name one. -->
-        <span class="mc-small more">{{ [day.meals.length > 1 ? `${day.meals.length} meals` : null, dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0))].filter(Boolean).join(" · ") }}</span>
+        <!-- One short line: the meal count when there are several (the dish count is its tooltip), else the dish count. -->
+        <span class="mc-small more" :title="dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0))">{{ day.meals.length > 1 ? `${day.meals.length} meals` : dishCount(day.meals.reduce((sum, meal) => sum + meal.dishes.length, 0)) }}</span>
       </button>
     </div>
     <div class="foot">
-      <button type="button" class="mc-btn secondary" @click="emit('open', 'groceries')">Shopping list</button>
-      <button type="button" class="mc-btn quiet" @click="emit('open', 'nutrition')">Nutrition</button>
+      <button type="button" class="mc-btn secondary sm" @click="emit('open', 'groceries')"><UIcon name="i-lucide-shopping-basket" aria-hidden="true" />Shopping list</button>
+      <button type="button" class="mc-btn secondary sm" @click="emit('open', 'nutrition')"><UIcon name="i-lucide-chart-pie" aria-hidden="true" />Nutrition</button>
       <span v-if="repeats" class="mc-small repeat-note">Some dishes appear more than once: not enough different ones fit your limits in this plan.</span>
     </div>
   </section>
@@ -124,6 +125,8 @@ h3 { margin: 0; }
 .again path { fill: none; stroke-width: 2; }
 /* Two lines at most; the full name is the tooltip. */
 .n { min-height: 34px; width: 100%; padding: 0 2px; color: #27272a; font-size: 12.5px; line-height: 17px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.more { white-space: nowrap; }
+.foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
 </style>

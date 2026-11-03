@@ -522,11 +522,11 @@ const refreshAll = () => {
             <p class="mc-small">Nothing is removed from your cart unless you remove it here, and nothing is bought. Your plan stays as it is.</p>
 
             <details v-if="(setup === 'missing' || addProblem) && links.length" class="links" open>
-              <summary>Add them yourself ({{ links.length }})</summary>
+              <summary><UIcon name="i-lucide-chevron-right" class="chev" aria-hidden="true" />Add them yourself ({{ links.length }})</summary>
               <ul class="lines">
                 <li v-for="line in links" :key="line.line_key">
                   <span class="what"><b>{{ line.ingredient_display_name }}</b><small>{{ line.quantity }} × {{ line.product_name }}</small></span>
-                  <a class="mc-btn quiet sm" :href="line.product_url!" target="_blank" rel="noopener">Open</a>
+                  <a class="mc-btn quiet sm" :href="line.product_url!" target="_blank" rel="noopener">Open<UIcon name="i-lucide-arrow-up-right" class="open-ic" aria-hidden="true" /></a>
                 </li>
               </ul>
             </details>
@@ -597,7 +597,7 @@ const refreshAll = () => {
                   <span v-if="rowError[item.cart_item_id]" class="msg alert" role="alert">{{ rowError[item.cart_item_id] }}</span>
                 </div>
                 <div class="side">
-                  <button type="button" class="mc-btn secondary sm" :disabled="removing[item.cart_item_id]" :aria-label="`Remove ${item.name}`" @click="remove(item.cart_item_id)">
+                  <button type="button" class="mc-btn quiet xs" :disabled="removing[item.cart_item_id]" :aria-label="`Remove ${item.name}`" @click="remove(item.cart_item_id)">
                     {{ removing[item.cart_item_id] ? "Removing…" : "Remove" }}
                   </button>
                 </div>
@@ -652,7 +652,8 @@ header p { margin: 0; color: #71717a; font-size: 13px; line-height: 18px; }
 .body p { margin: 0; }
 /* Setup: an info box with the paths as small code chips. */
 .setup { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid #d1e9ff; border-radius: 12px; background: #eff8ff; color: #175cd3; font-size: 13px; line-height: 20px; }
-.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.setup ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; list-style: decimal; color: #1e3a5f; }
+.setup li::marker { color: #175cd3; font-weight: 600; }
 .setup .mc-small, .setup .mc-label { color: #175cd3; }
 .setup .mc-label { font-size: 13px; font-weight: 600; }
 .setup code { padding: 1px 6px; border: 1px solid #d1e9ff; border-radius: 6px; background: #fff; font: 12px/18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -682,7 +683,11 @@ h4::after { content: ""; flex: 1; height: 1px; background: #f0f0f2; }
 .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
 .again { flex: 1 1 100%; color: #b54708; font-size: 13px; font-weight: 500; }
 .done { margin: 0; color: #067647; font-size: 13px; font-weight: 500; }
-.links summary { cursor: pointer; color: #27272a; font-size: 13px; font-weight: 500; }
+.links summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; color: #27272a; font-size: 13px; font-weight: 500; }
+.links summary::-webkit-details-marker { display: none; }
+.links .chev { width: 14px; height: 14px; color: #a1a1aa; transition: transform 150ms; }
+.links[open] .chev { transform: rotate(90deg); }
+.links .open-ic { width: 14px; height: 14px; }
 /* Cart rows: a square image, name and unit, the quantity stepper and the line total on the right. */
 .rows { list-style: none; margin: 0; padding: 0; }
 .row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 12px 0; border-top: 1px solid #f2f2f4; transition: opacity 150ms; }
@@ -700,7 +705,7 @@ h4::after { content: ""; flex: 1; height: 1px; background: #f0f0f2; }
 .unit b { color: #18181b; font-weight: 600; }
 .unit s { color: #a1a1aa; font-size: 12px; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
-.tags .mc-chip.plan { background: #f5f3ff; color: #6d28d9; }
+.tags .mc-chip.plan { background: #f4f4f5; color: #52525b; }
 .side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 112px; }
 .stepper { display: inline-flex; align-items: center; height: 32px; padding: 0 1px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; box-shadow: var(--mc-shadow-xs); }
 .stepper button { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px; background: transparent; color: #52525b; font-size: 16px; line-height: 1; font-weight: 500; }
@@ -709,7 +714,8 @@ h4::after { content: ""; flex: 1; height: 1px; background: #f0f0f2; }
 .stepper output { min-width: 26px; color: #18181b; font-size: 13px; text-align: center; font-weight: 500; font-variant-numeric: tabular-nums; }
 .total { color: #18181b; font-size: 15px; font-weight: 600; }
 .total.muted { color: #a1a1aa; font-weight: 500; }
-.side .mc-btn.xs { height: 26px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; box-shadow: none; color: #71717a; font-size: 13px; font-weight: 500; }
+.side .mc-btn.xs { height: 28px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; box-shadow: none; color: #52525b; font-size: 13px; font-weight: 500; }
+.side .mc-btn.xs:hover:not(:disabled) { background: #f4f4f5; color: #18181b; }
 .side .mc-btn.xs:hover { background: #fef3f2; color: #b42318; }
 /* Footer: the totals on the left, checkout on the right. */
 .summary { flex: none; display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; padding: 16px 24px; border-top: 1px solid #f0f0f2; background: #fafafa; }

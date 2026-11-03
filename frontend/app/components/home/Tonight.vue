@@ -127,8 +127,8 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 .head { grid-column: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .video, .acts { grid-column: 1 / -1; }
 .quiet .head { grid-column: 1 / -1; }
-.kicker { font-size: 12px; line-height: 16px; font-weight: 500; color: #7c3aed; }
-h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; }
+.kicker { font-size: 12px; line-height: 16px; font-weight: 500; color: #71717a; }
+h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; text-wrap: balance; }
 .with { margin: 0; font-size: 13px; color: var(--c-neutral-text); }
 .dish-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: var(--c-tonight-border); text-underline-offset: 3px; }
 .dish-link:hover { color: var(--c-ink); text-decoration-color: var(--c-coral); }
@@ -147,9 +147,16 @@ h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-
 .caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fafafa; font-size: 12px; line-height: 16px; color: var(--c-muted); }
 .acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 10px; }
-.swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
-.swap:hover { background: #f4f4f5; color: #18181b; }
+/* Swap: an outline icon button, round like the pills beside it. */
+.swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #52525b; box-shadow: var(--mc-shadow-xs); }
+.swap:hover { border-color: #d4d4d8; background: #f7f7f8; color: #18181b; }
 .swap .iconify { width: 16px; height: 16px; }
 .acts .cooked { border-color: var(--c-tonight-border); }
 .quiet { background: #fafafa; }
+/* The 340px column at 1280: a smaller icon and title, so the name keeps whole words together. */
+@media (max-width: 1359px) {
+  .tonight { grid-template-columns: 48px minmax(0, 1fr); column-gap: 12px; }
+  .big-icon { width: 48px; height: 48px; }
+  h2 { font-size: 17px; line-height: 24px; }
+}
 </style>

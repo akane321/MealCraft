@@ -68,25 +68,18 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
           class="row"
           :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals }"
         >
-          <span class="d">
-            <template v-if="severalMeals"><b>{{ MEAL_LABEL[meal.mealType] }}</b></template>
-            <template v-else><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></template>
-          </span>
+          <span v-if="!severalMeals" class="d"><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></span>
           <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
           <!-- One line per dish: its name, then its own changes, so a meal of several dishes never shows unlabelled rows. -->
           <span class="dishes">
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
+              <!-- With several meals a day, the meal's name is a caption over its first dish. -->
+              <span v-if="severalMeals && index === 0" class="meal-cap">{{ MEAL_LABEL[meal.mealType] }}</span>
               <span class="title-line">
-                <button type="button" class="name" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)">{{ dish.recipe.title }}</button>
+                <button type="button" class="name" :title="dish.recipe.title" @click="emit('openRecipe', dish.recipe.slug)"><span>{{ dish.recipe.title }}</span></button>
                 <span v-if="isStapleDish(dish)" class="role-tag" title="Rice, noodles or bread with the meal">Staple</span>
                 <!-- Who at this meal cannot eat this dish: the meal's other dishes cover them (ADR-0071). -->
                 <span v-if="dish.not_for?.length" class="not-for" :title="`${dish.not_for.join(', ')} cannot eat this dish; other dishes at this meal are for them`">Not for {{ dish.not_for.join(", ") }}</span>
-                <!-- The meal's chip rides on its first dish's line, leaving the full width for each dish's changes. -->
-                <span v-if="index === 0" class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
-                  <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
-                  <svg v-else-if="chip(meal).kind === 'partial'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14V5Z" /></svg>
-                  {{ chip(meal).label }}
-                </span>
               </span>
               <!-- Facts true of the dish, never why it was chosen; a tag opens the dish's facts. -->
               <span v-if="dish.reasons?.length" class="reasons">
@@ -101,9 +94,15 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
                   {{ reason.label }}
                 </button>
               </span>
-              <span v-if="meal.dishes.length === 1 || dish.is_locked" class="rest">
-                <template v-if="meal.dishes.length === 1">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(dish.nutrition_per_person.calories_kcal) }} kcal</template>
-                <span v-if="dish.is_locked" class="kept"><template v-if="meal.dishes.length === 1"> · </template>Kept as is</span>
+              <!-- The meta line: time and energy for a one-dish meal, then the meal's state (a one-dish count says nothing). -->
+              <span v-if="index === 0 || dish.is_locked" class="rest">
+                <span v-if="meal.dishes.length === 1" class="when">{{ dish.recipe.total_time_minutes }} min · {{ Math.round(dish.nutrition_per_person.calories_kcal) }} kcal</span>
+                <span v-if="index === 0 && chip(meal).label !== '1 dish'" class="mc-chip" :class="CHIP_TONE[chip(meal).kind]">
+                  <svg v-if="chip(meal).kind === 'completed'" class="ok-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                  <svg v-else-if="chip(meal).kind === 'partial'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 0 14V5Z" /></svg>
+                  {{ chip(meal).label }}
+                </span>
+                <span v-if="dish.is_locked" class="kept">Kept as is</span>
               </span>
               <span v-if="factsOpen === dish.entry_id" :id="`facts-${dish.entry_id}`" class="facts" role="region" :aria-label="`Facts about ${dish.recipe.title}`">
                 <span class="facts-head">Dish facts</span>
@@ -154,9 +153,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 <style scoped>
 .days { list-style: none; margin: 0; padding: 0 16px; }
 .day-head { margin: 0; padding: 12px 0 2px; }
-.row { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
-/* With several meals a day the first column names the meal ("Breakfast"), wider than a weekday. */
-.row.named { grid-template-columns: 64px 32px minmax(0, 1fr); }
+.row { display: grid; grid-template-columns: 36px 32px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 52px; padding: 12px 0 8px; border-bottom: 1px solid var(--c-line-soft); }
+/* With several meals a day the day is the heading and the meal a caption over the dish: no first column. */
+.row.named { grid-template-columns: 32px minmax(0, 1fr); }
+.meal-cap { color: #9a9aa3; font-size: 11px; line-height: 14px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .d { display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
 .d b { color: #71717a; font-weight: 600; }
 .d span { color: #a1a1aa; }
@@ -166,13 +166,16 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .title-line .name { flex: 0 1 auto; min-width: 0; }
 .not-for { flex: none; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 500; }
 .role-tag { flex: none; padding: 0 7px; border: 1px solid var(--c-line); border-radius: 999px; color: var(--c-muted); font-size: 11px; line-height: 18px; font-weight: 500; }
-.title-line .mc-chip { flex: none; margin-left: auto; }
-.title-line .mc-chip.warn { background: #f5f3ff; color: #6d28d9; }
-.title-line .mc-chip.info { background: #f4f4f5; color: #52525b; }
-.name { max-width: 100%; padding: 0; border: 0; background: none; color: var(--mc-strong); font: inherit; font-size: 14px; font-weight: 600; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rest .mc-chip { flex: none; height: 20px; padding: 0 7px; font-size: 11.5px; }
+.rest .mc-chip.warn { background: #f5f3ff; color: #6d28d9; }
+.rest .mc-chip.info { background: #f4f4f5; color: #52525b; }
+/* A long name takes two lines rather than an ellipsis. */
+.name { max-width: 100%; padding: 0; border: 0; background: none; color: var(--mc-strong); font: inherit; font-size: 14px; line-height: 20px; font-weight: 600; text-align: left; }
+.name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .dish.side .name { font-size: 13px; font-weight: 500; }
 .name:hover { color: #6d28d9; }
-.rest { font-size: 12.5px; line-height: 18px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; font-size: 12.5px; line-height: 18px; color: var(--c-muted); }
+.rest .when { white-space: nowrap; }
 .kept { color: var(--c-green-text); font-weight: 500; }
 .ok-tick { color: var(--c-green); }
 /* A dish's changes and its feedback: small ghost icon buttons, dim until the row is pointed at or focused. */

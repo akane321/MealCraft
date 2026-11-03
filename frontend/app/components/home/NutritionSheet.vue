@@ -18,13 +18,27 @@ const props = defineProps<{ dashboard: WeeklyNutritionDashboard; updatingEntryId
 const emit = defineEmits<{ close: []; setStatus: [entryId: number, status: MealPlanEntryStatus] }>();
 
 const metric = ref<NutritionMetric>("calories_kcal");
+// The plot is drawn at the card's own width, so the series fills it rather than sitting in the middle.
+const plot = ref<SVGSVGElement | null>(null);
+const width = ref(640);
+let observer: ResizeObserver | undefined;
+onMounted(() => {
+  observer = new ResizeObserver(([entry]) => { width.value = Math.max(320, Math.round(entry!.contentRect.width)); });
+  if (plot.value) observer.observe(plot.value);
+});
+onBeforeUnmount(() => observer?.disconnect());
 const definition = computed(() => nutritionMetrics.find(item => item.key === metric.value)!);
 const chart = computed(() => {
   const done = cumulativeNutritionValues(props.dashboard.days, metric.value, "completed");
   const plan = cumulativeNutritionValues(props.dashboard.days, metric.value, "planned");
   const max = Math.max(...done, ...plan, 1);
-  const donePoints = chartPointCoordinates(done, 640, 180, 24, max);
-  const planPoints = chartPointCoordinates(plan, 640, 180, 24, max);
+  const donePoints = chartPointCoordinates(done, width.value, 180, 24, max);
+  const planPoints = chartPointCoordinates(plan, width.value, 180, 24, max);
+  // One tick a day, under the day's first dish.
+  const ticks = planPoints.flatMap((point, index) => {
+    const date = props.dashboard.days[index]?.planned_date;
+    return date && date !== props.dashboard.days[index - 1]?.planned_date ? [{ x: point.x, label: formatPlanDate(date, { weekday: "short" }) }] : [];
+  });
   return {
     done: lineSegments(donePoints),
     plan: lineSegments(planPoints),
@@ -32,6 +46,7 @@ const chart = computed(() => {
     doneDots: donePoints.length === 1 ? donePoints : [],
     planDots: planPoints.length === 1 ? planPoints : [],
     max: Math.round(max),
+    ticks,
   };
 });
 
@@ -87,8 +102,10 @@ useDialog(overlay, () => emit("close"));
 
       <figure class="chart">
         <figcaption>Cumulative {{ definition.label.toLowerCase() }} ({{ definition.unit }}), up to {{ chart.max.toLocaleString("en-SG") }}</figcaption>
-        <svg viewBox="0 0 640 180" role="img" :aria-label="`Cumulative ${definition.label}: cooked against the current plan`">
-          <line v-for="y in [24, 68, 112, 156]" :key="`g${y}`" x1="0" x2="640" :y1="y" :y2="y" class="grid" />
+        <svg ref="plot" :viewBox="`0 0 ${width} 180`" role="img" :aria-label="`Cumulative ${definition.label}: cooked against the current plan`">
+          <line v-for="y in [24, 90, 156]" :key="`g${y}`" x1="0" :x2="width" :y1="y" :y2="y" class="grid" />
+          <text v-for="(y, index) in [24, 90, 156]" :key="`y${y}`" x="0" :y="y - 5" class="axis">{{ Math.round(chart.max * (2 - index) / 2).toLocaleString("en-SG") }}</text>
+          <text v-for="tick in chart.ticks" :key="`x${tick.x}`" :x="tick.x" y="176" text-anchor="middle" class="axis">{{ tick.label }}</text>
           <polyline v-for="(points, index) in chart.plan" :key="`p${index}`" :points="points" class="plan" />
           <polyline v-for="(points, index) in chart.done" :key="`d${index}`" :points="points" class="done" />
           <circle v-for="(point, index) in chart.planDots" :key="`pd${index}`" :cx="point.x" :cy="point.y" r="5" class="plan-dot" />
@@ -109,17 +126,17 @@ useDialog(overlay, () => emit("close"));
         </thead>
         <tbody>
           <tr v-for="day in dashboard.days" :key="day.entry_id" :class="day.status">
-            <td>{{ shortDate(day.planned_date) }}</td>
-            <td>{{ MEAL_LABEL[day.meal_type ?? "dinner"] }}</td>
-            <td class="dish">{{ day.recipe.title }}</td>
-            <td>{{ statusLabel(day) }}</td>
+            <td class="nowrap">{{ shortDate(day.planned_date) }}</td>
+            <td class="nowrap">{{ MEAL_LABEL[day.meal_type ?? "dinner"] }}</td>
+            <td class="dish"><span :title="day.recipe.title">{{ day.recipe.title }}</span></td>
+            <td class="nowrap">{{ statusLabel(day) }}</td>
             <td v-for="item in nutritionMetrics" :key="item.key">{{ Math.round(day.nutrition_per_person[item.key]) }}</td>
             <td v-if="!readonly" class="actions">
               <template v-if="day.status === 'planned'">
-                <button type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'completed')">Cooked</button>
-                <button type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'skipped')">Skip</button>
+                <button type="button" class="mc-btn quiet" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'completed')">Cooked</button>
+                <button type="button" class="mc-btn quiet" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'skipped')">Skip</button>
               </template>
-              <button v-else type="button" class="mc-btn secondary" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'planned')">Undo</button>
+              <button v-else type="button" class="mc-btn quiet" :disabled="updatingEntryId === day.entry_id" @click="emit('setStatus', day.entry_id, 'planned')">Undo</button>
             </td>
           </tr>
         </tbody>
@@ -144,7 +161,8 @@ header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; 
 .metric.active { border-color: #c4b5fd; background: #f5f3ff; }
 .chart { margin: 0; padding: 14px 16px; border: 1px solid #ececef; border-radius: 12px; }
 .chart figcaption { color: #71717a; font-size: 12px; font-weight: 500; }
-.chart svg { width: 100%; height: 180px; overflow: visible; }
+.chart svg { display: block; width: 100%; height: 180px; margin-top: 8px; overflow: visible; }
+.chart .axis { fill: #a1a1aa; font-size: 11px; }
 .chart .grid { stroke: #f0f0f2; stroke-width: 1; vector-effect: non-scaling-stroke; }
 .chart polyline { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .chart .done { stroke: #8b5cf6; }
@@ -155,15 +173,17 @@ header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; 
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 18px; height: 0; border-top: 2px solid #8b5cf6; }
 .legend i.plan { border-top: 2px dashed #c4b5fd; }
-.table-card { border: 1px solid #ececef; border-radius: 12px; overflow: hidden; }
+.table-card { border: 1px solid #ececef; border-radius: 12px; overflow-x: auto; }
 .days { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.days th { height: 36px; padding: 0 14px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }
-.days td { height: 44px; padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; line-height: 20px; text-align: right; }
+.days th { height: 36px; padding: 0 12px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: right; white-space: nowrap; }
+.days td { height: 44px; padding: 10px 12px; border-bottom: 1px solid #f2f2f4; color: #27272a; font-size: 14px; line-height: 20px; text-align: right; }
 .days tbody tr:last-child td { border-bottom: 0; }
 .days tbody tr:hover td { background: #fafafb; }
 .days th:nth-child(-n+4), .days td:nth-child(-n+4) { text-align: left; }
-.days .dish { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.days .nowrap { white-space: nowrap; }
+.days .dish { font-variant-numeric: normal; }
+.days .dish > span { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .days tr.skipped td { color: #a1a1aa; }
-.days .actions { padding-block: 0; white-space: nowrap; }
-.days .actions button { height: 28px; padding: 0 10px; margin-left: 6px; font-size: 12.5px; font-weight: 500; }
+.days .actions { width: 1%; padding-block: 0; padding-right: 14px; white-space: nowrap; }
+.days .actions button { height: 28px; padding: 0 10px; margin-left: 4px; border-radius: 8px; font-size: 13px; font-weight: 500; }
 </style>

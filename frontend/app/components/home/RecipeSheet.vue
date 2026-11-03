@@ -85,7 +85,7 @@ header > div { flex-grow: 1; min-width: 0; }
 .icon { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border-radius: 12px; background: #fafafa; }
 h2 { margin: 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
 header p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
-.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: start; padding: 20px 24px 24px; }
+.body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 16px; align-items: stretch; padding: 20px 24px 24px; }
 .card { padding: 16px; border: 1px solid #ececef; border-radius: 12px; background: #fff; }
 h3 { margin: 0 0 4px; color: var(--mc-strong); font-size: 14px; line-height: 20px; font-weight: 600; }
 .hint { margin: 0 0 8px; color: #71717a; font-size: 12px; line-height: 16px; }

@@ -44,7 +44,8 @@ function toggle(name: string) {
         <template v-for="store in trip.stores" :key="store.retailer">
           <h3 v-if="byStore" class="store">{{ store.name }}<span class="mc-num">{{ formatSgd(store.sum) }}</span></h3>
           <template v-for="group in store.groups" :key="group.name">
-            <h3 class="aisle">{{ group.name }}<span class="rule" /><span class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
+            <!-- A store's only aisle does not repeat the store's subtotal. -->
+            <h3 class="aisle">{{ group.name }}<span class="rule" /><span v-if="!byStore || store.groups.length > 1" class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
             <label v-for="line in group.lines" :key="lineKey(line)" class="item">
               <input type="checkbox" :checked="got.has(lineKey(line))" @change="toggle(lineKey(line))">
               <span class="what">
@@ -81,20 +82,21 @@ function toggle(name: string) {
 .aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #9a9aa3; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .aisle .mc-num { color: #a1a1aa; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
-.item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 2px 0; cursor: pointer; }
+.item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
 .what { display: flex; flex-direction: column; min-width: 0; }
 .p-line { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .p { min-width: 0; color: #18181b; font-size: 14px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fresh { flex: none; padding: 0 6px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 11px; line-height: 16px; font-weight: 500; }
 .store { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
 .store .mc-num { font-size: 13px; font-weight: 600; }
-.shop-link { flex: none; color: #7c3aed; font-size: 12px; line-height: 16px; font-weight: 500; text-decoration: none; }
+.shop-link { flex: none; color: #6d28d9; font-size: 12px; line-height: 16px; font-weight: 500; text-decoration: none; }
 .shop-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 .trip { margin: 12px 0 0; display: flex; align-items: baseline; justify-content: space-between; color: #0f0f12; font-size: 14px; line-height: 20px; font-weight: 600; }
 .trip .mc-num { font-size: 13px; font-weight: 600; }
-.s { color: #71717a; font-size: 12px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The price's source and date are the point of the line: two lines before any cut. */
+.s { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #71717a; font-size: 12px; line-height: 16px; }
 .s.stale { color: var(--c-amber-text); font-weight: 400; }
-.c { color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
+.c { flex: none; color: #18181b; font-weight: 500; font-variant-numeric: tabular-nums; }
 .item:has(input:checked) .p { color: #a1a1aa; text-decoration: line-through; }
 .unmapped { margin: 0; color: #71717a; font-size: 12px; line-height: 16px; }
 .basics { margin: 12px 0 0; padding: 8px 10px; border: 1px solid #d1e9ff; border-radius: 10px; background: var(--c-info-bg); color: var(--c-info-text); font-size: 12px; line-height: 16px; }

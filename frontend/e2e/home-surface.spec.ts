@@ -30,8 +30,9 @@ test("confirmation preferences really save, cancel and undo without changing har
   await editor.getByLabel("More vegetables", { exact: true }).check();
   await editor.getByLabel("Breakfast", { exact: true }).check();
   await editor.getByRole("button", { name: "Add flavour", exact: true }).click();
-  await editor.getByLabel("Days for flavour 1", { exact: true }).selectOption(["friday"]);
-  await editor.getByLabel("Meals for flavour 1", { exact: true }).selectOption(["dinner"]);
+  // Days and meals are toggle chips in a named group (they were multi-selects).
+  await editor.getByRole("group", { name: "Days for flavour 1", exact: true }).getByLabel("Fri", { exact: true }).check();
+  await editor.getByRole("group", { name: "Meals for flavour 1", exact: true }).getByLabel("Dinner", { exact: true }).check();
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/preferences-edit.png` });
   await editor.getByRole("button", { name: "Save preferences", exact: true }).click();
   await expect(editor).toHaveCount(0);
@@ -2149,9 +2150,12 @@ async function openFairPriceCart(page: Page) {
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await page.getByRole("button", { name: "Plan my week", exact: true }).click();
   await page.getByRole("tab", { name: /Groceries/ }).click();
-  // The footer button sits with Preview list and Export PDF.
+  // The footer button sits with Preview list and Export PDF (an icon button now, named by its aria-label).
   const footer = page.locator(".foot-acts");
-  await expect(footer.getByRole("button")).toHaveText(["FairPrice cart", "Preview list", "Export PDF"]);
+  await expect(footer.getByRole("button")).toHaveCount(3);
+  await expect(footer.getByRole("button").nth(0)).toHaveText("FairPrice cart");
+  await expect(footer.getByRole("button").nth(1)).toHaveText("Preview list");
+  await expect(footer.getByRole("button").nth(2)).toHaveAccessibleName("Export PDF");
   await footer.getByRole("button", { name: "FairPrice cart", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "FairPrice cart" });
   return {

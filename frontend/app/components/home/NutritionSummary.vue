@@ -65,16 +65,17 @@ function chooseDay(value: number) {
         </button>
       </div>
       <div class="body">
+        <!-- The meal pick has its own line, so the total's label keeps its width. -->
+        <label v-if="day.meals.length > 1" class="meal-pick">
+          <span class="visually-hidden">Meal</span>
+          <select v-model="selectedMeal" aria-label="Nutrition meal">
+            <option value="all">All meals</option>
+            <option v-for="item in day.meals" :key="item.key" :value="item.mealType">{{ MEAL_LABEL[item.mealType] }}</option>
+          </select>
+        </label>
         <div class="big">
           <span class="mc-display mc-num">{{ kcal(totals.currentPlan.calories_kcal) }}</span>
           <span class="what">kcal a person · {{ scopeLabel }}</span>
-          <label v-if="day.meals.length > 1" class="meal-pick">
-            <span class="visually-hidden">Meal</span>
-            <select v-model="selectedMeal" aria-label="Nutrition meal">
-              <option value="all">All meals</option>
-              <option v-for="item in day.meals" :key="item.key" :value="item.mealType">{{ MEAL_LABEL[item.mealType] }}</option>
-            </select>
-          </label>
         </div>
         <p class="mc-small actual">{{ kcal(totals.actual.calories_kcal) }} kcal eaten so far: actual counts cooked dishes only.<template v-if="notCounted">{{ ` ${notCounted} skipped ${notCounted === 1 ? "dish" : "dishes"} not counted.` }}</template></p>
         <div class="macros">
@@ -131,8 +132,8 @@ function chooseDay(value: number) {
 .body { display: flex; flex-direction: column; gap: 14px; padding: 10px 16px 16px; }
 .big { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .what { min-width: 0; font-size: 13px; color: var(--c-neutral-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.meal-pick { margin-left: auto; align-self: center; }
-.meal-pick select { height: 32px; padding: 0 8px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; color: #18181b; font: inherit; font-size: 13px; font-weight: 500; }
+.meal-pick { align-self: flex-start; margin-bottom: -6px; }
+.meal-pick select { appearance: none; height: 32px; padding: 0 30px 0 12px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px; color: #18181b; font: inherit; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); cursor: pointer; }
 .meal-pick select:focus-visible { outline: 0; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .actual { margin: -10px 0 0; }
 .macros { display: flex; flex-direction: column; gap: 10px; }

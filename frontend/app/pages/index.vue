@@ -680,7 +680,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <h1 class="mc-heading" :title="title">{{ title }}</h1>
           <span v-if="plan" class="date">{{ rangeLabel }}</span>
           <span class="grow" />
-          <UTooltip v-if="!isEmpty || planState === 'ready' || planState === 'error'" :text="panelOpen ? 'Hide plan' : 'Show plan'">
+          <UTooltip v-if="!isEmpty || planState === 'ready' || planState === 'error'" :text="panelOpen ? 'Hide plan' : 'Show plan'" :content="{ side: 'bottom', sideOffset: 6, collisionPadding: 8 }">
             <UButton
               color="neutral"
               variant="ghost"
@@ -834,7 +834,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         </section>
 
         <div class="composer-wrap">
-          <form class="composer" @submit.prevent="send()">
+          <form class="composer" :class="{ readonly: readOnly }" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
             <input
               id="mc-ask"
@@ -955,19 +955,24 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 FairPrice cart
               </button>
               <button type="button" class="mc-btn secondary" @click="previewOpen = true">Preview list</button>
-              <button type="button" class="mc-btn quiet" @click="exportPdf">Export PDF</button>
+              <UTooltip text="Export PDF">
+                <button type="button" class="mc-btn secondary icon-only" aria-label="Export PDF" @click="exportPdf"><UIcon name="i-lucide-download" aria-hidden="true" /></button>
+              </UTooltip>
             </div>
           </footer>
         </template>
+        <template v-else>
+        <!-- Every state keeps the column's 56px head, so its top edge lines up with the chat's. -->
+        <div class="panel-head"><h2 class="panel-title">This plan</h2></div>
         <HomePanelState
-          v-else
           :state="planState === 'ready' ? 'empty' : planState"
-          :title="planState === 'empty' ? 'No plan yet' : 'This plan'"
+          :title="planState === 'empty' ? 'No plan yet' : ''"
           empty-text="Your plan shows up here once it's planned: your next meal, the shopping list and nutrition."
           error-text="Your plan couldn't be loaded."
           :rows="6"
           @retry="retryPlan"
         />
+        </template>
       </aside>
       </div>
     </div>
@@ -1072,6 +1077,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .date { flex: none; color: #a1a1aa; font-size: 12.5px; }
 .thread { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px 8px; }
 .col { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.chat.is-empty .col { max-width: 760px; }
 .me { align-self: flex-end; max-width: 72%; padding: 10px 14px; border-radius: 18px 18px 6px 18px; background: #f4f4f5; color: #18181b; font-size: 14.5px; line-height: 22px; white-space: pre-line; }
 .bot { display: flex; flex-direction: column; gap: 12px; }
 .bot p { margin: 0; max-width: 600px; color: #27272a; font-size: 14.5px; line-height: 22px; white-space: pre-line; }
@@ -1081,6 +1087,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .week-start label { display: inline-flex; align-items: center; gap: 6px; color: var(--c-muted); }
 .week-start input { font: inherit; height: 30px; padding: 0 8px; border: 1px solid #e4e4e7; border-radius: 8px; background: #fff; color: var(--c-ink); }
 .card { align-self: flex-start; width: min(480px, 100%); }
+.card:has(.preference-editor) { width: min(640px, 100%); }
 .card-body { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
 .card-body p { margin: 0; }
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--c-line-soft); }
@@ -1116,6 +1123,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
   .ideas { margin-top: 20px; gap: 10px; }
   .idea { min-height: 0; padding: 14px; }
   .idea .mc-tile { margin-bottom: 6px; }
+  /* Beside the plan column the starters are title-only cards, so the column keeps room above and below. */
+  .app:not(.no-panel) .hello h2 { font-size: 30px; line-height: 36px; }
+  .app:not(.no-panel) .idea { flex-direction: row; align-items: center; gap: 10px; padding: 12px 14px; }
+  .app:not(.no-panel) .idea .mc-tile { margin-bottom: 0; }
+  .app:not(.no-panel) .idea-text { display: none; }
 }
 
 /* Swap preview: before struck and faded, after with a green inset ring. */
@@ -1149,7 +1161,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .typing span:nth-child(3) { animation-delay: 300ms; }
 @keyframes mc-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 /* Named apart from PanelState's .error root, which this scoped rule would also reach. */
-.send-error { margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
+.send-error { width: 100%; margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
 .send-error::before { content: ""; width: 16px; height: 16px; flex: none; margin-top: 2px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d92d20' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") no-repeat center / 16px; }
 
 /* Composer: one rounded card, the message on top and a row of chips with a round dark send below. */
@@ -1161,11 +1173,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
 .composer input { height: 40px; font-size: 14.5px; font-weight: 400; color: #18181b; }
 .composer :focus-visible { outline: 0; }
+/* A replaced plan's composer only reads: flat, no focus ring, a grey send. */
+.composer.readonly, .composer.readonly:hover, .composer.readonly:focus-within { border-color: #ececef; background: #fafafa; box-shadow: none; }
+.composer.readonly .mc-send, .composer.readonly .mc-send:disabled { background: #e4e4e7; color: #a1a1aa; box-shadow: none; cursor: not-allowed; }
+.composer.readonly .mc-send:disabled :deep(.iconify) { opacity: 1; }
 .composer-foot { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 32px; }
 /* The chips keep one row: a longer set scrolls sideways under a fade rather than wrap. */
 /* .after is scoped to the composer: the swap card has its own .tile-dish.after. */
-.tools, .composer-foot .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
-.composer-foot .after { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+.tools, .composer-foot .after { flex: 1; min-width: 0; display: flex; gap: 6px; align-items: center; padding-right: 8px; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
 .tools::-webkit-scrollbar, .composer-foot .after::-webkit-scrollbar { display: none; }
 .tools > *, .composer-foot .after > * { flex: none; }
 .composer-foot .after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
@@ -1179,7 +1194,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .tool.alert .iconify { color: currentColor; }
 .mc-send { width: 32px; height: 32px; flex: none; justify-content: center; padding: 0; border-radius: 999px; background: #18181b; color: #fff; }
 .mc-send:hover:not(:disabled) { background: #27272a; }
-.mc-send:disabled { background: #18181b; color: #fff; opacity: 1; cursor: default; }
+.mc-send:disabled { background: #18181b; color: #fff; opacity: 1; cursor: not-allowed; }
 .mc-send:disabled :deep(.iconify) { opacity: 0.5; }
 .fine { max-width: 720px; margin: 8px auto 0; color: #a1a1aa; font-size: 12px; line-height: 16px; text-align: center; }
 .fine.foot { flex: none; margin: 0 auto; padding: 0 28px 14px; }
@@ -1188,21 +1203,25 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 /* Plan column, inside the same white panel. */
 .panel { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: #fcfcfd; border-left: 1px solid #f0f0f2; }
 .panel-head { height: 56px; flex: none; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f2; }
+.panel-title { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
 .tabs .c { color: #a1a1aa; }
 .panel-body { flex: 1; min-height: 0; overflow: auto; }
 .panel-foot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; border-top: 1px solid #f0f0f2; background: #fff; }
 .spend { display: flex; align-items: baseline; gap: 8px; }
 .spend .of { min-width: 0; font-size: 12px; color: var(--c-muted); white-space: nowrap; }
 .spend .left { margin-left: auto; white-space: nowrap; color: var(--c-green-text); font-size: 12.5px; font-weight: 600; }
-.spend .left.near, .spend .left.over { color: var(--c-amber-text); }
+.spend .left.near { color: #b54708; }
+.spend .left.over { color: #b42318; }
 .meter { display: flex; height: 4px; border-radius: 999px; background: #f4f4f5; overflow: hidden; }
 .meter i { display: block; height: 100%; transition: width 600ms var(--ease); }
 .meter .fill { border-radius: 999px; background: #18181b; }
 .meter.near .fill { background: #f59e0b; }
 .meter.over .fill { border-radius: 999px 0 0 999px; background: #f59e0b; border-right: 2px solid #fff; }
 .meter .overage { background: #f04438; }
-.foot-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-.foot-acts button { flex: 1; }
+.foot-acts { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.foot-acts > button { flex: 1; }
+.foot-acts .icon-only { flex: none; width: 36px; padding: 0; justify-content: center; }
+.foot-acts .icon-only .iconify { width: 16px; height: 16px; }
 .cart-states { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 
 /* Shopping list preview */
