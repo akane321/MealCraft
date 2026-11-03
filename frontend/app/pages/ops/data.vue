@@ -41,5 +41,4 @@ function show(key: Tab) {
 :deep(.data-pane) { display: grid; gap: 16px; min-width: 0; }
 :deep(.filters) { display: grid; grid-auto-flow: column; grid-template-columns: minmax(0, 1fr); grid-auto-columns: minmax(140px, max-content); align-items: end; gap: 12px; margin: 0; }
 :deep(.data-note) { margin: -4px 0 0; color: #71717a; font-size: 12.5px; line-height: 18px; }
-:deep(.chip) { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
 </style>

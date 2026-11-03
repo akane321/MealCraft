@@ -3,7 +3,6 @@
   color-scheme: light;
   /* Legacy names on the home surface, mapped onto the design tokens in main.css. */
   --ink: var(--c-white);
-  --s1: var(--c-canvas);
   --s2: var(--c-rail);
   --s3: var(--c-neutral);
   --line: var(--c-line-soft);
@@ -14,7 +13,6 @@
   --accent: var(--c-coral);
   --sage: var(--c-green-text);
   --warn: var(--c-allergy-text);
-  --warn-soft: var(--c-allergy-bg);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --serif: var(--font-display);
   --sans: var(--font-body);

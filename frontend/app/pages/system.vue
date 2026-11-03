@@ -78,6 +78,3 @@ watch(actor, (signedIn) => {
   </main>
 </template>
 
-<style scoped>
-.prices { color: var(--muted); font-size: 16px; line-height: 1.5; }
-</style>

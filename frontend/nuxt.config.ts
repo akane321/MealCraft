@@ -18,8 +18,9 @@ export default defineNuxtConfig({
       fairpriceCartExtensionId: "iogncfhaaajiccdgdnncocllpojhdepm",
     },
   },
-  // Light only; fonts come from the Google Fonts links in app.vue.
-  ui: { colorMode: false, fonts: false },
+  // Light only; fonts come from the Google Fonts links in app.vue. Only the components the app uses get theme
+  // files, so the global stylesheet carries no utilities for the rest.
+  ui: { colorMode: false, fonts: false, experimental: { componentDetection: true } },
   typescript: {
     strict: true,
   },

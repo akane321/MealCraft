@@ -209,7 +209,6 @@ header a:hover { text-decoration: underline; }
 .replay-list button:hover { border-color: #e4e4e7; background: #fafafa; }
 .replay-list button.current { border-color: #ddd6fe; background: #faf8ff; }
 .replay-list .small { font-weight: 400; }
-.small { font-size: 12px; }
 .compare h3 { margin: 22px 0 10px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; }
 /* Stored and replayed side by side, in the shared table look; a changed row is amber. */
 table.side { border: 1px solid #ececef; border-radius: 10px; border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 13px; table-layout: fixed; }

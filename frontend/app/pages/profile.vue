@@ -760,7 +760,7 @@ onMounted(async () => {
 .never-list .secondary-button { flex: none; min-height: 28px; height: 28px; padding: 0 12px; font-size: 12.5px; }
 .portion-field { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 9px; }
 .portion-field:has(select:only-child) { grid-template-columns: minmax(0, 1fr); }
-.member-basis { margin-top: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.member-basis { margin-top: 0; }
 .member-presence { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .choice-card.plain > span { text-transform: none; }
 .choice-card small { color: #71717a; font-size: 12px; }

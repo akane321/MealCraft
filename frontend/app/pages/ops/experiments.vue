@@ -556,7 +556,6 @@ const failedCases = computed(() => reportRuns.value.filter((item) => {
 /* The controls in fixed columns, so every select starts at the same x and nothing moves when "Use default" shows. */
 .how { display: grid; grid-template-columns: 150px auto 104px; align-items: center; justify-items: start; gap: 8px; }
 .how select, .how input { width: 150px; }
-.small { font-size: 12px; }
 .ops-stack { display: grid; gap: 16px; }
 /* Tables run edge to edge under the card's title. */
 .ops-card.table-card > h2 { margin: 0; padding: 16px 20px; }
@@ -613,11 +612,8 @@ h3 { margin: 18px 0 8px; color: var(--mc-strong); font-size: 13px; line-height: 
 .case-changes th, .case-changes td { padding: 9px 8px; }
 .case-changes thead th { white-space: normal; }
 .case-changes td:nth-child(-n+3) { white-space: nowrap; }
-/* The drawer's overlay, with the same values as the shared console drawer in ops.vue. */
-.drawer-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); }
-.drawer { position: fixed; top: 8px; right: 8px; bottom: 8px; width: min(640px, calc(100vw - 16px)); overflow-y: auto; padding: 0 24px 24px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
+/* The drawer itself is the shared console drawer in ops.vue. */
 .drawer-head + .chips { margin-bottom: 4px; }
-.drawer h3 { margin: 0 0 12px; }
 .preset-table { overflow-x: auto; }
 .preset-table td { min-width: 96px; font-size: 12px; }
 .drawer details { margin-top: 12px; border: 1px solid #ececef; border-radius: 10px; }

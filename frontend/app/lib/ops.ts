@@ -44,7 +44,7 @@ const BAD = new Set(["failed"]);
 const WARN = new Set(["degraded", "cancelled"]);
 
 // A hue per family (done, waiting on the household, degraded, failed, in flight) and a shade per status, so the
-// statuses of one stacked chart stay apart and every badge matches its bar. succeeded is a planning run's,
+// statuses of one stacked chart stay apart (charts only: badges use statusTone below). succeeded is a planning run's,
 // committed a turn's: they never share a chart.
 const COLORS: Record<string, string> = {
   succeeded: "var(--sage)",
