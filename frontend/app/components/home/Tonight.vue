@@ -107,7 +107,9 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
         >
           {{ updatingEntryId === tonight.day.entry_id ? "Saving…" : "Mark cooked" }}
         </button>
-        <button v-if="!readonly" type="button" class="mc-btn quiet sm" @click="emit('swap', tonight.day)">Swap</button>
+        <UTooltip v-if="!readonly" text="Swap this dish">
+          <button type="button" class="swap" aria-label="Swap" @click="emit('swap', tonight.day)"><UIcon name="i-lucide-repeat" aria-hidden="true" /></button>
+        </UTooltip>
       </div>
   </section>
   <section v-else-if="days.length" class="tonight quiet" aria-label="Next meal">
@@ -125,13 +127,13 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 .head { grid-column: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .video, .acts { grid-column: 1 / -1; }
 .quiet .head { grid-column: 1 / -1; }
-.kicker { font-size: 12px; line-height: 16px; font-weight: 600; color: #7c3aed; }
-h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 26px; }
+.kicker { font-size: 12px; line-height: 16px; font-weight: 500; color: #7c3aed; }
+h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-weight: 600; font-size: 18px; line-height: 24px; }
 .with { margin: 0; font-size: 13px; color: var(--c-neutral-text); }
 .dish-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: var(--c-tonight-border); text-underline-offset: 3px; }
 .dish-link:hover { color: var(--c-ink); text-decoration-color: var(--c-coral); }
 .meta { margin: 0; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.meta .done { color: var(--c-green-text); font-weight: 800; }
+.meta .done { color: var(--c-green-text); font-weight: 500; }
 .video { margin-top: 10px; }
 .video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; display: block; }
 .poster { width: 100%; padding: 6px; border: 0; border-radius: 12px; background: #fff; display: flex; align-items: center; gap: 10px; text-align: left; color: var(--c-ink); }
@@ -139,12 +141,15 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 2
 .thumb { position: relative; width: 88px; height: 50px; flex: none; border-radius: 8px; overflow: hidden; background: linear-gradient(135deg, #7a3e1e, #d98b3a 55%, #f3d08a) center / cover; }
 .play { position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); display: flex; align-items: center; justify-content: center; }
 .play svg { width: 10px; height: 10px; fill: var(--c-ink); }
-.len { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; line-height: 14px; font-weight: 800; }
+.len { position: absolute; right: 4px; bottom: 3px; padding: 0 4px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; line-height: 14px; font-weight: 500; }
 .caption { min-width: 0; display: flex; flex-direction: column; }
-.caption small { font-size: 12px; line-height: 16px; font-weight: 800; color: var(--c-muted); }
-.caption span { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.caption small { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--c-muted); }
+.caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .no-video { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fafafa; font-size: 12px; line-height: 16px; color: var(--c-muted); }
-.acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 10px; }
+.swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #71717a; }
+.swap:hover { background: #f4f4f5; color: #18181b; }
+.swap .iconify { width: 16px; height: 16px; }
 .acts .cooked { border-color: var(--c-tonight-border); }
 .quiet { background: #fafafa; }
 </style>
