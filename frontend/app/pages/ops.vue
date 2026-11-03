@@ -62,7 +62,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
       <div class="mc-bar"><UIcon :name="icons[current?.slug ?? ''] ?? 'i-lucide-layout-dashboard'" />{{ current?.label ?? "Operations" }}</div>
       <div class="ops-body">
         <NuxtPage v-if="ready" />
-        <p v-else class="ops-wait" aria-busy="true">Checking your account…</p>
+        <p v-else class="ops-wait mc-loading" aria-busy="true"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Checking your account…</p>
       </div>
     </main>
   </div>
@@ -79,20 +79,86 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
 .ops-body { padding: 28px 40px 40px; }
 .product-link { flex: none; margin-top: 8px; padding-top: 0; border-top: 0; color: #71717a; font-size: 13px; box-shadow: 0 -9px 0 -8px #f0f0f2; }
 .product-link > .iconify { width: 16px; height: 16px; color: #a1a1aa; }
-.ops-wait { color: var(--t3); }
+.ops-wait { justify-content: center; min-height: 240px; }
 </style>
 
 <style>
 /* Shared console building blocks for the pages under /ops. */
 .ops-page { display: grid; gap: 24px; max-width: 1180px; margin: 0 auto; }
-.ops-page > header h1 { margin: 4px 0 4px; color: var(--mc-strong, var(--ivory)); font-size: 22px; line-height: 28px; }
+.ops-page > header h1 { margin: 4px 0 4px; color: var(--mc-strong); font-size: 22px; line-height: 28px; }
 .ops-page > header p { margin: 0; color: var(--t3); max-width: 760px; }
-.ops-page > header .mc-eyebrow { display: none; }
 .ops-card { padding: 20px; border: 1px solid #ececef; border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05); min-width: 0; }
-.ops-card h2 { margin: 0 0 14px; color: var(--mc-strong, var(--ivory)); font-family: var(--serif); font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.ops-card h2 { margin: 0 0 14px; color: var(--mc-strong); font-family: var(--serif); font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -0.01em; }
 .ops-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 16px; }
 .ops-muted { color: var(--t3); }
 .ops-error { color: var(--warn); }
 .ops-badge { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .ops-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot, var(--t3)); }
+
+/* Everything below is scoped to the console shell, so none of it reaches the product pages. */
+/* A list that failed to load: the soft red box led by a circle-alert icon, then Try again. */
+.ops-shell { --ops-alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E"); }
+.ops-shell .ops-card[role="alert"] { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-color: #fecdca; background: #fef3f2; box-shadow: none; }
+.ops-shell .ops-card[role="alert"]::before { content: ""; width: 16px; height: 16px; flex: none; background: #d92d20; -webkit-mask: var(--ops-alert-icon) no-repeat center / 16px; mask: var(--ops-alert-icon) no-repeat center / 16px; }
+.ops-shell .ops-card[role="alert"] > p { flex: 1; margin: 0; color: #b42318; font-size: 14px; }
+/* Nothing matched: a quiet centred line in the card. */
+.ops-shell .ops-card.ops-empty { padding: 32px 20px; color: #71717a; text-align: center; }
+
+/* Buttons: flat grey when disabled; busy keeps the ink pill; danger is the soft red pair. */
+.ops-shell :is(.mc-primary, .mc-pill):disabled:not([aria-busy="true"]) { opacity: 1; border-color: transparent; background: #f4f4f5; color: #a1a1aa !important; box-shadow: inset 0 0 0 1px #e4e4e7; cursor: not-allowed; }
+.ops-shell :is(.mc-primary, .mc-pill)[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
+.ops-shell :is(.mc-primary, .mc-pill).danger { border: 1px solid #fecaca; background: #fef2f2; color: #b42318 !important; box-shadow: none; }
+.ops-shell :is(.mc-primary, .mc-pill).danger:hover:not(:disabled) { background: #fee4e2; }
+.ops-shell .mc-pill.sm { min-height: 28px; height: 28px; padding: 0 10px; font-size: 12.5px; }
+
+/* Tables: a tinted 36px head, 44px rows, a hover tint and the open row in violet-50. */
+.ops-shell .table-card { padding: 0; overflow-x: auto; }
+.ops-shell main table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.ops-shell main thead th { height: 36px; padding: 0 14px; border-bottom: 1px solid #ececef; background: #fafafa; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; text-align: left; white-space: nowrap; }
+.ops-shell main :is(td, tbody th) { height: 44px; padding: 10px 14px; border-bottom: 1px solid #f2f2f4; color: #27272a; text-align: left; vertical-align: top; }
+.ops-shell main tbody th { color: #52525b; font-weight: 400; }
+.ops-shell main tbody tr:last-child > * { border-bottom: 0; }
+.ops-shell main tbody tr:hover > td { background: #fafafb; }
+.ops-shell main tbody tr.current > td { background: #f5f3ff; }
+.ops-shell :is(.table-card, .table-wrap, .job-table) .mc-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ops-shell .table-card .link { padding: 0; border: 0; background: none; color: #18181b; font-weight: 500; text-align: left; }
+.ops-shell .table-card .link:hover { color: #6d28d9; }
+.ops-shell .table-card .sub { display: block; color: #a1a1aa; font-size: 12px; line-height: 16px; }
+.ops-shell .pager { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid #f2f2f4; }
+.ops-shell .pager span { margin-right: auto; font-size: 12.5px; }
+
+/* Filters above a table. */
+.ops-shell .filters label { display: grid; gap: 6px; color: #71717a; font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* Drawers: a floating white panel on the right with a sticky head. */
+.ops-shell .drawer-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); backdrop-filter: blur(2px); }
+.ops-shell .drawer { position: fixed; top: 8px; right: 8px; bottom: 8px; width: min(640px, calc(100vw - 16px)); overflow-y: auto; padding: 0 24px 24px; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); animation: mc-rise 240ms var(--ease, ease-out) both; }
+.ops-shell .drawer-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: 0 -24px 20px; padding: 20px 24px; border-bottom: 1px solid #f0f0f2; background: #fff; }
+.ops-shell .drawer-head h2 { margin: 2px 0; color: var(--mc-strong); font-size: 20px; line-height: 28px; font-weight: 600; }
+.ops-shell .drawer-head p { margin: 0; color: #71717a; font-size: 13px; line-height: 18px; }
+.ops-shell .drawer-actions { display: flex; align-items: center; gap: 8px; }
+.ops-shell .drawer :is(section, form) { margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f2; }
+.ops-shell .drawer-head + :is(section, form) { margin-top: 0; padding-top: 0; border-top: 0; }
+.ops-shell .drawer section p { margin: 0 0 8px; }
+.ops-shell .drawer section p:last-child { margin-bottom: 0; }
+.ops-shell .drawer h3 { margin: 0 0 12px; color: var(--mc-strong); font-size: 13px; line-height: 18px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.ops-shell .drawer a { color: #6d28d9; text-decoration: none; }
+.ops-shell .drawer a:hover { text-decoration: underline; }
+.ops-shell .drawer pre { margin: 0; max-height: 360px; overflow: auto; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fafafa; color: #3f3f46; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ops-shell .rows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.ops-shell .rows li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 8px 12px; border: 1px solid #f2f2f4; border-radius: 10px; background: #fafafa; }
+.ops-shell .rows .sub { display: block; color: #a1a1aa; font-size: 12px; }
+/* Saved: the soft green box. */
+.ops-shell .note { margin: 0 0 12px; padding: 10px 14px; border: 1px solid #abefc6; border-radius: 12px; background: #ecfdf3; color: #067647; font-size: 13px; }
+.ops-shell .small { font-size: 12px; }
+.ops-shell .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ops-shell .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+/* A drawer's edit form: label above field, checkboxes in a row. */
+.ops-shell .edit { display: grid; gap: 12px; }
+.ops-shell .edit label { display: grid; gap: 6px; color: #3f3f46; font-size: 13px; font-weight: 500; }
+.ops-shell .edit fieldset { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; border: 0; }
+.ops-shell .edit legend { margin-bottom: 8px; color: #3f3f46; font-size: 13px; font-weight: 500; }
+.ops-shell .edit fieldset label, .ops-shell .edit label.check { display: flex; align-items: center; gap: 8px; color: #27272a; font-size: 13px; font-weight: 400; }
+.ops-shell .edit :is(.mc-primary, .mc-pill) { justify-self: start; }
+.ops-shell .edit p { margin: 0; }
 </style>

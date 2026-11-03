@@ -20,9 +20,9 @@ function isPlain(value: unknown) {
 </template>
 
 <style scoped>
-.ops-fields { display: grid; grid-template-columns: minmax(120px, 34%) 1fr; gap: 8px 16px; margin: 0; font-size: 13px; }
-dt { color: var(--t3); }
-dd { margin: 0; min-width: 0; color: var(--ivory); overflow-wrap: anywhere; }
-.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; color: var(--t2); }
-pre { margin: 0; max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--ink); color: var(--t2); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ops-fields { display: grid; grid-template-columns: minmax(120px, 34%) 1fr; gap: 8px 16px; margin: 0; font-size: 13px; line-height: 18px; }
+dt { color: #71717a; }
+dd { margin: 0; min-width: 0; color: #27272a; overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; color: #52525b; }
+pre { margin: 0; max-height: 260px; overflow: auto; padding: 10px 12px; border: 1px solid #ececef; border-radius: 10px; background: #fafafa; color: #3f3f46; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
