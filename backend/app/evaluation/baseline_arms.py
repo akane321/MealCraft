@@ -38,7 +38,6 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from app.core.code_version import code_commit
 from app.core.paths import repository_root
 from app.evaluation.baseline_output import BaselineResponse
 from app.evaluation.baseline_resources import BaselineResources, load_resources
@@ -482,11 +481,10 @@ def main(
     return 0
 
 
-def code_state() -> tuple[str | None, bool | None]:
-    """The checkout's commit and whether its worktree has changes (None when git cannot tell)."""
+def _git(*arguments: str) -> str | None:
     try:
-        status = subprocess.run(  # noqa: S603
-            ["git", "status", "--porcelain"],  # noqa: S607
+        result = subprocess.run(  # noqa: S603
+            ["git", *arguments],  # noqa: S607
             cwd=repository_root(),
             capture_output=True,
             text=True,
@@ -494,8 +492,20 @@ def code_state() -> tuple[str | None, bool | None]:
             check=True,
         )
     except (OSError, subprocess.SubprocessError):
-        return code_commit(), None
-    return code_commit(), bool(status.stdout.strip())
+        return None
+    return result.stdout
+
+
+def code_state() -> tuple[str | None, bool | None]:
+    """The checkout's commit and whether its worktree has changes (None when git cannot tell).
+
+    Both come from the same checkout: ``git rev-parse HEAD``, not a ``CODE_COMMIT`` variable.
+    """
+    head = _git("rev-parse", "HEAD")
+    status = _git("status", "--porcelain")
+    commit = (head.strip() or None) if head is not None else None
+    dirty = bool(status.strip()) if status is not None else None
+    return commit, dirty
 
 
 def sha256_text(text: str | bytes) -> str:

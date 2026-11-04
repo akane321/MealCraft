@@ -53,7 +53,14 @@ model) on top of the reported tokens; `SEARCH_BLOCK_TOKENS` is only the reserve 
 **Held-out runs publish aggregates only** (#408, group 3). The development trial's ledger, records, search trace
 and raw responses may be committed. For a held-out run the per-case records, search queries and sources and raw
 responses stay local; its ledger lines carry no episode id, and only the summary is published. `--allow-heldout`
-also refuses a checkout with uncommitted changes, and every report records `code_commit` and `worktree_dirty`.
+also refuses a checkout with uncommitted changes (untracked files included), and every report records `code_commit`
+(`git rev-parse HEAD` of the checkout) and `worktree_dirty` (`git status --porcelain` of the same checkout). So:
+
+- write a held-out run's `--output` under `.local/evaluation/` (ignored by git), never beside the committed development outputs;
+- commit the development trial's ledger before the held-out run, and, if the owner lets a capped run go on, commit
+  the ledger again before resuming.
+
+The rules of this section are `ADR-0115` of the Knowledge repository, which amends ADR-0086.
 
 ## Commands
 
