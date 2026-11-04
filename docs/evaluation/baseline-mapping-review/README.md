@@ -15,7 +15,18 @@ python -m app.evaluation.baseline_mapping_review generate \
 ```
 
 The input is an `offline-algorithm-comparison-dev-v1` report produced by the
-current baseline comparison runner. All completed runs in that report form one
+current baseline comparison runner, or one or more `*.jsonl` record files of the
+conversation-protocol arms (`app.evaluation.baseline_arms`, see
+[baseline-arms.md](../baseline-arms.md)) and the pure-LLM runner, read together as
+one population in the order given:
+
+```bash
+python -m app.evaluation.baseline_mapping_review generate \
+  rag.jsonl general-agent.jsonl path/to/review.jsonl
+```
+
+In record files, an answered case with a scored plan contributes its mapping
+rows; a clarification, a refusal and an invalid output have none. All completed runs in that report form one
 review population; failed runs have no mapping rows and are not included.
 
 The default seed is `364`. Every `needs_review` and `unmatched` row is retained.
