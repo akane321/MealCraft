@@ -21,6 +21,8 @@ from app.evaluation.baseline_resources import load_resources
 
 SCHEMA_VERSION = "baseline-mapping-review-v1"
 REPORT_SCHEMA_VERSION = "baseline-mapping-accuracy-v1"
+# The JSONL records of `baseline_arms` and `pure_llm_baseline` runs, read together as one population.
+ARM_RECORDS_SCHEMA = "baseline-arm-records-v1"
 DEFAULT_SEED = 364
 DEFAULT_MATCHED_SAMPLE = 200
 MAPPING_STATUSES = {"matched", "needs_review", "unmatched"}
@@ -60,6 +62,23 @@ def _completed_results(payload: dict[str, Any]) -> Iterable[dict[str, Any]]:
                     "run_id": f"repeat-{int(run.get('repeat', 1)):03d}",
                     "result": result,
                 }
+        return
+    if schema == ARM_RECORDS_SCHEMA:
+        records = payload.get("records")
+        if not isinstance(records, list):
+            raise ValueError("arm records must be a records array")
+        for record in records:
+            # An answered case with a scored plan; a clarification, refusal or invalid output has no mapping rows.
+            if not isinstance(record, dict) or record.get("status") != "answered" or not record.get("valid_output"):
+                continue
+            if not (record.get("scored") or {}).get("dishes"):
+                continue
+            yield {
+                "system_id": record.get("system_id"),
+                "episode_id": record.get("episode_id"),
+                "run_id": f"repeat-{int(record.get('repeat', 0)) + 1:03d}",
+                "result": record,
+            }
         return
     raise ValueError(f"unsupported baseline output schema: {schema!r}")
 
@@ -306,11 +325,25 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     )
 
 
+def load_population(paths: list[Path]) -> dict[str, Any]:
+    """One comparison JSON as it is, or arm-record JSONL files (`*.jsonl`) joined in the order given."""
+    if len(paths) == 1 and paths[0].suffix != ".jsonl":
+        return json.loads(paths[0].read_text(encoding="utf-8"))
+    if any(path.suffix != ".jsonl" for path in paths):
+        raise ValueError("several inputs must all be arm-record JSONL files")
+    records = [
+        json.loads(line) for path in paths for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
+    return {"schema_version": ARM_RECORDS_SCHEMA, "records": records}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
     generate = subparsers.add_parser("generate", help="generate a blank human-review table")
-    generate.add_argument("input", type=Path)
+    generate.add_argument(
+        "inputs", type=Path, nargs="+", help="one comparison JSON, or one or more arm-record JSONL files"
+    )
     generate.add_argument("output", type=Path)
     generate.add_argument("--seed", type=int, default=DEFAULT_SEED)
     generate.add_argument("--matched-sample-size", type=int, default=DEFAULT_MATCHED_SAMPLE)
@@ -320,7 +353,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.command == "generate":
-        payload = json.loads(args.input.read_text(encoding="utf-8"))
+        payload = load_population(args.inputs)
         resources = load_resources()
         rows = generate_review_rows(
             payload, names=resources.names, seed=args.seed, matched_sample_size=args.matched_sample_size
