@@ -30,7 +30,7 @@
 - [ ] `python scripts/check_docs_integrity.py`、`scripts/check_heldout_episodes.py` 与 `scripts/report_catalog_reality.py --check` 通过
 - [ ] 涉及 `data-engineering/` 时其单元测试（`python -m unittest discover -s tests`）通过
 - [ ] Docker Compose 配置检查通过
-- [ ] 已在最低 1280×720 桌面视口检查相关页面，或本 PR 不涉及页面
+- [ ] 已在最低 1280×720 桌面视口检查相关页面（涉及手机布局时另在 390×844 检查），或本 PR 不涉及页面
 - [ ] 已更新相关 API、架构或使用文档
 - [ ] 未提交密码、Token、个人数据或本地 .env
 

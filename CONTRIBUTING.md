@@ -98,7 +98,7 @@ See [docs/development.md](docs/development.md) for setup and troubleshooting.
 | Backend route or service | Ruff, focused Pytest, relevant integration tests, and API-contract update when behaviour changes |
 | Database schema | Alembic migration, upgrade verification, repository/service tests, and persistence documentation |
 | Frontend behaviour | ESLint, Vitest, typecheck, relevant loading/empty/success/error states, and screenshots for visible changes |
-| End-to-end workflow | Playwright or a documented browser walkthrough across the affected desktop path at 1280×720 or larger |
+| End-to-end workflow | Playwright or a documented browser walkthrough across the affected desktop path at 1280×720 or larger (and 390×844 for a phone-layout change) |
 | Recipe or ingredient data | Schema validation, source/provenance where required, duplicate and reference checks, and affected evaluation fixtures |
 | Grocery provider or mapping | Live/cache/fixture behaviour, package and unit tests, freshness/source display, and visible failure degradation |
 | Planner or validator | Hard-constraint, determinism, infeasibility, scoring, and Shopping List consistency tests |

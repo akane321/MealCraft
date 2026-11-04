@@ -2,6 +2,8 @@
 // (compose.yaml) polls for changes instead. A checkout run on the host keeps native file events.
 const pollForChanges = process.env.MEALCRAFT_WATCH_POLLING === "true";
 const polling = { usePolling: pollForChanges, interval: 300 };
+// The backend as the Nuxt server reaches it. Route rules are fixed at build time, so the build reads it here.
+const backendOrigin = (process.env.NUXT_API_BASE || "http://backend:8000").replace(/\/$/, "");
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-31",
@@ -16,6 +18,14 @@ export default defineNuxtConfig({
   // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
   icon: { clientBundle: { scan: true }, fallbackToApi: false },
   modules: ["@nuxt/eslint", "@nuxt/ui"],
+  // Phone demos through one HTTPS tunnel (ADR-0116): with an empty public apiBase (compose.demo.yaml) the
+  // browser calls /api on the page's own origin and Nuxt passes it to the backend. Dev keeps calling the backend
+  // directly. /docs and /openapi.json keep the administrators' API documentation link working.
+  routeRules: {
+    "/api/**": { proxy: `${backendOrigin}/api/**` },
+    "/docs": { proxy: `${backendOrigin}/docs` },
+    "/openapi.json": { proxy: `${backendOrigin}/openapi.json` },
+  },
   runtimeConfig: {
     apiBase: "http://backend:8000",
     public: {

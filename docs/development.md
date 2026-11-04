@@ -92,6 +92,21 @@ tagged `mealcraft-frontend-demo`, apart from the dev image. The backend,
 database and URLs are as above. Return to the development frontend with
 `docker compose up --detach`.
 
+The demo build also sets an empty `NUXT_PUBLIC_API_BASE`, so the browser calls
+`/api` on the page's own origin and Nuxt passes it to the backend. That lets a
+phone open the demo through one temporary HTTPS tunnel to port 3000, for
+example a Cloudflare quick tunnel:
+
+```bash
+cloudflared tunnel --url http://localhost:3000
+```
+
+It prints a `https://….trycloudflare.com` address, new each time; Ctrl+C
+closes it. Anyone with the address can reach the app while it is open, so open
+it only for a demo or a session, sign in with fictional accounts, and close it
+afterwards. Cloudflare ends a request that has no answer after about 125
+seconds, so demo requests that finish well inside that.
+
 In OpenAI mode the backend loads the OpenAI library and the catalog vectors in
 the background when it starts, without calling the API, so the first message
 or swap after a start is not the slow one. Give it a few seconds after the
@@ -318,8 +333,9 @@ started yourself from this checkout, run it on port 3100 and set
 
 A successful typecheck or build does not prove that the rendered interface is
 usable. Inspect affected pages at the supported minimum 1280×720 desktop
-viewport and check browser console errors for visible product changes. Mobile
-and tablet layouts are outside the current product and evaluation scope.
+viewport and check browser console errors for visible product changes. The
+planning journey also has a phone layout below 768 px (Knowledge ADR-0116);
+`/system` and `/ops` stay desktop only.
 
 ## Database Migrations
 

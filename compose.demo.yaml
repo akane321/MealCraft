@@ -13,3 +13,8 @@ services:
       target: demo
     # The production server reads its own build, not the source: no bind mount, no dev volumes.
     volumes: !reset []
+    environment:
+      # The browser calls /api on the page's own origin and Nuxt proxies it to the backend, so one HTTPS tunnel
+      # to the frontend port serves the whole app on a phone (ADR-0116). Written here, not as a `:-` default,
+      # because compose would replace an empty value with the default.
+      NUXT_PUBLIC_API_BASE: ""
