@@ -10,8 +10,10 @@ lines, steps and time come from its `evidence`) and scored by the same shared la
 changes none of them.
 
 Cost rules are the pure-LLM runner's (ADR-0086, US$5 per arm including development runs): dry run by default,
-`--live` for a paid call, `--max-usd` and `--max-tokens` stop before a call whose worst case could pass them, spend
-is counted across resumed runs into the same output, and held-out paths are refused without `--allow-heldout`.
+`--live` for a paid call, `--max-usd` and `--max-tokens` stop before a call whose worst case could pass them, and
+held-out paths are refused without `--allow-heldout`. Spend is kept in one append-only ledger per arm
+(`LedgerBudget`, owner review on #427), so it is counted across every run and output of the arm, a case cut by the
+cap or a killed process included.
 An arm without paid calls (strong rules) runs without `--live`.
 
     python -m app.evaluation.baseline_arms --arm strong-rule \\
@@ -25,16 +27,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
 
+from app.core.code_version import code_commit
 from app.core.paths import repository_root
 from app.evaluation.baseline_output import BaselineResponse
 from app.evaluation.baseline_resources import BaselineResources, load_resources
@@ -62,6 +66,113 @@ from app.evaluation.pure_llm_baseline import (
 )
 
 WEEKDAY_SLOTS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+LEDGER_DIR = Path("docs/evaluation/baselines")
+# An API error with one of these statuses was refused before any work, so it is not billed (400, 401, 403, 404,
+# 409, 422, 429). A timeout, a dropped connection or a server error may have been billed: its reserve stands.
+UNBILLED_STATUSES = frozenset({400, 401, 403, 404, 409, 422, 429})
+
+
+def ledger_totals(path: Path | None) -> tuple[float, int]:
+    """An arm's spend so far, read in order: every charge, and every reserve no charge followed at its worst case.
+
+    Calls are made one at a time, so a reserve is settled by the next line if that line is a charge; a reserve
+    followed by another reserve or by the end of the file was a call that may have been billed (a timeout, a
+    killed process) and counts in full."""
+    if path is None or not path.exists():
+        return 0.0, 0
+    usd, tokens = 0.0, 0
+    pending: dict | None = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue  # a half-written last line; its call is counted by the reserve before it
+        if row.get("event") == "reserve":
+            if pending is not None:
+                usd, tokens = usd + pending["usd"], tokens + pending.get("total_tokens", 0)
+            pending = row
+        elif row.get("event") == "charge":
+            usd, tokens = usd + row["usd"], tokens + row.get("total_tokens", 0)
+            pending = None
+    if pending is not None:
+        usd, tokens = usd + pending["usd"], tokens + pending.get("total_tokens", 0)
+    return usd, tokens
+
+
+@dataclass
+class LedgerBudget(Budget):
+    """`Budget` with the arm's append-only spend ledger: one per arm, not per output (owner review on #427).
+
+    Every paid call is `reserve`d at its worst case after the caps allow it and before it is made, then `charge`d
+    with what it cost (tokens plus tool fees), or settled at zero when the API refused it unbilled. The ledger's
+    total opens every run, so a case cut by the cap, a crash or a killed process is never lost, and the dev trial
+    and the held-out run share the arm's one US$5."""
+
+    ledger: Path | None = None
+    episode_id: str | None = None  # left out of the ledger on a held-out run
+    record_episodes: bool = True
+    _reserved: tuple[float, int] | None = None
+
+    def _write(self, row: dict) -> None:
+        if self.ledger is None:
+            return
+        self.ledger.parent.mkdir(parents=True, exist_ok=True)
+        with self.ledger.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(row, sort_keys=True) + "\n")
+            stream.flush()
+
+    def reserve(self, input_tokens: int, output_tokens: int, extra_usd: float = 0.0) -> None:
+        """Check both caps for this call's worst case; raise `BudgetExhausted` without writing, or write the reserve."""
+        usage = Usage(input_tokens, output_tokens)
+        usd = price_usd(self.model, usage) + extra_usd
+        if self.spent_usd + usd > self.max_usd:
+            self.stop_reason = f"spend cap: US${self.spent_usd:.4f} spent, next call could cost US${usd:.4f}"
+        elif self.used_tokens + usage.total_tokens > self.max_tokens:
+            self.stop_reason = f"token cap: {self.used_tokens} used, next call could use {usage.total_tokens}"
+        if self.stop_reason is not None:
+            raise BudgetExhausted(self.stop_reason)
+        self._reserved = (usd, usage.total_tokens)
+        self._write({"event": "reserve", "usd": usd, "total_tokens": usage.total_tokens})
+
+    def charge(self, usage: Usage, extra_usd: float = 0.0, **detail: Any) -> float:
+        cost = self.record(usage) + extra_usd
+        self.spent_usd += extra_usd
+        self._reserved = None
+        row = {
+            "event": "charge",
+            "usd": cost,
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "total_tokens": usage.total_tokens,
+            **detail,
+        }
+        if self.record_episodes and self.episode_id is not None:
+            row["episode_id"] = self.episode_id
+        self._write(row)
+        return cost
+
+    def failed(self, error: BaseException) -> None:
+        """Settle a call that raised: zero when the API refused it unbilled, else its reserve stands, in memory too."""
+        if self._reserved is None:
+            return
+        if getattr(error, "status_code", None) in UNBILLED_STATUSES:
+            self._write({"event": "charge", "usd": 0.0, "total_tokens": 0, "unbilled": type(error).__name__})
+        else:
+            usd, tokens = self._reserved
+            self.spent_usd += usd
+            self.used_tokens += tokens
+        self._reserved = None
+
+    def paid(self, call: Callable[[], Any], input_tokens: int, output_tokens: int, extra_usd: float = 0.0) -> Any:
+        """Reserve, call, and settle a call that raises; the caller charges a call that returns."""
+        self.reserve(input_tokens, output_tokens, extra_usd)
+        try:
+            return call()
+        except BaseException as error:
+            self.failed(error)
+            raise
 
 
 @dataclass(frozen=True)
@@ -69,8 +180,11 @@ class ArmContext:
     """What one case's responder may use: the frozen resources, and for a paid arm its model and budget."""
 
     resources: BaselineResources
-    budget: Budget | None = None
+    budget: LedgerBudget | None = None
     model: Any = None
+    # This case's tool calls and per-step response facts, written into its record; None outside a run.
+    trace: list[dict] | None = None
+    keep_raw: bool = True  # raw responses go into the trace on development runs only
 
 
 @dataclass(frozen=True)
@@ -164,6 +278,9 @@ def run_case(
     response: BaselineResponse | None = None
     errors: list[str] = []
     scored: dict[str, Any] = {}
+    context = replace(context, trace=[])
+    if context.budget is not None:
+        context.budget.episode_id = episode_id
     try:
         conversation = ConversationHarness(config).run(arm.system_id, episode_turns(episode), arm.responder(context))
     except BudgetExhausted:
@@ -199,6 +316,7 @@ def run_case(
         "cost_usd": (budget.spent_usd - spent_before) if budget else 0.0,
         "elapsed_seconds": round(time.perf_counter() - started, 3),
         "exchanges": [item.model_dump(mode="json") for item in conversation.exchanges] if conversation else [],
+        "tool_calls": context.trace,
         "response": response.model_dump(mode="json") if response else None,
         "scored": scored,
     }
@@ -221,6 +339,12 @@ def main(
     parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     parser.add_argument("--model", default="gpt-5.4-mini")
     parser.add_argument("--allow-heldout", action="store_true")
+    parser.add_argument(
+        "--ledger",
+        type=Path,
+        help=f"the arm's spend ledger (default {LEDGER_DIR}/<arm>.spend.jsonl), shared by its runs",
+    )
+    parser.add_argument("--retry-failed", action="store_true", help="ask again the cases whose call failed (paid)")
     parser.add_argument("--fingerprint", action="store_true", help="print the freeze fingerprint and exit")
     args = parser.parse_args(argv)
 
@@ -233,8 +357,9 @@ def main(
         return 0
     if args.episodes is None or args.output is None or args.anchor_date is None:
         parser.error("--episodes, --output and --anchor-date are required")
-    args.episodes, args.output = (
-        path if path.is_absolute() else repository_root() / path for path in (args.episodes, args.output)
+    args.ledger = args.ledger or LEDGER_DIR / f"{arm.system_id}.spend.jsonl"
+    args.episodes, args.output, args.ledger = (
+        path if path.is_absolute() else repository_root() / path for path in (args.episodes, args.output, args.ledger)
     )
     if args.repeats < 1:
         parser.error("--repeats must be at least 1")
@@ -281,19 +406,30 @@ def main(
     if args.output.exists() and not args.output.read_bytes().endswith(b"\n"):
         with args.output.open("a", encoding="utf-8") as stream:
             stream.write("\n")
-    done = {(row["episode_id"], row["repeat"]) for row in previous if row["status"] == "answered"}
+    # A case whose call failed was paid for; it is asked again only on request.
+    done = {
+        (row["episode_id"], row["repeat"])
+        for row in previous
+        if row["status"] == "answered" or (row["status"] == "call_failed" and not args.retry_failed)
+    }
+    commit, dirty = code_state()
+    if args.allow_heldout and dirty is not False:
+        parser.error("a held-out run needs a clean checkout at a recorded commit")
     budget = None
     if arm.paid:
-        budget = Budget(
+        spent, tokens = ledger_totals(args.ledger)
+        budget = LedgerBudget(
             args.model,
             args.max_usd,
             args.max_tokens,
-            spent_usd=sum(row["cost_usd"] for row in previous),
-            used_tokens=sum(row["usage"]["total_tokens"] for row in previous),
+            spent_usd=spent,
+            used_tokens=tokens,
+            ledger=args.ledger,
+            record_episodes=not args.allow_heldout,
         )
     resources = resource_loader()
     model = arm.model_factory(args.model) if arm.paid and arm.model_factory else None
-    context = ArmContext(resources=resources, budget=budget, model=model)
+    context = ArmContext(resources=resources, budget=budget, model=model, keep_raw=not args.allow_heldout)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     for episode, repeat in plan:
         if (episode_id_of(episode), repeat) in done:
@@ -312,6 +448,8 @@ def main(
         "run_date": datetime.now(UTC).isoformat(timespec="seconds"),
         "anchor_date": config.anchor_date.isoformat(),
         "fingerprint": fingerprint,
+        "code_commit": commit,
+        "worktree_dirty": dirty,
         "release_version": resources.release_version,
         "data_digests": dict(resources.data_digests),
         "episodes_path": str(args.episodes.relative_to(repository_root()))
@@ -324,7 +462,11 @@ def main(
         "answered": sum(row["status"] == "answered" for row in records),
         "call_failed": sum(row["status"] == "call_failed" for row in records),
         "spend": {
-            "usd": budget.spent_usd if budget else 0.0,
+            "ledger": str(args.ledger.relative_to(repository_root()))
+            if arm.paid and args.ledger.is_relative_to(repository_root())
+            else (str(args.ledger) if arm.paid else None),
+            # The arm's total from its ledger, every run of it included; this output's cases are in cost_usd.
+            "usd": ledger_totals(args.ledger)[0] if budget else 0.0,
             "tokens": budget.used_tokens if budget else 0,
             "calls_this_run": budget.calls if budget else 0,
             "max_usd": args.max_usd if arm.paid else None,
@@ -340,15 +482,20 @@ def main(
     return 0
 
 
-def affordable(budget: Budget, input_tokens: int, output_tokens: int) -> bool:
-    """Whether a call of this worst case fits what is left of both caps; sets the budget's stop reason if not."""
-    usage = Usage(input_tokens, output_tokens)
-    usd = price_usd(budget.model, usage)
-    if budget.spent_usd + usd > budget.max_usd:
-        budget.stop_reason = f"spend cap: US${budget.spent_usd:.4f} spent, next call could cost US${usd:.4f}"
-    elif budget.used_tokens + usage.total_tokens > budget.max_tokens:
-        budget.stop_reason = f"token cap: {budget.used_tokens} used, next call could use {usage.total_tokens}"
-    return budget.stop_reason is None
+def code_state() -> tuple[str | None, bool | None]:
+    """The checkout's commit and whether its worktree has changes (None when git cannot tell)."""
+    try:
+        status = subprocess.run(  # noqa: S603
+            ["git", "status", "--porcelain"],  # noqa: S607
+            cwd=repository_root(),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return code_commit(), None
+    return code_commit(), bool(status.stdout.strip())
 
 
 def sha256_text(text: str | bytes) -> str:

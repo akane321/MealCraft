@@ -220,7 +220,7 @@ def rag_plan(reference: str) -> str:
 
 
 def rag_context(chat, max_usd=5.0):
-    from app.evaluation.pure_llm_baseline import Budget
+    Budget = baseline_arms.LedgerBudget
 
     return baseline_arms.ArmContext(
         resources=resources(), budget=Budget("gpt-5.4-mini", max_usd, 10_000_000), model=chat
@@ -333,7 +333,8 @@ def test_the_general_agent_uses_its_tools_and_pays_for_searches():
     from types import SimpleNamespace
 
     from app.evaluation import general_agent_baseline as agent
-    from app.evaluation.pure_llm_baseline import Budget
+
+    Budget = baseline_arms.LedgerBudget
 
     responses = FakeResponses(
         [
@@ -352,10 +353,18 @@ def test_the_general_agent_uses_its_tools_and_pays_for_searches():
         ]
     )
     budget = Budget("gpt-5.4-mini", 5.0, 10_000_000)
-    context = baseline_arms.ArmContext(resources=resources(), budget=budget, model=SimpleNamespace(responses=responses))
+    trace: list = []
+    context = baseline_arms.ArmContext(
+        resources=resources(), budget=budget, model=SimpleNamespace(responses=responses), trace=trace
+    )
     output = agent.make_responder(context)("Two of us, dinner tonight.", (), "SHARED")
     first, second = responses.requests
     assert {tool["type"] for tool in first["tools"]} == {"web_search", "function"}
+    web = next(tool for tool in first["tools"] if tool["type"] == "web_search")
+    assert web["filters"]["blocked_domains"] == ["github.com", "githubusercontent.com"]
+    assert first["include"] == ["web_search_call.action.sources"]
+    assert [step["tool"] for step in trace] == ["response", "web_search", "calculator", "response"]
+    assert trace[0]["searches"] == 1 and "raw" in trace[0]
     assert first["input"][0]["content"].startswith("SHARED\n\n")
     assert second["input"][-1] == {"type": "function_call_output", "call_id": "c1", "output": "6"}
     assert output.plan.meals[0].dishes[0].evidence["ingredients"][0]["quantity_g"] == 300
@@ -367,8 +376,9 @@ def test_the_general_agent_has_no_tools_on_its_last_step_and_stops_at_its_cap():
     from types import SimpleNamespace
 
     from app.evaluation import general_agent_baseline as agent
-    from app.evaluation.pure_llm_baseline import Budget, BudgetExhausted
+    from app.evaluation.pure_llm_baseline import BudgetExhausted
 
+    Budget = baseline_arms.LedgerBudget
     call = {"type": "function_call", "name": "calculator", "call_id": "c", "arguments": '{"expression": "1"}'}
     responses = FakeResponses(
         [agent_response([call]) for _ in range(agent.MAX_STEPS - 1)] + [agent_response([], text=AGENT_PLAN)]
@@ -406,3 +416,101 @@ def test_the_mapping_review_reads_arm_records_byte_for_byte(tmp_path):
     assert all(row["personally_reviewed"] is None and row["decision"] is None for row in first)
     with pytest.raises(ValueError):
         review.load_population([output, tmp_path / "comparison.json"])
+
+
+# The arm's spend ledger (owner review on #427): every paid call is reserved, then charged or settled.
+
+
+def fake_paid_arm(calls_per_case: int, usd_per_call: float):
+    def responder(context):
+        def respond(message, own_history, instructions):
+            for _ in range(calls_per_case):
+                context.budget.paid(lambda: None, 0, 0, extra_usd=usd_per_call)
+                context.budget.charge(baseline_arms.Usage(0, 0), extra_usd=usd_per_call, call="fake")
+            return UnifiedOutput(answer="done")
+
+        return respond
+
+    return baseline_arms.Arm(
+        system_id="fake-paid",
+        paid=True,
+        fingerprint=lambda: {"system_id": "fake-paid"},
+        responder=responder,
+        model_factory=lambda name: object(),
+    )
+
+
+def test_a_case_cut_by_the_cap_is_still_charged_and_later_runs_spend_nothing(tmp_path):
+    episodes = tmp_path / "episodes"
+    episodes.mkdir()
+    for name in ("mdw-dev-001", "mdw-dev-002"):
+        (episodes / f"{name}.json").write_text(json.dumps(dev(name), ensure_ascii=False), encoding="utf-8")
+    ledger = tmp_path / "fake.spend.jsonl"
+    arm = fake_paid_arm(calls_per_case=4, usd_per_call=0.30)
+    argv = [
+        "--arm", "fake-paid", "--episodes", str(episodes), "--anchor-date", "2026-09-28",
+        "--output", str(tmp_path / "out.jsonl"), "--ledger", str(ledger), "--live", "--max-usd", "1.0",
+    ]  # fmt: skip
+    totals = []
+    for _ in range(3):
+        assert baseline_arms.main(argv, registry=lambda: {"fake-paid": arm}, resource_loader=resources) == 0
+        totals.append(baseline_arms.ledger_totals(ledger)[0])
+    assert totals == pytest.approx([0.90, 0.90, 0.90])
+    report = json.loads((tmp_path / "out.report.json").read_text(encoding="utf-8"))
+    assert report["spend"]["usd"] == pytest.approx(0.90) and report["spend"]["stop_reason"].startswith("spend cap")
+
+
+def test_a_reserve_with_no_charge_counts_at_its_worst_case(tmp_path):
+    ledger = tmp_path / "arm.spend.jsonl"
+    ledger.write_text(json.dumps({"event": "reserve", "usd": 0.50, "total_tokens": 100}) + "\n", encoding="utf-8")
+    spent, tokens = baseline_arms.ledger_totals(ledger)
+    assert (spent, tokens) == (0.50, 100)
+    budget = baseline_arms.LedgerBudget("gpt-5.4-mini", 1.0, 10_000_000, spent_usd=spent, ledger=ledger)
+    with pytest.raises(baseline_arms.BudgetExhausted):
+        budget.reserve(0, 0, extra_usd=0.60)
+
+
+def test_a_refused_call_writes_no_reserve_and_an_unbilled_error_is_settled_at_zero(tmp_path):
+    ledger = tmp_path / "arm.spend.jsonl"
+    budget = baseline_arms.LedgerBudget("gpt-5.4-mini", 1.0, 10_000_000, ledger=ledger)
+    with pytest.raises(baseline_arms.BudgetExhausted):
+        budget.reserve(0, 0, extra_usd=2.0)
+    assert not ledger.exists()
+    budget.stop_reason = None
+
+    class BadRequest(Exception):
+        status_code = 400
+
+    def refused():
+        raise BadRequest("json_object with tools")
+
+    with pytest.raises(BadRequest):
+        budget.paid(refused, 0, 0, extra_usd=0.20)
+    rows = [json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines()]
+    assert [row["event"] for row in rows] == ["reserve", "charge"] and rows[1]["usd"] == 0.0
+    assert baseline_arms.ledger_totals(ledger)[0] == 0.0
+
+    def timed_out():
+        raise TimeoutError("may have been billed")
+
+    with pytest.raises(TimeoutError):
+        budget.paid(timed_out, 0, 0, extra_usd=0.20)
+    assert baseline_arms.ledger_totals(ledger)[0] == pytest.approx(0.20)
+    assert budget.spent_usd == pytest.approx(0.20)
+
+
+def test_the_general_agents_charge_carries_its_search_fees(tmp_path):
+    from types import SimpleNamespace
+
+    from app.evaluation import general_agent_baseline as agent
+
+    search = {"type": "web_search_call", "action": {"query": "rice price"}}
+    responses = FakeResponses([agent_response([search, search, {"type": "message"}], text=AGENT_PLAN)])
+    ledger = tmp_path / "agent.spend.jsonl"
+    budget = baseline_arms.LedgerBudget("gpt-5.4-mini", 5.0, 10_000_000, ledger=ledger, episode_id="e1")
+    context = baseline_arms.ArmContext(resources=resources(), budget=budget, model=SimpleNamespace(responses=responses))
+    agent.make_responder(context)("Two of us, dinner tonight.", (), "SHARED")
+    charge = [json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines()][-1]
+    tokens_only = (3000 * 0.75 + 500 * 4.5) / 1_000_000
+    assert charge["searches"] == 2 and charge["episode_id"] == "e1"
+    assert charge["usd"] == pytest.approx(tokens_only + 2 * agent.SEARCH_USD)

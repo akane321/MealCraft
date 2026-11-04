@@ -17,7 +17,7 @@ product does, and are scored by the unchanged shared layers.
 | --- | --- | --- | --- |
 | `strong-rule` | `strong_rule_baseline.py` | No model. The product's rule parser and `plan_dates`, keyword rules for each meal's dishes, catalog filters (meal type, course, time, allergens, exclusions with the ingredient hierarchy, diet, halal), and a fixed cheapest-first priority with per-role energy and protein floors and the product's vegetable-led rule | no |
 | `rag` | `rag_baseline.py` | The release v3 recipes most similar to the request (the recipe vectors `data/recipes/embeddings-v1.json` and `.bin`, `PER_GROUP` per course group), listed with frozen-snapshot cost estimates; the model plans | yes |
-| `general-agent` | `general_agent_baseline.py` | OpenAI hosted web search and a calculator only, no MealCraft catalog or prices (owner, 2026-11-03 on #396) | yes |
+| `general-agent` | `general_agent_baseline.py` | OpenAI hosted web search (GitHub's domains blocked) and a calculator only, no MealCraft catalog or prices (owner, 2026-11-03 on #396); at most `MAX_STEPS` = 3 responses a turn and `MAX_SEARCHES` = 2 searches a response | yes |
 
 The pure-LLM arm keeps its own single-turn runner (`pure_llm_baseline.py`).
 
@@ -32,11 +32,28 @@ scoring code is changed here.
 ## Cost (ADR-0086)
 
 A paid arm makes no call without `--live`. The default is a dry run that prints each case's worst case with no
-network. A live run checks every call against `--max-usd` (default US$5) and `--max-tokens` at its worst case
-before it is made, charges the tokens the API reports, and counts what earlier runs into the same output spent.
-The general-agent arm also charges every web search at an upper estimate (`SEARCH_USD`, `SEARCH_BLOCK_TOKENS`);
-confirm both on the OpenAI pricing page before a run. Since the US$5 is the arm's total, each live run's
-`--max-usd` is what that arm's earlier outputs left of it.
+network.
+
+**One spend ledger per arm.** A live run keeps the arm's append-only ledger (`--ledger`, default
+`docs/evaluation/baselines/<arm>.spend.jsonl`), whatever the output file. Before every paid call, once
+`--max-usd` (default US$5) and `--max-tokens` allow its worst case, a `reserve` line is written; when the call
+returns, a `charge` line with its tokens and tool fees. A call the API refused unbilled (status 400, 401, 403, 404,
+409, 422 or 429) is settled with a zero charge. A reserve that no charge follows (a timeout, a dropped connection,
+a killed process) counts at its worst case. Every run starts from the ledger's total, so a case cut by the cap and
+a crash are never lost, and the caps hold for the arm as a whole: the development trial runs with
+`--max-usd 1.0`, the held-out run with `--max-usd 5.0`, and what the trial spent is already counted. The owner's
+rule for the held-out run: run until the cap stops it, then stop and report on #396 before anything else (no higher
+cap, new output, changed configuration or retried failures).
+
+A case whose call failed is not asked again on a rerun unless `--retry-failed` is given, since it was paid for.
+
+The general-agent arm charges each web search US$0.01 (the `web_search` tool, US$10 per 1,000 calls, for every
+model) on top of the reported tokens; `SEARCH_BLOCK_TOKENS` is only the reserve for search content before a call.
+
+**Held-out runs publish aggregates only** (#408, group 3). The development trial's ledger, records, search trace
+and raw responses may be committed. For a held-out run the per-case records, search queries and sources and raw
+responses stay local; its ledger lines carry no episode id, and only the summary is published. `--allow-heldout`
+also refuses a checkout with uncommitted changes, and every report records `code_commit` and `worktree_dirty`.
 
 ## Commands
 
@@ -50,7 +67,13 @@ python -m app.evaluation.baseline_arms --arm rag \
   --episodes data/evaluation/dev/v3-meal-day-week/episodes --anchor-date 2026-09-28 \
   --output docs/evaluation/baselines/dev/rag.jsonl            # dry run; add --live --max-usd to pay
 python -m app.evaluation.baseline_arms --arm general-agent --fingerprint   # the freeze fingerprint
+python -m app.evaluation.baseline_arms --arm rag \
+  --episodes data/evaluation/dev/v2-multidish/episodes --anchor-date 2026-09-28 \
+  --output docs/evaluation/baselines/dev/rag-v2-multidish.jsonl  # strict and adjusted pass rates
 ```
+
+The `v3-meal-day-week` episodes carry no `meal_composition`, so their strict and adjusted pass rates are empty;
+the main pass rates are read on `v2-multidish`.
 
 Each output is JSONL, one record per case and repeat, with a `.report.json` beside it. Its records are what the
 mapping review reads ([baseline-mapping-review](baseline-mapping-review/README.md)).
@@ -60,4 +83,6 @@ mapping review reads ([baseline-mapping-review](baseline-mapping-review/README.m
 - The strong-rule arm does not read nutrition targets, and its cost order is per gram of the cheapest package,
   not whole packages; the scorer recomputes the real purchase.
 - The RAG candidates are retrieved by similarity only and are not filtered by the household's limits.
-- The web-search prices are upper estimates from public reports, not confirmed figures.
+- Whether `response.usage` includes the search content tokens is not stated on the pricing page; the trial
+  compares the ledger with the project's usage page.
+- Blocking GitHub's domains does not block mirrors, other forges or web archives.

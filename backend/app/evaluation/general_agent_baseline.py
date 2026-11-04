@@ -11,12 +11,17 @@ The loop (OpenAI Responses API): each user turn may take up to `MAX_STEPS` model
 the calculator gets the result and continues; the last allowed response has tools off and must answer. Web search
 runs inside a response, at most `MAX_SEARCHES` per response (`max_tool_calls`).
 
-Cost (ADR-0086; the arm's tool fees count against its US$5): before each response the budget must cover its
-worst case, the rendered input plus `MAX_SEARCHES` blocks of `SEARCH_BLOCK_TOKENS` search content plus
-`MAX_OUTPUT_TOKENS`, plus the search fees. After it, the reported tokens are charged and each search call made
-is charged `SEARCH_USD`. Both search figures are deliberate upper estimates from public reports (US$25 per 1,000
-calls for non-reasoning models; an 8,000-token content block per call for mini models); confirm them on the
-OpenAI pricing page before a run, and raise them if the page says more.
+Cost (ADR-0086; the arm's tool fees count against its US$5): before each response the arm's ledger
+(`baseline_arms.LedgerBudget`) must cover its worst case, the rendered input plus `MAX_SEARCHES` blocks of
+`SEARCH_BLOCK_TOKENS` search content plus `MAX_OUTPUT_TOKENS`, plus the search fees, and that worst case is
+reserved. After it, the reported tokens are charged with `SEARCH_USD` for each search call made. Prices, from the
+OpenAI pricing page (owner review on #427, 2026-11-04): the `web_search` tool costs US$10 per 1,000 calls for every
+model, and its search content tokens are billed at the model's rates. The fixed 8,000-token block per call applies
+only to gpt-4o-mini and gpt-4.1-mini, so `SEARCH_BLOCK_TOKENS` is only the reserve before a call; what is charged
+after it is the reported usage. The dev trial checks the ledger against the project's usage page.
+
+The public web holds this repository (and its evaluation cases), so web search leaves out GitHub's domains
+(`blocked_domains`). The search queries and sources, each response's status and usage go into the case's trace.
 """
 
 from __future__ import annotations
@@ -32,14 +37,16 @@ from pydantic import ValidationError
 
 from app.evaluation import baseline_arms
 from app.evaluation.conversation_adapter import Exchange, Responder, UnifiedOutput
-from app.evaluation.pure_llm_baseline import MAX_ATTEMPTS, Budget, BudgetExhausted, Usage, price_usd
+from app.evaluation.pure_llm_baseline import MAX_ATTEMPTS, Usage, price_usd
 from app.evaluation.rag_baseline import estimate_tokens, parse_output
 
 SYSTEM_ID = "general-agent"
 MAX_OUTPUT_TOKENS = 6000
-MAX_STEPS = 4
+# Owner review on #427: one response can search MAX_SEARCHES times, so three steps allow two rounds of tools
+# (searches, then the calculator) and one forced answer.
+MAX_STEPS = 3
 MAX_SEARCHES = 2
-SEARCH_USD = 0.025
+SEARCH_USD = 0.010
 SEARCH_BLOCK_TOKENS = 8000
 CONFIGURATION = """Your registered configuration: two tools. web_search searches the public web (recipes, typical
 supermarket prices in Singapore, nutrition). calculator evaluates an arithmetic expression. You have no recipe
@@ -59,7 +66,12 @@ CALCULATOR = {
     },
     "strict": True,
 }
-WEB_SEARCH = {"type": "web_search", "search_context_size": "medium"}
+WEB_SEARCH = {
+    "type": "web_search",
+    "search_context_size": "medium",
+    "filters": {"blocked_domains": ["github.com", "githubusercontent.com"]},
+}
+INCLUDE = ["web_search_call.action.sources"]
 JSON_REMINDER = "Your last answer was not valid JSON for the shared output schema. Answer with that JSON only."
 
 _OPERATORS = {
@@ -109,21 +121,24 @@ def worst_case_usd(model: str, input_tokens: int, searches: int = MAX_SEARCHES) 
 class Agent:
     """One case's loop over the Responses API; `client` is an OpenAI client or a test double."""
 
-    def __init__(self, client: Any, budget: Budget, sleep: Callable[[float], None] = time.sleep):
+    def __init__(
+        self,
+        client: Any,
+        budget: baseline_arms.LedgerBudget,
+        trace: list[dict] | None = None,
+        keep_raw: bool = False,
+        sleep: Callable[[float], None] = time.sleep,
+    ):
         self.client = client
         self.budget = budget
         self.sleep = sleep
-        self.tool_calls: list[dict] = []
+        self.tool_calls: list[dict] = trace if trace is not None else []
+        self.keep_raw = keep_raw
 
     def _create(self, items: list, tools_on: bool) -> Any:
         rendered = json.dumps(items, ensure_ascii=False, default=str)
-        tokens, usd = worst_case_usd(self.budget.model, len(rendered) // 4 + 1, MAX_SEARCHES if tools_on else 0)
-        # The search fee is charged on top of the tokens, so the token check alone would let it through.
-        if not baseline_arms.affordable(self.budget, tokens, MAX_OUTPUT_TOKENS) or (
-            self.budget.spent_usd + usd > self.budget.max_usd
-        ):
-            self.budget.stop_reason = self.budget.stop_reason or f"spend cap: next response could cost US${usd:.4f}"
-            raise BudgetExhausted(self.budget.stop_reason)
+        searches_allowed = MAX_SEARCHES if tools_on else 0
+        tokens = len(rendered) // 4 + 1 + searches_allowed * SEARCH_BLOCK_TOKENS
         arguments: dict[str, Any] = {
             "model": self.budget.model,
             "input": items,
@@ -131,14 +146,39 @@ class Agent:
             "text": {"format": {"type": "json_object"}},
         }
         if tools_on:
-            arguments |= {"tools": [WEB_SEARCH, CALCULATOR], "max_tool_calls": MAX_SEARCHES}
-        response = self.client.responses.create(**arguments)
+            arguments |= {"tools": [WEB_SEARCH, CALCULATOR], "max_tool_calls": MAX_SEARCHES, "include": INCLUDE}
+        response = self.budget.paid(
+            lambda: self.client.responses.create(**arguments),
+            tokens,
+            MAX_OUTPUT_TOKENS,
+            extra_usd=searches_allowed * SEARCH_USD,
+        )
         usage = getattr(response, "usage", None)
         reported = Usage(int(getattr(usage, "input_tokens", 0) or 0), int(getattr(usage, "output_tokens", 0) or 0))
-        self.budget.record(reported if reported.total_tokens else Usage(tokens, MAX_OUTPUT_TOKENS))
+        cached = int(getattr(getattr(usage, "input_tokens_details", None), "cached_tokens", 0) or 0)
         searches = sum(_payload(item).get("type") == "web_search_call" for item in response.output or [])
-        if searches:
-            self.budget.spent_usd += searches * SEARCH_USD
+        status = getattr(response, "status", None)
+        incomplete = getattr(response, "incomplete_details", None)
+        incomplete = _payload(incomplete) if incomplete is not None else None
+        self.budget.charge(
+            reported if reported.total_tokens else Usage(tokens, MAX_OUTPUT_TOKENS),
+            extra_usd=searches * SEARCH_USD,
+            call="response",
+            cached_tokens=cached,
+            searches=searches,
+        )
+        step = {
+            "tool": "response",
+            "status": status,
+            "incomplete_details": incomplete,
+            "input_tokens": reported.input_tokens,
+            "cached_tokens": cached,
+            "output_tokens": reported.output_tokens,
+            "searches": searches,
+        }
+        if self.keep_raw:
+            step["raw"] = [_payload(item) for item in response.output or []]
+        self.tool_calls.append(step)
         return response
 
     def answer(self, items: list) -> UnifiedOutput:
@@ -182,7 +222,7 @@ def input_items(instructions: str, own_history: tuple[Exchange, ...], message: s
 def make_responder(context: baseline_arms.ArmContext, *, sleep: Callable[[float], None] = time.sleep) -> Responder:
     if context.model is None or context.budget is None:
         raise RuntimeError("the general-agent arm needs a client and a budget (a live run)")
-    agent = Agent(context.model, context.budget, sleep)
+    agent = Agent(context.model, context.budget, context.trace, context.keep_raw, sleep)
 
     def respond(message: str, own_history: tuple[Exchange, ...], instructions: str) -> UnifiedOutput:
         return agent.answer(input_items(instructions, own_history, message))
@@ -231,7 +271,16 @@ def fingerprint() -> dict[str, str]:
     return {
         "system_id": SYSTEM_ID,
         "configuration_sha256": baseline_arms.sha256_text(
-            CONFIGURATION + json.dumps([WEB_SEARCH, CALCULATOR], sort_keys=True)
+            CONFIGURATION
+            + json.dumps(
+                {
+                    "tools": [WEB_SEARCH, CALCULATOR],
+                    "include": INCLUDE,
+                    "max_steps": MAX_STEPS,
+                    "max_searches": MAX_SEARCHES,
+                },
+                sort_keys=True,
+            )
         ),
         "runner_sha256": baseline_arms.source_sha256(__file__),
     }

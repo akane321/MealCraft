@@ -16,7 +16,8 @@ its evidence, scaled to the dish's servings, so the shared layers score what the
 the model invents must carry its own lines in `evidence` or it cannot be scored.
 
 Cost (ADR-0086): every chat call is checked against the arm's budget before it is made, at its worst case
-(rendered input plus `MAX_OUTPUT_TOKENS`), and priced from the tokens the API reports. The embedding call is
+(rendered input plus `MAX_OUTPUT_TOKENS`), reserved in the arm's ledger, and charged from the tokens the API
+reports (`baseline_arms.LedgerBudget`). The embedding call is
 charged at the chat model's input price, an overestimate, so the cap never fails open.
 """
 
@@ -42,8 +43,6 @@ from app.evaluation.pure_llm_baseline import (
     BACKOFF_SECONDS,
     MAX_ATTEMPTS,
     RETRIABLE,
-    Budget,
-    BudgetExhausted,
     Usage,
     price_usd,
 )
@@ -214,17 +213,17 @@ def _usage(raw: Any, input_estimate: int) -> Usage:
     return usage if usage.total_tokens else Usage(input_estimate, MAX_OUTPUT_TOKENS)
 
 
-def call_model(model: Any, messages: list[tuple[str, str]], budget: Budget, sleep) -> UnifiedOutput:
+def call_model(
+    model: Any, messages: list[tuple[str, str]], budget: baseline_arms.LedgerBudget, sleep, trace: list | None = None
+) -> UnifiedOutput:
     """One answer: a malformed one is asked again once, a transient API error retried with backoff."""
     estimate = estimate_tokens(messages)
     errors: list[str] = []
     for _ in range(MAX_ATTEMPTS):
         raw = None
         for api_try in range(API_ATTEMPTS):
-            if not baseline_arms.affordable(budget, estimate, MAX_OUTPUT_TOKENS):
-                raise BudgetExhausted(budget.stop_reason)
-            try:
-                raw = model.invoke(messages)
+            try:  # every attempt is reserved, and settled if it raises (ADR-0086, the arm's ledger)
+                raw = budget.paid(lambda: model.invoke(messages), estimate, MAX_OUTPUT_TOKENS)
                 break
             except RETRIABLE as error:
                 errors.append(f"{type(error).__name__}: {error}")
@@ -232,7 +231,10 @@ def call_model(model: Any, messages: list[tuple[str, str]], budget: Budget, slee
                     sleep(BACKOFF_SECONDS[min(api_try, len(BACKOFF_SECONDS) - 1)])
         if raw is None:
             raise RuntimeError("; ".join(errors) or "no answer")
-        budget.record(_usage(raw, estimate))
+        usage = _usage(raw, estimate)
+        budget.charge(usage, call="chat")
+        if trace is not None:
+            trace.append({"tool": "chat", "input_tokens": usage.input_tokens, "output_tokens": usage.output_tokens})
         try:
             return parse_output(raw.content)
         except (ValidationError, ValueError) as error:
@@ -255,12 +257,13 @@ def make_responder(context: baseline_arms.ArmContext, *, embed: Embed | None = N
         turns = [item.message for item in own_history if not item.automatic_confirmation] + [message]
         text = query_text(turns)
         tokens = len(text) // 4 + 1
-        if not baseline_arms.affordable(budget, tokens, 0):
-            raise BudgetExhausted(budget.stop_reason)
-        (query,) = embed([text])
-        budget.record(Usage(tokens, 0))
-        system = system_prompt(instructions, render_candidates(retrieve(query, data), data))
-        output = call_model(model, messages_for(system, own_history, message), budget, sleep)
+        (query,) = budget.paid(lambda: embed([text]), tokens, 0)
+        budget.charge(Usage(tokens, 0), call="embedding")
+        keys = retrieve(query, data)
+        if context.trace is not None:
+            context.trace.append({"tool": "retrieval", "query": text, "candidates": keys})
+        system = system_prompt(instructions, render_candidates(keys, data))
+        output = call_model(model, messages_for(system, own_history, message), budget, sleep, context.trace)
         return fill_evidence(output, data, names)
 
     return respond
