@@ -61,6 +61,7 @@ def test_the_product_planner_option_scores_the_planner_the_product_runs(monkeypa
     assert len(strategies) == 2 * len(planned) == 36
     assert set(strategies) == {"beam"}
     assert set(improvement_settings) == {True}
+    assert "configuration" not in report
     assert report["metrics"]["hard_constraint_violation_count"] == 0
 
 

@@ -388,7 +388,7 @@ def evaluate(
         "schema_version": "2.0",
         **({"protocol": protocol} if protocol != "v1" else {}),
         "system": system,
-        "configuration": {"local_improvement": local_improvement},
+        **({"configuration": {"local_improvement": False}} if not local_improvement else {}),
         "dataset": {
             "path": scenario_path.as_posix(),
             "sha256": _file_sha256(scenario_path),
