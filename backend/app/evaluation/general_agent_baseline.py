@@ -22,6 +22,10 @@ after it is the reported usage. The dev trial checks the ledger against the proj
 
 The public web holds this repository (and its evaluation cases), so web search leaves out GitHub's domains
 (`blocked_domains`). The search queries and sources, each response's status and usage go into the case's trace.
+
+No JSON mode: OpenAI refuses `text.format` `json_object` together with web search (dev trial on #396, 2026-11-05).
+The configuration asks for the JSON only; the outermost object of the answer is parsed, and a malformed answer is
+asked again once, as in the other arms.
 """
 
 from __future__ import annotations
@@ -113,6 +117,12 @@ def _payload(item: Any) -> dict:
     return item.model_dump(exclude_none=True) if hasattr(item, "model_dump") else dict(item)
 
 
+def json_text(text: str) -> str:
+    """The answer's outermost JSON object: without JSON mode the model may wrap it in prose or citations."""
+    start, end = text.find("{"), text.rfind("}")
+    return text[start : end + 1] if 0 <= start < end else text
+
+
 def worst_case_usd(model: str, input_tokens: int, searches: int = MAX_SEARCHES) -> tuple[int, float]:
     tokens = input_tokens + searches * SEARCH_BLOCK_TOKENS
     return tokens, price_usd(model, Usage(tokens, MAX_OUTPUT_TOKENS)) + searches * SEARCH_USD
@@ -143,7 +153,6 @@ class Agent:
             "model": self.budget.model,
             "input": items,
             "max_output_tokens": MAX_OUTPUT_TOKENS,
-            "text": {"format": {"type": "json_object"}},
         }
         if tools_on:
             arguments |= {"tools": [WEB_SEARCH, CALCULATOR], "max_tool_calls": MAX_SEARCHES, "include": INCLUDE}
@@ -200,7 +209,7 @@ class Agent:
                     items.append({"type": "function_call_output", "call_id": call["call_id"], "output": result})
                 continue
             try:
-                return parse_output(getattr(response, "output_text", "") or "")
+                return parse_output(json_text(getattr(response, "output_text", "") or ""))
             except (ValidationError, ValueError) as error:
                 errors.append(f"malformed: {error}")
                 attempts += 1
