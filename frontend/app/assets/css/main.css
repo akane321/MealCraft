@@ -388,3 +388,12 @@ h1, h2 {
   font-size: 20px;
 }
 
+
+/* Phone browsers: iOS Safari zooms the page when a focused field's text is under 16px. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}

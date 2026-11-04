@@ -5,6 +5,12 @@ const polling = { usePolling: pollForChanges, interval: 300 };
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-31",
+  // Phone browsers: safe-area insets need viewport-fit=cover; Chrome on Android resizes the page for the keyboard.
+  app: {
+    head: {
+      meta: [{ name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" }],
+    },
+  },
   css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css", "~/assets/css/product.css"],
   devtools: { enabled: true },
   // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
