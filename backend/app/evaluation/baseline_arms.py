@@ -87,9 +87,9 @@ class Arm:
 
 
 def arms() -> dict[str, Arm]:
-    from app.evaluation import rag_baseline, strong_rule_baseline
+    from app.evaluation import general_agent_baseline, rag_baseline, strong_rule_baseline
 
-    registry = [strong_rule_baseline.ARM, rag_baseline.ARM]
+    registry = [strong_rule_baseline.ARM, rag_baseline.ARM, general_agent_baseline.ARM]
     return {arm.system_id: arm for arm in registry}
 
 

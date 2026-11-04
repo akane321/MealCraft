@@ -266,3 +266,143 @@ def test_rag_dry_run_prints_a_worst_case_without_the_network(capsys, tmp_path):
     printed = json.loads(capsys.readouterr().out)
     assert printed["dry_run"] and printed["max_calls"] == 4 and 0 < printed["worst_case_usd"] < 1
     assert not (tmp_path / "rag.jsonl").exists()
+
+
+# The general-agent arm, with a fake Responses client: no network.
+
+
+class FakeResponses:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.requests = []
+
+    def create(self, **arguments):
+        self.requests.append(arguments)
+        return self.responses.pop(0)
+
+
+def agent_response(output, text="", input_tokens=3000, output_tokens=500):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        output=output,
+        output_text=text,
+        usage=SimpleNamespace(input_tokens=input_tokens, output_tokens=output_tokens),
+    )
+
+
+AGENT_PLAN = json.dumps(
+    {
+        "plan": {
+            "household_size": 2,
+            "meals": [
+                {
+                    "date": "2026-09-28",
+                    "meal_type": "dinner",
+                    "dishes": [
+                        {
+                            "name": "Chicken rice",
+                            "role": "main",
+                            "servings": 2,
+                            "evidence": {
+                                "ingredients": [{"name": "chicken breast", "quantity_g": 300}],
+                                "steps": ["Cook."],
+                                "cooking_time_minutes": 30,
+                            },
+                        }
+                    ],
+                }
+            ],
+        }
+    }
+)
+
+
+@pytest.mark.parametrize(
+    ("expression", "result"),
+    [("3*4.5 + 2", "15.5"), ("(1+2)/4", "0.75"), ("__import__('os')", None), ("2**1000", None), ("1/0", None)],
+)
+def test_the_calculator_does_arithmetic_only(expression, result):
+    from app.evaluation.general_agent_baseline import calculate
+
+    answer = calculate(expression)
+    assert answer == result if result is not None else answer.startswith("error")
+
+
+def test_the_general_agent_uses_its_tools_and_pays_for_searches():
+    from types import SimpleNamespace
+
+    from app.evaluation import general_agent_baseline as agent
+    from app.evaluation.pure_llm_baseline import Budget
+
+    responses = FakeResponses(
+        [
+            agent_response(
+                [
+                    SimpleNamespace(model_dump=lambda **_: {"type": "web_search_call", "action": {"query": "rice"}}),
+                    {
+                        "type": "function_call",
+                        "name": "calculator",
+                        "call_id": "c1",
+                        "arguments": '{"expression": "2*3"}',
+                    },
+                ]
+            ),
+            agent_response([{"type": "message"}], text=AGENT_PLAN),
+        ]
+    )
+    budget = Budget("gpt-5.4-mini", 5.0, 10_000_000)
+    context = baseline_arms.ArmContext(resources=resources(), budget=budget, model=SimpleNamespace(responses=responses))
+    output = agent.make_responder(context)("Two of us, dinner tonight.", (), "SHARED")
+    first, second = responses.requests
+    assert {tool["type"] for tool in first["tools"]} == {"web_search", "function"}
+    assert first["input"][0]["content"].startswith("SHARED\n\n")
+    assert second["input"][-1] == {"type": "function_call_output", "call_id": "c1", "output": "6"}
+    assert output.plan.meals[0].dishes[0].evidence["ingredients"][0]["quantity_g"] == 300
+    tokens_only = 2 * (3000 * 0.75 + 500 * 4.5) / 1_000_000
+    assert budget.spent_usd == pytest.approx(tokens_only + agent.SEARCH_USD)
+
+
+def test_the_general_agent_has_no_tools_on_its_last_step_and_stops_at_its_cap():
+    from types import SimpleNamespace
+
+    from app.evaluation import general_agent_baseline as agent
+    from app.evaluation.pure_llm_baseline import Budget, BudgetExhausted
+
+    call = {"type": "function_call", "name": "calculator", "call_id": "c", "arguments": '{"expression": "1"}'}
+    responses = FakeResponses(
+        [agent_response([call]) for _ in range(agent.MAX_STEPS - 1)] + [agent_response([], text=AGENT_PLAN)]
+    )
+    context = baseline_arms.ArmContext(
+        resources=resources(),
+        budget=Budget("gpt-5.4-mini", 5.0, 10_000_000),
+        model=SimpleNamespace(responses=responses),
+    )
+    agent.make_responder(context)("Plan dinner.", (), "SHARED")
+    assert "tools" not in responses.requests[-1] and len(responses.requests) == agent.MAX_STEPS
+
+    broke = baseline_arms.ArmContext(
+        resources=resources(), budget=Budget("gpt-5.4-mini", 0.01, 10_000_000), model=SimpleNamespace(responses=None)
+    )
+    with pytest.raises(BudgetExhausted):
+        agent.make_responder(broke)("Plan dinner.", (), "SHARED")
+
+
+def test_the_mapping_review_reads_arm_records_byte_for_byte(tmp_path):
+    from app.evaluation import baseline_mapping_review as review
+
+    episodes = tmp_path / "episodes"
+    episodes.mkdir()
+    (episodes / "mdw-dev-013.json").write_text(json.dumps(dev("mdw-dev-013")), encoding="utf-8")
+    output = tmp_path / "strong-rule.jsonl"
+    argv = ["--arm", "strong-rule", "--episodes", str(episodes), "--anchor-date", "2026-09-28", "--output", str(output)]
+    assert baseline_arms.main(argv, resource_loader=resources) == 0
+    payload = review.load_population([output, output])
+    assert payload["schema_version"] == review.ARM_RECORDS_SCHEMA and len(payload["records"]) == 2
+    first = review.generate_review_rows(review.load_population([output]), names=resources().names)
+    again = review.generate_review_rows(review.load_population([output]), names=resources().names)
+    assert first == again and first
+    assert {row["system_id"] for row in first} == {"strong-rule"}
+    assert all(row["personally_reviewed"] is None and row["decision"] is None for row in first)
+    with pytest.raises(ValueError):
+        review.load_population([output, tmp_path / "comparison.json"])
