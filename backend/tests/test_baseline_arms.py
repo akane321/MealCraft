@@ -1,6 +1,7 @@
 """The conversation-protocol baseline runner and the strong-rule arm, offline only (no model, no network)."""
 
 import json
+from dataclasses import replace
 from datetime import date, datetime
 from functools import cache
 
@@ -514,3 +515,29 @@ def test_the_general_agents_charge_carries_its_search_fees(tmp_path):
     tokens_only = (3000 * 0.75 + 500 * 4.5) / 1_000_000
     assert charge["searches"] == 2 and charge["episode_id"] == "e1"
     assert charge["usd"] == pytest.approx(tokens_only + 2 * agent.SEARCH_USD)
+
+
+def test_a_dry_run_counts_what_the_arms_ledger_already_spent(tmp_path, capsys):
+    episodes = tmp_path / "episodes"
+    episodes.mkdir()
+    (episodes / "mdw-dev-001.json").write_text(json.dumps(dev("mdw-dev-001"), ensure_ascii=False), encoding="utf-8")
+    ledger = tmp_path / "fake.spend.jsonl"
+    ledger.write_text(json.dumps({"event": "charge", "usd": 0.80, "total_tokens": 0}) + "\n", encoding="utf-8")
+    arm = replace(fake_paid_arm(1, 0.30), estimate=lambda turns, instructions, model: (1, 10, 0.30))
+    argv = [
+        "--arm", "fake-paid", "--episodes", str(episodes), "--anchor-date", "2026-09-28",
+        "--output", str(tmp_path / "out.jsonl"), "--ledger", str(ledger), "--max-usd", "1.0",
+    ]  # fmt: skip
+    assert baseline_arms.main(argv, registry=lambda: {"fake-paid": arm}, resource_loader=resources) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["ledger_usd"] == pytest.approx(0.80) and report["fits_cap"] is False
+
+
+def test_a_held_out_ledger_line_carries_no_episode_id(tmp_path):
+    ledger = tmp_path / "arm.spend.jsonl"
+    budget = baseline_arms.LedgerBudget(
+        "gpt-5.4-mini", 1.0, 10_000_000, ledger=ledger, episode_id="e1", record_episodes=False
+    )
+    budget.paid(lambda: None, 0, 0)
+    budget.charge(baseline_arms.Usage(10, 10), call="fake")
+    assert all("episode_id" not in json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines())

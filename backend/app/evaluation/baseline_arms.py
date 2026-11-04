@@ -377,6 +377,7 @@ def main(
         instructions = ConversationHarness(config).instructions
         estimates = [arm.estimate(episode_turns(episode), instructions, args.model) for episode, _ in plan]  # type: ignore[misc]
         worst = sum(usd for _, _, usd in estimates)
+        spent_before = ledger_totals(args.ledger)[0]  # the arm's US$5 is shared by all its runs (ADR-0115)
         print(
             json.dumps(
                 {
@@ -388,7 +389,8 @@ def main(
                     "estimated_input_tokens": sum(tokens for _, tokens, _ in estimates),
                     "worst_case_usd": round(worst, 4),
                     "max_usd": args.max_usd,
-                    "fits_cap": worst <= args.max_usd,
+                    "ledger_usd": round(spent_before, 4),
+                    "fits_cap": spent_before + worst <= args.max_usd,
                 },
                 indent=2,
             )
@@ -412,7 +414,7 @@ def main(
         if row["status"] == "answered" or (row["status"] == "call_failed" and not args.retry_failed)
     }
     commit, dirty = code_state()
-    if args.allow_heldout and dirty is not False:
+    if args.allow_heldout and (dirty is not False or commit is None):
         parser.error("a held-out run needs a clean checkout at a recorded commit")
     budget = None
     if arm.paid:

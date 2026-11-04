@@ -31,8 +31,8 @@ scoring code is changed here.
 
 ## Cost (ADR-0086)
 
-A paid arm makes no call without `--live`. The default is a dry run that prints each case's worst case with no
-network.
+A paid arm makes no call without `--live`. The default is a dry run that prints the worst case with no
+network, with what the arm's ledger already holds (`ledger_usd`); `fits_cap` is true only when both fit `--max-usd`.
 
 **One spend ledger per arm.** A live run keeps the arm's append-only ledger (`--ledger`, default
 `docs/evaluation/baselines/<arm>.spend.jsonl`), whatever the output file. Before every paid call, once
@@ -93,3 +93,5 @@ mapping review reads ([baseline-mapping-review](baseline-mapping-review/README.m
 - Whether `response.usage` includes the search content tokens is not stated on the pricing page; the trial
   compares the ledger with the project's usage page.
 - Blocking GitHub's domains does not block mirrors, other forges or web archives.
+- The pure-LLM arm's own runner (`pure_llm_baseline.py`) is not on the ledger: it still counts the spend of earlier
+  runs into the same output (ADR-0086), so a new output of that arm takes a `--max-usd` set by hand to what is left.
