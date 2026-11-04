@@ -1086,7 +1086,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .chat.is-empty .chat-head { border-color: transparent; background: transparent; }
 .chat-head h1 { min-width: 0; max-width: 60%; margin: 0; overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .date { flex: none; color: #71717a; font-size: 12.5px; }
-.thread { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px 8px; }
+.thread { flex: 1; min-height: 0; overflow: auto; overscroll-behavior-y: contain; padding: 24px 28px 8px; }
 .col { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .chat.is-empty .col { max-width: 760px; }
 .me { align-self: flex-end; max-width: 72%; padding: 10px 14px; border-radius: 18px 18px 6px 18px; background: #f4f4f5; color: #18181b; font-size: 14.5px; line-height: 22px; white-space: pre-line; }

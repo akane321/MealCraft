@@ -83,14 +83,14 @@ async function submit() {
             <label for="sign-in-username">Username</label>
             <button v-if="mode === 'login'" type="button" class="switch" @click="signInWith = 'email'">Use email instead</button>
           </span>
-          <input id="sign-in-username" v-model="username" autocomplete="username" maxlength="32" required>
+          <input id="sign-in-username" v-model="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required>
         </div>
         <div v-if="mode === 'register' || signInWith === 'email'" class="field">
           <span class="field-head">
             <label for="sign-in-email">Email</label>
             <button v-if="mode === 'login'" type="button" class="switch" @click="signInWith = 'username'">Use username instead</button>
           </span>
-          <input id="sign-in-email" v-model="email" :autocomplete="mode === 'login' ? 'username' : 'email'" type="email" maxlength="320" required>
+          <input id="sign-in-email" v-model="email" :autocomplete="mode === 'login' ? 'username' : 'email'" type="email" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="320" required>
         </div>
         <label>
           Password
