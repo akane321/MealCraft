@@ -1,0 +1,464 @@
+{
+ "sampled": 100,
+ "checked": 75,
+ "correct": 43,
+ "rate": 0.573,
+ "wilson95": [
+  0.461,
+  0.679
+ ],
+ "correct_over_sampled": {
+  "correct": 43,
+  "sampled": 100,
+  "rate": 0.43
+ },
+ "target": 0.95,
+ "unsure": [
+  {
+   "id": "RCP2_0CC0B79D811C",
+   "title": "Cuban Mojo Marinated Pork",
+   "note": "AI辅助真人复核（真人已确认）：猪肩肉1587.6 g分4份偏大；腌料弃去且部位、可食率不明，505.5 kcal无法由表内信息确认。"
+  },
+  {
+   "id": "RCP2_1BC6E3A7291D",
+   "title": "Dad'S Micro Ribs",
+   "note": "AI辅助真人复核（真人已确认）：微波步骤的at 50缺功率单位，可推测为50%但未写明；带骨排骨映射成普通pork全重，蛋白75.4 g/份需核对可食率。"
+  },
+  {
+   "id": "RCP2_26C8360C2DBA",
+   "title": "Sour Cream Enchiladas",
+   "note": "AI辅助真人复核（真人已确认）：1包taco seasoning按120 g、每张玉米饼按45 g估算，包装规格未给，725.4 kcal/份待核。"
+  },
+  {
+   "id": "RCP2_34BCFA20EF26",
+   "title": "Banana Mango Lumpia",
+   "note": "AI辅助真人复核（真人已确认）：lumpia skins被映射为wonton wrapper，步骤直接生卷食用；须确认是可直接食用的皮还是需加热的面皮，且每张7 g是否适用。"
+  },
+  {
+   "id": "RCP2_4871D1095FE6",
+   "title": "Milwaukee Moussaka",
+   "note": "AI辅助真人复核（真人已确认）：28 oz番茄罐头被换算成360 g，未说明沥干后实重；份量和营养需核对罐头规格。"
+  },
+  {
+   "id": "RCP2_59F30F44669F",
+   "title": "Bread Machine Spinach And Feta Bread",
+   "note": "AI辅助真人复核（真人已确认）：有面包机加料顺序，但未指定面包机程序、面包大小或烘烤周期，步骤仅以Walk away结束，依设备无法确认。"
+  },
+  {
+   "id": "RCP2_6DE7B474EFEC",
+   "title": "Rice Almondine",
+   "note": "AI辅助真人复核（真人已确认）：高汤原文1/2 to 2杯范围过宽，取中间295.8 g；仅1/2杯米分6份为很小配菜，需确认高汤和米的原文数量。"
+  },
+  {
+   "id": "RCP2_6F19AE0ABC1E",
+   "title": "Asian Marinade",
+   "note": "AI辅助真人复核（真人已确认）：Small Orange, Zested被映射成整只orange 140 g；实际用橙皮还是全橙不明，33.5 kcal/份待核。"
+  },
+  {
+   "id": "RCP2_7E556A277B8B",
+   "title": "Bistec De Palomilla (Cuban Fried Steak)",
+   "note": "AI辅助真人复核（真人已确认）：2 limes, juice of被记为整果134 g，非净青柠汁；1 lb牛排分6份较小，现有营养需核汁量及腌料留存。"
+  },
+  {
+   "id": "RCP2_87C706CF543B",
+   "title": "Stuffed Mushrooms",
+   "note": "AI辅助真人复核（真人已确认）：步骤6把剩余margarine写成butter；另16个large mushrooms约1 lb却只换算288 g，原文与标准重量冲突。"
+  },
+  {
+   "id": "RCP2_908103955482",
+   "title": "Mayonnaise Cake",
+   "note": "AI辅助真人复核（真人已确认）：仅写Mix as given、Bake at 350及牙签测试，缺烤模规格和预计时间，基本可行但步骤不足以明确复现。"
+  },
+  {
+   "id": "RCP2_98370EF56FB9",
+   "title": "Spicy Cornish Game Hens – Pressure Cooker",
+   "note": "AI辅助真人复核（真人已确认）：1只Cornish hen估270 g且带骨/可食部分未说明，分2份可行但营养重量依据不足。"
+  },
+  {
+   "id": "RCP2_A03F760382F1",
+   "title": "Mangoade",
+   "note": "AI辅助真人复核（真人已确认）：糖已在水中溶成糖浆，后文又写Add sugar, syrup，易被理解为重复加糖，应明确只加入已制糖浆。"
+  },
+  {
+   "id": "RCP2_B6876037EBF8",
+   "title": "Greek Carrots",
+   "note": "AI辅助真人复核（真人已确认）：胡萝卜纵切四瓣，仅煮5分钟且未写煮至嫩，能否达到目标口感取决于粗细，需补完成判据。"
+  },
+  {
+   "id": "RCP2_B80B437F40A0",
+   "title": "Mexican Chicken Soup",
+   "note": "AI辅助真人复核（真人已确认）：两只各3.5 lb整鸡映射1932 g，且步骤弃皮骨、胡萝卜和洋葱；现有营养是否扣除弃去部分无法从表内确认。"
+  },
+  {
+   "id": "RCP2_BAECF89FDA29",
+   "title": "Sausage Strata(Breakfast Dish)",
+   "note": "AI辅助真人复核（真人已确认）：10×4英寸烤皿深度不明，要容纳面包、香肠和蛋奶液可能偏小，需核烤皿尺寸；6份量可接受。"
+  },
+  {
+   "id": "RCP2_C455C6ADB1FB",
+   "title": "Hamburger Stew",
+   "note": "AI辅助真人复核（真人已确认）：oregano, cumin, sage and pepper混合香料整行仅映射为oregano 1.8 g，四种调味料用量分配不明。"
+  },
+  {
+   "id": "RCP2_D217ADB4329D",
+   "title": "Thai Beef Noodles Soup, \"Kuaitiao Neua\"",
+   "note": "AI辅助真人复核（真人已确认）：3个Thai red chili被按普通辣椒计135 g，可能显著高估；米粉杯量90 g干湿未明，需核标准重量。"
+  },
+  {
+   "id": "RCP2_D2C1CAEA85AA",
+   "title": "Oregano Queso Fresco (Mexican-Style Fresh Oregano Cheese)",
+   "note": "AI辅助真人复核（真人已确认）：制鲜奶酪要弃去乳清，不能把全部牛奶营养直接分16份；原文又称每汤匙营养，成品出率和份定义待核。"
+  },
+  {
+   "id": "RCP2_DFDBC8E7A2D9",
+   "title": "Chilean Tossed Green Beans And Tomatoes",
+   "note": "AI辅助真人复核（真人已确认）：冷冻豆只写解冻沥干后冷拌，未说明已熟或按包装要求煮熟，需确认预处理状态。"
+  },
+  {
+   "id": "RCP2_E12A405D1ADA",
+   "title": "The Sarge'S Goetta - German Breakfast Treat",
+   "note": "AI辅助真人复核（真人已确认）：5杯steel cut oats仅405 g，沿用普通燕麦杯重可能不适用；需核钢切燕麦杯重及16份的份量。"
+  },
+  {
+   "id": "RCP2_EF70FCB56789",
+   "title": "Grilled Chicken Skewers With Wasabi Mayo",
+   "note": "AI辅助真人复核（真人已确认）：步骤1写cut in half lengthwise into 3 strips，二等分与三条表述矛盾，需明确每块切几条；主体配比合理。"
+  },
+  {
+   "id": "RCP2_F3C0DC8B5A8F",
+   "title": "Grilled Greek Lemon Oregano Chicken Wings",
+   "note": "AI辅助真人复核（真人已确认）：2 lemons, juice only按整柠檬200 g记录，鸡翅按带骨全重计；每份热量和可食量依据待核。"
+  },
+  {
+   "id": "RCP2_FE114C6DED23",
+   "title": "Thai Vegetable Salad",
+   "note": "AI辅助真人复核（真人已确认）：1–3个Thai red chili按90 g估算，疑采用普通辣椒单重；需核椒种和净汁青柠重量。"
+  },
+  {
+   "id": "RCP2_FEAC0F29AD17",
+   "title": "Spritskransar (Spritz Rings, Swedish)",
+   "note": "AI辅助真人复核（真人已确认）：面团仅做quarter大小小圈却分24份，未给总饼干数及每份个数，134.3 kcal对应的份定义待核。"
+  }
+ ],
+ "unchecked": 0,
+ "refill": [],
+ "errors_by_check": {
+  "菜谱完整": {
+   "recipes": 19,
+   "share_of_errors": 0.514
+  },
+  "步骤合理": {
+   "recipes": 7,
+   "share_of_errors": 0.189
+  },
+  "份量正常": {
+   "recipes": 11,
+   "share_of_errors": 0.297
+  }
+ },
+ "by_course": {
+  "baked_good": {
+   "checked": 4,
+   "correct": 2
+  },
+  "breakfast": {
+   "checked": 5,
+   "correct": 4
+  },
+  "dessert": {
+   "checked": 8,
+   "correct": 4
+  },
+  "drink": {
+   "checked": 3,
+   "correct": 3
+  },
+  "main": {
+   "checked": 26,
+   "correct": 7
+  },
+  "salad": {
+   "checked": 6,
+   "correct": 6
+  },
+  "sauce_condiment": {
+   "checked": 5,
+   "correct": 3
+  },
+  "side": {
+   "checked": 11,
+   "correct": 9
+  },
+  "snack_appetizer": {
+   "checked": 5,
+   "correct": 4
+  },
+  "soup": {
+   "checked": 2,
+   "correct": 1
+  }
+ },
+ "problems": [
+  {
+   "id": "RCP2_0A2EC78C74A3",
+   "title": "Scallops Provencal",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤5要求配米饭，食材清单未列米饭；扇贝及蔬菜分5份可接受。"
+  },
+  {
+   "id": "RCP2_0ECDF6A8FFE8",
+   "title": "Asian Ginger Scallop Stir-Fry",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤10要求配蒸白米饭，清单未列；另绍兴酒被标准化成sake，建议核对映射。"
+  },
+  {
+   "id": "RCP2_175BE2BD8D3F",
+   "title": "Alfredo Pasta",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：每份1900.2 kcal、脂肪138 g，340 g干面配476 g奶油和113.5 g黄油仅分2份，份量明显过大。"
+  },
+  {
+   "id": "RCP2_2646004D2E00",
+   "title": "Chili Glazed Shrimp Skewers",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤3需给烤架涂油，步骤6用青柠瓣，均未单列；现有181.5 kcal未含这些新增用料。"
+  },
+  {
+   "id": "RCP2_2A86FA8BECC3",
+   "title": "Ecuadorean Ceviche",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤4要求撒popcorn，清单未列；热量未包含爆米花用量。"
+  },
+  {
+   "id": "RCP2_40ED7A0044A2",
+   "title": "Marinated Beef Kabobs",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：12颗cherry tomatoes被换算成1476 g，相当于每颗普通番茄123 g，明显不符，份量及营养需重算。"
+  },
+  {
+   "id": "RCP2_4119D3A69BE1",
+   "title": "Vietnamese Chicken Stock",
+   "failed": [
+    "菜谱完整",
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤另加1 gallon水，清单未列；最后过滤弃去鸡肉和蔬菜，却报每份402.6 kcal及蛋白34.1 g，不能按全部固形物计成品高汤。"
+  },
+  {
+   "id": "RCP2_4163825B05AE",
+   "title": "Microwave Cabbage",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1称除奶酪外全部加入，已包含盐；步骤3又加盐，存在重复投料歧义。"
+  },
+  {
+   "id": "RCP2_43E93A76EF16",
+   "title": "Ramen Breakfast",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1用黄油炒蛋，清单缺黄油及用量，629.8 kcal/份不能确认完整。"
+  },
+  {
+   "id": "RCP2_4771370F9585",
+   "title": "Lime Curry Chicken",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：杏仁1 lb仅作装饰却达453.6 g，当前853.4 kcal/份与步骤注明185 cal/份差异明显，须核原始杏仁数量。"
+  },
+  {
+   "id": "RCP2_48E1C2AFE1D9",
+   "title": "Chicken Breasts With Salad And Peanut Sauce",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1加入1/2–1/3杯水及调味盐胡椒，清单未列；主体鸡肉和蔬菜分4份合理。"
+  },
+  {
+   "id": "RCP2_50D96DE72631",
+   "title": "Macaroni Paprikash",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤4另加water，清单无对应水量；buttered bread crumbs的额外黄油未单列，820.7 kcal/份可能不完整。"
+  },
+  {
+   "id": "RCP2_6208AAFA0881",
+   "title": "Mom'S Chinese Walnut Chicken",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1及12要求配米饭，清单未列米饭；鸡肉907.2 g分4份可接受。"
+  },
+  {
+   "id": "RCP2_6A87A81B603A",
+   "title": "Italian Meat Balls",
+   "failed": [
+    "菜谱完整",
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤3要求肉丸在spaghetti sauce内煮约1小时，清单缺该酱及用量；关键煮制介质缺失，营养亦不完整。"
+  },
+  {
+   "id": "RCP2_6D2B5CA68962",
+   "title": "Quiche Crust",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：清单有1个蛋白，但所有步骤均未使用或说明用途；需补刷蛋白步骤或删除该食材。"
+  },
+  {
+   "id": "RCP2_6D7C0D8E1A36",
+   "title": "Rhubarb Crunch",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：清单列1/2 tsp肉桂，步骤未说明何时加入；其余脆顶和烘烤流程成立。"
+  },
+  {
+   "id": "RCP2_7078F6DB9745",
+   "title": "Adobo-Marinated Pork Tenderloin With Grilled-Pineapple Salsa",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤3要求配Grilled-Pineapple Salsa，但清单无该酱或其配方，成品全套营养无法确认；未据标题臆补菠萝数量。"
+  },
+  {
+   "id": "RCP2_8993605D4EA0",
+   "title": "Spiced Vegetable Stew",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：8颗baby potatoes被按普通土豆计1704 g；熟米饭映射为rice 370 g且coconut cream映射为cream of coconut，842.9 kcal/份需重算。"
+  },
+  {
+   "id": "RCP2_92753FA3DA62",
+   "title": "Pez' Chimichurri Sauce",
+   "failed": [
+    "菜谱完整",
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1用serrano，清单却列jalapeno，未声明替换；应统一椒种后再确认步骤。"
+  },
+  {
+   "id": "RCP2_92CC37285970",
+   "title": "Apple And Cheddar Cheese Dessert Lasagna",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：烘烤未给时长或完成判据；8份甜点每份1210.2 kcal，糖、黄油和奶酪用量大，份量不正常。"
+  },
+  {
+   "id": "RCP2_975A3E03AFCA",
+   "title": "Corned Beef Hash British Style",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤2用milk、butter、salt调土豆泥，清单未列；未给用量，成品及540.4 kcal/份无法完整确认。"
+  },
+  {
+   "id": "RCP2_987CECBC025D",
+   "title": "Kate'S Easy Peanut Satay Sauce",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：花生酱451.5 g加糖浆和椰奶仅分4份，作为蘸酱每份840.7 kcal明显偏大，应核份数。"
+  },
+  {
+   "id": "RCP2_991FC5931E8E",
+   "title": "Twice-Cooked Lemon Chicken",
+   "failed": [
+    "菜谱完整",
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤10需防粘喷油但清单缺；6片lemon slices被换算成600 g整柠檬，明显误计成6个，份量及营养需重算。"
+  },
+  {
+   "id": "RCP2_9FF41CA3C004",
+   "title": "Feta Cheese Spread",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤2配crackers，清单未列；奶酪与蛋黄酱总量已远超说明的约1.5杯成品，12份与成品体积需核。"
+  },
+  {
+   "id": "RCP2_B608F609B53C",
+   "title": "French Onion Casserole",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：3/4杯beef bouillon是液体高汤语境，却映射成bouillon cube 112.5 g，不能按浓缩块重量计营养与调味量。"
+  },
+  {
+   "id": "RCP2_B719A66E8B47",
+   "title": "Lemony Chicken Stir-Fry",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：明确steamed rice却以rice 555 g计入，疑按干米营养计熟饭，857.3 kcal/份需按熟米饭条目核算。"
+  },
+  {
+   "id": "RCP2_BB417882B858",
+   "title": "Stir-Fry Pork With Bell Peppers",
+   "failed": [
+    "份量正常"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：首组1.5 tbsp oyster sauce未在腌制步骤使用，后文又列2 tbsp，是否全部在步骤5加入需澄清；cooked rice按普通rice计营养，需核熟米口径。"
+  },
+  {
+   "id": "RCP2_D3FEA159777B",
+   "title": "Czech Listy Celestial Crust",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤需hot fat油炸及confectioners sugar撒面，清单均缺；未说明面片厚度及形状，199.9 kcal未计炸油和糖粉。"
+  },
+  {
+   "id": "RCP2_D6623BB063A7",
+   "title": "Brazilian Pudding",
+   "failed": [
+    "菜谱完整",
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤1另加milk但清单无奶量；焦糖锅内直接加蛋、奶且未说明混合与隔水蒸的衔接，需补步骤，营养不完整。"
+  },
+  {
+   "id": "RCP2_EE8EEBDDD115",
+   "title": "Honey-Soy Grilled Chicken",
+   "failed": [
+    "步骤合理"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：清单有1 tbsp olive oil，步骤从腌制到刷蜂蜜均未使用，需补用油位置或删除该项。"
+  },
+  {
+   "id": "RCP2_F72D2F9BE34F",
+   "title": "Chicken Curry Bombay",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤6以salt and pepper调味，清单未列；鸡肉和蔬菜罐头分4份基本可接受。"
+  },
+  {
+   "id": "RCP2_FEA467B71587",
+   "title": "English Scones For Tea Time",
+   "failed": [
+    "菜谱完整"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：步骤4留少量buttermilk刷面，步骤6却写milk，清单无独立牛奶；需明确是否同一份酪乳。"
+  }
+ ]
+}

@@ -79,9 +79,14 @@ class WeightedScoreTest(unittest.TestCase):
         self.assertIsNone(combo["strata"][2]["wilson95"])
 
     def test_each_review_makes_its_waves_strata(self) -> None:
-        manual = manual_check.by_wave({1: {"correct": 9, "checked": 10}, 2: {"correct": 3, "checked": 6}}, {1: 3, 2: 1})
+        manual = manual_check.by_wave(
+            {1: {"correct": 9, "checked": 10, "sampled": 12}, 2: {"correct": 3, "checked": 6, "sampled": 8}},
+            {1: 3, 2: 1},
+        )
         self.assertEqual([part["name"] for part in manual["strata"]], ["wave 1", "wave 2"])
         self.assertEqual(manual["weighted"], 0.8)  # (0.9 * 3 + 0.5 * 1) / 4
+        self.assertEqual(manual["correct_over_sampled"]["rate"], 0.6)  # 12 correct of 20 sampled
+        self.assertNotIn("wilson95", manual["correct_over_sampled"])
         strata = {
             1: {"strata": {"milk": {"recipes_in_release": 30, "agree": 2, "checked": 2}}},
             2: {

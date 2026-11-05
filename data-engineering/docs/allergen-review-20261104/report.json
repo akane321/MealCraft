@@ -1,0 +1,486 @@
+{
+ "sampled": 30,
+ "checked": 28,
+ "agree": 27,
+ "unchecked": 0,
+ "cannot_tell": 2,
+ "refill": [],
+ "agreement_unweighted": 0.964,
+ "wilson95_unweighted": [
+  0.823,
+  0.994
+ ],
+ "agreement_weighted": 0.975,
+ "weighted_cover": {
+  "recipes": 5263,
+  "of": 5263
+ },
+ "strata": {
+  "crustaceans": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 241,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "eggs": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 738,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "fish": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 342,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "gluten": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 275,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "gluten_candidate": {
+   "checked": 3,
+   "agree": 2,
+   "recipes_in_release": 400,
+   "agreement": 0.667,
+   "wilson95": [
+    0.208,
+    0.939
+   ]
+  },
+  "milk": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 948,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "molluscs": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 168,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "none": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 806,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "peanuts": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 196,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "sesame": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 232,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "soy": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 308,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "sulfites": {
+   "checked": 1,
+   "agree": 1,
+   "recipes_in_release": 309,
+   "agreement": 1.0,
+   "wilson95": [
+    0.207,
+    1.0
+   ]
+  },
+  "tree_nuts": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 300,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  }
+ },
+ "missed_by_catalog": {
+  "gluten": 1
+ },
+ "extra_in_catalog": {
+  "gluten_candidate": 1
+ },
+ "corrections": [
+  {
+   "id": "RCP2_01272D466272",
+   "title": "Easy Cheeseburger Tacos",
+   "catalog": [
+    "gluten_candidate",
+    "milk"
+   ],
+   "confirmed": [
+    "gluten",
+    "milk"
+   ],
+   "missed": [
+    "gluten"
+   ],
+   "extra": [
+    "gluten_candidate"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：原文明示flour tortillas，麸质应确认为gluten；奶酪和酸奶油提供milk，不仅是gluten_candidate。"
+  }
+ ],
+ "either_or_disagreements": [],
+ "ai_candidates": {
+  "agree": 0,
+  "checked": 0,
+  "wilson95": null,
+  "differs": []
+ },
+ "waves": {
+  "strata": [
+   {
+    "name": "wave 1 `crustaceans`",
+    "population": 182,
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "wilson95": [
+     0.438,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `eggs`",
+    "population": 726,
+    "k": 5,
+    "n": 5,
+    "rate": 1.0,
+    "wilson95": [
+     0.566,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `fish`",
+    "population": 230,
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "wilson95": [
+     0.51,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `gluten`",
+    "population": 381,
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "wilson95": [
+     0.51,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `gluten_candidate`",
+    "population": 241,
+    "k": 2,
+    "n": 3,
+    "rate": 0.667,
+    "wilson95": [
+     0.208,
+     0.939
+    ]
+   },
+   {
+    "name": "wave 1 `milk`",
+    "population": 435,
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "wilson95": [
+     0.51,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `molluscs`",
+    "population": 96,
+    "k": 1,
+    "n": 2,
+    "rate": 0.5,
+    "wilson95": [
+     0.095,
+     0.905
+    ]
+   },
+   {
+    "name": "wave 1 `none`",
+    "population": 600,
+    "k": 5,
+    "n": 5,
+    "rate": 1.0,
+    "wilson95": [
+     0.566,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `peanuts`",
+    "population": 200,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `sesame`",
+    "population": 180,
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "wilson95": [
+     0.438,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `soy`",
+    "population": 225,
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "wilson95": [
+     0.438,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `sulfites`",
+    "population": 181,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 1 `tree_nuts`",
+    "population": 250,
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
+    "wilson95": [
+     0.301,
+     0.954
+    ]
+   },
+   {
+    "name": "wave 2 `crustaceans`",
+    "population": 241,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `eggs`",
+    "population": 738,
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "wilson95": [
+     0.438,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `fish`",
+    "population": 342,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `gluten`",
+    "population": 275,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `gluten_candidate`",
+    "population": 400,
+    "k": 2,
+    "n": 3,
+    "rate": 0.667,
+    "wilson95": [
+     0.208,
+     0.939
+    ]
+   },
+   {
+    "name": "wave 2 `milk`",
+    "population": 948,
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "wilson95": [
+     0.438,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `molluscs`",
+    "population": 168,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `none`",
+    "population": 806,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `peanuts`",
+    "population": 196,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `sesame`",
+    "population": 232,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `soy`",
+    "population": 308,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `sulfites`",
+    "population": 309,
+    "k": 1,
+    "n": 1,
+    "rate": 1.0,
+    "wilson95": [
+     0.207,
+     1.0
+    ]
+   },
+   {
+    "name": "wave 2 `tree_nuts`",
+    "population": 300,
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "wilson95": [
+     0.342,
+     1.0
+    ]
+   }
+  ],
+  "weighted": 0.965,
+  "cover": {
+   "recipes": 9190,
+   "of": 9190
+  },
+  "agree": 68,
+  "checked": 72,
+  "unweighted": 0.944,
+  "wilson95_unweighted": [
+   0.866,
+   0.978
+  ]
+ }
+}
