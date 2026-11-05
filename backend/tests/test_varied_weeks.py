@@ -534,7 +534,8 @@ def test_a_heavy_week_varies_every_start_whatever_the_clock_says(product, monkey
     plans.generate(three_meals(150.0))
     assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
-    plans.generate(three_meals(100.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))
+    # S$90: with the hand-recorded prices (2026-11-06) a S$100 week is already filled with no dish twice.
+    plans.generate(three_meals(90.0, {"dinner": DINNER_WITH_SOUP}, **WALKTHROUGH))
     assert passes[-1]["tried"] == passes[-1]["starts"] > 0
 
     request = three_meals(150.0)

@@ -17,7 +17,7 @@ def option(name, display, allergens=()):
 
 BUTTER_OR_MARGARINE = [option("butter", "butter", ["dairy"]), option("margarine", "margarine", ["dairy"])]
 BUTTER_OR_OIL = [option("butter", "butter", ["dairy"]), option("vegetable_oil", "vegetable oil")]
-BEEF_OR_TURKEY = [option("ground_beef", "ground beef"), option("turkey", "turkey")]
+BEEF_OR_RABBIT = [option("ground_beef", "ground beef"), option("rabbit", "rabbit")]
 
 
 def household(**changes):
@@ -40,8 +40,8 @@ def test_an_allergen_rules_out_every_option_that_carries_it():
 
 
 def test_an_option_the_planner_cannot_buy_is_never_chosen():
-    # Turkey has no FairPrice mapping, so a no-beef household cannot be given it.
-    assert alternatives.choose(BEEF_OR_TURKEY, household(excluded_ingredients=["ground_beef"])) is None
+    # Rabbit is priced at no store, so a no-beef household cannot be given it.
+    assert alternatives.choose(BEEF_OR_RABBIT, household(excluded_ingredients=["ground_beef"])) is None
 
 
 def recipe_with(combined_allergens, options_):
