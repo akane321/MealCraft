@@ -37,7 +37,7 @@ from app.orchestration.interactions import (
     typed_choice,
     validate_interaction_answer,
 )
-from app.orchestration.model_pricing import CHAT_RATES, EMBEDDING_RATES, model_name
+from app.orchestration.model_pricing import CHAT_RATES, EMBEDDING_RATES, WEB_SEARCH_USD_PER_CALL, model_name
 from app.orchestration.run_lifecycle import (
     AgentRunLifecycle,
     AgentRunLifecycleError,
@@ -2051,6 +2051,7 @@ class AgentSessionService:
                 "cached_input_tokens": taken.cached_input_tokens,
                 "output_tokens": taken.output_tokens,
                 "embedding_tokens": taken.embedding_tokens,
+                **({"web_search_calls": taken.web_search_calls} if taken.web_search_calls else {}),
             },
         }
         chat_rates = run.model_config.get("chat_token_rates_usd_per_million")
@@ -2065,6 +2066,8 @@ class AgentSessionService:
                 + Decimal(cached) * cached_rate
                 + Decimal(taken.output_tokens) * output_rate
             ) / Decimal(1_000_000)
+        if taken.web_search_calls:
+            estimated_cost += taken.web_search_calls * WEB_SEARCH_USD_PER_CALL
         if taken.embedding_tokens:
             if len(embedding_rates) == 1:
                 embedding_rate = Decimal(next(iter(embedding_rates.values())))

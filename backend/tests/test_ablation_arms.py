@@ -73,9 +73,9 @@ def test_a_case_runs_with_its_switch_and_the_anchor_day_and_restores_the_setting
 
 def test_the_runner_offers_the_baselines_the_product_and_its_six_ablations():
     available = baseline_arms.arms()
-    baselines = {strong_rule_baseline.SYSTEM_ID, rag_baseline.SYSTEM_ID, general_agent_baseline.SYSTEM_ID}
+    baselines = {strong_rule_baseline.SYSTEM_ID, "pure-llm", rag_baseline.SYSTEM_ID, general_agent_baseline.SYSTEM_ID}
     product = {"mealcraft", *(f"mealcraft/ablation/{name}" for name in ABLATIONS)}
-    assert set(available) == baselines | product and len(available) == 10
+    assert set(available) == baselines | product and len(available) == 11
     assert not any(available[name].paid for name in product)
 
 

@@ -203,10 +203,21 @@ class Arm:
 
 
 def arms() -> dict[str, Arm]:
-    """The three baselines, and the product with its six ablations run in this process (`ablation_arms`)."""
-    from app.evaluation import ablation_arms, general_agent_baseline, rag_baseline, strong_rule_baseline
+    """The four baselines, and the product with its six ablations run in this process (`ablation_arms`)."""
+    from app.evaluation import (
+        ablation_arms,
+        general_agent_baseline,
+        pure_llm_baseline,
+        rag_baseline,
+        strong_rule_baseline,
+    )
 
-    registry = [strong_rule_baseline.ARM, rag_baseline.ARM, general_agent_baseline.ARM]
+    registry = [
+        strong_rule_baseline.ARM,
+        pure_llm_baseline.conversation_arm(),
+        rag_baseline.ARM,
+        general_agent_baseline.ARM,
+    ]
     return {arm.system_id: arm for arm in registry} | ablation_arms.in_process_arms()
 
 
@@ -509,10 +520,12 @@ def _git(*arguments: str) -> str | None:
 def code_state() -> tuple[str | None, bool | None]:
     """The checkout's commit and whether its worktree has changes (None when git cannot tell).
 
-    Both come from the same checkout: ``git rev-parse HEAD``, not a ``CODE_COMMIT`` variable.
+    Both come from the same checkout: ``git rev-parse HEAD``, not a ``CODE_COMMIT`` variable. The arms' spend
+    ledgers are appended to by the run itself (ADR-0115), so they never make the checkout dirty: otherwise the second
+    arm of a held-out run, or a resumed one, would be refused.
     """
     head = _git("rev-parse", "HEAD")
-    status = _git("status", "--porcelain")
+    status = _git("status", "--porcelain", "--", ".", ":(exclude,glob)**/*.spend.jsonl")
     commit = (head.strip() or None) if head is not None else None
     dirty = bool(status.strip()) if status is not None else None
     return commit, dirty

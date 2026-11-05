@@ -408,9 +408,31 @@ def load_episodes(path: Path) -> list[dict[str, Any]]:
             episodes.extend(payload)
         elif isinstance(payload.get("episodes"), list):
             episodes.extend(payload["episodes"])
+        elif isinstance(payload.get("cases"), list):  # the held-out authoring interchange (sprint2-authoring-v1)
+            episodes.extend(map(case_episode, payload["cases"]))
         else:
             episodes.append(payload)
     return episodes
+
+
+def case_episode(case: dict[str, Any]) -> dict[str, Any]:
+    """An authored case as an episode: its `turns` are the user's strings in order, the last one the request.
+
+    Gold and source stay beside the scenario for the scorer and the report; an arm reads only the user strings
+    (`baseline_arms.episode_turns`)."""
+    turns = [str(turn) for turn in case["turns"]]
+    source = case.get("source")
+    return {
+        "episode_id": case["id"],
+        "category": case.get("category"),
+        "language": case.get("language"),
+        "source": source.get("kind") if isinstance(source, dict) else source,
+        "scenario": {
+            "user_request": turns[-1],
+            "conversation_history": [{"role": "user", "content": turn} for turn in turns[:-1]],
+        },
+        "gold": case.get("gold"),
+    }
 
 
 def _digest(path: Path) -> str:
@@ -483,6 +505,77 @@ def summarise(records: list[dict[str, Any]], repeats: int) -> dict[str, Any]:
             "stdev": statistics.pstdev(values) if len(values) > 1 else None,
         }
     return {"per_repeat": per_repeat, "across_repeats": spread}
+
+
+# The pure-LLM arm on the conversation protocol (ADR-0092), for the held-out run's four categories. The single-turn
+# runner above answers only plan, clarification or infeasible from structured household facts, which the held-out
+# cases do not carry: an intent question, a food question, a refusal or a later turn has no slot there. This arm
+# gets what every arm gets, the user's strings, its own earlier exchanges and the shared instructions, and answers
+# in the shared output with no tool, catalog or retrieval: the RAG arm without its candidates.
+CONVERSATION_SYSTEM_ID = "pure-llm"
+CONVERSATION_CONFIGURATION = """Your registered configuration: none. You have no tools, web search, calculator,
+recipe database, grocery database or retrieval system; answer from your own knowledge.
+For every dish give evidence.ingredients as a list of {"name": ..., "quantity_g": ...} (every ingredient, in grams,
+for the dish's servings), evidence.steps and evidence.cooking_time_minutes. Give total_cost_sgd as your estimate
+of the groceries for the whole plan."""
+
+
+def conversation_system(instructions: str) -> str:
+    return instructions + "\n\n" + CONVERSATION_CONFIGURATION
+
+
+def conversation_responder(context: Any, *, sleep: Callable[[float], None] | None = None):
+    from app.evaluation import rag_baseline
+
+    if context.model is None or context.budget is None:
+        raise RuntimeError("the pure-LLM arm needs a model and a budget (a live run)")
+    sleep = sleep or time.sleep
+
+    def respond(message: str, own_history: tuple, instructions: str):
+        messages = rag_baseline.messages_for(conversation_system(instructions), own_history, message)
+        return rag_baseline.call_model(context.model, messages, context.budget, sleep, context.trace)
+
+    return respond
+
+
+def conversation_estimate(turns: list[str], instructions: str, model: str) -> tuple[int, int, float]:
+    """Worst case of one case, as the RAG arm counts it: every turn answered and confirmed, each call asked twice."""
+    from app.evaluation.rag_baseline import MAX_OUTPUT_TOKENS as OUTPUT
+    from app.evaluation.rag_baseline import estimate_tokens as count
+
+    base = count([("system", conversation_system(instructions))])
+    calls = tokens = history = 0
+    usd = 0.0
+    for turn in turns:
+        for _ in range(2):
+            input_tokens = base + history + len(turn) // 4 + 1
+            calls += MAX_ATTEMPTS
+            tokens += MAX_ATTEMPTS * input_tokens
+            usd += MAX_ATTEMPTS * price_usd(model, Usage(input_tokens, OUTPUT))
+            history += OUTPUT + len(turn) // 4 + 1
+    return calls, tokens, usd
+
+
+def conversation_arm():
+    """The arm for `baseline_arms`: the RAG arm's model and call loop (JSON mode, one retry), no candidates."""
+    from app.evaluation import baseline_arms, rag_baseline
+
+    def fingerprint() -> dict[str, str]:
+        return {
+            "system_id": CONVERSATION_SYSTEM_ID,
+            "configuration_sha256": _sha256(CONVERSATION_CONFIGURATION),
+            "runner_sha256": baseline_arms.source_sha256(__file__),
+            "call_loop_sha256": baseline_arms.source_sha256(rag_baseline.__file__),
+        }
+
+    return baseline_arms.Arm(
+        system_id=CONVERSATION_SYSTEM_ID,
+        paid=True,
+        fingerprint=fingerprint,
+        responder=conversation_responder,
+        estimate=conversation_estimate,
+        model_factory=rag_baseline.LiveModel,
+    )
 
 
 def main(

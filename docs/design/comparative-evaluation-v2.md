@@ -634,6 +634,59 @@ The linked module contracts define how to close these dependencies:
 - use explicit API authorization and budget controls;
 - execute repeated held-out runs and retain raw structured outputs safely.
 
+### The formal Sprint 3 run in one command (`app.evaluation.formal_run`)
+
+```text
+python -m app.evaluation.formal_run --freeze-record --anchor-date <date>          # docs/evaluation/sprint3-freeze.md
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> --out <public dir>        # dry run
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> --out <public dir> \
+    --live --allow-heldout --select-failures 12
+```
+
+Run from the repository root with the key in `.env` there. The 11 arms answer the
+same questions in a fixed order: strong rules, the pure LLM, RAG, the general
+agent, then `mealcraft` and its six ablations back to back (ADR-0118, warm
+prompt cache). Every arm goes through `baseline_arms.main`: it resumes from its
+own records, stops before its cap (ADR-0115 ledger; US$5, the general agent
+US$15) and the run goes on with the next arm. Each arm's cap is also held to
+what `--credit-usd` (default 58) has left, so the whole run cannot pass the
+credit. The dry run prints each arm's worst case, its projection at the
+measured rates of ADR-0118 and its ledger beside its cap.
+
+- **Product arms with the OpenAI parser** (`ablation_arms.openai_arms`): the
+  product in process, FairPrice only, the scorer's catalog only, the real key.
+  Before each message US$0.05 is reserved; after it the product's own recorded
+  cost of the message's agent runs (`api_cost_estimate_usd`, now including
+  web-search fees at US$0.01 a call) is charged. A model request the product did
+  not record, or one with no reported usage, stops the arm as unknown spend.
+- **Pure LLM on the conversation protocol** (`pure_llm_baseline.conversation_arm`,
+  `pure-llm`): the single-turn runner answers only plan, clarification or
+  infeasible from structured household facts, which the held-out cases do not
+  carry, so it cannot answer an intent question, a food question, a refusal or
+  a later turn. The formal arm gets what every arm gets (the user's strings, its
+  own exchanges, the shared instructions) and answers in the shared output with
+  no tool, catalog or retrieval: the RAG arm without its candidates. The
+  single-turn runner stays for the development comparisons.
+- **Held-out input**: per-file episodes, or the authoring interchange
+  (`{"cases": [...]}`), whose `turns` become the user strings
+  (`pure_llm_baseline.case_episode`); gold and source never reach an arm.
+- **Held-out output**: `--allow-heldout` needs a clean checkout at a commit (the
+  spend ledgers aside, which the run itself appends to) and keeps the per-case
+  records and the selected failure cases under `.local/evaluation/`. `--out`
+  receives only `aggregate-{action,strict}.json` (by category, language and
+  source, `heldout_report` with small cells withheld, `--min-cell-n` 5),
+  `comparison-{action,strict}.json` (`heldout_statistics.compare`, overall only)
+  and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
+  this run, ledger and spend, answered and valid counts, stop reason).
+- **Outcomes, a draft to register before the run** (`formal-outcome-draft-1`):
+  `missing` (not reached or cut by the cap), `error` (call or scorer failed),
+  `failure` (invalid output). `action`: success when the final output takes the
+  action the gold expects (plan, clarify, refuse, food answer). `strict`: success
+  only where the code checks the whole gold (an intent case passing
+  `intent_scorer`); held-out plans, questions and replans need the sealed catalog
+  adjudication or a rubric, and the v3 development episodes lack the multi-dish
+  gold the validator reads, so they are voided in `strict` for every arm alike.
+
 ### Phase 5 — human subset and final analysis
 
 - run B4 and blinded paired utility tasks;

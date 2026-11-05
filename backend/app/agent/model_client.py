@@ -24,6 +24,7 @@ class Tally:
     output_tokens: int = 0
     cached_input_tokens: int = 0
     embedding_tokens: int = 0
+    web_search_calls: int = 0  # hosted web searches, billed per call on top of their tokens
     max_requests: int | None = None
     sent: int = 0
 
@@ -90,6 +91,8 @@ def _count_response_usage(response) -> None:
             tally.embedding_tokens += int(usage.get("prompt_tokens", usage.get("total_tokens", 0)) or 0)
         else:
             note_usage(usage)
+            output = payload.get("output") or []
+            tally.web_search_calls += sum(isinstance(i, dict) and i.get("type") == "web_search_call" for i in output)
     except Exception:  # noqa: BLE001 - usage accounting must never fail an otherwise valid model call
         return
 
@@ -129,12 +132,14 @@ def take() -> Tally:
             output_tokens=tally.output_tokens,
             cached_input_tokens=tally.cached_input_tokens,
             embedding_tokens=tally.embedding_tokens,
+            web_search_calls=tally.web_search_calls,
         )
         tally.requests = 0
         tally.input_tokens = 0
         tally.output_tokens = 0
         tally.cached_input_tokens = 0
         tally.embedding_tokens = 0
+        tally.web_search_calls = 0
         tally.fell_back = False
     return taken
 
