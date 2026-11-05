@@ -78,10 +78,16 @@ def combined(parts: list[dict]) -> dict:
         if part["n"]:
             weighted += part["k"] / part["n"] * part["population"]
             covered += part["population"]
+    checked = sum(part["n"] for part in parts)
+    agree = sum(part["k"] for part in parts)
     return {
         "strata": strata,
         "weighted": round(weighted / covered, 3) if covered else None,
         "cover": {"recipes": covered, "of": sum(part["population"] for part in parts)},
+        "agree": agree,
+        "checked": checked,
+        "unweighted": round(agree / checked, 3) if checked else None,
+        "wilson95_unweighted": wilson(agree, checked),
     }
 
 
@@ -106,6 +112,8 @@ def combined_lines(combo: dict, what: str, hits: str) -> list[str]:
         f"Both v3 waves together, the {what} weighted by each stratum's recipes: **{percent(combo['weighted'])}** "
         f"(strata covering {combo['cover']['recipes']} of {combo['cover']['of']} recipes). A point estimate only; "
         "each stratum carries its own Wilson 95% interval.",
+        f"- Unweighted agreement among determinable sample rows: {combo['agree']} of {combo['checked']} "
+        f"({percent(combo['unweighted'])}, Wilson 95% {interval(combo['wilson95_unweighted'])}).",
         "",
         f"| Stratum | Recipes | Checked | {hits} | Rate | Wilson 95% |",
         "| --- | ---: | ---: | ---: | ---: | --- |",

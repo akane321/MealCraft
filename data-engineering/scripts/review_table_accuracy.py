@@ -30,11 +30,12 @@ from import_review_table import (  # noqa: E402
     shown,
     valid,
 )
+from review_sampling import interval, wilson  # noqa: E402
 
 SAMPLE = OUT.parent / "sample.json"
 GROUPS = ("table", "rule_decided", *RULE_STRATA, "all")
 LABELS = {
-    "table": "表导入层",
+    "table": "模型补全层（llm）",
     "rule_decided": "规则已定层",
     "rule_equals_model": "规则已定：规则值等于模型原值",
     "rule_differs_from_model": "规则已定：规则值不同于模型原值",
@@ -60,12 +61,20 @@ def accuracy(rows: list[dict], sample: dict) -> dict:
         raise SystemExit(f"the filled sheet's rows are not the sample's: {sorted(set(seen) ^ set(expected))[:5]}")
     groups = {name: tally() for name in GROUPS}
     fields = {name: tally() for name in FIELDS}
+    determinate_groups = {name: {"checked": 0, "agree": 0} for name in GROUPS}
+    determinate_fields = {name: {"checked": 0, "agree": 0} for name in FIELDS}
     differ, unrecognized = [], []
     for row in rows:
         recipe, batch_value = expected[(row["id"], row["field"])]
         counted = [groups[recipe["layer"]], groups["all"], fields[row["field"]]]
+        determinate_counted = [
+            determinate_groups[recipe["layer"]],
+            determinate_groups["all"],
+            determinate_fields[row["field"]],
+        ]
         if recipe["layer"] == "rule_decided":
             counted.append(groups[recipe["stratum"]])
+            determinate_counted.append(determinate_groups[recipe["stratum"]])
         value = code(row["value"])
         if not row["checked"]:
             outcome = "unchecked"
@@ -81,13 +90,42 @@ def accuracy(rows: list[dict], sample: dict) -> dict:
             counts[outcome] += 1
             if outcome == "checked" and same_value(batch_value, value):
                 counts["agree"] += 1
+        if outcome == "checked" and value is not None:
+            for counts in determinate_counted:
+                counts["checked"] += 1
+                if same_value(batch_value, value):
+                    counts["agree"] += 1
         if outcome == "checked" and not same_value(batch_value, value):
             differ.append({**row, "batch_value": batch_value, "value": value})
     for counts in [*groups.values(), *fields.values()]:
         counts["accuracy"] = round(counts["agree"] / counts["checked"], 3) if counts["checked"] else None
+    actual_groups = {name: counts for name, counts in groups.items() if counts["rows"]}
+    actual_fields = {name: counts for name, counts in fields.items() if counts["rows"]}
+    actual_determinate_groups = {name: counts for name, counts in determinate_groups.items() if groups[name]["rows"]}
+    actual_determinate_fields = {name: counts for name, counts in determinate_fields.items() if fields[name]["rows"]}
+    for counts in [*actual_determinate_groups.values(), *actual_determinate_fields.values()]:
+        counts["accuracy"] = round(counts["agree"] / counts["checked"], 3) if counts["checked"] else None
+    wilson_intervals = {
+        "groups": {name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_groups.items()},
+        "fields": {name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_fields.items()},
+    }
+    determinate_intervals = {
+        "groups": {
+            name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_determinate_groups.items()
+        },
+        "fields": {
+            name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_determinate_fields.items()
+        },
+    }
     return {
-        "groups": {name: counts for name, counts in groups.items() if counts["rows"]},
-        "fields": {name: counts for name, counts in fields.items() if counts["rows"]},
+        "groups": actual_groups,
+        "fields": actual_fields,
+        "wilson95": wilson_intervals,
+        "determinate": {
+            "groups": actual_determinate_groups,
+            "fields": actual_determinate_fields,
+            "wilson95": determinate_intervals,
+        },
         "differ": differ,
         "unrecognized": unrecognized,
     }
@@ -112,31 +150,74 @@ def read_filled(path: Path) -> list[dict]:
     ]
 
 
-def table(title: str, counted: dict, label) -> list[str]:
+def table(
+    title: str,
+    counted: dict,
+    label,
+    wilson_by_group: dict,
+    determinate: dict,
+    determinate_wilson: dict,
+) -> list[str]:
     lines = [
         "",
-        f"| {title} | Rows | Checked | Agree | Accuracy | Unchecked | Checked, no value | Unrecognized, refill |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        f"| {title} | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | "
+        "Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | "
+        "Unrecognized, refill |",
+        "| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |",
     ]
     for name, c in counted.items():
         share = "n/a" if c["accuracy"] is None else f"{c['accuracy']:.1%}"
+        resolved = determinate[name]
+        determinate_share = "n/a" if resolved["accuracy"] is None else f"{resolved['accuracy']:.1%}"
         lines.append(
-            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} | {c['unchecked']} "
-            f"| {c['checked_without_value']} | {c['unrecognized']} |"
+            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} "
+            f"| {interval(wilson_by_group[name])} "
+            f"| {resolved['checked']} | {resolved['agree']} | "
+            f"{determinate_share} "
+            f"| {interval(determinate_wilson[name])} | {c['unchecked']} | "
+            f"{c['checked_without_value']} | {c['unrecognized']} |"
         )
     return lines
 
 
 def markdown(result: dict, path: Path, sample: dict) -> str:
+    batch = sample.get("batch")
+    batch_recipes = sample.get("batch_recipes")
+    if batch_recipes is not None:
+        batch_scope = (
+            f"This sample draws {sample['size']} recipes from the {batch_recipes}-recipe batch `{batch}`; "
+            "it does not measure accuracy for all tags."
+        )
+    elif batch:
+        batch_scope = f"Drawn from tag batch `{batch}`; this is not an estimate of accuracy for all tags."
+    else:
+        batch_scope = "This sample only describes the rows in `sample.json`; it is not an estimate for all tags."
     lines = [
         f"# Sample accuracy of {sample['batch']}",
         "",
         f"Filled sample: SHA-256 `{hashlib.sha256(path.read_bytes()).hexdigest()}`; drawn: `sample.json` "
-        f"({sample['size']} recipes, seed {sample['seed']}). Only rows marked 是 (checked in person) count; a value "
-        "this script cannot read counts neither way and is listed for the reviewer to fill again.",
+        f"({sample['size']} recipes, seed {sample['seed']}). {batch_scope} Human-confirmed rows marked 是 are scored; "
+        "the per-round README describes any AI assistance. Reviewer null means unresolved: it is excluded from the "
+        "determinate denominator even if the batch value is also null. In the all-checked result, "
+        "it counts as agreement "
+        "only when the values match.",
     ]
-    lines += table("Stratum", result["groups"], lambda name: f"{LABELS[name]} (`{name}`)")
-    lines += table("Field", result["fields"], lambda name: f"`{name}`")
+    lines += table(
+        "Stratum",
+        result["groups"],
+        lambda name: f"{LABELS[name]} (`{name}`)",
+        result["wilson95"]["groups"],
+        result["determinate"]["groups"],
+        result["determinate"]["wilson95"]["groups"],
+    )
+    lines += table(
+        "Field",
+        result["fields"],
+        lambda name: f"`{name}`",
+        result["wilson95"]["fields"],
+        result["determinate"]["fields"],
+        result["determinate"]["wilson95"]["fields"],
+    )
     lines += ["", f"无法识别，请重填: {len(result['unrecognized'])} rows.", ""]
     lines += [
         f"- {row['id']} {row['title']}: `{row['field']}` filled `{row['value']}`" for row in result["unrecognized"]

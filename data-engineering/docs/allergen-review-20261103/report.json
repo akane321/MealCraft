@@ -1,0 +1,223 @@
+{
+ "sampled": 50,
+ "checked": 44,
+ "agree": 41,
+ "unchecked": 0,
+ "cannot_tell": 6,
+ "refill": [],
+ "agreement_unweighted": 0.932,
+ "wilson95_unweighted": [
+  0.818,
+  0.977
+ ],
+ "agreement_weighted": 0.951,
+ "weighted_cover": {
+  "recipes": 3927,
+  "of": 3927
+ },
+ "strata": {
+  "crustaceans": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 182,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "eggs": {
+   "checked": 5,
+   "agree": 5,
+   "recipes_in_release": 726,
+   "agreement": 1.0,
+   "wilson95": [
+    0.566,
+    1.0
+   ]
+  },
+  "fish": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 230,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "gluten": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 381,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "gluten_candidate": {
+   "checked": 3,
+   "agree": 2,
+   "recipes_in_release": 241,
+   "agreement": 0.667,
+   "wilson95": [
+    0.208,
+    0.939
+   ]
+  },
+  "milk": {
+   "checked": 4,
+   "agree": 4,
+   "recipes_in_release": 435,
+   "agreement": 1.0,
+   "wilson95": [
+    0.51,
+    1.0
+   ]
+  },
+  "molluscs": {
+   "checked": 2,
+   "agree": 1,
+   "recipes_in_release": 96,
+   "agreement": 0.5,
+   "wilson95": [
+    0.095,
+    0.905
+   ]
+  },
+  "none": {
+   "checked": 5,
+   "agree": 5,
+   "recipes_in_release": 600,
+   "agreement": 1.0,
+   "wilson95": [
+    0.566,
+    1.0
+   ]
+  },
+  "peanuts": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 200,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "sesame": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 180,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "soy": {
+   "checked": 3,
+   "agree": 3,
+   "recipes_in_release": 225,
+   "agreement": 1.0,
+   "wilson95": [
+    0.438,
+    1.0
+   ]
+  },
+  "sulfites": {
+   "checked": 2,
+   "agree": 2,
+   "recipes_in_release": 181,
+   "agreement": 1.0,
+   "wilson95": [
+    0.342,
+    1.0
+   ]
+  },
+  "tree_nuts": {
+   "checked": 4,
+   "agree": 3,
+   "recipes_in_release": 250,
+   "agreement": 0.75,
+   "wilson95": [
+    0.301,
+    0.954
+   ]
+  }
+ },
+ "missed_by_catalog": {
+  "milk": 1
+ },
+ "extra_in_catalog": {
+  "gluten_candidate": 1
+ },
+ "corrections": [
+  {
+   "id": "RCP2_8799AD20355D",
+   "title": "Mexican Quiche",
+   "catalog": [
+    "eggs",
+    "gluten",
+    "gluten_candidate",
+    "milk"
+   ],
+   "confirmed": [
+    "eggs",
+    "gluten",
+    "milk"
+   ],
+   "missed": [],
+   "extra": [
+    "gluten_candidate"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：原文明示flour tortillas，麸质已明确，不应再为泛称tortilla保留gluten_candidate；鸡蛋、奶酪、奶及涂黄油均已计入。"
+  },
+  {
+   "id": "RCP2_DB51910E060D",
+   "title": "Portuguese 'Bacon From Heaven' (Toucinho Do Ceu)",
+   "catalog": [
+    "eggs",
+    "tree_nuts"
+   ],
+   "confirmed": [
+    "eggs",
+    "milk",
+    "tree_nuts"
+   ],
+   "missed": [
+    "milk"
+   ],
+   "extra": [],
+   "note": "AI辅助真人复核（真人已确认）：目录漏步骤7用于涂模的butter，须增加milk；蛋黄和杏仁分别支持eggs、tree_nuts。"
+  }
+ ],
+ "either_or_disagreements": [
+  {
+   "id": "RCP2_7395CA39C119",
+   "title": "Pork And Noodle Stir Fry",
+   "catalog": [
+    "gluten",
+    "molluscs",
+    "peanuts",
+    "soy"
+   ],
+   "confirmed": [
+    "gluten",
+    "molluscs",
+    "soy"
+   ],
+   "either_or": [
+    "peanuts"
+   ],
+   "note": "AI辅助真人复核（真人已确认）：原文vegetable or peanut oil首项为vegetable oil，标准化却选peanut oil，按首项口径去除peanuts；蚝油含molluscs，酱油含soy、gluten。"
+  }
+ ],
+ "ai_candidates": {
+  "agree": 0,
+  "checked": 0,
+  "wilson95": null,
+  "differs": []
+ }
+}

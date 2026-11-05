@@ -211,6 +211,14 @@ def test_accuracy_is_by_stratum_and_counts_only_readable_rows_checked_in_person(
     assert [row["field"] for row in result["unrecognized"]] == ["contains_staple"]
     rows[2]["checked"] = False
     assert accuracy.accuracy(rows, sample)["groups"]["rule_decided"]["unchecked"] == 1
+
+    sample["recipes"].append({"id": "C", "layer": "table", "stratum": "dessert", "values": b})
+    rows.append({"id": "C", "field": "protein_sources", "value": "null（未知）", "checked": True})
+    result = accuracy.accuracy(rows, sample)
+    table_group = result["groups"]["table"]
+    assert (table_group["checked"], table_group["agree"]) == (2, 0)
+    determinate = result["determinate"]["groups"]["table"]
+    assert (determinate["checked"], determinate["agree"]) == (1, 0)
     with pytest.raises(SystemExit):
         accuracy.accuracy(rows[:1], sample)
 

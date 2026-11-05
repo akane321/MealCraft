@@ -17,7 +17,9 @@ v3 里另有 177 道新增菜谱不在这一轮和第 1 波的抽样范围里：
 ## 文件
 
 - `sample.json`：抽样记录。固定种子 20261104，从第 2 波菜谱里抽 30 道。
-- `review.xlsx`：发给复核人的空表，"你确认的过敏原""备注""已亲自核对"几栏是空的。
+- `review.xlsx`：发给复核人的空白模板。
+- `review-filled.xlsx`：AI 辅助起草问题备注后的复核表；本轮没有 AI 过敏原候选。真人逐道查看食材和步骤、填写确认的过敏原并标记亲自核对。只有真人确认行计入评分；AI 不作为独立复核人。
+- `report.md`、`report.json`：由评分脚本生成的复核结果；传入第 1 波表时也包含两波合并估计。不要手改。
 
 `sample.json` 和 `review.xlsx` 由 `python -I -X utf8 data-engineering/scripts/allergen_review.py draw --wave 2` 生成（仓库根目录，
 离线，需要 openpyxl）。复核人交回后，把表存为 `review-filled.xlsx`，用
