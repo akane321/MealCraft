@@ -364,6 +364,7 @@ def test_the_general_agent_uses_its_tools_and_pays_for_searches():
     web = next(tool for tool in first["tools"] if tool["type"] == "web_search")
     assert web["filters"]["blocked_domains"] == ["github.com", "githubusercontent.com"]
     assert first["include"] == ["web_search_call.action.sources"]
+    assert "text" not in first and "text" not in second  # OpenAI refuses JSON mode with web search
     assert [step["tool"] for step in trace] == ["response", "web_search", "calculator", "response"]
     assert trace[0]["searches"] == 1 and "raw" in trace[0]
     assert first["input"][0]["content"].startswith("SHARED\n\n")
@@ -371,6 +372,13 @@ def test_the_general_agent_uses_its_tools_and_pays_for_searches():
     assert output.plan.meals[0].dishes[0].evidence["ingredients"][0]["quantity_g"] == 300
     tokens_only = 2 * (3000 * 0.75 + 500 * 4.5) / 1_000_000
     assert budget.spent_usd == pytest.approx(tokens_only + agent.SEARCH_USD)
+
+
+def test_the_general_agent_parses_a_plan_wrapped_in_prose():
+    from app.evaluation import general_agent_baseline as agent
+
+    assert agent.json_text(f"Here is the plan:\n{AGENT_PLAN}\nSources: [1]") == AGENT_PLAN
+    assert agent.json_text("no plan") == "no plan"
 
 
 def test_the_general_agent_has_no_tools_on_its_last_step_and_stops_at_its_cap():
