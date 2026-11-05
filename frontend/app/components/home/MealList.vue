@@ -22,6 +22,34 @@ const rated = (dish: NutritionDashboardDay) => Boolean(props.canGiveFeedback) &&
 const factsOpen = ref<number | null>(null);
 const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
+// Dishes whose recipe just changed (a confirmed swap): their rows glow once and the new dish pops in.
+const fresh = ref(new Set<number>());
+let freshTimer: ReturnType<typeof setTimeout> | undefined;
+watch(() => props.days, (days) => {
+  const changed = new Set<number>();
+  for (const dish of days) {
+    const before = lastShown.get(dish.entry_id);
+    if (before && before !== dish.recipe.slug) changed.add(dish.entry_id);
+    lastShown.set(dish.entry_id, dish.recipe.slug);
+  }
+  if (!changed.size) return;
+  fresh.value = changed;
+  clearTimeout(freshTimer);
+  freshTimer = setTimeout(() => { fresh.value = new Set(); }, 2600);
+  void nextTick(showFresh);
+}, { immediate: true });
+// The plan column scrolls the changed row to about a third of the way down, so the glow is seen.
+const list = ref<HTMLElement | null>(null);
+function showFresh() {
+  const row = list.value?.querySelector<HTMLElement>(".row.fresh");
+  let scroller = row?.parentElement ?? null;
+  while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement;
+  if (!row || !scroller) return;
+  const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - scroller.clientHeight / 3;
+  scroller.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+onBeforeUnmount(() => clearTimeout(freshTimer));
+
 const week = computed(() => mealsByDay(props.days));
 // Past seven days a weekday repeats, so an action names the date too.
 const numbered = computed(() => week.value.length > 7);
@@ -54,8 +82,14 @@ const ACTIONS = [
 const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", dislike: "i-lucide-thumbs-down", never_again: "i-lucide-ban" };
 </script>
 
+<script lang="ts">
+// Each dish entry's recipe as last shown, kept across mounts: the phone's plan sheet is closed while a swap is
+// confirmed, and the changed dish should still stand out when it opens again.
+const lastShown = new Map<number, string>();
+</script>
+
 <template>
-  <div>
+  <div ref="list">
     <p v-if="feedbackError" class="feedback-error" role="alert">{{ feedbackError }}</p>
     <ol class="days" aria-label="Plan days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
@@ -66,7 +100,7 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
           v-for="meal in day.meals"
           :key="meal.key"
           class="row"
-          :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals }"
+          :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals, fresh: meal.dishes.some(dish => fresh.has(dish.entry_id)) }"
         >
           <span v-if="!severalMeals" class="d"><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></span>
           <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
@@ -206,4 +240,14 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .facts-head { flex-basis: 100%; color: #71717a; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
 .fact b { font-weight: 500; }
 .feedback-error { margin: 8px 16px 0; color: #b42318; font-size: 12px; font-weight: 500; }
+/* A dish just swapped in: a violet wash on its row that fades, the new dish's plate pops and its name rises. */
+.days { position: relative; z-index: 0; }
+.row.fresh { position: relative; }
+.row.fresh::after { content: ""; position: absolute; inset: 3px -8px; z-index: -1; border-radius: 12px; background: #f5f3ff; box-shadow: inset 0 0 0 1px #ddd6fe; animation: fresh-wash 2.6s ease-out both; }
+.row.fresh .icon { animation: fresh-pop 760ms var(--spring) both; }
+.row.fresh .name { animation: fresh-rise 620ms var(--spring) 90ms both; }
+@keyframes fresh-wash { 0%, 50% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fresh-pop { from { opacity: 0; transform: scale(0.4) rotate(-30deg); } }
+@keyframes fresh-rise { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } }
+@media (prefers-reduced-motion: reduce) { .row.fresh .icon, .row.fresh .name { animation: none; } }
 </style>

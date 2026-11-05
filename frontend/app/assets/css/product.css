@@ -143,7 +143,7 @@
 .mc-shell .mc-sheet-head h2 { margin: 0; color: var(--mc-strong); font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
 .mc-shell .mc-sheet-head p { margin: 2px 0 0; color: #71717a; font-size: 13px; line-height: 18px; }
 
-/* Danger, disabled and busy buttons. Busy keeps the ink pill and shows a spinner. */
+/* Danger, disabled and busy buttons. Busy keeps the ink pill and shows the loader (MotionLoader). */
 .mc-shell .mc-btn.danger { border-color: #fecaca; background: #fef2f2; color: #b42318; }
 .mc-shell .mc-btn.danger:hover:not(:disabled) { background: #fee4e2; }
 /* Disabled: a light, flat control that still reads (like the disabled send button), never a faded ink pill.
@@ -155,9 +155,6 @@
 .mc-shell :is(.mc-btn.danger, .mc-pill.danger):disabled:not([aria-busy="true"]) { border-color: #f2dcd9; background: #fafafa; color: #d0a5a0; }
 .mc-shell :is(.mc-btn, .mc-pill, .secondary-button):disabled :is(.iconify, svg) { color: inherit; }
 .mc-shell .mc-btn[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
-.mc-shell .mc-spin { width: 14px; height: 14px; flex: none; animation: mc-spin 900ms linear infinite; }
-@keyframes mc-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .mc-shell .mc-spin { animation: none; } }
 
 /* Checkbox, radio and the search clear button. */
 .mc-shell input[type="checkbox"], .mc-shell input[type="radio"] { appearance: none; flex: none; width: 16px; height: 16px; margin: 0; border: 1px solid #d4d4d8; background: #fff; cursor: pointer; transition: background 120ms, border-color 120ms; }
@@ -268,9 +265,8 @@
 /* Error box of the product pages and sign-in: a soft red box led by a circle-alert icon. */
 .mc-shell .mc-alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
 .mc-shell .mc-alert > .iconify { width: 16px; height: 16px; flex: none; margin-top: 2px; color: #d92d20; }
-/* A loading line: a spinner, then the words. */
-.mc-shell .mc-loading { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 14px; line-height: 20px; }
-.mc-shell .mc-loading .mc-spin { width: 16px; height: 16px; }
+/* A loading line: the loader, then the words. */
+.mc-shell .mc-loading { display: flex; align-items: center; gap: 10px; color: #71717a; font-size: 14px; line-height: 20px; }
 
 /* Product pages inside the panel: one content width, a 22px title, no eyebrow labels. */
 .product-frame .page-width { width: min(100% - 80px, 1080px); }
@@ -313,7 +309,7 @@
 .product-frame :is(.primary-button, .secondary-button) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-family: var(--sans); text-decoration: none; transition: background 150ms, border-color 150ms; }
 .product-frame .primary-button { min-height: 40px; height: 40px; padding: 0 18px; border: 0; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .product-frame .primary-button:hover:not(:disabled) { background: #27272a; }
-/* Disabled (not busy) is the shell's faded pill; busy keeps the ink pill with a spinner. */
+/* Disabled (not busy) is the shell's faded pill; busy keeps the ink pill with the loader. */
 .product-frame .primary-button[aria-busy="true"]:disabled { opacity: 1; cursor: progress; }
 .product-frame .secondary-button { min-height: 32px; height: 32px; padding: 0 12px; border: 1px solid #e4e4e7; background: #fff; color: #27272a; font-size: 13px; font-weight: 500; box-shadow: var(--mc-shadow-xs); }
 .product-frame .secondary-button:hover:not(:disabled) { border-color: #d4d4d8; background: #f7f7f8; }
@@ -452,3 +448,25 @@
   .mc-shell :is(.mc-btn, .mc-send, .mc-primary, .mc-suggest, .mc-pill) { transition: background 150ms; transform: none !important; }
   .mc-overlay > .mc-panel, .mc-sheet-overlay > .sheet-frame { animation: mc-fade-in 150ms both; }
 }
+
+/* Sliding selection (MotionTabPill): the selected tab or page row draws its pill as a child that glides between
+   tabs, so the tab itself goes clear. */
+/* The row of tabs is the layer the pill slides in, under every tab's label (not just its own tab's). */
+:is(.mc-segmented, .sb .pages):has(.mc-tab-pill) { position: relative; isolation: isolate; }
+:is(.mc-segmented > button, .sb-item):has(> .mc-tab-pill) { position: relative; background: transparent !important; box-shadow: none !important; }
+.mc-tab-pill { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #fff; box-shadow: var(--mc-shadow-xs); pointer-events: none; }
+.sb-item > .mc-tab-pill { background: #e9e9ec; box-shadow: none; }
+
+/* Page changes (Nuxt view transitions): the old page fades, the new one rises into place. The desktop sidebar
+   stays put (only the live new one shows, so its pill glides instead of doubling). */
+/* Named only during a transition: a view-transition-name makes a stacking context, which would trap the sidebar's
+   own dialogs (delete a conversation) under the panel. */
+@media (min-width: 768px) { :root:active-view-transition .sb { view-transition-name: mc-sidebar; } }
+::view-transition-old(root) { animation: mc-vt-out 140ms ease-in both; }
+::view-transition-new(root) { animation: mc-vt-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+::view-transition-old(mc-sidebar) { display: none; }
+::view-transition-new(mc-sidebar) { animation: none; }
+::view-transition-old(mc-sidebar):only-child { display: block; animation: mc-vt-out 140ms ease-in both; }
+::view-transition-new(mc-sidebar):only-child { animation: mc-vt-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes mc-vt-out { to { opacity: 0; } }
+@keyframes mc-vt-in { from { opacity: 0; transform: translateY(10px); } }

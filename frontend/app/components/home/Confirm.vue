@@ -22,7 +22,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
       <footer>
         <button type="button" class="mc-btn secondary" :disabled="busy" @click="emit('cancel')">Cancel</button>
         <button ref="confirmButton" type="button" class="mc-btn danger" :disabled="busy" :aria-busy="busy || undefined" @click="emit('confirm')">
-          <UIcon v-if="busy" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />{{ busy ? "Deleting…" : action }}
+          <MotionLoader v-if="busy" />{{ busy ? "Deleting…" : action }}
         </button>
       </footer>
     </section>

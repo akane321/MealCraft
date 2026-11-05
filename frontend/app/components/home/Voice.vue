@@ -19,6 +19,9 @@ const demo = Boolean(config.public.demoScript);
 const supported = ref(false);
 const phase = ref<"idle" | "ask" | "recording" | "transcribing">("idle");
 const level = ref(0);
+// The level bars while recording: five bands of the voice's frequencies, 0 to 1, the strongest drawn in the middle.
+const bars = ref([0, 0, 0, 0, 0]);
+const BANDS = [[18, 32], [5, 10], [2, 5], [10, 18], [32, 64]] as const;
 const elapsed = ref(0);
 const error = ref<string | null>(null);
 
@@ -110,6 +113,13 @@ function tick(now: number) {
   let sum = 0;
   for (const sample of samples) sum += ((sample - 128) / 128) ** 2;
   level.value = Math.min(1, Math.sqrt(sum / samples.length) * 5);
+  const spectrum = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(spectrum);
+  bars.value = BANDS.map(([from, to]) => {
+    let total = 0;
+    for (let bin = from; bin < to; bin++) total += spectrum[bin]!;
+    return Math.min(1, (total / (to - from) / 255) * 1.5);
+  });
   elapsed.value = Math.floor((now - startedAt) / 1000);
   const loud = level.value > LOUD;
   if (loud) {
@@ -190,6 +200,7 @@ function cleanup() {
   audio = null;
   analyser = null;
   level.value = 0;
+  bars.value = [0, 0, 0, 0, 0];
   elapsed.value = 0;
 }
 
@@ -226,7 +237,11 @@ onBeforeUnmount(() => {
     </button>
 
     <div v-if="phase === 'recording' || phase === 'transcribing'" class="float rec" role="status">
-      <span class="ring" :style="{ '--lvl': level }"><UIcon name="i-lucide-mic" aria-hidden="true" /></span>
+      <!-- Recording: level bars that follow the voice; turning it into text: the loader. -->
+      <span class="ring" :style="{ '--lvl': level }" aria-hidden="true">
+        <span v-if="phase === 'recording'" class="wave"><i v-for="(height, bar) in bars" :key="bar" :style="{ '--h': height }" /></span>
+        <MotionLoader v-else class="ring-loader" />
+      </span>
       <template v-if="phase === 'recording'">
         <b class="time">{{ time }}</b><span class="hint">Listening…</span>
         <button type="button" class="rec-btn stop" @click="stop">Done</button>
@@ -260,6 +275,11 @@ onBeforeUnmount(() => {
 .float { position: absolute; z-index: 6; left: 0; right: 0; bottom: calc(100% + 10px); margin: 0 auto; width: fit-content; max-width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 10px; border: 1px solid #ececef; border-radius: 999px; background: rgba(255, 255, 255, 0.96); color: #27272a; font: 500 13px/18px var(--font-sans, Inter, system-ui, sans-serif); text-align: left; text-shadow: none; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.05), 0 12px 32px -12px rgba(16, 16, 20, 0.22); backdrop-filter: blur(10px); animation: mc-rise 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .ring { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 999px; background: #7c3aed; color: #fff; box-shadow: 0 0 0 calc(4px + var(--lvl, 0) * 14px) rgba(124, 58, 237, 0.18); transition: box-shadow 80ms linear; }
 .ring .iconify { width: 16px; height: 16px; }
+/* Five bars, one per band of the voice's frequencies (the strongest bands in the middle). */
+.wave { display: flex; align-items: center; gap: 2.5px; height: 18px; }
+.wave i { width: 3px; height: 18px; border-radius: 3px; background: #fff; transform: scaleY(calc(0.18 + var(--h, 0) * 0.82)); transition: transform 70ms linear; }
+.ring-loader { --l1: #fff; --l2: #fff; --l3: #fff; --dot: 4px; }
+@media (prefers-reduced-motion: reduce) { .wave i { transition: none; } }
 .time { font-variant-numeric: tabular-nums; color: #18181b; font-weight: 600; }
 .hint { color: #52525b; white-space: nowrap; }
 .rec-btn { height: 32px; flex: none; display: inline-grid; place-items: center; padding: 0 12px; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #27272a; font: 500 13px/1 var(--font-sans, Inter, system-ui, sans-serif); }

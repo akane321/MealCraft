@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MotionConfig } from "motion-v";
+
 const { load } = useAuth();
 const route = useRoute();
 useHead({
@@ -35,6 +37,8 @@ onMounted(load);
 
 <template>
   <UApp>
+    <!-- Every motion-v animation honours the reduced-motion setting (transforms and layout moves go). -->
+    <MotionConfig reduced-motion="user">
     <div class="app-shell">
       <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
@@ -51,6 +55,7 @@ onMounted(load);
       </div>
       <NuxtPage v-else />
     </div>
+    </MotionConfig>
   </UApp>
 </template>
 

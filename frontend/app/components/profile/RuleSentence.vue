@@ -90,7 +90,7 @@ function orphaned(rule: HouseholdRule) {
         <option v-for="name in names" :key="name" :value="name">{{ name }}</option>
       </select>
       <button class="secondary-button" type="button" :disabled="draft.status === 'loading' || !text.trim() || !names.length" @click="read">
-        {{ draft.status === "loading" ? "Reading…" : "Read it" }}
+        <MotionLoader v-if="draft.status === 'loading'" />{{ draft.status === "loading" ? "Reading…" : "Read it" }}
       </button>
     </div>
 

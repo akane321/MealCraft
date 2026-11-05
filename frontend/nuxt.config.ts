@@ -15,6 +15,9 @@ export default defineNuxtConfig({
   },
   css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css", "~/assets/css/product.css"],
   devtools: { enabled: true },
+  // Page changes cross-fade with the View Transitions API where the browser has it (product.css styles them);
+  // Nuxt skips them under reduced motion.
+  experimental: { viewTransition: true },
   // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
   icon: { clientBundle: { scan: true }, fallbackToApi: false },
   modules: ["@nuxt/eslint", "@nuxt/ui"],

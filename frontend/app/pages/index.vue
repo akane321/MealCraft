@@ -69,6 +69,10 @@ const filmPlaying = ref(true);
 const isPhone = ref(false);
 const filmShown = ref(false);
 const drawerOpen = ref(false);
+// Phone: the plan sheet and the menu drawer follow a finger dragging them shut.
+const sheetDrag = useDragDismiss("down", () => { panelOpen.value = false; });
+const drawerDrag = useDragDismiss("left", () => { drawerOpen.value = false; });
+watch(drawerOpen, open => open && drawerDrag.reset());
 // The on-screen keyboard's height (iPhone does not shrink the page for it), so the composer stays above it.
 const keyboard = ref(0);
 
@@ -77,6 +81,7 @@ const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m
 const isEmpty = computed(() => !messages.value.length && !isLoading.value);
 // A fresh conversation with no week to show is one wide welcome: the plan column comes with a plan or a failed load.
 const panelShown = computed(() => panelOpen.value && !(isEmpty.value && (planState.value === "empty" || planState.value === "loading")));
+watch(panelShown, shown => shown && sheetDrag.reset());
 const interaction = computed(() => session.value?.pending_interaction ?? null);
 const constraints = computed(() => session.value?.constraints ?? null);
 const editingPreferences = ref(false);
@@ -518,7 +523,9 @@ async function loadPlan(planId: number) {
   // Both the generated-plan watcher and the session watcher fire for the same plan.
   if (planState.value === "loading" && lastPlanId.value === planId) return;
   lastPlanId.value = planId;
-  planState.value = "loading";
+  // The week on show, loaded again (a change was confirmed): it stays up while the new revision loads, so the
+  // changed dish and the total move in place instead of the panel going back to a skeleton.
+  if (!(planState.value === "ready" && plan.value?.id === planId)) planState.value = "loading";
   try {
     const [loaded, weeks] = await Promise.all([
       apiFetch<WeeklyMealPlan>(`${config.public.apiBase}/api/plans/${planId}`),
@@ -805,8 +812,16 @@ onUnmounted(() => {
     </Transition>
 
     <div v-if="view === 'app'" class="app mc-shell" :class="{ 'no-panel': !panelShown, 'drawer-open': drawerOpen }">
-      <div v-if="isPhone && drawerOpen" class="phone-scrim drawer-veil" aria-hidden="true" @click="drawerOpen = false" />
-      <ShellSidebar current="plan" brand-button @brand="view = 'landing'">
+      <div v-if="isPhone && drawerOpen" class="phone-scrim drawer-veil" :style="{ opacity: 1 - drawerDrag.progress.value }" aria-hidden="true" @click="drawerOpen = false" />
+      <ShellSidebar
+        current="plan"
+        brand-button
+        data-dismiss
+        :class="{ dragging: drawerDrag.dragging.value }"
+        :style="isPhone ? { '--drag': `${-drawerDrag.offset.value}px` } : undefined"
+        v-on="isPhone && drawerOpen ? drawerDrag.handlers : {}"
+        @brand="view = 'landing'"
+      >
         <template #action>
           <UButton color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus" title="Start a new plan" @click="newChat">
             New plan<UKbd class="sb-kbd" value="Ctrl K" />
@@ -910,7 +925,7 @@ onUnmounted(() => {
                   :busy-label="labels.isWeek ? 'Planning your week…' : 'Making your plan…'"
                   @press="planWeek"
                 />
-                <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><MotionOrb class="note-orb" :size="14" />A large household on a tight budget can take a few minutes to plan.</p>
+                <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><MotionLoader class="note-loader" />A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 
@@ -1029,7 +1044,7 @@ onUnmounted(() => {
           <button v-if="isPhone && planState === 'ready' && plan && estimate && !panelOpen" type="button" class="week-bar" @click="openTab('dinners')">
             <UIcon name="i-lucide-calendar-days" aria-hidden="true" />
             <span>This {{ labels.noun }}</span>
-            <b class="mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</b>
+            <b class="mc-num"><MotionCount :value="estimate.purchase_total_sgd" /></b>
             <span v-if="estimate.weekly_budget_sgd" class="of">/ {{ formatSgd(estimate.weekly_budget_sgd) }}</span>
             <span class="grow" />
             <UIcon name="i-lucide-chevron-up" aria-hidden="true" />
@@ -1090,19 +1105,19 @@ onUnmounted(() => {
         <MotionSuccess v-if="celebration" :title="celebration.title" :detail="celebration.detail" :from="celebration.from" @collapse="celebrationFolds" @done="celebrationDone" />
       </main>
 
-      <div v-if="isPhone && panelShown" class="phone-scrim sheet-veil" aria-hidden="true" @click="panelOpen = false" />
+      <div v-if="isPhone && panelShown" class="phone-scrim sheet-veil" :style="{ opacity: 1 - sheetDrag.progress.value }" aria-hidden="true" @click="panelOpen = false" />
       <!-- Phone only: the sheet slides; on desktop the column comes and goes at once, as before. -->
       <Transition name="sheet" :css="isPhone">
-      <aside v-if="panelShown" class="panel" aria-label="This plan">
-        <button v-if="isPhone" type="button" class="sheet-grab" aria-label="Close the plan" @click="panelOpen = false"><span /></button>
+      <aside v-if="panelShown" class="panel" :class="{ dragging: sheetDrag.dragging.value }" :style="isPhone ? { '--drag': `${sheetDrag.offset.value}px` } : undefined" data-dismiss aria-label="This plan">
+        <button v-if="isPhone" type="button" class="sheet-grab" aria-label="Close the plan" v-on="sheetDrag.handlers" @click="panelOpen = false"><span /></button>
         <template v-if="planState === 'ready' && plan && days.length">
-          <div class="panel-head">
+          <div class="panel-head" v-on="isPhone ? sheetDrag.handlers : {}">
             <div class="tabs mc-segmented" role="tablist" aria-label="Plan details">
-              <button id="tab-dinners" type="button" role="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'">Plan</button>
+              <button id="tab-dinners" type="button" role="tab" :aria-selected="tab === 'dinners'" aria-controls="panel-body" @click="tab = 'dinners'"><MotionTabPill v-if="tab === 'dinners'" id="plan-tabs" />Plan</button>
               <button id="tab-groceries" type="button" role="tab" :aria-selected="tab === 'groceries'" aria-controls="panel-body" @click="tab = 'groceries'">
-                Groceries <span class="c">{{ groceryCount }}</span>
+                <MotionTabPill v-if="tab === 'groceries'" id="plan-tabs" />Groceries <span class="c">{{ groceryCount }}</span>
               </button>
-              <button id="tab-nutrition" type="button" role="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'">Nutrition</button>
+              <button id="tab-nutrition" type="button" role="tab" :aria-selected="tab === 'nutrition'" aria-controls="panel-body" @click="tab = 'nutrition'"><MotionTabPill v-if="tab === 'nutrition'" id="plan-tabs" />Nutrition</button>
             </div>
           </div>
           <HomeChangeLog :plan-id="plan.id" :revision="plan.revision" :start-date="plan.start_date" />
@@ -1141,7 +1156,7 @@ onUnmounted(() => {
           </div>
           <footer v-if="estimate && tab !== 'nutrition'" class="panel-foot">
             <div class="spend">
-              <b class="mc-title mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</b>
+              <b class="mc-title mc-num"><MotionCount :value="estimate.purchase_total_sgd" /></b>
               <span class="of">{{ estimate.weekly_budget_sgd ? `of ${formatSgd(estimate.weekly_budget_sgd)} · ` : "" }}{{ groceryCount }} items</span>
               <span v-if="budgetGapLabel" class="left" :class="budgetBar?.state" :title="budgetLine(estimate) ?? undefined">{{ budgetGapLabel }}</span>
             </div>
@@ -1309,7 +1324,7 @@ onUnmounted(() => {
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--c-line-soft); }
 .card-foot .foot-note { flex-basis: 100%; margin: 0; }
 .wait-note { display: flex; align-items: flex-start; gap: 8px; color: #71717a; font-size: 13px; line-height: 20px; }
-.wait-note .note-orb { margin-top: 3px; }
+.wait-note .note-loader { height: 20px; }
 /* Notices (a replaced or ended plan): a white card with a small tile beside the copy. */
 .notice { border-radius: 14px; }
 .notice .card-body { flex-direction: row; align-items: flex-start; gap: 12px; padding: 14px 16px; }
@@ -1370,7 +1385,7 @@ onUnmounted(() => {
 .delta .mc-chip.warn { background: #fffaeb; color: #b54708; }
 .caveat { margin: 0; }
 
-/* The pending reply: the living mark and its shimmering step, the wait note under the step. */
+/* The pending reply: the loader and its shimmering step, the wait note under the step. */
 .thinking { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 2px 0; transform-origin: left center; }
 .thinking .wait-note { margin: 0 0 0 50px; max-width: 520px; }
 /* A new reply's cards fade in once its words are out. */
@@ -1425,8 +1440,10 @@ onUnmounted(() => {
 .panel { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: #fcfcfd; border-left: 1px solid #f0f0f2; }
 @media (min-width: 768px) {
   .panel { animation: panel-in 620ms var(--spring) both; }
-  .panel-body > * { animation: mc-rise 640ms var(--spring) 80ms both; }
 }
+/* A tab's content rises in as the tab opens: quick and from nearly whole, so a tab change never shows a blank. */
+.panel-body > * { animation: tab-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes tab-in { from { opacity: 0.2; transform: translateY(8px); } }
 @keyframes panel-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
 .panel-head { height: 56px; flex: none; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f2; }
 .panel-title { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
@@ -1481,8 +1498,10 @@ onUnmounted(() => {
 
   /* Workspace: one column; the sidebar is a drawer from the left, the plan a sheet from the bottom. */
   .app { grid-template-columns: minmax(0, 1fr); }
-  .app > .sb { position: fixed; z-index: 31; top: 0; bottom: 0; left: 0; width: min(300px, 84vw); padding-top: calc(12px + env(safe-area-inset-top)); background: #f5f5f7; transform: translateX(-104%); transition: transform 300ms cubic-bezier(0.4, 0, 1, 1), box-shadow 300ms; overflow-y: auto; }
-  .app.drawer-open > .sb { transform: none; box-shadow: -120px 0 0 #f5f5f7, 0 24px 64px rgba(15, 15, 18, 0.28); transition: transform 560ms var(--spring), box-shadow 300ms; }
+  .app > .sb { position: fixed; z-index: 31; top: 0; bottom: 0; left: 0; width: min(300px, 84vw); padding-top: calc(12px + env(safe-area-inset-top)); background: #f5f5f7; transform: translateX(-104%); transition: transform 300ms cubic-bezier(0.4, 0, 1, 1), box-shadow 300ms; overflow-y: auto; touch-action: pan-y; }
+  /* Open, it follows a finger dragging it shut (--drag) and springs back if let go early. */
+  .app.drawer-open > .sb { transform: translateX(var(--drag, 0px)); box-shadow: -120px 0 0 #f5f5f7, 0 24px 64px rgba(15, 15, 18, 0.28); transition: transform 560ms var(--spring), box-shadow 300ms; }
+  .app > .sb.dragging, .panel.dragging { transition: none; }
   .phone-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); animation: mc-fade 200ms ease-out both; }
   .sheet-veil { z-index: 14; }
   @keyframes mc-fade { from { opacity: 0; } }
@@ -1518,7 +1537,9 @@ onUnmounted(() => {
   .week-bar .of { color: #71717a; }
   .week-bar .iconify { width: 18px; height: 18px; color: #52525b; }
 
-  .panel { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; height: min(86dvh, calc(100% - 40px)); padding-bottom: env(safe-area-inset-bottom); border: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 120px 0 #fff, 0 -16px 48px -12px rgba(15, 15, 18, 0.3); }
+  .panel { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; height: min(86dvh, calc(100% - 40px)); padding-bottom: env(safe-area-inset-bottom); border: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 120px 0 #fff, 0 -16px 48px -12px rgba(15, 15, 18, 0.3); transform: translateY(var(--drag, 0px)); transition: transform 520ms var(--spring); }
+  /* The grabber and the head take the drag; the list under them keeps its own scrolling. */
+  .sheet-grab, .panel-head { touch-action: none; }
   .sheet-grab { flex: none; display: grid; place-items: center; width: 100%; height: 22px; padding: 0; border: 0; background: transparent; }
   .sheet-grab span { width: 40px; height: 5px; border-radius: 999px; background: #d4d4d8; }
   .panel-head { height: 52px; }
