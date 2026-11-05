@@ -119,16 +119,14 @@ def _fixture_mapping_coverage(catalog: Catalog, fixture_path: Path) -> tuple[int
     return mapped, len(used), round(mapped / max(len(used), 1), 4)
 
 
-def _product_week(
-    engine: ProductPlanningEngine, request, recommendations, recipes, *, local_improvement: bool = True
-) -> list | None:
+def _product_week(engine: ProductPlanningEngine, request, recommendations, recipes) -> list | None:
     """The week the product's planning engine plans from these candidates; None when it refuses.
 
     WeeklyMealPlanService._search also retries once over a broadened pool (240 minutes, no diet filter) after an
     infeasible answer; that retry is not reproduced, so a week found only on it is scored here as infeasible.
     """
     try:
-        return engine.plan(request, recommendations, recipes, local_improvement=local_improvement).selected
+        return engine.plan(request, recommendations, recipes).selected
     except ProductPlanningError:
         return None
 
@@ -205,7 +203,6 @@ def evaluate(
     release_path: Path | None = None,
     protocol: str = "v1",
     forced_repetitions: dict[str, int] | None = None,
-    local_improvement: bool = True,
 ) -> dict[str, Any]:
     """Score one system on one scenario set.
 
@@ -264,13 +261,7 @@ def evaluate(
                 # Twice, as every system, for determinism. A week the product refuses is its answer that none
                 # fits, so the scenario is scored as answered infeasible.
                 weeks = [
-                    _product_week(
-                        product_engine,
-                        request,
-                        recommendation_result.recommendations,
-                        planning_recipes,
-                        local_improvement=local_improvement,
-                    )
+                    _product_week(product_engine, request, recommendation_result.recommendations, planning_recipes)
                     for _ in range(2)
                 ]
                 actual_feasible = weeks[0] is not None
@@ -388,7 +379,6 @@ def evaluate(
         "schema_version": "2.0",
         **({"protocol": protocol} if protocol != "v1" else {}),
         "system": system,
-        **({"configuration": {"local_improvement": False}} if not local_improvement else {}),
         "dataset": {
             "path": scenario_path.as_posix(),
             "sha256": _file_sha256(scenario_path),

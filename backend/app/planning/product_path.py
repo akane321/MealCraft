@@ -11,8 +11,10 @@ from dataclasses import asdict, dataclass, replace
 from datetime import timedelta
 from fractions import Fraction
 from math import ceil, floor, isfinite
+from statistics import fmean
 from typing import get_args
 
+from app.core.config import ablated
 from app.data import meal_structure
 from app.data.allergens import checked_allergens
 from app.data.halal import needs_certification
@@ -509,7 +511,6 @@ class ProductPlanningEngine:
         dates=None,
         plan_days=None,
         plan_day_count=None,
-        local_improvement=True,
     ):
         """A validated week, or ProductPlanningError saying why there is none.
 
@@ -893,8 +894,14 @@ class ProductPlanningEngine:
             # Preserve the product's existing nutrition, pantry and time ranking.
             # These scores only order candidates; the validator never reads them.
             losses = {r.recipe.slug: 1 - r.total_score / 100 for r in recommendations}
+            if ablated("retrieval_off") and losses:
+                # Evaluation (#397): every dish ranks alike, at the mean, so the search adds no relevance back.
+                losses = dict.fromkeys(losses, fmean(losses.values()))
             trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
             titles = {r.recipe.slug: r.recipe.title for r in recommendations}
+
+            # Evaluation (#397): no variety term; the household's own repeat limits still hold.
+            no_variety = ablated("diversity_off")
 
             def sameness(dishes) -> tuple[int, int]:
                 """Repeated dishes, then dishes of one kind ("fried rice"), in a week."""
@@ -908,7 +915,12 @@ class ProductPlanningEngine:
                 choices = [
                     state.choices
                     for state in sorted(
-                        search.states, key=lambda s: (sameness([r for _, r in s.choices]), s.loss, s.choices)
+                        search.states,
+                        key=lambda s: (
+                            (0, 0) if no_variety else sameness([r for _, r in s.choices]),
+                            s.loss,
+                            s.choices,
+                        ),
                     )
                 ]
                 budget = constraints.weekly_budget_sgd
@@ -946,13 +958,17 @@ class ProductPlanningEngine:
                         # A strongly cost-led search happily repeats a cheap dish; its weeks are tried
                         # only after every week without repeats, then with fewest dishes of one kind.
                         found_states.sort(
-                            key=lambda item: (sameness([r for _, r in item[1].choices]), item[0], item[1].loss)
+                            key=lambda item: (
+                                (0, 0) if no_variety else sameness([r for _, r in item[1].choices]),
+                                item[0],
+                                item[1].loss,
+                            )
                         )
                         extra = [state.choices for _, state in found_states]
                         trace["cost_fallback"] = {"weights": [round(w, 4) for w in weights], "candidates": len(extra)}
                         return [[PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in extra]
 
-                    fallback = cost_fallback
+                    fallback = None if ablated("repair_off") else cost_fallback
                 assignments_list = [
                     [PlanningAssignment(slot_id=s, recipe_id=r) for s, r in picked] for picked in choices
                 ]
@@ -964,10 +980,11 @@ class ProductPlanningEngine:
                     # covers the beam's 32 states times those meals, slot by slot.
                     meal_options_per_slot=256,
                     max_expansions=max(MealBeamLimits().max_expansions, 32 * 256 * len(slots) + 256),
-                    repeat_cost=1.0,
+                    repeat_cost=0.0 if no_variety else 1.0,
                     flat_repeat=True,
+                    adjacent_cost=0.0 if no_variety else MealBeamLimits.adjacent_cost,
                     max_meal_combinations=MEAL_COMBINATIONS,
-                    distinct_kinds=True,
+                    distinct_kinds=not no_variety,
                     rotate_candidates=True,
                 )
                 meal_beam = ProductMealCandidates(replace(meal_limits, **self.overrides), local_losses=losses)
@@ -994,6 +1011,8 @@ class ProductPlanningEngine:
                     optional dishes filled comes before one with a dish or two more of variety. Of two weeks
                     as varied, one dish twice and another twice beats one dish three times ("菜很单调")."""
                     # The staple repeats by design (ADR-0070) and counts towards no variety.
+                    if no_variety:
+                        return empty_roles(state, roles_of, staples), 0, 0, 0
                     dishes = [recipe for _, meal in state.choices for role, recipe in meal if role not in uncounted]
                     repeats, same_kind = sameness(dishes)
                     most = max(Counter(dishes).values(), default=0)
@@ -1127,7 +1146,9 @@ class ProductPlanningEngine:
                         return heavy_composition and full_and_varied(state)
 
                     found.extend(
-                        _vary_starts(
+                        []
+                        if no_variety
+                        else _vary_starts(
                             meal_beam,
                             problem,
                             starts,
@@ -1136,14 +1157,14 @@ class ProductPlanningEngine:
                         )
                     )
                 elif banded:
-                    fallback = lambda: most_varied_first(limit_led())  # noqa: E731
+                    fallback = None if ablated("repair_off") else lambda: most_varied_first(limit_led())
                 assignments_list = most_varied_first(found)
                 if cheapest:
                     assignments_list, fallback, last_resort = [], None, cheapest_weeks
                 elif cheapest_last and budget is not None:
                     # Every week above failed: the cheapest week the search can find, if it is within budget. Every
                     # plan shape gets it, however many dishes a meal has (owner, 2026-10-22; ADR-0080).
-                    last_resort = cheapest_weeks
+                    last_resort = None if ablated("repair_off") else cheapest_weeks
             trace["search"] = {k: v for k, v in asdict(search).items() if k != "states"}
             trace["search"]["completed_candidates"] = len(search.states)
         result = None
@@ -1272,14 +1293,14 @@ class ProductPlanningEngine:
                 trace["uncovered_members"] = uncovered
                 trace["uncovered_members_by_rule"] = by_rule
             raise ProductPlanningError(status, message, trace, problem=problem.model_copy(deep=True))
-        if constraints.planner_strategy == "beam" and budget_is_hard and local_improvement:
+        if constraints.planner_strategy == "beam" and budget_is_hard and not ablated("local_improvement_off"):
             result, trace["local_improvement"] = improve_product_plan(
                 problem,
                 result,
                 losses,
                 candidates=meal_beam if composition is not None else None,
                 validate=validate_product,
-                priority="price" if cheapest else "variety",
+                priority="price" if cheapest or no_variety else "variety",
             )
         assignments, shopping, report = result
         if "local_improvement" in trace:
@@ -1457,6 +1478,9 @@ def product_validation(validator, problem, assignments, shopping, *, minimum_dis
         report.status = (
             "failed" if report.hard_failure_count else "indeterminate" if report.indeterminate_count else "passed"
         )
+    if ablated("independent_validator_off"):
+        # Evaluation (#397): every built week is accepted; the checks and totals stay for the scorer.
+        report.status = "passed"
     return report
 
 

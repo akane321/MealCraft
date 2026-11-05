@@ -223,7 +223,6 @@ class RuntimeSettingHistory(BaseModel):
 
 LegacyExperimentName = Literal["developer-planning", "agent-benchmark"]
 PlanningExperimentName = Literal[
-    "planning-unified",
     "planning-components",
     "planning-final-gate",
     "planning-final-gate-composed",
@@ -257,7 +256,7 @@ class ExperimentRequest(BaseModel):
             if self.overrides:
                 raise ValueError("planning experiments accept only registered parameters")
             parameters = self.parameters or PlanningExperimentParameters()
-            if self.evaluation not in ("planning-components", "planning-unified") and (
+            if self.evaluation != "planning-components" and (
                 parameters.repeats != 1 or parameters.repair_rounds is not None
             ):
                 raise ValueError("final-gate experiments use one repeat and no repair setting")

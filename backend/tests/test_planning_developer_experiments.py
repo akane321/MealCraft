@@ -51,7 +51,7 @@ def test_repair_comparison_uses_same_input_and_audits_new_prices(report):
 
 def test_weights_change_only_soft_terms_and_hard_caps_remain(report):
     base = row(report, "diversity")["effective_weights"]
-    for preset, key in [("diversity_off", "diversity_penalty"), ("overlap_off", "overlap_reward_weight")]:
+    for preset, key in [("variety_off", "diversity_penalty"), ("overlap_off", "overlap_reward_weight")]:
         changed = row(report, "diversity", preset)
         assert changed["effective_weights"] == dict(base, **{key: 0})
         assert changed["audit"]["status"] == "passed"
@@ -77,13 +77,6 @@ def test_search_limit_is_not_reported_as_infeasible():
     result = run_experiments(dataset(), max_expansions=1)
     assert row(result, "diversity")["status"] == "candidate_rejected"
     assert row(result, "diversity")["solution"]["assignments"] == []
-
-
-def test_retrieval_off_uses_the_unavailable_provider_without_changing_the_input(report):
-    off = row(report, "price-change", "retrieval_off")
-    assert off["configuration"]["retrieval"] == "off"
-    assert off["stop_reason"] == "provider_unavailable"
-    assert len(off["attempts"]) == 1
 
 
 @pytest.mark.parametrize(

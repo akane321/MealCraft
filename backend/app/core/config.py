@@ -4,6 +4,17 @@ from typing import Literal
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+AblationName = Literal[
+    "retrieval_off",
+    "rule_only_parser",
+    "independent_validator_off",
+    "repair_off",
+    "diversity_off",
+    "local_improvement_off",
+]
+# Issue #397: each name switches off one product component for an evaluation run.
+ABLATIONS: tuple[str, ...] = AblationName.__args__
+
 
 class Settings(BaseSettings):
     app_name: str = "MealCraft"
@@ -12,6 +23,8 @@ class Settings(BaseSettings):
     # Debugging and demos only (ignored in production): the date, or date and time, the product takes as now in
     # Singapore, e.g. "2026-10-19" or "2026-10-19T21:30" (app/core/clock.py).
     simulated_today: str | None = None
+    # Evaluation only (ignored in production): the one product component switched off, see ablated().
+    evaluation_ablation: AblationName | None = None
     frontend_port: int = 3000
     database_url: str = "sqlite+pysqlite:///./mealcraft.db"
     cors_origins: list[str] = ["http://localhost:3000"]
@@ -85,3 +98,9 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def ablated(name: str) -> bool:
+    """Whether the evaluation switched this product component off; never outside development and test."""
+    settings = get_settings()
+    return settings.environment.casefold() in {"development", "test"} and settings.evaluation_ablation == name

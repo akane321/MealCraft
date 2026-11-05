@@ -21,7 +21,7 @@ from app.planning.snapshot_repair import RetrievalUnavailable, solve_with_repair
 from app.planning.workbench import FileSnapshots
 from app.schemas.planning_v2 import FinalPlanningProblem
 
-PRESETS = ("beam", "greedy", "retrieval_off", "diversity_off", "overlap_off", "repair_off")
+PRESETS = ("beam", "greedy", "variety_off", "overlap_off", "repair_off")
 
 
 class ExperimentCase(BaseModel):
@@ -112,7 +112,7 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
     for case in dataset.cases:
         for preset in PRESETS:
             problem = case.problem.model_copy(deep=True)
-            weight = {"diversity_off": "diversity_penalty", "overlap_off": "overlap_reward_weight"}.get(preset)
+            weight = {"variety_off": "diversity_penalty", "overlap_off": "overlap_reward_weight"}.get(preset)
             if weight and (problem.diversity_policy is None or getattr(problem.diversity_policy, weight) == 0):
                 rows.append(
                     {
@@ -127,11 +127,7 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
                 problem.diversity_policy = problem.diversity_policy.model_copy(update={weight: 0.0})
             rounds = 0 if preset == "repair_off" else repair_rounds
             for repeat in range(repeats):
-                provider = (
-                    UnavailableProvider()
-                    if preset == "retrieval_off" or case.provider_unavailable
-                    else FileSnapshots(case.snapshots)
-                )
+                provider = UnavailableProvider() if case.provider_unavailable else FileSnapshots(case.snapshots)
                 composed = any(s.composition is not None for s in problem.slots)
                 if composed:
                     planner = MealBeamPlanner(
@@ -184,7 +180,6 @@ def run_experiments(dataset, *, repeats=1, width=32, max_expansions=10000, repai
                             "width": (1 if composed else None) if preset == "greedy" else width,
                             "max_expansions": None if preset == "greedy" and not composed else max_expansions,
                             "repair_rounds": rounds,
-                            "retrieval": "off" if preset == "retrieval_off" else "fixture",
                             "ranking": "off",
                             "validation": "on",
                             "seed": None,

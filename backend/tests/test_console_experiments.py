@@ -44,12 +44,10 @@ def _run(client, body: dict, key: str):
 
 def test_the_product_planner_option_scores_the_planner_the_product_runs(monkeypatch) -> None:
     strategies = []
-    improvement_settings = []
 
     class Watched(ProductPlanningEngine):
         def plan(self, constraints, *args, **kwargs):
             strategies.append(constraints.planner_strategy)
-            improvement_settings.append(kwargs.get("local_improvement"))
             return super().plan(constraints, *args, **kwargs)
 
     monkeypatch.setattr(runner, "ProductPlanningEngine", Watched)
@@ -60,24 +58,7 @@ def test_the_product_planner_option_scores_the_planner_the_product_runs(monkeypa
     # Twice a week with candidates (the determinism check), each with the product's beam search.
     assert len(strategies) == 2 * len(planned) == 36
     assert set(strategies) == {"beam"}
-    assert set(improvement_settings) == {True}
-    assert "configuration" not in report
     assert report["metrics"]["hard_constraint_violation_count"] == 0
-
-
-def test_developer_runner_exposes_local_improvement_off_without_changing_the_product_default(monkeypatch) -> None:
-    settings = []
-
-    class Watched(ProductPlanningEngine):
-        def plan(self, constraints, *args, **kwargs):
-            settings.append(kwargs.get("local_improvement"))
-            return super().plan(constraints, *args, **kwargs)
-
-    monkeypatch.setattr(runner, "ProductPlanningEngine", Watched)
-    report = runner.evaluate(**CATALOG, system="product-planner", local_improvement=False)
-
-    assert set(settings) == {False}
-    assert report["configuration"] == {"local_improvement": False}
 
 
 def test_a_week_the_product_planner_refuses_is_scored_as_answered_infeasible(monkeypatch) -> None:

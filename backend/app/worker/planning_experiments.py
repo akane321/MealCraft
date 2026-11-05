@@ -11,8 +11,6 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app.core.paths import repository_root
-from app.evaluation.ablation_conditions import ABLATION_CONDITIONS
-from app.evaluation.unified_run import run_unified_evaluation
 from app.models.platform import OperationRun
 from app.orchestration.run_lifecycle import stable_digest
 from app.planning.developer_experiments import MealExperimentDataset, digest, run_experiments
@@ -41,24 +39,10 @@ def run_planning_experiment_handler(payload: dict, database_url: str, context: A
             if _has_complete_result(current):
                 return
 
-        root = repository_root()
-        dataset_path = root / registry["dataset"]
+        dataset_path = repository_root() / registry["dataset"]
         raw = dataset_path.read_bytes()
         started = perf_counter()
-        if request.evaluation == "planning-unified":
-            product, baselines, ablations = _unified_condition_runners(root, request.parameters)
-            report = run_unified_evaluation(product=product, baselines=baselines, ablations=ablations)
-            report["protocol"] = report["schema_version"]
-            report["dataset_sha256"] = hashlib.sha256(raw).hexdigest()
-            report["implementation"] = {"orchestrator": "app.worker.planning_experiments"}
-            metrics = {
-                "condition_count": len(report["manifest"]),
-                "completed_condition_count": sum(row["status"] == "completed" for row in report["results"]),
-                "failed_condition_count": sum(row["status"] == "failed" for row in report["results"]),
-            }
-            mechanisms = Counter(row["label"] for row in report["results"] if row["status"] == "failed")
-            dataset = None
-        elif request.evaluation == "planning-components":
+        if request.evaluation == "planning-components":
             dataset = MealExperimentDataset.model_validate_json(raw)
             report = run_experiments(dataset, **request.parameters)
             metrics, mechanisms = _component_summary(report, len(dataset.cases))
@@ -72,7 +56,7 @@ def run_planning_experiment_handler(payload: dict, database_url: str, context: A
             metrics, mechanisms = _gate_summary(report, len(dataset.cases))
         duration_seconds = perf_counter() - started
         file_sha256 = hashlib.sha256(raw).hexdigest()
-        snapshot_sha256 = _product_snapshot_digest(dataset) if dataset is not None else hashlib.sha256(raw).hexdigest()
+        snapshot_sha256 = _product_snapshot_digest(dataset)
 
         artifact = {
             "kind": "planning_experiment",
@@ -119,62 +103,6 @@ def run_planning_experiment_handler(payload: dict, database_url: str, context: A
             session.commit()
     finally:
         engine.dispose()
-
-
-def _unified_condition_runners(root: Any, parameters: dict[str, int]):
-    """Load registered developer inputs, then expose existing runners as one matrix."""
-    from app.evaluation.agent_benchmark import evaluate_agent
-    from app.evaluation.runner import evaluate
-    from app.services.ops_settings import PLANNERS
-
-    component_raw = (root / PLANNING_EXPERIMENTS["planning-components"]["dataset"]).read_bytes()
-    gate_raw = (root / PLANNING_EXPERIMENTS["planning-final-gate"]["dataset"]).read_bytes()
-    component_dataset = MealExperimentDataset.model_validate_json(component_raw)
-    gate_dataset = GateDataset.model_validate_json(gate_raw)
-    planning_dataset = root / PLANNING_EXPERIMENTS["planning-unified"]["dataset"]
-    agent_dataset = root / "data/evaluation/agent/fixture-v1.json"
-    common = {
-        "ingredient_path": root / "data/ingredients/ingredients.json",
-        "recipe_path": root / "data/recipes/recipes.json",
-        "scenario_path": planning_dataset,
-        "fixture_path": root / "data/fixtures/fairprice-products.json",
-    }
-    component_cache: dict[str, dict] = {}
-
-    def planning(system: str, **options: Any):
-        return lambda: evaluate(**common, system=system, **options)
-
-    def component(condition: str):
-        def run() -> dict:
-            if "report" not in component_cache:
-                component_cache["report"] = run_experiments(component_dataset, **parameters)
-            report = component_cache["report"]
-            return {**report, "runs": [row for row in report["runs"] if row["preset"] == condition]}
-
-        return run
-
-    def final_gate_off() -> dict:
-        report = run_gate_experiments(
-            gate_dataset,
-            width=parameters["width"],
-            max_expansions=parameters["max_expansions"],
-        )
-        return report
-
-    ablations = {
-        "retrieval_off": component("retrieval_off"),
-        "rule_only_parser": lambda: evaluate_agent(dataset_path=agent_dataset, provider="fixture"),
-        "independent_validator_off": final_gate_off,
-        "repair_off": component("repair_off"),
-        "diversity_off": component("diversity_off"),
-        "local_improvement_off": planning("product-planner", local_improvement=False),
-    }
-    assert set(ablations) == set(ABLATION_CONDITIONS)
-    return (
-        planning("product-planner"),
-        tuple((system, planning(system)) for system in PLANNERS if system != "product-planner"),
-        ablations,
-    )
 
 
 def _owns_attempt(run: OperationRun, attempt_count: int) -> bool:

@@ -7,7 +7,6 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from app.core.code_version import code_commit
-from app.evaluation.ablation_conditions import ablation_descriptors
 from app.models.platform import AuditEvent, OperationRun
 from app.orchestration.run_lifecycle import stable_digest
 from app.repositories.operation_jobs import OperationJobRepository
@@ -16,12 +15,6 @@ from app.schemas.operations import ExperimentRequest, PlanningExperimentName, Pl
 PLANNING_EXPERIMENT_RUN_TYPE = "planning_experiment"
 
 PLANNING_EXPERIMENTS: dict[PlanningExperimentName, dict[str, Any]] = {
-    "planning-unified": {
-        "label": "Unified Sprint 3 evaluation",
-        "description": "Product, registered baselines and all six canonical ablations in one run.",
-        "dataset": "data/evaluation/dev/planning-v1.json",
-        "runner": "unified-evaluation-run-v1",
-    },
     "planning-components": {
         "label": "Planning component ablations",
         "description": "Beam, greedy, diversity, overlap and repair conditions on developer fixtures.",
@@ -56,13 +49,12 @@ def normalized_parameters(request: ExperimentRequest) -> dict[str, int]:
         "width": parameters.width,
         "max_expansions": parameters.max_expansions,
     }
-    if request.evaluation in ("planning-components", "planning-unified"):
+    if request.evaluation == "planning-components":
         result["repair_rounds"] = 1 if parameters.repair_rounds is None else parameters.repair_rounds
     return result
 
 
 def planning_experiment_descriptors() -> list[dict[str, Any]]:
-    ablations = ablation_descriptors()
     return [
         {
             "name": name,
@@ -70,9 +62,6 @@ def planning_experiment_descriptors() -> list[dict[str, Any]]:
             "description": item["description"],
             "dataset": item["dataset"],
             "options": {},
-            "ablation_conditions": ablations
-            if name == "planning-unified"
-            else [condition for condition in ablations if condition["evaluation"] == name],
             "execution_mode": "durable_worker",
         }
         for name, item in PLANNING_EXPERIMENTS.items()

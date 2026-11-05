@@ -19,7 +19,6 @@ from app.core.code_version import code_commit
 from app.core.config import Settings
 from app.core.paths import repository_root
 from app.core.runtime_config import REGISTRY, runtime_value
-from app.evaluation.ablation_conditions import ablation_descriptors
 from app.models.platform import AuditEvent, OperationRun, RuntimeSetting, User
 from app.orchestration.run_lifecycle import stable_digest
 from app.schemas.operations import (
@@ -49,8 +48,6 @@ PLANNERS = {
     "rule-only-baseline": "Protocol v1 strong rule-only baseline: cheapest, then fastest, no recipe twice in a row",
 }
 
-ABLATION_DESCRIPTORS = ablation_descriptors()
-
 # Developer sets only. Held-out sets stay read-once and are not offered for tuning (ADR-0031 section 3).
 EVALUATIONS: dict[str, dict[str, Any]] = {
     "developer-planning": {
@@ -59,7 +56,6 @@ EVALUATIONS: dict[str, dict[str, Any]] = {
         " prices, scored for each planner on the same candidates.",
         "dataset": "data/evaluation/dev/planning-v1.json",
         "options": {"planner": list(PLANNERS)},
-        "ablation_conditions": [item for item in ABLATION_DESCRIPTORS if item["evaluation"] == "developer-planning"],
         "keys": [],
     },
     "agent-benchmark": {
@@ -67,7 +63,6 @@ EVALUATIONS: dict[str, dict[str, Any]] = {
         "description": "24 messages the assistant must read into constraints (developer set fixture-v1).",
         "dataset": "data/evaluation/agent/fixture-v1.json",
         "options": {},
-        "ablation_conditions": [item for item in ABLATION_DESCRIPTORS if item["evaluation"] == "agent-benchmark"],
         "keys": ["agent_parser_provider"],
     },
 }

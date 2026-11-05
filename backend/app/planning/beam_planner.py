@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from math import isfinite
 
+from app.core.config import ablated
 from app.planning.constraint_compiler import compile_search_domains
 from app.planning.diversity import diversity_loss, permits_extension
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
@@ -70,6 +71,8 @@ class BeamPlanner(FinalScopeReferencePlanner):
         bounds = SearchBounds(problem, ordered_slots, domains, local_losses=self.local_losses)
         nutrition_pruned = dominated = 0
         width_pruned_count = 0
+        # Evaluation (#397): no repeat or adjacent-repeat term; the household's own limits still hold.
+        no_variety = problem.diversity_policy is None and ablated("diversity_off")
         # Chronological order preserves the reference policy's adjacency meaning.
         for slot_index, slot in enumerate(ordered_slots):
             domain = domains[slot.slot_id]
@@ -101,7 +104,7 @@ class BeamPlanner(FinalScopeReferencePlanner):
                         )
                         + meal_affinity_loss(recipes[recipe_id], slot.meal_type)
                         + nutrition_guard_loss(problem, recipes[recipe_id])
-                        + diversity_loss(problem, previous, recipe_id)
+                        + (0.0 if no_variety else diversity_loss(problem, previous, recipe_id))
                     )
                     next_states.append(SearchState(state.choices + ((slot.slot_id, recipe_id),), state.loss + loss))
                 if exhausted:

@@ -137,6 +137,39 @@ If capacity permits, run MealCraft with one mechanism removed:
 Ablations explain which mechanism causes an improvement, but they should not
 replace the external baselines above.
 
+### Ablation arms (issue #397)
+
+Each ablation switches one product component off with one setting,
+`EVALUATION_ABLATION=<name>`, read only through `app.core.config.ablated()`,
+which is never true outside the development and test environments:
+
+| Name | What is switched off |
+| --- | --- |
+| `retrieval_off` | recipe candidate recall: `RecipeRecommendationEngine.recommend` orders by recipe id instead of relevance, and the beam's relevance losses tie (owner decision, 2026-11-04); hard exclusions stay |
+| `rule_only_parser` | the model parser: `create_constraint_parser` returns the rule parser, ahead of the console setting |
+| `independent_validator_off` | the final validator's verdict: `product_validation` reports passed, its checks and totals kept |
+| `repair_off` | the repair step: the second, relaxed-pool attempt of `services/meal_plan.py` `_search`, and the planner's fallbacks (`cost_fallback`, the most-varied fallback, the cheapest-last last resort); the "cheapest" main search stays |
+| `diversity_off` | the variety terms of the planner's ordering and searches; household repetition limits and minimum distinct dishes stay |
+| `local_improvement_off` | the simulated-annealing local improvement of `ProductPlanningEngine.plan` |
+
+They run as arms of the shared baseline runner (`app.evaluation.ablation_arms`,
+`app.evaluation.baseline_arms`): `mealcraft` and `mealcraft/ablation/<name>`
+reach the product through ordinary chat (`ProductTransport`), on the same
+episodes, through the same `to_baseline_response` and the unchanged
+`pure_llm_baseline.score` as the baselines. The interface is
+`ablation_arms(client_factory)`: the held-out caller supplies a logged-in client
+of a product server whose `ENVIRONMENT` is development or test. Development runs
+use the product in process with the fixture parser and no key, so they spend
+nothing and `rule_only_parser` equals `mealcraft` there by construction.
+
+The spend cap is US$5 for the ablation arms, development runs included (owner
+decision, 2026-11-04). The runner's budget counts only an arm's own model
+calls and these arms make none (`paid=False`), so it does not cap the product's
+model calls: a run against a product with the model parser must read the spend
+the product records (`used_api_cost_usd`), counting an unknown price as unknown
+spend, never as zero. Development results are diagnostics, not held-out
+conclusions.
+
 ## 4. Three information conditions
 
 ### A. Controlled planning condition — primary causal comparison
@@ -618,18 +651,3 @@ success, human effort and causal attribution.
 Until v2 is implemented, public status and README metrics must continue to cite
 v1. When v2 becomes executable, release it as a new version rather than silently
 rewriting v1 data or reports.
-
-## Ablation condition interface
-
-Evaluation orchestration uses the six canonical single-component condition names in
-`backend/app/evaluation/ablation_conditions.py`: retrieval off, rule-only parser,
-independent final validator off, repair off, diversity off, and local improvement off.
-They are evaluation conditions only. Normal product requests keep every component on,
-and an unchecked final-gate draft is never persistable as a product plan.
-
-`backend/app/evaluation/unified_run.py` consumes that registry. One run enumerates the
-product/default condition, the selected registered baselines, and all six ablations in
-canonical order, then invokes each existing runner without interpreting its packet or
-duplicating its implementation. The manifest and result rows retain the stable
-`product/default`, `baseline/<system-id>`, and `ablation/<condition>` labels. A failed
-condition is recorded and does not silently prevent later conditions from running.
