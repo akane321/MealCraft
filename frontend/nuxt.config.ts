@@ -32,6 +32,8 @@ export default defineNuxtConfig({
       apiBase: "http://localhost:8000",
       // The MealCraft FairPrice cart extension (browser-extension/fairprice-cart); its manifest key fixes this id.
       fairpriceCartExtensionId: "iogncfhaaajiccdgdnncocllpojhdepm",
+      // Demo videos only (NUXT_PUBLIC_DEMO_SCRIPT=1): the microphone shows a scripted sentence instead of uploading.
+      demoScript: false,
     },
   },
   // Light only; fonts come from the Google Fonts links in app.vue. Only the components the app uses get theme

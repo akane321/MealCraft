@@ -7,6 +7,7 @@ import { formatPlanDate, planLabels, planRange, sentenceDay, todayIsoDate } from
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
+import { revealDuration } from "~/lib/reveal";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { FairPriceCartState, MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
 
@@ -58,11 +59,17 @@ const cartOpen = ref(false);
 const nutritionOpen = ref(false);
 const recipeSlug = ref<string | null>(null);
 const log = ref<HTMLElement | null>(null);
-const ask = ref<HTMLInputElement | null>(null);
+const ask = ref<HTMLTextAreaElement | null>(null);
 // Stays mounted while closed so the export can print it.
 const preview = ref<HTMLElement | null>(null);
 const film = ref<HTMLVideoElement | null>(null);
 const filmPlaying = ref(true);
+// Phone layout (ADR-0116): under 768px. The film is only created at desktop width, so a phone never downloads it.
+const isPhone = ref(false);
+const filmShown = ref(false);
+const drawerOpen = ref(false);
+// The on-screen keyboard's height (iPhone does not shrink the page for it), so the composer stays above it.
+const keyboard = ref(0);
 
 const messages = computed<AgentMessage[]>(() => session.value?.messages.filter(m => m.role !== "system") ?? []);
 // Nothing said yet: the greeting, the prompt box and the starter cards.
@@ -156,21 +163,53 @@ const budgetGapLabel = computed(() => {
   const gap = estimate.value ? budgetGap(estimate.value) : null;
   return gap && `${gap.amount} ${gap.over ? "over" : "left"}`;
 });
-// A confirmed change stamps itself on the chat for a moment.
-const stamp = ref(false);
-let confirming = false;
+// A confirmed change stamps itself on the chat for a moment, with the mark's success motion.
+const stamp = ref<string | null>(null);
+const confirming = ref(false);
 let stampTimer: ReturnType<typeof setTimeout> | undefined;
+function showStamp(text: string) {
+  stamp.value = text;
+  clearTimeout(stampTimer);
+  stampTimer = setTimeout(() => { stamp.value = null; }, 1800);
+}
 function confirmChange() {
-  confirming = true;
+  confirming.value = true;
+  awaitingReply = true;
   void agent.confirmReplan();
 }
+async function planWeek() {
+  const before = session.value?.plan_id;
+  awaitingReply = true;
+  await agent.confirm();
+  if (!errorMessage.value && session.value?.plan_id && session.value.plan_id !== before) showStamp(labels.value.isWeek ? "Week planned" : "Plan made");
+}
 watch(() => session.value?.pending_replan, (now, before) => {
-  if (before && !now && confirming && !errorMessage.value) {
-    stamp.value = true;
-    clearTimeout(stampTimer);
-    stampTimer = setTimeout(() => { stamp.value = false; }, 1600);
-  }
-  if (!now) confirming = false;
+  if (before && !now && confirming.value && !errorMessage.value) showStamp("Change made");
+  if (!now) confirming.value = false;
+});
+watch(isLoading, (loading) => {
+  if (!loading && errorMessage.value) confirming.value = false;
+});
+
+// A new reply (one this page asked for) shows word by word, and the cards under it fade in after the words;
+// conversations opened from the list show at once. Synchronous, so the cards mount already delayed.
+let awaitingReply = false;
+const shownIds = new Set<number>();
+const revealId = ref<number | null>(null);
+let revealTimer: ReturnType<typeof setTimeout> | undefined;
+watch(messages, (list) => {
+  const added = list.filter(message => !shownIds.has(message.id));
+  added.forEach(message => shownIds.add(message.id));
+  const reply = awaitingReply ? [...added].reverse().find(message => message.role === "assistant") : undefined;
+  if (!reply) return;
+  awaitingReply = false;
+  revealId.value = reply.id;
+  clearTimeout(revealTimer);
+  revealTimer = setTimeout(() => { revealId.value = null; }, revealDuration(reply.content) + 100);
+}, { flush: "sync", immediate: true });
+const revealDelay = computed(() => {
+  const reply = revealId.value === null ? undefined : messages.value.find(message => message.id === revealId.value);
+  return reply ? revealDuration(reply.content) : 0;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const readOnly = computed(() => Boolean(plan.value && replaced.value));
@@ -405,6 +444,7 @@ async function deliver(message: string, request: () => Promise<AgentSession | nu
   const action = dishAction.value;
   const version = conversationVersion;
   if (draft.value === message) draft.value = "";
+  awaitingReply = true;
   if (await request() || version !== conversationVersion || draft.value) return;
   draft.value = message;
   dishAction.value = action;
@@ -418,6 +458,7 @@ function keepPlanning() {
 async function choose(optionId: string) {
   const pending = interaction.value;
   if (!pending || readOnly.value) return;
+  awaitingReply = true;
   await agent.answerInteraction({
     question_id: pending.question_id,
     option_ids: [optionId],
@@ -503,6 +544,8 @@ function toggleFilm() {
 function showConversation(item: AgentSession | null) {
   conversationVersion += 1;
   entering.value = false;
+  awaitingReply = false;
+  drawerOpen.value = false;
   // Keep the conversation being left in the recent list, as it is now (its listed copy may be older).
   const leaving = session.value;
   if (leaving?.messages.length) {
@@ -528,7 +571,55 @@ function openSession(item: AgentSession) {
   if (item.id !== session.value?.id) showConversation(item);
 }
 
+/** The composer grows with its text, up to about six lines. */
+function grow() {
+  const el = ask.value;
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${Math.min(el.scrollHeight, 168)}px`;
+}
+watch(draft, () => nextTick(grow));
+
+/** Enter sends; Shift+Enter is a new line, and Enter while an input method is composing (Chinese) is left to it. */
+function onEnter(event: KeyboardEvent) {
+  if (event.isComposing) return;
+  event.preventDefault();
+  void send();
+}
+
+// Voice input: the words land at the caret (replacing a selection); scripted demo words arrive a few at a time.
+let voiceAnchor: { before: string; after: string } | null = null;
+const voiceFlash = ref(false);
+const field = () => document.getElementById("mc-ask") as HTMLTextAreaElement | HTMLInputElement | null;
+function voiceStart() {
+  const el = field();
+  const start = el?.selectionStart ?? draft.value.length;
+  voiceAnchor = { before: draft.value.slice(0, start), after: draft.value.slice(el?.selectionEnd ?? start) };
+}
+async function voiceText(text: string, final: boolean) {
+  if (!voiceAnchor) voiceStart();
+  const { before, after } = voiceAnchor!;
+  const lead = before && text && !/\s$/.test(before) ? " " : "";
+  const trail = after && text && !/^\s/.test(after) ? " " : "";
+  draft.value = before + lead + text + trail + after;
+  if (!final) return;
+  voiceAnchor = null;
+  if (!text) return;
+  await nextTick();
+  const caret = (before + lead + text).length;
+  field()?.focus();
+  field()?.setSelectionRange(caret, caret);
+  voiceFlash.value = true;
+  setTimeout(() => { voiceFlash.value = false; }, 1200);
+}
+
+function onViewport() {
+  const viewport = window.visualViewport;
+  if (viewport) keyboard.value = Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop));
+}
+
 function onKey(event: KeyboardEvent) {
+  if (event.key === "Escape" && drawerOpen.value) drawerOpen.value = false;
   if (view.value === "app" && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     newChat();
@@ -569,7 +660,12 @@ watch([() => plan.value?.id, lastPlanId], (weeks) => {
 }, { flush: "sync" });
 watch(() => [messages.value.length, isLoading.value, session.value?.pending_replan?.id, showWeek.value, takeOn.value], async () => {
   await nextTick();
-  log.value?.scrollTo({ top: log.value.scrollHeight, behavior: "smooth" });
+  const thread = log.value;
+  if (!thread) return;
+  // A reply being revealed comes into view from its first words, not from the cards still to fade in under it.
+  const reply = revealId.value === null ? null : thread.querySelector(`[data-message="${revealId.value}"]`);
+  const top = reply ? thread.scrollTop + reply.getBoundingClientRect().top - thread.getBoundingClientRect().top - 16 : thread.scrollHeight;
+  thread.scrollTo({ top, behavior: "smooth" });
 });
 
 useDialog(preview, () => { previewOpen.value = false; }, previewOpen);
@@ -592,6 +688,14 @@ onMounted(() => watch(actor, (signedIn) => {
 
 onMounted(() => {
   window.addEventListener("keydown", onKey);
+  const phone = window.matchMedia("(max-width: 767px)");
+  isPhone.value = phone.matches;
+  filmShown.value = !phone.matches;
+  phone.addEventListener("change", () => { isPhone.value = phone.matches; });
+  // On a phone the plan is a sheet, opened from the week bar or a card.
+  if (isPhone.value) panelOpen.value = false;
+  window.visualViewport?.addEventListener("resize", onViewport);
+  window.visualViewport?.addEventListener("scroll", onViewport);
   try {
     const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null") as { text?: string; action?: typeof dishAction.value } | null;
     if (saved?.text) {
@@ -602,16 +706,21 @@ onMounted(() => {
   }
   catch { /* ignore */ }
 });
-onUnmounted(() => window.removeEventListener("keydown", onKey));
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKey);
+  window.visualViewport?.removeEventListener("resize", onViewport);
+  window.visualViewport?.removeEventListener("scroll", onViewport);
+});
 </script>
 
 <template>
-  <div class="mc-surface" :class="{ 'mc-shell': view === 'app' && landingGone }" :data-view="view">
+  <div class="mc-surface" :class="{ 'mc-shell': view === 'app' && landingGone }" :data-view="view" :style="{ '--kb': `${keyboard}px` }">
     <svg width="0" height="0" class="defs" aria-hidden="true">
       <symbol id="mc-logo" viewBox="0 0 32 32"><circle cx="16" cy="18" r="10.5" /><path class="leaf" d="M16 7.5c1.4-3.2 4.6-4.2 7-3.3-.9 2.8-3.7 4.4-7 3.3z" /></symbol>
     </svg>
     <div class="film" aria-hidden="true">
-      <video ref="film" autoplay muted loop playsinline preload="auto" poster="/media/hero-poster.jpg" @play="filmPlaying = true" @pause="filmPlaying = false">
+      <!-- Created only at desktop width after mounting: a phone shows the poster and never downloads the film. -->
+      <video v-if="filmShown" ref="film" autoplay muted loop playsinline preload="auto" poster="/media/hero-poster.jpg" @play="filmPlaying = true" @pause="filmPlaying = false">
         <source src="/media/hero.mp4" type="video/mp4">
       </video>
     </div>
@@ -631,7 +740,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           <p class="lede">Tell us who’s eating and what you can spend. We plan the meals and price the groceries at FairPrice first, then at Cold Storage and RedMart for what it lacks.</p>
           <form class="ask" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
-            <input id="mc-ask" v-model="draft" type="text" autocomplete="off" placeholder="What should we plan…  e.g. dinner tonight for two, no seafood">
+            <input id="mc-ask" v-model="draft" type="text" autocomplete="off" :placeholder="isPhone ? 'What should we plan?' : 'What should we plan…  e.g. dinner tonight for two, no seafood'">
+            <HomeVoice @start="voiceStart" @text="voiceText" />
             <button type="submit" class="send" aria-label="Send" :disabled="isLoading || !draft.trim()">
               <svg class="mc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
@@ -648,7 +758,8 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
       </section>
     </Transition>
 
-    <div v-if="view === 'app'" class="app mc-shell" :class="{ 'no-panel': !panelShown }">
+    <div v-if="view === 'app'" class="app mc-shell" :class="{ 'no-panel': !panelShown, 'drawer-open': drawerOpen }">
+      <div v-if="isPhone && drawerOpen" class="phone-scrim drawer-veil" aria-hidden="true" @click="drawerOpen = false" />
       <ShellSidebar current="plan" brand-button @brand="view = 'landing'">
         <template #action>
           <UButton color="neutral" variant="outline" class="sb-new" icon="i-lucide-plus" title="Start a new plan" @click="newChat">
@@ -685,6 +796,12 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 
       <div class="mc-frame work">
       <main class="chat" :class="{ 'is-empty mc-glow': isEmpty }">
+        <header v-if="isPhone" class="phone-bar">
+          <button type="button" class="pb-btn" aria-label="Open menu" :aria-expanded="drawerOpen" @click="drawerOpen = true"><UIcon name="i-lucide-menu" aria-hidden="true" /></button>
+          <button type="button" class="pb-brand" aria-label="Back to home" @click="view = 'landing'"><ShellMark />MealCraft</button>
+          <span class="grow" />
+          <ShellSimulated compact />
+        </header>
         <header class="chat-head">
           <h1 class="mc-heading" :title="title">{{ title }}</h1>
           <span v-if="plan" class="date">{{ rangeLabel }}</span>
@@ -703,15 +820,15 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
           </UTooltip>
         </header>
 
-        <section ref="log" class="thread" aria-label="Conversation" aria-live="polite">
-          <div class="col">
+        <section ref="log" class="thread" aria-label="Conversation" aria-live="polite" :aria-busy="revealId !== null || undefined">
+          <div class="col" :class="{ revealing: revealId !== null }" :style="{ '--reveal': `${revealDelay}ms` }">
             <div v-if="isEmpty" class="hello mc-rise">
               <h2><span class="mc-greet">Hello, {{ actor?.user.display_name ?? "there" }}</span><span class="hello-2">What shall we cook next?</span></h2>
             </div>
 
             <template v-for="message in messages" :key="message.id">
               <div v-if="message.role === 'user'" class="me mc-rise">{{ message.content }}</div>
-              <div v-else class="bot mc-rise"><p>{{ message.content }}</p></div>
+              <div v-else class="bot mc-rise" :data-message="message.id"><MotionRevealText :text="message.content" :animate="message.id === revealId" /></div>
             </template>
 
             <div v-if="interaction?.options.length" class="options mc-rise">
@@ -739,9 +856,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <HomePreferencesEditor v-else :value="copyPlanningPreferences(constraints?.planning_preferences)" :disabled="isLoading" @save="savePreferences" @cancel="editingPreferences = false" />
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading || editingPreferences || !canGiveFeedback" :aria-busy="isLoading || undefined" @click="agent.confirm()">
-                  <UIcon v-if="isLoading" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />{{ labels.isWeek ? (isLoading ? "Planning your week…" : "Plan my week") : (isLoading ? "Making your plan…" : "Make this plan") }}
-                </button>
+                <MotionConfirmButton
+                  :busy="isLoading"
+                  :failed="Boolean(errorMessage)"
+                  :disabled="isLoading || editingPreferences || !canGiveFeedback"
+                  :label="labels.isWeek ? 'Plan my week' : 'Make this plan'"
+                  :busy-label="labels.isWeek ? 'Planning your week…' : 'Making your plan…'"
+                  @press="planWeek"
+                />
                 <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
@@ -797,7 +919,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the ${labels.noun} ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
+                <MotionConfirmButton :busy="isLoading && confirming" :failed="Boolean(errorMessage)" :disabled="isLoading || readOnly" :label="choices.confirm" @press="confirmChange" />
                 <button type="button" class="mc-btn secondary" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </article>
@@ -829,32 +951,44 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                 <span v-if="swapOverBudget" class="mc-chip warn" :title="`This puts the ${labels.noun} ${swapOverBudget} over your ${formatSgd(estimate!.weekly_budget_sgd!)} budget.`">{{ swapOverBudget }} over your {{ formatSgd(estimate!.weekly_budget_sgd!) }}</span>
               </div>
               <div class="card-foot">
-                <button type="button" class="mc-btn primary" :disabled="isLoading || readOnly" @click="confirmChange">{{ choices.confirm }}</button>
+                <MotionConfirmButton :busy="isLoading && confirming" :failed="Boolean(errorMessage)" :disabled="isLoading || readOnly" :label="choices.confirm" @press="confirmChange" />
                 <button type="button" class="mc-btn secondary" :disabled="isLoading" @click="agent.discardReplan()">{{ choices.discard }}</button>
               </div>
             </article>
 
             <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat mc-small">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
-            <div v-if="stamp" class="stamp" role="status"><UIcon name="i-lucide-check" aria-hidden="true" />Change made</div>
+            <MotionStamp v-if="stamp" :text="stamp" />
             <div v-if="pending" class="me mc-rise">{{ pending }}</div>
-            <div v-if="isLoading" class="typing" aria-label="MealCraft is thinking"><span /><span /><span /></div>
-            <p v-if="pending" class="mc-small wait wait-note" role="status"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
+            <div v-if="isLoading" class="thinking mc-rise" aria-label="MealCraft is thinking">
+              <MotionThinking />
+              <p v-if="pending" class="mc-small wait-note" role="status">Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
+            </div>
             <p v-if="errorMessage" class="send-error" role="alert">{{ errorMessage }}</p>
           </div>
         </section>
 
         <div class="composer-wrap">
-          <form class="composer" :class="{ readonly: readOnly }" @submit.prevent="send()">
+          <!-- Phone: the week's spend and budget; a tap opens the plan sheet. -->
+          <button v-if="isPhone && planState === 'ready' && plan && estimate && !panelOpen" type="button" class="week-bar" @click="openTab('dinners')">
+            <UIcon name="i-lucide-calendar-days" aria-hidden="true" />
+            <span>This {{ labels.noun }}</span>
+            <b class="mc-num">{{ formatSgd(estimate.purchase_total_sgd) }}</b>
+            <span v-if="estimate.weekly_budget_sgd" class="of">/ {{ formatSgd(estimate.weekly_budget_sgd) }}</span>
+            <span class="grow" />
+            <UIcon name="i-lucide-chevron-up" aria-hidden="true" />
+          </button>
+          <form class="composer" :class="{ readonly: readOnly, flash: voiceFlash }" @submit.prevent="send()">
             <label for="mc-ask" class="visually-hidden">Message MealCraft</label>
-            <input
+            <textarea
               id="mc-ask"
               ref="ask"
               v-model="draft"
-              type="text"
+              rows="1"
               autocomplete="off"
               :readonly="readOnly"
-              :placeholder="readOnly ? `This ${labels.noun} was replaced. Open the current ${labels.noun} to make changes.` : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? 'Swap a night, change the budget, use up what\'s in the fridge…' : 'Who\'s eating, what to spend, anything to avoid…')"
-            >
+              :placeholder="readOnly ? `This ${labels.noun} was replaced. Open the current ${labels.noun} to make changes.` : interaction ? 'Choose an option, or type your answer…' : (ownsPlan ? (isPhone ? 'Swap a night, change the budget…' : 'Swap a night, change the budget, use up what\'s in the fridge…') : (isPhone ? 'Who\'s eating, what to spend…' : 'Who\'s eating, what to spend, anything to avoid…'))"
+              @keydown.enter.exact="onEnter"
+            />
             <div class="composer-foot">
               <!-- The household's own limits as the prompt's chips; each opens the household page.
                    A week open beside a fresh conversation shows its follow-ups instead. -->
@@ -871,6 +1005,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
                   <button v-for="text in followUps" :key="text" type="button" class="mc-suggest" @click="suggest(text)">{{ text }}</button>
                 </template>
               </div>
+              <HomeVoice :disabled="readOnly || entering" @start="voiceStart" @text="voiceText" />
               <UButton
                 type="submit"
                 color="neutral"
@@ -897,7 +1032,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         <p v-if="isEmpty" class="fine foot">Suggestions can be wrong. Check allergens on product labels.</p>
       </main>
 
+      <div v-if="isPhone && panelShown" class="phone-scrim sheet-veil" aria-hidden="true" @click="panelOpen = false" />
+      <!-- Phone only: the sheet slides; on desktop the column comes and goes at once, as before. -->
+      <Transition name="sheet" :css="isPhone">
       <aside v-if="panelShown" class="panel" aria-label="This plan">
+        <button v-if="isPhone" type="button" class="sheet-grab" aria-label="Close the plan" @click="panelOpen = false"><span /></button>
         <template v-if="planState === 'ready' && plan && days.length">
           <div class="panel-head">
             <div class="tabs mc-segmented" role="tablist" aria-label="Plan details">
@@ -984,6 +1123,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
         />
         </template>
       </aside>
+      </Transition>
       </div>
     </div>
 
@@ -1026,7 +1166,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 :deep(.leaf) { fill: #8fe3a6; stroke: none; }
 
 /* Film entry */
-.film { position: absolute; inset: 0; transition: opacity 900ms var(--ease), transform 1200ms var(--ease), filter 900ms var(--ease); }
+.film { position: absolute; inset: 0; background: #2a2a48 url("/media/hero-poster.jpg") center / cover no-repeat; transition: opacity 900ms var(--ease), transform 1200ms var(--ease), filter 900ms var(--ease); }
 .film video { width: 100%; height: 100%; object-fit: cover; }
 .film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 12, 10, 0.28) 0%, rgba(14, 12, 10, 0) 30%, rgba(14, 12, 10, 0.18) 55%, rgba(14, 12, 10, 0.6) 82%, rgba(14, 12, 10, 0.85) 100%); }
 [data-view="app"] .film { opacity: 0; transform: scale(1.06); filter: blur(20px); }
@@ -1053,9 +1193,10 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .hero em { color: #ffe27a; font-style: normal; }
 .lede { margin: 0; max-width: 520px; font-size: 18px; line-height: 1.5; font-weight: 600; color: rgba(255, 255, 255, 0.88); }
 .ask { width: 600px; display: flex; align-items: center; gap: 10px; padding: 7px 7px 7px 20px; border-radius: 18px; background: #fff; }
-.ask input, .composer input { flex: 1; min-width: 0; border: 0; background: transparent; outline: 0; color: var(--c-ink); font: inherit; }
+.ask { position: relative; }
+.ask input, .composer textarea { flex: 1; min-width: 0; border: 0; background: transparent; outline: 0; color: var(--c-ink); font: inherit; }
 .ask input { height: 46px; color: #1b1b3a; font-size: 16px; font-weight: 600; }
-.ask input::placeholder, .composer input::placeholder { color: var(--c-muted); }
+.ask input::placeholder, .composer textarea::placeholder { color: var(--c-muted); }
 .send { width: 40px; height: 40px; flex: none; border-radius: 12px; border: 0; background: var(--c-ink); color: #fff !important; display: grid; place-items: center; }
 .send svg { width: 18px; height: 18px; }
 .ask .send { width: 46px; height: 46px; border-radius: 13px; background: var(--c-coral); }
@@ -1165,14 +1306,11 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .delta .mc-chip.warn { background: #fffaeb; color: #b54708; }
 .caveat { margin: 0; }
 
-.stamp { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--c-ok-bg); color: var(--c-green-text); font-size: 12.5px; font-weight: 500; animation: mc-rise 420ms var(--ease) both; }
-.stamp .iconify { width: 14px; height: 14px; }
-.typing { display: flex; gap: 5px; padding: 8px 0; }
-.wait { margin: -12px 0 0; }
-.typing span { width: 6px; height: 6px; border-radius: 999px; background: #a1a1aa; animation: mc-dot 1.2s ease-in-out infinite; }
-.typing span:nth-child(2) { animation-delay: 150ms; }
-.typing span:nth-child(3) { animation-delay: 300ms; }
-@keyframes mc-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+/* The pending reply: the mark (leaf circling the plate) on the left, the wait note beside it. */
+.thinking { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+.thinking .wait-note { margin: 0; }
+/* A new reply's cards fade in once its words are out. */
+.col.revealing > .mc-rise:not(.me, .bot, .thinking) { animation-delay: var(--reveal); }
 /* Named apart from PanelState's .error root, which this scoped rule would also reach. */
 .send-error { width: 100%; margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border: 1px solid #fecdca; border-radius: 12px; background: #fef3f2; color: #b42318; font-size: 14px; line-height: 20px; }
 .send-error::before { content: ""; width: 16px; height: 16px; flex: none; margin-top: 2px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d92d20' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") no-repeat center / 16px; }
@@ -1181,12 +1319,16 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer-wrap { position: relative; flex: none; padding: 0 28px 10px; }
 .composer-wrap::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 24px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); pointer-events: none; }
 .chat.is-empty .composer-wrap::before { display: none; }
-.composer { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 10px 16px; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
+.composer { position: relative; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 10px 16px; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
 .composer:hover { border-color: #d4d4d8; }
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
-.composer input { height: 40px; font-size: 14.5px; font-weight: 400; color: #18181b; }
+.composer textarea { display: block; width: 100%; height: 40px; min-height: 40px; padding: 9px 0; resize: none; overflow-y: auto; font-size: 14.5px; line-height: 22px; font-weight: 400; color: #18181b; }
+/* Words just put in by voice: the box glows for a moment. */
+.composer.flash { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22); }
+.composer.flash textarea { background: linear-gradient(90deg, rgba(237, 233, 254, 0), rgba(237, 233, 254, 0.9), rgba(237, 233, 254, 0)) no-repeat; animation: mc-flash 1.1s ease-out both; }
+@keyframes mc-flash { from { background-position: -300px 0; background-size: 300px 100%; } to { background-position: 120% 0; background-size: 300px 100%; } }
 /* Only the field drops its ring (the card's focus glow marks it); chips and Send keep theirs, drawn inside the 28px row's clip. */
-.composer input:focus-visible { outline: 0; }
+.composer textarea:focus-visible { outline: 0; }
 .tool:focus-visible, .composer-foot .mc-suggest:focus-visible { outline-offset: -2px; }
 /* A replaced plan's composer only reads: flat, no focus ring, a grey send. */
 .composer.readonly, .composer.readonly:hover, .composer.readonly:focus-within { border-color: #ececef; background: #fafafa; box-shadow: none; }
@@ -1200,12 +1342,13 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .composer-foot .after .context { gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; background: #fafafa; color: #3f3f46; font-size: 12.5px; }
 .composer-foot .after .context .iconify { width: 14px; height: 14px; color: #71717a; }
 .chat.is-empty .composer { max-width: 760px; min-height: 112px; padding: 14px 12px 12px 16px; border-radius: 18px; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 12px 32px -16px rgba(16, 16, 20, 0.14); }
-.chat.is-empty .composer input { height: 44px; }
+.chat.is-empty .composer textarea { min-height: 44px; }
 .tool { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid #e8e8eb; border-radius: 999px; background: #fff; color: #3f3f46; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
 .tool:hover { background: #f7f7f8; }
 .tool .iconify { width: 14px; height: 14px; color: #71717a; }
 .tool.alert { border-color: #fecdca; background: var(--c-allergy-bg); color: var(--c-allergy-text); }
 .tool.alert .iconify { color: currentColor; }
+.composer-foot :deep(.voice .mic) { margin-left: auto; }
 .mc-send { width: 32px; height: 32px; flex: none; justify-content: center; padding: 0; border-radius: 999px; background: #18181b; color: #fff; }
 .mc-send:hover:not(:disabled) { background: #27272a; }
 .mc-send:disabled { background: #18181b; color: #fff; opacity: 1; cursor: not-allowed; }
@@ -1243,4 +1386,76 @@ onUnmounted(() => window.removeEventListener("keydown", onKey));
 .sheet-frame { width: min(680px, 100%); max-height: calc(100vh - 64px); overflow-y: auto; border: 1px solid #ececef; border-radius: 16px; background: #fff; box-shadow: var(--mc-shadow-md); }
 .sheet-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid #f0f0f2; background: #fff; }
 @media print { .sheet-actions { display: none; } }
+
+/* Phone-only pieces; the media query below lays them out. */
+.phone-bar, .week-bar, .sheet-grab { display: none; }
+
+/* Phone (ADR-0116): under 768px. The desktop rules above stay as they are. */
+@media (max-width: 767px) {
+  .mc-surface { bottom: var(--kb, 0px); }
+  /* Landing: the poster, one column that scrolls, no film controls. */
+  .landing { display: flex; flex-direction: column; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+  .topbar { flex: none; height: 60px; padding: 0 16px; gap: 8px; }
+  .brand > span { font-size: 19px; }
+  .brand svg { width: 22px; height: 22px; }
+  .link { min-height: 44px; display: inline-flex; align-items: center; padding: 0 6px; font-size: 14px; }
+  .cta { min-height: 44px; padding: 0 14px; font-size: 14px; white-space: nowrap; }
+  .hero-block { position: static; width: auto; margin-top: auto; padding: 24px 20px 0; gap: 18px; }
+  .hero { font-size: 44px; letter-spacing: -1px; }
+  .lede { font-size: 16px; }
+  .ask { width: 100%; padding: 6px 6px 6px 16px; gap: 8px; }
+  .ask input { min-width: 0; }
+  .ask .send { width: 44px; height: 44px; }
+  .landing .starters .mc-pill { min-height: 44px; }
+  .trust { position: static; flex-direction: column; gap: 6px; padding: 20px 20px 24px; font-size: 13px; }
+  .landing .film-toggle { display: none; }
+
+  /* Workspace: one column; the sidebar is a drawer from the left, the plan a sheet from the bottom. */
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .app > .sb { position: fixed; z-index: 31; top: 0; bottom: 0; left: 0; width: min(300px, 84vw); padding-top: calc(12px + env(safe-area-inset-top)); background: #f5f5f7; transform: translateX(-104%); transition: transform 320ms var(--ease), box-shadow 320ms; overflow-y: auto; }
+  .app.drawer-open > .sb { transform: none; box-shadow: 0 24px 64px rgba(15, 15, 18, 0.28); }
+  .phone-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); animation: mc-fade 200ms ease-out both; }
+  .sheet-veil { z-index: 14; }
+  @keyframes mc-fade { from { opacity: 0; } }
+  .work { margin: 0; border: 0; border-radius: 0; box-shadow: none; grid-template-columns: minmax(0, 1fr); }
+  .app.no-panel .work { grid-template-columns: minmax(0, 1fr); }
+  .chat-head { display: none; }
+  .phone-bar { flex: none; display: flex; align-items: center; gap: 6px; height: 56px; padding: env(safe-area-inset-top) 10px 0 4px; border-bottom: 1px solid #f0f0f2; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+  .chat.is-empty .phone-bar { border-color: transparent; background: transparent; }
+  .pb-btn { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 12px; background: transparent; color: #18181b; }
+  .pb-btn .iconify { width: 22px; height: 22px; }
+  .pb-brand { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--mc-strong); font: 600 16px/20px var(--font-sans, Inter, sans-serif); letter-spacing: -0.01em; }
+  .thread { padding: 16px 14px 8px; }
+  .me { max-width: 86%; }
+  .card, .swap-card { width: 100%; max-width: none; }
+  .card-foot > :is(button, .mc-btn) { flex: 1 1 auto; justify-content: center; }
+  .shape-body { flex-direction: column; align-items: flex-start; }
+
+  .chat.is-empty .thread { padding: 0 16px 20px; }
+  .hello h2 { font-size: 30px; line-height: 36px; }
+  .ideas { width: calc(100% - 32px); margin-top: 16px; }
+  .idea-grid, .app:not(.no-panel) .idea-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .idea { min-height: 0; padding: 14px; }
+  .idea-text { display: none; }
+  .fine, .fine.foot { display: none; }
+
+  .composer-wrap { padding: 0 10px calc(10px + env(safe-area-inset-bottom)); }
+  .composer, .chat.is-empty .composer { min-height: 0; padding: 6px 6px 6px 14px; border-radius: 22px; }
+  .composer textarea { min-height: 44px; padding: 11px 0; font-size: 16px; }
+  .composer-foot { min-height: 44px; }
+  .mc-send { width: 44px; height: 44px; }
+  .week-bar { width: 100%; display: flex; align-items: center; gap: 8px; height: 48px; margin: 0 0 8px; padding: 0 16px; border: 1px solid rgba(228, 228, 231, 0.9); border-radius: 16px; background: rgba(255, 255, 255, 0.78); color: #3f3f46; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px -14px rgba(16, 16, 20, 0.25); backdrop-filter: blur(12px) saturate(1.4); }
+  .week-bar b { color: var(--mc-strong); font-weight: 600; }
+  .week-bar .of { color: #71717a; }
+  .week-bar .iconify { width: 18px; height: 18px; color: #52525b; }
+
+  .panel { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; height: min(86dvh, calc(100% - 40px)); padding-bottom: env(safe-area-inset-bottom); border: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 -16px 48px -12px rgba(15, 15, 18, 0.3); }
+  .sheet-grab { flex: none; display: grid; place-items: center; width: 100%; height: 22px; padding: 0; border: 0; background: transparent; }
+  .sheet-grab span { width: 40px; height: 5px; border-radius: 999px; background: #d4d4d8; }
+  .panel-head { height: 52px; }
+  .tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .foot-acts .icon-only { width: 44px; }
+  .sheet-enter-active, .sheet-leave-active { transition: transform 320ms var(--ease); }
+  .sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
+}
 </style>

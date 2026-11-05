@@ -139,4 +139,14 @@ h3 { margin: 0; }
 .foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
+/* Phone: the figures under the title, the days a strip that scrolls sideways. */
+@media (max-width: 767px) {
+  .head { flex-direction: column; align-items: stretch; padding: 14px 16px 12px; }
+  .figures { margin-left: 0; justify-content: space-between; }
+  .fig { align-items: flex-start; }
+  .strip { display: flex; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+  .tile { flex: 0 0 92px; scroll-snap-align: start; }
+  .foot { padding: 12px 16px; }
+  .foot .mc-btn { flex: 1 1 0; justify-content: center; }
+}
 </style>

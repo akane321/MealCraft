@@ -420,3 +420,19 @@
 .product-frame .profile-page :is(input, select) { font-weight: 400; }
 /* Age, sex, activity and goal two a row, so each choice reads whole. */
 .product-frame .profile-page .member-basis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Phone (ADR-0116): touch targets of at least 44px, no keyboard hints. */
+@media (max-width: 767px) {
+  .mc-shell .mc-btn, .mc-shell .mc-btn.primary, .mc-shell .mc-btn.strong { height: 44px; }
+  .mc-shell .mc-btn.sm, .mc-shell .mc-pill, .mc-shell .mc-primary { height: auto; min-height: 44px; }
+  .mc-shell .mc-segmented > button { height: 40px; }
+  .mc-shell .mc-close { width: 44px; height: 44px; }
+  .sb-item { height: 44px; }
+  .sb-new { height: 44px; }
+  .sb-new .sb-kbd { display: none; }
+  .sb-search { height: 44px; }
+  .mc-bar { padding: 0 16px; }
+  .product-frame .page-width { width: calc(100% - 32px); }
+  .product-frame .profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .product-frame .profile-section-heading .secondary-button { flex: none; white-space: nowrap; }
+}
