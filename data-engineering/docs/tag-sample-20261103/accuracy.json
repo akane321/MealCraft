@@ -7,18 +7,7 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "determinate_checked": 88,
-      "determinate_agree": 50,
-      "accuracy": 0.526,
-      "wilson95": [
-        0.427,
-        0.624
-      ],
-      "determinate_accuracy": 0.568,
-      "determinate_wilson95": [
-        0.464,
-        0.667
-      ]
+      "accuracy": 0.526
     },
     "all": {
       "rows": 95,
@@ -27,18 +16,7 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "determinate_checked": 88,
-      "determinate_agree": 50,
-      "accuracy": 0.526,
-      "wilson95": [
-        0.427,
-        0.624
-      ],
-      "determinate_accuracy": 0.568,
-      "determinate_wilson95": [
-        0.464,
-        0.667
-      ]
+      "accuracy": 0.526
     }
   },
   "fields": {
@@ -49,18 +27,7 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "determinate_checked": 37,
-      "determinate_agree": 15,
-      "accuracy": 0.375,
-      "wilson95": [
-        0.242,
-        0.53
-      ],
-      "determinate_accuracy": 0.405,
-      "determinate_wilson95": [
-        0.263,
-        0.565
-      ]
+      "accuracy": 0.375
     },
     "contains_staple": {
       "rows": 40,
@@ -69,18 +36,7 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "determinate_checked": 37,
-      "determinate_agree": 25,
-      "accuracy": 0.625,
-      "wilson95": [
-        0.47,
-        0.758
-      ],
-      "determinate_accuracy": 0.676,
-      "determinate_wilson95": [
-        0.515,
-        0.804
-      ]
+      "accuracy": 0.625
     },
     "protein_sources": {
       "rows": 15,
@@ -89,18 +45,90 @@
       "unchecked": 0,
       "checked_without_value": 0,
       "unrecognized": 0,
-      "determinate_checked": 14,
-      "determinate_agree": 10,
-      "accuracy": 0.667,
-      "wilson95": [
+      "accuracy": 0.667
+    }
+  },
+  "wilson95": {
+    "groups": {
+      "table": [
+        0.427,
+        0.624
+      ],
+      "all": [
+        0.427,
+        0.624
+      ]
+    },
+    "fields": {
+      "meal_role": [
+        0.242,
+        0.53
+      ],
+      "contains_staple": [
+        0.47,
+        0.758
+      ],
+      "protein_sources": [
         0.417,
         0.848
-      ],
-      "determinate_accuracy": 0.714,
-      "determinate_wilson95": [
-        0.454,
-        0.883
       ]
+    }
+  },
+  "determinate": {
+    "groups": {
+      "table": {
+        "checked": 88,
+        "agree": 50,
+        "accuracy": 0.568
+      },
+      "all": {
+        "checked": 88,
+        "agree": 50,
+        "accuracy": 0.568
+      }
+    },
+    "fields": {
+      "meal_role": {
+        "checked": 37,
+        "agree": 15,
+        "accuracy": 0.405
+      },
+      "contains_staple": {
+        "checked": 37,
+        "agree": 25,
+        "accuracy": 0.676
+      },
+      "protein_sources": {
+        "checked": 14,
+        "agree": 10,
+        "accuracy": 0.714
+      }
+    },
+    "wilson95": {
+      "groups": {
+        "table": [
+          0.464,
+          0.667
+        ],
+        "all": [
+          0.464,
+          0.667
+        ]
+      },
+      "fields": {
+        "meal_role": [
+          0.263,
+          0.565
+        ],
+        "contains_staple": [
+          0.515,
+          0.804
+        ],
+        "protein_sources": [
+          0.454,
+          0.883
+        ]
+      }
     }
   },
   "differ": [

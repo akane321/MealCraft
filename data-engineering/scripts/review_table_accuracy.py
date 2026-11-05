@@ -45,9 +45,7 @@ COUNTS = ("rows", "checked", "agree", "unchecked", "checked_without_value", "unr
 
 
 def tally() -> dict:
-    counts = dict.fromkeys(COUNTS, 0)
-    counts.update({"determinate_checked": 0, "determinate_agree": 0})
-    return counts
+    return dict.fromkeys(COUNTS, 0)
 
 
 def accuracy(rows: list[dict], sample: dict) -> dict:
@@ -63,12 +61,20 @@ def accuracy(rows: list[dict], sample: dict) -> dict:
         raise SystemExit(f"the filled sheet's rows are not the sample's: {sorted(set(seen) ^ set(expected))[:5]}")
     groups = {name: tally() for name in GROUPS}
     fields = {name: tally() for name in FIELDS}
+    determinate_groups = {name: {"checked": 0, "agree": 0} for name in GROUPS}
+    determinate_fields = {name: {"checked": 0, "agree": 0} for name in FIELDS}
     differ, unrecognized = [], []
     for row in rows:
         recipe, batch_value = expected[(row["id"], row["field"])]
         counted = [groups[recipe["layer"]], groups["all"], fields[row["field"]]]
+        determinate_counted = [
+            determinate_groups[recipe["layer"]],
+            determinate_groups["all"],
+            determinate_fields[row["field"]],
+        ]
         if recipe["layer"] == "rule_decided":
             counted.append(groups[recipe["stratum"]])
+            determinate_counted.append(determinate_groups[recipe["stratum"]])
         value = code(row["value"])
         if not row["checked"]:
             outcome = "unchecked"
@@ -84,24 +90,42 @@ def accuracy(rows: list[dict], sample: dict) -> dict:
             counts[outcome] += 1
             if outcome == "checked" and same_value(batch_value, value):
                 counts["agree"] += 1
-            if outcome == "checked" and value is not None:
-                counts["determinate_checked"] += 1
+        if outcome == "checked" and value is not None:
+            for counts in determinate_counted:
+                counts["checked"] += 1
                 if same_value(batch_value, value):
-                    counts["determinate_agree"] += 1
+                    counts["agree"] += 1
         if outcome == "checked" and not same_value(batch_value, value):
             differ.append({**row, "batch_value": batch_value, "value": value})
     for counts in [*groups.values(), *fields.values()]:
         counts["accuracy"] = round(counts["agree"] / counts["checked"], 3) if counts["checked"] else None
-        counts["wilson95"] = wilson(counts["agree"], counts["checked"])
-        counts["determinate_accuracy"] = (
-            round(counts["determinate_agree"] / counts["determinate_checked"], 3)
-            if counts["determinate_checked"]
-            else None
-        )
-        counts["determinate_wilson95"] = wilson(counts["determinate_agree"], counts["determinate_checked"])
+    actual_groups = {name: counts for name, counts in groups.items() if counts["rows"]}
+    actual_fields = {name: counts for name, counts in fields.items() if counts["rows"]}
+    actual_determinate_groups = {name: counts for name, counts in determinate_groups.items() if groups[name]["rows"]}
+    actual_determinate_fields = {name: counts for name, counts in determinate_fields.items() if fields[name]["rows"]}
+    for counts in [*actual_determinate_groups.values(), *actual_determinate_fields.values()]:
+        counts["accuracy"] = round(counts["agree"] / counts["checked"], 3) if counts["checked"] else None
+    wilson_intervals = {
+        "groups": {name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_groups.items()},
+        "fields": {name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_fields.items()},
+    }
+    determinate_intervals = {
+        "groups": {
+            name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_determinate_groups.items()
+        },
+        "fields": {
+            name: wilson(counts["agree"], counts["checked"]) for name, counts in actual_determinate_fields.items()
+        },
+    }
     return {
-        "groups": {name: counts for name, counts in groups.items() if counts["rows"]},
-        "fields": {name: counts for name, counts in fields.items() if counts["rows"]},
+        "groups": actual_groups,
+        "fields": actual_fields,
+        "wilson95": wilson_intervals,
+        "determinate": {
+            "groups": actual_determinate_groups,
+            "fields": actual_determinate_fields,
+            "wilson95": determinate_intervals,
+        },
         "differ": differ,
         "unrecognized": unrecognized,
     }
@@ -126,7 +150,14 @@ def read_filled(path: Path) -> list[dict]:
     ]
 
 
-def table(title: str, counted: dict, label) -> list[str]:
+def table(
+    title: str,
+    counted: dict,
+    label,
+    wilson_by_group: dict,
+    determinate: dict,
+    determinate_wilson: dict,
+) -> list[str]:
     lines = [
         "",
         f"| {title} | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | "
@@ -136,12 +167,14 @@ def table(title: str, counted: dict, label) -> list[str]:
     ]
     for name, c in counted.items():
         share = "n/a" if c["accuracy"] is None else f"{c['accuracy']:.1%}"
-        determinate_share = "n/a" if c["determinate_accuracy"] is None else f"{c['determinate_accuracy']:.1%}"
+        resolved = determinate[name]
+        determinate_share = "n/a" if resolved["accuracy"] is None else f"{resolved['accuracy']:.1%}"
         lines.append(
-            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} | {interval(c['wilson95'])} "
-            f"| {c['determinate_checked']} | {c['determinate_agree']} | "
+            f"| {label(name)} | {c['rows']} | {c['checked']} | {c['agree']} | {share} "
+            f"| {interval(wilson_by_group[name])} "
+            f"| {resolved['checked']} | {resolved['agree']} | "
             f"{determinate_share} "
-            f"| {interval(c['determinate_wilson95'])} | {c['unchecked']} | "
+            f"| {interval(determinate_wilson[name])} | {c['unchecked']} | "
             f"{c['checked_without_value']} | {c['unrecognized']} |"
         )
     return lines
@@ -160,8 +193,22 @@ def markdown(result: dict, path: Path, sample: dict) -> str:
         "the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from "
         "the determinate denominator, while the all-checked result remains shown.",
     ]
-    lines += table("Stratum", result["groups"], lambda name: f"{LABELS[name]} (`{name}`)")
-    lines += table("Field", result["fields"], lambda name: f"`{name}`")
+    lines += table(
+        "Stratum",
+        result["groups"],
+        lambda name: f"{LABELS[name]} (`{name}`)",
+        result["wilson95"]["groups"],
+        result["determinate"]["groups"],
+        result["determinate"]["wilson95"]["groups"],
+    )
+    lines += table(
+        "Field",
+        result["fields"],
+        lambda name: f"`{name}`",
+        result["wilson95"]["fields"],
+        result["determinate"]["fields"],
+        result["determinate"]["wilson95"]["fields"],
+    )
     lines += ["", f"无法识别，请重填: {len(result['unrecognized'])} rows.", ""]
     lines += [
         f"- {row['id']} {row['title']}: `{row['field']}` filled `{row['value']}`" for row in result["unrecognized"]
