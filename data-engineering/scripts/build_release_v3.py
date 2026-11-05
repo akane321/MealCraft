@@ -27,12 +27,21 @@
    moves.
 5. Every record of the first v3 build (2026-11-03: 12,895 recipes; the added ones' line sha256 are in
    `data/enrichment/v3_first_build_lines.tsv`) stays byte for byte, and recipes.jsonl stays under 95,000,000 bytes
-   (GitHub refuses files over 100 MB); either failing stops the build.
+   (GitHub refuses files over 100 MB); either failing stops the build. Owner 2026-11-04 (issue #426): a first-build
+   record that rule 7 changes is exempt too; v2.2's records never are.
 6. Reviewed corrections (`data/enrichment/v3-corrections.csv`, checked by `v3_corrections.py`, issue #408): the
    cuisine, course and servings rows go into the added recipes' enrichment results before they are built, so the
    cap, the checks and the per-serving nutrition see the reviewed values; only the corrected recipes are exempt from
    rule 5. Withdraw rows stay released (`v3_corrections.py withdraw` keeps them out of plans). An empty table
    changes nothing.
+7. Two v3 line classes after the v2.2 correction (issue #426, `correct_v3_line`), each listed in corrections.jsonl:
+   `cooked_rice` (P5a): a rice line whose text says cooked, steamed, prepared, precooked or leftover rice but is
+   weighed as dry rice moves to the cooked form; a cup amount is re-weighed at the cooked form's own cup, any other
+   non-mass amount keeps its grams (assumed to be an estimate of cooked rice), a mass amount is left.
+   `package_mass` (P4f): an estimated counted line ("1 (14 ounce) can coconut milk" at one cup) whose own text
+   states a package mass (`correct_release_v22.stated_mass`) more than 20% away takes that mass, except when the line
+   is drained, rinsed or only partly used, is cooked, is a can or jar of a food packed in liquid (beans, corn, fruit,
+   olives...: the net weight includes the liquid), or the recipe marinates (the marinade is discarded).
 
 Every candidate not released is in `dropped.jsonl` with its reason. The manifest carries the sha256 of every input
 and a `fingerprint` over recipes.jsonl, ingredients.jsonl and the manifest itself without that field. Nothing reads
@@ -118,6 +127,11 @@ CHANGE_NOTES = [
     "Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.",
     "Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point "
     "estimate, reported with Wilson 95% intervals.",
+    "Two v3 line classes after the v2.2 correction (owner 2026-11-04, issue #426): cooked_rice (cooked, steamed or "
+    "prepared rice weighed as dry rice moves to the cooked form; a cup is re-weighed at the cooked cup, other "
+    "amounts keep their grams as an estimate of cooked rice) and package_mass (an estimated counted line takes the "
+    "package mass its own text states, unless drained, partly used, packed in liquid, cooked or a marinade). A "
+    "first-build record these change is exempt from the byte-for-byte check; v2.2's records are never changed.",
 ]
 SHORTCUTS = [
     "No new completeness review: a flagged new recipe with no verdict is dropped, not reviewed.",
@@ -134,6 +148,17 @@ SHORTCUTS = [
     "The cuisine labels of the model-enriched recipes are unreviewed model output (some are debatable).",
     "Wave 2's cuisine labels and course labels are unreviewed model output too; its human checks are the 2026-11-04 "
     "draws (manual-check-20261104/, allergen-review-20261104/).",
+    "Serving carriers and optional dips (issue #426 C): 'serve over hot rice' or 'serve with ... sauce' named only "
+    "in the steps is not listed as an ingredient line. full_default gives every meal a staple, so the planner adds "
+    "one; a carrier nobody reviewed may carry gluten that the recipe's allergens do not show.",
+    "Salt, pepper, water, ice and greasing or frying fat named only in the steps (issue #426 D) are taken as at "
+    "home and are not a defect: the shopping list and prices do not change, but sodium is low where salt is not "
+    "listed and energy is low where frying oil is not counted. P1 scan hits are not a defect count.",
+    "Unit weights left for later (issue #426 A): lemon and lime wedges, cherry and other mini items, small or dried "
+    "chilies and juice- or zest-only citrus are weighed as whole standard items (no cited per-piece weight yet); "
+    "liquid bouillon stays a bouillon cube (owner 2026-11-04: changing it to broth changes the shopping list); "
+    "cans of beans, corn, fruit and other foods packed in liquid keep their estimate (the net weight includes the "
+    "liquid). Release v2.2's own records are never changed, so their cooked-rice and package-weight hits stay.",
 ]
 
 
@@ -194,12 +219,61 @@ def admit(recipe: dict, entries: dict, forms: dict) -> tuple[dict | None, str, l
     if missing:
         return None, "ingredient form missing from the release ingredients: " + ", ".join(missing), []
     corrected, changes = correct.correct_recipe(recipe, forms, entries, LABELS)
+    corrected, more = correct.correct_recipe(
+        corrected, forms, entries, LABELS, lambda line, forms: correct_v3_line(line, forms, recipe)
+    )
+    changes += more
     kcal = corrected["nutrition"]["energy_kcal"]
     if not build.ENERGY_PER_SERVING[0] <= kcal <= build.ENERGY_PER_SERVING[1]:
         return None, f"implausible energy after the unit-weight correction: {kcal} kcal per serving", []
     if len(corrected["ingredients"]) < 2 or not corrected["instructions"]:
         return None, "below the importer floor: fewer than two ingredient lines or no step", []
     return corrected, "", changes
+
+
+V3_CLASSES = ("cooked_rice", "package_mass")
+RICE = {"ING_RICE", "ING_BROWN_RICE"}
+COOKED_RICE = re.compile(r"\b(?:cooked|steamed|prepared|precooked|pre-cooked|leftover)\b[^,;]{0,25}\brice\b", re.I)
+NOT_COOKED = re.compile(r"uncooked|\braw\b|\bdry\b|when cooked|makes|yields?|to make|after cooking|directions", re.I)
+PARTLY_USED = re.compile(r"drain|rinse|out of the can|start with|\bhalf\b|reserve|\bonly\b", re.I)
+# Masses `stated_mass` misreads: "(.25 ounce)" parses as 25 oz, "(1 pt. 2 oz.)" as 2 oz.
+MISREAD = re.compile(r"\(\s*\.\d|\bpts?\b|\bpints?\b", re.I)
+MARINADE = re.compile(r"marinade|marinate", re.I)
+LIQUID_PACKED = {
+    "ING_ARTICHOKE", "ING_BLACK_BEANS", "ING_CANNELLINI", "ING_CHERRY", "ING_CHICKPEA", "ING_CORN", "ING_KIDNEY_BEANS",
+    "ING_LIMA_BEANS", "ING_MUSHROOM", "ING_OLIVE", "ING_ONION", "ING_ORANGE", "ING_PEAS", "ING_PINEAPPLE",
+    "ING_SAUERKRAUT", "ING_WATER_CHESTNUT",
+}  # fmt: skip
+CANNED = re.compile(r"\b(?:cans?|jars?|tins?)\b", re.I)
+PACKAGE_OFF = 0.2  # as the quality scan's P4f: more than 20% away from the stated mass
+PACKAGE_TYPO = 10  # a stated mass over 10 times off the built grams is read as a typo and left
+
+
+def correct_v3_line(line: dict, forms: dict, recipe: dict) -> tuple[dict, str, str] | None:
+    """Rule 7: (the corrected line, its class, its source), or None when the line is left as built."""
+    text, cid = line["original_text"], line["canonical_ingredient_id"]
+    cooked = "cooked" in (line.get("preparation") or [])
+    if cid in RICE and not cooked and COOKED_RICE.search(text) and not NOT_COOKED.search(text):
+        if line["unit"] in correct.MASS_UNITS or f"{cid}#cooked" not in forms:
+            return None
+        new = {**line, "preparation": [*line["preparation"], "cooked"], "grams_correction": "cooked_rice"}
+        cups = {u["unit"]: u["grams"] for u in forms[f"{cid}#cooked"]["unit_grams"]}.get("cup")
+        if line["unit"] == "cup" and correct.quantity(line) and cups:
+            new["grams"] = round(correct.quantity(line) * cups, 1)
+            return new, "cooked_rice", f"the line's own text; ingredient entry {cid}#cooked unit_grams cup"
+        return new, "cooked_rice", f"the line's own text; grams kept as an estimate of cooked rice, form {cid}#cooked"
+    if line["grams_basis"] != "estimated" or cooked or "grams_correction" in line or "CHICKEN" in cid:
+        return None
+    if PARTLY_USED.search(text) or MISREAD.search(text) or (cid in LIQUID_PACKED and CANNED.search(text)):
+        return None
+    if MARINADE.search(" ".join([text, recipe["title"], *(s["text"] for s in recipe["instructions"])])):
+        return None
+    mass = correct.stated_mass(line)
+    if not mass or abs(line["grams"] - mass) <= PACKAGE_OFF * mass:
+        return None
+    if not line["grams"] / PACKAGE_TYPO <= mass <= line["grams"] * PACKAGE_TYPO:
+        return None  # "1 (1/16 ounce) package ramen noodles": a typo in the text, not a package
+    return {**line, "grams": round(mass, 1), "grams_correction": "package_mass"}, "package_mass", "the line's own text"
 
 
 def capped(base: collections.Counter, tiers: list[list[dict]]) -> tuple[list[dict], int]:
@@ -347,7 +421,7 @@ def verify(lines: list[str], v22_lines: list[str], added: list[dict], entries: d
     if not set(v22_lines) <= set(lines):
         problems.append("a v2.2 record is not byte-identical in v3")
     hashes, first = line_hashes(lines), limits["first_build"]
-    exempt = {row["recipe_id"] for row in limits["reviews"] if row["field"] != "withdraw"}
+    exempt = {row["recipe_id"] for row in limits["reviews"] if row["field"] != "withdraw"} | limits["v3_changed"]
     changed = sorted(key for key, digest in first.items() if key not in exempt and hashes.get(key) != digest)
     if changed:
         problems.append(f"{len(changed)} first-build records missing or changed, e.g. {changed[:3]}")
@@ -456,6 +530,7 @@ def assemble(
         "max_bytes": max_bytes,
         "reviews": reviews,
         "dropped_ids": dropped_ids,
+        "v3_changed": {c["recipe_id"] for c in corrections if c["class"] in V3_CLASSES},  # rule 5's exemption
     }
     checks = verify(lines, v22_lines, added, entries, rules, limits)
     enrichment_set = sizes["v2_enrichment_set"] + sizes["v3_selected"]

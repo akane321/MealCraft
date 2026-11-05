@@ -277,17 +277,22 @@ def contribution(line: dict, forms: dict[str, dict]) -> dict[str, float]:
 
 
 def correct_recipe(
-    recipe: dict, forms: dict[str, dict], entries: dict[str, dict], labels: tuple[str, str] = ("v2_1", "v2_2")
+    recipe: dict,
+    forms: dict[str, dict],
+    entries: dict[str, dict],
+    labels: tuple[str, str] = ("v2_1", "v2_2"),
+    fix_line=correct_line,
 ) -> tuple[dict, list[dict]]:
     """The recipe with its lines corrected and nutrition recomputed, and one record per changed line.
 
     `forms` and `entries` are the ingredient forms and entries of the release the recipe is weighed against; `labels`
-    name the before and after values in each change record (release v3 applies this to its added recipes).
+    name the before and after values in each change record (release v3 applies this to its added recipes, and
+    again with its own line rule as `fix_line`).
     """
     changes, lines = [], []
     delta = dict.fromkeys(NUTRIENTS, 0.0)
     for index, line in enumerate(recipe["ingredients"], 1):
-        corrected = None if "grams_consumed" in line else correct_line(line, forms)
+        corrected = None if "grams_consumed" in line else fix_line(line, forms)
         if corrected is None:
             lines.append(line)
             continue

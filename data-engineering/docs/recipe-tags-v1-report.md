@@ -7,35 +7,35 @@ Recipes: 18364 (release v3 recipes the importer loads, and the curated catalog).
 
 | Field | rule | llm | open (null) |
 | --- | ---: | ---: | ---: |
-| `meal_role` | 17879 | 266 | 219 |
-| `contains_staple` | 17879 | 266 | 219 |
-| `protein_sources` | 18084 | 93 | 187 |
+| `meal_role` | 17878 | 250 | 236 |
+| `contains_staple` | 17878 | 250 | 236 |
+| `protein_sources` | 18095 | 82 | 187 |
 | `cooking_methods` | 18364 | 0 | 0 |
 | `equipment` | 18364 | 0 | 0 |
 | `flavor_tags` | 18364 | 0 | 0 |
 
 ## The review batch for the frozen model batch
 
-`recipe-tags-v1/review-table-20261024` (owner 2026-10-24) replaces the failed model batch's frozen fields in two parts, both waiting for the owner's acceptance after the reviewer's in-person sample check: 214 values on 108 recipes from the human reviewer's table (`llm`: prefilled by AI and confirmed in chat by dish type, not checked row by row; only in fields the rules leave open), and 562 values on 269 recipes in frozen fields the rules now decide (`rule`). Recipes waiting for review: 533; accepting the batch releases 326 of them, and 207 still wait on frozen model fields the rules and the table leave open. The owner decided 10 values dish by dish (`recipe-tags-v1/owner-20261024`, reviewed).
+`recipe-tags-v1/review-table-20261024` (owner 2026-10-24) replaces the failed model batch's frozen fields in two parts, both waiting for the owner's acceptance after the reviewer's in-person sample check: 214 values on 108 recipes from the human reviewer's table (`llm`: prefilled by AI and confirmed in chat by dish type, not checked row by row; only in fields the rules leave open), and 562 values on 269 recipes in frozen fields the rules now decide (`rule`). Recipes waiting for review: 517; accepting the batch releases 326 of them, and 191 still wait on frozen model fields the rules and the table leave open. The owner decided 10 values dish by dish (`recipe-tags-v1/owner-20261024`, reviewed).
 
 ## The model batch for data release v3
 
-`recipe-tags-v1/llm-v3-20261103` (ADR-0111) holds the model's values for recipes data release v3 added, in fields the rules leave open: 276 values on 116 recipes, 276 of them unreviewed. The planner reads none of them before the owner accepts the batch (`--accept-batch`) after an in-person sample (`data-engineering/docs/tag-sample-20261103`). The frozen `recipe-tags-v1/llm` batch is not touched. The rule-decided tags of the new recipes are not gated.
+`recipe-tags-v1/llm-v3-20261103` (ADR-0111) holds the model's values for recipes data release v3 added, in fields the rules leave open: 233 values on 100 recipes, 233 of them unreviewed. The planner reads none of them before the owner accepts the batch (`--accept-batch`) after an in-person sample (`data-engineering/docs/tag-sample-20261103`). The frozen `recipe-tags-v1/llm` batch is not touched. The rule-decided tags of the new recipes are not gated.
 
 ## Meal role by method
 
 | Meal role | rule | llm |
 | --- | ---: | ---: |
 | protein_main | 6429 | 0 |
-| vegetable | 1359 | 2 |
+| vegetable | 1359 | 3 |
 | soup | 457 | 18 |
-| staple | 1096 | 53 |
-| one_bowl | 3451 | 25 |
-| breakfast | 763 | 18 |
+| staple | 1097 | 76 |
+| one_bowl | 3449 | 9 |
+| breakfast | 763 | 17 |
 | salad | 980 | 0 |
-| snack | 855 | 55 |
-| dessert | 1331 | 50 |
-| sauce | 954 | 45 |
+| snack | 855 | 43 |
+| dessert | 1331 | 54 |
+| sauce | 954 | 30 |
 | drink | 204 | 0 |
 | open (null) | 0 | 0 |
 
@@ -45,15 +45,15 @@ Recipes: 18364 (release v3 recipes the importer loads, and the curated catalog).
 | --- | ---: |
 | chicken | 3780 |
 | duck | 16 |
-| pork | 2304 |
+| pork | 2307 |
 | beef | 2418 |
 | lamb | 176 |
 | fish | 608 |
 | shellfish | 1009 |
 | soy | 319 |
-| egg | 1799 |
-| legume | 684 |
-| none (`[]`) | 6560 |
+| egg | 1794 |
+| legume | 694 |
+| none (`[]`) | 6555 |
 
 ## `cooking_methods` values (recipes carrying each)
 
@@ -76,17 +76,17 @@ Recipes: 18364 (release v3 recipes the importer loads, and the curated catalog).
 | --- | ---: |
 | fragrant | 3341 |
 | spicy | 3001 |
-| light | 3540 |
-| rich | 7175 |
-| none (`[]`) | 5441 |
+| light | 3543 |
+| rich | 7180 |
+| none (`[]`) | 5443 |
 
 ## `contains_staple` and `equipment`
 
 | Value | Recipes |
 | --- | ---: |
-| contains_staple True | 4625 |
-| contains_staple False | 13520 |
-| contains_staple None | 219 |
+| contains_staple True | 4631 |
+| contains_staple False | 13497 |
+| contains_staple None | 236 |
 | equipment ('air_fryer',) | 3 |
 | equipment ('blender',) | 1307 |
 | equipment ('microwave',) | 479 |
@@ -179,4 +179,4 @@ Perishable: arugula, baby_spinach, bean_sprouts, bok_choy, catfish, clam, cod, c
 
 ## Language model
 
-Recipe questions sent to the model over all runs: 2135 (recipes with a field the rules left open). Model: gpt-5.4-mini; calls: 110; input tokens: 584590; output tokens: 55856; estimated cost: US$0.690 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.
+Recipe questions sent to the model over all runs: 2261 (recipes with a field the rules left open). Model: claude/claude-opus-5-5; calls: 111; input tokens: 584590; output tokens: 55856; estimated cost: US$0.690 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.

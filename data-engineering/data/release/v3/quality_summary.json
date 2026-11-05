@@ -73,15 +73,17 @@
   },
   "allergen_rules_pending_human": 0,
   "nutrition_per_serving": {
-    "median_energy_kcal": 340.4
+    "median_energy_kcal": 340.5
   },
   "unit_weight_corrections": {
+    "cooked_rice": 39,
     "lasagna_sheet": 50,
     "n_times_total": 35,
+    "package_mass": 111,
     "pizza_crust": 18,
     "red_pepper_alias": 279,
     "red_pepper_alias+stated_weight": 1,
-    "stated_weight": 409,
+    "stated_weight": 408,
     "stated_weight+whole_bird_edible": 68,
     "whole_bird": 163,
     "whole_bird_edible": 115,

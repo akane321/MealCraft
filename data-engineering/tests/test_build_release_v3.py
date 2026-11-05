@@ -193,6 +193,60 @@ class BuildReleaseV3Test(unittest.TestCase):
             assemble(*inputs(V22, [wrong], []))
 
 
+class V3LineClassesTest(unittest.TestCase):
+    """Rule 7 (issue #426), on v2.2's own ingredient forms."""
+
+    entries = {r["ingredient_id"]: r for r in map(json.loads, (v3.V22 / "ingredients.jsonl").read_text().splitlines())}
+    forms = {key: form for row in entries.values() for key, form in row["forms"].items()}
+
+    def fix(self, text: str, cid: str, unit: str | None, quantity: float | None, grams: float, basis: str, **dish):
+        item = {
+            "original_text": text,
+            "canonical_ingredient_id": cid,
+            "unit": unit,
+            "quantity_min": quantity,
+            "quantity_max": None,
+            "grams": grams,
+            "grams_basis": basis,
+            "preparation": [],
+        }
+        dish = {"title": "Dish", "instructions": [{"text": "Cook."}], **dish}
+        return v3.correct_v3_line(item, self.forms, dish)
+
+    def test_cooked_rice_takes_the_cooked_form_and_its_cup(self) -> None:
+        new, name, _ = self.fix("4 cups steamed rice, hot", "ING_RICE", "cup", 4.0, 740.0, "stated")
+        self.assertEqual((name, new["preparation"], new["grams"]), ("cooked_rice", ["cooked"], 632.0))
+        kept, _, _ = self.fix("steamed rice, to serve", "ING_RICE", None, None, 370.0, "estimated")
+        self.assertEqual((kept["grams"], v3.correct.form_key(kept)), (370.0, "ING_RICE#cooked"))
+
+    def test_dry_rice_and_a_mass_of_steamed_rice_are_left(self) -> None:
+        self.assertIsNone(self.fix("2 cups uncooked rice", "ING_RICE", "cup", 2.0, 370.0, "stated"))
+        self.assertIsNone(self.fix("2 cups rice, cooked", "ING_RICE", "cup", 2.0, 370.0, "stated"))
+        self.assertIsNone(self.fix("60 g steamed rice", "ING_RICE", "g", 60.0, 60.0, "stated"))
+
+    def test_an_estimated_can_takes_its_stated_package_mass(self) -> None:
+        new, name, source = self.fix(
+            "1 (14 ounce) can coconut milk", "ING_COCONUT_MILK", "can", 1.0, 226.0, "estimated"
+        )
+        self.assertEqual((name, new["grams"], source), ("package_mass", 396.9, "the line's own text"))
+
+    def test_drained_liquid_packed_marinade_and_misread_packages_are_left(self) -> None:
+        drained = "1 (20 ounce) can crushed pineapple, drained"
+        self.assertIsNone(self.fix(drained, "ING_PINEAPPLE", "can", 1.0, 400.0, "estimated"))
+        self.assertIsNone(self.fix("1 (15 ounce) can chickpeas", "ING_CHICKPEA", "can", 1.0, 152.0, "estimated"))
+        part = "1 (13 ounce) can dulce de leche (Use 1/2 cup out of the can)"
+        self.assertIsNone(self.fix(part, "ING_CARAMEL", "can", 1.0, 160.0, "estimated"))
+        steps = [{"text": "Remove chicken from marinade. Discard marinade."}]
+        hoisin = self.fix(
+            "1 (7.5 ounce) jar hoisin sauce", "ING_HOISIN", "jar", 1.0, 40.0, "estimated", instructions=steps
+        )
+        self.assertIsNone(hoisin)
+        yeast = "1 (.25 ounce) package active dry yeast"
+        self.assertIsNone(self.fix(yeast, "ING_YEAST", "package", 1.0, 7.0, "estimated"))
+        stated = "1 (14 ounce) can coconut milk"
+        self.assertIsNone(self.fix(stated, "ING_COCONUT_MILK", "can", 1.0, 226.0, "stated"))
+
+
 class CommittedReleaseV3Test(unittest.TestCase):
     def test_every_first_build_record_is_byte_identical(self) -> None:
         # The first v3 build (12,895) = v2.2's records + the added lines in v3_first_build_lines.tsv.
@@ -202,8 +256,12 @@ class CommittedReleaseV3Test(unittest.TestCase):
 
         old = {**hashes(v3.V22 / "recipes.jsonl"), **v3.read_first_build()}
         self.assertEqual(len(old), 12895)
-        # The recipes a reviewed row corrects (data/enrichment/v3-corrections.csv) are the only exceptions.
+        # The recipes a reviewed row corrects (data/enrichment/v3-corrections.csv) and the recipes a rule-7 class
+        # changes (corrections.jsonl, owner 2026-11-04, issue #426) are the only exceptions.
         corrected = {row["recipe_id"] for row in v3.reviewed.read_table() if row["field"] != "withdraw"}
+        changes = map(json.loads, (v3.OUT / "corrections.jsonl").read_text(encoding="utf-8").splitlines())
+        corrected |= {c["recipe_id"] for c in changes if c["class"] in v3.V3_CLASSES}
+        self.assertFalse(corrected & set(hashes(v3.V22 / "recipes.jsonl")))  # never a v2.2 record
         old = {key: digest for key, digest in old.items() if key not in corrected}
         current = hashes(v3.OUT / "recipes.jsonl")
         self.assertEqual({key: current.get(key) for key in old}, old)
