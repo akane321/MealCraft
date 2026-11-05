@@ -397,3 +397,12 @@ h1, h2 {
     font-size: max(16px, 1em);
   }
 }
+
+/* Phone (ADR-0116): the recipe, nutrition and cart sheets and the shopping preview fill the screen. */
+@media (max-width: 767px) {
+  .mc-overlay, .mc-sheet-overlay { padding: 0 !important; align-items: stretch !important; justify-content: stretch !important; }
+  .mc-overlay > .mc-panel.panel, .mc-sheet-overlay > .sheet-frame {
+    width: 100% !important; max-width: none !important; height: 100% !important; max-height: none !important;
+    border: 0 !important; border-radius: 0 !important; padding-bottom: env(safe-area-inset-bottom);
+  }
+}
