@@ -48,8 +48,9 @@ After the reviewer fills `sample.xlsx` in person:
 uv run --project backend --with openpyxl python -I -X utf8 data-engineering/scripts/review_table_accuracy.py <filled.xlsx> --sample data-engineering/docs/tag-sample-20261103/sample.json --out data-engineering/docs/tag-sample-20261103/accuracy.md
 ```
 
-Only rows marked 是 count. The report shows a strict all-checked agreement rate (including unresolved reviewer nulls
-as disagreement) and a second rate excluding those unresolved nulls, each with a Wilson 95% interval. Publish the
+Only rows marked 是 count. The report shows a strict all-checked agreement rate and a determinate rate excluding all
+reviewer nulls, even when the batch value is also null; each rate has a Wilson 95% interval. In the strict rate, a null
+counts as agreement only when it equals the batch value. Publish the
 accuracy with the filled sheet. Then the owner decides:
 
 ```text

@@ -181,17 +181,26 @@ def table(
 
 
 def markdown(result: dict, path: Path, sample: dict) -> str:
+    batch = sample.get("batch")
+    batch_recipes = sample.get("batch_recipes")
+    if batch_recipes is not None:
+        batch_scope = (
+            f"This sample draws {sample['size']} recipes from the {batch_recipes}-recipe batch `{batch}`; "
+            "it does not measure accuracy for all tags."
+        )
+    elif batch:
+        batch_scope = f"Drawn from tag batch `{batch}`; this is not an estimate of accuracy for all tags."
+    else:
+        batch_scope = "This sample only describes the rows in `sample.json`; it is not an estimate for all tags."
     lines = [
         f"# Sample accuracy of {sample['batch']}",
         "",
         f"Filled sample: SHA-256 `{hashlib.sha256(path.read_bytes()).hexdigest()}`; drawn: `sample.json` "
-        f"({sample['size']} recipes, seed {sample['seed']}). This sample draws {sample['size']} recipes "
-        "from the 116-recipe "
-        "model-completed `llm-v3-20261103` batch, not all v3 tags. AI assisted with the initial comparison and draft "
-        "discrepancy notes; a human reviewer checked each source recipe and tag, "
-        "entered/confirmed the value, and marked "
-        "the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from "
-        "the determinate denominator, while the all-checked result remains shown.",
+        f"({sample['size']} recipes, seed {sample['seed']}). {batch_scope} Human-confirmed rows marked 是 are scored; "
+        "the per-round README describes any AI assistance. Reviewer null means unresolved: it is excluded from the "
+        "determinate denominator even if the batch value is also null. In the all-checked result, "
+        "it counts as agreement "
+        "only when the values match.",
     ]
     lines += table(
         "Stratum",

@@ -1,6 +1,6 @@
 # Sample accuracy of recipe-tags-v1/llm-v3-20261103
 
-Filled sample: SHA-256 `9123cf17ff95c5e9514c94da0a73e874c64a7255a269585ce1f5fafc9ee0a343`; drawn: `sample.json` (40 recipes, seed 20261103). This sample draws 40 recipes from the 116-recipe model-completed `llm-v3-20261103` batch, not all v3 tags. AI assisted with the initial comparison and draft discrepancy notes; a human reviewer checked each source recipe and tag, entered/confirmed the value, and marked the personal-check field. Only human-confirmed rows count; a reviewer null is unresolved and is excluded from the determinate denominator, while the all-checked result remains shown.
+Filled sample: SHA-256 `9123cf17ff95c5e9514c94da0a73e874c64a7255a269585ce1f5fafc9ee0a343`; drawn: `sample.json` (40 recipes, seed 20261103). This sample draws 40 recipes from the 116-recipe batch `recipe-tags-v1/llm-v3-20261103`; it does not measure accuracy for all tags. Human-confirmed rows marked 是 are scored; the per-round README describes any AI assistance. Reviewer null means unresolved: it is excluded from the determinate denominator even if the batch value is also null. In the all-checked result, it counts as agreement only when the values match.
 
 | Stratum | Rows | Checked | Agree | All-checked rate | Wilson 95% | Determinate n | Determinate agree | Determinate rate | Determinate Wilson 95% | Unchecked | Checked, no value | Unrecognized, refill |
 | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |
