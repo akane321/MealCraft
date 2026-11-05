@@ -19,10 +19,12 @@ v3 里另有 177 道新增菜谱不在这一轮和第 1 波的抽样范围里：
 - `report.md`、`report.json`：由评分脚本生成的复核结果；传入第 1 波表时也包含两波合并估计。不要手改。
 
 `sample.json` 和 `check.xlsx` 由 `python -I -X utf8 data-engineering/scripts/manual_check.py draw --wave 2` 生成（仓库根目录，
-离线，需要 openpyxl）。复核人交回后，把表存为 `check-filled.xlsx`，用
-`python -I -X utf8 data-engineering/scripts/manual_check.py score --wave 2 data-engineering/docs/manual-check-20261104/check-filled.xlsx`
-生成 `report.md` 和 `report.json`，不要手改。第 1 波的表也交回后，加上
-`--with data-engineering/docs/manual-check-20261103/check-filled.xlsx`，报告会多一节"Both waves"：每一波是一层，
+离线，需要 openpyxl）。复核人交回两轮表后，把第 1 波表存为 `manual-check-20261103/check-filled.xlsx`、第 2 波表存为
+`check-filled.xlsx`，用下面命令生成包含"Both waves"合并估计的 `report.md` 和 `report.json`，不要手改：
+
+`python -I -X utf8 data-engineering/scripts/manual_check.py score --wave 2 data-engineering/docs/manual-check-20261104/check-filled.xlsx --with data-engineering/docs/manual-check-20261103/check-filled.xlsx`
+
+报告中每一波是一层，
 各带 Wilson 区间，再按两波的菜谱数加权给出合并的正确率（点估计）。第 1 波交回的表只读不改。
 测试 `data-engineering/tests/test_review_draws_v3.py` 检查提交的样本就是重新抽出的样本。
 

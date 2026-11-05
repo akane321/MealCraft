@@ -22,9 +22,11 @@ v3 里另有 177 道新增菜谱不在这一轮和第 1 波的抽样范围里：
 - `report.md`、`report.json`：由评分脚本生成的复核结果；传入第 1 波表时也包含两波合并估计。不要手改。
 
 `sample.json` 和 `review.xlsx` 由 `python -I -X utf8 data-engineering/scripts/allergen_review.py draw --wave 2` 生成（仓库根目录，
-离线，需要 openpyxl）。复核人交回后，把表存为 `review-filled.xlsx`，用
-`python -I -X utf8 data-engineering/scripts/allergen_review.py score --wave 2 data-engineering/docs/allergen-review-20261104/review-filled.xlsx`
-生成 `report.md` 和 `report.json`，不要手改。第 1 波的表也交回后，加上
-`--with data-engineering/docs/allergen-review-20261103/review-filled.xlsx`，报告会多一节"Both waves"：两波的每一层
+离线，需要 openpyxl）。复核人交回两轮表后，把第 1 波表存为 `allergen-review-20261103/review-filled.xlsx`、第 2 波表存为
+`review-filled.xlsx`，用下面命令生成包含"Both waves"合并估计的 `report.md` 和 `report.json`，不要手改：
+
+`python -I -X utf8 data-engineering/scripts/allergen_review.py score --wave 2 data-engineering/docs/allergen-review-20261104/review-filled.xlsx --with data-engineering/docs/allergen-review-20261103/review-filled.xlsx`
+
+报告中两波的每一层
 （波 × 过敏原）各带 Wilson 区间，再按每层的菜谱数加权给出两波合并的一致率（点估计）。第 1 波交回的表只读不改。
 测试 `data-engineering/tests/test_review_draws_v3.py` 检查提交的样本就是重新抽出的样本。
