@@ -436,3 +436,19 @@
   .product-frame .profile-layout { grid-template-columns: minmax(0, 1fr); }
   .product-frame .profile-section-heading .secondary-button { flex: none; white-space: nowrap; }
 }
+
+/* Motion: primary buttons lift on hover and give on press, on a spring; sheets and dialogs spring in over a fading veil. */
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-send, .mc-primary) { transition: transform 460ms var(--spring), background 150ms, box-shadow 220ms ease; }
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-send, .mc-primary):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px -6px rgba(24, 24, 27, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+.mc-shell :is(.mc-btn.primary, .mc-btn.strong, .mc-send, .mc-primary):active:not(:disabled) { transform: scale(0.95); transition-duration: 90ms; }
+/* The confirm button is moved by motion-v (layout and press springs), so CSS must not ease its transform too. */
+.mc-shell .mc-btn.mc-confirm { transition: background 150ms, box-shadow 220ms ease; }
+.mc-shell :is(.mc-btn.secondary, .mc-suggest, .mc-pill) { transition: transform 420ms var(--spring), background 150ms, border-color 150ms, box-shadow 200ms; }
+.mc-shell :is(.mc-btn.secondary, .mc-suggest, .mc-pill):active:not(:disabled) { transform: scale(0.96); transition-duration: 90ms; }
+@keyframes mc-fade-in { from { opacity: 0; } }
+@keyframes mc-sheet-in { from { opacity: 0; transform: translateY(18px) scale(0.965); } to { opacity: 1; transform: none; } }
+.mc-overlay > .mc-panel, .mc-sheet-overlay > .sheet-frame { animation: mc-sheet-in 620ms var(--spring) both; }
+@media (prefers-reduced-motion: reduce) {
+  .mc-shell :is(.mc-btn, .mc-send, .mc-primary, .mc-suggest, .mc-pill) { transition: background 150ms; transform: none !important; }
+  .mc-overlay > .mc-panel, .mc-sheet-overlay > .sheet-frame { animation: mc-fade-in 150ms both; }
+}

@@ -8,6 +8,7 @@ import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/plannin
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
 import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import { revealDuration } from "~/lib/reveal";
+import { AnimatePresence, motion } from "motion-v";
 import type { AgentMessage, AgentSession } from "~/types/agent";
 import type { FairPriceCartState, MealPlanEntryStatus, NutritionDashboardDay, WeeklyMealPlan, WeeklyMealPlanCollection, WeeklyMealPlanListItem } from "~/types/meal-plan";
 
@@ -163,28 +164,70 @@ const budgetGapLabel = computed(() => {
   const gap = estimate.value ? budgetGap(estimate.value) : null;
   return gap && `${gap.amount} ${gap.over ? "over" : "left"}`;
 });
-// A confirmed change stamps itself on the chat for a moment, with the mark's success motion.
+// A confirmed change plays its success moment over the chat (MotionSuccess, grown out of the pressed button), which
+// then folds onto a stamp that stays on the chat for a moment. The reply's words and cards wait for it (revealHold).
+const CELEBRATE_MS = 1500;
 const stamp = ref<string | null>(null);
+const stampWaiting = ref(false);
+const celebration = ref<{ title: string; detail: string; stamp: string; from: DOMRect | null } | null>(null);
 const confirming = ref(false);
+const planning = ref(false);
 let stampTimer: ReturnType<typeof setTimeout> | undefined;
+let pressedFrom: DOMRect | null = null;
+// Set while a confirm is in flight: whether its answer is a success (read when the reply arrives).
+let celebrateNext: (() => boolean) | null = null;
 function showStamp(text: string) {
   stamp.value = text;
   clearTimeout(stampTimer);
-  stampTimer = setTimeout(() => { stamp.value = null; }, 1800);
+  stampTimer = setTimeout(() => { stamp.value = null; }, 2600);
 }
-function confirmChange() {
+function celebrate(title: string, total: number | undefined) {
+  const amount = total == null ? "" : formatSgd(total);
+  stamp.value = null;
+  celebration.value = { title, detail: amount && `${amount} of groceries`, stamp: amount ? `${title} · ${amount}` : title, from: pressedFrom };
+}
+// The success card folds onto the stamp: laid out but hidden until the card has landed on it.
+function celebrationFolds() {
+  stampWaiting.value = true;
+  showStamp(celebration.value?.stamp ?? "");
+}
+function celebrationDone() {
+  celebration.value = null;
+  stampWaiting.value = false;
+}
+function pressed(event?: MouseEvent) {
+  pressedFrom = (event?.currentTarget as HTMLElement | null)?.getBoundingClientRect() ?? null;
+}
+async function confirmChange(event?: MouseEvent) {
+  pressed(event);
   confirming.value = true;
   awaitingReply = true;
-  void agent.confirmReplan();
+  celebrateNext = () => !session.value?.pending_replan;
+  await agent.confirmReplan();
+  celebrateNext = null;
+  if (!errorMessage.value && !session.value?.pending_replan && generatedPlan.value) celebrate("Change made", generatedPlan.value.grocery_estimate.purchase_total_sgd);
 }
-async function planWeek() {
+async function planWeek(event?: MouseEvent) {
+  pressed(event);
   const before = session.value?.plan_id;
   awaitingReply = true;
+  planning.value = true;
+  celebrateNext = () => Boolean(session.value?.plan_id && session.value.plan_id !== before);
   await agent.confirm();
-  if (!errorMessage.value && session.value?.plan_id && session.value.plan_id !== before) showStamp(labels.value.isWeek ? "Week planned" : "Plan made");
+  celebrateNext = null;
+  planning.value = false;
+  if (!errorMessage.value && session.value?.plan_id && session.value.plan_id !== before) {
+    celebrate(labels.value.isWeek ? "Week planned" : "Plan made", generatedPlan.value?.grocery_estimate.purchase_total_sgd);
+  }
 }
-watch(() => session.value?.pending_replan, (now, before) => {
-  if (before && !now && confirming.value && !errorMessage.value) showStamp("Change made");
+// What the thinking line walks through while a reply is on its way.
+const thinkSteps = computed(() => {
+  if (planning.value) return [labels.value.isWeek ? "Planning your week" : "Making your plan", "Pricing the groceries", "Balancing the budget"];
+  if (confirming.value) return ["Making the change", "Repricing the groceries"];
+  if (pending.value) return ["Reading your request", "Checking your limits", "Pricing this plan"];
+  return ["Thinking", "Writing a reply"];
+});
+watch(() => session.value?.pending_replan, (now) => {
   if (!now) confirming.value = false;
 });
 watch(isLoading, (loading) => {
@@ -196,6 +239,7 @@ watch(isLoading, (loading) => {
 let awaitingReply = false;
 const shownIds = new Set<number>();
 const revealId = ref<number | null>(null);
+const revealHold = ref(0);
 let revealTimer: ReturnType<typeof setTimeout> | undefined;
 watch(messages, (list) => {
   const added = list.filter(message => !shownIds.has(message.id));
@@ -203,13 +247,15 @@ watch(messages, (list) => {
   const reply = awaitingReply ? [...added].reverse().find(message => message.role === "assistant") : undefined;
   if (!reply) return;
   awaitingReply = false;
+  revealHold.value = celebrateNext?.() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? CELEBRATE_MS : 0;
   revealId.value = reply.id;
   clearTimeout(revealTimer);
-  revealTimer = setTimeout(() => { revealId.value = null; }, revealDuration(reply.content) + 100);
+  revealTimer = setTimeout(() => { revealId.value = null; }, revealDuration(reply.content) + revealHold.value + 100);
 }, { flush: "sync", immediate: true });
+// The cards under a new reply rise in while its last words are still settling.
 const revealDelay = computed(() => {
   const reply = revealId.value === null ? undefined : messages.value.find(message => message.id === revealId.value);
-  return reply ? revealDuration(reply.content) : 0;
+  return reply ? Math.round(revealDuration(reply.content) * 0.4) + revealHold.value : 0;
 });
 const weekEnded = computed(() => Boolean(plan.value && plan.value.end_date < todayIsoDate()));
 const readOnly = computed(() => Boolean(plan.value && replaced.value));
@@ -828,7 +874,7 @@ onUnmounted(() => {
 
             <template v-for="message in messages" :key="message.id">
               <div v-if="message.role === 'user'" class="me mc-rise">{{ message.content }}</div>
-              <div v-else class="bot mc-rise" :data-message="message.id"><MotionRevealText :text="message.content" :animate="message.id === revealId" /></div>
+              <div v-else class="bot mc-rise" :data-message="message.id"><MotionRevealText :text="message.content" :animate="message.id === revealId" :delay="revealHold" /></div>
             </template>
 
             <div v-if="interaction?.options.length" class="options mc-rise">
@@ -864,7 +910,7 @@ onUnmounted(() => {
                   :busy-label="labels.isWeek ? 'Planning your week…' : 'Making your plan…'"
                   @press="planWeek"
                 />
-                <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />A large household on a tight budget can take a few minutes to plan.</p>
+                <p v-if="isLoading" class="mc-small foot-note wait-note" role="status"><MotionOrb class="note-orb" :size="14" />A large household on a tight budget can take a few minutes to plan.</p>
               </div>
             </div>
 
@@ -957,12 +1003,23 @@ onUnmounted(() => {
             </article>
 
             <p v-if="session?.pending_replan && estimate?.pricing_mode === 'live'" class="caveat mc-small">Grocery changes are estimates. Selected product prices are checked again when you confirm.</p>
-            <MotionStamp v-if="stamp" :text="stamp" />
+            <MotionStamp v-if="stamp" :text="stamp" :waiting="stampWaiting" />
             <div v-if="pending" class="me mc-rise">{{ pending }}</div>
-            <div v-if="isLoading" class="thinking mc-rise" aria-label="MealCraft is thinking">
-              <MotionThinking />
-              <p v-if="pending" class="mc-small wait-note" role="status">Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
-            </div>
+            <AnimatePresence>
+              <motion.div
+                v-if="isLoading"
+                key="thinking"
+                class="thinking"
+                aria-label="MealCraft is thinking"
+                :initial="{ opacity: 0, y: 10, scale: 0.97, filter: 'blur(4px)' }"
+                :animate="{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }"
+                :exit="{ opacity: 0, scale: 0.96, filter: 'blur(4px)', transition: { duration: 0.18 } }"
+                :transition="{ type: 'spring', stiffness: 380, damping: 30 }"
+              >
+                <MotionThinking :steps="thinkSteps" />
+                <p v-if="pending" class="mc-small wait-note" role="status">Checking your limits and this plan's prices. A large household on a tight budget can take a few minutes to plan.</p>
+              </motion.div>
+            </AnimatePresence>
             <p v-if="errorMessage" class="send-error" role="alert">{{ errorMessage }}</p>
           </div>
         </section>
@@ -1030,6 +1087,7 @@ onUnmounted(() => {
           </div>
         </section>
         <p v-if="isEmpty" class="fine foot">Suggestions can be wrong. Check allergens on product labels.</p>
+        <MotionSuccess v-if="celebration" :title="celebration.title" :detail="celebration.detail" :from="celebration.from" @collapse="celebrationFolds" @done="celebrationDone" />
       </main>
 
       <div v-if="isPhone && panelShown" class="phone-scrim sheet-veil" aria-hidden="true" @click="panelOpen = false" />
@@ -1189,6 +1247,12 @@ onUnmounted(() => {
 .cta:hover { background: #fff4d6; }
 .avatar { width: 34px; height: 34px; flex: none; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.22); color: #fff; font-size: 12px; font-weight: 800; text-decoration: none; }
 .hero-block { position: absolute; left: 72px; top: 170px; width: 720px; display: flex; flex-direction: column; gap: 24px; }
+.hero-block > * { animation: hero-in 900ms var(--spring) both; }
+.hero-block > :nth-child(2) { animation-delay: 110ms; }
+.hero-block > :nth-child(3) { animation-delay: 220ms; }
+.hero-block > :nth-child(4) { animation-delay: 320ms; }
+.trust { animation: hero-in 900ms var(--spring) 420ms both; }
+@keyframes hero-in { from { opacity: 0; transform: translateY(18px); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
 .hero { margin: 0; font-size: 64px; line-height: 1.02; letter-spacing: -1.5px; color: #fff; }
 .hero em { color: #ffe27a; font-style: normal; }
 .lede { margin: 0; max-width: 520px; font-size: 18px; line-height: 1.5; font-weight: 600; color: rgba(255, 255, 255, 0.88); }
@@ -1245,7 +1309,7 @@ onUnmounted(() => {
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--c-line-soft); }
 .card-foot .foot-note { flex-basis: 100%; margin: 0; }
 .wait-note { display: flex; align-items: flex-start; gap: 8px; color: #71717a; font-size: 13px; line-height: 20px; }
-.wait-note .mc-spin { margin-top: 3px; color: #a1a1aa; }
+.wait-note .note-orb { margin-top: 3px; }
 /* Notices (a replaced or ended plan): a white card with a small tile beside the copy. */
 .notice { border-radius: 14px; }
 .notice .card-body { flex-direction: row; align-items: flex-start; gap: 12px; padding: 14px 16px; }
@@ -1306,9 +1370,9 @@ onUnmounted(() => {
 .delta .mc-chip.warn { background: #fffaeb; color: #b54708; }
 .caveat { margin: 0; }
 
-/* The pending reply: the mark (leaf circling the plate) on the left, the wait note beside it. */
-.thinking { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
-.thinking .wait-note { margin: 0; }
+/* The pending reply: the living mark and its shimmering step, the wait note under the step. */
+.thinking { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 2px 0; transform-origin: left center; }
+.thinking .wait-note { margin: 0 0 0 50px; max-width: 520px; }
 /* A new reply's cards fade in once its words are out. */
 .col.revealing > .mc-rise:not(.me, .bot, .thinking) { animation-delay: var(--reveal); }
 /* Named apart from PanelState's .error root, which this scoped rule would also reach. */
@@ -1359,6 +1423,11 @@ onUnmounted(() => {
 
 /* Plan column, inside the same white panel. */
 .panel { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: #fcfcfd; border-left: 1px solid #f0f0f2; }
+@media (min-width: 768px) {
+  .panel { animation: panel-in 620ms var(--spring) both; }
+  .panel-body > * { animation: mc-rise 640ms var(--spring) 80ms both; }
+}
+@keyframes panel-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
 .panel-head { height: 56px; flex: none; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f2; }
 .panel-title { margin: 0; color: var(--mc-strong); font-size: 15px; line-height: 20px; font-weight: 600; }
 .tabs .c { color: #71717a; }
@@ -1412,8 +1481,8 @@ onUnmounted(() => {
 
   /* Workspace: one column; the sidebar is a drawer from the left, the plan a sheet from the bottom. */
   .app { grid-template-columns: minmax(0, 1fr); }
-  .app > .sb { position: fixed; z-index: 31; top: 0; bottom: 0; left: 0; width: min(300px, 84vw); padding-top: calc(12px + env(safe-area-inset-top)); background: #f5f5f7; transform: translateX(-104%); transition: transform 320ms var(--ease), box-shadow 320ms; overflow-y: auto; }
-  .app.drawer-open > .sb { transform: none; box-shadow: 0 24px 64px rgba(15, 15, 18, 0.28); }
+  .app > .sb { position: fixed; z-index: 31; top: 0; bottom: 0; left: 0; width: min(300px, 84vw); padding-top: calc(12px + env(safe-area-inset-top)); background: #f5f5f7; transform: translateX(-104%); transition: transform 300ms cubic-bezier(0.4, 0, 1, 1), box-shadow 300ms; overflow-y: auto; }
+  .app.drawer-open > .sb { transform: none; box-shadow: -120px 0 0 #f5f5f7, 0 24px 64px rgba(15, 15, 18, 0.28); transition: transform 560ms var(--spring), box-shadow 300ms; }
   .phone-scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15, 15, 18, 0.32); animation: mc-fade 200ms ease-out both; }
   .sheet-veil { z-index: 14; }
   @keyframes mc-fade { from { opacity: 0; } }
@@ -1449,13 +1518,14 @@ onUnmounted(() => {
   .week-bar .of { color: #71717a; }
   .week-bar .iconify { width: 18px; height: 18px; color: #52525b; }
 
-  .panel { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; height: min(86dvh, calc(100% - 40px)); padding-bottom: env(safe-area-inset-bottom); border: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 -16px 48px -12px rgba(15, 15, 18, 0.3); }
+  .panel { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; height: min(86dvh, calc(100% - 40px)); padding-bottom: env(safe-area-inset-bottom); border: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 120px 0 #fff, 0 -16px 48px -12px rgba(15, 15, 18, 0.3); }
   .sheet-grab { flex: none; display: grid; place-items: center; width: 100%; height: 22px; padding: 0; border: 0; background: transparent; }
   .sheet-grab span { width: 40px; height: 5px; border-radius: 999px; background: #d4d4d8; }
   .panel-head { height: 52px; }
   .tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .foot-acts .icon-only { width: 44px; }
-  .sheet-enter-active, .sheet-leave-active { transition: transform 320ms var(--ease); }
+  .sheet-enter-active { transition: transform 600ms var(--spring); }
+  .sheet-leave-active { transition: transform 260ms cubic-bezier(0.4, 0, 1, 1); }
   .sheet-enter-from, .sheet-leave-to { transform: translateY(100%); }
 }
 </style>

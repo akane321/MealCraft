@@ -103,9 +103,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
               <span v-if="changeable(dish) || rated(dish)" class="act-row">
                 <span v-if="changeable(dish)" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
                   <button
-                    v-for="action in ACTIONS"
+                    v-for="(action, k) in ACTIONS"
                     :key="action.label"
                     type="button"
+                    :style="{ '--k': k }"
                     :aria-label="action.label"
                     :title="action.label"
                     @click="emit('ask', action.text(sentenceDay(day.date, numbered), dish.recipe.title))"
@@ -116,9 +117,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
                 <!-- Pressing the pressed button again undoes it; the whole household's, whoever pressed it. -->
                 <span v-if="rated(dish)" class="feedback" role="group" :aria-label="`Feedback on ${dish.recipe.title}`">
                   <button
-                    v-for="button in FEEDBACK_BUTTONS"
+                    v-for="(button, k) in FEEDBACK_BUTTONS"
                     :key="button.kind"
                     type="button"
+                    :style="{ '--k': k + ACTIONS.length }"
                     :aria-pressed="dish.feedback === button.kind"
                     :aria-busy="feedbackRecipeId === dish.recipe.id"
                     :disabled="feedbackRecipeId === dish.recipe.id"
@@ -166,15 +168,28 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .dish.side .name { font-size: 13px; font-weight: 500; }
 .name:hover { color: #6d28d9; }
-.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 2px; font-size: 12.5px; line-height: 18px; color: var(--c-muted); }
+/* Each chip keeps its own 20px line, so a wrapped line never runs into the next one. */
+.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 20px; margin-top: 2px; font-size: 12.5px; line-height: 20px; color: var(--c-muted); }
+.rest > * { flex: none; }
 .rest .when { white-space: nowrap; }
 .kept { color: var(--c-green-text); font-weight: 500; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes and its feedback: small ghost icon buttons, dim until the row is pointed at or focused. */
-.act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 4px 0 0 -5px; }
-.acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.6; transition: opacity 120ms var(--ease); }
-.feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; }
-.row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
+/* A dish's changes and its feedback: small ghost icon buttons on their own line under the chips. */
+.act-row { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 26px; margin: 6px 0 0 -5px; }
+.acts, .feedback { display: flex; align-items: center; gap: 2px; }
+.feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; transition: border-color 200ms; }
+/* Desktop: the icons wait until the row is pointed at or holds the focus, then come in one after another on a
+   spring; they stay in place (and clickable) meanwhile. A pressed feedback button stays shown. Phone: always shown. */
+@media (min-width: 768px) {
+  .row { position: relative; }
+  .row::before { content: ""; position: absolute; inset: 3px -8px; z-index: -1; border-radius: 12px; background: #f4f4f5; opacity: 0; transform: scale(0.98); transition: opacity 200ms ease, transform 420ms var(--spring); }
+  .days { position: relative; z-index: 0; }
+  .row:is(:hover, :focus-within)::before { opacity: 0.7; transform: none; }
+  .act-row button:not([aria-pressed="true"]) { opacity: 0; transform: translateY(5px) scale(0.85); transition: opacity 160ms ease, transform 460ms var(--spring), background 150ms, color 150ms; transition-delay: 0ms; }
+  .row:is(:hover, :focus-within) .act-row button { opacity: 1; transform: none; transition-delay: calc(var(--k, 0) * 22ms); }
+  .feedback { border-left-color: transparent; }
+  .row:is(:hover, :focus-within) .feedback { border-left-color: #e4e4e7; }
+}
 /* Dark enough that the dimmed icons still reach 3:1 on the plan column. */
 .acts button, .feedback button { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #3f3f46; }
 .acts button .iconify, .feedback button .iconify { width: 16px; height: 16px; }
