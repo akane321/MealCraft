@@ -105,6 +105,7 @@ Available endpoints:
 - GET /api/agent/sessions/{session_id}/runs
 - GET /api/agent/sessions/{session_id}/runs/{run_id}
 - POST /api/agent/sessions/{session_id}/runs/{run_id}/cancel
+- POST /api/voice/transcriptions
 - POST /api/household-profiles
 - GET /api/household-profiles/reference
 - POST /api/household-profiles/parse-rule
@@ -940,6 +941,31 @@ overwriting a newer decision.
 
 `GET /api/plans/{plan_id}/events` returns the persistent audit trail in reverse
 chronological order.
+
+## Voice transcription
+
+`POST /api/voice/transcriptions` turns one short recorded clip into text for the
+chat box (ADR-0116); the person edits the text and sends it as an ordinary
+message. It requires the active household's CreatePlan permission and the CSRF
+token, like `/messages`. The body is the clip itself, not a form: `Content-Type`
+is `audio/webm`, `audio/mp4`, `audio/ogg`, `audio/wav` or `audio/mpeg`
+(parameters such as `;codecs=opus` are allowed). The response is
+`{"text": "..."}` with surrounding whitespace removed; a clip with no speech
+returns `{"text": ""}` with 200. The clip is sent on and never stored.
+
+| Status | When |
+| --- | --- |
+| 400 | empty body |
+| 413 | clip larger than `VOICE_MAX_CLIP_BYTES` (default 2,000,000) |
+| 415 | any other `Content-Type` |
+| 429 | `VOICE_TRANSCRIPTION_MAX_CLIPS` (default 300) paid calls were made since the app started |
+| 502 | the provider failed (one retry after a timeout or connection error first) |
+
+`VOICE_TRANSCRIPTION_PROVIDER=fixture` (default) returns one fixed sentence
+without a network call; `openai` transcribes with `VOICE_TRANSCRIPTION_MODEL`
+(default `gpt-transcribe`) and needs `OPENAI_API_KEY`, otherwise the fixture
+answers. The request passes `languages` en and zh, a short list of Singapore
+food words and a prompt so Chinese comes back as Simplified Chinese.
 
 ## Persistent Planning Assistant
 

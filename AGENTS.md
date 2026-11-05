@@ -196,7 +196,8 @@ docker compose run --rm frontend pnpm build
 Run `python -m app.evaluation.workbench` for evaluation-affecting changes (its
 held-out sections are diagnostic only and never drive tuning, decisions ADR-0020
 and ADR-0049) and Playwright for affected desktop user journeys. Do not claim visual quality from
-a successful build alone. Mobile and tablet product design are out of scope.
+a successful build alone. A phone layout covers the planning journey only (Knowledge ADR-0116, below 768 px);
+`/system` and `/ops` stay desktop only, and desktop layout changes are checked at 1280×720.
 
 CI runs Ruff and pytest from a checkout in the `backend` job (Ruff over
 `backend`, `scripts` and `data-engineering`; the container's `ruff check .` sees

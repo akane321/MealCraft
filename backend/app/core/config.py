@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     # An external call can hang, so the chat never waits on one for ever: past this the turn is read with the rule
     # parser instead. 60 s, not 15: a slow answer is still the model's reading, worth the wait (owner, 2026-10-22).
     openai_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
+    # Voice input (ADR-0116): a clip is transcribed, edited by the person, then sent as a chat message.
+    # The cap counts paid calls since the app started, so a stuck client cannot run up the bill.
+    voice_transcription_provider: Literal["fixture", "openai"] = "fixture"
+    voice_transcription_model: str = "gpt-transcribe"
+    voice_transcription_max_clips: int = Field(default=300, ge=0)
+    voice_max_clip_bytes: int = Field(default=2_000_000, ge=1)
+    voice_transcription_timeout_seconds: float = Field(default=10.0, gt=0, le=300)
     # The oldest recipes the planner plans from; the API loads them again in the background at half this age.
     # 0 loads them for every plan (tests).
     planning_pool_cache_seconds: int = 300
