@@ -1,6 +1,7 @@
 from bisect import bisect_left
 from dataclasses import dataclass
 
+from app.core.config import ablated
 from app.data import ingredient_hierarchy
 from app.data.allergens import allergen_conflicts, conflict_reasons
 from app.models.recipe import Recipe
@@ -74,7 +75,11 @@ class RecipeRecommendationEngine:
             response = self._score_recipe(recipe, constraints, protein_rank)
             scored.append(ScoredRecipe(recipe=recipe, response=response))
 
-        scored.sort(key=lambda item: (-item.response.total_score, item.recipe.id))
+        if ablated("retrieval_off"):
+            # Evaluation (#397): candidate recall without relevance, the first eligible recipes by id.
+            scored.sort(key=lambda item: item.recipe.id)
+        else:
+            scored.sort(key=lambda item: (-item.response.total_score, item.recipe.id))
         excluded.sort(key=lambda item: item.id)
         return [item.response for item in scored], excluded
 

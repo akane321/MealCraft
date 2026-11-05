@@ -14,7 +14,7 @@ Cost rules are the pure-LLM runner's (ADR-0086, US$5 per arm including developme
 held-out paths are refused without `--allow-heldout`. Spend is kept in one append-only ledger per arm
 (`LedgerBudget`, owner review on #427), so it is counted across every run and output of the arm, a case cut by the
 cap or a killed process included.
-An arm without paid calls (strong rules) runs without `--live`.
+An arm without paid calls (strong rules, the product and its ablations: `ablation_arms`) runs without `--live`.
 
     python -m app.evaluation.baseline_arms --arm strong-rule \\
         --episodes data/evaluation/dev/v3-meal-day-week/episodes --anchor-date 2026-09-28 \\
@@ -200,10 +200,11 @@ class Arm:
 
 
 def arms() -> dict[str, Arm]:
-    from app.evaluation import general_agent_baseline, rag_baseline, strong_rule_baseline
+    """The three baselines, and the product with its six ablations run in this process (`ablation_arms`)."""
+    from app.evaluation import ablation_arms, general_agent_baseline, rag_baseline, strong_rule_baseline
 
     registry = [strong_rule_baseline.ARM, rag_baseline.ARM, general_agent_baseline.ARM]
-    return {arm.system_id: arm for arm in registry}
+    return {arm.system_id: arm for arm in registry} | ablation_arms.in_process_arms()
 
 
 def episode_turns(episode: dict[str, Any]) -> list[str]:
