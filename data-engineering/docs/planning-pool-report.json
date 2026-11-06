@@ -6,9 +6,9 @@
  "excluded": {
   "release": {
    "course is not a dish course": 1032,
-   "an ingredient has no price": 1300,
-   "withdrawn": 2,
-   "incomplete recipe": 306
+   "an ingredient has no price": 421,
+   "withdrawn": 241,
+   "incomplete recipe": 302
   },
   "curated": {
    "course is not a dish course": 0,
@@ -18,134 +18,78 @@
   }
  },
  "incomplete": {
-  "too few kcal for a main": 238,
+  "too few kcal for a main": 237,
   "named meat missing": 39,
-  "wrapper or dough with no filling": 28,
+  "wrapper or dough with no filling": 25,
   "ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork": 1
  },
  "pool": {
-  "release": 15694,
+  "release": 16338,
   "curated": 30
  },
  "usable_roles": {
-  "protein_main": 5716,
-  "one_bowl": 3195,
-  "vegetable": 1206,
-  "staple": 944,
-  "salad": 845,
-  "breakfast": 716,
-  "soup": 420
+  "protein_main": 5928,
+  "one_bowl": 3204,
+  "vegetable": 1230,
+  "staple": 968,
+  "salad": 948,
+  "breakfast": 754,
+  "soup": 438
  },
  "not_usable": {
-  "not a breakfast, lunch or dinner role (dessert)": 1121,
-  "not a breakfast, lunch or dinner role (snack)": 796,
-  "meal-role tags wait for review": 420,
-  "no meal-role tag": 148,
-  "not a breakfast, lunch or dinner role (sauce)": 106,
+  "not a breakfast, lunch or dinner role (dessert)": 1279,
+  "not a breakfast, lunch or dinner role (snack)": 830,
+  "meal-role tags wait for review": 425,
+  "no meal-role tag": 166,
+  "not a breakfast, lunch or dinner role (sauce)": 107,
   "main with unknown protein source": 91
  },
- "usable": 13042,
+ "usable": 13470,
  "usable_by_meal": {
-  "lunch or dinner": 12326,
-  "breakfast": 716
+  "lunch or dinner": 12716,
+  "breakfast": 754
  },
  "local": {
   "recipes": 166,
-  "pool": 138,
-  "usable": 108
+  "pool": 140,
+  "usable": 110
  },
  "unpriced": {
-  "ingredients": 131,
+  "ingredients": 77,
   "per_recipe": {
-   "1": 1196,
-   "2": 100,
-   "3": 4
+   "1": 401,
+   "2": 20
   },
   "top": [
    {
-    "ingredient": "allspice",
-    "recipes": 124,
-    "only_missing": 101
-   },
-   {
-    "ingredient": "mixed_nuts",
-    "recipes": 93,
-    "only_missing": 79
-   },
-   {
-    "ingredient": "pie_crust",
-    "recipes": 90,
-    "only_missing": 82
-   },
-   {
-    "ingredient": "turkey",
-    "recipes": 90,
-    "only_missing": 79
-   },
-   {
-    "ingredient": "biscuit_mix",
-    "recipes": 72,
-    "only_missing": 70
-   },
-   {
-    "ingredient": "celery_seed",
-    "recipes": 71,
-    "only_missing": 64
-   },
-   {
-    "ingredient": "seasoned_salt",
-    "recipes": 66,
-    "only_missing": 57
-   },
-   {
-    "ingredient": "water_chestnut",
-    "recipes": 61,
-    "only_missing": 55
-   },
-   {
     "ingredient": "meat",
     "recipes": 53,
-    "only_missing": 49
-   },
-   {
-    "ingredient": "radish",
-    "recipes": 35,
-    "only_missing": 30
-   },
-   {
-    "ingredient": "dried_onion_flakes",
-    "recipes": 33,
-    "only_missing": 28
+    "only_missing": 51
    },
    {
     "ingredient": "chow_mein_noodles",
     "recipes": 30,
-    "only_missing": 20
+    "only_missing": 22
    },
    {
     "ingredient": "spaghetti_squash",
     "recipes": 30,
-    "only_missing": 27
+    "only_missing": 28
    },
    {
     "ingredient": "mashed_potatoes",
     "recipes": 29,
-    "only_missing": 27
+    "only_missing": 28
    },
    {
     "ingredient": "lime_zest",
     "recipes": 26,
-    "only_missing": 20
-   },
-   {
-    "ingredient": "onion_salt",
-    "recipes": 23,
-    "only_missing": 17
+    "only_missing": 23
    },
    {
     "ingredient": "orange_juice_conc",
     "recipes": 23,
-    "only_missing": 21
+    "only_missing": 23
    },
    {
     "ingredient": "lard",
@@ -155,19 +99,74 @@
    {
     "ingredient": "whipped_topping",
     "recipes": 20,
-    "only_missing": 14
+    "only_missing": 19
    },
    {
     "ingredient": "collard",
     "recipes": 18,
-    "only_missing": 16
+    "only_missing": 17
+   },
+   {
+    "ingredient": "poppy_seed",
+    "recipes": 14,
+    "only_missing": 13
+   },
+   {
+    "ingredient": "turnip",
+    "recipes": 14,
+    "only_missing": 14
+   },
+   {
+    "ingredient": "rutabaga",
+    "recipes": 13,
+    "only_missing": 12
+   },
+   {
+    "ingredient": "dashi",
+    "recipes": 9,
+    "only_missing": 8
+   },
+   {
+    "ingredient": "butterscotch_chips",
+    "recipes": 8,
+    "only_missing": 1
+   },
+   {
+    "ingredient": "vanilla_wafer",
+    "recipes": 8,
+    "only_missing": 6
+   },
+   {
+    "ingredient": "broccoli_slaw",
+    "recipes": 7,
+    "only_missing": 4
+   },
+   {
+    "ingredient": "rotel",
+    "recipes": 6,
+    "only_missing": 6
+   },
+   {
+    "ingredient": "buttered_breadcrumbs",
+    "recipes": 5,
+    "only_missing": 5
+   },
+   {
+    "ingredient": "chipped_beef",
+    "recipes": 5,
+    "only_missing": 5
+   },
+   {
+    "ingredient": "frozen_bread_dough",
+    "recipes": 5,
+    "only_missing": 5
    }
   ],
   "recovered_if_top_priced": {
-   "10": 680,
-   "20": 915,
-   "40": 1111,
-   "all": 1300
+   "10": 247,
+   "20": 324,
+   "40": 379,
+   "all": 421
   }
  },
  "import_skipped": [
@@ -175,8 +174,8 @@
  ],
  "sources": {
   "release_version": "v3",
-  "release_digest": "9c5a303d01cfca1ab802e1af0a89325b720210caa271d685ea4d7934643c5165",
-  "recipe_tags_sha256": "9ccec3af50858a3faf440e731dd721078a85cb275dfc9306f5fa8b6508128b25",
-  "priceable_sha256": "749b4bc22d4ca2abb116ec5bcf4cf87880814521b71834be60e8e5ce18f0f6f8"
+  "release_digest": "e0fd248ce5415efaaae62b25302c49923d89248bdf1511916a9024a7f6ad3129",
+  "recipe_tags_sha256": "4e1929fe9c39d8e6f4b92cf7b9445faad98c9a75d4520d56bd22ec0be727af43",
+  "priceable_sha256": "aa101947655a160a38c8153eb0cab1547f507e7797b797f214e964c7ca3e7eb8"
  }
 }

@@ -50,10 +50,14 @@ def line(name: str, product) -> GroceryLineEstimate:
     return GroceryEstimator.price_line(name, name, 300, "g", 0.0, 300, product, None)
 
 
-def test_manual_is_the_last_layer_and_an_absent_snapshot_is_empty() -> None:
+def test_manual_is_the_last_layer_and_an_absent_snapshot_is_empty(tmp_path, monkeypatch) -> None:
     assert SECOND_STORES[-1] == "manual"
+    monkeypatch.setattr(retailers, "data_root", lambda: tmp_path)
     retailers.manual_snapshot.cache_clear()
-    assert retailers.manual_snapshot() == {}
+    try:
+        assert retailers.manual_snapshot() == {}
+    finally:
+        retailers.manual_snapshot.cache_clear()
 
 
 def test_the_snapshot_file_is_read_with_whole_cent_prices_and_a_default_status(tmp_path, monkeypatch) -> None:

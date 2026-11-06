@@ -1,0 +1,1370 @@
+{
+ "snapshot_version": "manual-v1",
+ "source": "manual",
+ "fetched_from": "2026-11-06T00:00:00+08:00",
+ "fetched_to": "2026-11-06T00:00:00+08:00",
+ "ingredients": {
+  "adobo_seasoning": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-34-1",
+     "name": "Lawry's Casero Adobo Seasoning with Pepper, 14.37 oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 407.4,
+     "package_grams_basis": "printed 407.4 g",
+     "price_sgd": 9.61,
+     "product_url": "https://www.amazon.sg/dp/B076DBLJ65",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "allspice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-1-1",
+     "name": "Simply Organic Allspice, 2.57 oz (73 g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 73.0,
+     "package_grams_basis": "printed 73 g",
+     "price_sgd": 20.04,
+     "product_url": "https://www.amazon.sg/dp/B08FVC5G6B",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "almond_paste": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-79-1",
+     "name": "Odense, Almond Paste, 7 oz (198 g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 198.0,
+     "package_grams_basis": "printed 198 g",
+     "price_sgd": 29.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i2351750235.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "annatto": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-54-1",
+     "name": "Badia Ground Achiote (annatto) - 2.75 oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 78.0,
+     "package_grams_basis": "printed 78 g",
+     "price_sgd": 8.93,
+     "product_url": "https://www.amazon.sg/dp/B06XRKMR45",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "apple_pie_spice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-81-1",
+     "name": "Sauer's Apple Pie Spice, 1.00 Ounce",
+     "brand": null,
+     "category": null,
+     "package_grams": 28.3,
+     "package_grams_basis": "printed 28.3 g",
+     "price_sgd": 10.59,
+     "product_url": "https://www.amazon.sg/dp/B0DC1W84KX",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "au_jus_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-84-1",
+     "name": "Watkins Organic Gourmet Seasoning Mix, Au Jus Gravy, 1.0 Oz. Pouch",
+     "brand": null,
+     "category": null,
+     "package_grams": 28.3,
+     "package_grams_basis": "printed 28.3 g",
+     "price_sgd": 11.0,
+     "product_url": "https://www.amazon.sg/dp/B09KZ47B6S",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "baguette": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-141-1",
+     "name": "RedMart Traditional French Baguette Sourdough 280G X 2",
+     "brand": null,
+     "category": null,
+     "package_grams": 560.0,
+     "package_grams_basis": "printed 560 g",
+     "price_sgd": 7.36,
+     "product_url": "https://www.lazada.sg/products/pdp-i2782580340.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "basil": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-133-1",
+     "name": "Sweet Basil Herbs Leaf/Leaves (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 20.0,
+     "package_grams_basis": "printed 20 g",
+     "price_sgd": 4.25,
+     "product_url": "https://www.fairprice.com.sg/product/sweet-basil-herbs-leafleaves",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    },
+    {
+     "external_id": "mn-133-2",
+     "name": "Simply Finest Fresh Basil (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 30.0,
+     "package_grams_basis": "printed 30 g",
+     "price_sgd": 1.65,
+     "product_url": "https://www.fairprice.com.sg/product/simply-finest-fresh-basil-30g-13167537",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "berbere": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-46-1",
+     "name": "Frontier Organic Seasoning, Berbere, 2.3 Ounce",
+     "brand": null,
+     "category": null,
+     "package_grams": 65.2,
+     "package_grams_basis": "printed 65.2 g",
+     "price_sgd": 15.14,
+     "product_url": "https://www.amazon.sg/dp/B005WDVQHG",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "biscuit_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-4-1",
+     "name": "Betty Crocker Bisquick Original All-Purpose Baking Mix, 5.5 oz (Pack of 9)",
+     "brand": null,
+     "category": null,
+     "package_grams": 1403.3,
+     "package_grams_basis": "printed 1403.3 g",
+     "price_sgd": 16.43,
+     "product_url": "https://www.amazon.sg/dp/B00DJQ2AZ0",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "calamansi": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-90-1",
+     "name": "Lime (Small) Calamansi [4 Kg/Pkt] - Grocermart Fresh",
+     "brand": null,
+     "category": null,
+     "package_grams": 4000.0,
+     "package_grams_basis": "printed 4 kg = 4000 g",
+     "price_sgd": 26.4,
+     "product_url": "https://www.lazada.sg/products/pdp-i3541555457.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "celeriac": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-91-1",
+     "name": "MMMM! Celeriac (RedMart, sold by FreshCo)",
+     "brand": null,
+     "category": null,
+     "package_grams": 900.0,
+     "package_grams_basis": "printed 900 g",
+     "price_sgd": 10.8,
+     "product_url": "https://www.lazada.sg/products/pdp-i13786023416.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "celery_seed": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-9-1",
+     "name": "McCormick Gourmet Celery Seed 45g",
+     "brand": null,
+     "category": null,
+     "package_grams": 45.0,
+     "package_grams_basis": "printed 45 g",
+     "price_sgd": 16.4,
+     "product_url": "https://www.amazon.sg/dp/B0D5CLQN7Q",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "chayote": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-146-1",
+     "name": "RedMart Choko Chayote Mirliton",
+     "brand": null,
+     "category": null,
+     "package_grams": 300.0,
+     "package_grams_basis": "printed 300 g",
+     "price_sgd": 1.05,
+     "product_url": "https://www.lazada.sg/products/pdp-i327250337.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "coconut_flavoring": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-92-1",
+     "name": "RedMan Coconut Flavour (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 33.0,
+     "package_grams_basis": "printed 33 ml = 33 ml x 1.0 g/ml (assumed, no density in the release)",
+     "price_sgd": 3.2,
+     "product_url": "https://www.fairprice.com.sg/product/redman-coconut-flavour-2",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "coleslaw": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-93-1",
+     "name": "BELLVO Coleslaw Mix (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 250.0,
+     "package_grams_basis": "printed 250 g",
+     "price_sgd": 4.5,
+     "product_url": "https://www.lazada.sg/products/pdp-i304242967.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "coleslaw_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-35-1",
+     "name": "BELLVO Coleslaw Mix (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 250.0,
+     "package_grams_basis": "printed 250 g",
+     "price_sgd": 4.5,
+     "product_url": "https://www.lazada.sg/products/pdp-i304242967.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "crystallized_ginger": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-41-1",
+     "name": "Badia Organic Crystallized Ginger, 10 Ounce",
+     "brand": null,
+     "category": null,
+     "package_grams": 283.5,
+     "package_grams_basis": "printed 283.5 g",
+     "price_sgd": 23.61,
+     "product_url": "https://www.amazon.sg/dp/B01N3CI2ZL",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "dill_seed": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-96-1",
+     "name": "McCormick Dill Seed, 0.85 oz (Pack of 6)",
+     "brand": null,
+     "category": null,
+     "package_grams": 144.6,
+     "package_grams_basis": "printed 144.6 g",
+     "price_sgd": 29.48,
+     "product_url": "https://www.amazon.sg/dp/B0009P688E",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "dinner_roll": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-142-1",
+     "name": "Picard 6 Mini Italian Bread Rolls - Frozen, 240 g (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 240.0,
+     "package_grams_basis": "printed 240 g",
+     "price_sgd": 4.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i2636475065.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "dried_onion_flakes": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-11-1",
+     "name": "McCormick Minced Onions, 56g",
+     "brand": null,
+     "category": null,
+     "package_grams": 56.0,
+     "package_grams_basis": "printed 56 g",
+     "price_sgd": 5.69,
+     "product_url": "https://www.amazon.sg/dp/B00I9VB66E",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "enchilada_sauce": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-137-1",
+     "name": "Old El Paso Mild Enchilada Sauce 19 oz Can (pack of 6)",
+     "brand": null,
+     "category": null,
+     "package_grams": 3231.8,
+     "package_grams_basis": "printed 3231.8 g",
+     "price_sgd": 25.46,
+     "product_url": "https://www.amazon.sg/dp/B005EKI6MK",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "english_muffin": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-143-1",
+     "name": "Monoprix 4 Plain English Muffins (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 250.0,
+     "package_grams_basis": "printed 250 g",
+     "price_sgd": 7.9,
+     "product_url": "https://www.lazada.sg/products/pdp-i2480287580.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "fennel": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-140-1",
+     "name": "Yoiaji Australia Fennel (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 250.0,
+     "package_grams_basis": "printed 250 g",
+     "price_sgd": 7.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i305004771.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "fermented_soybeans": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-148-1",
+     "name": "Kirei Natto (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 100.0,
+     "package_grams_basis": "printed 100 g",
+     "price_sgd": 3.9,
+     "product_url": "https://www.fairprice.com.sg/product/kirei-natto-frozen-100g-90002863",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "golden_syrup": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-145-1",
+     "name": "Lyle's Golden Syrup (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 325.0,
+     "package_grams_basis": "printed 325 g",
+     "price_sgd": 4.8,
+     "product_url": "https://www.fairprice.com.sg/product/lyles-golden-syrup",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "grapefruit_juice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-147-1",
+     "name": "Ripe Freshly Squeezed Pink Grapefruit Juice (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 1000.0,
+     "package_grams_basis": "printed 1 l = 1000 ml x 1.0 g/ml (assumed, no density in the release)",
+     "price_sgd": 5.55,
+     "product_url": "https://www.lazada.sg/products/pdp-i2813754120.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "habanero_pepper": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-22-1",
+     "name": "MMMM! Red Habanero Chili Pepper (RedMart, sold by FreshCo)",
+     "brand": null,
+     "category": null,
+     "package_grams": 70.0,
+     "package_grams_basis": "printed 70 g",
+     "price_sgd": 5.4,
+     "product_url": "https://www.lazada.sg/products/pdp-i13746299048.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "harissa": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-32-1",
+     "name": "Simply Organic Harissa Seasoning, 3.2 oz (91 g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 91.0,
+     "package_grams_basis": "printed 91 g",
+     "price_sgd": 17.64,
+     "product_url": "https://www.amazon.sg/dp/B084T62V26",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "hazelnut": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-29-1",
+     "name": "Yupik Dry Roasted Hazelnuts 6oz, unsalted",
+     "brand": null,
+     "category": null,
+     "package_grams": 170.1,
+     "package_grams_basis": "printed 170.1 g",
+     "price_sgd": 22.85,
+     "product_url": "https://www.amazon.sg/dp/B0DNKR4PX2",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "jackfruit": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-72-1",
+     "name": "Sunny Fruit Peeled Jackfruit 300 g (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 300.0,
+     "package_grams_basis": "printed 300 g",
+     "price_sgd": 3.65,
+     "product_url": "https://www.lazada.sg/products/pdp-i303438487.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "jerk_seasoning": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-36-1",
+     "name": "Sainsbury's Jerk Seasoning 50G",
+     "brand": null,
+     "category": null,
+     "package_grams": 50.0,
+     "package_grams_basis": "printed 50 g",
+     "price_sgd": 2.34,
+     "product_url": "https://www.lazada.sg/products/pdp-i3365477182.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "kaffir_lime_leaf": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-138-1",
+     "name": "Simply Finest Lime Leaf (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 100.0,
+     "package_grams_basis": "printed 100 g",
+     "price_sgd": 2.3,
+     "product_url": "https://www.fairprice.com.sg/product/simply-finest-lime-leaf-100g-11667169",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "long_grain_wild_rice_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-104-1",
+     "name": "BEN'S ORIGINAL Flavored Long Grain Rice & Wild Rice, 6 oz Box (Pack of 12)",
+     "brand": null,
+     "category": null,
+     "package_grams": 2041.2,
+     "package_grams_basis": "printed 2041.2 g",
+     "price_sgd": 50.24,
+     "product_url": "https://www.amazon.sg/dp/B074JBGFL6",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "mixed_nuts": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-8-1",
+     "name": "FairPrice Classic Mix Nuts (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 150.0,
+     "package_grams_basis": "printed 150 g",
+     "price_sgd": 4.89,
+     "product_url": "https://www.fairprice.com.sg/product/fairprice-classic-mix-nuts-150g-13183195",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "msg": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-136-1",
+     "name": "Ajinomoto Monosodium Glutamate (MSG) (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 500.0,
+     "package_grams_basis": "printed 500 g",
+     "price_sgd": 4.02,
+     "product_url": "https://www.fairprice.com.sg/product/11935071",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "mung_bean_starch": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-108-1",
+     "name": "Xin Liang Mung Bean Starch 200 g (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 200.0,
+     "package_grams_basis": "printed 200 g",
+     "price_sgd": 3.91,
+     "product_url": "https://www.lazada.sg/products/pdp-i2362630173.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "mustard": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-134-1",
+     "name": "Heinz Yellow Mustard (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 368.0,
+     "package_grams_basis": "printed 368 g",
+     "price_sgd": 8.25,
+     "product_url": "https://www.fairprice.com.sg/product/heinz-yellow-mustard-368g-12600150",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "old_bay": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-74-1",
+     "name": "Old Bay Seasoning, 16 oz tin",
+     "brand": null,
+     "category": null,
+     "package_grams": 453.6,
+     "package_grams_basis": "printed 453.6 g",
+     "price_sgd": 23.8,
+     "product_url": "https://www.amazon.sg/dp/B008PO4B0I",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "onion_salt": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-16-1",
+     "name": "McCormick Onion Salt, 5.12 oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 145.1,
+     "package_grams_basis": "printed 145.1 g",
+     "price_sgd": 9.16,
+     "product_url": "https://www.amazon.sg/dp/B000V8BLJ0",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "onion_soup_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-33-1",
+     "name": "Coles Simply French Onion Soup Mix 40g (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 40.0,
+     "package_grams_basis": "printed 40 g",
+     "price_sgd": 2.25,
+     "product_url": "https://www.lazada.sg/products/pdp-i3501978314.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pandan_leaf": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-144-1",
+     "name": "Pandan Leaves (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 150.0,
+     "package_grams_basis": "printed 150 g",
+     "price_sgd": 1.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i305008689.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "papaya": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-58-1",
+     "name": "Hong Kong Red Papaya 1.2KG (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 1200.0,
+     "package_grams_basis": "printed 1.2 kg = 1200 g",
+     "price_sgd": 5.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i303422444.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pepperoni": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-139-1",
+     "name": "Aw's Market Pepperoni (Sliced) (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 100.0,
+     "package_grams_basis": "printed 100 g",
+     "price_sgd": 8.81,
+     "product_url": "https://www.fairprice.com.sg/product/aw-s-market-pepperoni-sliced-100-g-90018567",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "perilla": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-113-1",
+     "name": "K-Fresh Korean Perilla leaves 40 g (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 40.0,
+     "package_grams_basis": "printed 40 g",
+     "price_sgd": 4.64,
+     "product_url": "https://www.lazada.sg/products/pdp-i387470073.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "persimmon": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-114-1",
+     "name": "Sharon Persimmon (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 900.0,
+     "package_grams_basis": "printed 900 g",
+     "price_sgd": 14.95,
+     "product_url": "https://www.fairprice.com.sg/product/sharon-persimmon-800g-12019024",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pho_spice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-115-1",
+     "name": "India Tree Pho Spice Mix, 0.75 Ounce",
+     "brand": null,
+     "category": null,
+     "package_grams": 21.3,
+     "package_grams_basis": "printed 21.3 g",
+     "price_sgd": 16.6,
+     "product_url": "https://www.amazon.sg/dp/B0046IXPKO",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "phyllo": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-20-1",
+     "name": "Tek Lezet Fresh Turkish Filo Pastry (Yufka) (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 500.0,
+     "package_grams_basis": "printed 500 g",
+     "price_sgd": 13.8,
+     "product_url": "https://www.lazada.sg/products/pdp-i3439560038.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pie_crust": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-3-1",
+     "name": "Anne's Secret Recipe Fuss Free Pie Crust (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 286.0,
+     "package_grams_basis": "printed 286 g",
+     "price_sgd": 4.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i327396942.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pistachio": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-19-1",
+     "name": "Setton Farms Naturally Raw Shelled Pistachios, 8 x 5 oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 1134.0,
+     "package_grams_basis": "printed 1134 g",
+     "price_sgd": 64.08,
+     "product_url": "https://www.amazon.sg/dp/B099MBWZZ2",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "plantain": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-26-1",
+     "name": "India Fresh Nendran Banana (plantain), 500 g",
+     "brand": null,
+     "category": null,
+     "package_grams": 500.0,
+     "package_grams_basis": "printed 500 g",
+     "price_sgd": 6.3,
+     "product_url": "https://www.lazada.sg/products/pdp-i2212101648.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "poultry_seasoning": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-21-1",
+     "name": "McCormick Poultry Seasoning, 0.65 Oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 18.4,
+     "package_grams_basis": "printed 18.4 g",
+     "price_sgd": 7.23,
+     "product_url": "https://www.amazon.sg/dp/B000V86DH0",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "pumpkin_pie_spice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-116-1",
+     "name": "Frontier Co-op Pumpkin Pie Spice, 1.72 oz (49 g)",
+     "brand": null,
+     "category": null,
+     "package_grams": 49.0,
+     "package_grams_basis": "printed 49 g",
+     "price_sgd": 9.45,
+     "product_url": "https://www.amazon.sg/dp/B08BQ9T77M",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "radish": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-10-1",
+     "name": "Holland Red Radish (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 125.0,
+     "package_grams_basis": "printed 125 g",
+     "price_sgd": 1.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i304944890.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "radish_sprouts": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-118-1",
+     "name": "Radish Daikon Sprouts 50G (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 50.0,
+     "package_grams_basis": "printed 50 g",
+     "price_sgd": 1.95,
+     "product_url": "https://www.lazada.sg/products/pdp-i13745540113.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "ranch_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-119-1",
+     "name": "Mrs. Wages Ranch Dressing and Dip Mix, 0.8 Oz, Pack of 12",
+     "brand": null,
+     "category": null,
+     "package_grams": 272.2,
+     "package_grams_basis": "printed 272.2 g",
+     "price_sgd": 27.65,
+     "product_url": "https://www.amazon.sg/dp/B071VJJGFR",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "rhubarb": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-43-1",
+     "name": "Ravifruit IQF Rhubarb (Pcs) 1Kg, frozen (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 1000.0,
+     "package_grams_basis": "printed 1 kg = 1000 g",
+     "price_sgd": 16.28,
+     "product_url": "https://www.lazada.sg/products/pdp-i3594076706.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "rum_extract": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-120-1",
+     "name": "Rum Extract for Cocktails and Desserts Navy 60ml",
+     "brand": null,
+     "category": null,
+     "package_grams": 60.0,
+     "package_grams_basis": "printed 60 ml = 60 ml x 1.0 g/ml (assumed, no density in the release)",
+     "price_sgd": 15.94,
+     "product_url": "https://www.amazon.sg/dp/B0DQLTYBG2",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "seasoned_salt": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-6-1",
+     "name": "Lawry's 25% Less Sodium Seasoned Salt, 8 oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 226.8,
+     "package_grams_basis": "printed 226.8 g",
+     "price_sgd": 8.29,
+     "product_url": "https://www.amazon.sg/dp/B008VT0MDC",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "sesame_tahini": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-135-1",
+     "name": "Clearspring Organic Tahini White Sesame (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 280.0,
+     "package_grams_basis": "printed 280 g",
+     "price_sgd": 10.71,
+     "product_url": "https://www.fairprice.com.sg/product/clearspring-organic-tahini-white-sesame-280-g-90129209",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "sinigang_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-122-1",
+     "name": "Knorr Sinigang Sa Sampalok Soup Mix With Tamarind 40g",
+     "brand": null,
+     "category": null,
+     "package_grams": 40.0,
+     "package_grams_basis": "printed 40 g",
+     "price_sgd": 3.1,
+     "product_url": "https://www.lazada.sg/products/pdp-i3144810690.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "stuffing_mix": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-50-1",
+     "name": "Kraft Stove Top Traditional Sage Stuffing Mix (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 170.0,
+     "package_grams_basis": "printed 170 g",
+     "price_sgd": 4.99,
+     "product_url": "https://www.lazada.sg/products/pdp-i303218932.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "sumac": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-45-1",
+     "name": "Frontier Co-op Sumac Powder, 59g",
+     "brand": null,
+     "category": null,
+     "package_grams": 59.0,
+     "package_grams_basis": "printed 59 g",
+     "price_sgd": 17.55,
+     "product_url": "https://www.amazon.sg/dp/B08VW8R6MT",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "tamarind_soup_base": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-63-1",
+     "name": "Knorr Sinigang Sa Sampalok Soup Mix With Tamarind 40g",
+     "brand": null,
+     "category": null,
+     "package_grams": 40.0,
+     "package_grams_basis": "printed 40 g",
+     "price_sgd": 3.1,
+     "product_url": "https://www.lazada.sg/products/pdp-i3144810690.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "thai_basil": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-64-1",
+     "name": "The Little Red Farm Thai Basil 30G (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 30.0,
+     "package_grams_basis": "printed 30 g",
+     "price_sgd": 4.4,
+     "product_url": "https://www.lazada.sg/products/pdp-i2069415125.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "turkey": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-2-1",
+     "name": "The Meat Club Turkey Mince - Cage Free, Australia, 300g, Frozen (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 300.0,
+     "package_grams_basis": "printed 300 g",
+     "price_sgd": 20.23,
+     "product_url": "https://www.lazada.sg/products/pdp-i13743519539.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "vegan_mayonnaise": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-131-1",
+     "name": "Veeba Eggless Veginnaise Vegan Mayo (FairPrice)",
+     "brand": null,
+     "category": null,
+     "package_grams": 300.0,
+     "package_grams_basis": "printed 300 g",
+     "price_sgd": 5.5,
+     "product_url": "https://www.fairprice.com.sg/product/veeba-eggless-veginnaise-vegan-mayo",
+     "in_stock": true,
+     "retailer": "other",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "venison": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-78-1",
+     "name": "[FROZEN] Premium New Zealand Grass-Fed Venison Steak (1.5kg/pack) - meatmen_butchery",
+     "brand": null,
+     "category": null,
+     "package_grams": 1500.0,
+     "package_grams_basis": "printed 1.5 kg = 1500 g",
+     "price_sgd": 115.0,
+     "product_url": "https://www.lazada.sg/products/pdp-i3032913033.html",
+     "in_stock": true,
+     "retailer": "lazada",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "water_chestnut": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-5-1",
+     "name": "La Choy Sliced Water Chestnuts, 8 Ounce, 12 Pack",
+     "brand": null,
+     "category": null,
+     "package_grams": 2721.6,
+     "package_grams_basis": "printed 2721.6 g",
+     "price_sgd": 21.4,
+     "product_url": "https://www.amazon.sg/dp/B00FLO9DA8",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "wild_rice": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-30-1",
+     "name": "Dr Gram Organic Lake Wild Rice (RedMart)",
+     "brand": null,
+     "category": null,
+     "package_grams": 200.0,
+     "package_grams_basis": "printed 200 g",
+     "price_sgd": 18.3,
+     "product_url": "https://www.lazada.sg/products/pdp-i303078280.html",
+     "in_stock": true,
+     "retailer": "redmart",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  },
+  "zaatar": {
+   "status": "mapped",
+   "review_status": "owner_recorded",
+   "products": [
+    {
+     "external_id": "mn-52-1",
+     "name": "Watkins Organic Za'Atar Seasoning, 2.6 Oz",
+     "brand": null,
+     "category": null,
+     "package_grams": 73.7,
+     "package_grams_basis": "printed 73.7 g",
+     "price_sgd": 17.67,
+     "product_url": "https://www.amazon.sg/dp/B09QFMMFZF",
+     "in_stock": true,
+     "retailer": "amazon",
+     "fetched_at": "2026-11-06T00:00:00+08:00"
+    }
+   ]
+  }
+ }
+}

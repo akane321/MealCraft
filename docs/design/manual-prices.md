@@ -8,11 +8,18 @@ remaining gap is filled by hand, and the list groups these lines by platform.
 ## The sheet
 
 `data-engineering/data/enrichment/manual/v1/price-sheet.csv` (UTF-8 with BOM, so that Excel reads it) lists the
-ingredients no store priced when it was drawn up (132). They are ordered by how many release recipes use them.
-Since the coverage counts only mappings with a product in stock (2026-11-02), 150 bought ingredients are unpriced
-(549 of 699 priced, 78.5%), and 81 more reach the 90% target. 18 of the 150 are not on the sheet: their only
-FairPrice or Cold Storage products were out of stock at capture (basil, mustard, msg, baguette and 14 others; the
-coverage report lists the most used).
+ingredients no store priced when it was drawn up (ranks 1-132, ordered by how many release recipes use them).
+Since the coverage counts only mappings with a product in stock (2026-11-02), 150 bought ingredients were unpriced
+(549 of 699 priced, 78.5%). The 18 of them whose only FairPrice or Cold Storage products were out of stock at
+capture were added on 2026-11-06 as ranks 133-148 when a product was found (basil, mustard, msg, baguette, ...).
+
+**2026-11-06 lookup.** An AI web lookup (FairPrice search pages, Amazon.sg, RedMart and Lazada pages, each read
+that day) filled 72 rows for 71 ingredients; every row's note says "claude-ai web lookup 2026-11-06, pending owner
+spot-check". A product found on FairPrice is recorded as `other` with its fairprice.com.sg URL: the FairPrice
+snapshot is not edited, and an `other` line never goes to the FairPrice cart. Anything not clearly the ingredient
+(a stand-in, a different form, an unclear pack size) was left blank. Coverage is now 620 of 699 (88.7%), so 10
+more reach the 90% target; the [coverage report](../evaluation/price-coverage/latest.md) lists the most used still
+unpriced.
 
 - **Given:** `rank`, `ingredient_id`, `ingredient`, `recipes`, `typical_grams_per_recipe`, `example_lines`, and
   search links for Shopee, Lazada and Amazon.

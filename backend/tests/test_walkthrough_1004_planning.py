@@ -468,7 +468,10 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
         # v3 repair (#426, re-measured 2026-11-06): S$42 -> S$64 and S$33 -> S$41. The S$42 week was Sesame Ramen
         # With Green Peas (RCP2_C54503B406F8) and pickles; its "1 (3 ounce) package ramen noodles" weighed 28.3 g,
         # now 85 g (`package_mass`), so that week is no longer the cheapest.
-        assert [option.label for option in options] == ["Use S$64 for the week", "2 people at S$41 a week"]
+        # Hand-recorded prices (2026-11-06): S$64 -> S$54. The S$54 week buys no hand-recorded product (Simple Miso Soup
+        # and White Mixed Vegetable Curry); it also plans at S$54 with the snapshot stubbed out, where the refusal still
+        # offers S$64. The larger pool changed the packet, so the cost-led search reaches it.
+        assert [option.label for option in options] == ["Use S$54 for the week", "2 people at S$41 a week"]
         assert "减少人数也不能降低这个预算" not in refused.messages[-1].content
     for chosen, size in zip(options, (4, 2), strict=True):
         # A fresh refusal for each button: once one week is planned, the session reads the next tap as an edit.
@@ -484,7 +487,7 @@ def test_the_walkthrough_budget_choices_plan_at_the_offered_amount(walked):
 
 
 REFUSED_FOR_FOUR = (
-    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$63.61。"
+    "这个预算排不出来。4 个人一周 S$10，每人每餐大约只有 S$0.36（一周 7 餐）。我能找到的最便宜的一周要 S$53.15。"
 )
 
 
@@ -508,9 +511,9 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
     # Two people's check plans on release v3 with the budget packet ordered by cost as bought (2026-11-02).
     # v3 wave 2 (18,335 recipes, re-measured 2026-11-02): S$70 -> S$42, S$47 -> S$33; four's cheapest S$69.21 -> 41.65.
     # v3 repair (#426, re-measured 2026-11-06): four's cheapest S$41.65 -> S$63.61 (the ramen week, see above),
-    # two's S$33 -> S$41.
+    # two's S$33 -> S$41. Hand-recorded prices (2026-11-06): four's S$63.61 -> S$53.15 (see above).
     assert [option.label for option in refused.pending_interaction.options] == [
-        "Use S$64 for the week",
+        "Use S$54 for the week",
         "2 people at S$41 a week",
     ]
     # Each size's cheapest week, then that amount through the budgeted path; no third search, and no four-dish search
@@ -519,7 +522,8 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
     # to S$46.27, because new v3 dishes rank into its packet (no budget, so ranked only). The budgeted checks are at
     # S$70 and S$47 and both plan; on v2.2 the checks at S$52 and S$40 failed and the refusal named S$69.99. A budget
     # still plans below these amounts (four at S$60, two at S$38: `test_varied_weeks`), as on v2.2.
-    assert planned == [(4, None, True), (4, 64, False), (2, None, True), (2, 41, False)]  # 42, 33 -> 64, 41 (#426)
+    # Four: S$42 -> S$64 (#426) -> S$54 (hand-recorded prices); two: S$33 -> S$41 (#426).
+    assert planned == [(4, None, True), (4, 54, False), (2, None, True), (2, 41, False)]
 
 
 @pytest.fixture(scope="module")
@@ -580,7 +584,8 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
         # S$37: the most a check refuses on release v3 with the budget packet ordered by cost as bought (S$38 plans;
         # S$41 refused on v2.2 and before, re-measured 2026-11-02).
         # v3 wave 2 (18,335 recipes, re-measured 2026-11-02): S$37 -> S$31 (S$32 plans).
-        error = service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": 31}))
+        # v3 repair (#426) with hand-recorded prices, re-measured 2026-11-06: S$31 -> S$32 (S$33 plans).
+        error = service.meal_plan_service.check(request.model_copy(update={"weekly_budget_sgd": 32}))
         backed = sorted(
             attempt["purchase_total_sgd"]
             for attempt in error.trace["validation_attempts"]
@@ -589,7 +594,8 @@ def test_the_walkthrough_budgeted_checks_cheapest_weeks_plan_at_their_own_cost(w
         # S$38 on release v3 (S$37.68, re-measured 2026-11-02): the cost-led search inside the budgeted check bisects
         # to the dollar. With the old per-use packet order it was S$117 at S$41 on v3 (S$116.33), a dearer week than
         # v2.2's S$107 (S$101 on v2.1, S$103 before task 15); the order by cost as bought finds the cheaper one.
-        # v3 wave 2: S$38 -> S$32 (S$31.29, re-measured 2026-11-02); v3 repair (#426): S$33 (S$32.48, 2026-11-06).
+        # v3 wave 2: S$38 -> S$32 (S$31.29, re-measured 2026-11-02); v3 repair (#426): S$33 (S$32.48, 2026-11-06);
+        # unchanged by the hand-recorded prices (S$33 re-measured on both together, 2026-11-06).
         assert backed and math.ceil(backed[0]) == 33
         for cost in {backed[0], backed[-1]}:
             budget = math.ceil(cost)
@@ -615,7 +621,8 @@ def test_tapping_an_offered_budget_plans_the_week_its_refusal_checked_without_se
         refused = service.create("一共10新币给4个人做一周")
         monkeypatch.setattr(ProductPlanningEngine, "plan", counted)
         ready = service.reply(refused.id, refused.pending_interaction.options[0].value)
-        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 64  # S$70 -> S$42 (wave 2) -> S$64 (#426)
+        # S$70, S$42 (wave 2), S$64 (#426), S$54 (hand-recorded prices).
+        assert ready.can_confirm and ready.constraints.weekly_budget_sgd == 54
         confirmed = service.confirm(ready.id)
         # Release v3 (re-measured 2026-11-02): the refusal checked S$70 itself and that check planned, so its kept week
         # answers the tap and Plan saves it with no search. On v2.2 the S$70 offer was the cost of a week the S$53

@@ -132,6 +132,15 @@ The scan does not read `withdrawn.json`, so the withdrawals do not lower any cou
   - Their reports under `docs/evaluation/` were regenerated.
   - `workbench` was not run locally (CI runs it).
 
+After merging the hand-recorded prices (issue #391), re-measured on both together:
+
+- Same test: four people's offer is S$54 (cheapest S$53.15), two people's stays S$41, the budgeted check's cheapest
+  stays S$33 (S$32 is the most it refuses). The S$54 week buys no hand-recorded product: it also plans at S$54 with
+  the manual snapshot stubbed out, where the refusal still offers S$64. The larger pool changed the packet, so the
+  cost-led search reaches it.
+- The planning pool is 16,368 recipes, 13,470 filling a planner role. 241 of the 246 withdrawn recipes count in the
+  report's "withdrawn" row; the other 5 already fall at an earlier gate.
+
 ## Left for people
 
 1. Owner spot-check of `decisions.csv`, then the second person's 20-recipe re-check (10 withdraw, 10 keep). Put a real
