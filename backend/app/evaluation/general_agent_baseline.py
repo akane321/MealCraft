@@ -11,7 +11,7 @@ The loop (OpenAI Responses API): each user turn may take up to `MAX_STEPS` model
 the calculator gets the result and continues; the last allowed response has tools off and must answer. Web search
 runs inside a response, at most `MAX_SEARCHES` per response (`max_tool_calls`).
 
-Cost (ADR-0086; the arm's tool fees count against its US$5): before each response the arm's ledger
+Cost (ADR-0086, ADR-0118; the arm's tool fees count against its US$15): before each response the arm's ledger
 (`baseline_arms.LedgerBudget`) must cover its worst case, the rendered input plus `MAX_SEARCHES` blocks of
 `SEARCH_BLOCK_TOKENS` search content plus `MAX_OUTPUT_TOKENS`, plus the search fees, and that worst case is
 reserved. After it, the reported tokens are charged with `SEARCH_USD` for each search call made. Prices, from the
@@ -302,4 +302,7 @@ ARM = baseline_arms.Arm(
     responder=make_responder,
     estimate=estimate,
     model_factory=create_client,
+    # Owner, 2026-11-06 (ADR-0118): measured US$0.018-0.055 a question on four development episodes, about
+    # US$5-14 for the 280 held-out questions, so this arm alone gets US$15; the others keep US$5.
+    max_usd=15.0,
 )

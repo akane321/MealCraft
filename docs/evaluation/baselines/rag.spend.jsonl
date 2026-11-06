@@ -1,0 +1,17 @@
+{"event": "reserve", "total_tokens": 12, "usd": 9e-06}
+{"call": "embedding", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 12, "output_tokens": 0, "total_tokens": 12, "usd": 9e-06}
+{"event": "reserve", "total_tokens": 8738, "usd": 0.0290535}
+{"call": "chat", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 3676, "output_tokens": 2000, "total_tokens": 5676, "usd": 0.011757}
+{"event": "reserve", "total_tokens": 20, "usd": 1.5e-05}
+{"call": "embedding", "episode_id": "mdw-dev-008", "event": "charge", "input_tokens": 20, "output_tokens": 0, "total_tokens": 20, "usd": 1.5e-05}
+{"event": "reserve", "total_tokens": 8777, "usd": 0.02908275}
+{"call": "chat", "episode_id": "mdw-dev-008", "event": "charge", "input_tokens": 3732, "output_tokens": 117, "total_tokens": 3849, "usd": 0.0033255}
+{"event": "reserve", "total_tokens": 26, "usd": 1.95e-05}
+{"call": "embedding", "episode_id": "md-dev-001", "event": "charge", "input_tokens": 26, "output_tokens": 0, "total_tokens": 26, "usd": 1.95e-05}
+{"event": "reserve", "total_tokens": 8679, "usd": 0.02900925}
+{"call": "chat", "episode_id": "md-dev-001", "event": "charge", "input_tokens": 3602, "output_tokens": 200, "total_tokens": 3802, "usd": 0.0036015}
+{"event": "reserve", "total_tokens": 10, "usd": 7.5e-06}
+{"call": "embedding", "episode_id": "md-dev-017", "event": "charge", "input_tokens": 10, "output_tokens": 0, "total_tokens": 10, "usd": 7.5e-06}
+{"event": "reserve", "total_tokens": 8692, "usd": 0.029019}
+{"call": "chat", "episode_id": "md-dev-017", "event": "charge", "input_tokens": 3647, "output_tokens": 103, "total_tokens": 3750, "usd": 0.00319875}
+{"call": "chat", "event": "charge", "input_tokens": 33, "output_tokens": 3574, "total_tokens": 3607, "usd": 0.01610775, "note": "2026-11-06 output-cap check outside the runner"}

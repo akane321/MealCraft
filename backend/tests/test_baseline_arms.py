@@ -541,6 +541,24 @@ def test_a_dry_run_counts_what_the_arms_ledger_already_spent(tmp_path, capsys):
     assert report["ledger_usd"] == pytest.approx(0.80) and report["fits_cap"] is False
 
 
+def test_the_arms_own_cap_is_the_default_and_the_ceiling(tmp_path, capsys):
+    from app.evaluation import general_agent_baseline, rag_baseline
+
+    assert general_agent_baseline.ARM.max_usd == 15.0 and rag_baseline.ARM.max_usd == 5.0
+    episodes = tmp_path / "episodes"
+    episodes.mkdir()
+    (episodes / "mdw-dev-001.json").write_text(json.dumps(dev("mdw-dev-001"), ensure_ascii=False), encoding="utf-8")
+    arm = replace(fake_paid_arm(1, 0.30), estimate=lambda turns, instructions, model: (1, 10, 0.30), max_usd=2.0)
+    argv = [
+        "--arm", "fake-paid", "--episodes", str(episodes), "--anchor-date", "2026-09-28",
+        "--output", str(tmp_path / "out.jsonl"), "--ledger", str(tmp_path / "fake.spend.jsonl"),
+    ]  # fmt: skip
+    assert baseline_arms.main(argv, registry=lambda: {"fake-paid": arm}, resource_loader=resources) == 0
+    assert json.loads(capsys.readouterr().out)["max_usd"] == 2.0
+    with pytest.raises(SystemExit):
+        baseline_arms.main([*argv, "--max-usd", "2.5"], registry=lambda: {"fake-paid": arm}, resource_loader=resources)
+
+
 def test_a_held_out_ledger_line_carries_no_episode_id(tmp_path):
     ledger = tmp_path / "arm.spend.jsonl"
     budget = baseline_arms.LedgerBudget(
