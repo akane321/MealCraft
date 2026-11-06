@@ -4,7 +4,11 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "build_food_images.py"
+if not SCRIPT.exists():  # the backend image has no scripts/ or frontend/
+    pytest.skip("needs the repository's scripts", allow_module_level=True)
 spec = importlib.util.spec_from_file_location("build_food_images", SCRIPT)
 build_food_images = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(build_food_images)
