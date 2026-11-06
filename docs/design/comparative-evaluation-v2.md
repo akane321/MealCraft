@@ -685,7 +685,7 @@ measured rates of ADR-0118 and its ledger beside its cap.
   `comparison-{action,strict,plan}.json` (`heldout_statistics.compare`, overall only)
   and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
   this run, ledger and spend, answered and valid counts, stop reason).
-- **Outcomes, a draft to register before the run** (`formal-outcome-draft-4`):
+- **Outcomes, a draft to register before the run** (`formal-outcome-draft-5`):
   `missing` (not reached or cut by the cap), `error` (call or scorer failed),
   `failure` (invalid output). `action`: success when the final output takes the
   action the gold expects: `expected_fields.action` when the output slots can
@@ -708,17 +708,26 @@ A refusal stated as an answer or a question fails it, counted per arm as
   table of 02-baselines section 6 on every case where an arm output a plan,
   computed from the local records after every arm has run. Each hard constraint
   (allergen violation, over budget, nutrition out of bounds) is violated, within,
-  unknown or not applicable against the gold's stated constraints; the rate is
-  violated over known, with the unknown count beside it, and `comparison-plan.json`
-  pairs the product with each arm only where both are known. Beside them: gram
-  coverage, verifiable dish share, invalid outputs over all cases, distinct dishes,
-  recomputed price where known, the `full_default` meal checks per lunch and dinner
-  (a dish naming no catalog recipe is unknown for the tag checks), time, calls and
-  US$. Limits it states rather than hides: a total at or under the budgets of a plan
-  longer than seven days is unknown, as one consolidated purchase cannot show each
-  period; an over total with a pantry stated is unknown, as the recomputation buys
-  everything; `calls` are the ledger meter, one a message for the product arms.
-  Consistency over repeated runs and match to the request are not in it.
+  unknown or not applicable against the gold's stated constraints. The rate is
+  violated over known, and as an arm with partial evidence loses its clean plans
+  from that denominator, the lower and upper bounds (violated, and violated plus
+  unknown, over applicable) stand beside it, by one rule for every arm;
+  `comparison-plan.json` pairs the product with each arm only where both are known.
+  Beside them: gram coverage, verifiable dish share, invalid outputs over all cases,
+  distinct dishes, recomputed price where known, the `full_default` meal checks per
+  lunch and dinner (a dish naming no catalog recipe is unknown for the tag checks),
+  planned against requested days and meals, time, calls and US$. Per person divides
+  by the case's household, never an arm's own `servings`, and is unknown when the
+  case states none or states an attendance. One member's allergen is judged per
+  dish: unknown only when that dish's `not_for` names every member who avoids it,
+  which only the product can say. A rate, mean or bound on fewer known cases than
+  the small-cell minimum, or a paired block on fewer pairs, is withheld with its
+  unknown and not-applicable counts kept. Limits it states rather than hides: a
+  total at or under the budgets of a request longer than seven days is unknown, as
+  one consolidated purchase cannot show each period; an over total with a pantry
+  stated is unknown, as the recomputation buys everything; `calls_counted_as` labels
+  the ledger meter, one a message for the product arms and one a model call for the
+  others. Consistency over repeated runs and match to the request are not in it.
 
 ### Phase 5 — human subset and final analysis
 

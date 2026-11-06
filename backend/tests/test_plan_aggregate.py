@@ -6,6 +6,7 @@ import pytest
 
 from app.evaluation import plan_aggregate
 from app.evaluation.baseline_recomputation import IngredientEvaluationFacts
+from app.evaluation.pure_llm_baseline import case_episode
 from app.schemas.planning_v2 import PlanningNutrients
 
 
@@ -17,6 +18,7 @@ RESOURCES = SimpleNamespace(
     ingredient_facts={
         "rice": IngredientEvaluationFacts(allergens=(), nutrition_per_100g=nutrients(300, 100)),  # 3 kcal, 1 mg a gram
         "secret": IngredientEvaluationFacts(allergens=(), nutrition_per_100g=None),
+        "peanuts": IngredientEvaluationFacts(allergens=("peanut",), nutrition_per_100g=nutrients(600, 0)),
     },
     checked_allergens=frozenset({"peanut", "shellfish", "tree_nut"}),
 )
@@ -113,12 +115,13 @@ def record(meals=None, *, allergens=(), complete=True, total=50.0, status="compl
     }
 
 
-def episode(*constraints, **gold):
-    return {"episode_id": "case", "gold": {"hard_constraints": list(constraints), **gold}}
+def episode(*constraints, horizon_days=None, **gold):
+    case = {"episode_id": "case", "horizon_days": horizon_days}
+    return case | {"gold": {"hard_constraints": [constraint("household_size", "eq", 2), *constraints], **gold}}
 
 
-def constraint(field, operator, value, scope="household"):
-    return {"field": field, "operator": operator, "value": value, "unit": "x", "scope": scope, "evidence": "x"}
+def constraint(field, operator, value, scope="household", **extra):
+    return {"field": field, "operator": operator, "value": value, "unit": "x", "scope": scope, "evidence": "x"} | extra
 
 
 ALLERGIC = constraint("allergens", "exclude", ["peanut"])
@@ -149,13 +152,35 @@ def test_an_allergen_name_outside_the_vocabulary_is_read_through_the_keywords():
     assert row(episode(chinese), record(allergens=["peanut"]))["allergen_violation"] is True
 
 
-def test_one_members_allergen_on_a_dish_marked_not_for_someone_is_unknown():
-    member = constraint("allergens", "exclude", ["peanut"], "member")
-    marked = record([("2026-09-28", "dinner", [dish(not_for=["Ann"])])], allergens=["peanut"])
-    assert row(episode(member), marked)["allergen_violation"] is None
-    assert row(episode(member), record(allergens=["peanut"]))["allergen_violation"] is True
-    nested = constraint("members", "eq", [{"member_id": "Ann", "allergens": ["peanut"]}])
-    assert row(episode(nested), marked)["allergen_violation"] is None
+MEMBER = constraint("allergens", "exclude", ["peanut"], "member", target_member_ids=["Ann"])
+TWO = constraint("members", "eq", [{"member_id": "Ann", "allergens": ["peanut"]}, {"member_id": "Bob"}])
+
+
+def peanut_plan(*dishes):
+    return record([("2026-09-28", "dinner", list(dishes))], allergens=["peanut"])
+
+
+def test_one_members_allergen_is_unknown_only_on_the_dish_that_holds_it_marked_for_that_member():
+    marked = peanut_plan(dish(ingredient="peanuts", not_for=["ann"]))  # the plan's name, the gold's id
+    found = row(episode(MEMBER), marked)
+    assert found["allergen_violation"] is None and found["marked_not_for"] is True
+    assert row(episode(TWO), marked)["allergen_violation"] is None
+    assert row(episode(MEMBER), peanut_plan(dish(ingredient="peanuts")))["allergen_violation"] is True
+
+
+def test_a_not_for_on_another_dish_or_for_someone_else_hides_no_member_violation():
+    other_dish = peanut_plan(dish(ingredient="peanuts"), dish(name="Rice", not_for=["Ann"]))
+    assert row(episode(MEMBER), other_dish)["allergen_violation"] is True
+    someone_else = peanut_plan(dish(ingredient="peanuts", not_for=["Bob"]))
+    assert row(episode(TWO), someone_else)["allergen_violation"] is True
+    # Every arm alike: this is the same record whichever arm wrote it, and only `not_for` differs.
+    unknown_name = peanut_plan(dish(ingredient="peanuts", not_for=["Mum"]))
+    assert row(episode(MEMBER), unknown_name)["allergen_violation"] is None  # may be Ann under another id
+
+
+def test_a_household_allergen_stays_a_violation_whatever_the_marks_say():
+    marked = peanut_plan(dish(ingredient="peanuts", not_for=["Ann"]))
+    assert row(episode(ALLERGIC), marked)["allergen_violation"] is True
 
 
 @pytest.mark.parametrize(
@@ -191,6 +216,37 @@ def test_past_seven_days_the_total_proves_over_budget_only():
     assert row(episode(whole), record(fortnight, total=90.0))["over_budget"] is False
 
 
+def test_the_periods_come_from_the_request_not_from_the_plans_own_span():
+    fortnight = [("2026-09-28", "dinner", [dish()]), ("2026-10-11", "dinner", [dish()])]
+    assert row(episode(BUDGET, horizon_days=7), record(fortnight, total=150.0))["over_budget"] is True
+    assert row(episode(BUDGET, horizon_days=14), record(total=150.0))["over_budget"] is None
+
+
+def test_planned_days_and_meals_are_set_against_the_request():
+    types = constraint("meal_types", "eq", ["lunch", "dinner"])
+    plans = [
+        row(episode(types, horizon_days=2), record()),  # one dinner of four meals
+        row(episode(types, horizon_days=1), record([("2026-09-28", k, [dish()]) for k in ("lunch", "dinner")])),
+        row(episode(), record()),
+    ]
+    days = plan_aggregate._coverage(plans, "days")
+    assert days == {
+        "known_n": 2,
+        "unknown_n": 1,
+        "short_n": 1,
+        "exact_n": 1,
+        "over_n": 0,
+        "planned_mean": 1.0,
+        "requested_mean": 1.5,
+    }
+    assert plan_aggregate._coverage(plans, "meals")["short_n"] == 1
+
+
+def test_a_case_keeps_its_horizon_for_the_aggregate():
+    case = {"id": "c", "turns": ["hello"], "horizon_days": 5, "gold": {}, "source": {"kind": "authored"}}
+    assert plan_aggregate.requested_slots(case_episode(case)) == (5, None)
+
+
 def test_an_over_total_with_a_pantry_stated_is_unknown_as_the_recomputation_buys_everything():
     pantry = constraint("pantry", "include", [{"ingredient": "rice", "quantity": 100, "unit": "g"}])
     assert row(episode(BUDGET, pantry), record(total=150.0))["over_budget"] is None
@@ -212,6 +268,25 @@ def test_sodium_per_person_per_meal_and_per_day():
     assert row(episode(roomy), record(day))["nutrition_out_of_bounds"] is False
     share = constraint("dinner_sodium_share", "eq", 0.3)
     assert row(episode(roomy, share), record(day))["nutrition_out_of_bounds"] is True
+
+
+def test_per_person_is_the_cases_household_whatever_servings_the_arm_claims():
+    limit = constraint("sodium_limit_mg", "le", 150, "meal")  # 400 mg in the dish
+    claims_many = record([("2026-09-28", "dinner", [dish() | {"servings": 40.0}])])
+    assert row(episode(limit), claims_many)["nutrition_out_of_bounds"] is True  # 200 mg a person, not 10
+    family = {"episode_id": "case", "gold": {"hard_constraints": [limit, TWO]}}
+    assert row(family, claims_many)["nutrition_out_of_bounds"] is True  # two members
+    four = constraint("household_size", "eq", 4)
+    assert row({"gold": {"hard_constraints": [limit, four]}}, record())["nutrition_out_of_bounds"] is False
+
+
+def test_no_household_or_an_attendance_leaves_per_person_unknown():
+    limit = constraint("sodium_limit_mg", "le", 1, "meal")
+    silent = {"episode_id": "case", "gold": {"hard_constraints": [limit]}}
+    assert row(silent, record())["nutrition_out_of_bounds"] is None
+    assert row(silent, record())["meals"][0]["energy_floor"] is None
+    away = constraint("attendance", "eq", [{"date": "2026-09-28", "meal_type": "dinner", "absent_member_ids": ["x"]}])
+    assert row(episode(limit, away), record())["nutrition_out_of_bounds"] is None
 
 
 def test_nutrition_without_facts_or_a_usable_scope_is_unknown_and_with_no_limit_not_applicable():
@@ -279,6 +354,14 @@ def test_a_malformed_record_is_counted_not_fatal():
     del broken["exchanges"][0]["output"]["plan"]["meals"]
     found = row(episode(BUDGET), broken)
     assert found["status"] == "plan" and found["scoring_error"] is True and found["over_budget"] is None
+    assert found["gram_coverage"] == 0.5 and found["price_sgd"] == 50.0
+
+
+def test_one_fault_leaves_a_known_allergen_hit_and_a_requested_budget_standing():
+    broken = record(allergens=["peanut"], total=150.0)
+    del broken["exchanges"][0]["output"]["plan"]["meals"]
+    found = row(episode(ALLERGIC, BUDGET, horizon_days=7), broken)
+    assert found["allergen_violation"] is True and found["over_budget"] is True and found["scoring_error"] is True
 
 
 def test_a_plan_the_scorer_failed_on_stays_in_the_denominator_as_unknown():
@@ -320,17 +403,24 @@ def test_the_summary_keeps_numerators_denominators_and_every_case():
             (episode(BUDGET), None),
         ],
     )
-    overall = plan_aggregate.aggregate(rows, min_cell_n=1)["systems"]["arm"]["overall"]
+    report = plan_aggregate.aggregate(rows, min_cell_n=1, product="mealcraft")["systems"]["arm"]
+    assert report["calls_counted_as"] == "model_calls"
+    overall = report["overall"]
     assert overall["remaining_n"] == 8 and overall["plans_n"] == 4
     assert (overall["no_plan_n"], overall["call_failed_n"], overall["missing_n"]) == (1, 1, 1)
     assert overall["invalid_output"] == {"numerator_n": 1, "of_all_cases_n": 8, "rate": 0.125}
     budget = overall["hard_constraints"]["over_budget"]
     assert budget == {
-        "numerator_n": 1,
+        "violations_n": 1,
         "known_n": 2,
         "unknown_n": 1,
         "not_applicable_n": 1,
-        "rate": 0.5,
+        "applicable_n": 3,
+        "violation_rate": 0.5,
+        "violation_rate_lower": 0.333333,
+        "violation_rate_upper": 0.666667,
+        "stated_cases_n": 7,
+        "stated_without_plan_n": 4,
         "unknown_known_lines_over_n": 0,
     }
     assert overall["quality"]["price_sgd"] == {"mean": 100.0, "known_n": 2, "unknown_n": 2}
@@ -341,8 +431,10 @@ def test_the_summary_keeps_numerators_denominators_and_every_case():
 
 
 def test_no_plan_gives_no_rates_and_no_division():
-    overall = plan_aggregate.summary([{"status": "no_plan", "elapsed_seconds": 1.0, "calls": 0, "usd": 0.0}])
-    assert overall["plans_n"] == 0 and overall["hard_constraints"]["over_budget"]["rate"] is None
+    stated = dict.fromkeys(plan_aggregate.HARD, False)
+    answer = {"status": "no_plan", "stated": stated, "elapsed_seconds": 1.0, "calls": 0, "usd": 0.0}
+    overall = plan_aggregate.summary([answer])
+    assert overall["plans_n"] == 0 and overall["hard_constraints"]["over_budget"]["violation_rate"] is None
     assert overall["quality"]["price_sgd"]["mean"] is None
 
 
@@ -350,10 +442,45 @@ def test_small_cells_are_withheld_as_in_the_other_aggregates():
     rows = rows_for("arm", [(episode(BUDGET), record())] * 5) + rows_for("arm", [(episode(BUDGET), record())], "intent")
     for number, built in enumerate(rows):
         built["case"] = f"case{number}"
-    body = plan_aggregate.aggregate(rows, min_cell_n=5)["systems"]["arm"]
+    body = plan_aggregate.aggregate(rows, min_cell_n=5, product="mealcraft")["systems"]["arm"]
     assert "withheld" in body["cells"] and "plans_n" in body["overall"]
     assert body["by_category"]["intent"] == {"withheld": "fewer than 5 remaining cases"}
     assert "hard_constraints" not in body["by_language"]["en"]
+
+
+def test_a_cell_with_enough_cases_but_one_known_shows_no_rate_price_or_bound():
+    one_known = [(episode(BUDGET), record(total=150.0))] + [
+        (episode(BUDGET), record(total=None, status="needs_data")) for _ in range(5)
+    ]
+    rows = rows_for("arm", one_known)
+    overall = plan_aggregate.aggregate(rows, min_cell_n=5, product="mealcraft")["systems"]["arm"]["overall"]
+    assert overall["remaining_n"] == 6
+    budget = overall["hard_constraints"]["over_budget"]
+    assert budget["known_n"] == 1 and budget["unknown_n"] == 5 and budget["applicable_n"] == 6
+    assert budget["withheld"] == "fewer than 5 known cases"
+    assert not {"violations_n", "violation_rate", "violation_rate_lower", "violation_rate_upper"} & set(budget)
+    price = overall["quality"]["price_sgd"]
+    assert "mean" not in price and price["known_n"] == 1 and price["unknown_n"] == 5
+
+
+def test_a_lone_small_known_value_takes_the_smallest_other_with_it():
+    small = rows_for("arm", [(episode(BUDGET), record(total=150.0))], "intent")
+    middle = rows_for("arm", [(episode(BUDGET), record(total=50.0))] * 6, "planning")
+    large = rows_for("arm", [(episode(BUDGET), record(total=50.0))] * 8, "multi_turn")
+    needs = [(episode(BUDGET), record(total=None, status="needs_data"))] * 5
+    rows = small + rows_for("arm", needs, "intent") + middle + large
+    groups = plan_aggregate._groups(rows, lambda built: built["category"], 5)
+    blocks = {name: body["hard_constraints"]["over_budget"] for name, body in groups.items()}
+    assert "withheld" in blocks["intent"] and "withheld" in blocks["planning"]
+    assert "violation_rate" in blocks["multi_turn"]
+
+
+def test_meal_checks_are_guarded_by_the_cases_behind_them_not_the_meals():
+    week = [("2026-09-28", "dinner", [dish()])] + [(f"2026-09-{day}", "lunch", [dish()]) for day in range(20, 27)]
+    rows = rows_for("arm", [(episode(), record(week))]) + rows_for("arm", [(episode(), None)] * 5)
+    core = plan_aggregate.aggregate(rows, min_cell_n=5, product="mealcraft")["systems"]["arm"]["overall"]
+    block = core["meal_likeness"]["no_non_meal_dish"]
+    assert block["known_n"] == 8 and block["known_cases_n"] == 1 and "passes_n" not in block
 
 
 def test_the_comparison_pairs_only_what_both_arms_know_and_never_reads_no_plan_as_a_failed_constraint():
@@ -369,10 +496,28 @@ def test_the_comparison_pairs_only_what_both_arms_know_and_never_reads_no_plan_a
             (episode(), record()),
         ],
     )
-    report = plan_aggregate.comparison(product + other, "mealcraft")
+    report = plan_aggregate.comparison(product + other, "mealcraft", min_cell_n=1)
     within = report["comparisons"]["rag"]["within_budget"]
     assert within["paired_n"] == 2 and within["product_rate"] == 0.5 and within["baseline_rate"] == 1.0
     assert within["product_unpaired_n"] == 1 and within["baseline_unpaired_n"] == 0
     assert report["comparisons"]["rag"]["allergen_safe"]["paired_n"] == 0
     assert "success" not in report["comparisons"]["rag"]
-    assert plan_aggregate.comparison(product, "mealcraft") == {"not_computed": "at least one baseline is required"}
+    assert plan_aggregate.comparison(product, "mealcraft", min_cell_n=1) == {
+        "not_computed": "at least one baseline is required"
+    }
+    guarded = plan_aggregate.comparison(product + other, "mealcraft", min_cell_n=3)["comparisons"]["rag"][
+        "within_budget"
+    ]
+    assert guarded == {
+        "paired_n": 2,
+        "product_unpaired_n": 1,
+        "baseline_unpaired_n": 0,
+        "withheld": "fewer than 3 paired cases",
+    }
+
+
+def test_the_calls_are_labelled_by_what_they_count():
+    rows = rows_for("mealcraft/ablation/x", [(episode(), record())]) + rows_for("rag", [(episode(), record())])
+    systems = plan_aggregate.aggregate(rows, min_cell_n=1, product="mealcraft")["systems"]
+    assert systems["mealcraft/ablation/x"]["calls_counted_as"] == "messages"
+    assert systems["rag"]["calls_counted_as"] == "model_calls"

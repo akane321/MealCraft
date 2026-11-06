@@ -427,6 +427,7 @@ def case_episode(case: dict[str, Any]) -> dict[str, Any]:
         "category": case.get("category"),
         "language": case.get("language"),
         "source": source.get("kind") if isinstance(source, dict) else source,
+        "horizon_days": case.get("horizon_days"),  # for the plan aggregate; no arm reads it
         "scenario": {
             "user_request": turns[-1],
             "conversation_history": [{"role": "user", "content": turn} for turn in turns[:-1]],

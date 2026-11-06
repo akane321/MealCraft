@@ -56,9 +56,10 @@ two aggregates by category, language and source, small cells withheld (`heldout_
   the baselines; its count per arm is in `aggregate-strict.json` and the manifest.
 Each also gets the paired comparison of the product with every other arm (`heldout_statistics.compare`, overall
 only). A third aggregate, `plan` (`plan_aggregate`, the metric table of 02-baselines section 6), reads every case where
-an arm output a plan, voiding none: hard constraints, verifiability, quality, meal likeness and cost, with numerators,
-denominators and unknown counts; `comparison-plan.json` pairs the three hard constraints where both arms are known. It
-is computed after every arm has run, so it changes no answer. `--select-failures N` writes N product failures, round
+an arm output a plan, voiding none: hard constraints, verifiability, quality, meal likeness, requested coverage and
+cost, with numerators, denominators, unknown counts and bounds over applicable, a value on too few known cases withheld;
+`comparison-plan.json` pairs the three hard constraints where both arms are known, withheld on too few pairs. It is
+computed after every arm has run, so it changes no answer. `--select-failures N` writes N product failures, round
 robin over categories and first where a baseline succeeded, with their records, to the local folder for the failure
 analyses.
 """
@@ -91,7 +92,7 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-draft-4"
+SCORING = "formal-outcome-draft-5"
 AGGREGATES = ("action", "strict", "plan")
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
