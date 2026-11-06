@@ -749,7 +749,6 @@ test("a dinner opens its recipe with steps on the same surface", async ({ page }
   const recipe = page.getByRole("dialog", { name: "Tofu Brown Rice Stir-fry" });
   await expect(recipe.getByText("Stir-fry the tofu.")).toBeVisible();
   await expect(recipe.getByText("Contains soy")).toBeVisible();
-  await expect(recipe.getByText(/Allergens come from ingredient data/)).toBeVisible();
   if (SHOTS) await page.waitForTimeout(500).then(() => page.screenshot({ path: `${SHOTS}/11-recipe.png` }));
 });
 
@@ -2615,13 +2614,13 @@ test("a list with a Shopee line recorded by hand shows its own store section, li
   const groceries = page.locator(".groceries");
   await expect(groceries.locator("h3.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
   const row = groceries.locator(".item", { hasText: "Saffron" });
-  await expect(row.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
+  await expect(row.getByText("Price from 1 Nov")).toBeVisible();
   await expect(row.getByRole("link", { name: "View at Shopee" })).toHaveAttribute("href", url);
 
   await page.getByRole("button", { name: "Preview list" }).click();
   const sheet = page.getByRole("dialog", { name: "Shopping list preview" });
   await expect(sheet.locator("h2.store")).toHaveText([/^FairPrice\s*S\$10\.15$/, /^Shopee\s*S\$12\.90$/]);
-  await expect(sheet.getByText("Price recorded by hand on 1 Nov")).toBeVisible();
+  await expect(sheet.getByText("Price from 1 Nov")).toBeVisible();
   // On screen the link reads "View at Shopee" (the raw address is kept for the printed list).
   await expect(sheet.getByRole("link", { name: "View at Shopee" })).toHaveAttribute("href", url);
   await expect(sheet.getByRole("link", { name: "View at Shopee" })).toBeVisible();

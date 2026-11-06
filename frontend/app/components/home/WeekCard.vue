@@ -69,9 +69,9 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
         <span class="d">{{ formatPlanDate(day.date, { weekday: "short" }).toUpperCase() }} <span>{{ Number(day.date.slice(8, 10)) }}</span></span>
         <span class="meals">
           <span v-for="meal in day.meals" :key="meal.key" class="meal" :class="[meal.status, { several: day.meals.length > 1 }]" :title="mealTitle(meal)">
-            <HomeDishIcon :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="day.meals.length > 1 ? 32 : 48" />
+            <HomeDishIcon :slug="meal.dishes[0]!.recipe.slug" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="day.meals.length > 1 ? 32 : 48" />
             <span v-if="badge(meal) && day.meals.length === 1" class="badge">
-              <HomeDishIcon :title="badge(meal)!.recipe.title" :course="badge(meal)!.recipe.course" :role-id="badge(meal)!.role_id" :size="22" />
+              <HomeDishIcon :slug="badge(meal)!.recipe.slug" :title="badge(meal)!.recipe.title" :course="badge(meal)!.recipe.course" :role-id="badge(meal)!.role_id" :size="22" />
             </span>
             <svg v-if="meal.status === 'completed'" class="tick" viewBox="0 0 24 24" aria-label="Cooked"><circle cx="12" cy="12" r="11" /><path d="m7 12.5 3.5 3.5L17 9" /></svg>
             <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once in this plan"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
@@ -130,6 +130,7 @@ h3 { margin: 0; }
 .meal.completed > :first-child { opacity: 0.45; }
 .meal.skipped { opacity: 0.4; }
 .badge { position: absolute; right: -6px; bottom: -4px; display: flex; }
+.badge :deep(img) { box-shadow: 0 0 0 2px #fff; }
 .tick, .again { position: absolute; width: 16px; height: 16px; fill: #fff; stroke-linecap: round; stroke-linejoin: round; }
 .tick { right: -2px; top: -2px; fill: var(--c-green); }
 .tick path { fill: none; stroke: #fff; stroke-width: 2.4; }

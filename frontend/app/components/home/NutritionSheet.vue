@@ -79,7 +79,7 @@ useDialog(overlay, () => emit("close"));
       <header class="mc-sheet-head">
         <div>
           <h2>Nutrition</h2>
-          <p>Per person · cooked dishes count as actual · general guidance, not medical advice</p>
+          <p>Per person · cooked dishes count as actual</p>
         </div>
         <button type="button" class="mc-close" aria-label="Close nutrition details" @click="emit('close')">
           <UIcon name="i-lucide-x" aria-hidden="true" />

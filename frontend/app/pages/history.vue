@@ -129,7 +129,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
                 <template v-for="(dish, index) in meal.dishes" :key="dish.entry_id">
                   <template v-if="index"> · </template>
                   <button type="button" class="dish" :class="dish.status" @click="openSlug = dish.recipe.slug">
-                    <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
+                    <HomeDishIcon :slug="dish.recipe.slug" :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
                   </button>
                   <span v-if="dish.status === 'completed'" class="cooked"><UIcon name="i-lucide-check" aria-hidden="true" />Cooked</span>
                 </template>

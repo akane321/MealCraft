@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 const json = (body: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
@@ -47,6 +48,28 @@ test("recipes can be searched and filtered, and groceries looked up", async ({ p
   await expect(page.getByRole("cell", { name: /FairPrice Chicken Breast/ })).toBeVisible();
   await expect(page.getByRole("cell", { name: "S$6.95" })).toBeVisible();
   await expect(page.getByText("Sample prices", { exact: true })).toBeVisible();
+});
+
+test("a release recipe shows its photo, and the drawing when the photo cannot load or it has none", async ({ page }) => {
+  await signedIn(page);
+  const dishes: Record<string, string> = JSON.parse(readFileSync(new URL("../app/assets/food-images.json", import.meta.url), "utf8")).dishes;
+  const [[, shown], [broken, lost]] = Object.entries(dishes) as [[string, string], [string, string]];
+  const slug = (ids: string) => `v2-dish-${ids.split(" ")[0]}`;
+  await page.route(`**/images/dishes/${broken}.webp`, route => route.abort());
+  await page.route("**/api/recipes?*", route => route.fulfill(json({
+    items: [
+      { ...recipe(1, "Has a photo"), slug: slug(shown) },
+      { ...recipe(2, "Photo fails"), slug: slug(lost) },
+      recipe(3, "Curated, no photo"),
+    ],
+    next_cursor: null,
+  })));
+
+  await page.goto("/browse");
+  await expect(page.locator("img.dish-photo")).toHaveCount(1);
+  await expect(page.locator("img.dish-photo")).toHaveAttribute("src", /\/images\/dishes\/\w+\.webp$/);
+  await expect(page.locator("img.dish-photo").evaluate((image: HTMLImageElement) => image.decode().then(() => image.naturalWidth))).resolves.toBeGreaterThan(0);
+  await expect(page.locator("svg[data-role]")).toHaveCount(2);
 });
 
 test("past weeks open to show what was eaten", async ({ page }) => {
