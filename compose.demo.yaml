@@ -18,3 +18,5 @@ services:
       # to the frontend port serves the whole app on a phone (ADR-0116). Written here, not as a `:-` default,
       # because compose would replace an empty value with the default.
       NUXT_PUBLIC_API_BASE: ""
+      # The fixed demo-video sentence mode (ADR-0116 item 2); off unless the shell sets NUXT_PUBLIC_DEMO_SCRIPT=1.
+      NUXT_PUBLIC_DEMO_SCRIPT: ${NUXT_PUBLIC_DEMO_SCRIPT:-}

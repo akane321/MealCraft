@@ -440,14 +440,14 @@ const refreshAll = () => {
           <div class="block-head">
             <h3 class="mc-heading">This week's list</h3>
             <div v-if="trips > 1 && !sample" class="mc-segmented" role="tablist" aria-label="Shopping trip">
-              <button v-for="n in trips" :key="n" type="button" role="tab" :aria-selected="trip === n" :disabled="adding" @click="chooseTrip(n)">Trip {{ n }}</button>
+              <button v-for="n in trips" :key="n" type="button" role="tab" :aria-selected="trip === n" :disabled="adding" @click="chooseTrip(n)"><MotionTabPill v-if="trip === n" id="cart-trips" />Trip {{ n }}</button>
             </div>
           </div>
 
           <p v-if="sample" class="note" role="status">
             This plan uses sample prices, so there are no real FairPrice products to put in a cart. Plan the week again with live FairPrice prices to use this.
           </p>
-          <p v-else-if="listStep === 'loading'" class="note" role="status">Checking today's FairPrice prices and stock…</p>
+          <p v-else-if="listStep === 'loading'" class="note loading-note" role="status"><MotionLoader />Checking today's FairPrice prices and stock…</p>
           <template v-else-if="listStep === 'error'">
             <p class="msg alert" role="alert">{{ listProblem }}</p>
             <div class="acts"><button type="button" class="mc-btn secondary sm" @click="load">Try again</button></div>
@@ -504,7 +504,7 @@ const refreshAll = () => {
             </p>
 
             <div v-if="ready.length" class="acts">
-              <button v-if="adding" type="button" class="mc-btn primary" disabled aria-busy="true"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Adding to your cart…</button>
+              <button v-if="adding" type="button" class="mc-btn primary" disabled aria-busy="true"><MotionLoader />Adding to your cart…</button>
               <template v-else-if="toAdd.length">
                 <button type="button" class="mc-btn primary" :disabled="!canAdd" @click="add()">Add all to cart</button>
                 <span v-if="canAdd" class="mc-small">{{ toAdd.length }} {{ toAdd.length === 1 ? "item" : "items" }} not in your cart yet</span>
@@ -663,6 +663,7 @@ h4 { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; color: #7171
 h4::after { content: ""; flex: 1; height: 1px; background: #f0f0f2; }
 .lead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: #27272a; font-size: 14px; font-weight: 500; }
 .note { color: #52525b; font-size: 13px; line-height: 20px; }
+.loading-note { display: flex; align-items: center; gap: 10px; }
 .msg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 20px; }
 .msg.warn { border: 1px solid #fedf89; background: #fffaeb; color: #b54708; font-weight: 500; }
 .msg.alert { border: 1px solid #fecdca; background: #fef3f2; color: #b42318; }

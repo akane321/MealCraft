@@ -56,10 +56,11 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
     <!-- Seven tiles a row however short the plan (a one-day plan keeps a one-day tile); a longer plan takes a second row. -->
     <div class="strip" :class="{ short: week.length <= 3 }" :style="week.length <= 3 ? { gridTemplateColumns: `repeat(${week.length}, minmax(120px, 160px))` } : undefined">
       <button
-        v-for="day in week"
+        v-for="(day, i) in week"
         :key="day.dayIndex"
         type="button"
         class="tile"
+        :style="{ '--i': i }"
         :class="{ today: day.date === today, skipped: day.meals.every(meal => meal.status === 'skipped') }"
         :aria-current="day.date === today ? 'date' : undefined"
         :aria-label="`${formatPlanDate(day.date, { weekday: 'long' })}: ${day.meals.map(meal => meal.dishes.map(d => d.recipe.title).join(' and ')).join('; ')}`"
@@ -111,6 +112,12 @@ h3 { margin: 0; }
 .tile:last-child, .tile:nth-child(7n) { border-right: 0; }
 .tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
+/* The days come in one after another once the card is up (after a new reply's words: --reveal). */
+.tile { animation: tile-in 640ms var(--spring) both; animation-delay: calc(var(--reveal, 0ms) + 160ms + var(--i, 0) * 55ms); }
+.tile:hover .meals { transform: translateY(-2px) scale(1.04); }
+.meals { transition: transform 420ms var(--spring); }
+@keyframes tile-in { from { opacity: 0; transform: translateY(12px) scale(0.96); filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) { .tile { animation: none; } }
 .tile.skipped { opacity: 0.5; }
 .tile.today { background: #fafaff; }
 .d { padding: 2px 8px; border-radius: 999px; font-size: 11px; line-height: 16px; font-weight: 600; color: #52525b; letter-spacing: 0.02em; }
@@ -139,4 +146,14 @@ h3 { margin: 0; }
 .foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
+/* Phone: the figures under the title, the days a strip that scrolls sideways. */
+@media (max-width: 767px) {
+  .head { flex-direction: column; align-items: stretch; padding: 14px 16px 12px; }
+  .figures { margin-left: 0; justify-content: space-between; }
+  .fig { align-items: flex-start; }
+  .strip { display: flex; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+  .tile { flex: 0 0 92px; scroll-snap-align: start; }
+  .foot { padding: 12px 16px; }
+  .foot .mc-btn { flex: 1 1 0; justify-content: center; }
+}
 </style>
