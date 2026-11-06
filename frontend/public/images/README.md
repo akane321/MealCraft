@@ -1,7 +1,7 @@
 # Food images
 
 Illustrative photos for dishes (`dishes/`, 320 px) and ingredients (`ingredients/`, 192 px), as WebP at quality 78.
-They are AI-generated, not photographs of the dishes; the recipe dialog says so.
+They are AI-generated, not photographs of the dishes.
 
 - Model: FLUX.1-schnell (Black Forest Labs, Apache-2.0), run locally at 512 px with 4 steps.
 - Dish images: one per group of similar recipes in release v3, so similar dishes share a picture. Recipes in
