@@ -1,6 +1,6 @@
 import { onMounted, shallowRef } from "vue";
 
-// public/images/food-images.json: each dish image with the recipe ids it stands for (the last 12 characters of a
+// app/assets/food-images.json (scripts/build_food_images.py): each dish image with the recipe ids it stands for (the last 12 characters of a
 // release slug, space separated to keep the file small), and the ingredients that have a picture.
 export type FoodImageFile = { dishes: Record<string, string>; ingredients: string[] };
 export type FoodImageIndex = { dishes: Map<string, string>; ingredients: Set<string> };
@@ -27,14 +27,14 @@ const index = shallowRef<FoodImageIndex | null>(null);
 let requested = false;
 
 // Read once per page load, in the browser only: the server renders the drawn icons, so hydration matches.
+// A dynamic import gives the map a content-hashed chunk, so a browser never keeps an old copy; a failure retries on the next mount.
 export function useFoodImages() {
   onMounted(() => {
     if (requested) return;
     requested = true;
-    fetch("/images/food-images.json")
-      .then(response => (response.ok ? response.json() : null))
-      .then((file: FoodImageFile | null) => { if (file) index.value = indexFoodImages(file); })
-      .catch(() => {});
+    import("../assets/food-images.json")
+      .then((file) => { index.value = indexFoodImages(file.default); })
+      .catch(() => { requested = false; });
   });
   return {
     dishSrc: (slug: string) => dishImageSrc(index.value, slug),

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { dishImageSrc, indexFoodImages, ingredientImageSrc, type FoodImageFile } from "../app/composables/useFoodImages";
 
 const IMAGES = new URL("../public/images/", import.meta.url);
-const file: FoodImageFile = JSON.parse(readFileSync(new URL("food-images.json", IMAGES), "utf8"));
+const file: FoodImageFile = JSON.parse(readFileSync(new URL("../app/assets/food-images.json", import.meta.url), "utf8"));
 const index = indexFoodImages(file);
 
 describe("food images", () => {
