@@ -648,7 +648,7 @@ After an interruption, the same command again at the same commit, with nothing
 committed in between, not even the ledgers; `--retry-failed` also asks again the
 cases whose call failed. The run's `--out` stays in the ignored folder, or a
 resumed run would find the checkout dirty; copy it to
-`docs/evaluation/sprint3-formal` when the run is finished.
+a `sprint3-formal` folder under `docs/evaluation/` when the run is finished.
 
 Run from the repository root with the key in `.env` there. The 11 arms answer the
 same questions in a fixed order: strong rules, the pure LLM, RAG, the general
