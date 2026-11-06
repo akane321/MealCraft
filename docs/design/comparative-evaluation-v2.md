@@ -685,7 +685,7 @@ measured rates of ADR-0118 and its ledger beside its cap.
   `comparison-{action,strict,plan}.json` (`heldout_statistics.compare`, overall only)
   and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
   this run, ledger and spend, answered and valid counts, stop reason).
-- **Outcomes, a draft to register before the run** (`formal-outcome-draft-5`):
+- **Outcomes, a draft to register before the run** (`formal-outcome-v1`):
   `missing` (not reached or cut by the cap), `error` (call or scorer failed),
   `failure` (invalid output). `action`: success when the final output takes the
   action the gold expects: `expected_fields.action` when the output slots can

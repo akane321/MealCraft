@@ -34,7 +34,7 @@ authoring interchange (`{"cases": [...]}`, `pure_llm_baseline.case_episode`).
 - `--allow-heldout` needs a clean checkout at a commit (the spend ledgers aside) and keeps the per-case records in
   `.local/evaluation/` (ADR-0115 item 4). Only aggregates and the run manifest go to `--out`.
 
-Outcomes (`SCORING`, a draft for the owner to register before the run): an arm's case is `missing` with no record
+Outcomes (`SCORING`, registered by the owner on 2026-11-06, ADR-0120): an arm's case is `missing` with no record
 (not reached, or cut by the cap), `error` when the call or the scorer failed, `failure` for an invalid output. Then
 two aggregates by category, language and source, small cells withheld (`heldout_report`, ADR-0100 item 5):
 - `action`: success when the final output takes the action the gold expects (`expected_action`):
@@ -44,7 +44,7 @@ two aggregates by category, language and source, small cells withheld (`heldout_
   intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm, and so is a
   `catalog_dependent` case: until the sealed adjudication nobody knows whether a plan or a decline is right, and only
   the product plans from the catalog, so a "plan" gold would count its correct decline against it (the dry run shows
-  the count per category; the owner confirms this before registering the scoring). An expected refusal the output
+  the count per category). An expected refusal the output
   states as an answer or a question fails the action aggregate, against the product more than the baselines; its count
   per arm is `refuse_stated_as_reply` in `aggregate-action.json` and the manifest.
 - `strict`: success only where the code checks the whole gold: an intent case passes `intent_scorer`. A case whose
@@ -92,7 +92,7 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-draft-5"
+SCORING = "formal-outcome-v1"  # registered by the owner, 2026-11-06 (ADR-0120)
 AGGREGATES = ("action", "strict", "plan")
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
