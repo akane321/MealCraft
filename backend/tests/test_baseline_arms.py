@@ -606,7 +606,7 @@ def test_a_call_stopped_at_the_length_limit_is_charged_what_it_reports(tmp_path)
 def test_the_arms_own_cap_is_the_default_and_the_ceiling(tmp_path, capsys):
     from app.evaluation import general_agent_baseline, rag_baseline
 
-    assert general_agent_baseline.ARM.max_usd == 15.0 and rag_baseline.ARM.max_usd == 8.0
+    assert general_agent_baseline.ARM.max_usd == 20.0 and rag_baseline.ARM.max_usd == 8.0
     episodes = tmp_path / "episodes"
     episodes.mkdir()
     (episodes / "mdw-dev-001.json").write_text(json.dumps(dev("mdw-dev-001"), ensure_ascii=False), encoding="utf-8")

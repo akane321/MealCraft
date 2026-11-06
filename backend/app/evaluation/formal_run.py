@@ -21,8 +21,9 @@ Finished: copy `--out` to `docs/evaluation/sprint3-formal` and commit it with th
 Arms (ADR-0118): strong rules, the pure LLM on the conversation protocol (`pure_llm_baseline.conversation_arm`),
 RAG and the general agent, then the product "mealcraft" and its six ablations back to back, so the parser's prompt
 prefix stays in OpenAI's cache. Every arm runs through `baseline_arms.main` with its own spend ledger and cap
-(ADR-0115: US$5 each, the general agent US$15, RAG US$8); the product arms use the OpenAI parser and are metered from
-the product's own recorded cost (`ablation_arms.openai_arms`). The episodes may be per-file episodes or the held-out
+(ADR-0115: US$5 each; the general agent US$20, RAG US$8, the pure LLM US$7); the product arms use the OpenAI
+parser and are metered from the product's own recorded cost (`ablation_arms.openai_arms`).
+The episodes may be per-file episodes or the held-out
 authoring interchange (`{"cases": [...]}`, `pure_llm_baseline.case_episode`).
 
 - The default is a dry run: per arm its questions, worst case, projected spend (the measured rates of ADR-0118 a
@@ -41,10 +42,10 @@ two aggregates by category, language and source, small cells withheld (`heldout_
   `expected_fields.action` when the output slots can show it, else what the disposition implies. A disposition of
   clarify or refuse is the outcome itself and beats an action that names the user's intent; an `infeasible` case
   succeeds with any output that is not a plan, as the product states a limits refusal as a reply or a question. An
-  intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm, and so is a
-  `catalog_dependent` case: until the sealed adjudication nobody knows whether a plan or a decline is right, and only
-  the product plans from the catalog, so a "plan" gold would count its correct decline against it (the dry run shows
-  the count per category). An expected refusal the output
+  intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm. A
+  `catalog_dependent` case expects a plan (owner, 2026-11-07), though only the product plans from the catalog and its
+  correct decline counts against it until a sealed adjudication, so `action-no-catalog` reports the same scores with
+  those cases voided, beside it (the dry run shows the count per category). An expected refusal the output
   states as an answer or a question fails the action aggregate, against the product more than the baselines; its count
   per arm is `refuse_stated_as_reply` in `aggregate-action.json` and the manifest.
 - `strict`: success only where the code checks the whole gold: an intent case passes `intent_scorer`. A case whose
@@ -92,8 +93,8 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-v1"  # registered by the owner, 2026-11-06 (ADR-0120)
-AGGREGATES = ("action", "strict", "plan")
+SCORING = "formal-outcome-v2"  # registered by the owner, 2026-11-06 and 2026-11-07 (ADR-0120, ADR-0122)
+AGGREGATES = ("action", "action-no-catalog", "strict", "plan")
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
 DISPOSITION_ACTION = {
@@ -152,8 +153,8 @@ def expected_action(gold: dict[str, Any] | None) -> str | None:
     disposition = gold.get("disposition")
     if disposition == "infeasible" or gold.get("class") == "infeasible":
         return NO_PLAN
-    if disposition == "catalog_dependent":
-        return None
+    if disposition == "catalog_dependent":  # the gold asks for a plan; `action-no-catalog` reports the score without it
+        return "plan"
     if disposition in ("clarify", "refuse"):
         return DISPOSITION_ACTION[disposition]
     action = (gold.get("expected_fields") or {}).get("action")
@@ -502,7 +503,13 @@ def main(
     }
     action_rows, strict_rows, not_scorable, as_reply = outcomes(episodes, records, heldout=heldout)
     args.out.mkdir(parents=True, exist_ok=True)
-    for kind, rows in (("action", action_rows), ("strict", strict_rows)):
+    catalog_cases = {
+        episode_id_of(episode)
+        for episode in episodes
+        if (episode.get("gold") or {}).get("disposition") == "catalog_dependent"
+    }
+    no_catalog_rows = [row.model_copy(update={"voided": True}) if row.case_ref in catalog_cases else row for row in action_rows]
+    for kind, rows in (("action", action_rows), ("action-no-catalog", no_catalog_rows), ("strict", strict_rows)):
         report = aggregate(rows, expected_manifest(rows, order), min_cell_n=args.min_cell_n)
         report["scoring"] = SCORING
         if kind == "strict":
