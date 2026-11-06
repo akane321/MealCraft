@@ -1,0 +1,30 @@
+{"event": "reserve", "total_tokens": 23200, "usd": 0.059899999999999995}
+{"event": "charge", "total_tokens": 0, "unbilled": "BadRequestError", "usd": 0.0}
+{"event": "reserve", "total_tokens": 23200, "usd": 0.059899999999999995}
+{"cached_tokens": 0, "call": "response", "episode_id": "mdw-dev-008", "event": "charge", "input_tokens": 5538, "output_tokens": 54, "searches": 0, "total_tokens": 5592, "usd": 0.0043965}
+{"event": "reserve", "total_tokens": 23360, "usd": 0.060020000000000004}
+{"cached_tokens": 5504, "call": "response", "episode_id": "mdw-dev-008", "event": "charge", "input_tokens": 5618, "output_tokens": 3398, "searches": 0, "total_tokens": 9016, "usd": 0.0195045}
+{"event": "reserve", "total_tokens": 23190, "usd": 0.0598925}
+{"cached_tokens": 0, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 13715, "output_tokens": 5412, "searches": 2, "total_tokens": 19127, "usd": 0.05464025}
+{"event": "reserve", "total_tokens": 28235, "usd": 0.06367625}
+{"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 10989, "output_tokens": 54, "searches": 0, "total_tokens": 11043, "usd": 0.00848475}
+{"event": "reserve", "total_tokens": 23215, "usd": 0.05991125}
+{"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-021", "event": "charge", "input_tokens": 14076, "output_tokens": 5599, "searches": 2, "total_tokens": 19675, "usd": 0.055752499999999997}
+{"event": "reserve", "total_tokens": 29068, "usd": 0.064301}
+{"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-021", "event": "charge", "input_tokens": 11067, "output_tokens": 5427, "searches": 0, "total_tokens": 16494, "usd": 0.03272175}
+{"event": "reserve", "total_tokens": 23190, "usd": 0.0598925}
+{"cached_tokens": 0, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 14005, "output_tokens": 5340, "searches": 2, "total_tokens": 19345, "usd": 0.054533750000000006}
+{"event": "reserve", "total_tokens": 23200, "usd": 0.059899999999999995}
+{"cached_tokens": 0, "call": "response", "episode_id": "mdw-dev-008", "event": "charge", "input_tokens": 9481, "output_tokens": 240, "searches": 1, "total_tokens": 9721, "usd": 0.01819075}
+{"event": "reserve", "total_tokens": 23206, "usd": 0.0599045}
+{"cached_tokens": 5504, "call": "response", "episode_id": "md-dev-001", "event": "charge", "input_tokens": 13794, "output_tokens": 304, "searches": 3, "total_tokens": 14098, "usd": 0.0417135}
+{"event": "reserve", "total_tokens": 23189, "usd": 0.059891749999999994}
+{"cached_tokens": 4480, "call": "response", "episode_id": "md-dev-017", "event": "charge", "input_tokens": 13835, "output_tokens": 3888, "searches": 2, "total_tokens": 17723, "usd": 0.047872250000000005}
+{"event": "reserve", "total_tokens": 23213, "usd": 0.05990975}
+{"cached_tokens": 0, "call": "response", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 14064, "output_tokens": 2775, "searches": 2, "total_tokens": 16839, "usd": 0.043035500000000004}
+{"event": "reserve", "total_tokens": 27625, "usd": 0.06321875}
+{"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 8345, "output_tokens": 61, "searches": 0, "total_tokens": 8406, "usd": 0.00653325}
+{"event": "reserve", "total_tokens": 23190, "usd": 0.0598925}
+{"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 5548, "output_tokens": 999, "searches": 0, "total_tokens": 6547, "usd": 0.0086565}
+{"event": "reserve", "total_tokens": 24060, "usd": 0.060545}
+{"cached_tokens": 5504, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 6572, "output_tokens": 79, "searches": 0, "total_tokens": 6651, "usd": 0.0052845}

@@ -46,8 +46,8 @@ describe("prices recorded by hand on the list", () => {
   });
 
   it("labels a manual price with the Singapore day it was recorded, never as a live or store price", () => {
-    expect(groceryPriceLabel(items[3]!)).toBe("Price recorded by hand on 2 Nov");
-    expect(groceryPriceLabel({ ...items[3]!, evidence: { source: "manual", mode: "snapshot", fetched_at: "2026-11-01T16:00:00Z" } })).toBe("Price recorded by hand on 2 Nov");
+    expect(groceryPriceLabel(items[3]!)).toBe("Price from 2 Nov");
+    expect(groceryPriceLabel({ ...items[3]!, evidence: { source: "manual", mode: "snapshot", fetched_at: "2026-11-01T16:00:00Z" } })).toBe("Price from 2 Nov");
     expect(groceryPriceLabel(items[2]!)).toBe("RedMart price from 2 Nov");
   });
 });

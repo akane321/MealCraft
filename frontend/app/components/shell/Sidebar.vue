@@ -30,10 +30,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     </slot>
     <nav class="pages" aria-label="Pages">
       <!-- On the plan itself this is not a link, so the nav holds only the pages that leave it. -->
-      <span v-if="current === 'plan'" class="sb-item on" aria-current="page"><UIcon name="i-lucide-house" />My plan</span>
+      <!-- The current page's pill glides between the rows as the page changes. -->
+      <span v-if="current === 'plan'" class="sb-item on" aria-current="page"><MotionTabPill id="sb-nav" /><UIcon name="i-lucide-house" />My plan</span>
       <NuxtLink v-else to="/" class="sb-item"><UIcon name="i-lucide-house" />My plan</NuxtLink>
-      <NuxtLink to="/browse" class="sb-item" :class="on('browse')"><UIcon name="i-lucide-book-open" />Recipes &amp; groceries</NuxtLink>
-      <NuxtLink to="/history" class="sb-item" :class="on('history')"><UIcon name="i-lucide-calendar-clock" />Past plans</NuxtLink>
+      <NuxtLink to="/browse" class="sb-item" :class="on('browse')"><MotionTabPill v-if="current === 'browse'" id="sb-nav" /><UIcon name="i-lucide-book-open" />Recipes &amp; groceries</NuxtLink>
+      <NuxtLink to="/history" class="sb-item" :class="on('history')"><MotionTabPill v-if="current === 'history'" id="sb-nav" /><UIcon name="i-lucide-calendar-clock" />Past plans</NuxtLink>
     </nav>
     <!-- The same section on every page, so the sidebar keeps its shape; the list itself lives on My plan. -->
     <div class="sb-sep" />

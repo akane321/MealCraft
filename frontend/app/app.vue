@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MotionConfig } from "motion-v";
+
 const { load } = useAuth();
 const route = useRoute();
 useHead({
@@ -35,12 +37,14 @@ onMounted(load);
 
 <template>
   <UApp>
+    <!-- Every motion-v animation honours the reduced-motion setting (transforms and layout moves go). -->
+    <MotionConfig reduced-motion="user">
     <div class="app-shell">
       <!-- Product pages sit in the sidebar shell; the home surface and the console (/ops) draw their own. -->
       <div v-if="shellPage" class="mc-shell mc-page product-shell">
         <ShellSidebar :current="shellPage" />
         <div ref="frame" class="mc-frame product-frame">
-          <div class="mc-bar"><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}<ShellSimulated /></div>
+          <div class="mc-bar"><NuxtLink to="/" class="bar-home" aria-label="Back to My plan"><UIcon name="i-lucide-arrow-left" /></NuxtLink><UIcon :name="BARS[shellPage].icon" />{{ BARS[shellPage].label }}<ShellSimulated /></div>
           <NuxtPage />
         </div>
       </div>
@@ -51,6 +55,7 @@ onMounted(load);
       </div>
       <NuxtPage v-else />
     </div>
+    </MotionConfig>
   </UApp>
 </template>
 
@@ -59,6 +64,16 @@ onMounted(load);
 .product-shell { display: grid; grid-template-columns: 244px minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .product-frame { height: calc(100vh - 16px); overflow-y: auto; }
 .product-frame > .mc-bar { position: sticky; top: 0; z-index: 5; background: #fff; }
+/* Phone (ADR-0116): the page alone, full width; the bar's arrow goes back to My plan. */
+.bar-home { display: none; }
+@media (max-width: 767px) {
+  .product-shell { grid-template-columns: minmax(0, 1fr); height: 100dvh; }
+  .product-shell > .sb { display: none; }
+  .product-frame { height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+  .bar-home { width: 44px; height: 44px; margin: 0 -6px 0 -12px; display: grid; place-items: center; }
+  .bar-home .iconify { width: 20px; height: 20px; color: #18181b; }
+  .auth-shell { padding: 12px; }
+}
 /* The home's pastel glow behind the sign-in card. */
 .auth-shell {
   min-height: 100vh; padding: 12px 18px;

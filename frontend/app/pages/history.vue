@@ -88,7 +88,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
     <h1>Every plan you made, as it ended up</h1>
     <p class="mc-sub">Open a plan to see what was on each day and what got cooked.</p>
 
-    <p v-if="loading" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your plans…</p>
+    <p v-if="loading" class="mc-loading"><MotionLoader />Loading your plans…</p>
     <!-- The shape of the plan rows while they load, as the recipes page shows its cards. -->
     <div v-if="loading" class="skeletons" aria-hidden="true">
       <span v-for="n in 4" :key="n" class="skel"><i class="tile" /><span><i /><i /></span></span>
@@ -129,7 +129,7 @@ const plannedAt = (value: string) => new Date(value).toLocaleString("en-SG", { d
                 <template v-for="(dish, index) in meal.dishes" :key="dish.entry_id">
                   <template v-if="index"> · </template>
                   <button type="button" class="dish" :class="dish.status" @click="openSlug = dish.recipe.slug">
-                    <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
+                    <HomeDishIcon :slug="dish.recipe.slug" :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="20" />{{ dish.recipe.title }}
                   </button>
                   <span v-if="dish.status === 'completed'" class="cooked"><UIcon name="i-lucide-check" aria-hidden="true" />Cooked</span>
                 </template>

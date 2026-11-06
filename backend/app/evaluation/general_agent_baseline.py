@@ -11,7 +11,7 @@ The loop (OpenAI Responses API): each user turn may take up to `MAX_STEPS` model
 the calculator gets the result and continues; the last allowed response has tools off and must answer. Web search
 runs inside a response, at most `MAX_SEARCHES` per response (`max_tool_calls`).
 
-Cost (ADR-0086; the arm's tool fees count against its US$5): before each response the arm's ledger
+Cost (ADR-0086, ADR-0118; the arm's tool fees count against its US$15): before each response the arm's ledger
 (`baseline_arms.LedgerBudget`) must cover its worst case, the rendered input plus `MAX_SEARCHES` blocks of
 `SEARCH_BLOCK_TOKENS` search content plus `MAX_OUTPUT_TOKENS`, plus the search fees, and that worst case is
 reserved. After it, the reported tokens are charged with `SEARCH_USD` for each search call made. Prices, from the
@@ -23,9 +23,10 @@ after it is the reported usage. The dev trial checks the ledger against the proj
 The public web holds this repository (and its evaluation cases), so web search leaves out GitHub's domains
 (`blocked_domains`). The search queries and sources, each response's status and usage go into the case's trace.
 
-No JSON mode: OpenAI refuses `text.format` `json_object` together with web search (dev trial on #396, 2026-11-05).
-The configuration asks for the JSON only; the outermost object of the answer is parsed, and a malformed answer is
-asked again once, as in the other arms.
+No JSON mode while tools are on: OpenAI refuses `text.format` `json_object` together with web search (dev trial on
+#396). The configuration asks for the JSON only and the outermost object of the answer is parsed. An answer that cannot
+be read is asked again once with no tools and JSON mode on; a repaired answer that drops the plan is an invalid output,
+never an infeasible one.
 """
 
 from __future__ import annotations
@@ -41,11 +42,11 @@ from pydantic import ValidationError
 
 from app.evaluation import baseline_arms
 from app.evaluation.conversation_adapter import Exchange, Responder, UnifiedOutput
-from app.evaluation.pure_llm_baseline import MAX_ATTEMPTS, Usage, price_usd
+from app.evaluation.pure_llm_baseline import Usage, price_usd
 from app.evaluation.rag_baseline import estimate_tokens, parse_output
 
 SYSTEM_ID = "general-agent"
-MAX_OUTPUT_TOKENS = 6000
+MAX_OUTPUT_TOKENS = 12000  # a week's answer reached 5,412 on a development episode (owner, 2026-11-06)
 # Owner review on #427: one response can search MAX_SEARCHES times, so three steps allow two rounds of tools
 # (searches, then the calculator) and one forced answer.
 MAX_STEPS = 3
@@ -76,7 +77,9 @@ WEB_SEARCH = {
     "filters": {"blocked_domains": ["github.com", "githubusercontent.com"]},
 }
 INCLUDE = ["web_search_call.action.sources"]
-JSON_REMINDER = "Your last answer was not valid JSON for the shared output schema. Answer with that JSON only."
+REPAIR = """Your last answer is above. It could not be read: {error}
+Answer again with the whole answer as one valid JSON object in the shared output schema, including the whole plan if
+you gave one. Do not apologise and do not explain."""
 
 _OPERATORS = {
     ast.Add: operator.add,
@@ -145,7 +148,7 @@ class Agent:
         self.tool_calls: list[dict] = trace if trace is not None else []
         self.keep_raw = keep_raw
 
-    def _create(self, items: list, tools_on: bool) -> Any:
+    def _create(self, items: list, tools_on: bool, json_mode: bool = False) -> Any:
         rendered = json.dumps(items, ensure_ascii=False, default=str)
         searches_allowed = MAX_SEARCHES if tools_on else 0
         tokens = len(rendered) // 4 + 1 + searches_allowed * SEARCH_BLOCK_TOKENS
@@ -156,6 +159,8 @@ class Agent:
         }
         if tools_on:
             arguments |= {"tools": [WEB_SEARCH, CALCULATOR], "max_tool_calls": MAX_SEARCHES, "include": INCLUDE}
+        if json_mode:
+            arguments["text"] = {"format": {"type": "json_object"}}
         response = self.budget.paid(
             lambda: self.client.responses.create(**arguments),
             tokens,
@@ -190,9 +195,21 @@ class Agent:
         self.tool_calls.append(step)
         return response
 
+    def _repair(self, items: list, text: str, error: Exception) -> UnifiedOutput:
+        """Ask once more for an answer that could not be read: no tools, so JSON mode is allowed (dev trial on #396)."""
+        reason = " ".join(str(error).split())[:300]
+        messages = [item for item in items if "role" in item]
+        messages += [
+            {"role": "assistant", "content": text},
+            {"role": "user", "content": REPAIR.format(error=reason)},
+        ]
+        response = self._create(messages, tools_on=False, json_mode=True)
+        answer = parse_output(json_text(getattr(response, "output_text", "") or ""))
+        if answer.plan is None and '"plan":{' in "".join(text.split()):
+            raise ValueError("the repaired answer dropped the plan it was asked to repair")
+        return answer
+
     def answer(self, items: list) -> UnifiedOutput:
-        errors: list[str] = []
-        attempts = 0
         for step in range(MAX_STEPS):
             response = self._create(items, tools_on=step + 1 < MAX_STEPS)
             output = [_payload(item) for item in response.output or []]
@@ -208,15 +225,13 @@ class Agent:
                     self.tool_calls.append({"tool": "calculator", "expression": expression, "result": result})
                     items.append({"type": "function_call_output", "call_id": call["call_id"], "output": result})
                 continue
+            text = getattr(response, "output_text", "") or ""
             try:
-                return parse_output(json_text(getattr(response, "output_text", "") or ""))
+                return parse_output(json_text(text))
             except (ValidationError, ValueError) as error:
-                errors.append(f"malformed: {error}")
-                attempts += 1
-                if attempts >= MAX_ATTEMPTS:
-                    break
-                items = items + output + [{"role": "user", "content": JSON_REMINDER}]
-        raise ValueError("; ".join(errors) or "no answer within the step limit")
+                self.tool_calls.append({"tool": "repair", "error": str(error)[:300]})
+                return self._repair(items, text, error)
+        raise ValueError("no answer within the step limit")
 
 
 def input_items(instructions: str, own_history: tuple[Exchange, ...], message: str) -> list[dict]:
@@ -255,6 +270,10 @@ def estimate(turns: list[str], instructions: str, model: str) -> tuple[int, int,
                 tokens += step_tokens
                 usd += step_usd
                 grown += searches * SEARCH_BLOCK_TOKENS + MAX_OUTPUT_TOKENS
+            repair_tokens, repair_usd = worst_case_usd(model, grown, 0)  # one unreadable answer is asked again
+            calls += 1
+            tokens += repair_tokens
+            usd += repair_usd
             history += MAX_OUTPUT_TOKENS + len(turn) // 4 + 1
     return calls, tokens, usd
 
@@ -302,4 +321,7 @@ ARM = baseline_arms.Arm(
     responder=make_responder,
     estimate=estimate,
     model_factory=create_client,
+    # Owner, 2026-11-06 (ADR-0118): measured US$0.018-0.055 a question on four development episodes, about
+    # US$5-14 for the 280 held-out questions, so this arm gets US$15 (ADR-0118).
+    max_usd=15.0,
 )

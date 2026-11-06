@@ -78,6 +78,8 @@ class MealBeamLimits:
     # Charge a reused recipe once, however often it came before: a household that asked for a soup
     # would rather have a soup again than none, which a cost growing per use would buy.
     flat_repeat: bool = False
+    # What repeating the previous meal's dish costs on top (the one-dish beam's 0.35, `app/planning/diversity.py`).
+    adjacent_cost: float = 0.35
     # Search breadth: the most dish combinations a meal's first widening step builds from its roles' candidates
     # (`integer_root` of it per role, never fewer than three), so a meal of many roles keeps fewer dishes a role.
     # Under a budget the cheapest dishes then share a role's places with its best-ranked ones instead of doubling
@@ -92,7 +94,7 @@ class MealBeamLimits:
 
     def __post_init__(self):
         counts = (self.width, self.candidates_per_role, self.meal_options_per_slot, self.max_expansions)
-        if min(counts) < 1 or self.repeat_cost < 0 or (self.max_meal_combinations or 1) < 1:
+        if min(counts) < 1 or self.repeat_cost < 0 or self.adjacent_cost < 0 or (self.max_meal_combinations or 1) < 1:
             raise ValueError("Meal beam limits must be positive")
 
 
@@ -401,6 +403,7 @@ class MealBeamPlanner(FinalScopeReferencePlanner):
                                 self.limits.repeat_cost,
                                 self.limits.flat_repeat,
                                 meal_type=slot.meal_type,
+                                adjacent_cost=self.limits.adjacent_cost,
                             )
                         )
                         next_states.append(
@@ -982,6 +985,7 @@ def repetition_loss(
     flat_repeat: bool = False,
     *,
     meal_type: str | None = None,
+    adjacent_cost: float = 0.35,
 ) -> float:
     """Without a diversity policy, the one-dish beam's legacy penalties, counted per dish.
 
@@ -1017,7 +1021,7 @@ def repetition_loss(
         last = {recipe_id for role, recipe_id in state.choices[-1][1] if role not in free} if state.choices else set()
         return sum(
             (min(previous.count(recipe_id), 1) if flat_repeat else previous.count(recipe_id)) * repeat_cost
-            + (0.35 if recipe_id in last else 0.0)
+            + (adjacent_cost if recipe_id in last else 0.0)
             for role, recipe_id in dishes
             if role not in free
         )
@@ -1041,7 +1045,7 @@ def repetition_loss(
             )
             exempt = meal_type in allowed_meals and last_slot_id in slots and slots[last_slot_id].meal_type == meal_type
             if previous_same and not exempt:
-                loss += 0.35
+                loss += adjacent_cost
     return loss
 
 

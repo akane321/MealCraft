@@ -56,10 +56,11 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
     <!-- Seven tiles a row however short the plan (a one-day plan keeps a one-day tile); a longer plan takes a second row. -->
     <div class="strip" :class="{ short: week.length <= 3 }" :style="week.length <= 3 ? { gridTemplateColumns: `repeat(${week.length}, minmax(120px, 160px))` } : undefined">
       <button
-        v-for="day in week"
+        v-for="(day, i) in week"
         :key="day.dayIndex"
         type="button"
         class="tile"
+        :style="{ '--i': i }"
         :class="{ today: day.date === today, skipped: day.meals.every(meal => meal.status === 'skipped') }"
         :aria-current="day.date === today ? 'date' : undefined"
         :aria-label="`${formatPlanDate(day.date, { weekday: 'long' })}: ${day.meals.map(meal => meal.dishes.map(d => d.recipe.title).join(' and ')).join('; ')}`"
@@ -68,9 +69,9 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
         <span class="d">{{ formatPlanDate(day.date, { weekday: "short" }).toUpperCase() }} <span>{{ Number(day.date.slice(8, 10)) }}</span></span>
         <span class="meals">
           <span v-for="meal in day.meals" :key="meal.key" class="meal" :class="[meal.status, { several: day.meals.length > 1 }]" :title="mealTitle(meal)">
-            <HomeDishIcon :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="day.meals.length > 1 ? 32 : 48" />
+            <HomeDishIcon :slug="meal.dishes[0]!.recipe.slug" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="day.meals.length > 1 ? 32 : 48" />
             <span v-if="badge(meal) && day.meals.length === 1" class="badge">
-              <HomeDishIcon :title="badge(meal)!.recipe.title" :course="badge(meal)!.recipe.course" :role-id="badge(meal)!.role_id" :size="22" />
+              <HomeDishIcon :slug="badge(meal)!.recipe.slug" :title="badge(meal)!.recipe.title" :course="badge(meal)!.recipe.course" :role-id="badge(meal)!.role_id" :size="22" />
             </span>
             <svg v-if="meal.status === 'completed'" class="tick" viewBox="0 0 24 24" aria-label="Cooked"><circle cx="12" cy="12" r="11" /><path d="m7 12.5 3.5 3.5L17 9" /></svg>
             <svg v-if="repeated(meal)" class="again" viewBox="0 0 24 24" aria-label="Appears more than once in this plan"><circle cx="12" cy="12" r="11" /><path d="M7 11a5 5 0 0 1 9-2.5M17 13a5 5 0 0 1-9 2.5M16 5v4h-4M8 19v-4h4" /></svg>
@@ -111,6 +112,12 @@ h3 { margin: 0; }
 .tile:last-child, .tile:nth-child(7n) { border-right: 0; }
 .tile:nth-child(n + 8) { border-top: 1px solid var(--c-line-soft); }
 .tile:hover { background: var(--c-canvas); }
+/* The days come in one after another once the card is up (after a new reply's words: --reveal). */
+.tile { animation: tile-in 640ms var(--spring) both; animation-delay: calc(var(--reveal, 0ms) + 160ms + var(--i, 0) * 55ms); }
+.tile:hover .meals { transform: translateY(-2px) scale(1.04); }
+.meals { transition: transform 420ms var(--spring); }
+@keyframes tile-in { from { opacity: 0; transform: translateY(12px) scale(0.96); filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) { .tile { animation: none; } }
 .tile.skipped { opacity: 0.5; }
 .tile.today { background: #fafaff; }
 .d { padding: 2px 8px; border-radius: 999px; font-size: 11px; line-height: 16px; font-weight: 600; color: #52525b; letter-spacing: 0.02em; }
@@ -123,6 +130,7 @@ h3 { margin: 0; }
 .meal.completed > :first-child { opacity: 0.45; }
 .meal.skipped { opacity: 0.4; }
 .badge { position: absolute; right: -6px; bottom: -4px; display: flex; }
+.badge :deep(img) { box-shadow: 0 0 0 2px #fff; }
 .tick, .again { position: absolute; width: 16px; height: 16px; fill: #fff; stroke-linecap: round; stroke-linejoin: round; }
 .tick { right: -2px; top: -2px; fill: var(--c-green); }
 .tick path { fill: none; stroke: #fff; stroke-width: 2.4; }
@@ -139,4 +147,14 @@ h3 { margin: 0; }
 .foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
 .repeat-note { flex: 1 1 200px; text-align: right; }
+/* Phone: the figures under the title, the days a strip that scrolls sideways. */
+@media (max-width: 767px) {
+  .head { flex-direction: column; align-items: stretch; padding: 14px 16px 12px; }
+  .figures { margin-left: 0; justify-content: space-between; }
+  .fig { align-items: flex-start; }
+  .strip { display: flex; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+  .tile { flex: 0 0 92px; scroll-snap-align: start; }
+  .foot { padding: 12px 16px; }
+  .foot .mc-btn { flex: 1 1 0; justify-content: center; }
+}
 </style>

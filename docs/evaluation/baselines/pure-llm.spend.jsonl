@@ -1,0 +1,9 @@
+{"event": "charge", "note": "ADR-0118 cost trial, 2026-11-06, single-turn pure-LLM runner (4 development episodes)", "total_tokens": 0, "usd": 0.05}
+{"event": "reserve", "total_tokens": 7027, "usd": 0.02777025}
+{"call": "chat", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 1026, "output_tokens": 3260, "total_tokens": 4286, "usd": 0.0154395}
+{"event": "reserve", "total_tokens": 9916, "usd": 0.029937}
+{"call": "chat", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 4138, "output_tokens": 3297, "total_tokens": 7435, "usd": 0.01794}
+{"event": "reserve", "total_tokens": 7003, "usd": 0.02775225}
+{"call": "chat", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 1027, "output_tokens": 3902, "total_tokens": 4929, "usd": 0.01832925}
+{"event": "reserve", "total_tokens": 9356, "usd": 0.029517}
+{"call": "chat", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 4814, "output_tokens": 3954, "total_tokens": 8768, "usd": 0.0214035}

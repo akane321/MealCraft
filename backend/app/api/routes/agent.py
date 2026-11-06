@@ -16,7 +16,7 @@ from app.agent.parser import (
 )
 from app.api.routes.auth import CurrentHouseholdCreatePlanCsrfDependency, CurrentHouseholdViewDependency
 from app.api.routes.meal_plans import build_meal_plan_service, build_replanning_service
-from app.core.config import Settings, get_settings
+from app.core.config import Settings, ablated, get_settings
 from app.core.runtime_config import runtime_value
 from app.db.session import get_db_session
 from app.models.recipe import Ingredient
@@ -59,6 +59,10 @@ router = APIRouter(prefix="/agent/sessions", tags=["planning agent"])
 def create_constraint_parser(
     settings: Settings, database: Session | None = None, *, provider: str | None = None
 ) -> ConstraintParser:
+    if ablated("rule_only_parser"):
+        # Evaluation (#397), ahead of the console setting so it cannot override the arm. The rule parser alone:
+        # this also drops the model scope classifier and tool scheduler the model parser carries.
+        return RuleBasedConstraintParser()
     # The console's runtime setting (ADR-0047) overrides the environment; a replay may name its own parser.
     provider = provider or runtime_value("agent_parser_provider", settings, database)
     if provider == "fixture":

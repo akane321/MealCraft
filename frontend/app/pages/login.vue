@@ -98,7 +98,7 @@ async function submit() {
         </label>
         <p v-if="errorMessage" class="auth-error mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</p>
         <button class="auth-submit" type="submit" :disabled="isLoading" :aria-busy="isLoading || undefined">
-          <UIcon v-if="isLoading" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
+          <MotionLoader v-if="isLoading" />
           {{ isLoading ? "Please wait…" : mode === "register" ? "Create account" : audience === "admin" ? "Sign in to the console" : "Sign in" }}
         </button>
       </form>
@@ -135,7 +135,7 @@ input { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #e4e4e7; b
 input:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
 .auth-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; margin-top: 4px; border: 0; border-radius: 999px; background: #18181b; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .auth-submit:hover:not(:disabled) { background: #27272a; }
-/* In flight: the same ink pill with a spinner, never the disabled grey. */
+/* In flight: the same ink pill with the loader, never the disabled grey. */
 .auth-submit:disabled { cursor: progress; }
 .auth-error { margin: 4px 0 16px; color: #b42318 !important; }
 /* Above the form: left-aligned beside its icon (the card centres its other lines), with room before the fields. */

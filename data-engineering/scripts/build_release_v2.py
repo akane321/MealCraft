@@ -281,7 +281,7 @@ def build_recipe(record: dict, result: dict, forms: dict[str, dict], rules: dict
             "candidate_id": record["candidate_id"],
         },
         "servings": servings,
-        "servings_basis": "stated" if record.get("servings") else "estimated",
+        "servings_basis": result.get("servings_basis") or ("stated" if record.get("servings") else "estimated"),
         "prep_minutes": result["prep_minutes"],
         "cook_minutes": result["cook_minutes"],
         "passive_minutes": result["passive_minutes"],

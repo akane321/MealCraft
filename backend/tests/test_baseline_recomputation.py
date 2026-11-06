@@ -104,6 +104,15 @@ def test_dish_nutrition_per_serving_never_sums_a_partial_dish():
     assert dish_nutrition_per_serving(plan(mapping("rice", 200), mapping("x", 5, None)).dishes[0], FACTS) is None
 
 
+def test_float_noise_in_a_frozen_price_does_not_lose_the_price():
+    noisy = recompute_ingredient_baseline(
+        plan(mapping("rice", 100)),
+        ingredient_facts=FACTS,
+        frozen_products=[product("rice", "rice-a", 400, 7.510000000000001)],
+    )
+    assert (noisy.pricing_status, noisy.purchase_total_sgd) == ("complete", 7.51)
+
+
 def test_basics_cost_nothing_and_package_limit_is_not_a_price():
     bought = recompute_ingredient_baseline(
         plan(mapping("rice", 700), mapping("water", 50)),

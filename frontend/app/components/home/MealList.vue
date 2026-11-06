@@ -22,6 +22,34 @@ const rated = (dish: NutritionDashboardDay) => Boolean(props.canGiveFeedback) &&
 const factsOpen = ref<number | null>(null);
 const toggleFacts = (entryId: number) => { factsOpen.value = factsOpen.value === entryId ? null : entryId; };
 
+// Dishes whose recipe just changed (a confirmed swap): their rows glow once and the new dish pops in.
+const fresh = ref(new Set<number>());
+let freshTimer: ReturnType<typeof setTimeout> | undefined;
+watch(() => props.days, (days) => {
+  const changed = new Set<number>();
+  for (const dish of days) {
+    const before = lastShown.get(dish.entry_id);
+    if (before && before !== dish.recipe.slug) changed.add(dish.entry_id);
+    lastShown.set(dish.entry_id, dish.recipe.slug);
+  }
+  if (!changed.size) return;
+  fresh.value = changed;
+  clearTimeout(freshTimer);
+  freshTimer = setTimeout(() => { fresh.value = new Set(); }, 2600);
+  void nextTick(showFresh);
+}, { immediate: true });
+// The plan column scrolls the changed row to about a third of the way down, so the glow is seen.
+const list = ref<HTMLElement | null>(null);
+function showFresh() {
+  const row = list.value?.querySelector<HTMLElement>(".row.fresh");
+  let scroller = row?.parentElement ?? null;
+  while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement;
+  if (!row || !scroller) return;
+  const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - scroller.clientHeight / 3;
+  scroller.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+onBeforeUnmount(() => clearTimeout(freshTimer));
+
 const week = computed(() => mealsByDay(props.days));
 // Past seven days a weekday repeats, so an action names the date too.
 const numbered = computed(() => week.value.length > 7);
@@ -54,8 +82,14 @@ const ACTIONS = [
 const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", dislike: "i-lucide-thumbs-down", never_again: "i-lucide-ban" };
 </script>
 
+<script lang="ts">
+// Each dish entry's recipe as last shown, kept across mounts: the phone's plan sheet is closed while a swap is
+// confirmed, and the changed dish should still stand out when it opens again.
+const lastShown = new Map<number, string>();
+</script>
+
 <template>
-  <div>
+  <div ref="list">
     <p v-if="feedbackError" class="feedback-error" role="alert">{{ feedbackError }}</p>
     <ol class="days" aria-label="Plan days">
       <li v-for="day in week" :key="day.dayIndex" class="day">
@@ -66,10 +100,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
           v-for="meal in day.meals"
           :key="meal.key"
           class="row"
-          :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals }"
+          :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals, fresh: meal.dishes.some(dish => fresh.has(dish.entry_id)) }"
         >
           <span v-if="!severalMeals" class="d"><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></span>
-          <HomeDishIcon class="icon" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
+          <HomeDishIcon class="icon" :slug="meal.dishes[0]!.recipe.slug" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
           <!-- One line per dish: its name, then its own changes, so a meal of several dishes never shows unlabelled rows. -->
           <span class="dishes">
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
@@ -103,9 +137,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
               <span v-if="changeable(dish) || rated(dish)" class="act-row">
                 <span v-if="changeable(dish)" class="acts" role="group" :aria-label="`Change ${dish.recipe.title}`">
                   <button
-                    v-for="action in ACTIONS"
+                    v-for="(action, k) in ACTIONS"
                     :key="action.label"
                     type="button"
+                    :style="{ '--k': k }"
                     :aria-label="action.label"
                     :title="action.label"
                     @click="emit('ask', action.text(sentenceDay(day.date, numbered), dish.recipe.title))"
@@ -116,9 +151,10 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
                 <!-- Pressing the pressed button again undoes it; the whole household's, whoever pressed it. -->
                 <span v-if="rated(dish)" class="feedback" role="group" :aria-label="`Feedback on ${dish.recipe.title}`">
                   <button
-                    v-for="button in FEEDBACK_BUTTONS"
+                    v-for="(button, k) in FEEDBACK_BUTTONS"
                     :key="button.kind"
                     type="button"
+                    :style="{ '--k': k + ACTIONS.length }"
                     :aria-pressed="dish.feedback === button.kind"
                     :aria-busy="feedbackRecipeId === dish.recipe.id"
                     :disabled="feedbackRecipeId === dish.recipe.id"
@@ -166,15 +202,28 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .name > span { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .dish.side .name { font-size: 13px; font-weight: 500; }
 .name:hover { color: #6d28d9; }
-.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 2px; font-size: 12.5px; line-height: 18px; color: var(--c-muted); }
+/* Each chip keeps its own 20px line, so a wrapped line never runs into the next one. */
+.rest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 20px; margin-top: 2px; font-size: 12.5px; line-height: 20px; color: var(--c-muted); }
+.rest > * { flex: none; }
 .rest .when { white-space: nowrap; }
 .kept { color: var(--c-green-text); font-weight: 500; }
 .ok-tick { color: var(--c-green); }
-/* A dish's changes and its feedback: small ghost icon buttons, dim until the row is pointed at or focused. */
-.act-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 4px 0 0 -5px; }
-.acts, .feedback { display: flex; align-items: center; gap: 2px; opacity: 0.6; transition: opacity 120ms var(--ease); }
-.feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; }
-.row:hover .acts, .row:focus-within .acts, .row:hover .feedback, .row:focus-within .feedback { opacity: 1; }
+/* A dish's changes and its feedback: small ghost icon buttons on their own line under the chips. */
+.act-row { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 26px; margin: 6px 0 0 -5px; }
+.acts, .feedback { display: flex; align-items: center; gap: 2px; }
+.feedback { padding-left: 6px; border-left: 1px solid #f0f0f2; transition: border-color 200ms; }
+/* Desktop: the icons wait until the row is pointed at or holds the focus, then come in one after another on a
+   spring; they stay in place (and clickable) meanwhile. A pressed feedback button stays shown. Phone: always shown. */
+@media (min-width: 768px) {
+  .row { position: relative; }
+  .row::before { content: ""; position: absolute; inset: 3px -8px; z-index: -1; border-radius: 12px; background: #f4f4f5; opacity: 0; transform: scale(0.98); transition: opacity 200ms ease, transform 420ms var(--spring); }
+  .days { position: relative; z-index: 0; }
+  .row:is(:hover, :focus-within)::before { opacity: 0.7; transform: none; }
+  .act-row button:not([aria-pressed="true"]) { opacity: 0; transform: translateY(5px) scale(0.85); transition: opacity 160ms ease, transform 460ms var(--spring), background 150ms, color 150ms; transition-delay: 0ms; }
+  .row:is(:hover, :focus-within) .act-row button { opacity: 1; transform: none; transition-delay: calc(var(--k, 0) * 22ms); }
+  .feedback { border-left-color: transparent; }
+  .row:is(:hover, :focus-within) .feedback { border-left-color: #e4e4e7; }
+}
 /* Dark enough that the dimmed icons still reach 3:1 on the plan column. */
 .acts button, .feedback button { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #3f3f46; }
 .acts button .iconify, .feedback button .iconify { width: 16px; height: 16px; }
@@ -191,4 +240,14 @@ const FEEDBACK_ICON: Record<string, string> = { like: "i-lucide-thumbs-up", disl
 .facts-head { flex-basis: 100%; color: #71717a; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
 .fact b { font-weight: 500; }
 .feedback-error { margin: 8px 16px 0; color: #b42318; font-size: 12px; font-weight: 500; }
+/* A dish just swapped in: a violet wash on its row that fades, the new dish's plate pops and its name rises. */
+.days { position: relative; z-index: 0; }
+.row.fresh { position: relative; }
+.row.fresh::after { content: ""; position: absolute; inset: 3px -8px; z-index: -1; border-radius: 12px; background: #f5f3ff; box-shadow: inset 0 0 0 1px #ddd6fe; animation: fresh-wash 2.6s ease-out both; }
+.row.fresh .icon { animation: fresh-pop 760ms var(--spring) both; }
+.row.fresh .name { animation: fresh-rise 620ms var(--spring) 90ms both; }
+@keyframes fresh-wash { 0%, 50% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fresh-pop { from { opacity: 0; transform: scale(0.4) rotate(-30deg); } }
+@keyframes fresh-rise { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } }
+@media (prefers-reduced-motion: reduce) { .row.fresh .icon, .row.fresh .name { animation: none; } }
 </style>

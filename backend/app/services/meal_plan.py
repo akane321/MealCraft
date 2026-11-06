@@ -8,7 +8,7 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from app.core.code_version import code_commit
-from app.core.config import get_settings
+from app.core.config import ablated, get_settings
 from app.data import meal_structure
 from app.models.meal_plan import MealPlan
 from app.models.platform import OperationRun
@@ -241,7 +241,8 @@ class WeeklyMealPlanService:
                     result.trace["prior_candidate_attempt"] = prior_trace
                 return recommendation_result, result
             except ProductPlanningError as error:
-                if error.status == "infeasible" and not broadened and attempt == 0:
+                # The second attempt is the repair step an evaluation can switch off (#397).
+                if error.status == "infeasible" and not broadened and attempt == 0 and not ablated("repair_off"):
                     # A time/diet-filtered pool cannot establish which of those
                     # constraints conflicts with budget. Retain original quotes
                     # and add diagnostic candidates, then establish evidence again.

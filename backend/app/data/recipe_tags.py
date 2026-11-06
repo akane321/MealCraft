@@ -292,6 +292,11 @@ CRITICAL_MODEL_FIELDS = ("meal_role", "contains_staple", "protein_sources")
 PROTEIN_SOURCES: tuple[str, ...] = get_args(ProteinSource)
 FLESH_SOURCES = frozenset({"chicken", "duck", "pork", "beef", "lamb", "fish", "shellfish"})
 SWEET_OR_CONDIMENT = frozenset({"dessert", "drink", "sauce"})
+# The roles that fill a lunch or dinner plate. A main or side whose options hold none of them is not sent to the
+# model, which could only force a sauce, dessert or breakfast on it (issue #426 E1); it stays open for the reviewer.
+MEAL_FILLING_ROLES = frozenset({"protein_main", "one_bowl", "staple", "vegetable"})
+MEAL_COURSES = frozenset({"main", "side"})
+SAVOURY_COURSES = MEAL_COURSES | {"soup"}
 PLANT_EGG_SHARE = 0.10
 _SOURCE_IDS = {
     "chicken": "chicken chicken_breast chicken_thigh chicken_wings cooked_chicken cornish_hen chicken_or_turkey turkey"
@@ -1068,7 +1073,9 @@ meal_role: what the dish is in a meal.
 - Egg rolls, spring rolls, dumplings, fritters, dips and other finger food are snack, not protein_main.
 - A soup with noodles, rice or dumplings as a large part of it is one_bowl, not soup.
 - A title may signal a missing ingredient, but never proves that the ingredient exists. Do not fill a lost line.
-- When none of "allowed_meal_roles" fits the dish (a vegetable side when vegetable is not allowed), answer null.
+- When none of "allowed_meal_roles" fits the dish, answer null. A savoury dish eaten in a lunch or dinner (beans,
+  potatoes, a curry, a vegetable or egg side) is never sauce, dessert, drink, snack or breakfast just because those
+  are the only roles allowed.
 protein_sources: the main protein sources of the dish, from "allowed_protein_sources" only; [] when it has no
 main protein. Name only sources the ingredient lines explicitly support: never add legume without a bean, lentil
 or pea line, nor egg or soy without an egg or soy line. Turkey and other poultry are chicken, goose is duck,
@@ -1147,12 +1154,20 @@ def ask_model(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict
     return {"answers": answers, "usage": usage}
 
 
-def merge_answer(tags: Tags, answer: dict, batch: str | None = None) -> None:
+def model_may_decide(dish: Dish, tags: Tags) -> bool:
+    """Whether the model is asked (or its earlier v3 answer kept): any course but main or side, or a main or side
+    whose allowed roles hold a meal-filling one (issue #426 E1). `tags.open` is left as it is for `review_roles`."""
+    return dish.course not in MEAL_COURSES or bool(MEAL_FILLING_ROLES & set(tags.allowed_roles))
+
+
+def merge_answer(tags: Tags, answer: dict, batch: str | None = None, course: str | None = None) -> None:
     """Take the model's open fields when they are allowed; anything else stays null. `batch` names the batch the
     values are recorded in when it is not the frozen `LLM_BATCH`.
 
     A protein the dish's lines do not support (a legume with no bean line) is dropped, and a role
-    the model makes sweet or a condiment has no protein, as with the rules.
+    the model makes sweet or a condiment has no protein, as with the rules. With `course` (the v3 batch), a sweet or
+    condiment role for a savoury course whose rules found a protein is dropped whole, before the role is written,
+    so the rules' protein stays (issue #426 E2).
     """
 
     def decided(*names: str) -> None:
@@ -1162,6 +1177,8 @@ def merge_answer(tags: Tags, answer: dict, batch: str | None = None) -> None:
                 tags.batches[name] = batch
 
     role = answer.get("meal_role")
+    if role in SWEET_OR_CONDIMENT and course in SAVOURY_COURSES and tags.values["protein_sources"]:
+        return
     if "meal_role" in tags.open and role in tags.allowed_roles:
         tags.values["meal_role"] = role
         tags.values["contains_staple"] = role in {"one_bowl", "staple"}
@@ -1250,7 +1267,7 @@ def write_keyed(path: Path, header: dict, key: str, entries: dict[str, dict]) ->
     path.write_text(f"{head},\n  {json.dumps(key)}: {{\n{body}\n  }}\n}}\n", encoding="utf-8", newline="\n")
 
 
-NO_USAGE = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "asked": 0, "stopped": False, "model": None}
+NO_USAGE = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "asked": 0, "stopped": False, "models": []}
 
 
 def previous_file() -> dict:
@@ -1283,20 +1300,57 @@ def base_release_keys() -> set[str]:
         return {json.loads(line)["recipe_id"] for line in handle if line.strip()}
 
 
-def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict:
+def export_open(path: Path):
+    """An `ask` for `build` that writes each recipe it would send the model as one JSONL line (`_llm_payload`), for a
+    Claude subagent to answer with the PROMPT's meal_role part, and answers nothing."""
+
+    def ask(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict:
+        lines = "".join(json.dumps(_llm_payload(dish, tags), ensure_ascii=False) + "\n" for dish, tags in open_dishes)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(lines, encoding="utf-8", newline="\n")
+        log(f"Exported {len(open_dishes)} open recipes to {path}.")
+        return {"answers": {}, "usage": {**NO_USAGE}}
+
+    return ask
+
+
+def answers_from(path: Path, model: str):
+    """An `ask` for `build` that reads a Claude subagent's answers, one `{"key", "meal_role", "protein_sources"}` line
+    each; a value outside the vocabulary raises. The usage records the model as `claude/<model>` at no API cost."""
+    answers = {}
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        role, sources = row.get("meal_role"), row.get("protein_sources")
+        if role is not None and role not in MEAL_ROLES:
+            raise ValueError(f"{path} line {number}: meal_role {role!r} is not in the vocabulary")
+        if sources is not None and not set(sources) <= set(PROTEIN_SOURCES):
+            raise ValueError(f"{path} line {number}: protein_sources {sources!r} are not in the vocabulary")
+        answers[row["key"]] = {"key": row["key"], "meal_role": role, "protein_sources": sources}
+
+    def ask(open_dishes: list[tuple[Dish, Tags]], max_usd: float, log) -> dict:
+        found = {dish.key: answers[dish.key] for dish, _ in open_dishes if dish.key in answers}
+        log(f"{len(found)} of {len(open_dishes)} open recipes answered in {path}.")
+        return {"answers": found, "usage": {**NO_USAGE, "calls": 1, "model": f"claude/{model}"}}
+
+    return ask
+
+
+def build(use_llm: bool, max_usd: float, log=print, reask: bool = False, reask_v3: bool = False, ask=None) -> dict:
     release = release_dishes()
     tagged = [(dish, rule_tags(dish)) for dish in curated_dishes() + release]
     previous = previous_file()
     earlier = {} if reask else previous_answers(previous)
-    earlier_v3 = {} if reask else previous_answers(previous, V3_LLM_BATCH)
+    earlier_v3 = {} if reask or reask_v3 else previous_answers(previous, V3_LLM_BATCH)
     review_table = review_table_values()
     for dish, tags in tagged:
         ruled = {name: tags.values[name] for name in CRITICAL_MODEL_FIELDS}
         roles = review_roles(dish, tags)
         if dish.key in earlier and tags.open:
             merge_answer(tags, earlier[dish.key])
-        if dish.key in earlier_v3 and tags.open:
-            merge_answer(tags, earlier_v3[dish.key], V3_LLM_BATCH)
+        if dish.key in earlier_v3 and tags.open and model_may_decide(dish, tags):
+            merge_answer(tags, earlier_v3[dish.key], V3_LLM_BATCH, dish.course)
         # Better rules alone do not release the failed, unreviewed model batch (owner 2026-10-24). A frozen field the
         # rules now decide takes the rule's value into the review batch, still waiting for review; one they leave
         # open stays frozen for the reviewer's table below, whose values come from decisions.json alone. The owner's
@@ -1330,23 +1384,23 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False) -> dict
                 tags.batches.pop("protein_sources", None)
     still_open = [(dish, tags) for dish, tags in tagged if any(tags.values[name] is None for name in tags.open)]
     # Only recipes data release v3 added are asked about; the others' open fields stay as they are.
-    new_keys = {dish.key for dish in release} - base_release_keys() if use_llm else set()
-    to_ask = [(dish, tags) for dish, tags in still_open if dish.key in new_keys]
+    new_keys = {dish.key for dish in release} - base_release_keys() if use_llm or ask else set()
+    to_ask = [(dish, tags) for dish, tags in still_open if dish.key in new_keys and model_may_decide(dish, tags)]
     # The model's spend over every run, kept in the tag file's header.
     usage = dict(NO_USAGE) | previous.get("llm_usage", {})
-    if use_llm and to_ask:
-        result = ask_model(to_ask, max_usd, log)
+    if (use_llm or ask) and to_ask:
+        result = (ask or ask_model)(to_ask, max_usd, log)
         run = result["usage"]
         for name in ("calls", "input_tokens", "output_tokens", "usd"):
             usage[name] += run[name]
         usage.update(
             asked=usage["asked"] + (len(to_ask) if run["calls"] else 0),
             stopped=run["stopped"],
-            model=run["model"] or usage["model"],
+            models=list(dict.fromkeys([*usage["models"], *filter(None, [run["model"]])])),  # the spend covers them all
         )
         for dish, tags in to_ask:
             if dish.key in result["answers"]:
-                merge_answer(tags, result["answers"][dish.key], V3_LLM_BATCH)
+                merge_answer(tags, result["answers"][dish.key], V3_LLM_BATCH, dish.course)
     usage["usd"] = round(usage["usd"], 4)
     return {"tagged": tagged, "usage": usage, "open": len(still_open)}
 
@@ -1556,7 +1610,7 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         "## Language model",
         "",
         f"Recipe questions sent to the model over all runs: {usage['asked']} (recipes with a field the rules left "
-        f"open). Model: {usage['model'] or 'not called'}; calls: {usage['calls']}; "
+        f"open). Model: {', '.join(usage['models']) or 'not called'}; calls: {usage['calls']}; "
         f"input tokens: {usage['input_tokens']}; "
         f"output tokens: {usage['output_tokens']}; estimated cost: US${usage['usd']:.3f} at US${INPUT_USD_PER_M} "
         f"and US${OUTPUT_USD_PER_M} per million input and output tokens; spend cap hit in the last run: "
@@ -1586,14 +1640,34 @@ def main() -> None:
         "reviewed in the tag "
         "file, and stop",
     )
+    parser.add_argument(
+        "--reask-v3",
+        action="store_true",
+        help=f"drop the earlier answers of {V3_LLM_BATCH} only (the frozen {LLM_BATCH} stays) and ask again",
+    )
+    parser.add_argument(
+        "--export-open",
+        type=Path,
+        metavar="FILE",
+        help="write the open recipes the model would be asked as JSONL for a Claude subagent, and stop (the tag file "
+        "is not written)",
+    )
+    parser.add_argument("--answers", type=Path, metavar="FILE", help="take the open fields from a subagent's JSONL")
+    parser.add_argument(
+        "--answers-model", default="claude-sonnet-5-5", help="the subagent model, recorded as claude/<model>"
+    )
     args = parser.parse_args()
 
     root = repository_root()
     if args.accept_batch:
         print(f"Accepted {accept_batch(args.accept_batch)} values of {args.accept_batch}.")
         return
+    if args.export_open:
+        build(False, args.max_usd, reask=args.reask, reask_v3=args.reask_v3, ask=export_open(args.export_open))
+        return
+    ask = answers_from(args.answers, args.answers_model) if args.answers else None
     previous = previous_file().get("recipes", {})
-    result = build(args.llm, args.max_usd, reask=args.reask)
+    result = build(args.llm, args.max_usd, reask=args.reask, reask_v3=args.reask_v3, ask=ask)
     tagged = result["tagged"]
     entries = {dish.key: recipe_entry(tags, previous.get(dish.key)) for dish, tags in tagged}
     write_keyed(

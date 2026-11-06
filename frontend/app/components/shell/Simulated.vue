@@ -4,8 +4,8 @@ import type { ServerClock } from "~/plugins/server-today";
 
 // A simulated day (SIMULATED_TODAY, debugging and demos) is always visible, so it is never mistaken for today.
 // Inside a panel's header bar it is a small badge; `floating` puts it at the top centre of a page with no bar;
-// `strip` is the landing's thin dark strip along the top edge, as it was before the redesign.
-defineProps<{ floating?: boolean; strip?: boolean }>();
+// `compact` is the date alone (the phone top bar); `strip` is the landing's thin dark strip along the top edge, as it was before the redesign.
+defineProps<{ floating?: boolean; strip?: boolean; compact?: boolean }>();
 const clock = useState<ServerClock | null>("server-clock");
 const label = computed(() => {
   const value = clock.value?.simulated;
@@ -17,7 +17,7 @@ const label = computed(() => {
 
 <template>
   <p v-if="label && strip" class="strip" role="status">Simulated date: {{ label }} · for debugging</p>
-  <span v-else-if="label" class="simulated-clock" :class="{ floating }" role="status"><UIcon name="i-lucide-clock" aria-hidden="true" />Simulated date: {{ label }} · for debugging</span>
+  <span v-else-if="label" class="simulated-clock" :class="{ floating }" role="status"><UIcon name="i-lucide-clock" aria-hidden="true" />{{ compact ? label : `Simulated date: ${label} · for debugging` }}</span>
 </template>
 
 <style scoped>

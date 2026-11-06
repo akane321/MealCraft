@@ -53,6 +53,7 @@ function toggle(name: string) {
             <h3 class="aisle">{{ group.name }}<span class="rule" /><span v-if="!byStore || store.groups.length > 1" class="mc-num">{{ formatSgd(group.sum) }}</span></h3>
             <label v-for="line in group.lines" :key="lineKey(line)" class="item">
               <input type="checkbox" :checked="got.has(lineKey(line))" @change="toggle(lineKey(line))">
+              <HomeIngredientImage :name="line.ingredient_display_name" />
               <span class="what">
                 <span class="p-line">
                   <span class="p">{{ line.ingredient_display_name }}</span>
@@ -90,7 +91,7 @@ function toggle(name: string) {
 .aisle { margin: 0; display: flex; align-items: center; gap: 8px; height: 34px; color: #71717a; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
 .aisle .mc-num { color: #71717a; font-size: 12px; font-weight: 400; letter-spacing: 0; }
 .rule { flex-grow: 1; height: 1px; background: var(--c-line-soft); }
-.item { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
+.item { display: grid; grid-template-columns: 16px 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; padding: 4px 0; cursor: pointer; }
 .item input { align-self: start; margin-top: 2px; }
 .item .c { align-self: start; display: flex; flex-direction: column; align-items: flex-end; line-height: 20px; }
 .item .c small { color: #71717a; font-size: 12px; line-height: 16px; font-weight: 400; white-space: nowrap; }

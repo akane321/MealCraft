@@ -170,7 +170,7 @@ def read_request(turns: list[str], now: datetime) -> Request:
         span = plan_dates.read_span(turn, now) or span
         said = plan_dates.read_start(turn.lower(), now.date())
         start = said.start if said else start
-    days = (span.days if span and span.days else None) or merged.get("plan_day_count") or 7
+    days = (span.day_count if span else None) or merged.get("plan_day_count") or 7
     meals = read_meals(text, span.meals if span else tuple(merged.get("plan_meals") or ()) or None)
     start = (span.start if span and span.start else None) or start or plan_dates.default_start(now, list(meals))
     minutes = merged.get("max_cooking_time_minutes")
