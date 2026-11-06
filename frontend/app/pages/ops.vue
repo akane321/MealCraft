@@ -64,7 +64,7 @@ const current = computed(() => OPS_MODULES.find(module => active(module.path)) ?
       <div class="mc-bar"><UIcon :name="icons[current?.slug ?? ''] ?? 'i-lucide-compass'" />{{ current?.label ?? "Operations" }}<ShellSimulated /></div>
       <div class="ops-body">
         <NuxtPage v-if="ready" />
-        <p v-else class="ops-wait mc-loading" aria-busy="true"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Checking your account…</p>
+        <p v-else class="ops-wait mc-loading" aria-busy="true"><MotionLoader />Checking your account…</p>
       </div>
     </main>
   </div>

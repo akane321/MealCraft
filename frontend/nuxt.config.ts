@@ -15,6 +15,9 @@ export default defineNuxtConfig({
   },
   css: ["~/assets/css/tailwind.css", "~/assets/css/main.css", "~/assets/css/surface.css", "~/assets/css/product.css"],
   devtools: { enabled: true },
+  // Page changes cross-fade with the View Transitions API where the browser has it (product.css styles them);
+  // Nuxt skips them under reduced motion.
+  experimental: { viewTransition: true },
   // Icons are bundled from @iconify-json/lucide; nothing is fetched at runtime.
   icon: { clientBundle: { scan: true }, fallbackToApi: false },
   modules: ["@nuxt/eslint", "@nuxt/ui"],
@@ -32,6 +35,8 @@ export default defineNuxtConfig({
       apiBase: "http://localhost:8000",
       // The MealCraft FairPrice cart extension (browser-extension/fairprice-cart); its manifest key fixes this id.
       fairpriceCartExtensionId: "iogncfhaaajiccdgdnncocllpojhdepm",
+      // Demo videos only (NUXT_PUBLIC_DEMO_SCRIPT=1): the microphone shows a scripted sentence instead of uploading.
+      demoScript: false,
     },
   },
   // Light only; fonts come from the Google Fonts links in app.vue. Only the components the app uses get theme

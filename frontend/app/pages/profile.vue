@@ -413,7 +413,7 @@ onMounted(async () => {
       </p>
     </section>
 
-    <div v-if="isLoading" class="notice-panel mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading your household…</div>
+    <div v-if="isLoading" class="notice-panel mc-loading"><MotionLoader />Loading your household…</div>
     <div v-if="errorMessage" ref="errorBox" class="notice-panel error-notice mc-alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ errorMessage }}</div>
     <div v-if="saveNotice" class="notice-panel success-notice"><UIcon name="i-lucide-circle-check" aria-hidden="true" />{{ saveNotice }}</div>
 
@@ -661,7 +661,7 @@ onMounted(async () => {
         <!-- The save button rides along the bottom of the panel, with how the last save went beside it. -->
         <div class="save-bar">
           <button class="primary-button profile-save-button" type="submit" :disabled="isSaving || totalServings > 12 || orphanRules" :aria-busy="isSaving || undefined">
-            <UIcon v-if="isSaving" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
+            <MotionLoader v-if="isSaving" />
             {{ isSaving ? "Saving…" : current ? "Save changes" : "Save household" }}
           </button>
           <span v-if="errorMessage && !isSaving" class="save-status bad"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />Not saved. The reason is at the top of the page.</span>
@@ -702,7 +702,7 @@ onMounted(async () => {
           </div>
           <p v-if="dayCount > 7" class="field-help">Two shopping trips: before day 1 and before day 8. Fresh meat, fish and greens are used within 3 days of the trip they're bought on.</p>
           <button class="primary-button" type="button" :disabled="!current || isPlanning" :aria-busy="isPlanning || undefined" @click="generateFromProfile">
-            <UIcon v-if="isPlanning" name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />
+            <MotionLoader v-if="isPlanning" />
             {{ isPlanning ? "Planning…" : planWord }}
           </button>
           <p v-if="!current" class="field-help plan-reason"><UIcon name="i-lucide-info" aria-hidden="true" />Save your household first, then plan.</p>
