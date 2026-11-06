@@ -10,7 +10,7 @@ lines, steps and time come from its `evidence`) and scored by the same shared la
 changes none of them.
 
 Cost rules are the pure-LLM runner's (ADR-0086, US$5 per arm including development runs;
-the general agent US$15, ADR-0118): dry run by default,
+the general agent US$15, ADR-0118; RAG US$8, ADR-0120): dry run by default,
 `--live` for a paid call, `--max-usd` and `--max-tokens` stop before a call whose worst case could pass them, and
 held-out paths are refused without `--allow-heldout`. Spend is kept in one append-only ledger per arm
 (`LedgerBudget`, owner review on #427), so it is counted across every run and output of the arm, a case cut by the
@@ -157,8 +157,12 @@ class LedgerBudget(Budget):
         """Settle a call that raised: zero when the API refused it unbilled, else its reserve stands, in memory too."""
         if self._reserved is None:
             return
+        # A call stopped at the length limit was billed and says for how much (`LengthFinishReasonError.completion`).
+        reported = getattr(getattr(error, "completion", None), "usage", None)
         if getattr(error, "status_code", None) in UNBILLED_STATUSES:
             self._write({"event": "charge", "usd": 0.0, "total_tokens": 0, "unbilled": type(error).__name__})
+        elif reported is not None:
+            self.charge(Usage(reported.prompt_tokens, reported.completion_tokens), call=type(error).__name__)
         else:
             usd, tokens = self._reserved
             self.spent_usd += usd
@@ -198,7 +202,7 @@ class Arm:
     estimate: Callable[[list[str], str, str], tuple[int, int, float]] | None = None
     # A paid arm's model client, built only for a live run.
     model_factory: Callable[[str], Any] | None = None
-    # The arm's total cap over all its runs (ADR-0086: US$5; ADR-0118: US$15 for the general agent).
+    # The arm's total cap over all its runs (ADR-0086: US$5; ADR-0118: general agent US$15; ADR-0120: RAG US$8).
     max_usd: float = DEFAULT_MAX_USD
 
 

@@ -21,7 +21,7 @@ Finished: copy `--out` to `docs/evaluation/sprint3-formal` and commit it with th
 Arms (ADR-0118): strong rules, the pure LLM on the conversation protocol (`pure_llm_baseline.conversation_arm`),
 RAG and the general agent, then the product "mealcraft" and its six ablations back to back, so the parser's prompt
 prefix stays in OpenAI's cache. Every arm runs through `baseline_arms.main` with its own spend ledger and cap
-(ADR-0115: US$5 each, the general agent US$15); the product arms use the OpenAI parser and are metered from the
+(ADR-0115: US$5 each, the general agent US$15, RAG US$8); the product arms use the OpenAI parser and are metered from the
 product's own recorded cost (`ablation_arms.openai_arms`). The episodes may be per-file episodes or the held-out
 authoring interchange (`{"cases": [...]}`, `pure_llm_baseline.case_episode`).
 
