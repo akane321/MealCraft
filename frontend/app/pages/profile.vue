@@ -581,7 +581,6 @@ onMounted(async () => {
                   {{ sodiumPerDay }} mg per person a day{{ sodiumLimitMg === null ? " (HPB adult limit)" : "" }}. A hard limit.
                   <template v-if="plannedShare > 0 && plannedShare < 1">The meals you plan keep within their {{ Math.round(plannedShare * 100) }}% share of the day: {{ Math.round(sodiumPerDay! * plannedShare) }} mg.</template>
                 </template>
-                Estimates, not medical advice.
               </p>
             </template>
           </div>

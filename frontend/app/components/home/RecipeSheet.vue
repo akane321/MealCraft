@@ -58,7 +58,7 @@ useDialog(overlay, () => emit("close"));
       <div v-else class="body">
         <section class="card" aria-label="Ingredients">
           <h3>Ingredients</h3>
-          <p class="hint">Quantities serve {{ recipe.servings }}. Allergens come from ingredient data; check product labels.</p>
+          <p class="hint">Quantities serve {{ recipe.servings }}.</p>
           <ul>
             <li v-for="item in recipe.ingredients" :key="item.normalized_name">
               <HomeIngredientImage :name="item.name" />

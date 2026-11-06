@@ -66,7 +66,7 @@ const basics = computed(() => basicsNote(props.estimate));
     <footer>
       <p class="sum"><span>Estimated total</span><strong>{{ formatSgd(estimate.purchase_total_sgd) }}</strong></p>
       <p v-if="basics">{{ basics }}</p>
-      <p>{{ priceSourceLabel(estimate) }}. Prices can change at the store. Check allergens on product labels.</p>
+      <p>{{ priceSourceLabel(estimate) }}.</p>
     </footer>
   </article>
 </template>

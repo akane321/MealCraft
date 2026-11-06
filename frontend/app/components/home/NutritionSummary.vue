@@ -111,7 +111,7 @@ function chooseDay(value: number) {
         <p class="mc-small">
           <strong>Eaten so far</strong>: {{ cooked }} {{ cooked === 1 ? "dish" : "dishes" }},
           {{ kcal(dashboard.completed_nutrition_per_person.calories_kcal) }} kcal and
-          {{ Math.round(dashboard.completed_nutrition_per_person.protein_g) }} g protein per person. General guidance, not medical advice.
+          {{ Math.round(dashboard.completed_nutrition_per_person.protein_g) }} g protein per person.
         </p>
       </div>
     </template>

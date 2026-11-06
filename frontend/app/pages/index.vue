@@ -1089,7 +1089,6 @@ onUnmounted(() => {
               />
             </div>
           </form>
-          <p v-if="!isEmpty" class="fine">Suggestions can be wrong. Check allergens on product labels.</p>
         </div>
 
         <section v-if="isEmpty" class="ideas" aria-label="Suggestions">
@@ -1101,7 +1100,6 @@ onUnmounted(() => {
             </button>
           </div>
         </section>
-        <p v-if="isEmpty" class="fine foot">Suggestions can be wrong. Check allergens on product labels.</p>
         <MotionSuccess v-if="celebration" :title="celebration.title" :detail="celebration.detail" :from="celebration.from" @collapse="celebrationFolds" @done="celebrationDone" />
       </main>
 

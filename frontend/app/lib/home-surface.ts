@@ -234,7 +234,7 @@ export function groceryPriceParts(line: GroceryLineEstimate): [string, string | 
   if (source === "no_external_product") return ["Sample price · no matching FairPrice product; not checked", null];
   const kind = priceKind(line);
   const date = shortDate(evidence?.fetched_at ?? line.product.fetched_at);
-  if (line.product.source === "manual") return [`Price recorded by hand on ${date}`, null]; // observed on a person's visit; never checked live
+  if (line.product.source === "manual") return [`Price from ${date}`, null]; // observed on a person's visit; never checked live
   const base = kind === "sample"
     ? "Sample price"
     : lineRetailer(line) !== "fairprice" ? `${RETAILER_SHORT[lineRetailer(line)]} price from ${date}` : `${kind === "live" ? "FairPrice" : "Saved FairPrice"} price · ${date}`;
