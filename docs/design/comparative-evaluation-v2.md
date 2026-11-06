@@ -638,10 +638,17 @@ The linked module contracts define how to close these dependencies:
 
 ```text
 python -m app.evaluation.formal_run --freeze-record --anchor-date <date>          # docs/evaluation/sprint3-freeze.md
-python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> --out <public dir>        # dry run
-python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> --out <public dir> \
-    --live --allow-heldout --select-failures 12
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> \
+    --out .local/evaluation/sprint3-formal --allow-heldout                           # dry run
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> \
+    --out .local/evaluation/sprint3-formal --live --allow-heldout --select-failures 12
 ```
+
+After an interruption, the same command again at the same commit, with nothing
+committed in between, not even the ledgers; `--retry-failed` also asks again the
+cases whose call failed. The run's `--out` stays in the ignored folder, or a
+resumed run would find the checkout dirty; copy it to
+`docs/evaluation/sprint3-formal` when the run is finished.
 
 Run from the repository root with the key in `.env` there. The 11 arms answer the
 same questions in a fixed order: strong rules, the pure LLM, RAG, the general
@@ -678,14 +685,21 @@ measured rates of ADR-0118 and its ledger beside its cap.
   `comparison-{action,strict}.json` (`heldout_statistics.compare`, overall only)
   and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
   this run, ledger and spend, answered and valid counts, stop reason).
-- **Outcomes, a draft to register before the run** (`formal-outcome-draft-1`):
+- **Outcomes, a draft to register before the run** (`formal-outcome-draft-2`):
   `missing` (not reached or cut by the cap), `error` (call or scorer failed),
   `failure` (invalid output). `action`: success when the final output takes the
-  action the gold expects (plan, clarify, refuse, food answer). `strict`: success
-  only where the code checks the whole gold (an intent case passing
-  `intent_scorer`); held-out plans, questions and replans need the sealed catalog
-  adjudication or a rubric, and the v3 development episodes lack the multi-dish
-  gold the validator reads, so they are voided in `strict` for every arm alike.
+  action the gold expects: `expected_fields.action` when the output slots can
+  show it, else what the disposition implies; a disposition of clarify or refuse
+  beats an action naming the user's intent; an `infeasible` case succeeds with
+  anything but a plan; an intent action the slots cannot show is voided. `strict`:
+  success only where the code checks the whole gold (an intent case passing
+  `intent_scorer`). An intent case with an action or field the output cannot show,
+  and every held-out plan, question and replan (they need the sealed catalog
+  adjudication or a rubric; the v3 development episodes lack the multi-dish gold
+  the validator reads) are voided for every arm alike. An expected refusal shown
+  only as an answer or a question is not scorable for that arm alone and counts
+  as a failure, with its count per arm published. The dry run prints the voids
+  per category from the gold alone.
 
 ### Phase 5 — human subset and final analysis
 

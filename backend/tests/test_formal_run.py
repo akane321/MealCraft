@@ -168,6 +168,124 @@ def test_the_public_output_holds_aggregates_only_and_failures_stay_local(tmp_pat
     assert len(failures) == 3 and len({row["episode"]["category"] for row in failures}) == 3
 
 
+@pytest.mark.parametrize(
+    ("gold", "want"),
+    [
+        ({"kind": "plan", "disposition": "feasible", "expected_fields": {"action": "plan"}}, "plan"),
+        ({"kind": "qa", "disposition": "answer", "expected_fields": {"action": "food_qa"}}, "food_qa"),
+        ({"kind": "plan", "disposition": "infeasible", "expected_fields": {"action": "plan"}}, formal_run.NO_PLAN),
+        ({"kind": "replan", "disposition": "infeasible", "expected_fields": {"action": "refuse"}}, formal_run.NO_PLAN),
+        ({"kind": "plan", "disposition": "clarify", "expected_fields": {"action": "plan"}}, "clarify"),
+        ({"kind": "replan", "disposition": "feasible", "expected_fields": {"action": "swap"}}, "plan"),
+        ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "swap"}}, None),
+        ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "plan"}}, "plan"),
+        ({"class": "infeasible"}, formal_run.NO_PLAN),
+        ({"class": "feasible"}, "plan"),
+    ],
+)
+def test_the_expected_action_reads_the_gold(gold, want):
+    assert formal_run.expected_action(gold) == want
+
+
+def record(output):
+    return {"status": "answered", "valid_output": True, "exchanges": [{"output": output.model_dump(mode="json")}]}
+
+
+def test_an_infeasible_case_succeeds_with_anything_but_a_plan():
+    episode = {"gold": {"kind": "plan", "disposition": "infeasible", "expected_fields": {"action": "plan"}}}
+    assert formal_run.judge(episode, record(UnifiedOutput(answer="Not possible on S$1.")))[0] == "success"
+    assert formal_run.judge(episode, record(UnifiedOutput(clarification=["Raise the budget?"])))[0] == "success"
+    assert formal_run.judge(episode, record(UnifiedOutput()))[0] == "failure"  # no answer at all
+    planned = record(UnifiedOutput(answer="Here."))
+    with pytest.MonkeyPatch.context() as patch:  # the slot order itself is intent_scorer's test
+        patch.setattr(formal_run, "observed_action", lambda output: "plan")
+        assert formal_run.judge(episode, planned)[0] == "failure"
+
+
+def test_strict_voids_what_the_output_cannot_show_for_every_arm_and_counts_a_refusal_it_cannot_tell():
+    answer = record(UnifiedOutput(answer="An answer."))
+    unseen = {"kind": "intent", "disposition": "answer", "expected_fields": {"action": "swap"}}
+    assert formal_run.judge({"gold": unseen}, answer)[2] is True
+    field = {"kind": "intent", "disposition": "answer", "expected_fields": {"action": "food_qa", "horizon_days": 7}}
+    assert formal_run.judge({"gold": field}, answer)[1:3] == ("failure", True)
+    no_action = {"kind": "intent", "disposition": "answer", "expected_fields": {}}
+    assert formal_run.judge({"gold": no_action}, answer)[2] is True  # voided, and the scorer is not asked
+    refusal = {"kind": "intent", "disposition": "refuse", "expected_fields": {"action": "refuse"}}
+    assert formal_run.judge({"gold": refusal}, answer) == ("failure", "failure", False, True)
+
+
+def test_the_dry_run_shows_the_voids_from_the_gold_alone(tmp_path, capsys):
+    assert run(tmp_path) == 0
+    gold = json.loads(capsys.readouterr().out)["gold"]
+    assert gold["strict_voided"] == {"planning": 3, "multi_turn": 3, "adversarial": 3}
+    assert gold["action_voided"] == {} and gold["action_overridden"] == 0
+
+
+def test_the_strict_aggregate_publishes_the_not_scorable_counts(tmp_path):
+    assert run(tmp_path, "--live", "--arms", "strong-rule", "mealcraft") == 0
+    strict = json.loads((tmp_path / "out/aggregate-strict.json").read_text(encoding="utf-8"))
+    assert strict["intent_not_scorable"] == {"strong-rule": 0, "mealcraft": 0}
+
+
+def test_retry_failed_asks_again_and_the_last_record_counts(tmp_path):
+    def failing(context):
+        def respond(message, own_history, instructions):
+            raise RuntimeError("the network went away")
+
+        return respond
+
+    arms = fake_registry()
+    broken = arms(False) | {"strong-rule": replace(answering_arm("strong-rule"), responder=failing)}
+    assert run(tmp_path, "--live", "--arms", "strong-rule", registry=lambda no_paid: broken) == 0
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["arms"]["strong-rule"]["call_failed"] == 12
+    assert run(tmp_path, "--live", "--arms", "strong-rule", registry=arms) == 0  # a plain resume leaves them
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["arms"]["strong-rule"]["call_failed"] == 12
+    assert run(tmp_path, "--live", "--arms", "strong-rule", "--retry-failed", registry=arms) == 0
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))
+    assert manifest["arms"]["strong-rule"]["answered"] == 12 and manifest["arms"]["strong-rule"]["call_failed"] == 0
+
+
+def test_two_sets_in_folders_of_one_name_keep_their_records_apart(tmp_path):
+    outputs = []
+
+    def run_arm(argv, **_):
+        outputs.append(argv[argv.index("--output") + 1])
+        return 0
+
+    for name, count in (("one", 4), ("two", 8)):
+        folder = tmp_path / name
+        folder.mkdir()
+        argv = ["--episodes", str(write_cases(folder, count)), "--anchor-date", "2026-09-28", "--live"]
+        argv += ["--out", str(folder / "out"), "--arms", "strong-rule", "--ledger-dir", str(folder / "ledgers")]
+        assert formal_run.main(argv, arms_for=fake_registry(), resource_loader=resources, run_arm=run_arm) == 0
+    assert len(set(outputs)) == 2
+
+
+def test_a_held_out_path_is_refused_by_either_name_and_by_the_freeze_record(tmp_path):
+    for name in ("sealed", "held-out"):
+        folder = tmp_path / name
+        folder.mkdir()
+        episodes = write_cases(folder)
+        with pytest.raises(SystemExit):
+            run_args = ["--episodes", str(episodes), "--anchor-date", "2026-09-28", "--out", str(tmp_path / "out")]
+            formal_run.main(run_args, arms_for=fake_registry(), resource_loader=resources)
+        with pytest.raises(SystemExit):
+            record_args = ["--freeze-record", str(tmp_path / "record.md"), "--episodes", str(episodes)]
+            formal_run.main([*record_args, "--anchor-date", "2026-09-28"], arms_for=fake_registry())
+    assert not (tmp_path / "record.md").exists()
+
+
+def test_the_freeze_record_leaves_out_the_commit_a_later_commit_would_change(tmp_path):
+    arms = {name: answering_arm(name) for name in formal_run.ORDER}
+    arms = {k: replace(a, fingerprint=lambda: {"code_commit": "abc", "data_tree": "t"}) for k, a in arms.items()}
+    argv = ["--freeze-record", str(tmp_path / "record.md"), "--anchor-date", "2026-09-28"]
+    assert formal_run.main(argv, arms_for=lambda no_paid: arms, resource_loader=resources) == 0
+    text = (tmp_path / "record.md").read_text(encoding="utf-8")
+    assert '"data_tree": "t"' in text and '"code_commit"' not in text
+
+
 def test_small_cells_are_withheld_in_the_public_aggregate(tmp_path):
     assert run(tmp_path, "--live", "--arms", "strong-rule", "mealcraft", "--min-cell-n", "5") == 0
     action = json.loads((tmp_path / "out/aggregate-action.json").read_text(encoding="utf-8"))
@@ -187,6 +305,11 @@ def test_a_held_out_run_needs_a_clean_commit_a_local_record_folder_and_the_flag(
         main()  # no --allow-heldout
     with pytest.raises(SystemExit):
         main("--allow-heldout", "--local", str(tmp_path / "local"))  # records outside .local/evaluation
+    inside = str(formal_run.repository_root() / "docs/evaluation/never-written")
+    with pytest.raises(SystemExit):
+        formal_run.main(  # a public folder in the checkout would dirty it for a resume
+            [*argv[:-1], inside, "--allow-heldout"], arms_for=fake_registry(), resource_loader=resources
+        )
     monkeypatch.setattr(baseline_arms, "code_state", lambda: ("abc", True))
     with pytest.raises(SystemExit):
         main("--allow-heldout")  # uncommitted changes

@@ -4,6 +4,19 @@
     python -m app.evaluation.formal_run --episodes <dir> --anchor-date <date> --out <dir> --live --allow-heldout
     python -m app.evaluation.formal_run --freeze-record --anchor-date <date>       # docs/evaluation/sprint3-freeze.md
 
+The one command after the freeze, from the repository root, the key in `.env`, at the commit that holds the freeze
+record (fill in the frozen set's folder and the freeze record's anchor date; on one line in PowerShell):
+
+    uv run --project backend python -m app.evaluation.formal_run --episodes <frozen set> --anchor-date <date> \\
+        --out .local/evaluation/sprint3-formal --live --allow-heldout --select-failures 12
+
+After an interruption run the same command again, at the same commit, and commit nothing in between (the spend ledgers
+included): recorded cases are neither asked nor paid again, and the product arms' fingerprints name the commit, so at
+another one their records are refused and their cases count as missing. Add `--retry-failed` to ask again the cases
+whose call failed (paid), and set `--credit-usd` to what the credit has left, as the guard counts from each start.
+Finished: copy `--out` to `docs/evaluation/sprint3-formal` and commit it with the ledgers. A held-out run always passes
+`--allow-heldout`, whatever its folder is called: the path check catches only names with heldout or sealed.
+
 Arms (ADR-0118): strong rules, the pure LLM on the conversation protocol (`pure_llm_baseline.conversation_arm`),
 RAG and the general agent, then the product "mealcraft" and its six ablations back to back, so the parser's prompt
 prefix stays in OpenAI's cache. Every arm runs through `baseline_arms.main` with its own spend ledger and cap
@@ -23,12 +36,18 @@ authoring interchange (`{"cases": [...]}`, `pure_llm_baseline.case_episode`).
 Outcomes (`SCORING`, a draft for the owner to register before the run): an arm's case is `missing` with no record
 (not reached, or cut by the cap), `error` when the call or the scorer failed, `failure` for an invalid output. Then
 two aggregates by category, language and source, small cells withheld (`heldout_report`, ADR-0100 item 5):
-- `action`: success when the final output takes the action the gold expects (plan, clarify, refuse or food_qa);
-  a case whose gold names no action is voided for every arm.
-- `strict`: success only where the code checks the whole gold: an intent case passes `intent_scorer` (its
-  not-scorable verdict is not a success). Every other case is voided for every arm: a held-out plan, question or
-  replan needs the sealed catalog adjudication or a rubric, and the v3 development episodes lack the multi-dish
-  gold the validator reads (the dev rehearsal showed every arm's validation skipped).
+- `action`: success when the final output takes the action the gold expects (`expected_action`):
+  `expected_fields.action` when the output slots can show it, else what the disposition implies. A disposition of
+  clarify or refuse is the outcome itself and beats an action that names the user's intent; an `infeasible` case
+  succeeds with any output that is not a plan, as the product states a limits refusal as a reply or a question. An
+  intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm.
+- `strict`: success only where the code checks the whole gold: an intent case passes `intent_scorer`. A case whose
+  gold the output cannot show in full (`intent_scorer`: such an action, or a field the echo cannot carry) is voided
+  for every arm, as is every non-intent case: a held-out plan, question or replan needs the sealed catalog adjudication
+  or a rubric, and the v3 development episodes lack the multi-dish gold the validator reads (the dev rehearsal showed
+  every arm's validation skipped). An expected refusal shown only as an answer or a question is not scorable for that
+  arm alone, and void flags must be the same for every arm, so it counts as a failure, against the product more than
+  the baselines; its count per arm is in `aggregate-strict.json` and the manifest.
 Each also gets the paired comparison of the product with every other arm (`heldout_statistics.compare`, overall
 only). `--select-failures N` writes N product failures, round robin over categories and first where a baseline
 succeeded, with their records, to the local folder for the failure analyses.
@@ -50,9 +69,10 @@ from app.core.paths import repository_root
 from app.evaluation import baseline_arms
 from app.evaluation.baseline_resources import BaselineResources, load_resources
 from app.evaluation.conversation_adapter import UnifiedOutput
+from app.evaluation.field_mapping import MAPPED_FIELDS
 from app.evaluation.heldout_report import CaseOutcome, ExpectedManifest, aggregate, render
 from app.evaluation.heldout_statistics import compare
-from app.evaluation.intent_scorer import observed_action, score_intent
+from app.evaluation.intent_scorer import OBSERVABLE_ACTIONS, observed_action, score_intent
 from app.evaluation.pure_llm_baseline import _digest, episode_id_of, load_episodes, read_records
 
 PRODUCT = "mealcraft"
@@ -61,7 +81,7 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-draft-1"
+SCORING = "formal-outcome-draft-2"
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
 DISPOSITION_ACTION = {
@@ -71,6 +91,8 @@ DISPOSITION_ACTION = {
     "answer": "food_qa",
     "refuse": "refuse",
 }
+NO_PLAN = "no_plan"  # what an infeasible request expects: anything but a plan
+NOT_A_PLAN = {"refuse", "clarify", "food_qa"}
 
 
 def registry(no_paid: bool = False) -> dict[str, baseline_arms.Arm]:
@@ -88,7 +110,8 @@ def _absolute(path: Path) -> Path:
 
 
 def _heldout(path: Path) -> bool:
-    return "heldout" in "".join(ch for ch in str(path).lower() if ch.isalnum())
+    name = "".join(ch for ch in str(path).lower() if ch.isalnum())
+    return "heldout" in name or "sealed" in name
 
 
 def file_name(system_id: str) -> str:
@@ -112,13 +135,32 @@ def labels(episode: dict[str, Any], *, heldout: bool) -> tuple[str, str, str]:
 
 
 def expected_action(gold: dict[str, Any] | None) -> str | None:
+    """What the final output must do (`SCORING`); None voids the case for every arm."""
     if not gold:
         return None
+    disposition = gold.get("disposition")
+    if disposition == "infeasible" or gold.get("class") == "infeasible":
+        return NO_PLAN
+    if disposition in ("clarify", "refuse"):
+        return DISPOSITION_ACTION[disposition]
+    action = (gold.get("expected_fields") or {}).get("action")
+    if action in OBSERVABLE_ACTIONS:
+        return action
     if gold.get("kind") == "intent":
-        return (gold.get("expected_fields") or {}).get("action")
-    if "disposition" in gold:  # the held-out authoring interchange
-        return DISPOSITION_ACTION.get(gold["disposition"])
+        return None
+    if disposition is not None:  # the held-out authoring interchange; a replan's swap ends in a plan
+        return DISPOSITION_ACTION.get(disposition)
     return {"feasible": "plan", "clarification": "clarify"}.get(gold.get("class"))  # the development gold
+
+
+def strict_voided(gold: dict[str, Any]) -> bool:
+    """True unless `intent_scorer` can check all of this gold, whatever an arm answers."""
+    expected = gold.get("expected_fields") or {}
+    return (
+        gold.get("kind") != "intent"
+        or expected.get("action") not in OBSERVABLE_ACTIONS
+        or any(name != "action" and name not in MAPPED_FIELDS for name in expected)
+    )
 
 
 def final_output(record: dict[str, Any]) -> UnifiedOutput | None:
@@ -130,19 +172,20 @@ def judge(episode: dict[str, Any], record: dict[str, Any] | None) -> tuple[str, 
     """(action status, strict status, strict voided, intent not scorable) for one arm's case (`SCORING`)."""
     gold = episode.get("gold") or {}
     want = expected_action(gold)
-    strict_void = gold.get("kind") != "intent"
+    voided = strict_voided(gold)
     if record is None:
-        return "missing", "missing", strict_void, False
+        return "missing", "missing", voided, False
     if record.get("status") != "answered" or "error" in (record.get("scored") or {}):
-        return "error", "error", strict_void, False
+        return "error", "error", voided, False
     output = final_output(record)
     if not record.get("valid_output") or output is None:
-        return "failure", "failure", strict_void, False
-    action = "success" if want is not None and observed_action(output) == want else "failure"
-    if gold.get("kind") == "intent":
-        verdict = score_intent(gold, output).outcome
-        return action, "success" if verdict == "pass" else "failure", False, verdict == "not_scorable"
-    return action, "failure", strict_void, False  # voided: the code cannot check the whole gold
+        return "failure", "failure", voided, False
+    seen = observed_action(output)
+    action = "success" if (seen in NOT_A_PLAN if want == NO_PLAN else seen == want) else "failure"
+    if voided:
+        return action, "failure", True, False  # the code cannot check the whole gold
+    verdict = score_intent(gold, output).outcome
+    return action, "success" if verdict == "pass" else "failure", False, verdict == "not_scorable"
 
 
 def outcomes(
@@ -228,11 +271,23 @@ def dry_run(arms: list[baseline_arms.Arm], episodes: list[dict[str, Any]], args:
             "cap_usd": arm.max_usd if arm.paid else None,
             "projected_fits_cap": spent + projected <= arm.max_usd if arm.paid else True,
         }
+    golds = [(labels(episode, heldout=args.allow_heldout)[0], episode.get("gold") or {}) for episode in episodes]
     projected = sum(row["projected_usd"] for row in rows.values())
     bound = sum(max(0.0, row["cap_usd"] - row["ledger_usd"]) for row in rows.values() if row["paid"])
     return {
         "dry_run": True,
         "arms": rows,
+        # From the gold alone, to read before any spend: voids per category, and the cases where the disposition
+        # overrode an action the slots could show (the gold may need a second look).
+        "gold": {
+            "action_voided": Counter(category for category, gold in golds if expected_action(gold) is None),
+            "strict_voided": Counter(category for category, gold in golds if strict_voided(gold)),
+            "action_overridden": sum(
+                (gold.get("expected_fields") or {}).get("action") in OBSERVABLE_ACTIONS
+                and expected_action(gold) not in ((gold.get("expected_fields") or {}).get("action"), NO_PLAN)
+                for _, gold in golds
+            ),
+        },
         "total": {
             "projected_usd": round(projected, 4),
             "caps_left_usd": round(bound, 4),
@@ -253,7 +308,8 @@ def freeze_record(arms: dict[str, baseline_arms.Arm], args: argparse.Namespace, 
         "# Sprint 3 formal evaluation: freeze record",
         "",
         f"Computed by `python -m app.evaluation.formal_run --freeze-record` on {datetime.now(UTC):%Y-%m-%d %H:%M} UTC;"
-        " not hand-written. Compare it with a fresh one before the held-out run.",
+        " not hand-written. Before the held-out run compare it with a fresh one: all but the date and the code commit"
+        " must match, and `git diff` from that commit to HEAD must show only this record.",
         "",
         f"- Code commit: `{commit}`" + (" (uncommitted changes)" if dirty else ""),
         f"- Anchor date: {args.anchor_date.isoformat()}",
@@ -264,12 +320,14 @@ def freeze_record(arms: dict[str, baseline_arms.Arm], args: argparse.Namespace, 
         f"- Scoring: {SCORING}",
     ]
     if args.episodes is not None:
-        lines.append(f"- Episodes digest: `{_digest(_absolute(args.episodes))}`")
+        lines.append(f"- Episodes digest: `{_digest(args.episodes)}`")
     lines += ["", "| Arm | Paid | Cap (US$) | Parser or model | Fingerprint SHA-256 |", "| --- " * 5 + "|"]
     prints = {}
     for system_id in ORDER:
         arm = arms[system_id]
-        prints[system_id] = found = arm.fingerprint()
+        # Committing this record moves HEAD, so the commit a product arm's fingerprint names is left out of the record.
+        found = {key: value for key, value in arm.fingerprint().items() if key != "code_commit"}
+        prints[system_id] = found
         parser = found.get("parser_provider") and f"{found['parser_provider']} parser, {found.get('parser_model')}"
         if system_id.endswith("rule_only_parser"):
             parser = "rule parser (switch), no parser call"
@@ -298,6 +356,7 @@ def main(
     parser.add_argument("--credit-usd", type=float, default=58.0, help="what the OpenAI credit has left")
     parser.add_argument("--min-cell-n", type=int, default=5, help="small-cell rule of the aggregates (ADR-0100)")
     parser.add_argument("--select-failures", type=int, default=0, metavar="N")
+    parser.add_argument("--retry-failed", action="store_true", help="ask again the cases whose call failed (paid)")
     parser.add_argument("--local", type=Path, help=f"per-case records (default {LOCAL}/<episodes>-<anchor>)")
     parser.add_argument("--ledger-dir", type=Path, default=baseline_arms.LEDGER_DIR)
     parser.add_argument("--model", default="gpt-5.4-mini")
@@ -309,6 +368,10 @@ def main(
     available = arms_for(args.no_paid)
     loader = cache(resource_loader)
     args.ledger_dir = _absolute(args.ledger_dir)
+    if args.episodes is not None:
+        args.episodes = _absolute(args.episodes)
+        if _heldout(args.episodes) and not args.allow_heldout:
+            parser.error(f"{args.episodes} is a held-out path; pass --allow-heldout only for the frozen run")
     if args.freeze_record is not None:
         missing = [system_id for system_id in ORDER if system_id not in available]
         if missing:
@@ -326,15 +389,19 @@ def main(
     if unknown:
         parser.error(f"unknown arms {unknown}; known: {', '.join(ORDER)}")
     order = [name for name in ORDER if name in wanted and name in available]
-    args.episodes, args.out = _absolute(args.episodes), _absolute(args.out)
-    tag = f"{args.episodes.name}-{args.anchor_date.isoformat()}" + ("-no-paid" if args.no_paid else "")
-    args.local = _absolute(args.local or LOCAL / tag)
-    for path in (args.episodes, args.out, args.local):
+    args.out = _absolute(args.out)
+    # The digest keeps two sets in folders of the same name out of one records folder.
+    tag = f"{args.episodes.name}-{_digest(args.episodes)[:8]}-{args.anchor_date.isoformat()}"
+    args.local = _absolute(args.local or LOCAL / (tag + ("-no-paid" if args.no_paid else "")))
+    for path in (args.out, args.local):
         if _heldout(path) and not args.allow_heldout:
             parser.error(f"{path} is a held-out path; pass --allow-heldout only for the frozen run")
     if args.allow_heldout:
-        if not args.local.is_relative_to(repository_root() / ".local/evaluation"):
+        evaluation = repository_root() / ".local/evaluation"
+        if not args.local.is_relative_to(evaluation):
             parser.error("a held-out run keeps its per-case records under .local/evaluation/ (ADR-0115 item 4)")
+        if args.out.is_relative_to(repository_root()) and not args.out.is_relative_to(evaluation):
+            parser.error("--out in the checkout dirties it, and a dirty checkout cannot resume; use .local/evaluation/")
         commit, dirty = baseline_arms.code_state()
         if dirty is not False or commit is None:
             parser.error("a held-out run needs a clean checkout at a recorded commit")
@@ -368,6 +435,8 @@ def main(
             argv_arm += ["--live", "--max-usd", str(run["max_usd"]), "--model", args.model]
         if args.allow_heldout:
             argv_arm.append("--allow-heldout")
+        if args.retry_failed:
+            argv_arm.append("--retry-failed")
         try:
             run_arm(argv_arm, registry=lambda: available, resource_loader=loader)
         except SystemExit as error:  # the arm's runner refused (another configuration's records, say)
@@ -392,6 +461,8 @@ def main(
     for kind, rows in (("action", action_rows), ("strict", strict_rows)):
         report = aggregate(rows, expected_manifest(rows, order), min_cell_n=args.min_cell_n)
         report["scoring"] = SCORING
+        if kind == "strict":
+            report["intent_not_scorable"] = {name: not_scorable[name] for name in order}
         (args.out / f"aggregate-{kind}.json").write_text(render(report), encoding="utf-8", newline="\n")
         comparison_text = render(comparison(rows))
         (args.out / f"comparison-{kind}.json").write_text(comparison_text, encoding="utf-8", newline="\n")
@@ -403,6 +474,9 @@ def main(
         runs[name] |= {
             "fingerprint": available[name].fingerprint(),
             "records": len(rows),
+            # After the arm's own report: a retried case has two records, of which the last counts.
+            "answered": sum(row["status"] == "answered" for row in rows),
+            "call_failed": sum(row["status"] == "call_failed" for row in rows),
             "valid_output": sum(bool(row.get("valid_output")) for row in rows),
             "intent_not_scorable": not_scorable[name],
             "ledger_usd": round(spent, 6),
