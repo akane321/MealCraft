@@ -53,7 +53,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 
 <template>
   <section v-if="tonight" class="tonight" aria-label="Next meal">
-    <HomeDishIcon class="big-icon" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="64" />
+    <HomeDishIcon class="big-icon" :slug="tonight.day.recipe.slug" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="64" />
     <div class="head">
       <span class="kicker">{{ eyebrow }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
       <h2>{{ tonight.day.recipe.title }}</h2>
