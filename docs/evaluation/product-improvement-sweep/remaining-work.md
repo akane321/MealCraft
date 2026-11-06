@@ -44,8 +44,8 @@ sequential-swap test is locally verified and is not included in that CI run.
 | Member-mean product objective | Implemented offline; product remains table-based by instruction | Separate product decision before adoption |
 | Global minimum and at most 5% gap | Matched fixed-catalog product references now cover up to 14 days and two trips; product remains heuristic | Broader catalog and observed-price comparisons; generated options and fixed packages do not prove global minimum |
 | Fine-grained stage timing | Recommendation/candidate generation, meal-option generation, shopping, independent validation and objective instrumentation are implemented | Use these inclusive, overlapping timings in further matched scans; candidate generation includes its nested fixture grocery estimates, stages must not be summed, and they exclude LLM and live lookup |
-| Real-price evaluation | The generated snapshot package-policy report compares fixed-product and exact mixed-package checkout on identical observed FairPrice facts and deterministic synthetic demands | Run a matched product-plan comparison on real household demands after product mixed-package wiring; this diagnostic is not a plan optimum or five-percent result |
-| Mixed packages in product | Mixed shopping optimizer and validator exist offline | Agree the multi-package-per-ingredient/trip output contract with the shopping/retrieval owners, then connect and test it |
+| Real-price evaluation | Deterministically generated snapshot package-policy evidence compares fixed-product and exact mixed-package checkout on identical observed FairPrice facts and synthetic demands | Run a matched product-plan comparison on real household demands after product mixed-package wiring; this diagnostic is not a plan optimum or five-percent result |
+| Mixed packages in product | Mixed shopping optimizer and validator exist offline; the generated readiness audit verifies that the product shopping-line schema has no multi-product allocation field | Agree the multi-package-per-ingredient/trip output contract with the shopping/retrieval owners, then connect and test it |
 | Other section 7 acceptance | Shared-dish, nutrition, feedback and relaxation components exist | Cross-week recency is not wired: the product ranking boundary receives no household completion history, and ADR-0073 fixes only the qualitative bounded/fading behavior rather than a numeric decay policy. Define that input/policy and check/save cache consistency before wiring; complete end-to-end checks for variable dish counts, counterfactual refusals and mixed purchase |
 | Genetic algorithm | Optional in the task plan | Deferred while existing methods still require product acceptance; no GA implementation claim |
 | Final acceptance | Local developer diagnostics | Full CI and the remaining independent/exact/real-price evidence; final evaluation remains with its owner |
@@ -65,7 +65,9 @@ binds its counts to the observed snapshot digest. It records that the snapshot
 contains many multi-product ingredients while the product packet retains one
 selected product per line, candidate generation is bounded, and no joint exact
 plan-and-purchase solver is wired. It is evidence that the requested conclusion
-is currently unsupported, not a substitute minimum-price result.
+is currently unsupported, not a substitute minimum-price result. The audit
+derives the mixed-package blocker from the product shopping-selection schema,
+rather than treating the missing wiring as an unverified prose assertion.
 
 The generated [matched snapshot packaging comparison](../algorithm-dev/snapshot-package-policy-comparison.json)
 holds ingredient, demand, availability, package sizes and observed prices fixed
@@ -73,6 +75,8 @@ while comparing the current one-product-type checkout rule with the exact
 mixed-package optimizer. Its demands are a deterministic developer grid derived
 from package sizes, not household shopping demand, so it isolates packaging
 policy value without claiming end-to-end plan quality or a real minimum.
+Both JSON artifacts have script `--check` modes and focused regression coverage
+that fails when committed evidence differs from deterministic regeneration.
 
 Latest composed-household diagnostic: [0/50/200 steps](../composed-household-steps/README.md). All 15 runs passed their household checks; the six-person 200-step plan traded higher cost for more table dish kinds. No default was changed.
 
