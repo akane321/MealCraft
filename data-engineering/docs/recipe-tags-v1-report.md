@@ -179,4 +179,4 @@ Perishable: arugula, baby_spinach, bean_sprouts, bok_choy, catfish, clam, cod, c
 
 ## Language model
 
-Recipe questions sent to the model over all runs: 2261 (recipes with a field the rules left open). Model: claude/claude-opus-5-5; calls: 111; input tokens: 584590; output tokens: 55856; estimated cost: US$0.690 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.
+Recipe questions sent to the model over all runs: 2261 (recipes with a field the rules left open). Model: gpt-5.4-mini, claude/claude-opus-5-5; calls: 111; input tokens: 584590; output tokens: 55856; estimated cost: US$0.690 at US$0.75 and US$4.5 per million input and output tokens; spend cap hit in the last run: False. Earlier model answers are kept in the tag file and reused, so a re-run asks only for what is still open.

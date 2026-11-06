@@ -30,20 +30,22 @@ them. Owner decision 2026-11-04: a first-build record these classes change is ex
     estimated) or a pouch keeps its grams. The estimate is read as cooked rice, so only the per-gram nutrition
     changes (365 to 130 kcal per 100 g for white rice).
   - A mass amount ("60 g steamed rice", v2.2) is left.
-- `package_mass`: 111 lines in 108 recipes (52 first-build, 59 other added).
+- `package_mass`: 108 lines in 105 recipes (51 first-build, 57 other added).
   - Rule: an `estimated` counted line takes the mass its own text states ("1 (14 ounce) can coconut milk" weighed
     as one cup = 226 g becomes 396.9 g) when that mass is more than 20% away. Lines already corrected, cooked lines
     and chicken lines are left.
   - Excluded:
-    - drained, rinsed or partly used text ("drain", "rinse", "out of the can", "start with", "half", "reserve",
-      "only");
+    - drained, rinsed, optional or partly used text ("drain", "rinse", "out of the can", "start with", "half",
+      "reserve", "only", "optional");
+    - a recipe that does not eat it all ("pour out", "drink", "any or all" in the steps): beer can chicken, a choice
+      of pizza toppings;
     - a can or jar of a food packed in liquid (beans, chickpeas, corn, peas, olives, artichoke, water chestnut,
       mushroom, fruit, onion, sauerkraut), since the net weight includes the liquid;
     - a recipe that marinates (the marinade is discarded);
     - masses the parser misreads ("(.25 ounce)" read as 25 oz, "1 pt. 2 oz.");
     - a stated mass more than 10x off the built grams (a typo such as "1/16 ounce" ramen).
-  - Of the 132 candidates, 95 changed. Not changed: 24 liquid-packed cans or jars, 4 drained or partly used,
-    4 marinades, 4 v2.2 records, 1 cooked form (`p4f-candidates.csv`). Split of the candidates: v2.2 4, first-build
+  - Of the 132 candidates, 92 changed. Not changed: 24 liquid-packed cans or jars, 4 drained or partly used,
+    4 marinades, 3 optional or not all eaten, 4 v2.2 records, 1 cooked form (`p4f-candidates.csv`). Split of the candidates: v2.2 4, first-build
     60, other added 68. 16 more changed lines are outside the scan's P4f (e.g. "14 1/2 ounce" cans, which the scan
     skips).
 - Spot check, 10 changed recipes per class drawn with `random.Random(20261106)`, read by the AI (not a person), all
@@ -64,7 +66,8 @@ them. Owner decision 2026-11-04: a first-build record these classes change is ex
   - withdraw 230 (v2.2 119, added 111): mostly steps that stop part-way, steps that are only a link or a note, or
     a main ingredient that is not listed.
   - servings 5 (added only): RCP2_001D96D38CEB 2 to 4, 037D595945A8 1 to 6, 175BE2BD8D3F 2 to 3,
-    7FD933840208 1 to 4, C8133F6D4AC7 8 to 12.
+    7FD933840208 1 to 4, C8133F6D4AC7 8 to 12. The last two are the reviewer's estimate, not a number in the source
+    (their reason starts `estimate:`), so the build marks them `servings_basis: estimated`, confidence 0.6.
   - keep 156: optional dips and serving suggestions, implied steps, frying oil counted in full, false positives.
 - Fat safety list, by the owner's rule (2026-11-04), as a script that can be run again:
   `python data-engineering/scripts/v3_fat_safety_scan.py`.
@@ -106,13 +109,13 @@ planner treats those recipes as untagged (`meal_composition.unreviewed`, ADR-009
 
 | | Before (11-04 v3) | After |
 | --- | ---: | ---: |
-| fingerprint | `fd33aba2ae94...` | `c7912a1f71d7...` |
+| fingerprint | `fd33aba2ae94...` | `c9ce37569b0f...` |
 | released / v2.2 / over-quota / wave 1 / wave 2 | 18335 / 8968 / 1867 / 2237 / 5263 | unchanged |
-| corrections.jsonl lines | 638 | 788 (+39 `cooked_rice`, +111 `package_mass`) |
+| corrections.jsonl lines | 638 | 785 (+39 `cooked_rice`, +108 `package_mass`) |
 | scan P5a | 50 | 11 (all v2.2) |
-| scan P4f | 181 | 93 |
+| scan P4f | 181 | 96 |
 | scan P6h | 73 | 68 |
-| scan HP union / core union | 4771 / 2824 | 4681 / 2714 |
+| scan HP union / core union | 4771 / 2824 | 4684 / 2717 |
 
 The scan does not read `withdrawn.json`, so the withdrawals do not lower any count.
 
@@ -138,8 +141,15 @@ After merging the hand-recorded prices (issue #391), re-measured on both togethe
   stays S$33 (S$32 is the most it refuses). The S$54 week buys no hand-recorded product: it also plans at S$54 with
   the manual snapshot stubbed out, where the refusal still offers S$64. The larger pool changed the packet, so the
   cost-led search reaches it.
-- The planning pool is 16,368 recipes, 13,470 filling a planner role. 241 of the 246 withdrawn recipes count in the
-  report's "withdrawn" row; the other 5 already fall at an earlier gate.
+After a review of that merge blanked 11 hand-recorded price rows (multi-packs, a stand-in, oversize packs;
+`docs/design/manual-prices.md`) and rule 7 left three more package lines alone, re-measured again:
+
+- No pin moved: four people's S$54, two people's S$41 and the S$32 refusal boundary all pass unchanged. Those weeks
+  buy no hand-recorded product, so the blanked rows do not reach them.
+- Coverage is 609 of 699 (87.1%), 17,568 of 18,334 recipes (95.8%). The 90% target is not met; the blanked rows can
+  be recorded again with a single-unit product.
+- The planning pool is 16,126 recipes, 13,273 filling a planner role. 239 of the 246 withdrawn recipes count in the
+  report's "withdrawn" row; the others already fall at an earlier gate.
 
 ## Left for people
 

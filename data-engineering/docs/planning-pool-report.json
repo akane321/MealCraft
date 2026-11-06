@@ -6,9 +6,9 @@
  "excluded": {
   "release": {
    "course is not a dish course": 1032,
-   "an ingredient has no price": 421,
-   "withdrawn": 241,
-   "incomplete recipe": 302
+   "an ingredient has no price": 667,
+   "withdrawn": 239,
+   "incomplete recipe": 300
   },
   "curated": {
    "course is not a dish course": 0,
@@ -18,36 +18,36 @@
   }
  },
  "incomplete": {
-  "too few kcal for a main": 237,
-  "named meat missing": 39,
+  "too few kcal for a main": 236,
+  "named meat missing": 38,
   "wrapper or dough with no filling": 25,
   "ingredient/step conflict: turkey or vegan sausage listed, but steps cook pork": 1
  },
  "pool": {
-  "release": 16338,
+  "release": 16096,
   "curated": 30
  },
  "usable_roles": {
-  "protein_main": 5928,
-  "one_bowl": 3204,
-  "vegetable": 1230,
-  "staple": 968,
-  "salad": 948,
-  "breakfast": 754,
-  "soup": 438
+  "protein_main": 5820,
+  "one_bowl": 3172,
+  "vegetable": 1220,
+  "staple": 963,
+  "salad": 927,
+  "breakfast": 736,
+  "soup": 435
  },
  "not_usable": {
-  "not a breakfast, lunch or dinner role (dessert)": 1279,
-  "not a breakfast, lunch or dinner role (snack)": 830,
-  "meal-role tags wait for review": 425,
-  "no meal-role tag": 166,
+  "not a breakfast, lunch or dinner role (dessert)": 1262,
+  "not a breakfast, lunch or dinner role (snack)": 818,
+  "meal-role tags wait for review": 418,
+  "no meal-role tag": 162,
   "not a breakfast, lunch or dinner role (sauce)": 107,
-  "main with unknown protein source": 91
+  "main with unknown protein source": 86
  },
- "usable": 13470,
+ "usable": 13273,
  "usable_by_meal": {
-  "lunch or dinner": 12716,
-  "breakfast": 754
+  "lunch or dinner": 12537,
+  "breakfast": 736
  },
  "local": {
   "recipes": 166,
@@ -55,12 +55,27 @@
   "usable": 110
  },
  "unpriced": {
-  "ingredients": 77,
+  "ingredients": 86,
   "per_recipe": {
-   "1": 401,
-   "2": 20
+   "1": 640,
+   "2": 27
   },
   "top": [
+   {
+    "ingredient": "turkey",
+    "recipes": 90,
+    "only_missing": 86
+   },
+   {
+    "ingredient": "biscuit_mix",
+    "recipes": 72,
+    "only_missing": 71
+   },
+   {
+    "ingredient": "water_chestnut",
+    "recipes": 61,
+    "only_missing": 59
+   },
    {
     "ingredient": "meat",
     "recipes": 53,
@@ -69,7 +84,7 @@
    {
     "ingredient": "chow_mein_noodles",
     "recipes": 30,
-    "only_missing": 22
+    "only_missing": 20
    },
    {
     "ingredient": "spaghetti_squash",
@@ -79,12 +94,12 @@
    {
     "ingredient": "mashed_potatoes",
     "recipes": 29,
-    "only_missing": 28
+    "only_missing": 27
    },
    {
     "ingredient": "lime_zest",
     "recipes": 26,
-    "only_missing": 23
+    "only_missing": 21
    },
    {
     "ingredient": "orange_juice_conc",
@@ -104,6 +119,11 @@
    {
     "ingredient": "collard",
     "recipes": 18,
+    "only_missing": 17
+   },
+   {
+    "ingredient": "pistachio",
+    "recipes": 17,
     "only_missing": 17
    },
    {
@@ -140,33 +160,13 @@
     "ingredient": "broccoli_slaw",
     "recipes": 7,
     "only_missing": 4
-   },
-   {
-    "ingredient": "rotel",
-    "recipes": 6,
-    "only_missing": 6
-   },
-   {
-    "ingredient": "buttered_breadcrumbs",
-    "recipes": 5,
-    "only_missing": 5
-   },
-   {
-    "ingredient": "chipped_beef",
-    "recipes": 5,
-    "only_missing": 5
-   },
-   {
-    "ingredient": "frozen_bread_dough",
-    "recipes": 5,
-    "only_missing": 5
    }
   ],
   "recovered_if_top_priced": {
-   "10": 247,
-   "20": 324,
-   "40": 379,
-   "all": 421
+   "10": 412,
+   "20": 536,
+   "40": 608,
+   "all": 667
   }
  },
  "import_skipped": [
@@ -174,8 +174,8 @@
  ],
  "sources": {
   "release_version": "v3",
-  "release_digest": "e0fd248ce5415efaaae62b25302c49923d89248bdf1511916a9024a7f6ad3129",
-  "recipe_tags_sha256": "4e1929fe9c39d8e6f4b92cf7b9445faad98c9a75d4520d56bd22ec0be727af43",
-  "priceable_sha256": "aa101947655a160a38c8153eb0cab1547f507e7797b797f214e964c7ca3e7eb8"
+  "release_digest": "af588d9f3134c21b3e45c7e21bc13787cbd714d18283eb445d5b1e4c72529f8c",
+  "recipe_tags_sha256": "3abe623171b7997db76051642355ec08b8c41d287cd167774c62d7a9d45961c0",
+  "priceable_sha256": "992af136f92914a6e3d3f19908fd1430160b8fc3d956e8bf5c61890fa222e6e8"
  }
 }

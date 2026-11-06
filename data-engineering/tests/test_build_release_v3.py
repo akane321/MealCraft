@@ -246,6 +246,16 @@ class V3LineClassesTest(unittest.TestCase):
         stated = "1 (14 ounce) can coconut milk"
         self.assertIsNone(self.fix(stated, "ING_COCONUT_MILK", "can", 1.0, 226.0, "stated"))
 
+    def test_a_package_not_all_eaten_is_left(self) -> None:
+        beer = "1 (12 ounce) can beer"
+        steps = [{"text": "Drink or pour out the top inch of the beer."}]
+        self.assertIsNone(self.fix(beer, "ING_BEER", "can", 1.0, 59.2, "estimated", instructions=steps))
+        toppings = "1 (16 oz.) pkg. sliced pepperoni"
+        steps = [{"text": "Top with any or all of the toppings."}]
+        self.assertIsNone(self.fix(toppings, "ING_PEPPERONI", "package", 1.0, 113.4, "estimated", instructions=steps))
+        chilies = "1 (4 oz.) can green chilies, chopped (optional)"
+        self.assertIsNone(self.fix(chilies, "ING_GREEN_CHILI", "can", 1.0, 75.0, "estimated"))
+
 
 class CommittedReleaseV3Test(unittest.TestCase):
     def test_every_first_build_record_is_byte_identical(self) -> None:

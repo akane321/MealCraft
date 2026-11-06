@@ -2,9 +2,9 @@
  "ingredients": {
   "total": 699,
   "fairprice": 505,
-  "combined": 620,
+  "combined": 609,
   "fairprice_share": 0.7225,
-  "combined_share": 0.887,
+  "combined_share": 0.8712,
   "released": 701,
   "not_purchased": [
    "ice",
@@ -14,26 +14,42 @@
   "cold_storage_only_share": 0.0558,
   "redmart_only": 5,
   "redmart_only_share": 0.0072,
-  "manual_only": 71,
-  "manual_only_share": 0.1016,
+  "manual_only": 60,
+  "manual_only_share": 0.0858,
   "target": 0.9,
   "target_met": false
  },
  "recipes": {
   "total": 18334,
   "fairprice": 14019,
-  "combined": 17889,
+  "combined": 17568,
   "fairprice_share": 0.7646,
-  "combined_share": 0.9757
+  "combined_share": 0.9582
  },
  "lines": {
   "total": 159486,
   "fairprice": 154545,
-  "combined": 159017,
+  "combined": 158683,
   "fairprice_share": 0.969,
-  "combined_share": 0.9971
+  "combined_share": 0.995
  },
  "unpriced": [
+  {
+   "ingredient": "turkey",
+   "recipes": 90
+  },
+  {
+   "ingredient": "enchilada_sauce",
+   "recipes": 77
+  },
+  {
+   "ingredient": "biscuit_mix",
+   "recipes": 72
+  },
+  {
+   "ingredient": "water_chestnut",
+   "recipes": 61
+  },
   {
    "ingredient": "meat",
    "recipes": 54
@@ -67,6 +83,10 @@
    "recipes": 20
   },
   {
+   "ingredient": "pistachio",
+   "recipes": 19
+  },
+  {
    "ingredient": "collard",
    "recipes": 18
   },
@@ -93,32 +113,12 @@
   {
    "ingredient": "vanilla_wafer",
    "recipes": 8
-  },
-  {
-   "ingredient": "broccoli_slaw",
-   "recipes": 7
-  },
-  {
-   "ingredient": "rotel",
-   "recipes": 7
-  },
-  {
-   "ingredient": "buttered_breadcrumbs",
-   "recipes": 5
-  },
-  {
-   "ingredient": "chipped_beef",
-   "recipes": 5
-  },
-  {
-   "ingredient": "coconut_extract",
-   "recipes": 5
   }
  ],
  "sources": {
   "products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb",
   "products/cold-storage-v1-snapshot.json": "5ca8c95646b29358",
   "products/redmart-v1-snapshot.json": "a63f7c3ba676f967",
-  "products/manual-v1-snapshot.json": "198e72d6f3d2a3a6"
+  "products/manual-v1-snapshot.json": "9689c3e40256ec14"
  }
 }

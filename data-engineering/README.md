@@ -77,7 +77,7 @@ PYTHONPATH=src python -m unittest discover -s tests -p "test_correct*"
 
 "data release v3"是数据版本，不是名为 v3 的留出评测协议。产品从这一版起读 v3（Knowledge ADR-0111）：后端
 `RELEASE_VERSION` 是 v3；v2.2 作为 v3 的冻结底本保留。v3 现在是 18,335 道（2026-11-02 加了第 2 波，见下），recipes.jsonl
-92,796,485 字节；第一次 v3 构建的 12,895 道逐字节不变（2026-11-06 修复的第 7 条规则改到的首版菜除外，见 `docs/v3-repair-20261106/README.md`）。导入器和 v2.2 一样跳过 `RCP2_5EFEFE98D566`，导入 18,334 道
+92,796,398 字节；第一次 v3 构建的 12,895 道逐字节不变（2026-11-06 修复的第 7 条规则改到的首版菜除外，见 `docs/v3-repair-20261106/README.md`）。导入器和 v2.2 一样跳过 `RCP2_5EFEFE98D566`，导入 18,334 道
 （第一次构建导入 12,894 道）。
 
 构建要用 `data/staging/` 里被 git 忽略的输入（只在有这份 staging 的机器上能重跑）：

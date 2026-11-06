@@ -98,7 +98,7 @@ Estimated values carry their evidence and confidence per field in `enrichment` (
 ## Unit-weight corrections of the added recipes
 
 The v2.2 correction (`scripts/correct_release_v22.py`, owner 2026-10-23) applied to the added recipes:
-788 lines in 759 recipes, each in `corrections.jsonl` with its
+785 lines in 757 recipes, each in `corrections.jsonl` with its
 built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corrections.jsonl`).
 
 | Class | Lines |
@@ -106,7 +106,7 @@ built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corr
 | `cooked_rice` | 39 |
 | `lasagna_sheet` | 29 |
 | `n_times_total` | 18 |
-| `package_mass` | 111 |
+| `package_mass` | 108 |
 | `pizza_crust` | 9 |
 | `red_pepper_alias` | 145 |
 | `stated_weight` | 217 |
@@ -133,8 +133,8 @@ All pass, or the build stops:
 
 1. Every v2.2 record is byte-identical in v3 (8968).
 2. Every record of the first v3 build is present and byte-identical (by recipe_id and line sha256;
-   12822 records).
-3. recipes.jsonl is 92796485 bytes <= 95000000.
+   12823 records).
+3. recipes.jsonl is 92796398 bytes <= 95000000.
 4. No ingredient id outside v2.2's 701.
 5. No cuisine label above 20%: the largest is `american` at 3188
    (17.4%).
@@ -180,14 +180,14 @@ v2.2 records outside the energy range, kept verbatim: 0.
 ## Files
 
 `fingerprint` (manifest) is the sha256 of the lines "<sha256>  <name>" for `recipes.jsonl`, `ingredients.jsonl` and
-`release_manifest.json` without its `fingerprint` field: `c7912a1f71d7dadb0ed4d18d965e8b030c101d11c3a491654d6e486c7907f8fd`.
+`release_manifest.json` without its `fingerprint` field: `c9ce37569b0fb872541633e954eb753c831e05fa9c09823c3cb240723fe9b116`.
 
 | File | sha256 |
 | --- | --- |
-| `recipes.jsonl` | `ed5cff6ae38278f33c52e724dd9a76a52d3c18eb6903140c406863cfe376234e` |
+| `recipes.jsonl` | `d510c63ddf989723019f82dfd54dbe1b7710b6a64b4cbdce843f2e1d9089ce75` |
 | `ingredients.jsonl` | `4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e` |
 | `dropped.jsonl` | `aff76094d068504a2f4902335c6264f700a318ad4b93c68b3dbdb0fd6056301a` |
-| `corrections.jsonl` | `d7f6f2be82ee3d49348ea4f82015b85d44d8e3ca8832fba5ad64e38c58835ff0` |
-| `release_manifest.json` | `9ec46e85f684dd6c19a71bc165611bb2eeead9509a79f5987694849ca8ed91b1` |
-| `quality_summary.json` | `07da8a15a203eb2173d498d4da5020294d038b793de545081ce16d46acdee375` |
+| `corrections.jsonl` | `d87a5a8dd3d7636afb5be1b8a2db3d3d1d494b63999d7600891a74298315bbb6` |
+| `release_manifest.json` | `1a4b9c9fbde2423369a2f798dd43e2f381dc05a2ad29fc3a74cbd64beac807d4` |
+| `quality_summary.json` | `f833a76dc074e9a4d5f9761ea40aaa41468d288b6208c79e32fefb084ac936f8` |
 | `ATTRIBUTION.md` | `ca9a6264ff9d53f71bf01a37905a18a267a274337712b1d13fcb9a7ebb115f0f` |

@@ -25,8 +25,8 @@ the batch is made, and the whole batch was asked again (`--reask-v3`). Two route
   dropped by E2 (the rules had found a protein), so 100 recipes hold a batch value.
 - The batch now holds 233 values (100 `meal_role`, 100 `contains_staple`, 33 `protein_sources` set to [] by a
   dessert role). Every value is `method: llm`, `reviewed: false`. The frozen `recipe-tags-v1/llm` batch and the
-  v2.2 entries were not touched. The tag file's `llm_usage` header keeps the earlier OpenAI spend; its `model`
-  field now names the last run (`claude/claude-opus-5-5`).
+  v2.2 entries were not touched. The tag file's `llm_usage` header keeps the earlier OpenAI spend; its `models`
+  field lists both (`gpt-5.4-mini`, `claude/claude-opus-5-5`).
 
 | Role in the batch | Recipes |
 | --- | ---: |

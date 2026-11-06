@@ -1267,7 +1267,7 @@ def write_keyed(path: Path, header: dict, key: str, entries: dict[str, dict]) ->
     path.write_text(f"{head},\n  {json.dumps(key)}: {{\n{body}\n  }}\n}}\n", encoding="utf-8", newline="\n")
 
 
-NO_USAGE = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "asked": 0, "stopped": False, "model": None}
+NO_USAGE = {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "asked": 0, "stopped": False, "models": []}
 
 
 def previous_file() -> dict:
@@ -1396,7 +1396,7 @@ def build(use_llm: bool, max_usd: float, log=print, reask: bool = False, reask_v
         usage.update(
             asked=usage["asked"] + (len(to_ask) if run["calls"] else 0),
             stopped=run["stopped"],
-            model=run["model"] or usage["model"],
+            models=list(dict.fromkeys([*usage["models"], *filter(None, [run["model"]])])),  # the spend covers them all
         )
         for dish, tags in to_ask:
             if dish.key in result["answers"]:
@@ -1610,7 +1610,7 @@ def report(tagged: list[tuple[Dish, Tags]], ingredients: dict[str, dict], usage:
         "## Language model",
         "",
         f"Recipe questions sent to the model over all runs: {usage['asked']} (recipes with a field the rules left "
-        f"open). Model: {usage['model'] or 'not called'}; calls: {usage['calls']}; "
+        f"open). Model: {', '.join(usage['models']) or 'not called'}; calls: {usage['calls']}; "
         f"input tokens: {usage['input_tokens']}; "
         f"output tokens: {usage['output_tokens']}; estimated cost: US${usage['usd']:.3f} at US${INPUT_USD_PER_M} "
         f"and US${OUTPUT_USD_PER_M} per million input and output tokens; spend cap hit in the last run: "

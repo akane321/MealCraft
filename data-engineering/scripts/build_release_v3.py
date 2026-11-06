@@ -40,8 +40,9 @@
    non-mass amount keeps its grams (assumed to be an estimate of cooked rice), a mass amount is left.
    `package_mass` (P4f): an estimated counted line ("1 (14 ounce) can coconut milk" at one cup) whose own text
    states a package mass (`correct_release_v22.stated_mass`) more than 20% away takes that mass, except when the line
-   is drained, rinsed or only partly used, is cooked, is a can or jar of a food packed in liquid (beans, corn, fruit,
-   olives...: the net weight includes the liquid), or the recipe marinates (the marinade is discarded).
+   is drained, rinsed, optional or only partly used, is cooked, is a can or jar of a food packed in liquid (beans,
+   corn, fruit, olives...: the net weight includes the liquid), or the recipe does not eat it all (it marinates, the
+   cook drinks or pours out the can, "any or all" toppings).
 
 Every candidate not released is in `dropped.jsonl` with its reason. The manifest carries the sha256 of every input
 and a `fingerprint` over recipes.jsonl, ingredients.jsonl and the manifest itself without that field. Nothing reads
@@ -73,6 +74,7 @@ RELEASE_VERSION = "v3"
 SCHEMA_VERSION = "mealcraft.recipe.v2"
 CREATED_AT = "2026-11-03T00:00:00+00:00"  # fixed, so a rerun writes the same bytes
 MINIMUM_RELEASED = 18000  # owner 2026-11-02 ~14:45: grow v3 toward 18,280 (the build gives 18,335)
+ESTIMATED_SERVINGS_CONFIDENCE = 0.6  # as low as the enrichers' own "not stated" servings
 MAX_RECIPES_BYTES = 95_000_000  # GitHub refuses files over 100 MB
 RELEASES = ROOT / "data" / "release"
 V21, V22, OUT = RELEASES / "v2.1", RELEASES / "v2.2", RELEASES / RELEASE_VERSION
@@ -235,10 +237,11 @@ V3_CLASSES = ("cooked_rice", "package_mass")
 RICE = {"ING_RICE", "ING_BROWN_RICE"}
 COOKED_RICE = re.compile(r"\b(?:cooked|steamed|prepared|precooked|pre-cooked|leftover)\b[^,;]{0,25}\brice\b", re.I)
 NOT_COOKED = re.compile(r"uncooked|\braw\b|\bdry\b|when cooked|makes|yields?|to make|after cooking|directions", re.I)
-PARTLY_USED = re.compile(r"drain|rinse|out of the can|start with|\bhalf\b|reserve|\bonly\b", re.I)
+PARTLY_USED = re.compile(r"drain|rinse|out of the can|start with|\bhalf\b|reserve|\bonly\b|optional", re.I)
 # Masses `stated_mass` misreads: "(.25 ounce)" parses as 25 oz, "(1 pt. 2 oz.)" as 2 oz.
 MISREAD = re.compile(r"\(\s*\.\d|\bpts?\b|\bpints?\b", re.I)
-MARINADE = re.compile(r"marinade|marinate", re.I)
+# Not all of the package is eaten: a marinade, a can the cook empties, a choice of toppings.
+NOT_ALL_EATEN = re.compile(r"marinade|marinate|pour(?:ing)? out|\bdrink\b|\bany or all\b", re.I)
 LIQUID_PACKED = {
     "ING_ARTICHOKE", "ING_BLACK_BEANS", "ING_CANNELLINI", "ING_CHERRY", "ING_CHICKPEA", "ING_CORN", "ING_KIDNEY_BEANS",
     "ING_LIMA_BEANS", "ING_MUSHROOM", "ING_OLIVE", "ING_ONION", "ING_ORANGE", "ING_PEAS", "ING_PINEAPPLE",
@@ -266,7 +269,7 @@ def correct_v3_line(line: dict, forms: dict, recipe: dict) -> tuple[dict, str, s
         return None
     if PARTLY_USED.search(text) or MISREAD.search(text) or (cid in LIQUID_PACKED and CANNED.search(text)):
         return None
-    if MARINADE.search(" ".join([text, recipe["title"], *(s["text"] for s in recipe["instructions"])])):
+    if NOT_ALL_EATEN.search(" ".join([text, recipe["title"], *(s["text"] for s in recipe["instructions"])])):
         return None
     mass = correct.stated_mass(line)
     if not mass or abs(line["grams"] - mass) <= PACKAGE_OFF * mass:
@@ -354,6 +357,8 @@ def apply_reviews(results: dict[str, dict], fixes: dict[str, list[dict]]) -> tup
             result[field] = reviewed.new_value(row)
             result["evidence"][field] = f"reviewed by {row['reviewer']}: {row['reason']} (was {old})"
             result["confidence"][field] = 1.0
+            if field == "servings" and reviewed.is_estimate(row):  # the reviewer's guess, not a number in the source
+                result["servings_basis"], result["confidence"][field] = "estimated", ESTIMATED_SERVINGS_CONFIDENCE
     return problems, found
 
 

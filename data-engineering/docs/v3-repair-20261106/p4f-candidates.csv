@@ -36,7 +36,7 @@ RCP2_38F566A35F18,12,other added,1 (16 ounce) can stewed tomatoes,240.0,453.6,45
 RCP2_39BBC7112A38,15,first build,"1 (12 ounce) can plum tomatoes, lightly mashed with a potato masher",180.0,340.2,340.2,changed
 RCP2_39BBC7112A38,17,first build,1 (8 ounce) can chickpeas,152.0,226.8,,can or jar of a food packed in liquid
 RCP2_3D42C04ED1F5,8,other added,1 (7 oz.) bag shredded coconut,85.0,198.4,198.4,changed
-RCP2_3ED2C8F4BA32,4,other added,1 (16 oz.) pkg. sliced pepperoni,113.4,453.6,453.6,changed
+RCP2_3ED2C8F4BA32,4,other added,1 (16 oz.) pkg. sliced pepperoni,113.4,453.6,113.4,any or all toppings
 RCP2_4191BDA91183,2,first build,1 (12 oz.) can corn (nowadays 15 oz.),253.8,340.2,,can or jar of a food packed in liquid
 RCP2_426675F7EC7F,13,first build,1 (11 ounce) can coconut milk,226.0,311.8,311.8,changed
 RCP2_45C46673CCFB,7,first build,"1 (15 ounce) can diced tomatoes, with juices",270.0,425.2,425.2,changed
@@ -66,7 +66,7 @@ RCP2_6CB4BE77C3C5,8,first build,"1 (8 oz.) pkg. spaghetti, cooked",560.0,226.8,,
 RCP2_6EE68213D15D,7,other added,1 can (14 oz) diced tomatoes,315.0,396.9,396.9,changed
 RCP2_7025B2A00771,9,first build,"1 (28 ounce) can tomatoes, diced",608.7,793.8,793.8,changed
 RCP2_703781931A43,3,first build,1 (14 ounce) can coconut milk,226.0,396.9,396.9,changed
-RCP2_7246E8F66853,5,first build,"1 (4 oz.) can green chilies, chopped (optional)",75.0,113.4,113.4,changed
+RCP2_7246E8F66853,5,first build,"1 (4 oz.) can green chilies, chopped (optional)",75.0,113.4,75.0,optional
 RCP2_764EDEB4A5A1,8,other added,1 (28 ounce) can crushed tomatoes,630.0,793.8,793.8,changed
 RCP2_7734DF61FD14,2,other added,1 (10 ounce) box couscous,432.5,283.5,283.5,changed
 RCP2_78401D0B8E96,9,other added,2 cans (14 oz each) diced tomatoes,1260.0,793.8,793.8,changed
@@ -128,6 +128,6 @@ RCP2_F469F1BF6F5B,2,other added,1 (30 oz.) jar spaghetti sauce,453.6,850.5,850.5
 RCP2_F67B03156061,4,other added,1 (16 ounce) can tomatoes,360.0,453.6,453.6,changed
 RCP2_F8E1E23C8AA2,5,first build,1 (6 ounce) can pineapple juice,125.0,170.1,170.1,changed
 RCP2_FA7C3F02A231,10,other added,1 (28 ounce) can diced tomatoes,608.7,793.8,793.8,changed
-RCP2_FA95D479D002,2,other added,"1 (12 ounce) can beer, at room temperature",59.2,340.2,340.2,changed
+RCP2_FA95D479D002,2,other added,"1 (12 ounce) can beer, at room temperature",59.2,340.2,59.2,poured out
 RCP2_FB641550D69E,3,first build,2 (14 ounce) cans sweetened condensed milk,1091.9,793.8,793.8,changed
 RCP2_FFCCA7752CF8,12,first build,1 can (14 oz) diced tomatoes,315.0,396.9,396.9,changed

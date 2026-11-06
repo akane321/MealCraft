@@ -6,7 +6,7 @@
  "ingredients": {
   "adobo_seasoning": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-34-1",
@@ -25,7 +25,7 @@
   },
   "allspice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-1-1",
@@ -44,7 +44,7 @@
   },
   "almond_paste": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-79-1",
@@ -63,7 +63,7 @@
   },
   "annatto": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-54-1",
@@ -82,7 +82,7 @@
   },
   "apple_pie_spice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-81-1",
@@ -101,7 +101,7 @@
   },
   "au_jus_mix": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-84-1",
@@ -120,7 +120,7 @@
   },
   "baguette": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-141-1",
@@ -139,7 +139,7 @@
   },
   "basil": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-133-1",
@@ -171,7 +171,7 @@
   },
   "berbere": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-46-1",
@@ -188,47 +188,9 @@
     }
    ]
   },
-  "biscuit_mix": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-4-1",
-     "name": "Betty Crocker Bisquick Original All-Purpose Baking Mix, 5.5 oz (Pack of 9)",
-     "brand": null,
-     "category": null,
-     "package_grams": 1403.3,
-     "package_grams_basis": "printed 1403.3 g",
-     "price_sgd": 16.43,
-     "product_url": "https://www.amazon.sg/dp/B00DJQ2AZ0",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
-  "calamansi": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-90-1",
-     "name": "Lime (Small) Calamansi [4 Kg/Pkt] - Grocermart Fresh",
-     "brand": null,
-     "category": null,
-     "package_grams": 4000.0,
-     "package_grams_basis": "printed 4 kg = 4000 g",
-     "price_sgd": 26.4,
-     "product_url": "https://www.lazada.sg/products/pdp-i3541555457.html",
-     "in_stock": true,
-     "retailer": "lazada",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "celeriac": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-91-1",
@@ -247,7 +209,7 @@
   },
   "celery_seed": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-9-1",
@@ -266,7 +228,7 @@
   },
   "chayote": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-146-1",
@@ -285,7 +247,7 @@
   },
   "coconut_flavoring": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-92-1",
@@ -304,7 +266,7 @@
   },
   "coleslaw": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-93-1",
@@ -323,7 +285,7 @@
   },
   "coleslaw_mix": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-35-1",
@@ -342,7 +304,7 @@
   },
   "crystallized_ginger": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-41-1",
@@ -359,28 +321,9 @@
     }
    ]
   },
-  "dill_seed": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-96-1",
-     "name": "McCormick Dill Seed, 0.85 oz (Pack of 6)",
-     "brand": null,
-     "category": null,
-     "package_grams": 144.6,
-     "package_grams_basis": "printed 144.6 g",
-     "price_sgd": 29.48,
-     "product_url": "https://www.amazon.sg/dp/B0009P688E",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "dinner_roll": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-142-1",
@@ -399,7 +342,7 @@
   },
   "dried_onion_flakes": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-11-1",
@@ -416,28 +359,9 @@
     }
    ]
   },
-  "enchilada_sauce": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-137-1",
-     "name": "Old El Paso Mild Enchilada Sauce 19 oz Can (pack of 6)",
-     "brand": null,
-     "category": null,
-     "package_grams": 3231.8,
-     "package_grams_basis": "printed 3231.8 g",
-     "price_sgd": 25.46,
-     "product_url": "https://www.amazon.sg/dp/B005EKI6MK",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "english_muffin": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-143-1",
@@ -456,7 +380,7 @@
   },
   "fennel": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-140-1",
@@ -475,7 +399,7 @@
   },
   "fermented_soybeans": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-148-1",
@@ -494,7 +418,7 @@
   },
   "golden_syrup": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-145-1",
@@ -513,7 +437,7 @@
   },
   "grapefruit_juice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-147-1",
@@ -532,7 +456,7 @@
   },
   "habanero_pepper": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-22-1",
@@ -551,7 +475,7 @@
   },
   "harissa": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-32-1",
@@ -570,7 +494,7 @@
   },
   "hazelnut": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-29-1",
@@ -589,7 +513,7 @@
   },
   "jackfruit": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-72-1",
@@ -608,7 +532,7 @@
   },
   "jerk_seasoning": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-36-1",
@@ -627,7 +551,7 @@
   },
   "kaffir_lime_leaf": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-138-1",
@@ -644,28 +568,9 @@
     }
    ]
   },
-  "long_grain_wild_rice_mix": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-104-1",
-     "name": "BEN'S ORIGINAL Flavored Long Grain Rice & Wild Rice, 6 oz Box (Pack of 12)",
-     "brand": null,
-     "category": null,
-     "package_grams": 2041.2,
-     "package_grams_basis": "printed 2041.2 g",
-     "price_sgd": 50.24,
-     "product_url": "https://www.amazon.sg/dp/B074JBGFL6",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "mixed_nuts": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-8-1",
@@ -684,7 +589,7 @@
   },
   "msg": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-136-1",
@@ -703,7 +608,7 @@
   },
   "mung_bean_starch": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-108-1",
@@ -722,7 +627,7 @@
   },
   "mustard": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-134-1",
@@ -739,28 +644,9 @@
     }
    ]
   },
-  "old_bay": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-74-1",
-     "name": "Old Bay Seasoning, 16 oz tin",
-     "brand": null,
-     "category": null,
-     "package_grams": 453.6,
-     "package_grams_basis": "printed 453.6 g",
-     "price_sgd": 23.8,
-     "product_url": "https://www.amazon.sg/dp/B008PO4B0I",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "onion_salt": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-16-1",
@@ -779,7 +665,7 @@
   },
   "onion_soup_mix": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-33-1",
@@ -798,7 +684,7 @@
   },
   "pandan_leaf": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-144-1",
@@ -817,7 +703,7 @@
   },
   "papaya": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-58-1",
@@ -836,7 +722,7 @@
   },
   "pepperoni": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-139-1",
@@ -855,7 +741,7 @@
   },
   "perilla": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-113-1",
@@ -874,7 +760,7 @@
   },
   "persimmon": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-114-1",
@@ -893,7 +779,7 @@
   },
   "pho_spice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-115-1",
@@ -912,7 +798,7 @@
   },
   "phyllo": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-20-1",
@@ -931,7 +817,7 @@
   },
   "pie_crust": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-3-1",
@@ -948,28 +834,9 @@
     }
    ]
   },
-  "pistachio": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-19-1",
-     "name": "Setton Farms Naturally Raw Shelled Pistachios, 8 x 5 oz",
-     "brand": null,
-     "category": null,
-     "package_grams": 1134.0,
-     "package_grams_basis": "printed 1134 g",
-     "price_sgd": 64.08,
-     "product_url": "https://www.amazon.sg/dp/B099MBWZZ2",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "plantain": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-26-1",
@@ -988,7 +855,7 @@
   },
   "poultry_seasoning": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-21-1",
@@ -1007,7 +874,7 @@
   },
   "pumpkin_pie_spice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-116-1",
@@ -1026,7 +893,7 @@
   },
   "radish": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-10-1",
@@ -1045,7 +912,7 @@
   },
   "radish_sprouts": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-118-1",
@@ -1062,28 +929,9 @@
     }
    ]
   },
-  "ranch_mix": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-119-1",
-     "name": "Mrs. Wages Ranch Dressing and Dip Mix, 0.8 Oz, Pack of 12",
-     "brand": null,
-     "category": null,
-     "package_grams": 272.2,
-     "package_grams_basis": "printed 272.2 g",
-     "price_sgd": 27.65,
-     "product_url": "https://www.amazon.sg/dp/B071VJJGFR",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "rhubarb": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-43-1",
@@ -1102,7 +950,7 @@
   },
   "rum_extract": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-120-1",
@@ -1121,7 +969,7 @@
   },
   "seasoned_salt": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-6-1",
@@ -1140,7 +988,7 @@
   },
   "sesame_tahini": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-135-1",
@@ -1159,7 +1007,7 @@
   },
   "sinigang_mix": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-122-1",
@@ -1178,7 +1026,7 @@
   },
   "stuffing_mix": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-50-1",
@@ -1197,7 +1045,7 @@
   },
   "sumac": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-45-1",
@@ -1216,7 +1064,7 @@
   },
   "tamarind_soup_base": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-63-1",
@@ -1235,7 +1083,7 @@
   },
   "thai_basil": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-64-1",
@@ -1252,28 +1100,9 @@
     }
    ]
   },
-  "turkey": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-2-1",
-     "name": "The Meat Club Turkey Mince - Cage Free, Australia, 300g, Frozen (RedMart)",
-     "brand": null,
-     "category": null,
-     "package_grams": 300.0,
-     "package_grams_basis": "printed 300 g",
-     "price_sgd": 20.23,
-     "product_url": "https://www.lazada.sg/products/pdp-i13743519539.html",
-     "in_stock": true,
-     "retailer": "redmart",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "vegan_mayonnaise": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-131-1",
@@ -1290,47 +1119,9 @@
     }
    ]
   },
-  "venison": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-78-1",
-     "name": "[FROZEN] Premium New Zealand Grass-Fed Venison Steak (1.5kg/pack) - meatmen_butchery",
-     "brand": null,
-     "category": null,
-     "package_grams": 1500.0,
-     "package_grams_basis": "printed 1.5 kg = 1500 g",
-     "price_sgd": 115.0,
-     "product_url": "https://www.lazada.sg/products/pdp-i3032913033.html",
-     "in_stock": true,
-     "retailer": "lazada",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
-  "water_chestnut": {
-   "status": "mapped",
-   "review_status": "owner_recorded",
-   "products": [
-    {
-     "external_id": "mn-5-1",
-     "name": "La Choy Sliced Water Chestnuts, 8 Ounce, 12 Pack",
-     "brand": null,
-     "category": null,
-     "package_grams": 2721.6,
-     "package_grams_basis": "printed 2721.6 g",
-     "price_sgd": 21.4,
-     "product_url": "https://www.amazon.sg/dp/B00FLO9DA8",
-     "in_stock": true,
-     "retailer": "amazon",
-     "fetched_at": "2026-11-06T00:00:00+08:00"
-    }
-   ]
-  },
   "wild_rice": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-30-1",
@@ -1349,7 +1140,7 @@
   },
   "zaatar": {
    "status": "mapped",
-   "review_status": "owner_recorded",
+   "review_status": "ai_lookup_unreviewed",
    "products": [
     {
      "external_id": "mn-52-1",

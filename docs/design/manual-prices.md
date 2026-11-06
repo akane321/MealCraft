@@ -14,10 +14,13 @@ Since the coverage counts only mappings with a product in stock (2026-11-02), 15
 capture were added on 2026-11-06 as ranks 133-148 when a product was found (basil, mustard, msg, baguette, ...).
 
 **2026-11-06 lookup.** An AI web lookup (FairPrice search pages, Amazon.sg, RedMart and Lazada pages, each read
-that day) filled 72 rows for 71 ingredients; every row's note says "claude-ai web lookup 2026-11-06, pending owner
+that day) filled 72 rows for 71 ingredients, 61 and 60 after the review below; every row's note says "claude-ai web lookup 2026-11-06, pending owner
 spot-check". A product found on FairPrice is recorded as `other` with its fairprice.com.sg URL: the FairPrice
 snapshot is not edited, and an `other` line never goes to the FairPrice cart. Anything not clearly the ingredient
-(a stand-in, a different form, an unclear pack size) was left blank. Coverage is now 620 of 699 (88.7%), so 10
+(a stand-in, a different form, an unclear pack size) was left blank. A review the same day blanked 11 more rows that
+would charge a recipe far more than it uses: six multi-packs (for example enchilada sauce, 6 cans, S$25.46), turkey
+mince standing in for turkey, and oversize packs (pistachio, calamansi, venison, Old Bay). Each blank row's note says
+why, and a single-unit product can still be recorded there. Coverage is now 609 of 699 (87.1%), so 21
 more reach the 90% target; the [coverage report](../evaluation/price-coverage/latest.md) lists the most used still
 unpriced.
 
@@ -63,8 +66,11 @@ unpriced.
   - `ml` and `l` use the release ingredient's own grams per millilitre when its record has one, else 1.0 g/ml. The
     basis says which.
   - `count` uses the release ingredient's grams per item when known; otherwise the row is refused.
-- **Review.** The person who records the price is the review: every row is `owner_recorded`, and there is no
-  proposal step.
+- **Review.** The person who records the price is the review: such a row is `owner_recorded`, and there is no
+  proposal step. An ingredient with a row whose note says `claude-ai web lookup` is `ai_lookup_unreviewed`: an AI read
+  that price and no person has checked it yet.
+- **One unit.** The planner buys whole listings, so `validate` refuses a product name that says it is a multi-pack
+  (`pack of 6`, `12 pack`, `9 x 5.5 oz`).
 
 ## Runtime
 

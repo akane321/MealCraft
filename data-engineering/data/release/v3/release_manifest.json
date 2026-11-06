@@ -68,7 +68,7 @@
       "TheMealDB": 244,
       "Wikibooks Cookbook": 97
     },
-    "servings_estimated": 14655,
+    "servings_estimated": 14656,
     "time_estimated": 10264,
     "lines_with_estimated_amount": 10053,
     "from_v2_2": 8968,
@@ -94,13 +94,13 @@
       "v3_selected": 7541,
       "v3_selected_wave_1": 2262
     },
-    "corrected_lines": 788,
-    "corrected_recipes": 759,
+    "corrected_lines": 785,
+    "corrected_recipes": 757,
     "corrected_lines_by_class": {
       "cooked_rice": 39,
       "lasagna_sheet": 29,
       "n_times_total": 18,
-      "package_mass": 111,
+      "package_mass": 108,
       "pizza_crust": 9,
       "red_pepper_alias": 145,
       "stated_weight": 217,
@@ -132,7 +132,7 @@
     "committed_sha256": {
       "data/enrichment/v3_selected_wave1.csv": "be0829c48cfd15e660b880897280c6c34daf307f4fb0cb23cedf0cb4ddb61fe0",
       "data/enrichment/v3_first_build_lines.tsv": "2961a74f3243cd4e956c1b46d25ba8ec06d9aef29e6046d26882faa85c651290",
-      "data/enrichment/v3-corrections.csv": "03c4da7a6d13be2b099f8c1fa73912defbd7ecf7e3d8de8a0ddd7c8c8cf7ae48"
+      "data/enrichment/v3-corrections.csv": "2fdd13eca1bc03e17b85525bb1a92c581152471e8be6883d30fe4848bfb01bef"
     },
     "reviewed_corrections": {
       "rows_by_field": {
@@ -155,5 +155,5 @@
     "Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point estimate, reported with Wilson 95% intervals.",
     "Two v3 line classes after the v2.2 correction (owner 2026-11-04, issue #426): cooked_rice (cooked, steamed or prepared rice weighed as dry rice moves to the cooked form; a cup is re-weighed at the cooked cup, other amounts keep their grams as an estimate of cooked rice) and package_mass (an estimated counted line takes the package mass its own text states, unless drained, partly used, packed in liquid, cooked or a marinade). A first-build record these change is exempt from the byte-for-byte check; v2.2's records are never changed."
   ],
-  "fingerprint": "c7912a1f71d7dadb0ed4d18d965e8b030c101d11c3a491654d6e486c7907f8fd"
+  "fingerprint": "c9ce37569b0fb872541633e954eb753c831e05fa9c09823c3cb240723fe9b116"
 }

@@ -45,6 +45,9 @@ HOSTS = {  # a URL host is the domain or one of its subdomains
 UNITS = {"g", "kg", "ml", "l", "count"}
 STOCK = {"y": True, "yes": True, "n": False, "no": False}
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+# The planner buys whole listings, so a multi-pack would charge a recipe for all of it.
+MULTI_PACK = re.compile(r"\bpack of \d|\b\d+[ -]pack\b|\b\d+\s*x\s*\d", re.I)
+AI_LOOKUP = "claude-ai web lookup"  # in a row's note: an AI read the price and no person has checked it yet
 MONEY = re.compile(r"^(?:s?\$|sgd)?\s*([\d,]*\.?\d+)$", re.IGNORECASE)
 THOUSANDS = re.compile(r"\d{1,3}(,\d{3})+(\.\d+)?")
 
@@ -121,6 +124,9 @@ def check_row(row: dict, grams: dict[str, dict], today: date) -> tuple[list[str]
         issues.append(f"rank {row['rank']!r} is not a whole number")
     if row["ingredient_id"] and row["ingredient_id"] not in grams:
         issues.append(f"ingredient_id {row['ingredient_id']!r} is not in the release")
+
+    if MULTI_PACK.search(row["product_name"]):
+        issues.append(f"product_name {row['product_name']!r} is a multi-pack: record one single unit")
 
     platform = row["platform"].lower()
     if row["platform"] and platform not in HOSTS:
@@ -250,6 +256,8 @@ def export(path: Path, release: Path = RELEASE, out: Path = RUNTIME, today: date
         key = row["ingredient_id"][4:].lower()
         entry = ingredients.setdefault(key, {"status": "mapped", "review_status": "owner_recorded", "products": []})
         entry["products"].append(product)
+        if AI_LOOKUP in row.get("note", ""):
+            entry["review_status"] = "ai_lookup_unreviewed"
     seen = sorted(product["fetched_at"] for _, product in good)
     snapshot = {
         "snapshot_version": "manual-v1",

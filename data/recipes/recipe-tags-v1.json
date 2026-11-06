@@ -11,7 +11,10 @@
     "usd": 0.6898,
     "asked": 2261,
     "stopped": false,
-    "model": "claude/claude-opus-5-5"
+    "models": [
+      "gpt-5.4-mini",
+      "claude/claude-opus-5-5"
+    ]
   },
   "recipes": {
     "lemon-herb-chicken-rice-bowl": {"contains_staple": true, "cooking_methods": ["pan_fry"], "equipment": [], "estimated": {"contains_staple": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "cooking_methods": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "equipment": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "flavor_tags": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "meal_role": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}, "protein_sources": {"batch": "recipe-tags-v1/rules", "method": "rule", "reviewed": false}}, "flavor_tags": [], "meal_role": "one_bowl", "protein_sources": ["chicken"]},
