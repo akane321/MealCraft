@@ -5,6 +5,7 @@ import pytest
 from app.core.paths import repository_root
 from app.planning.algorithm_reference import AnnealingPlanner
 from app.planning.meal_beam import MealBeamPlanner
+from app.services.recommendation import RecipeRecommendationService
 from tests.test_diversity_greedy import setup_problem
 
 
@@ -22,10 +23,12 @@ def test_profile_preserves_plan_and_restores_methods():
     planner = AnnealingPlanner(objective, steps=20)
     expected = planner.solve(problem)
     original = MealBeamPlanner.meal_options
+    original_recommend = RecipeRecommendationService.recommend
     with profiler_class()() as profile:
         actual = planner.solve(problem)
     assert actual == expected
     assert MealBeamPlanner.meal_options is original
+    assert RecipeRecommendationService.recommend is original_recommend
     rows = profile.snapshot()
     assert rows["annealing_domains"]["calls"] == 1
     assert rows["annealing_proposal"]["calls"] > 0
