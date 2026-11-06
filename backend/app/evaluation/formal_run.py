@@ -508,7 +508,9 @@ def main(
         for episode in episodes
         if (episode.get("gold") or {}).get("disposition") == "catalog_dependent"
     }
-    no_catalog_rows = [row.model_copy(update={"voided": True}) if row.case_ref in catalog_cases else row for row in action_rows]
+    no_catalog_rows = [
+        row.model_copy(update={"voided": True}) if row.case_ref in catalog_cases else row for row in action_rows
+    ]
     for kind, rows in (("action", action_rows), ("action-no-catalog", no_catalog_rows), ("strict", strict_rows)):
         report = aggregate(rows, expected_manifest(rows, order), min_cell_n=args.min_cell_n)
         report["scoring"] = SCORING
