@@ -111,6 +111,19 @@ def test_the_request_is_read_with_the_rule_parser():
     assert strong_rule_baseline.read_request(["Just me, dinners."], MONDAY_NOON).household_size == 1
 
 
+@pytest.mark.parametrize(
+    ("text", "start", "days"),
+    [
+        ("Plan dinners for 2 people for 2 days", date(2026, 9, 28), 2),
+        ("Plan dinner for tomorrow for 2", date(2026, 9, 29), 1),
+        ("plan three days of dinners for 2", date(2026, 9, 28), 3),
+    ],
+)
+def test_a_said_day_span_is_read_not_a_crash(text, start, days):
+    request = strong_rule_baseline.read_request([text], MONDAY_NOON)
+    assert (request.start, request.days) == (start, days)
+
+
 def test_a_missing_household_size_is_asked_for():
     output = strong_rule_baseline.respond_to(["Plan dinners."], MONDAY_NOON, resources(), repository_root())
     assert output.plan is None and output.clarification == [strong_rule_baseline.CLARIFY_SIZE]

@@ -2,7 +2,8 @@
 
     python -m app.evaluation.formal_run --episodes <dir> --anchor-date <date> --out <dir>            # dry run
     python -m app.evaluation.formal_run --episodes <dir> --anchor-date <date> --out <dir> --live --allow-heldout
-    python -m app.evaluation.formal_run --freeze-record --anchor-date <date>       # docs/evaluation/sprint3-freeze.md
+    python -m app.evaluation.formal_run --freeze-record --anchor-date <date> --episodes <frozen set> --allow-heldout
+        # writes docs/evaluation/sprint3-freeze.md; without --episodes the record says it names no set
 
 The one command after the freeze, from the repository root, the key in `.env`, at the commit that holds the freeze
 record (fill in the frozen set's folder and the freeze record's anchor date; on one line in PowerShell):
@@ -40,7 +41,12 @@ two aggregates by category, language and source, small cells withheld (`heldout_
   `expected_fields.action` when the output slots can show it, else what the disposition implies. A disposition of
   clarify or refuse is the outcome itself and beats an action that names the user's intent; an `infeasible` case
   succeeds with any output that is not a plan, as the product states a limits refusal as a reply or a question. An
-  intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm.
+  intent case whose action the slots cannot show (a swap, a budget change) is voided for every arm, and so is a
+  `catalog_dependent` case: until the sealed adjudication nobody knows whether a plan or a decline is right, and only
+  the product plans from the catalog, so a "plan" gold would count its correct decline against it (the dry run shows
+  the count per category; the owner confirms this before registering the scoring). An expected refusal the output
+  states as an answer or a question fails the action aggregate, against the product more than the baselines; its count
+  per arm is `refuse_stated_as_reply` in `aggregate-action.json` and the manifest.
 - `strict`: success only where the code checks the whole gold: an intent case passes `intent_scorer`. A case whose
   gold the output cannot show in full (`intent_scorer`: such an action, or a field the echo cannot carry) is voided
   for every arm, as is every non-intent case: a held-out plan, question or replan needs the sealed catalog adjudication
@@ -72,7 +78,7 @@ from app.evaluation.conversation_adapter import UnifiedOutput
 from app.evaluation.field_mapping import MAPPED_FIELDS
 from app.evaluation.heldout_report import CaseOutcome, ExpectedManifest, aggregate, render
 from app.evaluation.heldout_statistics import compare
-from app.evaluation.intent_scorer import OBSERVABLE_ACTIONS, observed_action, score_intent
+from app.evaluation.intent_scorer import LIMITS_REFUSAL_SHOWS_AS, OBSERVABLE_ACTIONS, observed_action, score_intent
 from app.evaluation.pure_llm_baseline import _digest, episode_id_of, load_episodes, read_records
 
 PRODUCT = "mealcraft"
@@ -81,12 +87,11 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-draft-2"
+SCORING = "formal-outcome-draft-3"
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
 DISPOSITION_ACTION = {
     "feasible": "plan",
-    "catalog_dependent": "plan",
     "clarify": "clarify",
     "answer": "food_qa",
     "refuse": "refuse",
@@ -141,6 +146,8 @@ def expected_action(gold: dict[str, Any] | None) -> str | None:
     disposition = gold.get("disposition")
     if disposition == "infeasible" or gold.get("class") == "infeasible":
         return NO_PLAN
+    if disposition == "catalog_dependent":
+        return None
     if disposition in ("clarify", "refuse"):
         return DISPOSITION_ACTION[disposition]
     action = (gold.get("expected_fields") or {}).get("action")
@@ -190,20 +197,23 @@ def judge(episode: dict[str, Any], record: dict[str, Any] | None) -> tuple[str, 
 
 def outcomes(
     episodes: list[dict[str, Any]], records: dict[str, dict[str, dict]], *, heldout: bool
-) -> tuple[list[CaseOutcome], list[CaseOutcome], Counter]:
-    action_rows, strict_rows, not_scorable = [], [], Counter()
+) -> tuple[list[CaseOutcome], list[CaseOutcome], Counter, Counter]:
+    action_rows, strict_rows, not_scorable, as_reply = [], [], Counter(), Counter()
     for episode in episodes:
         case = episode_id_of(episode)
         category, language, source = labels(episode, heldout=heldout)
-        no_action = expected_action(episode.get("gold")) is None
+        want = expected_action(episode.get("gold"))
         for system_id, by_case in records.items():
-            action, strict, voided, unknown = judge(episode, by_case.get(case))
+            record = by_case.get(case)
+            action, strict, voided, unknown = judge(episode, record)
             not_scorable[system_id] += unknown
+            if want == "refuse" and action == "failure" and record.get("valid_output"):
+                as_reply[system_id] += observed_action(final_output(record)) in LIMITS_REFUSAL_SHOWS_AS
             common = {"case_ref": case, "system_id": system_id, "run": 1, "category": category}
             common |= {"language": language, "source": source}
-            action_rows.append(CaseOutcome(**common, status=action, voided=no_action))
+            action_rows.append(CaseOutcome(**common, status=action, voided=want is None))
             strict_rows.append(CaseOutcome(**common, status=strict, voided=voided))
-    return action_rows, strict_rows, not_scorable
+    return action_rows, strict_rows, not_scorable, as_reply
 
 
 def expected_manifest(rows: list[CaseOutcome], systems: list[str]) -> ExpectedManifest:
@@ -281,10 +291,11 @@ def dry_run(arms: list[baseline_arms.Arm], episodes: list[dict[str, Any]], args:
         # overrode an action the slots could show (the gold may need a second look).
         "gold": {
             "action_voided": Counter(category for category, gold in golds if expected_action(gold) is None),
+            "catalog_dependent": Counter(c for c, gold in golds if gold.get("disposition") == "catalog_dependent"),
             "strict_voided": Counter(category for category, gold in golds if strict_voided(gold)),
             "action_overridden": sum(
                 (gold.get("expected_fields") or {}).get("action") in OBSERVABLE_ACTIONS
-                and expected_action(gold) not in ((gold.get("expected_fields") or {}).get("action"), NO_PLAN)
+                and expected_action(gold) not in ((gold.get("expected_fields") or {}).get("action"), NO_PLAN, None)
                 for _, gold in golds
             ),
         },
@@ -319,8 +330,9 @@ def freeze_record(arms: dict[str, baseline_arms.Arm], args: argparse.Namespace, 
         *(f"- `{Path(path).as_posix()}`: `{digest}`" for path, digest in resources.data_digests),
         f"- Scoring: {SCORING}",
     ]
-    if args.episodes is not None:
-        lines.append(f"- Episodes digest: `{_digest(args.episodes)}`")
+    lines.append(f"- Smallest published cell: {args.min_cell_n}")
+    named = f"`{_digest(args.episodes)}`" if args.episodes is not None else "none: no --episodes, this names no set"
+    lines.append(f"- Episodes digest: {named}")
     lines += ["", "| Arm | Paid | Cap (US$) | Parser or model | Fingerprint SHA-256 |", "| --- " * 5 + "|"]
     prints = {}
     for system_id in ORDER:
@@ -456,13 +468,15 @@ def main(
         else {row["episode_id"]: row for row in read_records(args.local / f"{file_name(name)}.jsonl")}
         for name in order
     }
-    action_rows, strict_rows, not_scorable = outcomes(episodes, records, heldout=heldout)
+    action_rows, strict_rows, not_scorable, as_reply = outcomes(episodes, records, heldout=heldout)
     args.out.mkdir(parents=True, exist_ok=True)
     for kind, rows in (("action", action_rows), ("strict", strict_rows)):
         report = aggregate(rows, expected_manifest(rows, order), min_cell_n=args.min_cell_n)
         report["scoring"] = SCORING
         if kind == "strict":
             report["intent_not_scorable"] = {name: not_scorable[name] for name in order}
+        else:
+            report["refuse_stated_as_reply"] = {name: as_reply[name] for name in order}
         (args.out / f"aggregate-{kind}.json").write_text(render(report), encoding="utf-8", newline="\n")
         comparison_text = render(comparison(rows))
         (args.out / f"comparison-{kind}.json").write_text(comparison_text, encoding="utf-8", newline="\n")
@@ -479,6 +493,7 @@ def main(
             "call_failed": sum(row["status"] == "call_failed" for row in rows),
             "valid_output": sum(bool(row.get("valid_output")) for row in rows),
             "intent_not_scorable": not_scorable[name],
+            "refuse_stated_as_reply": as_reply[name],
             "ledger_usd": round(spent, 6),
             "spent_this_run_usd": round(spent - started.get(name, 0.0), 6),
         }

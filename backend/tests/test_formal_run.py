@@ -3,6 +3,7 @@
 import json
 from contextlib import contextmanager
 from dataclasses import replace
+from datetime import date
 from decimal import Decimal
 from functools import cache
 from types import SimpleNamespace
@@ -18,7 +19,7 @@ from app.services.agent import AgentSessionService
 
 GOLDS = {
     "intent": {"kind": "intent", "disposition": "answer", "expected_fields": {"action": "food_qa"}},
-    "planning": {"kind": "plan", "disposition": "catalog_dependent"},
+    "planning": {"kind": "plan", "disposition": "feasible"},
     "adversarial": {"kind": "refusal", "disposition": "refuse"},
     "multi_turn": {"kind": "replan", "disposition": "feasible"},
 }
@@ -179,6 +180,7 @@ def test_the_public_output_holds_aggregates_only_and_failures_stay_local(tmp_pat
         ({"kind": "replan", "disposition": "feasible", "expected_fields": {"action": "swap"}}, "plan"),
         ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "swap"}}, None),
         ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "plan"}}, "plan"),
+        ({"kind": "plan", "disposition": "catalog_dependent", "expected_fields": {"action": "plan"}}, None),
         ({"class": "infeasible"}, formal_run.NO_PLAN),
         ({"class": "feasible"}, "plan"),
     ],
@@ -219,6 +221,52 @@ def test_the_dry_run_shows_the_voids_from_the_gold_alone(tmp_path, capsys):
     gold = json.loads(capsys.readouterr().out)["gold"]
     assert gold["strict_voided"] == {"planning": 3, "multi_turn": 3, "adversarial": 3}
     assert gold["action_voided"] == {} and gold["action_overridden"] == 0
+
+
+def test_catalog_dependent_cases_are_voided_counted_and_not_read_as_overridden():
+    gold = {"kind": "plan", "disposition": "catalog_dependent", "expected_fields": {"action": "plan"}}
+    args = SimpleNamespace(
+        allow_heldout=False, anchor_date=date(2026, 9, 28), ledger_dir=None, model="m", credit_usd=1.0
+    )
+    with_gold = {
+        "id": "c",
+        "category": "planning",
+        "language": "en",
+        "source": "authored",
+        "gold": gold,
+        "turns": ["q"],
+    }
+    found = formal_run.dry_run([], [with_gold], args)["gold"]
+    assert found["catalog_dependent"] == {"planning": 1} and found["action_voided"] == {"planning": 1}
+    assert found["action_overridden"] == 0
+    answer = record(UnifiedOutput(answer="No."))
+    rows = formal_run.outcomes([with_gold], {"mealcraft": {"c": answer}}, heldout=False)[0]
+    assert rows[0].voided
+
+
+def test_a_refusal_stated_as_a_reply_is_counted_for_that_arm_only():
+    refuses = {"id": "c", "category": "adversarial", "language": "en", "source": "authored"}
+    refuses["gold"] = {"kind": "refusal", "disposition": "refuse", "expected_fields": {"action": "refuse"}}
+    records = {
+        "mealcraft": {"c": record(UnifiedOutput(answer="We cannot do that on S$1."))},
+        "strong-rule": {"c": record(UnifiedOutput(refusal="No."))},
+        "rag": {},
+    }
+    action, _, _, as_reply = formal_run.outcomes([refuses], records, heldout=False)
+    assert as_reply == {"mealcraft": 1}
+    assert {row.system_id: row.status for row in action} == {
+        "mealcraft": "failure",
+        "strong-rule": "success",
+        "rag": "missing",
+    }
+
+
+def test_the_action_aggregate_and_manifest_publish_the_reply_counts(tmp_path):
+    assert run(tmp_path, "--live", "--arms", "strong-rule", "mealcraft") == 0
+    action = json.loads((tmp_path / "out/aggregate-action.json").read_text(encoding="utf-8"))
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))
+    assert action["refuse_stated_as_reply"] == {"strong-rule": 3, "mealcraft": 3}  # the set's adversarial cases
+    assert manifest["arms"]["mealcraft"]["refuse_stated_as_reply"] == 3
 
 
 def test_the_strict_aggregate_publishes_the_not_scorable_counts(tmp_path):
@@ -284,6 +332,7 @@ def test_the_freeze_record_leaves_out_the_commit_a_later_commit_would_change(tmp
     assert formal_run.main(argv, arms_for=lambda no_paid: arms, resource_loader=resources) == 0
     text = (tmp_path / "record.md").read_text(encoding="utf-8")
     assert '"data_tree": "t"' in text and '"code_commit"' not in text
+    assert "Episodes digest: none" in text and "Smallest published cell: 5" in text
 
 
 def test_small_cells_are_withheld_in_the_public_aggregate(tmp_path):
