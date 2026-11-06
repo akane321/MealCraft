@@ -10,6 +10,8 @@ EMBEDDING_RATES: dict[str, Decimal] = {
     "text-embedding-3-small": Decimal("0.02"),
     "text-embedding-3-large": Decimal("0.13"),
 }
+# The hosted web_search tool: US$10 per 1,000 calls for every model, on top of its tokens (checked 2026-11-04).
+WEB_SEARCH_USD_PER_CALL = Decimal("0.010")
 
 
 def model_name(vector_meta: str | None) -> str | None:

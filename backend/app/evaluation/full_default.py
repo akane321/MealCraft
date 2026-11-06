@@ -164,6 +164,28 @@ def _carries_staple(recipe) -> bool:
     return recipe.meal_role == "one_bowl" or recipe.contains_staple is True
 
 
+def has_filling_core(tags: dict) -> bool:
+    """A lunch or dinner, role id -> recipe tags: a protein main and a staple, or a main that carries its staple."""
+    core = tags.get("main")
+    if core is None:
+        return False
+    if _carries_staple(core):
+        return "staple" not in tags
+    return "staple" in tags and core.meal_role == "protein_main"
+
+
+def no_non_meal_dish(tags: dict) -> bool:
+    """No snack, dessert, sauce, drink or breakfast dish; a salad only as the vegetable, a soup only as the soup."""
+    return not (
+        any(recipe.meal_role in NON_MEAL_ROLES for recipe in tags.values())
+        or any(
+            (recipe.meal_role == "salad" and _kind(role) != "vegetable")
+            or (recipe.meal_role == "soup" and _kind(role) != "soup")
+            for role, recipe in tags.items()
+        )
+    )
+
+
 def request_for(case: dict) -> WeeklyMealPlanRequest:
     return WeeklyMealPlanRequest.model_validate(
         {
@@ -188,7 +210,6 @@ def _recipes(session, slugs) -> dict[str, Recipe]:
 
 def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Recipe]) -> dict:
     """The real-meal checks of one planned week (`week` is the plan response as JSON)."""
-    floor = {meal: share * hpb()["adult_reference"]["energy_kcal"] for meal, share in _floors().items()}
     basics = set(basic_seasonings())
     missing = set(request.household.missing_equipment if request.household else [])
     listed: dict[int | None, set[str]] = {}
@@ -227,17 +248,9 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
             moves.append(f"day {day} {meal}: {', '.join(sorted(left_out))} left out")
         if meal not in ("lunch", "dinner"):
             continue
-        if (
-            core is None
-            or (bowl and "staple" in tags)
-            or (not bowl and ("staple" not in tags or core.meal_role != "protein_main"))
-        ):
+        if not has_filling_core(tags):
             failures["filling_core_and_staple"] += 1
-        if any(recipe.meal_role in NON_MEAL_ROLES for recipe in tags.values()) or any(
-            (recipe.meal_role == "salad" and _kind(role) != "vegetable")
-            or (recipe.meal_role == "soup" and _kind(role) != "soup")
-            for role, recipe in tags.items()
-        ):
+        if not no_non_meal_dish(tags):
             failures["no_non_meal_dish"] += 1
         mains = [recipe for role, recipe in tags.items() if _kind(role) == "main"]
         sources = [set(recipe.protein_sources) for recipe in mains if recipe.protein_sources is not None]
@@ -246,7 +259,7 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
         ):
             failures["protein_sources_distinct"] += 1
         per_serving = sum(d["nutrition_per_person"]["calories_kcal"] for d in dishes)
-        energy.append(per_serving >= floor[meal] - 1e-6)
+        energy.append(per_serving >= energy_floor_kcal(meal) - 1e-6)
         if not energy[-1]:
             failures["energy_floor"] += 1
         if "staple" in tags:
@@ -312,6 +325,10 @@ def check_week(week: dict, request: WeeklyMealPlanRequest, recipes: dict[str, Re
 def _floors() -> dict[str, float]:
     shares = meal_structure.meal_structure()["energy_floor_share"]
     return {meal: share for meal, share in shares.items() if meal != "note"}
+
+
+def energy_floor_kcal(meal: str) -> float:
+    return _floors()[meal] * hpb()["adult_reference"]["energy_kcal"]
 
 
 def _meal_rows(week: dict) -> list[dict]:

@@ -634,6 +634,101 @@ The linked module contracts define how to close these dependencies:
 - use explicit API authorization and budget controls;
 - execute repeated held-out runs and retain raw structured outputs safely.
 
+### The formal Sprint 3 run in one command (`app.evaluation.formal_run`)
+
+```text
+python -m app.evaluation.formal_run --freeze-record --anchor-date <date>          # docs/evaluation/sprint3-freeze.md
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> \
+    --out .local/evaluation/sprint3-formal --allow-heldout                           # dry run
+python -m app.evaluation.formal_run --episodes <set> --anchor-date <date> \
+    --out .local/evaluation/sprint3-formal --live --allow-heldout --select-failures 12
+```
+
+After an interruption, the same command again at the same commit, with nothing
+committed in between, not even the ledgers; `--retry-failed` also asks again the
+cases whose call failed. The run's `--out` stays in the ignored folder, or a
+resumed run would find the checkout dirty; copy it to
+a `sprint3-formal` folder under `docs/evaluation/` when the run is finished.
+
+Run from the repository root with the key in `.env` there. The 11 arms answer the
+same questions in a fixed order: strong rules, the pure LLM, RAG, the general
+agent, then `mealcraft` and its six ablations back to back (ADR-0118, warm
+prompt cache). Every arm goes through `baseline_arms.main`: it resumes from its
+own records, stops before its cap (ADR-0115 ledger; US$5, the general agent
+US$15) and the run goes on with the next arm. Each arm's cap is also held to
+what `--credit-usd` (default 58) has left, so the whole run cannot pass the
+credit. The dry run prints each arm's worst case, its projection at the
+measured rates of ADR-0118 and its ledger beside its cap.
+
+- **Product arms with the OpenAI parser** (`ablation_arms.openai_arms`): the
+  product in process, FairPrice only, the scorer's catalog only, the real key.
+  Before each message US$0.05 is reserved; after it the product's own recorded
+  cost of the message's agent runs (`api_cost_estimate_usd`, now including
+  web-search fees at US$0.01 a call) is charged. A model request the product did
+  not record, or one with no reported usage, stops the arm as unknown spend.
+- **Pure LLM on the conversation protocol** (`pure_llm_baseline.conversation_arm`,
+  `pure-llm`): the single-turn runner answers only plan, clarification or
+  infeasible from structured household facts, which the held-out cases do not
+  carry, so it cannot answer an intent question, a food question, a refusal or
+  a later turn. The formal arm gets what every arm gets (the user's strings, its
+  own exchanges, the shared instructions) and answers in the shared output with
+  no tool, catalog or retrieval: the RAG arm without its candidates. The
+  single-turn runner stays for the development comparisons.
+- **Held-out input**: per-file episodes, or the authoring interchange
+  (`{"cases": [...]}`), whose `turns` become the user strings
+  (`pure_llm_baseline.case_episode`); gold and source never reach an arm.
+- **Held-out output**: `--allow-heldout` needs a clean checkout at a commit (the
+  spend ledgers aside, which the run itself appends to) and keeps the per-case
+  records and the selected failure cases under `.local/evaluation/`. `--out`
+  receives only `aggregate-{action,strict,plan}.json` (by category, language and
+  source, `heldout_report` with small cells withheld, `--min-cell-n` 5),
+  `comparison-{action,strict,plan}.json` (`heldout_statistics.compare`, overall only)
+  and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
+  this run, ledger and spend, answered and valid counts, stop reason).
+- **Outcomes, a draft to register before the run** (`formal-outcome-v1`):
+  `missing` (not reached or cut by the cap), `error` (call or scorer failed),
+  `failure` (invalid output). `action`: success when the final output takes the
+  action the gold expects: `expected_fields.action` when the output slots can
+  show it, else what the disposition implies; a disposition of clarify or refuse
+  beats an action naming the user's intent; an `infeasible` case succeeds with
+  anything but a plan; an intent action the slots cannot show is voided, and so is
+a `catalog_dependent` case until the sealed adjudication, as only the product plans
+from the catalog and may rightly decline (the owner confirms this when registering).
+A refusal stated as an answer or a question fails it, counted per arm as
+`refuse_stated_as_reply`. `strict`:
+  success only where the code checks the whole gold (an intent case passing
+  `intent_scorer`). An intent case with an action or field the output cannot show,
+  and every held-out plan, question and replan (they need the sealed catalog
+  adjudication or a rubric; the v3 development episodes lack the multi-dish gold
+  the validator reads) are voided for every arm alike. An expected refusal shown
+  only as an answer or a question is not scorable for that arm alone and counts
+  as a failure, with its count per arm published. The dry run prints the voids
+  per category from the gold alone.
+- **The `plan` aggregate** (`app.evaluation.plan_aggregate`) reports the metric
+  table of 02-baselines section 6 on every case where an arm output a plan,
+  computed from the local records after every arm has run. Each hard constraint
+  (allergen violation, over budget, nutrition out of bounds) is violated, within,
+  unknown or not applicable against the gold's stated constraints. The rate is
+  violated over known, and as an arm with partial evidence loses its clean plans
+  from that denominator, the lower and upper bounds (violated, and violated plus
+  unknown, over applicable) stand beside it, by one rule for every arm;
+  `comparison-plan.json` pairs the product with each arm only where both are known.
+  Beside them: gram coverage, verifiable dish share, invalid outputs over all cases,
+  distinct dishes, recomputed price where known, the `full_default` meal checks per
+  lunch and dinner (a dish naming no catalog recipe is unknown for the tag checks),
+  planned against requested days and meals, time, calls and US$. Per person divides
+  by the case's household, never an arm's own `servings`, and is unknown when the
+  case states none or states an attendance. One member's allergen is judged per
+  dish: unknown only when that dish's `not_for` names every member who avoids it,
+  which only the product can say. A rate, mean or bound on fewer known cases than
+  the small-cell minimum, or a paired block on fewer pairs, is withheld with its
+  unknown and not-applicable counts kept. Limits it states rather than hides: a
+  total at or under the budgets of a request longer than seven days is unknown, as
+  one consolidated purchase cannot show each period; an over total with a pantry
+  stated is unknown, as the recomputation buys everything; `calls_counted_as` labels
+  the ledger meter, one a message for the product arms and one a model call for the
+  others. Consistency over repeated runs and match to the request are not in it.
+
 ### Phase 5 — human subset and final analysis
 
 - run B4 and blinded paired utility tasks;

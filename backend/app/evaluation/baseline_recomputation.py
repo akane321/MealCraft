@@ -252,7 +252,7 @@ def recompute_ingredient_baseline(
     ingredient_facts: Mapping[str, IngredientEvaluationFacts],
     frozen_products: list[PlanningProductOption],
     not_purchased: frozenset[str] = frozenset(),
-    max_package_combinations: int = 100000,
+    max_package_combinations: int = 3000000,  # tuna has many can sizes; 100,000 left 4 of 18 development plans unpriced
 ) -> BaselineRecomputation:
     """Recompute nutrition, allergens, and whole-package frozen pricing.
 
@@ -282,6 +282,11 @@ def recompute_ingredient_baseline(
         if not complete:
             allergen_unknown.append(mapping.original_name)
 
+    # The frozen snapshot holds some prices with float noise (7.510000000000001); a shelf price is whole cents, and
+    # the package optimizer refuses anything else (`needs_data`).
+    frozen_products = [
+        product.model_copy(update={"price_sgd": round(product.price_sgd, 2)}) for product in frozen_products
+    ]
     price_results = tuple(
         _price_ingredient(
             ingredient_id,

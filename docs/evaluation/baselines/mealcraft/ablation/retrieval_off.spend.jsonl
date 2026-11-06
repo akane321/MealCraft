@@ -1,0 +1,8 @@
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5447, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00170295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "episode_id": "mdw-dev-001", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5450, "output_tokens": 198, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017817}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}

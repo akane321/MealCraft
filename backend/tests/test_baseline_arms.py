@@ -111,6 +111,19 @@ def test_the_request_is_read_with_the_rule_parser():
     assert strong_rule_baseline.read_request(["Just me, dinners."], MONDAY_NOON).household_size == 1
 
 
+@pytest.mark.parametrize(
+    ("text", "start", "days"),
+    [
+        ("Plan dinners for 2 people for 2 days", date(2026, 9, 28), 2),
+        ("Plan dinner for tomorrow for 2", date(2026, 9, 29), 1),
+        ("plan three days of dinners for 2", date(2026, 9, 28), 3),
+    ],
+)
+def test_a_said_day_span_is_read_not_a_crash(text, start, days):
+    request = strong_rule_baseline.read_request([text], MONDAY_NOON)
+    assert (request.start, request.days) == (start, days)
+
+
 def test_a_missing_household_size_is_asked_for():
     output = strong_rule_baseline.respond_to(["Plan dinners."], MONDAY_NOON, resources(), repository_root())
     assert output.plan is None and output.clarification == [strong_rule_baseline.CLARIFY_SIZE]
@@ -541,10 +554,59 @@ def test_a_dry_run_counts_what_the_arms_ledger_already_spent(tmp_path, capsys):
     assert report["ledger_usd"] == pytest.approx(0.80) and report["fits_cap"] is False
 
 
+def test_an_unreadable_general_agent_answer_is_repaired_without_tools_and_may_not_drop_its_plan():
+    from types import SimpleNamespace
+
+    from app.evaluation import general_agent_baseline as agent
+
+    Budget = baseline_arms.LedgerBudget
+    broken = AGENT_PLAN[:-1]  # a whole plan with one syntax error
+    responses = FakeResponses([agent_response([], text=broken), agent_response([], text=AGENT_PLAN)])
+    context = baseline_arms.ArmContext(
+        resources=resources(),
+        budget=Budget("gpt-5.4-mini", 5.0, 10_000_000),
+        model=SimpleNamespace(responses=responses),
+    )
+    assert agent.make_responder(context)("Plan dinner.", (), "SHARED").plan is not None
+    first, repair = responses.requests
+    assert "text" not in first and "tools" in first
+    assert repair["text"] == {"format": {"type": "json_object"}} and "tools" not in repair
+    assert all("role" in item for item in repair["input"]) and repair["input"][-2]["content"] == broken
+
+    apology = json.dumps({"plan": None, "refusal": "sorry", "clarification": [], "answer": None})
+    responses = FakeResponses([agent_response([], text=broken), agent_response([], text=apology)])
+    context = baseline_arms.ArmContext(
+        resources=resources(),
+        budget=Budget("gpt-5.4-mini", 5.0, 10_000_000),
+        model=SimpleNamespace(responses=responses),
+    )
+    with pytest.raises(ValueError, match="dropped the plan"):
+        agent.make_responder(context)("Plan dinner.", (), "SHARED")
+
+
+def test_a_call_stopped_at_the_length_limit_is_charged_what_it_reports(tmp_path):
+    from types import SimpleNamespace
+
+    ledger = tmp_path / "arm.spend.jsonl"
+    budget = baseline_arms.LedgerBudget("gpt-5.4-mini", 1.0, 10_000_000, ledger=ledger)
+
+    class LengthLimit(Exception):
+        completion = SimpleNamespace(usage=SimpleNamespace(prompt_tokens=13387, completion_tokens=6000))
+
+    def stopped():
+        raise LengthLimit("length")
+
+    with pytest.raises(LengthLimit):
+        budget.paid(stopped, 1000, 6000)
+    rows = [json.loads(line) for line in ledger.read_text(encoding="utf-8").splitlines()]
+    assert rows[-1]["event"] == "charge" and rows[-1]["output_tokens"] == 6000
+    assert baseline_arms.ledger_totals(ledger)[0] == pytest.approx((13387 * 0.75 + 6000 * 4.5) / 1_000_000)
+
+
 def test_the_arms_own_cap_is_the_default_and_the_ceiling(tmp_path, capsys):
     from app.evaluation import general_agent_baseline, rag_baseline
 
-    assert general_agent_baseline.ARM.max_usd == 15.0 and rag_baseline.ARM.max_usd == 5.0
+    assert general_agent_baseline.ARM.max_usd == 15.0 and rag_baseline.ARM.max_usd == 8.0
     episodes = tmp_path / "episodes"
     episodes.mkdir()
     (episodes / "mdw-dev-001.json").write_text(json.dumps(dev("mdw-dev-001"), ensure_ascii=False), encoding="utf-8")

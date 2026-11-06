@@ -50,7 +50,8 @@ from app.evaluation.release_catalog import load_release_catalog
 from app.planning.recipe_similarity import VECTORS, in_english
 
 SYSTEM_ID = "rag"
-MAX_OUTPUT_TOKENS = 6000
+# A week's confirmation turn hit 6,000 on a development episode (dev trial on #396), so owner, 2026-11-06: 12,000.
+MAX_OUTPUT_TOKENS = 12000
 PER_GROUP = 12
 GROUPS = {
     "breakfast": ("breakfast", "baked_good"),
@@ -338,4 +339,5 @@ ARM = baseline_arms.Arm(
     responder=make_responder,
     estimate=estimate,
     model_factory=LiveModel,
+    max_usd=8.0,  # owner, 2026-11-06 (ADR-0120): two dev trials put the 280 questions near US$5
 )

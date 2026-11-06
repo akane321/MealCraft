@@ -23,6 +23,13 @@ only store, so a development run cannot spend money. The product's clock is the 
 The arms make no paid call of their own (`paid=False`). A run with the OpenAI parser runs "mealcraft" and the six
 switches back to back (owner, 2026-11-06, ADR-0118): the parser's long prompt prefix stays in OpenAI's cache, which
 cut a question from about US$0.005 to US$0.0016 on the development episodes.
+`openai_arms()` is that run (`formal_run`): the same seven arms on `InProcessClient(parser="openai")`, the product's
+parser, scope classifier and tool calls on the real key from the settings, still FairPrice only and the scorer's
+catalog only. They are paid arms on the shared ledger (ADR-0115, US$5 each, ADR-0118): before each message a
+worst case of `TURN_RESERVE_USD` is reserved, and after it the product's own recorded cost of every agent run the
+message made (`model_config.api_cost_estimate_usd`, web-search fees included) is charged. A run whose cost the
+product could not price is priced from its `token_usage` at the dearest rates; a model request no run recorded,
+or one with no reported usage, is unknown spend, and the arm stops with the reserve counted.
 From the repository root (the product reads its fixture files relative to it):
 
     uv run --project backend python -m app.evaluation.baseline_arms --arm mealcraft/ablation/repair_off \\
@@ -35,6 +42,8 @@ from __future__ import annotations
 import uuid
 from collections.abc import Callable, Iterator
 from contextlib import ExitStack, contextmanager
+from dataclasses import replace
+from decimal import Decimal
 from functools import cache
 from typing import Any
 
@@ -55,6 +64,10 @@ IN_PROCESS_SETTINGS: dict[str, Any] = {
     "youtube_api_key": None,
 }
 _open = ExitStack()  # keeps the release database open for the life of the process
+# A message's reserve: ten times the measured cold cost of a whole development question (ADR-0118: US$0.005). The
+# charge is what the product recorded, so a dearer message is still charged in full and the next reserve stops the arm.
+TURN_RESERVE_USD = 0.05
+TOKEN_KEYS = ("input_tokens", "cached_input_tokens", "output_tokens", "embedding_tokens", "web_search_calls")
 
 
 def system_id(ablation: str | None) -> str:
@@ -127,6 +140,87 @@ def in_process_arms() -> dict[str, baseline_arms.Arm]:
     return ablation_arms(InProcessClient, parser_provider=IN_PROCESS_SETTINGS["agent_parser_provider"])
 
 
+def run_cost(run: Any) -> float | None:
+    """What one agent run cost: the product's own estimate, else its token usage at the dearest rates; None if the
+    run sent requests with no reported usage."""
+    from app.orchestration.model_pricing import CHAT_RATES, EMBEDDING_RATES, WEB_SEARCH_USD_PER_CALL
+
+    config = run.model_config or {}
+    if config.get("api_cost_estimate_usd") is not None:
+        return float(config["api_cost_estimate_usd"])
+    usage = config.get("token_usage") or {}
+    tokens = sum(int(usage.get(key) or 0) for key in ("input_tokens", "output_tokens", "embedding_tokens"))
+    if not tokens:
+        return None if run.used_llm_calls else 0.0
+    input_rate, _, output_rate = max(CHAT_RATES.values())
+    cost = (
+        Decimal(int(usage.get("input_tokens") or 0)) * input_rate
+        + Decimal(int(usage.get("output_tokens") or 0)) * output_rate
+        + Decimal(int(usage.get("embedding_tokens") or 0)) * max(EMBEDDING_RATES.values())
+    ) / Decimal(1_000_000) + int(usage.get("web_search_calls") or 0) * WEB_SEARCH_USD_PER_CALL
+    return float(cost)
+
+
+def metered(respond: Responder, budget: baseline_arms.LedgerBudget, sessions: Callable[[], Any]) -> Responder:
+    """Reserve each message's worst case, then charge what the product recorded for the runs the message made."""
+    from sqlalchemy import func, select
+
+    from app.agent import model_client
+    from app.models.agent import AgentRun
+
+    def answer(message: str, own_history, instructions: str) -> UnifiedOutput:
+        budget.reserve(0, 0, TURN_RESERVE_USD)
+        with sessions() as session:
+            mark = session.scalar(select(func.max(AgentRun.id))) or 0
+        unrecorded = model_client._unrecorded.requests
+        try:
+            output = respond(message, own_history, instructions)
+        except BaseException as error:
+            budget.failed(error)  # what the runs cost before the error is not read: the reserve stands
+            raise
+        with sessions() as session:
+            runs = session.scalars(select(AgentRun).where(AgentRun.id > mark)).all()
+            costs = [run_cost(run) for run in runs]
+            usage = [(run.model_config or {}).get("token_usage") or {} for run in runs]
+        if None in costs or model_client._unrecorded.requests != unrecorded:
+            budget.failed(RuntimeError("unknown spend"))
+            budget.stop_reason = "unknown spend: a model request with no recorded usage or price"
+            raise baseline_arms.BudgetExhausted(budget.stop_reason)
+        # The product priced its own tokens, so they are charged as a fee, not again at the ledger's model rates.
+        budget.charge(
+            baseline_arms.Usage(0, 0),
+            extra_usd=sum(costs),
+            call="product",
+            runs=len(runs),
+            token_usage={key: sum(int(row.get(key) or 0) for row in usage) for key in TOKEN_KEYS},
+        )
+        return output
+
+    return answer
+
+
+def openai_arms(sessions: Callable[[], Any] | None = None) -> dict[str, baseline_arms.Arm]:
+    """The seven arms with the OpenAI parser, metered on their ledgers; a held-out run needs the key in `.env`."""
+
+    def client(ablation: str | None) -> InProcessClient:
+        return InProcessClient(ablation, sessions, parser="openai")
+
+    def paid(arm: baseline_arms.Arm) -> baseline_arms.Arm:
+        def responder(context: baseline_arms.ArmContext) -> Responder:
+            if context.budget is None:
+                raise RuntimeError("a product arm with the OpenAI parser needs a budget (a live run)")
+            return metered(arm.responder(context), context.budget, sessions or release_database())
+
+        return replace(arm, paid=True, responder=responder, estimate=estimate)
+
+    return {key: paid(arm) for key, arm in ablation_arms(client, parser_provider="openai").items()}
+
+
+def estimate(turns: list[str], instructions: str, model: str) -> tuple[int, int, float]:
+    """Worst case of one case: every message, and its possible confirmation, at the message reserve."""
+    return 2 * len(turns), 0, 2 * len(turns) * TURN_RESERVE_USD
+
+
 @cache
 def release_database():
     """The scorer's release catalog in one in-memory product database, imported by the product's own importer."""
@@ -143,12 +237,18 @@ class InProcessClient:
     Every call runs with `IN_PROCESS_SETTINGS`, the switch and the case's database, set on the cached settings and
     the app's database dependency for that call only and restored after it."""
 
-    def __init__(self, ablation: str | None, sessions: Callable[[], Any] | None = None):
+    def __init__(self, ablation: str | None, sessions: Callable[[], Any] | None = None, *, parser: str = "fixture"):
         from fastapi.testclient import TestClient
 
         from app.main import app
 
         self.app, self.ablation = app, ablation
+        self.forced = {**IN_PROCESS_SETTINGS, "evaluation_ablation": ablation}
+        if parser == "openai":  # the formal run (`openai_arms`): the key the settings read from `.env`
+            if get_settings().openai_api_key is None:
+                raise RuntimeError("the OpenAI parser needs OPENAI_API_KEY in .env in the working directory")
+            self.forced["agent_parser_provider"] = "openai"
+            del self.forced["openai_api_key"]
         self.sessions = sessions or release_database()
         self.client = TestClient(app)  # not entered: no start-up model warming or pool thread
 
@@ -157,7 +257,7 @@ class InProcessClient:
         from app.db.session import get_db_session
 
         settings = get_settings()
-        forced = {**IN_PROCESS_SETTINGS, "evaluation_ablation": self.ablation}
+        forced = self.forced
         before = {name: getattr(settings, name) for name in forced}
         overrides = self.app.dependency_overrides
         previous = overrides.get(get_db_session)

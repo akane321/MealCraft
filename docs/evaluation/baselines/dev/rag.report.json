@@ -1,0 +1,78 @@
+{
+  "system_id": "rag",
+  "model": "gpt-5.4-mini",
+  "run_date": "2026-11-04T16:53:34+00:00",
+  "anchor_date": "2026-09-28",
+  "fingerprint": {
+    "system_id": "rag",
+    "configuration_sha256": "e10b7a3c8e62158611febff76ba63731637df7fe5ad45643868beafebd086d51",
+    "runner_sha256": "ef494e8a9011be555ed4f90d47aa5bd0f7a8a891b43154d6227e85dcd2daeb3a"
+  },
+  "code_commit": "02076ec6fdc44250f32f6a471405102bb756cafe",
+  "worktree_dirty": true,
+  "release_version": "v3",
+  "data_digests": {
+    "data-engineering/data/release/v3/ingredients.jsonl": "4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e",
+    "data-engineering/data/release/v3/release_manifest.json": "56bf9296953c7d9889eb1fff85495ed69d21c032bc40c023aade12eb536a29e3",
+    "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+    "data/ingredients/ingredients.json": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8",
+    "data/ingredients/basic-seasonings-v2.json": "c188e5deee5840ba39c6841b8ead1dd5c71f75288b5f0c3cc8b313d2afbfa9f8"
+  },
+  "episodes_path": "/tmp/rag6",
+  "episodes_sha256": "710b1670308423edbae0231c7bc086c8b8bdcaefdffb4ee69e5086ed5c5ae651",
+  "allow_heldout": false,
+  "repeats": 1,
+  "planned_cases": 6,
+  "answered": 5,
+  "call_failed": 1,
+  "spend": {
+    "ledger": "docs/evaluation/baselines/rag.spend.jsonl",
+    "usd": 0.07931474999999999,
+    "tokens": 52693,
+    "calls_this_run": 15,
+    "max_usd": 1.0,
+    "stop_reason": null
+  },
+  "summary": {
+    "per_repeat": [
+      {
+        "repeat": 0,
+        "episodes": 5,
+        "scoring_errors": 0,
+        "validation_skipped": 1,
+        "valid_output_rate": 1.0,
+        "strict_pass_rate": null,
+        "adjusted_pass_rate": null,
+        "allergen_safe_rate": 1.0,
+        "gram_coverage": 1.0,
+        "verifiable_dish_share": 1.0
+      }
+    ],
+    "across_repeats": {
+      "valid_output_rate": {
+        "mean": 1.0,
+        "stdev": null
+      },
+      "strict_pass_rate": {
+        "mean": null,
+        "stdev": null
+      },
+      "adjusted_pass_rate": {
+        "mean": null,
+        "stdev": null
+      },
+      "allergen_safe_rate": {
+        "mean": 1.0,
+        "stdev": null
+      },
+      "gram_coverage": {
+        "mean": 1.0,
+        "stdev": null
+      },
+      "verifiable_dish_share": {
+        "mean": 1.0,
+        "stdev": null
+      }
+    }
+  }
+}

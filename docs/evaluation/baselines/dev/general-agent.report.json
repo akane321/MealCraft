@@ -1,0 +1,78 @@
+{
+  "system_id": "general-agent",
+  "model": "gpt-5.4-mini",
+  "run_date": "2026-11-04T17:19:19+00:00",
+  "anchor_date": "2026-09-28",
+  "fingerprint": {
+    "system_id": "general-agent",
+    "configuration_sha256": "87e851c43c060ebcc73b22fe084d087298cbc10f816b1d7c0cf0e54b06da33b3",
+    "runner_sha256": "50fb6441fe2eee952ee0ba1381703a1a4e3b9d7a9aee6fe78d61741afae81daf"
+  },
+  "code_commit": "21f45b47b351425e4428212503025fb899c3433b",
+  "worktree_dirty": false,
+  "release_version": "v3",
+  "data_digests": {
+    "data-engineering/data/release/v3/ingredients.jsonl": "4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e",
+    "data-engineering/data/release/v3/release_manifest.json": "56bf9296953c7d9889eb1fff85495ed69d21c032bc40c023aade12eb536a29e3",
+    "data/products/fairprice-v2-snapshot.json": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91",
+    "data/ingredients/ingredients.json": "c995508b5d9dde109b62d0cf3d8fad2e9086a115eaee5bdc50a7a5937f573fe8",
+    "data/ingredients/basic-seasonings-v2.json": "c188e5deee5840ba39c6841b8ead1dd5c71f75288b5f0c3cc8b313d2afbfa9f8"
+  },
+  "episodes_path": "/tmp/agent3",
+  "episodes_sha256": "a0ff3236d652539238e43f7c507bee058cbc905e410512f60e511733dea53b15",
+  "allow_heldout": false,
+  "repeats": 1,
+  "planned_cases": 3,
+  "answered": 3,
+  "call_failed": 0,
+  "spend": {
+    "ledger": "docs/evaluation/baselines/general-agent.spend.jsonl",
+    "usd": 0.17550025,
+    "tokens": 80947,
+    "calls_this_run": 0,
+    "max_usd": 1.0,
+    "stop_reason": null
+  },
+  "summary": {
+    "per_repeat": [
+      {
+        "repeat": 0,
+        "episodes": 3,
+        "scoring_errors": 0,
+        "validation_skipped": 2,
+        "valid_output_rate": 1.0,
+        "strict_pass_rate": null,
+        "adjusted_pass_rate": null,
+        "allergen_safe_rate": 1.0,
+        "gram_coverage": 0.984569168788552,
+        "verifiable_dish_share": 0.9666666666666667
+      }
+    ],
+    "across_repeats": {
+      "valid_output_rate": {
+        "mean": 1.0,
+        "stdev": null
+      },
+      "strict_pass_rate": {
+        "mean": null,
+        "stdev": null
+      },
+      "adjusted_pass_rate": {
+        "mean": null,
+        "stdev": null
+      },
+      "allergen_safe_rate": {
+        "mean": 1.0,
+        "stdev": null
+      },
+      "gram_coverage": {
+        "mean": 0.984569168788552,
+        "stdev": null
+      },
+      "verifiable_dish_share": {
+        "mean": 0.9666666666666667,
+        "stdev": null
+      }
+    }
+  }
+}
