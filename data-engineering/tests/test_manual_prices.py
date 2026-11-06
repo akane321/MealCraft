@@ -241,6 +241,20 @@ class ManualPricesTest(unittest.TestCase):
         )
         self.assertEqual(snapshot["ingredients"]["coconut_milk"]["products"][0]["external_id"], "mn-3-1")
 
+    def test_a_multi_pack_is_refused_and_a_twin_loaf_size_is_not(self):
+        names = ["Sauce 19 oz (pack of 6)", "Nuts, 12 Pack", "Spice, 9 x 5.5 oz"]
+        rows = [good(rank=str(n), product_name=name) for n, name in enumerate(names, 1)]
+        rows.append(good(rank="9", product_name="Baguette 280G X 2"))
+        problems, kept = manual.check_sheet(write_sheet(self.tmp.name, rows), RELEASE, TODAY)
+        self.assertEqual((len(problems), len(kept)), (3, 1))
+        self.assertIn("multi-pack", problems[0])
+
+    def test_an_ai_lookup_is_marked_unreviewed(self):
+        rows = [good(note="claude-ai web lookup 2026-11-06, pending owner spot-check")]
+        out = Path(self.tmp.name) / "out.json"
+        snapshot = manual.export(write_sheet(self.tmp.name, rows), RELEASE, out, TODAY)
+        self.assertEqual(snapshot["ingredients"]["saffron"]["review_status"], "ai_lookup_unreviewed")
+
     def test_export_writes_nothing_while_any_row_has_a_problem(self):
         sheet = write_sheet(self.tmp.name, [good(), good(rank="2", price_sgd="free")])
         out = Path(self.tmp.name) / "manual-v1-snapshot.json"

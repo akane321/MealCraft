@@ -20,3 +20,10 @@
 离线，需要 openpyxl）。复核人交回后，把表存为 `review-filled.xlsx`，用
 `python -I -X utf8 data-engineering/scripts/allergen_review.py score --new data-engineering/docs/allergen-review-20261103/review-filled.xlsx`
 生成 `report.md` 和 `report.json`，不要手改。测试 `data-engineering/tests/test_review_draws_v3.py` 检查提交的样本就是重新抽出的样本。
+
+## 2026-11-06 修复后的变化（issue #426）
+
+本轮抽检之后，下列样本菜被 issue #426 的修复改动（`data-engineering/docs/v3-repair-20261106/`）。复核结论针对改动前的版本，未重新复核：
+
+- `RCP2_703781931A43`：罐装椰奶改按罐上写的 14 oz 称重（`package_mass`）。
+- `RCP2_DB51910E060D`：撤出计划（步骤用黄油涂模、清单没有黄油，却标了 dairy-free）。
