@@ -98,13 +98,15 @@ Estimated values carry their evidence and confidence per field in `enrichment` (
 ## Unit-weight corrections of the added recipes
 
 The v2.2 correction (`scripts/correct_release_v22.py`, owner 2026-10-23) applied to the added recipes:
-638 lines in 625 recipes, each in `corrections.jsonl` with its
+785 lines in 757 recipes, each in `corrections.jsonl` with its
 built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corrections.jsonl`).
 
 | Class | Lines |
 | --- | ---: |
+| `cooked_rice` | 39 |
 | `lasagna_sheet` | 29 |
 | `n_times_total` | 18 |
+| `package_mass` | 108 |
 | `pizza_crust` | 9 |
 | `red_pepper_alias` | 145 |
 | `stated_weight` | 217 |
@@ -113,14 +115,26 @@ built and v3 grams. The v2.2 records keep their own v2.2 corrections (v2.2 `corr
 | `whole_bird_edible` | 35 |
 | `whole_head` | 119 |
 
+## Reviewed corrections
+
+From `data/enrichment/v3-corrections.csv` (checked by `scripts/v3_corrections.py`; its sha256 is in the manifest's
+`committed_sha256`): 5 added recipes corrected (exempt from check 2), and each corrected
+field's evidence names the reviewer and the reason. Withdrawn: 117; they
+stay released, and `data/recipes/withdrawn.json` keeps them out of plans (`v3_corrections.py withdraw`).
+
+| Field | Rows |
+| --- | ---: |
+| `withdraw` | 117 |
+| `servings` | 5 |
+
 ## Checks
 
 All pass, or the build stops:
 
 1. Every v2.2 record is byte-identical in v3 (8968).
 2. Every record of the first v3 build is present and byte-identical (by recipe_id and line sha256;
-   12895 records).
-3. recipes.jsonl is 92790359 bytes <= 95000000.
+   12823 records).
+3. recipes.jsonl is 92796398 bytes <= 95000000.
 4. No ingredient id outside v2.2's 701.
 5. No cuisine label above 20%: the largest is `american` at 3188
    (17.4%).
@@ -145,6 +159,7 @@ v2.2 records outside the energy range, kept verbatim: 0.
 8. Wave 2 enrichment (owner 2026-11-02 ~16:10): part by the OpenAI API (gpt-5.4-mini, as wave 1) until that run stopped, the rest by Claude subagents (enrich_v3_agents.py: the OpenAI enricher's instructions, schema, input and validation); their records say enrichment.by 'claude/<model>'. The OpenAI API is not used for enrichment again.
 9. Composite substitutes ('half-and-half = milk + cream') are not built: the release schema has no field. Open.
 10. Quality targets for the later human checks of the new recipes (issue #392): 'at least 95%' is the point estimate, reported with Wilson 95% intervals.
+11. Two v3 line classes after the v2.2 correction (owner 2026-11-04, issue #426): cooked_rice (cooked, steamed or prepared rice weighed as dry rice moves to the cooked form; a cup is re-weighed at the cooked cup, other amounts keep their grams as an estimate of cooked rice) and package_mass (an estimated counted line takes the package mass its own text states, unless drained, partly used, packed in liquid, cooked or a marinade). A first-build record these change is exempt from the byte-for-byte check; v2.2's records are never changed.
 
 ## Shortcuts (for teammates to refine later)
 
@@ -158,18 +173,21 @@ v2.2 records outside the energy range, kept verbatim: 0.
 - Composite substitutes are not built (no schema field).
 - The cuisine labels of the model-enriched recipes are unreviewed model output (some are debatable).
 - Wave 2's cuisine labels and course labels are unreviewed model output too; its human checks are the 2026-11-04 draws (manual-check-20261104/, allergen-review-20261104/).
+- Serving carriers and optional dips (issue #426 C): 'serve over hot rice' or 'serve with ... sauce' named only in the steps is not listed as an ingredient line. full_default gives every meal a staple, so the planner adds one; a carrier nobody reviewed may carry gluten that the recipe's allergens do not show.
+- Salt, pepper, water, ice and greasing or frying fat named only in the steps (issue #426 D) are taken as at home and are not a defect: the shopping list and prices do not change, but sodium is low where salt is not listed and energy is low where frying oil is not counted. P1 scan hits are not a defect count.
+- Unit weights left for later (issue #426 A): lemon and lime wedges, cherry and other mini items, small or dried chilies and juice- or zest-only citrus are weighed as whole standard items (no cited per-piece weight yet); liquid bouillon stays a bouillon cube (owner 2026-11-04: changing it to broth changes the shopping list); cans of beans, corn, fruit and other foods packed in liquid keep their estimate (the net weight includes the liquid). Release v2.2's own records are never changed, so their cooked-rice and package-weight hits stay.
 
 ## Files
 
 `fingerprint` (manifest) is the sha256 of the lines "<sha256>  <name>" for `recipes.jsonl`, `ingredients.jsonl` and
-`release_manifest.json` without its `fingerprint` field: `fd33aba2ae946739c72462cd931076bc9c78a2059b8a89322df7c708159ece5f`.
+`release_manifest.json` without its `fingerprint` field: `c9ce37569b0fb872541633e954eb753c831e05fa9c09823c3cb240723fe9b116`.
 
 | File | sha256 |
 | --- | --- |
-| `recipes.jsonl` | `a9ad33595d0b1424cfbb8475d3d5f5635ec6d50e283e13e03bee093e3fff99a9` |
+| `recipes.jsonl` | `d510c63ddf989723019f82dfd54dbe1b7710b6a64b4cbdce843f2e1d9089ce75` |
 | `ingredients.jsonl` | `4c71b1a9f13e738d7c82d8a302ef11543d0d1705b614d3dc05150b86529eb95e` |
 | `dropped.jsonl` | `aff76094d068504a2f4902335c6264f700a318ad4b93c68b3dbdb0fd6056301a` |
-| `corrections.jsonl` | `1174d3e783fc434defaa3bdafe910bb3b7ea57605d4fa0f3ccdcf19bb5587df3` |
-| `release_manifest.json` | `56bf9296953c7d9889eb1fff85495ed69d21c032bc40c023aade12eb536a29e3` |
-| `quality_summary.json` | `3b1006d2d7e11581828fb39f6bd99eb40333de4ca0618f6fdadd52319426b28a` |
+| `corrections.jsonl` | `d87a5a8dd3d7636afb5be1b8a2db3d3d1d494b63999d7600891a74298315bbb6` |
+| `release_manifest.json` | `1a4b9c9fbde2423369a2f798dd43e2f381dc05a2ad29fc3a74cbd64beac807d4` |
+| `quality_summary.json` | `f833a76dc074e9a4d5f9761ea40aaa41468d288b6208c79e32fefb084ac936f8` |
 | `ATTRIBUTION.md` | `ca9a6264ff9d53f71bf01a37905a18a267a274337712b1d13fcb9a7ebb115f0f` |

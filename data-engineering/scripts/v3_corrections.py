@@ -89,6 +89,11 @@ def value_problem(field: str, value: str) -> str | None:
     return None
 
 
+def is_estimate(row: dict) -> bool:
+    """A reason starting "estimate:" says the new value is the reviewer's guess, not a number the source states."""
+    return row["reason"].lower().startswith("estimate:")
+
+
 def new_value(row: dict) -> str | int:
     """The value a checked row gives its field, as the release record holds it."""
     return int(row["new_value"]) if row["field"] == "servings" else row["new_value"]

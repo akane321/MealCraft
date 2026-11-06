@@ -82,8 +82,10 @@ class CheckerTest(unittest.TestCase):
         for row, text in EXPECTED.items():
             self.assertTrue(any(text in p for p in by_row[row]), (row, by_row[row]))
 
-    def test_the_committed_table_is_empty(self) -> None:
-        self.assertEqual(corrections.read_table(), [])
+    def test_the_committed_table_validates(self) -> None:
+        rows = corrections.read_table()
+        released = corrections.read_release("v3")
+        self.assertEqual(corrections.check_rows(rows, set(corrections.read_release("v2.2")), released), [])
 
     def test_a_row_the_release_already_carries_passes(self) -> None:
         released = {**RELEASED, "RCP2_000000000005": {**RELEASED["RCP2_000000000005"], "cuisine": "greek"}}
