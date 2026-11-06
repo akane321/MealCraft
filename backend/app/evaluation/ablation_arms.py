@@ -1,4 +1,4 @@
-﻿"""The product and its six ablations as arms of the shared baseline runner (issue #397; ADR-0092; 02-baselines.md).
+"""The product and its six ablations as arms of the shared baseline runner (issue #397; ADR-0092; 02-baselines.md).
 
 Each arm reaches the product through ordinary chat (`ProductTransport`), so its answers are turned into the same
 `BaselineResponse` and scored by the same unchanged `pure_llm_baseline.score` as the three baselines, on the same
@@ -201,4 +201,3 @@ class InProcessClient:
 
     def get(self, url: str):
         return self._call("get", url)
-
