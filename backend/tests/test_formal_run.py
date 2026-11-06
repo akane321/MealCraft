@@ -154,11 +154,20 @@ def test_the_public_output_holds_aggregates_only_and_failures_stay_local(tmp_pat
     assert "SECRET" not in public and "case-0" not in public
     assert {path.name for path in (tmp_path / "out").iterdir()} == {
         "aggregate-action.json",
+        "aggregate-plan.json",
         "aggregate-strict.json",
         "comparison-action.json",
+        "comparison-plan.json",
         "comparison-strict.json",
         "manifest.json",
     }
+    plan = json.loads((tmp_path / "out/aggregate-plan.json").read_text(encoding="utf-8"))
+    assert plan["scoring"] == formal_run.SCORING
+    overall = plan["systems"]["mealcraft"]["overall"]
+    assert (overall["remaining_n"], overall["plans_n"], overall["no_plan_n"]) == (12, 0, 12)  # every arm only answered
+    manifest = json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))
+    assert "aggregate-plan.json" in manifest["aggregates"] and manifest["plan_aggregate_computed"] is True
+    assert manifest["arms"]["mealcraft"]["plans"] == 0
     action = json.loads((tmp_path / "out/aggregate-action.json").read_text(encoding="utf-8"))
     product = action["systems"]["mealcraft"]
     # Every arm answered with a food answer: the intent cases expect one, the planning ones a plan.
@@ -167,6 +176,20 @@ def test_the_public_output_holds_aggregates_only_and_failures_stay_local(tmp_pat
     assert strict["systems"]["mealcraft"]["overall"]["remaining_n"] == 3  # only the intent cases are scored whole
     failures = json.loads((tmp_path / "local/failures.json").read_text(encoding="utf-8"))
     assert len(failures) == 3 and len({row["episode"]["category"] for row in failures}) == 3
+
+
+def test_a_fault_in_the_plan_aggregate_loses_that_file_alone_and_names_only_its_type(tmp_path, monkeypatch):
+    from app.evaluation import plan_aggregate
+
+    def broken(*args, **kwargs):
+        raise KeyError("SECRET question 1")
+
+    monkeypatch.setattr(plan_aggregate, "build", broken)
+    assert run(tmp_path, "--live", "--arms", "strong-rule", "mealcraft") == 0
+    plan = json.loads((tmp_path / "out/aggregate-plan.json").read_text(encoding="utf-8"))
+    assert plan["not_computed"] == "KeyError" and "SECRET" not in json.dumps(plan)
+    assert json.loads((tmp_path / "out/manifest.json").read_text(encoding="utf-8"))["plan_aggregate_computed"] is False
+    assert (tmp_path / "out/aggregate-action.json").exists()
 
 
 @pytest.mark.parametrize(

@@ -21,8 +21,8 @@ Finished: copy `--out` to `docs/evaluation/sprint3-formal` and commit it with th
 Arms (ADR-0118): strong rules, the pure LLM on the conversation protocol (`pure_llm_baseline.conversation_arm`),
 RAG and the general agent, then the product "mealcraft" and its six ablations back to back, so the parser's prompt
 prefix stays in OpenAI's cache. Every arm runs through `baseline_arms.main` with its own spend ledger and cap
-(ADR-0115: US$5 each, the general agent US$15, RAG US$8); the product arms use the OpenAI parser and are metered from the
-product's own recorded cost (`ablation_arms.openai_arms`). The episodes may be per-file episodes or the held-out
+(ADR-0115: US$5 each, the general agent US$15, RAG US$8); the product arms use the OpenAI parser and are metered from
+the product's own recorded cost (`ablation_arms.openai_arms`). The episodes may be per-file episodes or the held-out
 authoring interchange (`{"cases": [...]}`, `pure_llm_baseline.case_episode`).
 
 - The default is a dry run: per arm its questions, worst case, projected spend (the measured rates of ADR-0118 a
@@ -55,8 +55,12 @@ two aggregates by category, language and source, small cells withheld (`heldout_
   arm alone, and void flags must be the same for every arm, so it counts as a failure, against the product more than
   the baselines; its count per arm is in `aggregate-strict.json` and the manifest.
 Each also gets the paired comparison of the product with every other arm (`heldout_statistics.compare`, overall
-only). `--select-failures N` writes N product failures, round robin over categories and first where a baseline
-succeeded, with their records, to the local folder for the failure analyses.
+only). A third aggregate, `plan` (`plan_aggregate`, the metric table of 02-baselines section 6), reads every case where
+an arm output a plan, voiding none: hard constraints, verifiability, quality, meal likeness and cost, with numerators,
+denominators and unknown counts; `comparison-plan.json` pairs the three hard constraints where both arms are known. It
+is computed after every arm has run, so it changes no answer. `--select-failures N` writes N product failures, round
+robin over categories and first where a baseline succeeded, with their records, to the local folder for the failure
+analyses.
 """
 
 from __future__ import annotations
@@ -87,7 +91,8 @@ ORDER = ("strong-rule", "pure-llm", "rag", "general-agent", PRODUCT, *(f"{PRODUC
 MEASURED_USD = {"pure-llm": 0.0153, "rag": 0.0118, "general-agent": 0.0545, PRODUCT: 0.005}
 LOCAL = Path(".local/evaluation/formal")
 FREEZE_RECORD = Path("docs/evaluation/sprint3-freeze.md")
-SCORING = "formal-outcome-draft-3"
+SCORING = "formal-outcome-draft-4"
+AGGREGATES = ("action", "strict", "plan")
 CATEGORIES = ("planning", "intent", "multi_turn", "adversarial")
 SOURCES = ("forum", "authored")
 DISPOSITION_ACTION = {
@@ -230,6 +235,32 @@ def comparison(rows: list[CaseOutcome]) -> dict:
         return compare(rows, product_system_id=PRODUCT)
     except ValueError as error:  # no product, no baseline, or nothing left to pair
         return {"not_computed": str(error)}
+
+
+def plan_aggregates(
+    episodes: list[dict[str, Any]],
+    records: dict[str, dict[str, dict]],
+    resources: BaselineResources,
+    min_cell_n: int,
+    *,
+    heldout: bool,
+) -> tuple[dict, dict]:
+    """(aggregate, comparison). The arms have run and been paid for, so a fault here costs this file alone; the
+    records stay and it can be computed again. The type alone is reported, as a message might quote a case."""
+    from app.evaluation import plan_aggregate
+
+    try:
+        report, paired = plan_aggregate.build(
+            episodes,
+            records,
+            lambda episode: labels(episode, heldout=heldout),
+            resources,
+            min_cell_n=min_cell_n,
+            product=PRODUCT,
+        )
+    except Exception as error:
+        return {"not_computed": type(error).__name__, "scoring": SCORING}, {"not_computed": type(error).__name__}
+    return report | {"scoring": SCORING}, paired
 
 
 def select_failures(
@@ -481,6 +512,9 @@ def main(
         comparison_text = render(comparison(rows))
         (args.out / f"comparison-{kind}.json").write_text(comparison_text, encoding="utf-8", newline="\n")
     resources = loader()
+    plan_report, plan_comparison = plan_aggregates(episodes, records, resources, args.min_cell_n, heldout=heldout)
+    (args.out / "aggregate-plan.json").write_text(render(plan_report), encoding="utf-8", newline="\n")
+    (args.out / "comparison-plan.json").write_text(render(plan_comparison), encoding="utf-8", newline="\n")
     commit, dirty = baseline_arms.code_state()
     for name in order:
         rows = list(records[name].values())
@@ -492,6 +526,7 @@ def main(
             "answered": sum(row["status"] == "answered" for row in rows),
             "call_failed": sum(row["status"] == "call_failed" for row in rows),
             "valid_output": sum(bool(row.get("valid_output")) for row in rows),
+            "plans": sum(bool((row.get("response") or {}).get("plan")) for row in rows),
             "intent_not_scorable": not_scorable[name],
             "refuse_stated_as_reply": as_reply[name],
             "ledger_usd": round(spent, 6),
@@ -508,6 +543,8 @@ def main(
         "release_version": resources.release_version,
         "data_digests": {Path(path).as_posix(): digest for path, digest in resources.data_digests},
         "scoring": SCORING,
+        "aggregates": [f"{name}-{kind}.json" for kind in AGGREGATES for name in ("aggregate", "comparison")],
+        "plan_aggregate_computed": "not_computed" not in plan_report,
         "min_cell_n": args.min_cell_n,
         "credit_usd": args.credit_usd,
         "spent_this_run_usd": round(sum(run.get("spent_this_run_usd", 0.0) for run in runs.values()), 6),
