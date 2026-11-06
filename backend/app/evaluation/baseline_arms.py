@@ -9,7 +9,8 @@ lines, steps and time come from its `evidence`) and scored by the same shared la
 (`pure_llm_baseline.score`: mapping, coverage, recomputation, allergen safety, the product validator). This module
 changes none of them.
 
-Cost rules are the pure-LLM runner's (ADR-0086, US$5 per arm including development runs): dry run by default,
+Cost rules are the pure-LLM runner's (ADR-0086, US$5 per arm including development runs;
+the general agent US$15, ADR-0118): dry run by default,
 `--live` for a paid call, `--max-usd` and `--max-tokens` stop before a call whose worst case could pass them, and
 held-out paths are refused without `--allow-heldout`. Spend is kept in one append-only ledger per arm
 (`LedgerBudget`, owner review on #427), so it is counted across every run and output of the arm, a case cut by the
@@ -197,6 +198,8 @@ class Arm:
     estimate: Callable[[list[str], str, str], tuple[int, int, float]] | None = None
     # A paid arm's model client, built only for a live run.
     model_factory: Callable[[str], Any] | None = None
+    # The arm's total cap over all its runs (ADR-0086: US$5; ADR-0118: US$15 for the general agent).
+    max_usd: float = DEFAULT_MAX_USD
 
 
 def arms() -> dict[str, Arm]:
@@ -335,7 +338,7 @@ def main(
     parser.add_argument("--anchor-date", type=date.fromisoformat, help="the one global clock date (ADR-0092)")
     parser.add_argument("--live", action="store_true", help="make paid model calls (default: dry run)")
     parser.add_argument("--repeats", type=int, default=1)
-    parser.add_argument("--max-usd", type=float, default=DEFAULT_MAX_USD)
+    parser.add_argument("--max-usd", type=float, help="the arm's total cap; default and ceiling: the arm's own")
     parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     parser.add_argument("--model", default="gpt-5.4-mini")
     parser.add_argument("--allow-heldout", action="store_true")
@@ -357,6 +360,10 @@ def main(
         return 0
     if args.episodes is None or args.output is None or args.anchor_date is None:
         parser.error("--episodes, --output and --anchor-date are required")
+    if args.max_usd is None:
+        args.max_usd = arm.max_usd
+    elif args.max_usd > arm.max_usd:
+        parser.error(f"--max-usd {args.max_usd} is above {arm.system_id}'s cap of US${arm.max_usd}")
     args.ledger = args.ledger or LEDGER_DIR / f"{arm.system_id}.spend.jsonl"
     args.episodes, args.output, args.ledger = (
         path if path.is_absolute() else repository_root() / path for path in (args.episodes, args.output, args.ledger)
@@ -378,7 +385,7 @@ def main(
         instructions = ConversationHarness(config).instructions
         estimates = [arm.estimate(episode_turns(episode), instructions, args.model) for episode, _ in plan]  # type: ignore[misc]
         worst = sum(usd for _, _, usd in estimates)
-        spent_before = ledger_totals(args.ledger)[0]  # the arm's US$5 is shared by all its runs (ADR-0115)
+        spent_before = ledger_totals(args.ledger)[0]  # the arm's cap is shared by all its runs (ADR-0115)
         print(
             json.dumps(
                 {

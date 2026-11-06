@@ -88,8 +88,8 @@ function packLabel(size: number | null, unit: string | null) {
       <h1>Everything the planner can choose from</h1>
       <p class="mc-sub">Open a recipe for its steps, or look up what a grocery costs at FairPrice.</p>
       <div class="tabs mc-segmented" role="tablist" aria-label="What to browse">
-        <button type="button" role="tab" :aria-selected="tab === 'recipes'" @click="tab = 'recipes'">Recipes</button>
-        <button type="button" role="tab" :aria-selected="tab === 'products'" @click="tab = 'products'">Groceries</button>
+        <button type="button" role="tab" :aria-selected="tab === 'recipes'" @click="tab = 'recipes'"><MotionTabPill v-if="tab === 'recipes'" id="browse-tabs" />Recipes</button>
+        <button type="button" role="tab" :aria-selected="tab === 'products'" @click="tab = 'products'"><MotionTabPill v-if="tab === 'products'" id="browse-tabs" />Groceries</button>
       </div>
     </section>
 
@@ -105,7 +105,7 @@ function packLabel(size: number | null, unit: string | null) {
         </div>
       </div>
       <p v-if="recipeError" class="mc-alert" role="alert"><UIcon name="i-lucide-circle-alert" aria-hidden="true" />{{ recipeError }}</p>
-      <p v-else-if="loadingRecipes && !recipes.length" class="mc-loading"><UIcon name="i-lucide-loader-circle" class="mc-spin" aria-hidden="true" />Loading recipes…</p>
+      <p v-else-if="loadingRecipes && !recipes.length" class="mc-loading"><MotionLoader />Loading recipes…</p>
       <div v-else-if="!loadingRecipes && !recipes.length" class="mc-empty">
         <div class="mc-empty-art"><span><span class="mc-tile" data-tone="violet"><UIcon name="i-lucide-search-x" /></span></span></div>
         <h2>No recipe matches that</h2>
