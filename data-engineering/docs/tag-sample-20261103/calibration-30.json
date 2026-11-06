@@ -1,0 +1,358 @@
+{
+  "seed": 20261104,
+  "drawn_from": "data-engineering/data/staging/tag-v3/open.jsonl (126 asked recipes)",
+  "recipes": [
+    {
+      "key": "RCP2_05426F648B01",
+      "title": "Pirishki",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_0965231509C5",
+      "title": "Diane’S Homemade Scottish Butter Shortbread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_0BDB8D2D202C",
+      "title": "Healthy Turkey Bacon Quiche",
+      "course": "main",
+      "allowed_meal_roles": [
+        "staple"
+      ]
+    },
+    {
+      "key": "RCP2_244D8C7CC69D",
+      "title": "Baked Grits Souffle",
+      "course": "side",
+      "allowed_meal_roles": [
+        "soup",
+        "staple",
+        "one_bowl",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
+      ]
+    },
+    {
+      "key": "RCP2_2EF9545B7718",
+      "title": "Babka Ii",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_46296CCD6E5E",
+      "title": "Eva'S Irish Soda Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_55D610F7F931",
+      "title": "Garden Kabobs",
+      "course": "main",
+      "allowed_meal_roles": [
+        "staple"
+      ]
+    },
+    {
+      "key": "RCP2_60D6B3E03E36",
+      "title": "Indian Bannock",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_62B71CF8637C",
+      "title": "Mexican Grits Souffle",
+      "course": "side",
+      "allowed_meal_roles": [
+        "soup",
+        "staple",
+        "one_bowl",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
+      ]
+    },
+    {
+      "key": "RCP2_6FB6CF3C9F3B",
+      "title": "Moroccan Pan De Casa",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_7729B032C971",
+      "title": "Irish Oatmeal Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_7927961DBA66",
+      "title": "Tim'S Cornbread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_7D39A53C9427",
+      "title": "Honey And Rosemary Soda Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_8D1D070C1CEB",
+      "title": "Sopapillas",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_8D51C6B1134E",
+      "title": "Ladyfingers",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_90A96655F635",
+      "title": "Brazilian Cheese Puffs (Pao De Queijo)",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_945D19C2A04C",
+      "title": "Milk Lefse",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_A7359CF108DB",
+      "title": "Soda Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_A8A47440CCFB",
+      "title": "Sour Dough Starter",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_B0AA2AFB445D",
+      "title": "Hungarian Butterhorns",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_B3F7BEEC2E95",
+      "title": "African Ginger Cake",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_BA21C876BBC1",
+      "title": "Hargadon'S Brown Soda Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_BCAB959C44CD",
+      "title": "Microwave Eggless Cornbread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_C63E6BCA63FD",
+      "title": "White Pizza",
+      "course": "main",
+      "allowed_meal_roles": [
+        "staple",
+        "vegetable"
+      ]
+    },
+    {
+      "key": "RCP2_C73B1C2A0A46",
+      "title": "Tarradls (Italian Pepper Rings)",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_CA7A948B08C4",
+      "title": "German Nut Balls",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_D5C45C31044E",
+      "title": "Kolaches",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "staple",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_E929BB7BD8BB",
+      "title": "Guatemalan Banana Bread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl"
+      ]
+    },
+    {
+      "key": "RCP2_F53EEB62D5B1",
+      "title": "Yellow Cornbread",
+      "course": "baked_good",
+      "allowed_meal_roles": [
+        "breakfast",
+        "dessert",
+        "snack",
+        "one_bowl",
+        "protein_main"
+      ]
+    },
+    {
+      "key": "RCP2_FAC8C7EE0B8D",
+      "title": "Lola'S Ethereal Orzo",
+      "course": "side",
+      "allowed_meal_roles": [
+        "soup",
+        "staple",
+        "one_bowl",
+        "breakfast",
+        "snack",
+        "dessert",
+        "sauce",
+        "drink"
+      ]
+    }
+  ]
+}

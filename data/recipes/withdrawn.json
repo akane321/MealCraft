@@ -9,6 +9,1226 @@
     {
       "slug": "v2-chicken-curry-or-cat-s-vomit-on-a-bed-of-maggots-for-halloween-89080bdb3a37",
       "reason": "Joke Halloween title (\"cat's vomit on a bed of maggots\"), unfit to show in a household's week (owner, 2026-10-08)."
+    },
+    {
+      "slug": "v2-adana-kebab-efaee5ac4f8a",
+      "reason": "P6h: a cup of lard for 100 g of beef makes 2,123 kcal a serving; v2.2 cannot be re-weighed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-adobo-popular-filipino-dish-f21604f296c2",
+      "reason": "P8f: the only step is a substitution note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-african-yams-3a30ca605035",
+      "reason": "P7b: syrup, sugar and pineapple are never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-sauerkraut-wirth-431bb9960eb2",
+      "reason": "safety: a buttered casserole dish (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-sauerkraut-wirth-bb96ec674f08",
+      "reason": "safety: a buttered ovenproof dish (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-curry-delicious-b745e0078172",
+      "reason": "P7b: steps stop after flouring the meat; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-stir-fry-004a29337450",
+      "reason": "P7b: steps stop after browning the beef; soy sauce, cornstarch, vegetables never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-stroganoff-6e16a2a0b2b4",
+      "reason": "P7b: steps stop after browning; broth, sour cream and noodles never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-broccoli-quesadilla-dbe81c5792c3",
+      "reason": "P7b: steps stop at the filling; tortillas, cheese and cooking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-bubble-and-squeak-b5e623611a8e",
+      "reason": "P7b: the frying step is missing; the onion and oil are never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-bubble-and-squeak-microwave-cd197651e844",
+      "reason": "P7b: steps stop after the potatoes; cabbage, onion and cheese never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-butternut-tostada-faa82b8ec9cf",
+      "reason": "P8f: the only step is a note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cabbage-casserole-bf6bcdcbd8c3",
+      "reason": "safety: a buttered casserole (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cannelloni-7a4bc6dead5a",
+      "reason": "P7b: only the crepes are made; the cannelloni filling and sauce are missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cheese-stuffing-for-manicotti-e58eb09d4e0d",
+      "reason": "P7b: steps stop after boiling the manicotti, which are not listed; no filling or baking",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-curry-28eef897ee5f",
+      "reason": "P7b: a whole cut-up chicken cooked 10 minutes; flour, curry and lemon never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-soy-stir-fry-serves-4-07b688d5413e",
+      "reason": "P7b: the only step is a note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-stir-fry-098643639416",
+      "reason": "P7b: steps stop after marinating the chicken; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-stir-fry-70816bac557e",
+      "reason": "P7b: steps stop after marinating; the stir-fry is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-asparagus-c198bfb085f4",
+      "reason": "P7b: steps stop after slicing; the asparagus is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-boiled-chicken-chow-yow-gai-eaeb02c89818",
+      "reason": "P7b: steps stop after shredding the chicken; the onion and oil sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-chicken-b6bc7fad9d04",
+      "reason": "P7b: steps stop after frying the chicken; vegetables and sauce never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-chicken-dd3cde775edc",
+      "reason": "P7b: a marinade only; the chicken is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-fried-rice-d5b8f58767c2",
+      "reason": "P7b: steps stop after the eggs; the rice is never fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-pepper-steak-1fb427617529",
+      "reason": "P7b: steps stop after the marinade; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-pepper-steak-379d9a72d22c",
+      "reason": "P7b: steps stop after marinating; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-pepper-steak-76a6ce8b8473",
+      "reason": "P7b: steps stop after browning the steak; vegetables and sauce never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-pork-chops-aa52264e15d0",
+      "reason": "safety: served over buttered rice (butter unlisted) while labelled dairy-free; the pork chops are not listed either",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-smoked-ribs-or-chicken-938ca091118f",
+      "reason": "P8f: the only step is an equipment note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chinese-style-fried-rice-ae45d66f3c3b",
+      "reason": "P7b: steps stop after the rice; egg, onions and soy never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-colcannon-potatoes-and-cabbage-1c6656fe0d2d",
+      "reason": "P7b: the cabbage and green onions are never cooked or mixed in",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cornish-pasties-258b8e45aa08",
+      "reason": "P7b: steps stop after cutting the pastry; the filling is never made or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-crustless-leek-and-potato-quiche-25a8a8670314",
+      "reason": "P7b: steps stop after simmering the leeks; the custard and baking are missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-dajaj-pilaf-chicken-middle-eastern-feast-dish-c6d42b901a36",
+      "reason": "P7b: steps stop after poaching the chicken; the rice pilaf is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-dinner-tonight-kimchi-chahan-fried-rice-recipe-e465663e8372",
+      "reason": "P7b: the rice and eggs are never added to the fried rice",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-dumpling-noodles-ec29565337d3",
+      "reason": "safety: served with melted butter (unlisted) while labelled vegetarian and dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-easy-pork-fried-rice-c9557ee46df9",
+      "reason": "P7b: steps stop after the egg; the rice is never fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-eggplant-lasagna-06293f121a47",
+      "reason": "P7b: steps stop after frying the eggplant; no layering, sauce, cheese or baking",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-english-brown-stew-c37155b4001e",
+      "reason": "P7b: the onions, potatoes, carrots and celery are never added to the stew",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-eula-s-indian-potato-salad-09dde09cc5e2",
+      "reason": "P7b: steps stop after frying potatoes; eggs, onion and tomatoes never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-gnocches-italian-potato-pasta-98b58258e3bd",
+      "reason": "P7b: the steps are a family story; no instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-greek-burger-420585f27319",
+      "reason": "P7b: steps stop after shaping; the patties are never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-greek-macaroni-6c667e766380",
+      "reason": "P7b: steps stop after the meat; pasta, sauce and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-greek-roast-chicken-04f032de60b0",
+      "reason": "P7b: steps stop after roasting; the rice, stock, onion, currants and gravy are never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-greek-vegetables-d44dee4d7c96",
+      "reason": "P7b: steps stop after cutting the vegetables; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-grilled-scallop-teriyaki-6ee4bc82596d",
+      "reason": "P8f: the only step is an equipment note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-ham-fried-rice-95aa750540ce",
+      "reason": "P7b: steps stop after the egg; the rice is never fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-hamburger-pepper-steak-a788481f3396",
+      "reason": "P7b: the soy, sugar and cornstarch sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-hawaiian-chicken-kabobs-21a2a40e1c0c",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-homemade-lasagne-a4c7a977116d",
+      "reason": "P7b: steps stop after cooking the noodles; cheeses, assembly and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indian-curried-chicken-3c091b706cc4",
+      "reason": "P7b: steps stop after the onions; chicken, tomatoes and curry powder never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indian-pilau-4ea037636c76",
+      "reason": "P7b: steps stop after the spices; rice, broth, peas and raisins never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indian-pinto-beans-31457fbd2e5c",
+      "reason": "P7b: steps stop after simmering the beans; tomatoes, bacon, onion and seasoning missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indonesian-chicken-breasts-a1037deba2b4",
+      "reason": "P7b: steps stop after marinating; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-irish-beef-stew-a256b9a26750",
+      "reason": "P7b: the potatoes, onion and carrots are never added to the stew",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-italian-kish-e10807417a78",
+      "reason": "P7b: the sausage or ham the steps cook is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-japanese-katsudon-9486c9d791a7",
+      "reason": "P8e: the tonkatsu comes from an outside recipe; its breading is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-josie-s-sauerkraut-63caffbf73ec",
+      "reason": "P7b: steps stop after covering with water; sugar, butter and onion never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-kebabs-ebea5ba9b77e",
+      "reason": "P8f: the only step is an equipment note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-beef-e11561da3929",
+      "reason": "P7b: steps stop after slicing the meat; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-beef-sauce-77c3dd69db3a",
+      "reason": "P8e: the ground beef the steps cook is not listed (main ingredient missing)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-bulgogi-burgers-653168217674",
+      "reason": "safety: the buns are served toasted and buttered (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-fried-rice-bokgeum-bahb-0ea2929b8d92",
+      "reason": "P7b: steps stop after the egg pancakes; rice is never fried with the rest",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-noodles-and-beef-main-course-from-abroad-pungent-dish-f96c60076a19",
+      "reason": "P8f: the only step is an optional-vegetables note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-short-ribs-174aa22e1fd4",
+      "reason": "P7b: a marinade only; the meat is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-korean-spareribs-f66f94e1f512",
+      "reason": "P7b: steps stop after par-baking; the soy-sherry glaze is never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lasagna-style-bow-tie-dish-44870004d5fb",
+      "reason": "P7b: steps stop after the sauce; cheeses, egg, assembly and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lasagne-85a912e9dc25",
+      "reason": "P7b: steps stop at the meat sauce; noodles, cheese and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lemon-chicken-cf305696e8d5",
+      "reason": "P7b: steps stop after marinating; the chicken is never floured or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lemon-chicken-hawaiian-style-7196ed0f9266",
+      "reason": "P3: the lemon sauce that makes the dish is neither listed nor made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-louisiana-jambalaya-21f314ddc0cc",
+      "reason": "safety: 'brown in bacon grease or butter' (both unlisted) while labelled dairy-free; no non-animal option",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-maple-teriyaki-chicken-wings-f2dd9c074546",
+      "reason": "P7b: the maple-soy sauce is never mixed or added to the wings",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-marinated-pork-kabobs-f119f66cee93",
+      "reason": "P7b: steps stop after marinating; the kabobs are never assembled or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mediterranean-shrimp-linguine-c22f1d435da6",
+      "reason": "P7b: steps stop after the shrimp; the tomato sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mexican-rice-with-charred-tomatoes-chiles-and-onion-53b79e8069ab",
+      "reason": "P7b: the steps end with 'follow the recipe for Mexican Rice', an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mmm-beef-stew-dumplings-5aff3d1cd8c1",
+      "reason": "P8e: the dumplings come from an outside recipe whose ingredients are not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mock-yaksoba-ab1cb8d4c153",
+      "reason": "P7b: steps stop after boiling the noodles; onion, ham and eggs never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mom-s-in-a-hurry-curry-415eb0035f73",
+      "reason": "P7b: the curry sauce (onion, garlic, soup, milk, meat) is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mongolian-beef-for-4-10-recipe-a3eaaac11c66",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-moroccan-snapper-in-parchment-serves-2-9ae41f47365b",
+      "reason": "P7b: steps stop after slicing; the fish is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mushroom-chicken-quiche-6c920f52dda7",
+      "reason": "P7b: steps stop after the rice crust; filling and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-nanay-s-filipino-fried-chicken-f35e1fa71a48",
+      "reason": "P6h: a whole chicken is weighed as 100 g and the frying oil counted in full; v2.2 cannot be re-weighed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-one-pan-mexican-style-beef-bake-4a58de0dae4a",
+      "reason": "P7b: steps stop after the batter; beef, cheese, tomato and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-orzo-primavera-988a8fb8bd33",
+      "reason": "P7b: steps stop after draining; garlic, pepper, peas, broth and cheese never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pad-thai-6ace271f0113",
+      "reason": "P7b: steps stop after soaking the noodles; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-paella-ala-valenciana-b05d1552c35f",
+      "reason": "P7b: steps stop after browning the chicken; the paella is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pancit-bihon-guisado-sauteed-rice-sticks-cb40030c8bf3",
+      "reason": "P7b: steps stop after poaching the chicken; the noodles are never sauteed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pancit-canton-sauteed-noodles-canton-style-93f8882ebaa2",
+      "reason": "P7b: steps stop after slicing the mushrooms; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-parmesan-chicken-a700cae2edb3",
+      "reason": "P7b: the chicken, the main ingredient, is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pizza-meatballs-a5e3a0513e4a",
+      "reason": "P8f: the only step is a yield note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pork-chop-fried-rice-casserole-microwave-0d176fbfbc4c",
+      "reason": "P7b: steps stop after soaking the rice; pork chops, bacon, eggs never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pork-vegetable-stir-fry-for-1-94d9c4171cb2",
+      "reason": "P7b: the soy and sugar sauce is never added and the rice never served",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-potato-croquettes-4a1f0b77ac77",
+      "reason": "P7b: the steps make oven fries; the croquette mixture is never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-potatoes-moussaka-9b204e51c88d",
+      "reason": "P7b: steps stop after layering potatoes; sauce, eggplant and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-quiche-35f74b7d1564",
+      "reason": "P7b: the egg and cream custard is never made or poured",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-refritos-refried-beans-5216e8f6555e",
+      "reason": "P7b: steps stop after mashing; onion, garlic, pepper and oil never fried in",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-rice-croquettes-e5e4f3f505b8",
+      "reason": "P8f: the steps belong to another recipe (a chile ristra); no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-roasted-peking-chicken-d5b3e35a43a4",
+      "reason": "P7b: steps stop after drying the chicken; it is never glazed or roasted",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sage-and-lemon-chicken-c071d3d7d2af",
+      "reason": "P6h: '.75 oz' sage is weighed as 2,126 g, so shopping and nutrition are wrong; v2.2 cannot be re-weighed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sausage-rissoto-stuffing-c7d5f6cce3db",
+      "reason": "P7b: steps stop after toasting the rice; broth, wine, sausage and cheese never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-savory-sauerkraut-casserole-7ec289c20a2a",
+      "reason": "safety: a buttered casserole dish (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-shrimp-curry-indienne-5f0766064381",
+      "reason": "P7b: steps stop after boiling the shrimp; the curry sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-shrimp-fried-rice-626305659f70",
+      "reason": "P8f: the only step is a substitution note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-singapore-spicy-noodles-2cfdcf43d860",
+      "reason": "P7b: steps stop after the sauce; noodles, peanut butter and cabbage never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-southern-pot-roast-c681f2c54c49",
+      "reason": "P7b: the potatoes, carrots and onions (1.9 kg) are never placed or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-spanish-pork-chops-336d549ec3ab",
+      "reason": "P7b: the potatoes and carrots (800 g) are listed but never placed or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-squid-adobo-39491e455778",
+      "reason": "P7b: steps stop after cutting the squid; the adobo is never finished",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-steak-stir-fry-dcb3499f2af6",
+      "reason": "P7b: the green pepper and the thickened soy sauce are never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-steak-teriyaki-b2843b21ce46",
+      "reason": "P7b: a marinade only; the steak is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stir-fry-chicken-c07cc7f744ff",
+      "reason": "P7b: steps stop after marinating; nothing is stir-fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stir-fry-sesame-green-beans-5a619df97c88",
+      "reason": "P7b: steps stop before the soy sauce, ginger, apricots, sesame oil and seeds",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stroganoff-steak-sandwich-a148a2140c66",
+      "reason": "P7b: steps stop after broiling; onions, sour cream and bread never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-swedish-meat-balls-for-48-f4450ce98ae9",
+      "reason": "P7b: the steps start at 'return meat balls to gravy'; the meatballs and gravy are never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sweet-and-sour-ham-balls-ca22d65e2d5f",
+      "reason": "P7b: the ham balls are never mixed, shaped or first baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sweet-and-sour-meatball-bake-64bcb8bff8fb",
+      "reason": "P7b: steps stop after browning the meatballs; sauce, vegetables and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-syrian-rice-446c8aa2dbff",
+      "reason": "P8f: the only step is a shop footnote; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tacos-945a8e29dd66",
+      "reason": "P7b: the taco filling (the meat) is not listed; only shells and toppings",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tandoori-chicken-3b8f8f89b8ac",
+      "reason": "P7b: steps stop after salting the chicken; yogurt marinade and cooking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tempura-783368d92192",
+      "reason": "P7b: steps stop after slicing; no batter and no frying",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-teriyaki-42279d0eaf16",
+      "reason": "P7b: the marinade is never made and no cooking time or method is given",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-thai-chicken-saute-e5f431bf423d",
+      "reason": "P7b: the steps carve a pineapple; the chicken is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-thai-green-chicken-curry-diabetic-friendly-sugarless-478193540896",
+      "reason": "P7b: the chicken and broccoli are never added to the curry",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tortilla-espanola-spanish-omelette-d96b29513c0f",
+      "reason": "P8f: the only step is a note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-vegetable-lasagna-microwave-3d43b053ed01",
+      "reason": "P7b: steps stop after the zucchini; no layering, cheese or cooking",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-vegetable-quesadillas-a6b39a418283",
+      "reason": "P7b: steps stop after the vegetables; tortillas and cheese never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-whole-roast-lemon-chicken-with-vegetables-d02735fcd596",
+      "reason": "P7b: steps stop after stuffing the lemons; vegetables and roasting missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-wild-rice-and-mushroom-frittata-3cf36e309009",
+      "reason": "P7b: steps stop after the vegetables; the eggs and cheese are never added or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sadie-s-cuban-style-rice-013ff1b2bf29",
+      "reason": "P7b: one vague step; when to add the dry kidney beans, shallots and scallions is never said",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-spicy-shrimp-curry-0174fde02be4",
+      "reason": "P8f: the only step is a shop footnote; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-make-ahead-irish-potato-casserole-06724765acfc",
+      "reason": "P7b: steps stop after mashing; cream cheese, sour cream, chives, garlic and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-meat-loaf-teriyaki-style-0839c9611e7f",
+      "reason": "P7b: steps stop after draining the pineapple; the meat loaf is never mixed or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tortilla-pizza-08940b5c74ee",
+      "reason": "P7b: steps stop after the meat sauce; tortillas, cheese and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chili-lasagna-08b48d42dcb5",
+      "reason": "P7b: steps stop after cooking the noodles; nothing is assembled or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-crispy-chicken-thighs-09cde7f29a47",
+      "reason": "safety: steps dredge in 1/2 cup flour and cornstarch that are not listed (gluten not in allergens)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-northern-style-lasagna-0b67001c5066",
+      "reason": "P7b: steps stop after the meat sauce; ricotta, soup, noodles and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beggar-s-chicken-0beeb8eded95",
+      "reason": "P8f: the only step is an equipment note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-zucchini-parmigiana-12df652e5252",
+      "reason": "P7b: steps stop after slicing the zucchini; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-green-curry-shrimp-with-pan-roasted-bok-choy-167387d57d86",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stephen-s-chicken-enchilada-16b14c2beed5",
+      "reason": "P7b: steps stop after poaching the chicken; sauce, filling, tortillas and cheese missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-surprise-crust-pizza-178f83fba5ac",
+      "reason": "P7b: steps stop after the onions; mushrooms, sauce, cheese and final bake missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cashew-chicken-serves-4-1925cf93042d",
+      "reason": "P7b: pineapple, cashews, green onions and red pepper are listed but never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indian-style-grilled-chicken-1a7e9c882ee4",
+      "reason": "P7b: steps stop after scoring the chicken; marinade and grilling missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-turkish-stew-1ad3635132f3",
+      "reason": "P8f: the only step is an equipment note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-rigatoni-ala-carbonara-1c5e9744ee84",
+      "reason": "P7b: steps stop after boiling the pasta; eggs and cheese never combined",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mitsutaki-21cae81038e9",
+      "reason": "P8f: no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-grits-souffle-244d8c7cc69d",
+      "reason": "safety: the dish is greased with bacon drippings that are not listed (pork not visible to diet rules)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-fish-plaka-style-greek-25b28d1fa3fa",
+      "reason": "safety: the fish goes into a buttered crockpot (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-szechuan-chicken-with-cashews-27ecb8317055",
+      "reason": "P7b: steps stop after marinating the chicken; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-ja-jang-mung-lip-smacking-chinese-dish-2cdd2ab81d12",
+      "reason": "P3: beef, pork belly, onions and noodles used in the steps are not listed (gluten not in allergens)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-hamburg-chop-suey-2e6cd0604d12",
+      "reason": "P7b: steps only cover the rice; beef, celery, sprouts never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-roast-persian-lamb-2ef5c1de04bc",
+      "reason": "P7b: steps stop before roasting; butter, tomato paste, onions, carrots never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-general-tso-s-chicken-3074dbba42a1",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stir-fry-pepper-steaks-30939c7751a6",
+      "reason": "P7b: steps stop after marinating; nothing is stir-fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-skipper-s-linguine-325ab820e25a",
+      "reason": "P7b: steps stop after the onions; clams, tuna, olives and linguine never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-argentinian-stew-in-a-pumpkin-shell-34271289e1ee",
+      "reason": "P7b: steps stop at the stew; the pumpkin shell, corn and sherry are never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cheese-grits-souffle-393831956260",
+      "reason": "P7b: steps stop after the grits; eggs, milk, cheese and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-portuguese-chicken-saute-3bd6096cd39d",
+      "reason": "P7b: steps stop after browning; tomatoes, onion, mushrooms and wine never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-meal-on-kabobs-3e9e535f4f39",
+      "reason": "P7b: steps stop after marinating; the kabobs are never assembled or grilled",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-never-fail-dumplings-3ec194dad3b7",
+      "reason": "P7b: the steps are a joke (elephant stew); the dumplings are never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lazy-lasagne-3f2c09be99cd",
+      "reason": "P7b: steps stop after the meat sauce; cheeses, noodles and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-shrimp-kabobs-low-fat-3f840960d5dc",
+      "reason": "P7b: steps stop after marinating; skewering and cooking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-fish-spanish-style-4345830f487c",
+      "reason": "P8f: the only step is a description; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-stuffed-fish-43c7a41e9d03",
+      "reason": "P7b: steps stop before stuffing; the fish is never stuffed or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-grilled-chicken-tacos-497563fc05e0",
+      "reason": "P7b: steps stop after seasoning; the chicken is never grilled or assembled",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-colorful-dragon-stir-fry-49d446ae3922",
+      "reason": "P7b: steps stop after the chicken; broccoli, onion and carrot never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mexican-casserole-microwave-4b43ea8428ba",
+      "reason": "P7b: steps stop before cooking the casserole; chips and sour cream never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-fruit-curry-4cb46715223e",
+      "reason": "P7b: the fruit, the main ingredient, is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-nightshade-free-chicken-fajitas-4eb2b854e0a8",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-smothered-sirloin-steak-with-adobo-gravy-51315ac62e79",
+      "reason": "P8f: the steps are a publisher note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-japanese-fried-green-tomatoes-519d4d3f66d7",
+      "reason": "safety: the steps whisk eggs with buttermilk that is not listed (milk not in allergens)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-stir-fry-american-style-526c2b842c44",
+      "reason": "P7b: steps stop after the carrots; meat, cauliflower, peas and sauce never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-tex-mex-steak-52abc07c85b1",
+      "reason": "P7b: steps stop before the salsa mixture; onions, tomatoes and cheese never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-oriental-chicken-stir-fry-555bea264a70",
+      "reason": "P7b: steps stop after the vegetables; the sauce is never made and the chicken never returned",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-vegetarian-lasagne-5956ed44108a",
+      "reason": "P7b: steps stop at the sauce; noodles, spinach and cheeses never layered or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-curry-serves-6-5fe4e64895fd",
+      "reason": "P7b: steps stop at the roux; broth, chicken, milk and chutney never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-karhai-chicken-6312f068d215",
+      "reason": "P7b: steps stop after boiling the chicken; tomatoes, chillies, sauce and oil never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-shepherd-s-pie-with-cheesy-mashed-potatoes-65707415b55e",
+      "reason": "P7b: steps stop after the mash; the meat filling is never made or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-caribbean-carrots-65b5b420823f",
+      "reason": "P7b: steps stop after steaming; pineapple and the glaze are never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indiana-pork-chops-6695c292d24d",
+      "reason": "P3: the pork chops, the main ingredient, are not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-quick-skillet-enchiladas-6d3c70315592",
+      "reason": "P7b: steps stop at the sauce; tortillas, cheese and olives never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sam-s-stir-fry-72e805dbfd65",
+      "reason": "P8f: the only step is an optional-vegetables note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-enchilada-casserole-yield-4-servings-cooking-time-25-to-30-minutes-7306c2de59f7",
+      "reason": "P7b: steps stop after frying tortillas; the casserole is never assembled or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-weight-watchers-spicy-beef-and-vegetable-stir-fry-7438a9cf452b",
+      "reason": "P7b: steps stop after cutting the broccoli; nothing is stir-fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-rice-pilaf-with-black-eyed-peas-and-green-beans-75cca4a4fdea",
+      "reason": "P7b: steps stop after soaking the rice; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-fish-with-lemon-and-black-pepper-7a6bf05570b1",
+      "reason": "P7b: steps stop after marinating; the fish is never baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cantonese-eggplant-7b001f2b8061",
+      "reason": "P7b: steps stop after frying the eggplant; meat, sauce and scallions never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chilaquilas-american-name-enchilada-casserole-7c54a159d422",
+      "reason": "P8f: steps stop after oiling the crockpot; nothing is assembled or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mixed-vegetable-curry-7e1aeded4f62",
+      "reason": "P7b: steps stop after frying the vegetables; the curry sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mama-mcquaid-s-lasagna-7e3d908a102e",
+      "reason": "P7b: steps stop at the meat sauce; white sauce, noodles and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-vegetarian-quiche-7eb67b49c61b",
+      "reason": "P7b: steps stop after the pastry; the filling is never made or baked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-seafood-lasagne-by-dennis-7f6e995ae145",
+      "reason": "P7b: steps stop at the sauce; noodles, crab and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-bernie-arnold-s-chinese-pepper-steak-834ef233ab8d",
+      "reason": "P7b: steps stop after slicing the steak; nothing is cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-provencale-844b3271b19b",
+      "reason": "P7b: steps stop after browning the chicken; vegetables and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indiana-baked-beans-882366890116",
+      "reason": "P7b: steps stop after simmering the beans; sugar, ketchup, molasses and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-breasts-moroccan-89aa128ce2b7",
+      "reason": "P7b: steps stop after the lemon rind; the chicken is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sour-cream-chicken-enchilada-casserole-8b04238f884f",
+      "reason": "P7b: steps stop after the filling; sauce, tortillas, cheese and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-steak-and-mushroom-kabobs-935e6d79fb18",
+      "reason": "P8e: the steps are only a link to an outside recipe",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-cabbage-for-a-king-945cb1aba973",
+      "reason": "P7b: the tomato sauce is never finished; tomatoes and Worcestershire never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-enchiladas-in-a-skillet-9b7237527c01",
+      "reason": "P7b: steps stop at the sauce; tortillas, cheese and olives never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-round-sauerbraten-9d3dec7d98b2",
+      "reason": "safety: served over buttered noodles (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-and-asparagus-stir-fry-9f3aa1f1eb51",
+      "reason": "P7b: steps stop after the pasta; beef, sauce and asparagus never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-easy-cheese-quiche-a1719247f16a",
+      "reason": "P7b: the only step is a note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lamb-and-veggie-kebabs-a757c1f4df92",
+      "reason": "P7b: steps stop after marinating; the kebabs are never assembled or cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-okra-lover-s-omelet-a7ef75920f8a",
+      "reason": "safety: the okra is fried in bacon grease that is not listed (pork not visible to diet rules)",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-green-bean-stir-fry-a8ea4bb8cf6b",
+      "reason": "P7b: steps stop after the onions; ramen, tomato and sauce never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-light-beef-kabobs-aaaec3713987",
+      "reason": "P7b: steps stop after marinating; the kabobs are never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-seneca-goulash-b45c4f753156",
+      "reason": "P7b: steps stop after browning the beef; vegetables and tomatoes never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-yorkshire-mint-humbugs-b53603207985",
+      "reason": "safety: cut with buttered scissors (butter unlisted) while labelled vegan and dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chunky-chicken-curry-b59b5d8c4740",
+      "reason": "P7b: steps stop after cooking the chicken; the curry sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-indian-curry-b5f31c84aa33",
+      "reason": "P3: the onion and potatoes the steps use are not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-stroganoff-microwave-b7d3a0635388",
+      "reason": "P7b: the soup, catsup and sour cream are never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mandarin-chicken-use-meat-poultry-or-seafood-b995fbaa7a53",
+      "reason": "P7b: steps stop before the sauce; sugar, vinegar, catsup and nuts never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-sesame-chicken-and-celery-stir-fry-bbde11181b87",
+      "reason": "P7b: steps stop after the marinade; nothing is stir-fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-lebanese-rolled-cabbage-bd11afde5fba",
+      "reason": "P8f: the only step is a note; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-donna-s-lasagne-c01d2c8fe9ce",
+      "reason": "P7b: steps stop at the sauce; sausage, noodles and cheeses never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-parmesan-crusted-lemon-chicken-c6db70a94e62",
+      "reason": "P7b: steps stop after the lemon soak; breading and cooking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-oven-chicken-croquettes-serves-4-c937ca41c281",
+      "reason": "P7b: steps stop at the white sauce; chicken, crumbs, eggs and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-ceylonese-beef-cca9e982606c",
+      "reason": "P7b: steps stop after the spices; broth, vinegar and the simmer are missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-caribbean-baked-squash-ce71f60e74f4",
+      "reason": "P7b: steps stop after par-cooking; butter, pineapple and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chilean-chicken-corn-pie-d432e493ec83",
+      "reason": "P7b: steps stop before the corn topping; corn, milk and egg never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-orange-pineapple-chicken-stir-fry-lo-fat-d6ce38c9fb99",
+      "reason": "P7b: steps stop before the sauce; cornstarch, broth and oranges never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mediterranean-shrimp-with-linguine-d704ff0af488",
+      "reason": "P7b: steps stop after the shrimp; the tomato sauce is never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-garbage-chop-suey-d83e49e36ae8",
+      "reason": "P7b: steps stop at the sauce; macaroni, cheese and olives never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-and-apricot-stir-fry-da07f67236ee",
+      "reason": "P7b: steps stop before the sauce; orange juice and tamari never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-portuguese-bacon-from-heaven-toucinho-do-ceu-db51910e060d",
+      "reason": "safety: a buttered pan (butter unlisted) while labelled dairy-free",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-chicken-with-curry-dc09d71391e2",
+      "reason": "P7b: steps stop after the first bake; the sauce, tomatoes and mushrooms are never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-crock-pot-enchiladas-dc1415481037",
+      "reason": "P7b: steps stop at the filling; tortillas, cheese and slow cooking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-seafood-lasagne-betty-crocker-s-cookbook-df485ccdc431",
+      "reason": "P7b: steps stop after the first sauce layer; noodles, seafood and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-pizza-hot-dish-casserole-e042090ab648",
+      "reason": "P7b: steps stop at the sauce; noodles, cheeses and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-and-vegetable-stir-fry-e055e739584a",
+      "reason": "P7b: steps stop after the vegetables; chicken, broth, wine and snow peas never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-chicken-with-cashews-szechwan-style-e57162067362",
+      "reason": "P8f: the only step is a substitution footnote; no cooking instructions",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-grilled-cornish-hens-e71d4ed316e8",
+      "reason": "P7b: steps stop after marinating; the hens are never grilled",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-walnut-vegetable-stir-fry-eabb0f9ab212",
+      "reason": "P7b: steps stop after the sauce mixture; nothing is stir-fried",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-beef-and-peppers-stir-fry-ed039661f860",
+      "reason": "P7b: steps stop after the peppers; the beef is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-hungarian-chicken-paprikash-ee6671472b7a",
+      "reason": "P8d: the steps break off mid-sentence; sour cream and flour never added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-calvin-s-chicken-enchiladas-f03054ca46f2",
+      "reason": "P7b: steps stop after slicing the chicken; tortillas, cheese and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-baked-lasagna-casserole-f236c4c2c8fd",
+      "reason": "P7b: steps stop after the noodles; cheeses, layering and baking missing",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-mary-jo-s-lemon-chicken-f2594e27e0f1",
+      "reason": "P7b: steps stop after breading; the chicken is never cooked and the sauce never made",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-brazilian-black-beans-and-rice-f4f108d33f2c",
+      "reason": "P7b: steps stop after simmering beans; sausage, onion and garlic never used",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-quick-scalloped-potatoes-f4f496dff0b8",
+      "reason": "P7b: the only step is a microwave power note; nothing is assembled",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-oven-parmesan-chicken-f73cae0682a1",
+      "reason": "P7b: the chicken, the main ingredient, is not listed",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-black-beans-cuban-style-f88d9c9f1850",
+      "reason": "P7b: steps stop at the garlic paste; the onion and oil sofrito is never made or added",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-fajitas-pronto-ff4e4b68142b",
+      "reason": "P7b: steps stop after chilling the salsas; the steak is never cooked",
+      "reviewer": "claude-ai (pending owner spot-check)"
+    },
+    {
+      "slug": "v2-garbanzo-and-chorizo-ffa75e0dfe45",
+      "reason": "P7b: the only cooking step is 'simmer until done', with no liquid, order or time",
+      "reviewer": "claude-ai (pending owner spot-check)"
     }
   ]
 }

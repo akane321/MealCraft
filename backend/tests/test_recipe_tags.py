@@ -212,6 +212,36 @@ def test_the_models_answer_keeps_only_what_the_lines_support() -> None:
     assert cookie.values["protein_sources"] == [] and cookie.methods["protein_sources"] == "llm"
 
 
+BAKED_BEANS = ("Baked Beans", "side", [("pinto_beans", 400), ("pork", 100), ("ketchup", 80), ("brown_sugar", 50)])
+
+
+def test_a_side_with_no_meal_filling_option_is_not_sent_to_the_model_but_keeps_its_reviewer_roles() -> None:
+    from app.data.recipe_tags import model_may_decide, review_roles
+
+    beans = dish(*BAKED_BEANS)
+    found = rule_tags(beans)
+    assert found.open == ["meal_role"] and not set(found.allowed_roles) & {"protein_main", "vegetable", "staple"}
+    assert not model_may_decide(beans, found)
+    assert {"staple", "one_bowl"} <= set(review_roles(beans, found))  # the reviewer still sees the meal roles
+    cookie = dish("Kifliks", "baked_good", [("flour", 300), ("egg", 100), ("walnut", 100)], sugar_g=8.0)
+    assert model_may_decide(cookie, rule_tags(cookie))  # other courses are asked as before
+
+
+def test_a_sweet_or_condiment_answer_does_not_erase_a_savoury_courses_rule_protein() -> None:
+    beans = rule_tags(dish(*BAKED_BEANS))
+    merge_answer(beans, {"meal_role": "sauce", "protein_sources": None}, "batch", "side")
+    assert beans.values["meal_role"] is None and beans.values["protein_sources"] == ["pork", "legume"]
+    assert "meal_role" not in beans.methods
+
+
+def test_the_prompt_tells_the_model_not_to_force_a_non_meal_role() -> None:
+    from app.data.recipe_tags import PROMPT
+
+    text = " ".join(PROMPT.split())
+    assert 'When none of "allowed_meal_roles" fits the dish, answer null.' in text
+    assert "is never sauce, dessert, drink, snack or breakfast just because those are the only roles allowed" in text
+
+
 def test_explicit_ingredient_wording_beats_generic_ids_and_does_not_split_mixed_weights() -> None:
     beef = dish("Pasties", "main", [("meat", 900), ("onion", 200)])
     beef.lines[0].text = "5 lb. meat, cut small (beef stew or chuck roast)"
@@ -446,6 +476,17 @@ def test_model_answers_for_v3_recipes_form_their_own_batch_and_v22_recipes_are_n
     after = json.loads(target.read_text(encoding="utf-8"))["recipes"]
     assert all(after["RCP2_NEWV3"]["estimated"][name]["reviewed"] for name in recipe_tags.CRITICAL_MODEL_FIELDS)
     assert after["FROZEN"]["estimated"]["meal_role"]["reviewed"] is False
+
+    # An injected `ask` (a subagent's answers) is called without `--llm`, and `reask_v3` re-asks the v3 batch
+    # while the frozen model batch keeps its answers.
+    asked.clear()
+    monkeypatch.setattr(recipe_tags, "ask_model", lambda *a: pytest.fail("No model call authorized"))
+    frozen_entry = {"meal_role": "snack", "estimated": {"meal_role": wanted | {"batch": recipe_tags.LLM_BATCH}}}
+    monkeypatch.setattr(recipe_tags, "previous_file", lambda: {"recipes": entries | {"RCP2_OLDV22": frozen_entry}})
+    again = recipe_tags.build(False, 0, reask_v3=True, ask=answer)
+    assert asked == ["RCP2_NEWV3"]
+    old = next(found for item, found in again["tagged"] if item.key == "RCP2_OLDV22")
+    assert old.values["meal_role"] == "snack" and old.methods["meal_role"] == "llm"
 
 
 def test_a_frozen_homemade_staple_takes_the_rules_staple_but_stays_gated(monkeypatch) -> None:

@@ -1,0 +1,133 @@
+recipe_id,line,group,original_text,grams_before,stated_mass_g,grams_after,result
+RCP2_02369FA0C7BF,10,first build,1 (14.5 ounce) can diced tomatoes,270.0,411.1,411.1,changed
+RCP2_0236C88B7A30,9,first build,1 (1.5 ounce) box raisins,72.5,42.5,42.5,changed
+RCP2_0317E052C1E9,7,other added,1 (15 ounce) can tomato sauce,245.0,425.2,425.2,changed
+RCP2_033B4982BD5B,9,other added,1 (16 ounce) can low fat refried beans,335.2,453.6,453.6,changed
+RCP2_05101EDF2C11,6,other added,1 (13 ounce) can dulce de leche (Use 1/2 cup out of the can),160.0,368.5,,partly used / drained
+RCP2_0546B951C558,7,other added,1 (14 ounce) can reduced-fat coconut milk,226.0,396.9,396.9,changed
+RCP2_0573B8DC2E51,9,first build,1 (12 oz.) can crushed tomatoes (with juice),180.0,340.2,340.2,changed
+RCP2_06BD5193D2D9,11,other added,1 can (14 oz) diced tomatoes,180.0,396.9,396.9,changed
+RCP2_06EE976CBB3E,12,first build,1 (20 ounce) can green peas,134.0,567.0,,can or jar of a food packed in liquid
+RCP2_08B48D42DCB5,1,other added,1 (16 oz.) pkg. lasagna noodles,340.2,453.6,453.6,changed
+RCP2_0B805B6CFC84,14,other added,1 (4 ounce) can sliced olives,67.5,113.4,,can or jar of a food packed in liquid
+RCP2_0F1727B42C7A,2,first build,6 (12 ounce) bottles beer,1001.7,2041.2,2041.2,changed
+RCP2_11AEB66291D1,11,first build,"1 (8 ounce) package mushrooms, sliced",140.0,226.8,226.8,changed
+RCP2_12381CD30675,11,first build,1 (10 ounce) can coconut milk,226.0,283.5,283.5,changed
+RCP2_12E6C1C8729C,5,other added,1 (4 ounce) can diced green chilies,75.0,113.4,113.4,changed
+RCP2_143067DAA9BA,9,first build,1 (14 ounce) can plum tomatoes,180.0,396.9,396.9,changed
+RCP2_19D4047E196E,5,first build,1 (16 oz.) can tomatoes,180.0,453.6,453.6,changed
+RCP2_1BA8735E065A,8,first build,1 (14 ounce) can vegetable broth,239.0,396.9,396.9,changed
+RCP2_1BA8735E065A,10,first build,1/2 (14 ounce) can coconut milk,113.0,198.4,198.4,changed
+RCP2_1D5E7EAD3257,7,first build,1 (20 ounce) can crushed pineapple,200.0,567.0,,can or jar of a food packed in liquid
+RCP2_1DB23DAD539F,8,other added,1 (14 ounce) can sweetened condensed milk,546.0,396.9,396.9,changed
+RCP2_203F0DEE8E9F,10,other added,1 (12 ounce) can coconut,90.0,340.2,340.2,changed
+RCP2_22B9CA19D67D,9,first build,1 (12 ounce) jar salsa (HOT!),250.0,340.2,340.2,changed
+RCP2_23C5E9926B7C,2,other added,1 (400 g) can crushed tomatoes,180.0,400.0,400.0,changed
+RCP2_26CDA77ED509,3,first build,1 (16 oz.) can tomatoes,360.0,453.6,453.6,changed
+RCP2_2982E2393E69,2,first build,"1 (15 ounce) can cherries, pitted",240.0,425.2,,can or jar of a food packed in liquid
+RCP2_29AC130A4367,4,first build,1 (28 oz.) can tomatoes,180.0,793.8,793.8,changed
+RCP2_2BEFF70BF7F8,4,first build,1 (6 oz.) can tomato paste,262.0,170.1,170.1,changed
+RCP2_312E81984262,1,other added,1 (7.5 ounce) jar hoisin sauce,40.0,212.6,,marinade (discarded)
+RCP2_33114C9FC7B9,11,first build,1 (15 ounce) can cannellini beans,179.0,425.2,,can or jar of a food packed in liquid
+RCP2_3503F8798149,2,other added,1 (14 ounce) can coconut milk,226.0,396.9,396.9,changed
+RCP2_3690CA8E4762,8,first build,1 (10 ounce) can coconut milk,226.0,283.5,283.5,changed
+RCP2_36C272861242,4,other added,"2 (4 ounce) cans green chilies, chopped",300.0,226.8,226.8,changed
+RCP2_38F566A35F18,12,other added,1 (16 ounce) can stewed tomatoes,240.0,453.6,453.6,changed
+RCP2_39BBC7112A38,15,first build,"1 (12 ounce) can plum tomatoes, lightly mashed with a potato masher",180.0,340.2,340.2,changed
+RCP2_39BBC7112A38,17,first build,1 (8 ounce) can chickpeas,152.0,226.8,,can or jar of a food packed in liquid
+RCP2_3D42C04ED1F5,8,other added,1 (7 oz.) bag shredded coconut,85.0,198.4,198.4,changed
+RCP2_3ED2C8F4BA32,4,other added,1 (16 oz.) pkg. sliced pepperoni,113.4,453.6,113.4,any or all toppings
+RCP2_4191BDA91183,2,first build,1 (12 oz.) can corn (nowadays 15 oz.),253.8,340.2,,can or jar of a food packed in liquid
+RCP2_426675F7EC7F,13,first build,1 (11 ounce) can coconut milk,226.0,311.8,311.8,changed
+RCP2_45C46673CCFB,7,first build,"1 (15 ounce) can diced tomatoes, with juices",270.0,425.2,425.2,changed
+RCP2_45E7E26F0218,1,other added,1 can (20 ounces) pineapple chunks,340.0,567.0,,can or jar of a food packed in liquid
+RCP2_470143CEE6D8,5,other added,1 box (about 48 Oz. Box) Vanilla Ice Cream,453.6,1360.8,1360.8,changed
+RCP2_47E74BE2A6CD,3,first build,1 can (4.5 oz.) chopped green chilies,75.0,127.6,127.6,changed
+RCP2_4A0B12B92454,1,v2.2,4 (15 ounce) cans chickpeas (garbanzo),1000.0,1701.0,,v2.2 record (never changed)
+RCP2_4F7383D25A1E,7,first build,1 (13.5 oz) can diced tomatoes,180.0,382.7,382.7,changed
+RCP2_50926CC84274,2,first build,1 (15 ounce) can cream of mushroom soup,850.5,425.2,425.2,changed
+RCP2_509B579E2727,6,first build,1 (16 oz.) can whole tomatoes,360.0,453.6,453.6,changed
+RCP2_53D8ACB984D1,7,other added,1 (11 ounce) can mandarin orange segments,165.0,311.8,,can or jar of a food packed in liquid
+RCP2_541282D2E26A,14,first build,1 (16 oz.) jar whole small onions,240.0,453.6,,can or jar of a food packed in liquid
+RCP2_54ED4766F52D,14,other added,1 (28 ounce) can diced tomatoes,453.6,793.8,793.8,changed
+RCP2_572E7546B560,6,other added,2 (28 ounce) cans diced tomatoes,1260.0,1587.6,1587.6,changed
+RCP2_584BEFC67869,8,first build,2 (16 oz.) cans chopped tomatoes,720.0,907.2,907.2,changed
+RCP2_5989020230F0,2,other added,1 (8 oz.) can pizza sauce,126.0,226.8,226.8,changed
+RCP2_5AD4997ECF58,4,other added,1 (8 ounce) can diced tomatoes,180.0,226.8,226.8,changed
+RCP2_5AF9BA54B4AD,1,other added,1 (13.5 oz) can sweetened condensed milk,506.4,382.7,382.7,changed
+RCP2_61DBA68A4590,2,first build,2 (15 ounce) cans chickpeas,304.0,850.5,,can or jar of a food packed in liquid
+RCP2_61DBA68A4590,10,first build,"1 (8 ounce) can tomatoes, chopped",180.0,226.8,226.8,changed
+RCP2_62DF7DBA33D5,3,first build,1 (4 oz.) can diced green chilies,75.0,113.4,113.4,changed
+RCP2_68679CAE3264,3,other added,1 (28 ounce) can low sodium tomato,630.0,793.8,793.8,changed
+RCP2_68BD9A5178D4,6,first build,2 (15 ounce) cans black beans,602.0,850.5,,can or jar of a food packed in liquid
+RCP2_6C2ADBA3779E,2,other added,1 (17 ounce) jar mango chutney,300.0,481.9,481.9,changed
+RCP2_6C59131F0211,3,first build,1 can (16 oz.) stewed tomatoes,360.0,453.6,453.6,changed
+RCP2_6CB4BE77C3C5,8,first build,"1 (8 oz.) pkg. spaghetti, cooked",560.0,226.8,,cooked form
+RCP2_6EE68213D15D,7,other added,1 can (14 oz) diced tomatoes,315.0,396.9,396.9,changed
+RCP2_7025B2A00771,9,first build,"1 (28 ounce) can tomatoes, diced",608.7,793.8,793.8,changed
+RCP2_703781931A43,3,first build,1 (14 ounce) can coconut milk,226.0,396.9,396.9,changed
+RCP2_7246E8F66853,5,first build,"1 (4 oz.) can green chilies, chopped (optional)",75.0,113.4,75.0,optional
+RCP2_764EDEB4A5A1,8,other added,1 (28 ounce) can crushed tomatoes,630.0,793.8,793.8,changed
+RCP2_7734DF61FD14,2,other added,1 (10 ounce) box couscous,432.5,283.5,283.5,changed
+RCP2_78401D0B8E96,9,other added,2 cans (14 oz each) diced tomatoes,1260.0,793.8,793.8,changed
+RCP2_82618EC5A764,2,other added,3 (15 ounce) cans black beans,750.0,1275.7,,can or jar of a food packed in liquid
+RCP2_87F956B41204,7,other added,2 (8 ounce) cans diced tomatoes,360.0,453.6,453.6,changed
+RCP2_8802B346D3F7,11,other added,1 (14 ounce) can artichoke hearts,240.0,396.9,,can or jar of a food packed in liquid
+RCP2_8D085718D651,5,other added,1 (14 ounce) can sweetened condensed milk,546.0,396.9,396.9,changed
+RCP2_921EF77AC50C,1,first build,1 (11 ounce) can mandarin oranges,165.0,311.8,,can or jar of a food packed in liquid
+RCP2_953F161C1A6A,6,other added,1 (15 oz.) jar spaghetti sauce,245.0,425.2,425.2,changed
+RCP2_96EB208480CC,4,other added,1 (14 ounce) can diced tomatoes,180.0,396.9,396.9,changed
+RCP2_993C753B35B6,1,other added,"1 (5 ounce) package teriyaki marinade, divided",54.0,141.7,,marinade (discarded)
+RCP2_A2955C8CDAC5,9,other added,1 (14 ounce) can coconut milk,226.0,396.9,396.9,changed
+RCP2_A383CEAC2A7D,3,v2.2,1 (8 ounce) jar green peas,134.0,226.8,,v2.2 record (never changed)
+RCP2_A84ED9879779,7,other added,1 (14 ounce) can low sodium beef broth,240.0,396.9,396.9,changed
+RCP2_A8C20BD2A96E,5,other added,1 (16 ounce) jar chunky salsa,250.0,453.6,453.6,changed
+RCP2_A9D81A882776,12,v2.2,1 (8 ounce) can sliced water chestnuts,140.0,226.8,,v2.2 record (never changed)
+RCP2_AE5C70472885,2,other added,1 (15 ounce) can diced tomatoes (low sodium if available),180.0,425.2,425.2,changed
+RCP2_B08A8544F38D,5,other added,1 (19 ounce) can pineapple chunks,200.0,538.6,,can or jar of a food packed in liquid
+RCP2_B10BCDC0CB5D,3,other added,1 (15 ounce) can diced tomatoes,180.0,425.2,425.2,changed
+RCP2_B1604620323C,6,other added,1 (14 ounce) can whole tomatoes,315.0,396.9,396.9,changed
+RCP2_B27B749954BB,10,first build,1 (28 oz.) jar spaghetti sauce,245.0,793.8,793.8,changed
+RCP2_B35DFDDB80D0,4,other added,1 (14 ounce) can diced tomatoes,315.0,396.9,396.9,changed
+RCP2_B42396BB7731,5,other added,"1 (10 ounce) package frozen spinach, start with 1/2 this",141.7,283.5,,partly used / drained
+RCP2_B4874D66162E,2,first build,"1 (16 ounce) can tomatoes, chopped",360.0,453.6,453.6,changed
+RCP2_B4874D66162E,4,first build,"1 (4 ounce) can green chilies, chopped",75.0,113.4,113.4,changed
+RCP2_B5B9BC5BF4B0,8,other added,1 (16 ounce) can sauerkraut,284.0,453.6,,can or jar of a food packed in liquid
+RCP2_B686D1183CDA,1,other added,2 (28 ounce) cans spaghetti sauce,490.0,1587.6,1587.6,changed
+RCP2_B6E78D49CDCB,9,first build,1 (14 ounce) can diced tomatoes (no need to drain),301.3,396.9,,partly used / drained
+RCP2_BB0D13B89A88,2,other added,1 (12 ounce) bottle teriyaki marinade,54.0,340.2,,marinade (discarded)
+RCP2_BBEEFAFCFB96,16,other added,1 (15 ounce) can coconut milk,226.0,425.2,425.2,changed
+RCP2_BBEEFAFCFB96,17,other added,1 (15 ounce) can chickpeas,152.0,425.2,,can or jar of a food packed in liquid
+RCP2_C20776E7D8DB,4,first build,1 (15 oz.) can tomato sauce,245.0,425.2,425.2,changed
+RCP2_C4F2DAB5B1A0,5,first build,1 (16 oz.) can kernel corn,217.5,453.6,,can or jar of a food packed in liquid
+RCP2_C4F2DAB5B1A0,6,first build,1 (16 oz.) can tomatoes,360.0,453.6,453.6,changed
+RCP2_C54503B406F8,1,other added,1 (3 ounce) package ramen noodles,28.3,85.0,85.0,changed
+RCP2_C70D73AD9751,10,other added,1 (28 oz) can whole tomatoes,608.7,793.8,793.8,changed
+RCP2_C9115A04D4EB,5,first build,1 (1 lb.) can kidney beans,316.0,453.6,,can or jar of a food packed in liquid
+RCP2_CA66A75E731C,4,first build,1 (14 ounce) can garbanzo beans,240.0,396.9,,can or jar of a food packed in liquid
+RCP2_CB02FAF06506,2,first build,"1 (4 oz.) can green chilies, diced",150.0,113.4,113.4,changed
+RCP2_CBFBA477E643,9,first build,1 (16 oz.) can lima beans,360.0,453.6,,can or jar of a food packed in liquid
+RCP2_CC84AFAC9F06,17,other added,"1 (11 ounce) can mandarin oranges, reserve 6 tbsp syrup from oranges",247.5,311.8,,partly used / drained
+RCP2_CE61643D6DB8,8,first build,1 (15.5 ounce) can diced tomatoes,180.0,439.4,439.4,changed
+RCP2_CF63D8F42D5E,3,first build,"1 (16 oz.) can tomatoes, cut up (2 c.)",360.0,453.6,453.6,changed
+RCP2_D0692AB617C5,5,first build,1 (4 oz.) can diced green chiles,150.0,113.4,113.4,changed
+RCP2_D206CF8D68B2,1,other added,1 (12 oz.) bottle Kikkoman soy sauce,127.5,340.2,,marinade (discarded)
+RCP2_DA41EB98C6B4,5,first build,"1 (16 oz.) can tomatoes, chopped",360.0,453.6,453.6,changed
+RCP2_E115AEC3F102,10,other added,2 (14 ounce) cans sweetened condensed milk,1047.1,793.8,793.8,changed
+RCP2_E156E46FD53A,5,v2.2,"2 (8 ounce) cans water chestnuts, sliced",300.0,453.6,,v2.2 record (never changed)
+RCP2_E370AE576BCB,8,first build,1 (12 oz.) pkg. shredded hash brown potatoes,204.0,340.2,340.2,changed
+RCP2_E3C6F3CCCC9B,2,other added,2 (16 ounce) cans sauerkraut,568.0,907.2,,can or jar of a food packed in liquid
+RCP2_E3F170561E56,2,first build,"1 (14 ounce) can tomatoes, diced",315.0,396.9,396.9,changed
+RCP2_E62D77CF61DB,4,other added,1 (16 ounce) can tomatoes,360.0,453.6,453.6,changed
+RCP2_E8D7862E9A9F,3,other added,1 (14 ounce) can low sodium beef broth,300.0,396.9,396.9,changed
+RCP2_E8D7862E9A9F,8,other added,1 (4 ounce) can mushrooms,35.0,113.4,,can or jar of a food packed in liquid
+RCP2_F0BE7490DEFB,6,other added,1 (28 ounce) can tomatoes,360.0,793.8,793.8,changed
+RCP2_F21AA9AF6D54,18,other added,1 (15 ounce) can coconut milk,226.0,425.2,425.2,changed
+RCP2_F45A33372AD2,12,other added,1 (400 g) can chopped tomatoes,180.0,400.0,400.0,changed
+RCP2_F469F1BF6F5B,2,other added,1 (30 oz.) jar spaghetti sauce,453.6,850.5,850.5,changed
+RCP2_F67B03156061,4,other added,1 (16 ounce) can tomatoes,360.0,453.6,453.6,changed
+RCP2_F8E1E23C8AA2,5,first build,1 (6 ounce) can pineapple juice,125.0,170.1,170.1,changed
+RCP2_FA7C3F02A231,10,other added,1 (28 ounce) can diced tomatoes,608.7,793.8,793.8,changed
+RCP2_FA95D479D002,2,other added,"1 (12 ounce) can beer, at room temperature",59.2,340.2,59.2,poured out
+RCP2_FB641550D69E,3,first build,2 (14 ounce) cans sweetened condensed milk,1091.9,793.8,793.8,changed
+RCP2_FFCCA7752CF8,12,first build,1 can (14 oz) diced tomatoes,315.0,396.9,396.9,changed
