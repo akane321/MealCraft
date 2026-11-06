@@ -3,8 +3,10 @@ import { dishRole, foodGroup } from "~/lib/dish-icon";
 import type { DishRole, FoodGroup } from "~/lib/dish-icon";
 
 // `title` is the dish title used for mapping. The icon is decorative (call sites print the title next to it).
+// `slug` shows the dish's photo where there is one (public/images); curated and private recipes keep the drawing.
 // `role`/`group` override the mapping (used by the /dev/dish-icons gallery).
 const props = withDefaults(defineProps<{
+  slug?: string | null;
   title?: string;
   course?: string | null;
   roleId?: string | null;
@@ -12,7 +14,14 @@ const props = withDefaults(defineProps<{
   size?: number;
   role?: DishRole;
   group?: FoodGroup;
-}>(), { title: "", course: null, roleId: null, ingredients: () => [], size: 40, role: undefined, group: undefined });
+}>(), { slug: null, title: "", course: null, roleId: null, ingredients: () => [], size: 40, role: undefined, group: undefined });
+
+const { dishSrc } = useFoodImages();
+const failedSrc = ref<string | null>(null);
+const photo = computed(() => {
+  const src = props.slug ? dishSrc(props.slug) : null;
+  return src === failedSrc.value ? null : src;
+});
 
 const dish = computed(() => ({ title: props.title, course: props.course, roleId: props.roleId, ingredients: props.ingredients }));
 const role = computed(() => props.role ?? dishRole(dish.value));
@@ -35,7 +44,19 @@ const drinkFill = computed(() => DRINK_FILL[group.value] ?? "#FFE27A");
 </script>
 
 <template>
+  <img
+    v-if="photo"
+    class="dish-photo"
+    :src="photo"
+    alt=""
+    :width="size"
+    :height="size"
+    loading="lazy"
+    decoding="async"
+    @error="failedSrc = photo"
+  >
   <svg
+    v-else
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 64 64"
     :width="size"
@@ -195,3 +216,8 @@ const drinkFill = computed(() => DRINK_FILL[group.value] ?? "#FFE27A");
     </g>
   </svg>
 </template>
+
+<style scoped>
+/* Round like the drawn plate; the empty disc holds the place until the photo arrives. */
+.dish-photo { flex: none; display: block; border-radius: 50%; object-fit: cover; background: #f6f1e7; }
+</style>

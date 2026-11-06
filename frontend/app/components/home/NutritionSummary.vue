@@ -100,7 +100,7 @@ function chooseDay(value: number) {
         <div class="dishes mc-card">
           <span class="dishes-head">{{ scopeLabel }}, per person</span>
           <div v-for="dish in dishes" :key="dish.entry_id" class="dish" :class="{ skipped: dish.status === 'skipped' }">
-            <HomeDishIcon :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="32" />
+            <HomeDishIcon :slug="dish.recipe.slug" :title="dish.recipe.title" :course="dish.recipe.course" :role-id="dish.role_id" :size="32" />
             <span class="dish-name">
               <b>{{ dish.recipe.title }}</b>
               <small>{{ Math.round(dish.nutrition_per_person.protein_g) }} g protein · {{ Math.round(dish.nutrition_per_person.fat_g) }} g fat{{ dish.status === "skipped" ? " · skipped" : dish.status === "completed" ? " · cooked" : "" }}</small>
@@ -111,7 +111,7 @@ function chooseDay(value: number) {
         <p class="mc-small">
           <strong>Eaten so far</strong>: {{ cooked }} {{ cooked === 1 ? "dish" : "dishes" }},
           {{ kcal(dashboard.completed_nutrition_per_person.calories_kcal) }} kcal and
-          {{ Math.round(dashboard.completed_nutrition_per_person.protein_g) }} g protein per person. General guidance, not medical advice.
+          {{ Math.round(dashboard.completed_nutrition_per_person.protein_g) }} g protein per person.
         </p>
       </div>
     </template>

@@ -53,7 +53,7 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
 
 <template>
   <section v-if="tonight" class="tonight" aria-label="Next meal">
-    <HomeDishIcon class="big-icon" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="64" />
+    <HomeDishIcon class="big-icon" :slug="tonight.day.recipe.slug" :title="tonight.day.recipe.title" :course="tonight.day.recipe.course" :role-id="tonight.day.role_id" :size="64" />
     <div class="head">
       <span class="kicker">{{ eyebrow }} · {{ formatPlanDate(tonight.day.planned_date, { weekday: "short", day: "numeric", month: "short" }) }}</span>
       <h2>{{ tonight.day.recipe.title }}</h2>
@@ -93,7 +93,6 @@ watch(() => tonight.value?.day.recipe.slug, async (slug) => {
             <span>{{ video.title }}</span>
           </span>
         </button>
-        <p v-else class="no-video"><UIcon name="i-lucide-video-off" aria-hidden="true" />No how-to video for this dish yet.</p>
       </div>
 
       <div class="acts">
@@ -145,10 +144,6 @@ h2 { margin: 0; color: var(--mc-strong); font-family: var(--font-display); font-
 .caption { min-width: 0; display: flex; flex-direction: column; }
 .caption small { font-size: 12px; line-height: 16px; font-weight: 400; color: var(--c-muted); }
 .caption span { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* A missing video is a caption, not an empty box. */
-.no-video { margin: 0; display: flex; align-items: center; gap: 6px; color: #71717a; font-size: 12px; line-height: 16px; }
-.no-video .iconify { width: 12px; height: 12px; flex: none; }
-.video:has(.no-video) { margin-top: 6px; }
 .acts { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-top: 12px; }
 /* Swap: an outline icon button, round like the pills beside it. */
 .swap { width: 32px; height: 32px; flex: none; margin-left: auto; display: grid; place-items: center; padding: 0; border: 1px solid #e4e4e7; border-radius: 999px; background: #fff; color: #52525b; box-shadow: var(--mc-shadow-xs); }
