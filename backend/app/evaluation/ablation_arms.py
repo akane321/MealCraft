@@ -20,8 +20,10 @@ holding the release recipes the scorer's catalog holds (imported once per proces
 registered account, every call with the test environment, the fixture parser, no OpenAI key and FairPrice as the
 only store, so a development run cannot spend money. The product's clock is the harness's anchor noon
 (`ConversationHarness` freezes it around the conversation).
-The arms make no paid call of their own (`paid=False`). From the repository root (the product reads its fixture
-files relative to it):
+The arms make no paid call of their own (`paid=False`). A run with the OpenAI parser runs "mealcraft" and the six
+switches back to back (owner, 2026-11-06, ADR-0118): the parser's long prompt prefix stays in OpenAI's cache, which
+cut a question from about US$0.005 to US$0.0016 on the development episodes.
+From the repository root (the product reads its fixture files relative to it):
 
     uv run --project backend python -m app.evaluation.baseline_arms --arm mealcraft/ablation/repair_off \\
         --episodes data/evaluation/dev/v3-meal-day-week/episodes --anchor-date 2026-09-28 \\
