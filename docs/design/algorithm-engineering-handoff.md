@@ -375,6 +375,19 @@ Generate minimal relaxation options by assigning predeclared costs to
 relaxable, non-safety constraints. Allergens and prohibited ingredients are
 never auto-relaxed. The user chooses whether to accept a relaxation.
 
+The product acceptance regressions keep counterfactuals on that boundary:
+allergen, excluded-ingredient and hard nutrition obstructions produce no
+relaxation proposal; missing data and bounded-search exhaustion do not start a
+counterfactual search; a claimed proof is independently rechecked; and only a
+re-solved, independently validated budget or cooking-time witness is presented
+for confirmation. A nearby feasible control is accepted without a refusal.
+
+Meal composition is not fixed to one output size. The population-to-dinner-role
+table is checked at each 1–2, 3–4, 5–6 and 7+ boundary, while the HTTP product
+path has focused accepted cases for fixed one-dish and three-dish dinners. Both
+pass the same independent validator and response serialization; role,
+filling-core and composition rules are unchanged.
+
 ## Interfaces with other modules
 
 ### Recipe and ingredient data

@@ -126,6 +126,19 @@ def test_false_caller_proof_is_rechecked():
     assert result["suggestions"] == []
 
 
+def test_nearby_valid_control_is_accepted_without_a_counterfactual_refusal():
+    problem = joint_packet()
+    problem.purchase_budget_sgd = 20
+    for slot in problem.slots:
+        slot.max_time_minutes = 30
+
+    result = explain_infeasibility(problem, evidence="exactly_infeasible")
+
+    assert result["status"] == "candidate_is_feasible"
+    assert result["conflict"] == []
+    assert result["suggestions"] == []
+
+
 def test_missing_data_and_per_meal_ceiling_are_not_relaxed():
     problem = joint_packet()
     result = explain_infeasibility(problem, evidence="exhaustively_infeasible", per_meal_budget=0.01)
