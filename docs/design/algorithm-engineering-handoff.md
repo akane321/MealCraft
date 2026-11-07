@@ -284,6 +284,24 @@ Weights apply only to active, observable dimensions. Missing fields are masked
 from the denominator rather than scored as zero satisfaction. Stable recipe and
 product IDs provide deterministic tie-breaking.
 
+### Cross-week completion recency
+
+The live household planning service supplies the latest persisted completion
+date for each previously completed recipe. Planned and skipped entries do not
+count. For a recipe completed `age_days` before the requested plan start date,
+the recommendation score loses:
+
+```text
+10 * max(0, 1 - max(0, age_days) / 21) points
+```
+
+This `cross-week-recency-v1` policy is linear, bounded to ten score points and
+neutral at 21 days. It is a soft recommendation/ranking input only: eligibility,
+hard repetition minima and maxima, safety, availability, roles, nutrition
+limits, budget checks and independent validation are unchanged. Missing history
+serializes as no input and preserves the previous ranking. The date basis is the
+Singapore completion date and the requested plan start date (ADR-0064/0073).
+
 ## Proposed production algorithm
 
 ### Phase 1: compile and filter

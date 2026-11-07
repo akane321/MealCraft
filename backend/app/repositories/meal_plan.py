@@ -4,15 +4,17 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from fractions import Fraction
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.clock import SINGAPORE
 from app.models.meal_plan import MealPlan, MealPlanEntry, MealPlanEvent, MealPlanGroceryItem
 from app.models.platform import OperationRun
 from app.models.recipe import Recipe
 from app.schemas.meal_plan import (
     MealPlanEntryStatus,
     MealPlanEventType,
+    PriorMealCompletion,
     WeeklyGroceryEstimateResponse,
     WeeklyMealPlanRequest,
     week_shape,
@@ -212,6 +214,27 @@ class MealPlanRepository:
             .limit(limit)
         )
         return list(self.session.scalars(statement).all())
+
+    def prior_completions(self, *, limit: int = 500) -> list[PriorMealCompletion]:
+        """Latest completed day per recipe for this household; planned and skipped entries are not history."""
+        statement = (
+            select(MealPlanEntry.recipe_id, func.max(MealPlanEntry.consumed_at))
+            .join(MealPlan, MealPlan.id == MealPlanEntry.plan_id)
+            .where(MealPlan.household_id == self.household_id, MealPlanEntry.status == "completed")
+            .group_by(MealPlanEntry.recipe_id)
+            .order_by(func.max(MealPlanEntry.consumed_at).desc(), MealPlanEntry.recipe_id)
+            .limit(limit)
+        )
+        result = []
+        for recipe_id, completed_at in self.session.execute(statement):
+            if completed_at is None:
+                continue
+            if completed_at.tzinfo is None:
+                completed_at = completed_at.replace(tzinfo=UTC)
+            result.append(
+                PriorMealCompletion(recipe_id=recipe_id, completed_on=completed_at.astimezone(SINGAPORE).date())
+            )
+        return result
 
     def is_current(self, plan: MealPlan) -> bool:
         """Check overlapping newer plans across the household's entire history: a plan is replaced only when they

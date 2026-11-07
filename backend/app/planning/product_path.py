@@ -897,7 +897,12 @@ class ProductPlanningEngine:
             if ablated("retrieval_off") and losses:
                 # Evaluation (#397): every dish ranks alike, at the mean, so the search adds no relevance back.
                 losses = dict.fromkeys(losses, fmean(losses.values()))
-            trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
+            trace["ranking"] = {
+                "policy": "recommendation-score-v1",
+                "recency_policy": "cross-week-recency-v1",
+                "completion_count": len(constraints.prior_completions),
+                "digest": digest(losses),
+            }
             titles = {r.recipe.slug: r.recipe.title for r in recommendations}
 
             # Evaluation (#397): no variety term; the household's own repeat limits still hold.
