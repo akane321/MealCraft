@@ -1,10 +1,11 @@
 # Algorithm follow-up inventory — 2026-10-27
 
 This inventory describes the development branch, not merged product acceptance.
-The contributor confirmed completion of the supplied human review; reviewer
-identity was not recorded. PAIR-030 remains unsure and is excluded from fitting
-and correctness counts. Full CI on #370 commit 69c1387 passed (run 40434611660). The new
-sequential-swap test is locally verified and is not included in that CI run.
+Engineering acceptance and the reproducible developer evidence listed below are
+complete. The contributor confirmed completion of the supplied human review,
+but reviewer identity was not recorded; PAIR-030 remains unsure and is excluded
+from fitting and correctness counts. Independent attribution and global-minimum
+evidence remain unresolved.
 
 ## Covered by this batch
 
@@ -40,15 +41,15 @@ sequential-swap test is locally verified and is not included in that CI run.
 
 | Requirement | Current boundary | Next work or dependency |
 | --- | --- | --- |
-| Independent near-duplicate labels and 21 swaps | Operational thresholds are frozen separately from exploratory fitting; product validation checks composed-meal dish kinds; 21 accepted composed-meal previews and 21 sequential confirmed swaps cover the product API on a fixed developer catalog | Obtain an attributable independent review and resolve the unsure pair. This is not full-catalog accuracy evidence |
+| Independent near-duplicate labels and 21 swaps | The frozen operational policy, composed 21-preview acceptance, and sequential 21-confirmation acceptance are complete on the fixed developer catalog; the supplied review still has no attributable reviewer identity and PAIR-030 remains unsure | Obtain an independently attributable review and resolve PAIR-030. The operational acceptance is complete, but this is not full-catalog accuracy evidence |
 | Member-mean product objective | Implemented offline; product remains table-based by instruction | Separate product decision before adoption |
-| Global minimum and at most 5% gap | Matched fixed-catalog product references now cover up to 14 days and two trips; product remains heuristic | Broader catalog and observed-price comparisons; generated options and fixed packages do not prove global minimum |
-| Fine-grained stage timing | Recommendation/candidate generation, meal-option generation, shopping, independent validation and objective instrumentation are implemented | Use these inclusive, overlapping timings in further matched scans; candidate generation includes its nested fixture grocery estimates, stages must not be summed, and they exclude LLM and live lookup |
-| Real-price evaluation | Deterministically generated snapshot package-policy evidence compares fixed-product and exact mixed-package checkout on identical observed FairPrice facts and synthetic demands | Run a matched product-plan comparison on real household demands after product mixed-package wiring; this diagnostic is not a plan optimum or five-percent result |
-| Mixed packages in product | The real product shopping builder now runs the exact mixed-package optimizer per ingredient/trip. Planning and public grocery contracts carry allocations, independent validation recomputes their arithmetic and compatibility, and FairPrice checkout expands mixed lines by product while legacy single-product fields remain compatible | Run the permitted matched developer households with observed prices; this wiring alone is not household evidence or a global-plan optimum |
-| Other section 7 acceptance | Shared-dish, nutrition, feedback, relaxation, mixed purchase and cross-week completion recency are wired. The live household path loads the latest completion date per recipe and applies the documented bounded 21-day soft ranking decay; absent history is neutral. Variable-count acceptance covers every population boundary in the dinner-role table plus independently validated one- and three-dish HTTP product plans. Counterfactual acceptance refuses safety and hard-nutrition relaxations, does not treat missing data or bounded search as infeasibility, rechecks claimed proofs, and accepts a nearby feasible control | No remaining work in this row; broader full-catalog evidence stays under the separate final-acceptance and global-minimum rows |
+| Global minimum and at most 5% gap | Matched fixed-catalog and observed-price developer references now cover up to 14 days and two trips, with exact price-gap claim scoping; product remains heuristic and the evidence is not a full-catalog optimum | Provide a broader exact comparison over the supported catalog, mixed packages, and observed prices before making a global-minimum or ≤5% claim |
+| Fine-grained stage timing | Recommendation/candidate generation, meal-option generation, shopping, independent validation, objective instrumentation, and the full matched parameter calibration are complete; timings remain inclusive and overlapping and exclude LLM/live lookup | No engineering work remains in this row; do not sum overlapping stages or turn developer timing into a product quality claim |
+| Real-price evaluation | Matched observed-price household comparison is complete, using identical observed FairPrice facts and the product mixed-package path | No further acceptance work in this row; the comparison is developer evidence, not a plan optimum or ≤5% result |
+| Mixed packages in product | Product wiring, planning/public grocery allocations, independent arithmetic and compatibility validation, FairPrice cart expansion, and matched observed-price household evidence are complete | No further acceptance work in this row; the evidence does not prove a global-plan optimum |
+| Other section 7 acceptance | Shared-dish, nutrition, feedback, relaxation, mixed purchase, cross-week recency, variable dish counts, counterfactual refusals, and their focused product-path regressions are complete. The live household path applies the documented bounded 21-day recency decay; absent history is neutral. | No remaining engineering work in this row; broader full-catalog evidence stays under the separate independent-review and global-minimum rows |
 | Genetic algorithm | Optional in the task plan | Deferred while existing methods still require product acceptance; no GA implementation claim |
-| Final acceptance | Local developer diagnostics | Full CI and the remaining independent/exact/real-price evidence; final evaluation remains with its owner |
+| Final acceptance | Engineering acceptance and reproducible developer evidence are complete; the remaining blockers are independent attribution for PAIR-030 and proof of the global-minimum/≤5% claim | Obtain the independent review and broader exact observed-price comparison; do not close the issue or make global claims before both are resolved |
 
 These reports do not close all of issue #310. A non-worsening weekly objective
 does not mean every quality measure or the checkout price improves. A faster
