@@ -44,8 +44,11 @@ For developer diagnosis, `scripts/product_household_comparison.py --profile`
 records candidate generation, shopping, validation and objective durations.
 These stage durations are inclusive and overlap, so they must not be summed
 as total runtime. `--cases` selects named developer households and `--steps`
-selects iteration counts; omitted options retain the full comparison. Profiling
-adds overhead and does not enter product traces, scores or stopping rules.
+selects iteration counts. `--widths` selects product beam widths and `--repeats`
+runs matched rounds with a rotated condition order, rather than measuring every
+setting in one block. Omitted options retain the full comparison and current
+default width. Profiling adds overhead and does not enter product traces,
+scores or stopping rules.
 
 ### Replacement near-dish checks
 
@@ -211,9 +214,13 @@ remaining_i = Q_i - d_i
 
 Package coverage and purchase budget are:
 
-Multiple `P_i` alternatives express the optimization target and offline mixed
-purchase tools. The integrated product's fixed compatible-product policy is a
-special case, not a claim that mixed-package optimization is already active.
+Multiple `P_i` alternatives are active in the product shopping builder. A
+shopping line keeps the legacy `selected_product_id` and `packages` fields for
+one-product purchases and adds `allocations[{product_id, packages}]` for a
+mixed purchase; mixed lines leave the legacy selection empty so it cannot be
+mistaken for the whole basket. The product response binds each allocation to
+its product, price evidence, retailer, package count and line cost. Checkout
+expands such a line into one cart row per product.
 
 ```text
 sum_(p in P_i) a_ip * y_ip >= remaining_i
@@ -319,12 +326,23 @@ number of retrieve-repair rounds and preserve every snapshot and rejection.
 Live retrieval is for product operation. Comparative evaluation uses a frozen
 snapshot so all methods receive the same facts.
 
+The developer snapshot package-policy comparison keeps the ingredient, demand,
+availability, package sizes and observed FairPrice prices identical between the
+single-product and mixed-package conditions. Its synthetic package-size-derived
+demands isolate the purchasing policy only; they are not evidence about a full
+household plan or the global catalog minimum.
+
 ### Phase 5: independent validation
 
 The validator receives the immutable problem, selected assignments and Shopping
 List. It recomputes constraints without trusting planner score fields. Each
 check reports code, scope, actual value, limit, margin, hard/soft status and
 detail. A failed soft band remains visible but does not become a hard failure.
+For mixed purchases it independently checks allocation identity and uniqueness,
+whole package counts, ingredient/unit/availability/halal compatibility,
+coverage, supplied and surplus quantities, per-allocation prices, line totals
+and the basket total. This validates arithmetic and consistency, not global
+optimality of the whole plan.
 
 ### Phase 6: infeasibility and relaxation
 
