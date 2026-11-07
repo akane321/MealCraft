@@ -49,10 +49,10 @@ def test_snapshot_comparison_is_matched_deterministic_and_claim_limited():
     assert len(first["rows_sha256"]) == 64
 
 
-def test_readiness_measures_the_missing_product_mixed_package_contract():
+def test_readiness_measures_the_product_mixed_package_contract():
     capability = readiness_script().product_mixed_package_capability()
-    assert capability["multi_product_allocation_fields"] == []
-    assert not capability["supports_multiple_products_per_ingredient_line"]
+    assert capability["multi_product_allocation_fields"] == ["allocations"]
+    assert capability["supports_multiple_products_per_ingredient_line"]
     assert {"selected_product_id", "packages"} <= set(capability["shopping_selection_fields"])
 
 

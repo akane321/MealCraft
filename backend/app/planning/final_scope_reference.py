@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from collections import defaultdict
 
 from app.planning.diversity import diversity_loss, permits_extension
@@ -11,10 +10,12 @@ from app.planning.input_audit import require_finite_problem
 from app.planning.meal_composition import dish_servings, require_one_dish_slots
 from app.planning.member_coverage import servable
 from app.planning.nutrition_scope import nutrition_guard_loss
+from app.planning.package_optimizer import optimize_packages
 from app.schemas.planning_v2 import (
     FinalPlanningProblem,
     FinalPlanningSolution,
     PlanningAssignment,
+    PlanningPackageAllocation,
     PlanningProductOption,
     PlanningRecipeCandidate,
     PlanningShoppingSelection,
@@ -219,21 +220,33 @@ class FinalScopeReferencePlanner:
                 surplus_quantity=None,
                 note="No compatible product or normalized quantity is available.",
             )
-        ranked: list[tuple[float, float, str, PlanningProductOption, int]] = []
-        for product in compatible:
-            packages = math.ceil(remaining / product.package_quantity)
-            purchase_cost = round(packages * product.price_sgd, 2)
-            surplus = packages * product.package_quantity - remaining
-            ranked.append((purchase_cost, surplus, product.product_id, product, packages))
-        purchase_cost, surplus, _, selected, packages = min(ranked)
+        result = optimize_packages(ingredient_id, remaining, unit, compatible)
+        if result.status != "optimal":
+            return PlanningShoppingSelection(
+                ingredient_id=ingredient_id,
+                required_quantity=required,
+                unit=unit,
+                pantry_deduction=round(deduction, 3),
+                remaining_quantity=remaining,
+                selected_product_id=None,
+                packages=0,
+                purchase_cost_sgd=0,
+                surplus_quantity=None,
+                note=f"Mixed-package selection could not complete: {result.status}.",
+            )
+        chosen = [
+            PlanningPackageAllocation(product_id=item.product_id, packages=item.packages) for item in result.allocations
+        ]
+        sole = chosen[0] if len(chosen) == 1 else None
         return PlanningShoppingSelection(
             ingredient_id=ingredient_id,
             required_quantity=round(required, 3) if required is not None else None,
             unit=unit,
             pantry_deduction=round(deduction, 3),
             remaining_quantity=round(remaining, 3),
-            selected_product_id=selected.product_id,
-            packages=packages,
-            purchase_cost_sgd=purchase_cost,
-            surplus_quantity=round(surplus, 3),
+            selected_product_id=sole.product_id if sole else None,
+            packages=sole.packages if sole else 0,
+            allocations=[] if sole else chosen,
+            purchase_cost_sgd=round(result.purchase_cost_sgd, 2),
+            surplus_quantity=round(result.surplus_quantity, 3),
         )

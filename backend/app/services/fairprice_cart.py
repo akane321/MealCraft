@@ -11,6 +11,7 @@ from app.schemas.fairprice_cart import (
     LineStatus,
     OtherStoreTrip,
     TripNumber,
+    cart_lines,
     cart_state,
     fingerprint,
     line_key,
@@ -43,7 +44,7 @@ class FairPriceCartService:
 
     def prepare(self, plan_id: int, shopping_trip: TripNumber | None) -> FairPriceCartPrepareResponse:
         plan = self._plan(plan_id)
-        trip = trip_lines(self._lines(plan), shopping_trip)
+        trip = cart_lines(trip_lines(self._lines(plan), shopping_trip))
         # Only FairPrice lines are rechecked and put in the cart; another store's lines are totalled apart.
         lines = [line for line in trip if line.retailer in {"fairprice", None}]
         other_cents: dict[str, list[int]] = {}

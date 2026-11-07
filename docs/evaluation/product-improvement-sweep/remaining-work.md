@@ -45,7 +45,7 @@ sequential-swap test is locally verified and is not included in that CI run.
 | Global minimum and at most 5% gap | Matched fixed-catalog product references now cover up to 14 days and two trips; product remains heuristic | Broader catalog and observed-price comparisons; generated options and fixed packages do not prove global minimum |
 | Fine-grained stage timing | Recommendation/candidate generation, meal-option generation, shopping, independent validation and objective instrumentation are implemented | Use these inclusive, overlapping timings in further matched scans; candidate generation includes its nested fixture grocery estimates, stages must not be summed, and they exclude LLM and live lookup |
 | Real-price evaluation | Deterministically generated snapshot package-policy evidence compares fixed-product and exact mixed-package checkout on identical observed FairPrice facts and synthetic demands | Run a matched product-plan comparison on real household demands after product mixed-package wiring; this diagnostic is not a plan optimum or five-percent result |
-| Mixed packages in product | Mixed shopping optimizer and validator exist offline; the generated readiness audit verifies that the product shopping-line schema has no multi-product allocation field | Agree the multi-package-per-ingredient/trip output contract with the shopping/retrieval owners, then connect and test it |
+| Mixed packages in product | The real product shopping builder now runs the exact mixed-package optimizer per ingredient/trip. Planning and public grocery contracts carry allocations, independent validation recomputes their arithmetic and compatibility, and FairPrice checkout expands mixed lines by product while legacy single-product fields remain compatible | Run the permitted matched developer households with observed prices; this wiring alone is not household evidence or a global-plan optimum |
 | Other section 7 acceptance | Shared-dish, nutrition, feedback and relaxation components exist | Cross-week recency is not wired: the product ranking boundary receives no household completion history, and ADR-0073 fixes only the qualitative bounded/fading behavior rather than a numeric decay policy. Define that input/policy and check/save cache consistency before wiring; complete end-to-end checks for variable dish counts, counterfactual refusals and mixed purchase |
 | Genetic algorithm | Optional in the task plan | Deferred while existing methods still require product acceptance; no GA implementation claim |
 | Final acceptance | Local developer diagnostics | Full CI and the remaining independent/exact/real-price evidence; final evaluation remains with its owner |
@@ -63,16 +63,15 @@ gap is within 5%.
 The generated [real-price readiness audit](../algorithm-dev/real-price-minimum-readiness.json)
 binds its counts to the observed snapshot digest. It records that the snapshot
 contains many multi-product ingredients while the product packet retains one
-selected product per line, candidate generation is bounded, and no joint exact
-plan-and-purchase solver is wired. It is evidence that the requested conclusion
-is currently unsupported, not a substitute minimum-price result. The audit
-derives the mixed-package blocker from the product shopping-selection schema,
-rather than treating the missing wiring as an unverified prose assertion.
+or more product allocations per line. Candidate generation remains bounded and
+no joint exact plan-and-purchase solver is wired. The audit therefore removes
+the product-contract blocker but still records that the requested global claim
+is unsupported; it is not a substitute minimum-price result.
 
 The generated [matched snapshot packaging comparison](../algorithm-dev/snapshot-package-policy-comparison.json)
 holds ingredient, demand, availability, package sizes and observed prices fixed
-while comparing the current one-product-type checkout rule with the exact
-mixed-package optimizer. Its demands are a deterministic developer grid derived
+while comparing the former one-product-type rule with the exact mixed-package
+optimizer now used by product shopping. Its demands are a deterministic developer grid derived
 from package sizes, not household shopping demand, so it isolates packaging
 policy value without claiming end-to-end plan quality or a real minimum.
 Both JSON artifacts have script `--check` modes and focused regression coverage

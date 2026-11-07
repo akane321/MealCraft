@@ -58,7 +58,8 @@ class DiversityAwareGreedyPlanner:
             assignments = assignments_of(trial)
             shopping = self.candidates._build_shopping(problem, assignments)
             if any(
-                row.remaining_quantity is None or (row.remaining_quantity > 0 and row.selected_product_id is None)
+                row.remaining_quantity is None
+                or (row.remaining_quantity > 0 and row.selected_product_id is None and not row.allocations)
                 for row in shopping
             ):
                 return None

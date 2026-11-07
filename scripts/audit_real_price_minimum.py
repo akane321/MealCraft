@@ -33,7 +33,7 @@ def build_artifact(snapshot, raw):
         observed_snapshot=True,
         # Product candidate construction is bounded and role-ranked.
         full_supported_catalog=False,
-        # ProductPlanningEngine projects the one product already selected for each grocery line.
+        # Product shopping now carries and validates all allocations for each ingredient/trip.
         mixed_packages_in_product=capability["supports_multiple_products_per_ingredient_line"],
         # Existing exact references solve generated assignments and package subproblems separately.
         exact_joint_plan_and_purchase_solver=False,
@@ -45,8 +45,8 @@ def build_artifact(snapshot, raw):
         "snapshot_sha256": hashlib.sha256(raw).hexdigest(),
         "readiness": readiness.model_dump(mode="json"),
         "supported_claim": "observed-snapshot domain audit; no real-minimum or five-percent conclusion",
-        "product_projection": "one selected product per ingredient line",
-        "offline_mixed_solver": "exact package subproblem for a supplied bounded packet; not product wiring",
+        "product_projection": "mixed package allocations per ingredient and shopping trip",
+        "offline_mixed_solver": "exact package subproblem is wired into product shopping; not a joint plan optimum",
         "product_output_contract": capability,
     }
 

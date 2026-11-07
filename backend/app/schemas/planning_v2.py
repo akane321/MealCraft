@@ -498,6 +498,13 @@ class PlanningAssignment(BaseModel):
     role_id: str | None = None
 
 
+class PlanningPackageAllocation(BaseModel):
+    """One product type contributing whole packages to an ingredient/trip line."""
+
+    product_id: str
+    packages: int = Field(ge=1)
+
+
 class PlanningShoppingSelection(BaseModel):
     ingredient_id: str
     required_quantity: float | None
@@ -506,6 +513,9 @@ class PlanningShoppingSelection(BaseModel):
     remaining_quantity: float | None
     selected_product_id: str | None
     packages: int = Field(ge=0)
+    # Empty on legacy/pantry lines. Mixed purchases use this list and leave the
+    # two legacy selection fields empty so they cannot misdescribe the basket.
+    allocations: list[PlanningPackageAllocation] = Field(default_factory=list)
     purchase_cost_sgd: float = Field(ge=0)
     surplus_quantity: float | None
     note: str | None = None

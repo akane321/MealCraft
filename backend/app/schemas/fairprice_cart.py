@@ -85,18 +85,43 @@ FairPriceCartState = dict[str, FairPriceCartTrip]
 
 
 def line_key(line: GroceryLineEstimate) -> str:
-    return f"{line.shopping_trip or 1}|{line.ingredient_name}|{line.unit or ''}"
+    suffix = f"|{line.allocation_product_id}" if line.allocation_product_id else ""
+    return f"{line.shopping_trip or 1}|{line.ingredient_name}|{line.unit or ''}{suffix}"
 
 
 def trip_lines(lines: list[GroceryLineEstimate], trip: int | None) -> list[GroceryLineEstimate]:
     return [line for line in lines if (line.shopping_trip or 1) == (trip or 1)]
 
 
+def cart_lines(lines: list[GroceryLineEstimate]) -> list[GroceryLineEstimate]:
+    """Expand a mixed ingredient line into one checkout row per selected product."""
+    expanded = []
+    for line in lines:
+        if len(line.allocations) <= 1:
+            expanded.append(line)
+            continue
+        expanded.extend(
+            line.model_copy(
+                update={
+                    "product": allocation.product,
+                    "packages_required": allocation.packages_required,
+                    "purchase_cost_sgd": allocation.purchase_cost_sgd,
+                    "evidence": allocation.evidence,
+                    "retailer": allocation.retailer,
+                    "allocations": [],
+                    "allocation_product_id": allocation.product.external_id,
+                }
+            )
+            for allocation in line.allocations
+        )
+    return expanded
+
+
 def fingerprint(lines: list[GroceryLineEstimate]) -> str:
     """The trip's bought FairPrice lines, from stored fields only, so the plan response can recompute it."""
     bought = sorted(
         f"{line_key(line)}|{line.product.external_id}|{line.packages_required}"
-        for line in lines
+        for line in cart_lines(lines)
         if line.product is not None and line.product.source == "fairprice" and line.packages_required > 0
     )
     return sha256("\n".join(bought).encode()).hexdigest()

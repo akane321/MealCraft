@@ -83,6 +83,14 @@ class PriceEvidence(BaseModel):
     checked_at: datetime | None = None
 
 
+class GroceryPackageAllocation(BaseModel):
+    product: ProductResponse
+    packages_required: int = Field(ge=1)
+    purchase_cost_sgd: float = Field(ge=0)
+    evidence: PriceEvidence | None = None
+    retailer: Retailer | None = None
+
+
 class GroceryLineEstimate(BaseModel):
     ingredient_name: str
     ingredient_display_name: str
@@ -105,6 +113,11 @@ class GroceryLineEstimate(BaseModel):
     # The store the product is bought at: retailer_of(product) when the line has a product, else None
     # (docs/design/cold-storage.md).
     retailer: Retailer | None = None
+    # Detailed package choices. Empty keeps saved legacy lines readable; new
+    # single-product lines also populate it, while mixed lines rely on it.
+    allocations: list[GroceryPackageAllocation] = Field(default_factory=list)
+    # Set only on an expanded checkout row derived from a mixed ingredient line.
+    allocation_product_id: str | None = None
 
 
 class GroceryEstimateResponse(BaseModel):

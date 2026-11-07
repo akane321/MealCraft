@@ -87,7 +87,7 @@ from app.schemas.planning_v2 import (
     PlanningSlot,
     structured,
 )
-from app.schemas.product import GroceryLineEstimate
+from app.schemas.product import GroceryLineEstimate, GroceryPackageAllocation
 from app.schemas.recipe import RecipeListItemResponse
 from app.services.recipe import RecipeService
 
@@ -1312,8 +1312,29 @@ class ProductPlanningEngine:
         perishables = perishable_ingredients(by_id.values()) if household_rules else set()
         lines = []
         for row in shopping:
+            selection = row.allocations or (
+                [type("LegacyAllocation", (), {"product_id": row.selected_product_id, "packages": row.packages})]
+                if row.selected_product_id is not None and row.packages > 0
+                else []
+            )
+            allocated = [
+                GroceryPackageAllocation(
+                    product=observations[item.product_id],
+                    packages_required=item.packages,
+                    purchase_cost_sgd=round(observations[item.product_id].price_sgd * item.packages, 2),
+                    evidence=provenance.get(item.product_id),
+                    retailer=retailer_of(observations[item.product_id]),
+                )
+                for item in selection
+            ]
             product = observations.get(row.selected_product_id)
-            consumed = (row.remaining_quantity * product.price_sgd / product.package_size) if product else 0.0
+            consumed = (
+                row.remaining_quantity * row.purchase_cost_sgd / (row.remaining_quantity + row.surplus_quantity)
+                if row.remaining_quantity is not None
+                and row.surplus_quantity is not None
+                and row.remaining_quantity + row.surplus_quantity > 0
+                else 0.0
+            )
             lines.append(
                 GroceryLineEstimate(
                     ingredient_name=row.ingredient_id,
@@ -1333,6 +1354,7 @@ class ProductPlanningEngine:
                     retailer=retailer_of(product) if product is not None else None,
                     shopping_trip=row.trip,
                     perishable=True if row.ingredient_id in perishables else None,
+                    allocations=allocated,
                 )
             )
         budget_check = next((c for c in report.checks if c.code == "purchase_budget"), None)
