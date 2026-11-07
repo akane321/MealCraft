@@ -1485,6 +1485,7 @@ def product_validation(validator, problem, assignments, shopping, *, minimum_dis
     """The same complete product acceptance boundary for beam and every improvement move."""
     report = validator.validate(problem, assignments, shopping)
     extra = per_meal_budget_checks(problem, assignments, per_meal_budget) if per_meal_budget is not None else []
+    extra.extend(product_dish_kind_checks(problem, assignments))
     if minimum_distinct_dishes:
         extra.append(
             PlanningConstraintCheck(
@@ -1504,6 +1505,28 @@ def product_validation(validator, problem, assignments, shopping, *, minimum_dis
         # Evaluation (#397): every built week is accepted; the checks and totals stay for the scorer.
         report.status = "passed"
     return report
+
+
+def product_dish_kind_checks(problem, assignments):
+    """Recompute the product beam's same-meal kind rule from returned output."""
+    recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+    slots = {slot.slot_id: slot for slot in problem.slots}
+    by_meal = defaultdict(list)
+    checks = []
+    for assignment in assignments:
+        if assignment.recipe_id in recipes and assignment.slot_id in slots:
+            by_meal[assignment.slot_id].append(dish_kind(recipes[assignment.recipe_id].title))
+    for slot_id, kinds in by_meal.items():
+        if slots[slot_id].composition is not None and len(kinds) != len(set(kinds)):
+            checks.append(
+                PlanningConstraintCheck(
+                    code="meal_duplicate_dish_kind",
+                    status="failed",
+                    scope_id=slot_id,
+                    detail="Two product dishes in one composed meal have the same dish kind.",
+                )
+            )
+    return checks
 
 
 def per_meal_budget_checks(problem, assignments, budget):

@@ -1113,6 +1113,12 @@ class MealPlanReplanningService:
         ]
         if candidate.id in {item.recipe_id for item in others}:
             return False
+        # Product meal generation admits at most one title-based dish kind per
+        # composed meal. A swap must preserve the same invariant; recipe IDs
+        # alone do not catch two fried-rice variants (Issue #310 acceptance).
+        other_kinds = {dish_kind(item.recipe.title) for item in others}
+        if dish_kind(candidate.title) in other_kinds:
+            return False
         dishes = [TimedDish.of(item.recipe) for item in others] + [TimedDish.of(candidate)]
         # The meal's own limit: a cooking-time rule for its weekday and meal, else the household's (layer 08).
         limit = slot_time_limit(

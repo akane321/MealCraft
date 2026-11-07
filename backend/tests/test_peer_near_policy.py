@@ -4,9 +4,37 @@ import pytest
 
 from app.planning.near_duplicate_groups import NearDuplicatePolicy, classify
 from app.planning.recipe_pair_similarity import RecipePairIndex, RecipePairSignals
+from app.planning.swap_diversity import FROZEN_SWAP_ACCEPTANCE_POLICY
 from tests.test_recipe_pair_similarity import recipe
 
-POLICY = NearDuplicatePolicy("peer-review-dev-v2", 0.2, 0.05, 0.75, fried_rice_cosine_min=0.64)
+POLICY = FROZEN_SWAP_ACCEPTANCE_POLICY
+
+
+def test_product_swap_thresholds_are_frozen_separately_from_exploratory_fit():
+    assert POLICY.version == "product-swap-acceptance-v1"
+    assert (POLICY.title_min, POLICY.ingredients_min, POLICY.cosine_min, POLICY.fried_rice_cosine_min) == (
+        0.2,
+        0.05,
+        0.75,
+        0.64,
+    )
+
+
+@pytest.mark.parametrize(
+    "cosine,expected",
+    [(0.749999, "distinct"), (0.75, "near")],
+)
+def test_general_cosine_threshold_boundary_is_deterministic(cosine, expected):
+    assert classify(RecipePairSignals(0.2, 0.05, cosine, "available"), POLICY) == expected
+
+
+@pytest.mark.parametrize(
+    "cosine,expected",
+    [(0.639999, "distinct"), (0.64, "near")],
+)
+def test_fried_rice_threshold_boundary_is_deterministic(cosine, expected):
+    signals = RecipePairSignals(0.2, 0.05, cosine, "available", "fried_rice")
+    assert classify(signals, POLICY) == expected
 
 
 @pytest.mark.parametrize(

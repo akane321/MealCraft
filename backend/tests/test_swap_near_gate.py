@@ -74,6 +74,26 @@ def test_swap_also_checks_the_other_dishes_staying_in_the_meal(composed_client, 
     assert composed_client.get(f"/api/plans/{initial['id']}").json()["days"] == initial["days"]
 
 
+def test_swap_cannot_duplicate_a_product_dish_kind_in_the_same_meal(composed_client, monkeypatch):  # noqa: F811
+    from app.services import replanning
+
+    initial = _composed_plan(composed_client)
+    target = next(d for d in initial["days"] if d["role_id"] == "main")
+    retained = next(d for d in initial["days"] if d["day_index"] == target["day_index"] and d["role_id"] == "vegetable")
+    real_kind = replanning.dish_kind
+
+    def collide(title):
+        return "forced-collision" if title != target["recipe"]["title"] else real_kind(title)
+
+    monkeypatch.setattr(replanning, "dish_kind", collide)
+    response = composed_client.post(
+        f"/api/plans/{initial['id']}/replan/preview",
+        json={"entry_id": target["entry_id"], "event_type": "REPLACE_MEAL"},
+    )
+    assert response.status_code in (409, 422), response.text
+    assert retained["recipe"]["title"] != target["recipe"]["title"]
+
+
 @pytest.mark.parametrize("explicit_cap", [None, 2])
 def test_near_preference_precedes_default_repeat_fallback_but_never_relaxes_explicit_cap(monkeypatch, explicit_cap):
     from collections import Counter

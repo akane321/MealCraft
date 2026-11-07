@@ -63,13 +63,22 @@ the week. A pair with no vector is unknown: it is neither filtered nor
 penalised, so it does not prove that the replacement is different and the
 repetition penalty does not apply to it. This does not change the
 product improvement objective or its `dish_kind` grouping (ADR-0089).
+For a composed meal, replanning also recomputes the product's title-based
+`dish_kind` invariant and rejects a candidate whose kind is already retained in
+that meal. The 21-dish product preview acceptance requires every swap across
+seven three-role dinners to succeed, so role and kind checks are non-vacuous; a separate 21-confirmation
+regression continues to check persistence and revision semantics.
 
-The explicit developer policy combines title and ingredient overlap with
-vector cosine. A lower cosine threshold applies only when both titles name
+The frozen product-swap acceptance policy is `product-swap-acceptance-v1`:
+title overlap at least 0.20, ingredient overlap at least 0.05 and vector cosine
+at least 0.75. A cosine threshold of 0.64 applies only when both titles name
 fried rice, excluding titles that indicate soup, cakes, noodles, burgers or other listed forms.
-The policy and thresholds live in `SWAP_POLICY`; this title cue is not a
-general understanding of cooking methods. Developer regression agreement is
-not independent accuracy or a frozen near-duplicate acceptance result.
+The policy and thresholds live in `FROZEN_SWAP_ACCEPTANCE_POLICY`; this title
+cue is not a general understanding of cooking methods. The exploratory fit in
+`scripts/calibrate_recipe_pairs.py` remains separate and cannot update the
+frozen product policy. The supplied review did not record reviewer identity and
+left one pair unsure, so these frozen operational thresholds are not independent
+accuracy evidence or full-catalog acceptance.
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final

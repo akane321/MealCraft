@@ -3,9 +3,30 @@ import pytest
 from app.core.paths import repository_root
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.product_path import product_dish_kind_checks
 from app.schemas.planning_v2 import FinalPlanningProblem
 
 FIXTURE = repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json"
+
+
+def test_product_acceptance_rechecks_same_meal_dish_kinds():
+    from types import SimpleNamespace
+
+    problem = SimpleNamespace(
+        recipes=[
+            SimpleNamespace(recipe_id="egg-rice", title="Egg Fried Rice"),
+            SimpleNamespace(recipe_id="chicken-rice", title="Chicken Fried Rice"),
+        ],
+        slots=[SimpleNamespace(slot_id="dinner", composition=["main", "side"])],
+    )
+    assignments = [
+        SimpleNamespace(slot_id="dinner", recipe_id="egg-rice"),
+        SimpleNamespace(slot_id="dinner", recipe_id="chicken-rice"),
+    ]
+    checks = product_dish_kind_checks(problem, assignments)
+    assert [(check.code, check.status, check.scope_id) for check in checks] == [
+        ("meal_duplicate_dish_kind", "failed", "dinner")
+    ]
 
 
 def sample():
