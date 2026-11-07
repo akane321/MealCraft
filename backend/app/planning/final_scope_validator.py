@@ -858,7 +858,10 @@ class FinalPlanningValidator:
                         detail="No compatible available product was selected.",
                     )
                 )
-            elif line.remaining_quantity > 0 and line.packages <= 0:
+            elif (
+                line.remaining_quantity > 0
+                and sum(allocation.packages for allocation in FinalPlanningValidator._line_allocations(line)) <= 0
+            ):
                 checks.append(
                     FinalPlanningValidator._failed(
                         "package_coverage",

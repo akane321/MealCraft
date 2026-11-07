@@ -60,6 +60,7 @@ def test_product_builder_and_validator_accept_a_mixed_package_line():
 
     checks, total, complete = FinalPlanningValidator._product_checks(packet, [line])
     assert checks == [] and total == 7 and complete
+    assert FinalPlanningValidator._shopping_checks(packet, {}, [line]) == []
 
 
 @pytest.mark.parametrize(
