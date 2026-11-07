@@ -1,0 +1,53 @@
+{
+  "schema_version": "baseline-mapping-accuracy-v1",
+  "table_rows": 275,
+  "counts": {
+    "reviewed": 275,
+    "unreviewed": 0,
+    "invalid": 0
+  },
+  "accuracy": {
+    "ordinary_matched": {
+      "correct": 200,
+      "denominator": 200,
+      "accuracy": 1.0,
+      "wilson_95": [
+        0.9811546736227335,
+        1.0
+      ],
+      "unreviewed_excluded": 0
+    },
+    "suspicious": {
+      "correct": 72,
+      "denominator": 75,
+      "accuracy": 0.96,
+      "wilson_95": [
+        0.8888701291759625,
+        0.9863039357398561
+      ],
+      "unreviewed_excluded": 0
+    }
+  },
+  "suspicious": {
+    "count": 75,
+    "denominator": 3403,
+    "proportion": 0.022039377020276227,
+    "review_table_count": 75
+  },
+  "corrected": {
+    "count": 3,
+    "denominator": 275,
+    "rate": 0.01090909090909091
+  },
+  "unmatched": {
+    "count": 28,
+    "handling": "included in suspicious accuracy only when personally reviewed; unreviewed rows are excluded"
+  },
+  "safety_errors": {
+    "count": 0,
+    "allergen_omission": 0,
+    "false_allergen_assignment": 0,
+    "row_ids": []
+  },
+  "denominator_note": "Accuracy denominators contain only rows with personally_reviewed=true and a valid human decision. Ordinary matched uses status=matched; suspicious combines needs_review and unmatched."
+}
