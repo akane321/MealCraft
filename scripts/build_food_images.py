@@ -5,7 +5,8 @@ A dish photo is shared by similar recipes, so a recipe keeps it only if the pict
   share it (a kind is shown once it is in 40% of them), and for what FLUX added on its own, from SHOWS_MEAT;
 - a vegan recipe also gets no picture of egg or dairy;
 - a dish word in the title (soup, cake, ...) must be common among the recipes sharing the picture.
-Any other recipe keeps the drawn icon. `python scripts/build_food_images.py <local-image-gen folder>`
+A recipe its own picture would mislead takes the most similar picture that would not (TF-IDF on title and ingredients).
+`python scripts/build_food_images.py <local-image-gen folder>`
 """
 
 import json
@@ -83,6 +84,7 @@ def load_recipes() -> list[dict]:
                 {
                     "id": row["recipe_id"],
                     "title": row["title"].lower(),
+                    "text": " ".join([row["title"], *sorted(names)]),
                     "vegan": "vegan" in row["dietary_tags"],
                     "meat": set().union(*map(meat_kinds, names & meats)),
                 }
@@ -115,7 +117,7 @@ def misfit(recipe: dict, shown: set[str], shows_animal: bool, members: list[dict
 
 
 def build(source: Path) -> tuple[dict[str, str], Counter]:
-    """{image: its recipes' slug ends, space separated} and how many recipes went back to the drawing, by reason."""
+    """{image: its recipes' slug ends, space separated} and, by reason, how many recipes moved to another picture."""
     origin = {row["canonical_name"]: row["dietary_origin"] for row in load_ingredients()}
     groups = json.loads((source / "groups.json").read_text(encoding="utf-8"))
     pictured = [group for group in groups if group["main"] != "mixed"]  # the order make_batch.py numbers the images in
@@ -126,23 +128,43 @@ def build(source: Path) -> tuple[dict[str, str], Counter]:
     for recipe in load_recipes():
         by_image[assigned[recipe["id"]]].append(recipe)
 
-    dishes, dropped = {}, Counter()
-    for image, members in sorted(by_image.items()):
+    shown, shows_animal = {}, {}
+    for image, members in by_image.items():
         flesh = [name for name in subjects[image] if origin.get(name) == "flesh"]
-        shown = shown_kinds(members, set().union(*map(meat_kinds, flesh)))
+        shown[image] = shown_kinds(members, set().union(*map(meat_kinds, flesh)))
         if image in SHOWS_MEAT:
-            shown.add("meat")
-        shows_animal = any(origin.get(name) == "secretion" for name in subjects[image])
-        kept = []
+            shown[image].add("meat")
+        shows_animal[image] = any(origin.get(name) == "secretion" for name in subjects[image])
+
+    kept, moved, reasons = defaultdict(list), [], Counter()
+    for image, members in sorted(by_image.items()):
         for recipe in members:
-            why = misfit(recipe, shown, shows_animal, members)
+            why = misfit(recipe, shown[image], shows_animal[image], members)
             if why:
-                dropped[why] += 1
+                reasons[why] += 1
+                moved.append(recipe)
             else:
-                kept.append(recipe["id"][-12:].lower())
-        if kept:
-            dishes[image] = " ".join(kept)
-    return dishes, dropped
+                kept[image].append(recipe)
+
+    from sklearn.feature_extraction.text import TfidfVectorizer  # the local image folder's Python has it
+
+    # Only pictures that keep recipes of their own exist in the repository.
+    images = sorted(kept)
+    vectorizer = TfidfVectorizer(sublinear_tf=True)
+    matrix = vectorizer.fit_transform(" ".join(recipe["text"] for recipe in kept[image]) for image in images)
+    similarity = (vectorizer.transform(recipe["text"] for recipe in moved) * matrix.T).toarray()
+    additions = defaultdict(list)
+    for recipe, scores in zip(moved, similarity, strict=True):
+        for index in scores.argsort()[::-1]:
+            image = images[index]
+            if not misfit(recipe, shown[image], shows_animal[image], by_image[image]):
+                additions[image].append(recipe)
+                break
+        else:
+            reasons["no picture fits"] += 1
+
+    dishes = {image: " ".join(r["id"][-12:].lower() for r in kept[image] + additions[image]) for image in images}
+    return dishes, reasons
 
 
 def main() -> None:
@@ -150,7 +172,7 @@ def main() -> None:
     names = sorted(re.sub(r"[^a-z0-9]", "-", row["canonical_name"].lower()) for row in load_ingredients())
     OUTPUT.write_text(json.dumps({"dishes": dishes, "ingredients": names}, separators=(",", ":")), encoding="utf-8")
     recipes = sum(len(ids.split()) for ids in dishes.values())
-    print(f"{len(dishes)} images, {recipes} recipes; drawn icon instead: {dict(dropped)}")
+    print(f"{len(dishes)} images, {recipes} recipes; moved to a nearer picture, by reason: {dict(dropped)}")
 
 
 if __name__ == "__main__":

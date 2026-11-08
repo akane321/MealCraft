@@ -23,8 +23,8 @@ def test_a_meatless_recipe_never_gets_a_picture_of_meat() -> None:
         if not meatless:
             continue
         assert image not in build_food_images.SHOWS_MEAT, (image, meatless[:3])
-        # The rule's 40% is measured before recipes leave an image, so a few images may pass it afterwards; not by much.
-        assert len(meatless) >= 0.5 * len(members), (image, meatless[:3])
+        # The 40% rule is measured on an image's own group; recipes moved in afterwards can dilute the share.
+        assert len(meatless) >= 0.25 * len(members), (image, meatless[:3])
 
 
 def test_a_recipe_keeps_a_picture_only_if_it_has_what_the_picture_shows() -> None:

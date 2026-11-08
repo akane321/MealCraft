@@ -5,8 +5,8 @@ They are AI-generated, not photographs of the dishes.
 
 - Model: FLUX.1-schnell (Black Forest Labs, Apache-2.0), run locally at 512 px with 4 steps.
 - Dish images: one per group of similar recipes in release v3, so similar dishes share a picture. Recipes in
-  catch-all groups reuse the nearest picture (TF-IDF on title and ingredients). 1,809 images serve 15,638 of the
-  18,335 recipes; the other 2,697 keep the drawn icon because the picture could mislead (see below).
+  catch-all groups reuse the nearest picture (TF-IDF on title and ingredients). 1,809 images serve 18,211 of the
+  18,335 recipes.
 - Ingredient images: one per canonical ingredient (701), on white.
 - Prompts, seeds and scripts stay outside this repo, in the course folder `local-image-gen/` (`prompts.py`,
   `make_batch.py`, `batch_jobs.json`, `gen_batch.py`). Seven ingredients with a grey background were re-rendered on
