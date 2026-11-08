@@ -8,8 +8,8 @@ evaluation success.
 
 ## Reproduction
 
-Run from the repository root at commit
-`7628c70193dc967e1600c1cf2ef31f1a72ad0064`:
+Run from the repository root. The [JSON artifacts](.) are the canonical carrier
+for the issue #310 run commit and reproducibility metadata:
 
 ```powershell
 uv run --no-sync --project backend python scripts/product_household_comparison.py `
