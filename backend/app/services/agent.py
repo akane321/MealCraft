@@ -859,18 +859,23 @@ class AgentSessionService:
                 constraints,
                 lambda **changes: self.meal_plan_service.week_floor(request.model_copy(update=changes)),
                 lang,
-                check=lambda **changes: self.meal_plan_service.check(
-                    request.model_copy(
-                        update={key: value for key, value in changes.items() if key != "minimum_distinct_dishes"}
-                    ),
-                    minimum_distinct_dishes=changes.get("minimum_distinct_dishes", 0),
-                ),
+                check=self._check(request),
                 distinct_dishes=lambda: self.meal_plan_service.checked_distinct_dishes(request),
                 cheapest=self._cheapest(request),
             )
         except (ProductProviderError, WeeklyPlanSelectionError):
             # Prices or recipes could not be read now: nothing is refused, and Plan answers for itself.
             return None
+
+    def _check(self, request: WeeklyMealPlanRequest) -> Callable[..., Exception | None]:
+        """What Plan would answer for the request with `changes` made to it: None for a week, else its error."""
+
+        def check(**changes) -> Exception | None:
+            minimum_distinct_dishes = changes.pop("minimum_distinct_dishes", 0)
+            candidate = request.model_copy(update=changes)
+            return self.meal_plan_service.check(candidate, minimum_distinct_dishes=minimum_distinct_dishes)
+
+        return check
 
     def _cheapest(self, request: WeeklyMealPlanRequest) -> Callable[..., float | None]:
         """A found week's cost, backed by the same budgeted path that clicking its suggestion uses."""
@@ -1869,8 +1874,9 @@ class AgentSessionService:
         The Plan card gives way to the explanation (the session collects again), unless the same request
         may simply plan next time (slow search, missing data).
         """
+        request = self._plan_request(snapshot.constraints)
         explained = limits.planning_failure(
-            error, snapshot.constraints, lang, cheapest=self._cheapest(self._plan_request(snapshot.constraints))
+            error, snapshot.constraints, lang, cheapest=self._cheapest(request), check=self._check(request)
         )
         context_version = max(snapshot.context_version, 1)
         self.repository.explain_unplanned(

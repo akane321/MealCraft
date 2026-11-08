@@ -85,6 +85,7 @@ ZH_WORDS = {
     "main": "主菜",
     "vegetable": "配菜",
     "soup": "汤",
+    "staple": "主食",
 }
 
 
@@ -593,6 +594,15 @@ REPLIES: dict[str, tuple[str, str]] = {
         "Planning for fewer people would not lower that budget.",
         "减少人数也不能降低这个预算。",
     ),
+    # The dish whose going lets a real week fit the budget (agent/limits.py); the option is said as it is labelled.
+    "nth_dish": ("{nth} {role}", "第{number}道{role}"),
+    "drop_dish": ("Drop the {dish} at {meal}", "{meal}不要{dish}"),
+    "drop_dish_offer": (
+        "Or I can drop the {dish} at {meal}: the cheapest week I found without it costs S${cost:.2f}, "
+        "within your S${budget:g}.",
+        "也可以{meal}不要{dish}：这样我找到的最便宜的一周要 S${cost:.2f}，在 S${budget:g} 预算之内。",
+    ),
+    "dropped_dish": ("This plan leaves out the {dish} at {meal}.", "这次计划{meal}不要{dish}。"),
     "raise_time": ("Allow up to {minutes} minutes", "放宽到 {minutes} 分钟"),
     "raise_time_say": ("Allow up to {minutes} minutes of cooking", "做饭 {minutes} 分钟以内"),
     # A week the planner could not find (services/agent.py confirm).
@@ -669,6 +679,11 @@ SHORT_REPLIES: dict[str, tuple[str, str]] = {
     "budget_variety": (
         "If you'd like at least {count} different dishes, a plan we checked costs S${cost:.2f}.",
         "如果想要至少 {count} 种不同的菜，我们核对过的计划要 S${cost:.2f}。",
+    ),
+    "drop_dish_offer": (
+        "Or I can drop the {dish} at {meal}: the cheapest plan I found without it costs S${cost:.2f}, "
+        "within your S${budget:g}.",
+        "也可以{meal}不要{dish}：这样我找到的最便宜的计划要 S${cost:.2f}，在 S${budget:g} 预算之内。",
     ),
     "use_weekly": ("Use S${amount} for the plan", "这次计划用 S${amount}"),
     "use_weekly_say": ("Make the plan budget S${amount}", "这次计划预算 {amount} 新币"),

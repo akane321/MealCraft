@@ -7,6 +7,7 @@ import {
   MEAL_PRESETS,
   PLANNED_MEALS,
   describeShape,
+  droppedDishes,
   dishCounts,
   dishLabel,
   isFullDefault,
@@ -151,6 +152,15 @@ describe("shapeChangeSummary", () => {
     expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: removed.slice(0, 1), added: added.slice(0, 1) }), start)).toBe("A dish swapped on Tue");
     // A soup in the vegetable's place is a meal made up anew.
     expect(shapeChangeSummary(change({ day_indexes: [2], roles, removed: [at(1, 2, "vegetable")], added: [at(0, 2, "soup")] }), start)).toBe("Dinner on Tue: Main dish, Soup");
+  });
+
+  it("says which dishes a plan leaves out of the meals it plans", () => {
+    const dinner = DEFAULT_SHAPE.meals.dinner!;
+    const without = (...ids: string[]) => ({ meals: { dinner: dinner.filter(role => !ids.includes(role.role_id)) } });
+    expect(droppedDishes(without("soup"), DEFAULT_SHAPE)).toEqual(["soup at dinner"]);
+    expect(droppedDishes(without("main-2"), DEFAULT_SHAPE)).toEqual(["second protein main at dinner"]);
+    expect(droppedDishes(without(), DEFAULT_SHAPE)).toEqual([]); // a dinner-only plan left no lunch "out"
+    expect(droppedDishes(null, DEFAULT_SHAPE)).toEqual([]);
   });
 
   it("names days by the plan's own dates, the same way wherever a change is shown", () => {

@@ -6,7 +6,7 @@ import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, planLabels, planRange, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
-import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
+import { DEFAULT_SHAPE, droppedDishes, planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import { revealDuration } from "~/lib/reveal";
 import { AnimatePresence, motion } from "motion-v";
 import type { AgentMessage, AgentSession } from "~/types/agent";
@@ -126,6 +126,7 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
+    ...droppedDishes(c.plan_shape, household.current.value?.current?.plan_shape ?? DEFAULT_SHAPE).map(value => ({ text: "No", value })),
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
     ...planningPreferenceLabels(c.planning_preferences).map(value => ({ text: "Preference", value })),
   ];

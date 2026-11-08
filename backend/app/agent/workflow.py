@@ -5,7 +5,7 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.agent import replies
-from app.agent.limits import Refusal
+from app.agent.limits import Refusal, dropped_dish_note, without_role
 from app.agent.parser import ConstraintParser, bare_amount, read_budgets
 from app.agent.plan_dates import MEAL_ORDER, default_start, read_span, read_start, reads_week
 from app.agent.replies import language, say
@@ -32,6 +32,7 @@ class AgentWorkflowState(TypedDict, total=False):
     language: str
     refusal: Refusal | None
     asked: str | None
+    drop: tuple[str, str] | None  # the (meal, role) a tap on "drop this dish" took off: read without the model
 
 
 BUDGET_FIELDS = {"weekly_budget_sgd", "budget_per_meal_sgd"}
@@ -59,20 +60,24 @@ class AgentConstraintWorkflow:
         acknowledged_unknowns: list[str],
         history: list[AgentMessageResponse],
         asked: str | None = None,
+        drop: tuple[str, str] | None = None,
     ) -> AgentWorkflowState:
-        """`asked` is the field the assistant's last question was about, if any."""
+        """`asked` is the field the assistant's last question was about, if any; `drop` a dish taken off by a tap."""
         return self.graph.invoke(
             {
-                "message": message,
+                "message": "" if drop else message,  # the tap's whole meaning is `drop`: no rule reads its words
                 "current_constraints": current.model_dump(mode="json"),
                 "acknowledged_unknowns": acknowledged_unknowns,
                 "history": history,
                 "language": language(message, history),
                 "asked": asked,
+                "drop": drop,
             }
         )
 
     def _parse_message(self, state: AgentWorkflowState) -> AgentWorkflowState:
+        if state.get("drop"):
+            return {"extraction": AgentConstraintExtraction().model_dump(mode="json")}
         current = AgentConstraintState.model_validate(state["current_constraints"])
         extraction = self.parser.parse(
             state["message"],
@@ -132,6 +137,10 @@ class AgentConstraintWorkflow:
             merged.day_count = day_count
         # "Dinners with a soup" in the request shapes the plan it sets up, and the reply says so.
         shaped = setup_shape(message, base, lang)
+        if state.get("drop"):  # this conversation's shape only: the saved household keeps its own
+            meal, role = state["drop"]
+            kept = {**base.meals, meal: without_role(shown, meal, role).meals[meal]}
+            shaped = MealPlanShape(meals=kept), dropped_dish_note(meal, role, lang)
         if shaped is not None:
             base = shaped[0]
         keep = tuple(meals) if meals else (None if back or usual is None else tuple(shown.meals))

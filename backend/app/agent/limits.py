@@ -10,6 +10,8 @@ never says no week exists.
 
 A budget is offered only when a real week backs it. The suggestion's amount is checked through the
 same budgeted planning path used when the household accepts it, not inferred from an unbudgeted search.
+A weekly budget short of every week also offers the one dish whose going saves most, when a real week without it
+plans within the budget (owner, 2026-11-09): only the plan's shape changes, never a limit that keeps anyone safe.
 A budget that plans only a week of fewer than four different dishes is planned as asked; the reply adds what a
 verified four-dish week costs, when one is found and dearer than the budget (ADR-0067, owner 2026-10-13).
 """
@@ -22,7 +24,8 @@ from dataclasses import dataclass
 from app.agent.replies import details, joined, people, planner_message, say, word
 from app.data.allergens import checked_allergens
 from app.planning.week_floor import WeekFloor
-from app.schemas.meal_plan import default_plan_shape
+from app.products.provider import ProductProviderError
+from app.schemas.meal_plan import MealPlanShape, default_plan_shape
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
@@ -37,6 +40,7 @@ EMPTIED = {
     "meal": "meal",
 }
 ROLE_EN = {"main": "main dish", "vegetable": "vegetable dish", "soup": "soup"}
+ORDINAL_EN = {"2": "second", "3": "third"}
 
 
 def _say(constraints, key: str, lang: str, **values) -> str:
@@ -106,7 +110,7 @@ def refusal(
         # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
         cost = cheapest() if cheapest is not None else None
         if cost is not None:
-            return _budget_short(cost, constraints, lang, cheapest)
+            return _budget_short(cost, constraints, lang, cheapest, check)
         # The search found no week: the floor, with no amount a week backs to offer.
         size, meals = constraints.household_size or 1, floor.meals
         each, least = weekly / (size * meals), _cents_down(floor.total_sgd)
@@ -126,7 +130,9 @@ def refusal(
         # costs 1.6 to 122 times the floor (122 for one person's breakfasts, no dish twice). Plan it as Plan would,
         # and refuse what that refuses.
         error = check()
-        failure = planning_failure(error, constraints, lang, cheapest=cheapest) if error is not None else None
+        failure = (
+            planning_failure(error, constraints, lang, cheapest=cheapest, check=check) if error is not None else None
+        )
         if failure is not None and not failure.retry:  # late data may plan at Plan
             return failure
         # The week plans. With fewer than four different dishes it still does, as the household asked (ADR-0044,
@@ -218,12 +224,12 @@ def _role(role: str, lang: str, *, plural: bool = False) -> str:
     return name + ("es" if name.endswith("dish") else "s") if plural else name
 
 
-def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None) -> Refusal:
+def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None, check=None) -> Refusal:
     """Why the planner found no week, from its error and trace: the limit its search kept running into.
 
     A request the planner turned down before searching (a budget in fractions of a cent, missing allergen
     data) is passed on as the planner said it. `cheapest(**changes)`, when given, backs a budget refusal's
-    options with a smaller household's cheapest week.
+    options with a smaller household's cheapest week; with `check(**changes)` too, with a week short of one dish.
     """
     status, trace = getattr(error, "status", None), getattr(error, "trace", None) or {}
     if status in {"needs_clarification", "needs_data"} or not trace:
@@ -249,7 +255,7 @@ def planning_failure(error: Exception, constraints, lang: str, *, cheapest=None)
             if attempt.get("cheapest_search") and _failed(attempt) == {"purchase_budget"}
         ]
         if backed:
-            return _budget_short(min(backed), constraints, lang, cheapest)
+            return _budget_short(min(backed), constraints, lang, cheapest, check)
         # No week backs an amount. The budget is still what the search ran into when every week it ranked failed
         # the budget alone (or none was ranked: the search emptied on the budget); else it is not all that binds.
         ranked = [_failed(attempt) for attempt in attempts if not attempt.get("cheapest_search")]
@@ -278,9 +284,9 @@ def _failed(attempt: dict) -> set[str]:
     return {check["code"] for check in attempt.get("checks", []) if check.get("hard") and check["status"] == "failed"}
 
 
-def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
+def _budget_short(cost: float, constraints, lang: str, cheapest, check=None) -> Refusal:
     """A weekly budget under the cheapest week the search found: what it is a person a meal, that week's
-    cost, and the budgets a real week backs."""
+    cost, the budgets a real week backs, and the one dish whose going a real week within the budget backs."""
     weekly, size = constraints.weekly_budget_sgd, constraints.household_size or 1
     meals = getattr(constraints, "day_count", 7) * len((constraints.plan_shape or default_plan_shape()).meals)
     text = _say(
@@ -319,7 +325,72 @@ def _budget_short(cost: float, constraints, lang: str, cheapest) -> Refusal:
             )
     elif smaller is not None:
         text += " " + say("fewer_not_cheaper", lang)
+    dropped = _dearest_dish(constraints, cheapest, check) if cheapest is not None and check is not None else None
+    if dropped is not None:
+        meal, role, without_it = dropped
+        text += " " + _say(
+            constraints,
+            "drop_dish_offer",
+            lang,
+            dish=_dish(role, lang),
+            meal=word(meal, lang),
+            cost=without_it,
+            budget=weekly,
+        )
+        options.append(_drop_option(meal, role, lang))
     return Refusal("weekly_budget_sgd", text, tuple(options))
+
+
+def without_role(shape: MealPlanShape, meal: str, role_id: str) -> MealPlanShape:
+    """`shape` with one dish taken off one meal; ValueError when what is left is not a real meal."""
+    roles = [role for role in shape.meals[meal] if role.role_id != role_id]
+    return MealPlanShape.model_validate({"meals": {**shape.meals, meal: roles}})
+
+
+def _dearest_dish(constraints, cheapest, check) -> tuple[str, str, float] | None:
+    """(meal, role, cost) of the dish whose going leaves the cheapest week that plans within the budget; None for
+    none. Only the shape changes: allergies, diets, halal and every member's filling dish hold in `check`."""
+    weekly, shape = constraints.weekly_budget_sgd, constraints.plan_shape or default_plan_shape()
+    found = []
+    for meal, roles in shape.ordered():
+        for role in roles:
+            # The main is the meal's core, in a shape of courses too; a role for more people than eat is not planned.
+            if role.role_id == "main" or (role.min_people or 0) > (constraints.household_size or 1):
+                continue
+            try:
+                candidate = without_role(shape, meal, role.role_id)
+                cost = cheapest(plan_shape=candidate)
+                if cost is not None and cost <= weekly and check(plan_shape=candidate) is None:
+                    found.append((meal, role.role_id, cost))
+            except (ValueError, ProductProviderError):  # not a real meal without it (a ValueError), or no prices now
+                continue
+    return min(found, key=lambda item: item[2], default=None)
+
+
+def _dish(role_id: str, lang: str) -> str:
+    """One dish of a meal, told from others of its kind: 'soup', 'second main dish', 第2道主菜."""
+    number = role_id.partition("-")[2]
+    name = _role(role_id, lang)
+    return say("nth_dish", lang, nth=ORDINAL_EN.get(number, number), number=number, role=name) if number else name
+
+
+def _drop_option(meal: str, role_id: str, lang: str) -> tuple[str, str]:
+    said = say("drop_dish", lang, dish=_dish(role_id, lang), meal=word(meal, lang))
+    return say("drop_dish", "en", dish=_dish(role_id, "en"), meal=meal), said
+
+
+def dropped_dish_note(meal: str, role_id: str, lang: str) -> str:
+    return say("dropped_dish", lang, dish=_dish(role_id, lang), meal=word(meal, lang))
+
+
+def tapped_drop(message: str, constraints) -> tuple[str, str] | None:
+    """The (meal, role) a tap on the drop option names: its own sentence, whole, in either language."""
+    shape = constraints.plan_shape or default_plan_shape()
+    for meal, roles in shape.ordered():
+        for role in roles:
+            if message in (_drop_option(meal, role.role_id, lang)[1] for lang in ("en", "zh")):
+                return meal, role.role_id
+    return None
 
 
 def _option(key: str, lang: str, *, short: bool = False, **values) -> tuple[str, str]:

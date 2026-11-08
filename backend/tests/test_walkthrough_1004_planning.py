@@ -523,7 +523,10 @@ def test_the_walkthrough_refusal_searches_each_household_size_once_under_a_budge
     # S$70 and S$47 and both plan; on v2.2 the checks at S$52 and S$40 failed and the refusal named S$69.99. A budget
     # still plans below these amounts (four at S$60, two at S$38: `test_varied_weeks`), as on v2.2.
     # Four: S$42 -> S$64 (#426) -> S$54 (hand-recorded prices); two: S$33 -> S$41 (#426).
-    assert planned == [(4, None, True), (4, 54, False), (2, None, True), (2, 41, False)]
+    assert planned[:4] == [(4, None, True), (4, 54, False), (2, None, True), (2, 41, False)]
+    # Then the week without each dish that may be dropped (owner, 2026-11-09), for everyone; none costs S$10 or less, so
+    # none is planned under the S$10 asked.
+    assert all(size == 4 and budget != 10 for size, budget, _ in planned[4:])
 
 
 @pytest.fixture(scope="module")

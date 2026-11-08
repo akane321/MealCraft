@@ -3,11 +3,13 @@ from collections.abc import Callable
 
 from pydantic import BaseModel, Field
 
+from app.agent.limits import tapped_drop
 from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.replies import language, say
 from app.agent.workflow import AgentConstraintWorkflow, FeasibilityCheck
 from app.orchestration.contracts import InteractionRequest, ScopeClass, ScopeDecision
 from app.orchestration.interactions import (
+    SAY_FIELD,
     household_size_interaction,
     pantry_quantity_interaction,
     say_interaction,
@@ -136,7 +138,21 @@ class BoundedAgentOrchestrator:
         context_version: int,
         pending_interaction: InteractionRequest | None = None,
     ) -> AgentTurnOutcome:
-        decision = self.classify(message, history=history)
+        offered = pending_interaction is not None and pending_interaction.field_path == SAY_FIELD
+        tapped = offered and any(option.value == message for option in pending_interaction.options)
+        # The option offered to drop a dish, tapped: a verified change no model may reinterpret, not even its scope.
+        drop = tapped_drop(message, current) if tapped else None
+        decision = (
+            ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["drop_dish"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="DROP_DISH_OPTION",
+            )
+            if drop
+            else self.classify(message, history=history)
+        )
         if decision.scope_class is ScopeClass.AMBIGUOUS and current_questions:
             decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
@@ -207,6 +223,7 @@ class BoundedAgentOrchestrator:
             acknowledged_unknowns=acknowledged_unknowns,
             history=history,
             asked=current_missing_fields[0] if current_missing_fields else None,
+            drop=drop,
         )
         next_context_version = max(context_version + 1, 1)
         missing_fields = list(result["missing_fields"])
