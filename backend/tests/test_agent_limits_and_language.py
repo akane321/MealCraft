@@ -1436,7 +1436,8 @@ def test_tapping_the_dish_asks_no_model_and_changes_only_the_shape(lang, note):
     assert outcome.status == "ready" and outcome.missing_fields == [] and outcome.pending_interaction is None
     assert outcome.assistant_message.startswith(note)
     assert outcome.constraints.plan_shape == without_role(base, "dinner", "soup")
-    left, before = (item.model_dump(exclude={"plan_shape", "start_date"}) for item in (outcome.constraints, current))
+    skip = {"plan_shape", "start_date", "dropped_dishes"}
+    left, before = (item.model_dump(exclude=skip) for item in (outcome.constraints, current))
     assert left == before
 
 
@@ -1458,6 +1459,58 @@ def test_tapping_the_dish_on_a_short_plan_keeps_its_days_and_meals():
     assert constraints.day_count == 1 and list(constraints.plan_shape.meals) == ["dinner"]
     assert "soup" not in {role.role_id for role in constraints.plan_shape.meals["dinner"]}
     assert constraints.usual_plan_shape.meals["lunch"] == base.meals["lunch"]
+
+
+def test_tapping_a_dish_of_a_meal_the_household_lacks_leaves_the_household_its_meals():
+    base = full_shape()
+    usual = MealPlanShape.model_validate({"meals": {"dinner": base.meals["dinner"]}})
+    plan = MealPlanShape.model_validate({"meals": {"lunch": base.meals["lunch"], "dinner": base.meals["dinner"]}})
+    current = AgentConstraintState(
+        household_size=4,
+        weekly_budget_sgd=10,
+        base_weekly_budget_sgd=40,
+        plan_shape=plan,
+        usual_plan_shape=usual,
+        day_count=3,
+    )
+
+    constraints = tap_turn("Drop the vegetable dish at lunch", current).constraints
+
+    assert constraints.usual_plan_shape == usual
+    assert constraints.plan_shape == without_role(plan, "lunch", "vegetable")
+    assert (constraints.weekly_budget_sgd, constraints.base_weekly_budget_sgd) == (10, 40)
+
+
+def test_a_first_vegetable_dish_is_not_offered_while_a_second_one_would_stay():
+    base = full_shape()
+    state = AgentConstraintState(household_size=5, weekly_budget_sgd=40, plan_shape=base)
+    asked = []
+    costs = {("dinner", "vegetable"): 30.0, ("dinner", "vegetable-2"): 30.0}
+
+    told = _budget_short(52.0, state, "en", cheapest_by_dish(costs, base, asked), lambda **_: None)
+
+    assert ("dinner", "vegetable") not in asked
+    assert told.options[-1][0] == "Drop the second vegetable dish at dinner"
+
+
+def test_keeping_a_later_change_saves_the_dish_dropped_for_the_budget_as_the_household_had_it():
+    full = full_shape()
+    household = MealPlanShape.model_validate({"meals": {"lunch": full.meals["lunch"], "dinner": full.meals["dinner"]}})
+    current = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=household)
+    tapped = tap_turn("Drop the soup at dinner", current).constraints
+    stored = AgentConstraintState.model_validate(tapped.model_dump(mode="json"))  # as the conversation is kept
+    later = MealPlanShape(meals={**tapped.plan_shape.meals, "breakfast": full.meals["breakfast"]})
+    saved = []
+    service = SimpleNamespace(
+        meal_plan_service=SimpleNamespace(get=lambda plan_id: SimpleNamespace(plan_shape=later)),
+        keep_plan_shape=saved.append,
+        repository=SimpleNamespace(append_replan_exchange=lambda *_, **__: "updated"),
+        _to_response=lambda updated: updated,
+    )
+
+    AgentSessionService._answer_keep_shape(service, 1, SimpleNamespace(plan_id=1, constraints=stored), "yes", keep=True)
+
+    assert saved == [MealPlanShape(meals={**household.meals, "breakfast": full.meals["breakfast"]})]
 
 
 @pytest.fixture(params=["fixture", "openai"])

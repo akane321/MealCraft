@@ -137,14 +137,22 @@ class AgentConstraintWorkflow:
             merged.day_count = day_count
         # "Dinners with a soup" in the request shapes the plan it sets up, and the reply says so.
         shaped = setup_shape(message, base, lang)
-        if state.get("drop"):  # this conversation's shape only: the saved household keeps its own
-            meal, role = state["drop"]
-            kept = {**base.meals, meal: without_role(shown, meal, role).meals[meal]}
+        drop = state.get("drop")
+        if drop:  # this conversation's shape only: the saved household keeps its own
+            meal, role = drop
+            place = [item.role_id for item in shown.meals[meal]].index(role)
+            merged.dropped_dishes = [*merged.dropped_dishes, (meal, place, shown.meals[meal][place])]
+            left = without_role(shown, meal, role).meals[meal]
+            # A meal only this plan holds stays out of the household's meals.
+            kept = {**base.meals, meal: left} if meal in base.meals else base.meals
             shaped = MealPlanShape(meals=kept), dropped_dish_note(meal, role, lang)
         if shaped is not None:
             base = shaped[0]
         keep = tuple(meals) if meals else (None if back or usual is None else tuple(shown.meals))
-        if keep is not None:
+        if drop:
+            merged.plan_shape = without_role(shown, *drop)
+            merged.usual_plan_shape = base if usual is not None else None
+        elif keep is not None:
             # Only these meals, each as the household composes it (one the household lacks, as the default does).
             full = default_plan_shape().meals
             merged.plan_shape = MealPlanShape(

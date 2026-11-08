@@ -347,15 +347,30 @@ def without_role(shape: MealPlanShape, meal: str, role_id: str) -> MealPlanShape
     return MealPlanShape.model_validate({"meals": {**shape.meals, meal: roles}})
 
 
+def with_dropped(shape: MealPlanShape, dropped: list) -> MealPlanShape:
+    """`shape` with each dish taken off only to fit a budget, (meal, place, role), back in its place."""
+    for meal, place, role in reversed(dropped):
+        roles = list(shape.meals.get(meal, []))
+        if roles and role.role_id not in {item.role_id for item in roles}:
+            roles.insert(place, role)
+            try:
+                shape = MealPlanShape.model_validate({"meals": {**shape.meals, meal: roles}})
+            except ValueError:  # the meal has been recomposed since, and the dish no longer fits it
+                continue
+    return shape
+
+
 def _dearest_dish(constraints, cheapest, check) -> tuple[str, str, float] | None:
     """(meal, role, cost) of the dish whose going leaves the cheapest week that plans within the budget; None for
     none. Only the shape changes: allergies, diets, halal and every member's filling dish hold in `check`."""
     weekly, shape = constraints.weekly_budget_sgd, constraints.plan_shape or default_plan_shape()
     found = []
     for meal, roles in shape.ordered():
-        for role in roles:
-            # The main is the meal's core, in a shape of courses too; a role for more people than eat is not planned.
-            if role.role_id == "main" or (role.min_people or 0) > (constraints.household_size or 1):
+        # A role for more people than eat is not planned.
+        planned = [role for role in roles if (role.min_people or 0) <= (constraints.household_size or 1)]
+        for role in planned:
+            # The main is the meal's core, in a shape of courses too; "the vegetable dish" goes only as the last.
+            if role.role_id == "main" or any(item.role_id.startswith(f"{role.role_id}-") for item in planned):
                 continue
             try:
                 candidate = without_role(shape, meal, role.role_id)

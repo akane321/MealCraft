@@ -1488,7 +1488,7 @@ class AgentSessionService:
         """After a week's shape changed: keep it as the household's usual one only on a yes (`keep_shape_answer`)."""
         plan = self.meal_plan_service.get(snapshot.plan_id) if keep else None
         if keep and plan is not None and plan.plan_shape is not None and self.keep_plan_shape is not None:
-            self.keep_plan_shape(plan.plan_shape)
+            self.keep_plan_shape(limits.with_dropped(plan.plan_shape, snapshot.constraints.dropped_dishes))
             reply = say("kept", lang)
         elif keep:
             reply = say("keep_failed", lang)

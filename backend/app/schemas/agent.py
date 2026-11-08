@@ -21,6 +21,7 @@ from app.schemas.meal_plan import (
     MealPlanShape,
     WeeklyMealPlanResponse,
 )
+from app.schemas.planning_v2 import PlanningMealRole
 from app.schemas.product import PricingMode
 from app.schemas.recommendation import (
     NO_COOKING_TIME_LIMIT,
@@ -158,6 +159,9 @@ class AgentConstraintState(BaseModel):
     base_weekly_budget_sgd: float | None = None
     # The household's meals while a plan names fewer of them (plan_shape then holds only those): a week restores it.
     usual_plan_shape: MealPlanShape | None = None
+    # Dishes taken off only to fit the budget, (meal, place, role): saving the plan's shape as usual puts them back.
+    # ponytail: lives on the conversation; a later conversation that takes over the plan would need it on the plan.
+    dropped_dishes: list[tuple[str, int, PlanningMealRole]] = Field(default_factory=list)
     # The saved household's members, rules and limits (layer 08); a size the conversation states replaces its
     # members and who is home. None: a conversation with no saved household.
     household: HouseholdPlanning | None = None
@@ -171,6 +175,8 @@ class AgentConstraintState(BaseModel):
         for field in ("base_weekly_budget_sgd", "usual_plan_shape"):
             if getattr(self, field) is None and isinstance(data, dict):
                 data.pop(field, None)
+        if not self.dropped_dishes and isinstance(data, dict):
+            data.pop("dropped_dishes", None)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
         if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
