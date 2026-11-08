@@ -11,7 +11,7 @@ The one run of the 280-question held-out set, at commit `b7538434` with anchor d
 | `aggregate-plan.json` | Quality of the plans each system produced |
 | `comparison-*.json` | Bootstrap comparisons of MealCraft against each other system |
 | `manifest.json` | Arms, answers, digests and spend of the run |
-| `freeze-record.md` | What was frozen before the run |
+| `freeze-record.txt` | What was frozen before the run |
 
 The spend ledgers are in `docs/evaluation/baselines/`.
 
