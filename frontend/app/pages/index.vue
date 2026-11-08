@@ -283,7 +283,7 @@ const shapePreview = computed(() => {
   return {
     title: shapeChangeSummary(change, plan.value?.start_date),
     days: [...byDay.entries()].map(([day, titles]) => ({ day: planDayLabel(plan.value?.start_date, day), titles })),
-    dishes: change.added.slice(0, 3).map(dish => ({ slug: dish.recipe_slug, title: dish.recipe_title, roleId: dish.role_id })),
+    dishes: change.added.slice(0, 3).map(dish => ({ slug: dish.recipe_slug, title: dish.recipe_title })),
     removed: change.removed.length,
   };
 });
@@ -966,7 +966,7 @@ onUnmounted(() => {
               </div>
               <div class="shape-body">
                 <div class="plates">
-                  <HomeDishIcon v-for="dish in shapePreview.dishes" :key="dish.slug" class="swap-icon" :slug="dish.slug" :title="dish.title" :role-id="dish.roleId" :size="48" />
+                  <HomeDishIcon v-for="dish in shapePreview.dishes" :key="dish.slug" class="swap-icon" :slug="dish.slug" :title="dish.title" :size="48" />
                 </div>
                 <ul v-if="shapePreview.days.length" class="shape-days">
                   <li v-for="item in shapePreview.days" :key="item.day"><b>{{ item.day }}</b> {{ item.titles.join(" · ") }}</li>
@@ -992,14 +992,14 @@ onUnmounted(() => {
               </div>
               <div class="tiles" :class="{ single: sameDishChange(session.pending_replan) }">
                 <div class="tile-dish before">
-                  <HomeDishIcon :slug="session.pending_replan.before_entry.recipe_slug" :title="session.pending_replan.before_entry.recipe_title" :role-id="session.pending_replan.before_entry.role_id" :size="48" />
+                  <HomeDishIcon :slug="session.pending_replan.before_entry.recipe_slug" :title="session.pending_replan.before_entry.recipe_title" :size="48" />
                   <s v-if="!sameDishChange(session.pending_replan)">{{ session.pending_replan.before_entry.recipe_title }}</s>
                   <b v-else>{{ session.pending_replan.before_entry.recipe_title }}</b>
                 </div>
                 <template v-if="!sameDishChange(session.pending_replan)">
                   <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                   <div class="tile-dish after">
-                    <HomeDishIcon :slug="session.pending_replan.after_entry.recipe_slug" :title="session.pending_replan.after_entry.recipe_title" :role-id="session.pending_replan.after_entry.role_id" :size="48" />
+                    <HomeDishIcon :slug="session.pending_replan.after_entry.recipe_slug" :title="session.pending_replan.after_entry.recipe_title" :size="48" />
                     <b>{{ session.pending_replan.after_entry.recipe_title }}</b>
                   </div>
                 </template>

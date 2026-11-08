@@ -6,6 +6,9 @@ A dish photo is shared by similar recipes, so a recipe keeps it only if the pict
 - a vegan recipe also gets no picture of egg or dairy;
 - a dish word in the title (soup, cake, ...) must be common among the recipes sharing the picture.
 A recipe its own picture would mislead takes the most similar picture that would not (TF-IDF on title and ingredients).
+Every recipe gets a picture: if none passes, the dish word gives way first, then the rest.
+The curated catalog goes through the same matching. A dish imported from the web is matched in the browser by the rarest
+word of its title.
 `python scripts/build_food_images.py <local-image-gen folder>`
 """
 
@@ -17,6 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE = ROOT / "data-engineering" / "data" / "release" / "v3"
+CURATED = ROOT / "data" / "recipes" / "recipes.json"
 OUTPUT = ROOT / "frontend" / "app" / "assets" / "food-images.json"
 
 # Seen on contact sheets of every image still serving a meatless recipe: meat or fish its prompt never asked for.
@@ -57,6 +61,14 @@ DISH_WORDS = [
     r"sauce|dip|dressing|salsa|pesto|chutney|gravy",
 ]
 RARE_BELOW = 0.3
+# Title words that say nothing about the dish, and how many recipes a word needs to stand for a picture.
+FILLER_WORDS = frozenset(
+    "a air an and au black bowl bowls brown de del easy for green homemade in my of on or plain plate quick recipe red "
+    "s sheet simple skillet style sweet the tray white with yellow".split()
+)
+WORD_IN_RECIPES = 5
+# A word this meatless (curry, rice, pasta...) must not bring a picture of meat to an imported dish.
+MEATLESS_WORD = 0.25
 
 
 def meat_kinds(name: str) -> set[str]:
@@ -83,12 +95,31 @@ def load_recipes() -> list[dict]:
             recipes.append(
                 {
                     "id": row["recipe_id"],
+                    "key": row["recipe_id"][-12:].lower(),
                     "title": row["title"].lower(),
                     "text": " ".join([row["title"], *sorted(names)]),
                     "vegan": "vegan" in row["dietary_tags"],
                     "meat": set().union(*map(meat_kinds, names & meats)),
                 }
             )
+    return recipes
+
+
+def load_curated() -> list[dict]:
+    """The curated catalog, keyed by whole slug: the last 12 characters of two curated slugs can be the same."""
+    recipes = []
+    for row in json.loads(CURATED.read_text(encoding="utf-8")):
+        names = {item["ingredient"].replace("_", " ") for item in row["ingredients"]}
+        meat = {k for k, words in KINDS.items() for name in names if re.search(rf"\b({words})s?\b", name)}
+        recipes.append(
+            {
+                "key": row["slug"],
+                "title": row["title"].lower(),
+                "text": " ".join([row["title"], *sorted(names)]),
+                "vegan": "vegan" in row["dietary_tags"],
+                "meat": meat,
+            }
+        )
     return recipes
 
 
@@ -116,8 +147,8 @@ def misfit(recipe: dict, shown: set[str], shows_animal: bool, members: list[dict
     return None
 
 
-def build(source: Path) -> tuple[dict[str, str], Counter]:
-    """{image: its recipes' slug ends, space separated} and, by reason, how many recipes moved to another picture."""
+def build(source: Path) -> tuple[dict[str, list[dict]], Counter]:
+    """{image: the recipes it stands for} and, by reason, how many recipes moved to another picture."""
     origin = {row["canonical_name"]: row["dietary_origin"] for row in load_ingredients()}
     groups = json.loads((source / "groups.json").read_text(encoding="utf-8"))
     pictured = [group for group in groups if group["main"] != "mixed"]  # the order make_batch.py numbers the images in
@@ -152,25 +183,49 @@ def build(source: Path) -> tuple[dict[str, str], Counter]:
     images = sorted(kept)
     vectorizer = TfidfVectorizer(sublinear_tf=True)
     matrix = vectorizer.fit_transform(" ".join(recipe["text"] for recipe in kept[image]) for image in images)
+    moved += load_curated()
     similarity = (vectorizer.transform(recipe["text"] for recipe in moved) * matrix.T).toarray()
-    additions = defaultdict(list)
     for recipe, scores in zip(moved, similarity, strict=True):
-        for index in scores.argsort()[::-1]:
-            image = images[index]
-            if not misfit(recipe, shown[image], shows_animal[image], by_image[image]):
-                additions[image].append(recipe)
-                break
-        else:
+        nearest = [images[index] for index in scores.argsort()[::-1]]
+        why = {image: misfit(recipe, shown[image], shows_animal[image], by_image[image]) for image in nearest}
+        fits = next((image for image in nearest if why[image] is None), None)
+        if fits is None:
             reasons["no picture fits"] += 1
+            fits = next((image for image in nearest if why[image] == "dish word"), nearest[0])
+            if why[fits] != "dish word":
+                reasons["shows what the recipe lacks"] += 1
+        kept[fits].append(recipe)
 
-    dishes = {image: " ".join(r["id"][-12:].lower() for r in kept[image] + additions[image]) for image in images}
-    return dishes, reasons
+    return {image: kept[image] for image in images}, reasons
+
+
+def title_words(dishes: dict[str, list[dict]]) -> dict[str, str]:
+    """{title word: the picture most recipes with that word use}, rarest word first (a rare word says most).
+
+    An imported dish has no checked ingredients, so a word many meatless recipes use counts only their pictures.
+    """
+    every, meatless = defaultdict(Counter), defaultdict(Counter)
+    for image, members in dishes.items():
+        for recipe in members:
+            for word in set(re.findall(r"[a-z]+", recipe["title"])) - FILLER_WORDS:
+                every[word][image] += 1
+                if not recipe["meat"]:
+                    meatless[word][image] += 1
+    usable = [(sum(c.values()), word) for word, c in every.items() if sum(c.values()) >= WORD_IN_RECIPES]
+    words = {}
+    for total, word in sorted(usable):
+        pictures = meatless[word] if sum(meatless[word].values()) >= MEATLESS_WORD * total else every[word]
+        words[word] = pictures.most_common(1)[0][0]
+    return words
 
 
 def main() -> None:
-    dishes, dropped = build(Path(sys.argv[1]))
+    pictured, dropped = build(Path(sys.argv[1]))
+    dishes = {image: " ".join(recipe["key"] for recipe in members) for image, members in pictured.items()}
+    words = title_words(pictured)
     names = sorted(re.sub(r"[^a-z0-9]", "-", row["canonical_name"].lower()) for row in load_ingredients())
-    OUTPUT.write_text(json.dumps({"dishes": dishes, "ingredients": names}, separators=(",", ":")), encoding="utf-8")
+    food_images = {"dishes": dishes, "ingredients": names, "words": words, "fallback": words["vegetable"]}
+    OUTPUT.write_text(json.dumps(food_images, separators=(",", ":")), encoding="utf-8")
     recipes = sum(len(ids.split()) for ids in dishes.values())
     print(f"{len(dishes)} images, {recipes} recipes; moved to a nearer picture, by reason: {dict(dropped)}")
 
