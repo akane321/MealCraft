@@ -126,12 +126,19 @@ def test_fractional_serving_demand_is_not_silently_rounded():
     assert result.issues == ("quantity_not_representable",)
 
 
-def test_mixed_beam_recovers_budget_rejected_by_single_product_policy():
+def test_standard_and_offline_mixed_beams_accept_the_same_mixed_package_plan():
     problem = packet()
-    assert BeamPlanner().solve(problem).status == "candidate_rejected"
+    standard = BeamPlanner().solve(problem)
+    assert standard.status == "feasible"
+    assert standard.validation.purchase_total_sgd == 3.5
+    assert [(item.product_id, item.packages) for item in standard.shopping[0].allocations] == [("100", 1), ("150", 1)]
     result = solve_mixed_beam(problem)
     assert result.status == "feasible"
     assert result.shopping.purchase_total_sgd == 3.5
+    assert [(item.product_id, item.packages) for item in result.shopping.lines[0].purchase.allocations] == [
+        ("100", 1),
+        ("150", 1),
+    ]
     assert result.choices == exhaustive_mixed_plan(problem).best_choices
     assert result == solve_mixed_beam(problem.model_copy(update={"products": list(reversed(problem.products))}))
 

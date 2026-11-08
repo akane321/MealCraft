@@ -29,6 +29,8 @@ import statistics
 import time
 from dataclasses import dataclass
 from datetime import date, timedelta
+from fractions import Fraction
+from math import isfinite
 from pathlib import Path
 
 from app.agent.parser import RuleBasedConstraintParser
@@ -172,6 +174,11 @@ def build_problem(episode: dict, understood: Constraints) -> FinalPlanningProble
                 }
                 for p in catalog.products
                 if p["external_id"] in allowed
+                and isfinite(p["package_size"])
+                and p["package_size"] > 0
+                and isfinite(p["price_sgd"])
+                and p["price_sgd"] >= 0
+                and (Fraction(str(p["price_sgd"])) * 100).denominator == 1
             ],
             "allergens": understood.allergens,
             "allergen_vocabulary": sorted(checked_allergens()),
@@ -200,6 +207,47 @@ def respond(episode: dict, system_id: str, problem: FinalPlanningProblem | None,
         return {**base, "status": "infeasible", "infeasible": {"conflict": why or "no plan meets every constraint"}}
     servings = dish_servings(problem, solution.assignments)
     total = round(sum(line.purchase_cost_sgd for line in solution.shopping), 2)
+    products = {product.product_id: product for product in problem.products}
+    shopping = []
+    for line in solution.shopping:
+        allocations = line.allocations or (
+            [type("LegacyAllocation", (), {"product_id": line.selected_product_id, "packages": line.packages})]
+            if line.selected_product_id is not None
+            else []
+        )
+        deduction = (
+            line.required_quantity - line.remaining_quantity
+            if line.required_quantity is not None and line.remaining_quantity is not None
+            else line.pantry_deduction
+        )
+        if not allocations:
+            shopping.append(
+                {
+                    "ingredient_id": line.ingredient_id,
+                    "required_quantity": line.required_quantity,
+                    "unit": line.unit,
+                    "pantry_deduction": deduction,
+                    "product_id": None,
+                    "packages": 0,
+                    "line_cost_sgd": 0,
+                }
+            )
+            continue
+        for index, allocation in enumerate(allocations):
+            product = products[allocation.product_id]
+            shopping.append(
+                {
+                    "ingredient_id": line.ingredient_id,
+                    "required_quantity": line.required_quantity,
+                    "unit": line.unit,
+                    # The common schema represents a mixed purchase as several lines.
+                    # State the ingredient's pantry deduction once, not once per package type.
+                    "pantry_deduction": deduction if index == 0 else 0,
+                    "product_id": allocation.product_id,
+                    "packages": allocation.packages,
+                    "line_cost_sgd": round(product.price_sgd * allocation.packages, 2),
+                }
+            )
     return {
         **base,
         "status": "plan",
@@ -208,23 +256,7 @@ def respond(episode: dict, system_id: str, problem: FinalPlanningProblem | None,
                 {"slot_id": a.slot_id, "role_id": a.role_id, "recipe_id": a.recipe_id, "servings": float(servings[i])}
                 for i, a in enumerate(solution.assignments)
             ],
-            "shopping": [
-                {
-                    "ingredient_id": line.ingredient_id,
-                    "required_quantity": line.required_quantity,
-                    "unit": line.unit,
-                    # Exact: the shopping line rounds its deduction to thousandths for display.
-                    "pantry_deduction": (
-                        line.required_quantity - line.remaining_quantity
-                        if line.required_quantity is not None and line.remaining_quantity is not None
-                        else line.pantry_deduction
-                    ),
-                    "product_id": line.selected_product_id,
-                    "packages": line.packages,
-                    "line_cost_sgd": line.purchase_cost_sgd,
-                }
-                for line in solution.shopping
-            ],
+            "shopping": shopping,
             "total_cost_sgd": total,
             "within_budget": None if problem.purchase_budget_sgd is None else total <= problem.purchase_budget_sgd,
         },
