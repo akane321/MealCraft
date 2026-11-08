@@ -1,0 +1,540 @@
+{
+  "bootstrap_samples": 10000,
+  "comparisons": {
+    "general-agent": {
+      "baseline_system_id": "general-agent",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.544715,
+          "baseline_run_summary": {
+            "mean": 0.544715,
+            "per_run": [
+              0.544715
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.482273,
+            0.605782
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 48,
+            "discordant_n": 97,
+            "exact_two_sided_p_value": 1.0,
+            "product_only_success_n": 49
+          },
+          "paired_bootstrap_95_ci": [
+            -0.077236,
+            0.081301
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.004065,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/diversity_off": {
+      "baseline_system_id": "mealcraft/ablation/diversity_off",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.560976,
+          "baseline_run_summary": {
+            "mean": 0.560976,
+            "per_run": [
+              0.560976
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.498495,
+            0.621582
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 8,
+            "discordant_n": 13,
+            "exact_two_sided_p_value": 0.581055,
+            "product_only_success_n": 5
+          },
+          "paired_bootstrap_95_ci": [
+            -0.04065,
+            0.01626
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": -0.012195,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/independent_validator_off": {
+      "baseline_system_id": "mealcraft/ablation/independent_validator_off",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.585366,
+          "baseline_run_summary": {
+            "mean": 0.585366,
+            "per_run": [
+              0.585366
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.52295,
+            0.645156
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 20,
+            "discordant_n": 31,
+            "exact_two_sided_p_value": 0.149613,
+            "product_only_success_n": 11
+          },
+          "paired_bootstrap_95_ci": [
+            -0.081301,
+            0.00813
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": -0.036585,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/local_improvement_off": {
+      "baseline_system_id": "mealcraft/ablation/local_improvement_off",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.54065,
+          "baseline_run_summary": {
+            "mean": 0.54065,
+            "per_run": [
+              0.54065
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.478228,
+            0.601822
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 7,
+            "discordant_n": 16,
+            "exact_two_sided_p_value": 0.803619,
+            "product_only_success_n": 9
+          },
+          "paired_bootstrap_95_ci": [
+            -0.02439,
+            0.04065
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.00813,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/repair_off": {
+      "baseline_system_id": "mealcraft/ablation/repair_off",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.544715,
+          "baseline_run_summary": {
+            "mean": 0.544715,
+            "per_run": [
+              0.544715
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.482273,
+            0.605782
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 6,
+            "discordant_n": 13,
+            "exact_two_sided_p_value": 1.0,
+            "product_only_success_n": 7
+          },
+          "paired_bootstrap_95_ci": [
+            -0.02439,
+            0.03252
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.004065,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/retrieval_off": {
+      "baseline_system_id": "mealcraft/ablation/retrieval_off",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.565041,
+          "baseline_run_summary": {
+            "mean": 0.565041,
+            "per_run": [
+              0.565041
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.50256,
+            0.625521
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 13,
+            "discordant_n": 22,
+            "exact_two_sided_p_value": 0.523467,
+            "product_only_success_n": 9
+          },
+          "paired_bootstrap_95_ci": [
+            -0.052846,
+            0.020325
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": -0.01626,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "mealcraft/ablation/rule_only_parser": {
+      "baseline_system_id": "mealcraft/ablation/rule_only_parser",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.337398,
+          "baseline_run_summary": {
+            "mean": 0.337398,
+            "per_run": [
+              0.337398
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.281216,
+            0.398581
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 27,
+            "discordant_n": 106,
+            "exact_two_sided_p_value": 0.0,
+            "product_only_success_n": 79
+          },
+          "paired_bootstrap_95_ci": [
+            0.134146,
+            0.288618
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.211382,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "pure-llm": {
+      "baseline_system_id": "pure-llm",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.630081,
+          "baseline_run_summary": {
+            "mean": 0.630081,
+            "per_run": [
+              0.630081
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.568184,
+            0.687979
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 59,
+            "discordant_n": 98,
+            "exact_two_sided_p_value": 0.054391,
+            "product_only_success_n": 39
+          },
+          "paired_bootstrap_95_ci": [
+            -0.158537,
+            -0.004065
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": -0.081301,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "rag": {
+      "baseline_system_id": "rag",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.54878,
+          "baseline_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 47,
+            "discordant_n": 94,
+            "exact_two_sided_p_value": 1.0,
+            "product_only_success_n": 47
+          },
+          "paired_bootstrap_95_ci": [
+            -0.077236,
+            0.077236
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.0,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    },
+    "strong-rule": {
+      "baseline_system_id": "strong-rule",
+      "metrics": {
+        "success": {
+          "baseline_rate": 0.402439,
+          "baseline_run_summary": {
+            "mean": 0.402439,
+            "per_run": [
+              0.402439
+            ],
+            "standard_deviation": 0.0
+          },
+          "baseline_unpaired_n": 0,
+          "baseline_wilson_95_ci": [
+            0.343113,
+            0.464765
+          ],
+          "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+          "higher_is_better": true,
+          "mcnemar": {
+            "baseline_only_success_n": 46,
+            "discordant_n": 128,
+            "exact_two_sided_p_value": 0.001862,
+            "product_only_success_n": 82
+          },
+          "paired_bootstrap_95_ci": [
+            0.056911,
+            0.231707
+          ],
+          "paired_n": 246,
+          "paired_rate_difference": 0.146341,
+          "product_rate": 0.54878,
+          "product_run_summary": {
+            "mean": 0.54878,
+            "per_run": [
+              0.54878
+            ],
+            "standard_deviation": 0.0
+          },
+          "product_unpaired_n": 0,
+          "product_wilson_95_ci": [
+            0.486322,
+            0.609738
+          ]
+        }
+      },
+      "power_note": {
+        "approximate_minimum_detectable_absolute_difference": 0.049386,
+        "limitation": "descriptive planning guidance, not a post-hoc power calculation from observed effects",
+        "method": "planning approximation sqrt(0.6 / n); about 0.10 requires at least 60 paired episodes",
+        "paired_episodes": 246
+      }
+    }
+  },
+  "grouped_reporting_enabled": false,
+  "method": "paired episode-level comparison",
+  "note": "Voided episodes are excluded. Timeout, error, failure and missing statuses are failures. Metric values are consumed after scoring; this analysis does not rescore outputs.",
+  "product_system_id": "mealcraft",
+  "seed": 365
+}
