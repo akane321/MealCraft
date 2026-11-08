@@ -527,6 +527,10 @@ class ProductPlanningEngine:
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
+        # The dish this plan must hold: locked in its role at the first of its meal on its day, as a kept dish is.
+        pin = getattr(constraints, "required_dish", None)
+        if pin is not None:
+            kept_dishes.add(pin.recipe_slug)
         household = getattr(constraints, "household", None)
         # A limit the household switched on is a hard band of each day, pro-rated to the meals planned.
         nutrition_targets = [
@@ -766,6 +770,14 @@ class ProductPlanningEngine:
                     floor_share = meal_structure.energy_floor_share(meal)
                     if kept_roles:
                         kept_roles = {r: d for r, d in kept_roles.items() if r in {x.role_id for x in meal_roles}}
+                if (
+                    pin is not None
+                    and meal == pin.meal
+                    and pin.weekday in (None, weekday)
+                    and any(role.role_id == pin.role_id for role in meal_roles or ())
+                ):
+                    kept_roles = {**(kept_roles or {}), pin.role_id: pin.recipe_slug}
+                    pin = None
                 slot = PlanningSlot(
                     slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
                     planned_date=planned_date,
@@ -791,6 +803,8 @@ class ProductPlanningEngine:
             trace["unattended_slots"] = unattended
         if not slots:
             raise ProductPlanningError("candidate_rejected", "Nobody is home for any planned meal this week.", trace)
+        if pin is not None:  # never a week without the dish it must hold
+            raise ProductPlanningError("candidate_rejected", "No planned meal can hold the dish you asked for.", trace)
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)

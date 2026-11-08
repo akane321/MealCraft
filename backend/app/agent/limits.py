@@ -12,6 +12,8 @@ A budget is offered only when a real week backs it. The suggestion's amount is c
 same budgeted planning path used when the household accepts it, not inferred from an unbudgeted search.
 A weekly budget short of every week also offers the one dish whose going saves most, when a real week without it
 plans within the budget (owner, 2026-11-09): only the plan's shape changes, never a limit that keeps anyone safe.
+A dish the household must have that alone stands in the way of a week offers the most alike dish that lets one plan,
+a dish taken off, and a budget a real week backs: each only when a real week passes with exactly that change.
 A budget that plans only a week of fewer than four different dishes is planned as asked; the reply adds what a
 verified four-dish week costs, when one is found and dearer than the budget (ADR-0067, owner 2026-10-13).
 """
@@ -21,10 +23,11 @@ from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from app.agent.replies import details, joined, people, planner_message, say, word
+from app.agent.replies import details, joined, listed, people, planner_message, say, word
 from app.data.allergens import checked_allergens
 from app.planning.week_floor import WeekFloor
 from app.products.provider import ProductProviderError
+from app.schemas.agent import OfferedChange
 from app.schemas.meal_plan import MealPlanShape, default_plan_shape
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
@@ -41,6 +44,8 @@ EMPTIED = {
 }
 ROLE_EN = {"main": "main dish", "vegetable": "vegetable dish", "soup": "soup"}
 ORDINAL_EN = {"2": "second", "3": "third"}
+# Replacements for a pinned dish checked with a week each, the most alike first: a search each, so a few.
+PIN_SWAPS_CHECKED = 6
 
 
 def _say(constraints, key: str, lang: str, **values) -> str:
@@ -55,6 +60,7 @@ class Refusal:
     options: tuple[tuple[str, str], ...] = ()  # (label, what tapping it says)
     retry: bool = False  # nothing to change: the same request may plan next time
     aside: bool = False  # not refused: the week plans as asked, and the text follows the reply (ADR-0067)
+    changes: tuple[OfferedChange, ...] = ()  # what the options that change a limit do, tapped: no model reads them
 
 
 def refusal(
@@ -65,6 +71,7 @@ def refusal(
     check: Callable[..., Exception | None],
     cheapest: Callable[..., float | None],
     distinct_dishes: Callable[[], int | None] | None = None,
+    replacements: Callable[..., list] | None = None,
 ) -> Refusal | None:
     """A limit no week from the planner's candidates meets, or None; or an aside to a week that plans (`aside`).
 
@@ -72,6 +79,7 @@ def refusal(
     planner answers at Plan (None for a week, else its error), `cheapest` what the cheapest week the
     planner's cost-led search finds costs (None for no week), all without saving anything; each of the last two
     also takes `minimum_distinct_dishes`. `distinct_dishes` counts the different dishes of the week `check` kept.
+    `replacements(pin)` lists the dishes that could take a pinned dish's place, the most alike first.
     """
     floor = floor_of()
     if floor.empty_roles:
@@ -106,6 +114,10 @@ def refusal(
             text = say("floor_meal", lang, budget=per_meal, meal=word(meal, lang), floor=_cents_down(cheapest_meal))
             return Refusal("budget_per_meal_sgd", text, _raise_meal(check, math.ceil(cheapest_meal), lang))
     weekly = constraints.weekly_budget_sgd
+    if getattr(constraints, "required_dish", None) is not None and check is not None and replacements is not None:
+        conflict = _pin_conflict(constraints, lang, check, cheapest, replacements)
+        if conflict is not None:
+            return conflict
     if weekly is not None and weekly < floor.total_sgd - SLACK_SGD:
         # Under the floor no week fits: what remains to say is what the cheapest week the search finds costs.
         cost = cheapest() if cheapest is not None else None
@@ -341,6 +353,66 @@ def _budget_short(cost: float, constraints, lang: str, cheapest, check=None) -> 
     return Refusal("weekly_budget_sgd", text, tuple(options))
 
 
+def _pin_conflict(constraints, lang: str, check, cheapest, replacements) -> Refusal | None:
+    """The reply when the dish the plan must hold is all that stands in the way of a week, or None: what binds, in
+    real numbers, then every way out a real week backs. Money cannot fix calories, so it is never offered for them."""
+    pin, weekly, ceiling = constraints.required_dish, constraints.weekly_budget_sgd, constraints.max_kcal_per_meal
+    error = check()
+    if error is None or getattr(error, "status", None) in {"needs_clarification", "needs_data"}:
+        return None
+    if check(required_dish=None) is not None:
+        return None  # no week without it either: the limits are refused as they are with no dish named
+    calories = ceiling is not None and check(nutrition_constraints=[]) is None
+    money = weekly is not None and not calories and check(weekly_budget_sgd=None) is None
+    cost = cheapest() if money else None
+    title, when, meal = pin.title, pin_when(pin, lang), word(pin.meal, lang)
+    if cost is not None:
+        parts = [say("pin_over_budget", lang, title=title, when=when, cost=cost, budget=weekly)]
+    elif calories:
+        parts = [say("pin_over_kcal", lang, title=title, kcal=pin.kcal, meal=meal, limit=ceiling)]
+    else:
+        limits = joined(details(constraints, lang), lang)
+        parts = [say("pin_stuck", lang, title=title, when=when, limits=limits)]
+    options: list[tuple[str, str]] = []
+    changes: list[OfferedChange] = []
+
+    def saves(item) -> bool:
+        return item.saved_kcal > 0 if calories else item.saved_sgd > 0 if money else True
+
+    fitting = [item for item in replacements(pin) if saves(item)]
+    swap = next((item for item in fitting[:PIN_SWAPS_CHECKED] if check(required_dish=item.dish) is None), None)
+    if swap is not None:
+        after = swap.dish.title
+        parts.append(say("pin_swap_offer", lang, after=after))
+        saved = []
+        if swap.saved_sgd > 0:
+            saved.append(say("pin_saved_money", lang, amount=swap.saved_sgd))
+        if swap.saved_kcal > 0:
+            saved.append(say("pin_saved_kcal", lang, kcal=swap.saved_kcal))
+        if saved:
+            parts.append(say("pin_swap_saved", lang, before=title, saved=listed(saved, lang)))
+        said = say("pin_use_say", lang, after=after, before=title)
+        options.append((say("pin_use", "en", title=after), said))
+        changes.append(OfferedChange(value=said, required_dish=swap.dish))
+    dropped = _dearest_dish(constraints, cheapest, check)
+    if dropped is not None:
+        drop_meal, role, without_it = dropped
+        dish, at = _dish(role, lang), word(drop_meal, lang)
+        if weekly is not None:
+            parts.append(say("pin_drop_cost", lang, dish=dish, meal=at, title=title, cost=without_it, budget=weekly))
+        else:
+            parts.append(say("pin_drop", lang, dish=dish, meal=at, title=title))
+        options.append(_drop_option(drop_meal, role, lang))
+    if cost is not None:
+        amount = math.ceil(cost)
+        parts.append(say("pin_raise", lang, amount=amount, title=title))
+        option = _option("use_weekly", lang, short=getattr(constraints, "day_count", 7) < 7, amount=amount)
+        options.append(option)
+        changes.append(OfferedChange(value=option[1], weekly_budget_sgd=amount))
+    field = "weekly_budget_sgd" if money else "required_dish"
+    return Refusal(field, ("" if lang == "zh" else " ").join(parts), tuple(options), changes=tuple(changes))
+
+
 def without_role(shape: MealPlanShape, meal: str, role_id: str) -> MealPlanShape:
     """`shape` with one dish taken off one meal; ValueError when what is left is not a real meal."""
     roles = [role for role in shape.meals[meal] if role.role_id != role_id]
@@ -364,6 +436,7 @@ def _dearest_dish(constraints, cheapest, check) -> tuple[str, str, float] | None
     """(meal, role, cost) of the dish whose going leaves the cheapest week that plans within the budget; None for
     none. Only the shape changes: allergies, diets, halal and every member's filling dish hold in `check`."""
     weekly, shape = constraints.weekly_budget_sgd, constraints.plan_shape or default_plan_shape()
+    pin = getattr(constraints, "required_dish", None)
     found = []
     for meal, roles in shape.ordered():
         # A role for more people than eat is not planned.
@@ -372,10 +445,12 @@ def _dearest_dish(constraints, cheapest, check) -> tuple[str, str, float] | None
             # The main is the meal's core, in a shape of courses too; "the vegetable dish" goes only as the last.
             if role.role_id == "main" or any(item.role_id.startswith(f"{role.role_id}-") for item in planned):
                 continue
+            if pin is not None and (pin.meal, pin.role_id) == (meal, role.role_id):
+                continue  # the dish the plan must hold stays
             try:
                 candidate = without_role(shape, meal, role.role_id)
                 cost = cheapest(plan_shape=candidate)
-                if cost is not None and cost <= weekly and check(plan_shape=candidate) is None:
+                if cost is not None and (weekly is None or cost <= weekly) and check(plan_shape=candidate) is None:
                     found.append((meal, role.role_id, cost))
             except (ValueError, ProductProviderError):  # not a real meal without it (a ValueError), or no prices now
                 continue
@@ -392,6 +467,20 @@ def _dish(role_id: str, lang: str) -> str:
 def _drop_option(meal: str, role_id: str, lang: str) -> tuple[str, str]:
     said = say("drop_dish", lang, dish=_dish(role_id, lang), meal=word(meal, lang))
     return say("drop_dish", "en", dish=_dish(role_id, "en"), meal=meal), said
+
+
+DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def day_name(weekday: str, lang: str) -> str:
+    """'Friday', 周五."""
+    return f"周{'一二三四五六日'[DAYS.index(weekday)]}" if lang == "zh" else weekday.capitalize()
+
+
+def pin_when(pin, lang: str) -> str:
+    """'Friday dinner', 周五晚餐; 'dinner' when no day was named."""
+    meal = word(pin.meal, lang)
+    return meal if pin.weekday is None else f"{day_name(pin.weekday, lang)}{'' if lang == 'zh' else ' '}{meal}"
 
 
 def dropped_dish_note(meal: str, role_id: str, lang: str) -> str:

@@ -225,6 +225,8 @@ def details(stated, lang: str, *, week: bool = False) -> list[str]:
         parts.append(
             say("pantry_detail", lang, words=words(item.normalized_name for item in stated.available_ingredients))
         )
+    if getattr(stated, "max_kcal_per_meal", None):
+        parts.append(say("kcal_detail", lang, kcal=stated.max_kcal_per_meal))
     if stated.max_uses_per_recipe == 1:
         parts.append(say("no_repeats_detail", lang))
     elif stated.max_uses_per_recipe:
@@ -603,6 +605,63 @@ REPLIES: dict[str, tuple[str, str]] = {
         "也可以{meal}不要{dish}：这样我找到的最便宜的一周要 S${cost:.2f}，在 S${budget:g} 预算之内。",
     ),
     "dropped_dish": ("This plan leaves out the {dish} at {meal}.", "这次计划{meal}不要{dish}。"),
+    "kcal_detail": ("each meal under {kcal:g} kcal", "每餐不超过 {kcal:g} 千卡"),
+    # A dish the household must have (agent/required_dish.py, agent/limits.py).
+    "pin_noted": ("{title} is in this plan for {when}.", "这次计划{when}安排 {title}。"),
+    "pin_retry": ("I can't look up dishes right now. Please try again.", "现在查不了菜谱，请再试一次。"),
+    "pin_not_found": (
+        "I couldn't find {name} in the recipes. Is it one of these?",
+        "菜谱里没有找到{name}。是下面这些吗？",
+    ),
+    "pin_no_match": (
+        "I couldn't find {name} in the recipes. Which dish do you mean?",
+        "菜谱里没有找到{name}。你想要哪道菜？",
+    ),
+    "pin_which": ("Which {name} do you mean?", "你说的{name}是哪一道？"),
+    "pin_not_in_plan": ("This plan doesn't include {day}.", "这次计划不包含{day}。"),
+    "pin_not_fresh": (
+        "{title} uses fresh food that keeps {kept} days after shopping, so {day} is too late. "
+        "{last} is the latest it fits.",
+        "{title} 用的新鲜食材买回来只放 {kept} 天，{day}太晚了。最晚可以排在{last}。",
+    ),
+    "pin_move": ("Have it on {day}", "排在{day}"),
+    "pin_unpriced": ("I can't price {title}, so I can't plan it.", "{title} 查不到价格，排不进计划。"),
+    "pin_unsafe": ("I can't plan {title}: {why}.", "{title} 不能排进计划：{why}。"),
+    "pin_allergy": ("it has something you are allergic to", "含有你过敏的东西"),
+    "pin_excluded": ("it has an ingredient you excluded", "含有你不吃的食材"),
+    "pin_halal": ("it is not halal", "不是清真的"),
+    "pin_diet": ("it does not fit your diet", "不符合你的饮食要求"),
+    "pin_never": ("you asked not to have it again", "你说过不想再吃"),
+    "pin_member": ("{names} can't eat it", "{names}不能吃"),
+    "pin_over_budget": (
+        "With {title} at {when}, the cheapest plan I found costs S${cost:.2f}, over your S${budget:g}.",
+        "{when}吃 {title} 的话，我找到的最便宜的计划要 S${cost:.2f}，超过了 S${budget:g} 的预算。",
+    ),
+    "pin_over_kcal": (
+        "{title} is {kcal:.0f} kcal a serving. With the rest of the meal, "
+        "I found no {meal} with it under {limit:g} kcal.",
+        "{title} 每份 {kcal:.0f} 千卡，加上这顿的其他菜，我找不到不超过 {limit:g} 千卡的{meal}。",
+    ),
+    "pin_stuck": (
+        "I found no plan with {title} at {when} within {limits}.",
+        "我找不到{when}有 {title} 又满足{limits}的计划。",
+    ),
+    "pin_swap_offer": ("{after} is the closest dish that fits.", "{after} 是最接近又排得下的菜。"),
+    "pin_swap_saved": ("Against {before} it is {saved}.", "比起 {before}，{saved}。"),
+    "pin_saved_money": ("S${amount:.2f} cheaper to cook", "做一次便宜 S${amount:.2f}"),
+    "pin_saved_kcal": ("{kcal:.0f} kcal lighter a serving", "每份少 {kcal:.0f} 千卡"),
+    "pin_drop": ("Or I can drop the {dish} at {meal} and keep {title}.", "也可以{meal}不要{dish}，保留 {title}。"),
+    "pin_drop_cost": (
+        "Or I can drop the {dish} at {meal} and keep {title}: the cheapest plan I found then costs S${cost:.2f}, "
+        "within your S${budget:g}.",
+        "也可以{meal}不要{dish}，保留 {title}：这样我找到的最便宜的计划要 S${cost:.2f}，在 S${budget:g} 预算之内。",
+    ),
+    "pin_raise": (
+        "Or raise the budget to S${amount} and keep {title}.",
+        "也可以把预算提高到 S${amount}，保留 {title}。",
+    ),
+    "pin_use": ("Use {title} instead", "改用 {title}"),
+    "pin_use_say": ("Use {after} instead of {before}", "用 {after} 代替 {before}"),
     "raise_time": ("Allow up to {minutes} minutes", "放宽到 {minutes} 分钟"),
     "raise_time_say": ("Allow up to {minutes} minutes of cooking", "做饭 {minutes} 分钟以内"),
     # A week the planner could not find (services/agent.py confirm).

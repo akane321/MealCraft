@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
-from app.agent import limits, model_client
+from app.agent import limits, model_client, required_dish
 from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
@@ -69,15 +69,18 @@ from app.schemas.agent import (
     AgentSessionCollectionResponse,
     AgentSessionLabel,
     AgentSessionResponse,
+    DishAsked,
 )
 from app.schemas.meal_plan import (
     MealPlanReplanEventResponse,
     MealPlanReplanPreviewRequest,
     MealPlanShape,
+    RequiredDish,
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
     default_plan_shape,
 )
+from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.services.food_questions import (
     CatalogFoodQuestionAnswerer,
     OpenAIWebFoodQuestionAnswerer,
@@ -461,6 +464,7 @@ class AgentSessionService:
         self.orchestrator = BoundedAgentOrchestrator(
             parser,
             check=self._refusal,
+            resolve_dish=self._resolve_dish,
             food_question_handler=self._answer_food_question,
             food_question_context_handler=(
                 self.substitution_question_answerer.answer if self.substitution_question_answerer else None
@@ -846,6 +850,16 @@ class AgentSessionService:
             avoid_recipe_ids=constraints.avoid_recipe_ids,
             household=constraints.household,
             planning_preferences=constraints.planning_preferences,
+            required_dish=constraints.required_dish,
+            nutrition_constraints=(
+                [
+                    ProductNutritionTarget(
+                        metric="calories_kcal", scope="per_serving", upper=constraints.max_kcal_per_meal
+                    )
+                ]
+                if constraints.max_kcal_per_meal is not None
+                else []
+            ),
         )
 
     def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:
@@ -862,10 +876,32 @@ class AgentSessionService:
                 check=self._check(request),
                 distinct_dishes=lambda: self.meal_plan_service.checked_distinct_dishes(request),
                 cheapest=self._cheapest(request),
+                replacements=lambda pin: required_dish.similar(
+                    pin, request, *self.meal_plan_service.dish_pool(request)
+                ),
             )
         except (ProductProviderError, WeeklyPlanSelectionError):
             # Prices or recipes could not be read now: nothing is refused, and Plan answers for itself.
             return None
+
+    def _resolve_dish(
+        self, asked: DishAsked, constraints: AgentConstraintState, lang: str
+    ) -> RequiredDish | limits.Refusal:
+        """The dish a message names, in this plan's shape and days, or the reply that says why not."""
+        size = constraints.household_size or 1  # a dish can be named before who eats is known
+        try:
+            request = self._plan_request(constraints.model_copy(update={"household_size": size, "required_dish": None}))
+            recipes, ranked = self.meal_plan_service.dish_pool(request)
+            return required_dish.resolve(
+                asked,
+                request,
+                recipes,
+                ranked,
+                lambda recipe: self.meal_plan_service.dish_blockers(request, recipe),
+                lang,
+            )
+        except (ValueError, ProductProviderError, WeeklyPlanSelectionError):
+            return limits.Refusal(required_dish.FIELD, say("pin_retry", lang))
 
     def _check(self, request: WeeklyMealPlanRequest) -> Callable[..., Exception | None]:
         """What Plan would answer for the request with `changes` made to it: None for a week, else its error."""
@@ -1129,6 +1165,7 @@ class AgentSessionService:
             "start_date": plan.start_date,
             "day_count": plan.day_count,
             "avoid_recipe_ids": avoid_recipe_ids,
+            "required_dish": None,  # different dishes from the week it replaces, this one's named dish too
         }
         if plan.plan_shape is not None:
             changes["plan_shape"] = plan.plan_shape

@@ -881,7 +881,7 @@ def meal_permitted(problem, slot, dishes, recipes, shares=None) -> bool:
     chosen = [recipes[recipe_id] for recipe_id in ids]
     if slot.max_time_minutes is not None and meal_minutes(chosen, problem.composition_policy) > slot.max_time_minutes:
         return False
-    if len(dishes) > 1:
+    if slot.composition is not None:  # a meal of one dish too: the validator holds it to the same band
         for band in problem.nutrition_bands:
             if band.hard and band.scope == "per_slot":
                 actual = sum(

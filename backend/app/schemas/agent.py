@@ -19,6 +19,9 @@ from app.schemas.meal_plan import (
     MealPlanEventType,
     MealPlanReplanEventResponse,
     MealPlanShape,
+    PlannedMeal,
+    RequiredDish,
+    Weekday,
     WeeklyMealPlanResponse,
 )
 from app.schemas.planning_v2 import PlanningMealRole
@@ -68,6 +71,22 @@ class UnmatchedTermSuggestion(BaseModel):
     options: list[str] = Field(default_factory=list)
 
 
+class DishAsked(BaseModel):
+    """A dish as the household named it, before it is resolved to a catalog recipe."""
+
+    name: str = Field(min_length=2, max_length=120)
+    weekday: Weekday | None = None
+    meal: PlannedMeal | None = None
+
+
+class OfferedChange(BaseModel):
+    """What one offered option does when tapped, so no model reads it (agent/limits.py)."""
+
+    value: str  # the option's own sentence
+    required_dish: RequiredDish | None = None
+    weekly_budget_sgd: float | None = None
+
+
 class AgentConstraintExtraction(BaseModel):
     household_size: int | None = Field(default=None, ge=1, le=12)
     max_cooking_time_minutes: int | None = Field(default=None, ge=5, le=240)
@@ -81,6 +100,20 @@ class AgentConstraintExtraction(BaseModel):
     planning_preferences: PlanningPreferences | None = None
     nutrition_targets: NutritionTargets | None = None
     max_sodium_mg_per_meal: float | None = Field(default=None, ge=100, le=5000)
+    max_kcal_per_meal: float | None = Field(
+        default=None,
+        ge=100,
+        le=2500,
+        description="A ceiling on every meal's kcal, only when stated: each meal under 650 kcal, 每餐不超过650千卡.",
+    )
+    required_dish: DishAsked | None = Field(
+        default=None,
+        description=(
+            "A specific dish this plan must contain, only when the user names one: chicken curry on Friday dinner, "
+            "周五晚餐要吃咖喱鸡. name is the dish as said; weekday and meal only when said. Null for an ingredient "
+            "(some chicken), a kind of food (something spicy) or a change to a saved plan."
+        ),
+    )
     available_ingredients: list[AvailableIngredientInput] | None = None
     acknowledged_unknown_quantities: list[str] = Field(default_factory=list)
     pricing_mode: PricingMode | None = None
@@ -140,6 +173,12 @@ class AgentConstraintState(BaseModel):
     planning_preferences: PlanningPreferences = Field(default_factory=PlanningPreferences)
     nutrition_targets: NutritionTargets = Field(default_factory=NutritionTargets)
     max_sodium_mg_per_meal: float | None = None
+    # A hard ceiling on every planned meal, per person; one state field for the planner's per_serving energy band.
+    max_kcal_per_meal: float | None = None
+    # The dish this plan must hold, resolved to a catalog recipe (agent/required_dish.py); this conversation's only.
+    required_dish: RequiredDish | None = None
+    # What each option of the last refusal does when tapped (agent/limits.py); replaced every turn.
+    offered_changes: list[OfferedChange] = Field(default_factory=list)
     available_ingredients: list[AvailableIngredientInput] = Field(default_factory=list)
     pricing_mode: PricingMode = "fixture"
     # Which meals and dishes this week plans (ADR-0046); None is the household default.
@@ -172,11 +211,13 @@ class AgentConstraintState(BaseModel):
         data = handler(self)
         if self.day_count == 7 and isinstance(data, dict):
             data.pop("day_count", None)
-        for field in ("base_weekly_budget_sgd", "usual_plan_shape"):
+        for field in ("base_weekly_budget_sgd", "usual_plan_shape", "max_kcal_per_meal", "required_dish"):
             if getattr(self, field) is None and isinstance(data, dict):
                 data.pop(field, None)
         if not self.dropped_dishes and isinstance(data, dict):
             data.pop("dropped_dishes", None)
+        if not self.offered_changes and isinstance(data, dict):
+            data.pop("offered_changes", None)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
         if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):

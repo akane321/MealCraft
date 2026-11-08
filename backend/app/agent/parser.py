@@ -15,6 +15,7 @@ from app.schemas.agent import (
     AgentConstraintExtraction,
     AgentConstraintState,
     AgentMessageResponse,
+    DishAsked,
     UnmatchedTermSuggestion,
 )
 from app.schemas.household_rules import PlanningPreferences
@@ -239,6 +240,105 @@ def apply_rule_span(extraction: AgentConstraintExtraction, message: str, span: S
         extraction.plan_day_count = span.day_count
     if span.meals:
         extraction.plan_meals = list(span.meals)  # type: ignore[assignment]
+
+
+# A ceiling on every meal's energy: "each meal under 650 kcal", "650 calories per meal", 每餐不超过650千卡.
+MEAL_KCAL = re.compile(
+    r"\b(?:each|every|per|a)\s+meal\b[^\d.,;]{0,24}?(\d{3,4})\s*(?:kcal|cal\b|calories?)"
+    r"|(\d{3,4})\s*(?:kcal|cal\b|calories?)\s*(?:or (?:less|under)\s*)?(?:per|each|a|every)\s+meal\b"
+    r"|(?:每餐|一餐|每顿)[^\d，。；]{0,8}?(\d{3,4})\s*(?:千卡|大卡|卡)"
+)
+NOT_A_CEILING = re.compile(r"at least|minimum|no less than|more than|over \d|至少|不少于|不低于")
+
+
+def read_meal_kcal(text: str) -> float | None:
+    """The ceiling a lower-cased message puts on every meal's kcal; a floor ("at least 400") is not one."""
+    match = MEAL_KCAL.search(text)
+    if match is None or NOT_A_CEILING.search(text[max(0, match.start() - 16) : match.end()]):
+        return None
+    value = float(next(group for group in match.groups() if group))
+    return value if 100 <= value <= 2500 else None
+
+
+WEEKDAY_NAME = "monday|tuesday|wednesday|thursday|friday|saturday|sunday"
+MEAL_NAME = "breakfast|lunch|dinner"
+# "chicken curry on Friday dinner", "for Friday's dinner", "for dinner on Friday", "on Friday".
+NAMED_WHEN = re.compile(
+    rf"\b(?:on|for|at)\s+(?:this\s+|next\s+)?(?:({WEEKDAY_NAME})(?:'s)?(?:\s+({MEAL_NAME}))?|({MEAL_NAME})\s+on\s+({WEEKDAY_NAME}))\b"
+)
+# "must have chicken curry", "has to include laksa for dinner".
+MUST_HAVE = re.compile(
+    rf"\b(?:must (?:have|include)|has to (?:have|include)|have to have|make sure (?:we|there)[^,.;]*? (?:have|has|is)|"
+    rf"insist on)\s+([^,.;!?]+?)(?:\s+for\s+({MEAL_NAME}))?(?=\s*(?:[,.;!?]|$))"
+)
+# "Friday dinner must be chicken curry", "Friday's dinner is laksa".
+WHEN_IS = re.compile(rf"\b({WEEKDAY_NAME})(?:'s)?\s+({MEAL_NAME})\s+(?:must be|should be|has to be|is)\s+([^,.;!?]+)")
+# 周五晚餐要吃咖喱鸡, 周三想吃红烧肉; 一定要有咖喱鸡.
+ZH_WHEN = re.compile(
+    r"(?:周|星期)([一二三四五六日天])的?(早餐|早饭|午餐|午饭|中饭|晚餐|晚饭|晚上)?的?"
+    r"(?:一定)?(?:要吃|想吃|想要|要有|要|吃|安排|做|来)(?:一?[个份道])?([^，,。；;！!？?、\s]{2,16})"
+)
+ZH_MUST = re.compile(r"(?:一定要有|必须有|必须要有|一定要吃|必须吃)(?:一?[个份道])?([^，,。；;！!？?、\s]{2,16})")
+ZH_DAYS = dict(zip("一二三四五六日", WEEKDAY_NAME.split("|"), strict=True)) | {"天": "sunday"}
+ZH_MEALS = {
+    "早餐": "breakfast",
+    "早饭": "breakfast",
+    "午餐": "lunch",
+    "午饭": "lunch",
+    "中饭": "lunch",
+    "晚餐": "dinner",
+    "晚饭": "dinner",
+    "晚上": "dinner",
+}
+DISH_LEAD = re.compile(
+    r"^(?:and\s+|(?:i|we)(?:'d| would)?\s+|please\s+|really\s+|(?:like|love|want|wants|need|have|include|cook|"
+    r"make|serve|get|add|with|plan|put|to|us|let's)\b\s*|(?:a|an|the|some|my|our)\s+)+"
+)
+# Words that name no dish: "skip lunch on Friday", "something quick on Monday".
+NOT_A_DISH = re.compile(
+    r"\d|\$|\b(?:no|not|don't|without|skip|cancel|away|out|home|plan|week|meals?|dish(?:es)?|something|anything|food|"
+    r"budget|people|lunch|dinner|breakfast|cooking|leftovers?|nothing)\b|[人份块元钱]|^做饭|^吃饭"
+)
+
+
+def _dish_name(words: str) -> str | None:
+    name = DISH_LEAD.sub("", words.strip()).strip()
+    return name if len(name) >= 2 and not NOT_A_DISH.search(name) else None
+
+
+def read_required_dish(message: str) -> DishAsked | None:
+    """The dish a message says the plan must hold, by rules: which words name the dish, the day and the meal."""
+    text = message.strip().lower().replace("’", "'")
+    if found := WHEN_IS.search(text):
+        name = _dish_name(found.group(3))
+        return DishAsked(name=name, weekday=found.group(1), meal=found.group(2)) if name else None
+    if found := NAMED_WHEN.search(text):
+        clause = re.split(r"[,.;:!?]", text[: found.start()])[-1]
+        # "Chicken and rice" is one dish; "2 people and chicken curry", "next week with laksa" hold one at their end.
+        cut = re.sub(r"^.*?\b(?:with|and|want|need|have|like|include)\b", "", clause)
+        name = _dish_name(clause) or _dish_name(cut)
+        if name:
+            return DishAsked(name=name, weekday=found.group(1) or found.group(4), meal=found.group(2) or found.group(3))
+    if found := MUST_HAVE.search(text):
+        name = _dish_name(found.group(1))
+        return DishAsked(name=name, meal=found.group(2)) if name else None
+    if found := ZH_WHEN.search(text):
+        name, weekday = _dish_name(found.group(3)), ZH_DAYS[found.group(1)]
+        return DishAsked(name=name, weekday=weekday, meal=ZH_MEALS.get(found.group(2))) if name else None
+    if found := ZH_MUST.search(text):
+        name = _dish_name(found.group(1))
+        return DishAsked(name=name) if name else None
+    return None
+
+
+def apply_rule_dish(extraction: AgentConstraintExtraction, message: str) -> None:
+    """The per-meal kcal ceiling a message states, by rules; the dish it names, where the model read none."""
+    ceiling = read_meal_kcal(message.lower())
+    if ceiling is not None:
+        extraction.max_kcal_per_meal = ceiling
+    if extraction.max_kcal_per_meal is not None and extraction.nutrition_targets is not None:
+        extraction.nutrition_targets.calories_kcal = None  # a ceiling, not a number to aim at
+    extraction.required_dish = extraction.required_dish or read_required_dish(message)
 
 
 class AgentConfigurationError(RuntimeError):
@@ -623,6 +723,7 @@ class RuleBasedConstraintParser:
             token in lower for token in ("diabetes", "diabetic", "gout", "kidney disease", "糖尿病", "痛风", "肾病")
         )
         apply_rule_span(extraction, message, span)
+        apply_rule_dish(extraction, message)
         extraction.assistant_summary = self._summary(extraction, replies.language(message, history), week=per_week)
         return extraction
 
@@ -781,6 +882,9 @@ medical_request_detected=true and must never be translated into medical treatmen
 Extract soft planning preferences separately: repeat_allowed_meals only when the user allows a meal type
 to repeat; flavor_boosts for stated flavors (fragrant, spicy, light, rich); more_vegetables and lighter
 only when requested. These never relax allergies, exclusions, halal, budget, or nutrition limits.
+required_dish is one specific dish the user says this plan must contain, by its name as said (chicken curry on
+Friday dinner); never an ingredient they want to use or a kind of food. max_kcal_per_meal is a ceiling on every
+meal's calories (each meal under 650 kcal), never a daily figure.
 Set requires_halal=true only when the latest user message explicitly asks for halal food or 清真饮食.
 Use empty lists and false values when no soft preference is stated. Do not infer a preference from cuisine.
 Available ingredients with no explicit quantity must keep quantity=null and unit=null.
@@ -802,6 +906,7 @@ Latest user message: {message}
             result = AgentConstraintExtraction.model_validate(result)
         aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
         apply_rule_span(aligned, message)
+        apply_rule_dish(aligned, message)
         if requests_halal(message):
             # A clear halal request is never dropped because the model left the flag out (ADR-0104).
             aligned.requires_halal = True

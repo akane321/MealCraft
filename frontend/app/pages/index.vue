@@ -108,6 +108,8 @@ async function undoPreferences() {
 }
 watch(() => session.value?.id, () => { editingPreferences.value = false; preferencesUndo.value = null; });
 // A stated cap on how often a dish may come back; 1 is the usual ask.
+const mustHaveLabel = (dish: { title: string; meal: string; weekday: string | null }) =>
+  `${dish.title}, ${dish.weekday ? `${dish.weekday[0]!.toUpperCase()}${dish.weekday.slice(1)} ` : ""}${dish.meal}`;
 const repeatLabel = (cap: number | null | undefined) => (cap == null ? null : cap === 1 ? "No repeats" : `Each dish up to ${cap} times`);
 const contextLabel = computed(() => {
   const c = constraints.value;
@@ -128,6 +130,8 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
     ...droppedDishes(c.plan_shape, household.current.value?.current?.plan_shape ?? DEFAULT_SHAPE).map(value => ({ text: "No", value })),
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
+    ...(c.max_kcal_per_meal ? [{ text: "Each meal under", value: `${c.max_kcal_per_meal} kcal` }] : []),
+    ...(c.required_dish ? [{ text: "Must have", value: mustHaveLabel(c.required_dish) }] : []),
     ...planningPreferenceLabels(c.planning_preferences).map(value => ({ text: "Preference", value })),
   ];
 });

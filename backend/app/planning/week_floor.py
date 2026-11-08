@@ -81,6 +81,8 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
         bought[recipe_id] = bought.get(recipe_id, 0.0) + price
         paid[recipe_id] = paid.get(recipe_id, 0.0) + (0.0 if line.ingredient_name in held else price)
 
+    pin = getattr(constraints, "required_dish", None)
+    pin_id = next((item.recipe.id for item in recommendations if pin and item.recipe.slug == pin.recipe_slug), None)
     policy = PlanningCompositionPolicy()
     total, meal_sgd, empty, stats = 0.0, {}, [], {}
     for meal, composition in shape:
@@ -105,6 +107,11 @@ def week_floor(constraints, recommendations, recipes) -> WeekFloor:
                 dishes = sorted({item.recipe.id: paid.get(item.recipe.id, 0.0) for item in fits}.values())
                 uses = constraints.max_uses_per_recipe or constraints.day_count
                 week_paid[role["role_id"]] = [cost for cost in dishes for _ in range(uses)][: constraints.day_count]
+                if pin_id is not None and meal == pin.meal and role["role_id"] == pin.role_id:
+                    # One of the role's days is the pinned dish; the rest stay at their cheapest.
+                    week_paid[role["role_id"]] = sorted(
+                        [paid.get(pin_id, 0.0), *week_paid[role["role_id"]][: constraints.day_count - 1]]
+                    )
                 cheapest_bought[role["role_id"]] = min(bought.get(item.recipe.id, 0.0) for item in fits)
             elif role.get("required", True) and not (tagged and role_base(role["role_id"]) in ("staple", "vegetable")):
                 # A structured meal's staple and vegetable may stay empty beside a one-bowl dish (ADR-0070).

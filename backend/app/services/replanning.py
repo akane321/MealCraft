@@ -160,8 +160,9 @@ class MealPlanReplanningService:
 
     def _constraints(self, plan: MealPlan) -> WeeklyMealPlanRequest:
         """The request a change to `plan` is planned with, priced at snapshot prices."""
+        # A dish the plan had to hold was held when the week was planned; a change is free to swap it.
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
+            update={"pricing_mode": "fixture", "required_dish": None}
         )
         if not self.live_feedback:
             return constraints

@@ -112,6 +112,20 @@ def week_shape(constraints: dict) -> MealPlanShape:
     return MealPlanShape.model_validate({"meals": {"dinner": roles}})
 
 
+Weekday = Literal["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+
+class RequiredDish(BaseModel):
+    """The one dish a plan must hold, in the role of its meal that takes it (owner, 2026-11-09)."""
+
+    recipe_slug: str
+    title: str  # as the plan shows it
+    meal: PlannedMeal
+    role_id: str
+    weekday: Weekday | None = None  # None: the first day that meal is planned
+    kcal: float  # per serving, as the catalog has it
+
+
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     nutrition_constraints: list[ProductNutritionTarget] = Field(default_factory=list, max_length=12)
     nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
@@ -132,12 +146,16 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
     # The household's members, rules and limits (layer 08); None plans exactly as before.
     household: HouseholdPlanning | None = None
+    # A dish this plan must hold; only a composed meal has a role to pin it in.
+    required_dish: RequiredDish | None = None
 
     @model_serializer(mode="wrap")
     def _no_household_key(self, handler):
         # Without a household block a request dumps as it did before the field existed: the same digests,
         # stored constraints and evaluation reports.
         data = handler(self)
+        if self.required_dish is None and isinstance(data, dict):
+            data.pop("required_dish", None)
         if self.household is None and isinstance(data, dict):
             data.pop("household", None)
         if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
@@ -148,6 +166,12 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     def one_way_to_say_the_shape(self) -> "WeeklyMealPlanRequest":
         if self.plan_shape is not None and self.meal_composition is not None:
             raise ValueError("Give the plan shape or a dinner composition, not both")
+        return self
+
+    @model_validator(mode="after")
+    def a_required_dish_needs_a_composed_meal(self) -> "WeeklyMealPlanRequest":
+        if self.required_dish is not None and self.plan_shape is None:
+            raise ValueError("A required dish is pinned in a plan shape's role")
         return self
 
     @model_validator(mode="after")

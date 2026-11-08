@@ -354,17 +354,49 @@ class WeeklyMealPlanService:
                 for r in result.recommendations
                 if r.recipe.id not in avoid or kept[course.get(r.recipe.id)] < constraints.day_count
             ]
-        return recipes, result
+        return recipes, self._with_required_dish(constraints, recipes, result)
+
+    def _with_required_dish(self, constraints: WeeklyMealPlanRequest, recipes, result):
+        """The candidates with the dish the plan must hold, however it ranked, if it passes the household's limits."""
+        pin = constraints.required_dish
+        if pin is None or any(item.recipe.slug == pin.recipe_slug for item in result.recommendations):
+            return result
+        pinned = [recipe for recipe in recipes if recipe.slug == pin.recipe_slug]
+        added = self.recommendation_service.recommend(
+            pool_constraints(constraints), deduct_pantry_from_cost=False, recipes=pinned, priced_release_only=True
+        ).recommendations
+        return result.model_copy(update={"recommendations": [*result.recommendations, *added]})
 
     def _checked_candidates(self, constraints: WeeklyMealPlanRequest):
         """`_candidates`, worked out once per request for the checks a chat turn makes before it answers.
 
         The weekly budget is not a recommendation input, so the floor and the cheapest week share one pass.
         """
-        key = constraints.model_dump_json(exclude={"weekly_budget_sgd"})
+        key = constraints.model_dump_json(exclude={"weekly_budget_sgd", "required_dish"})
         if key not in self._checked:
-            self._checked[key] = self._candidates(constraints)
-        return self._checked[key]
+            self._checked[key] = self._candidates(constraints.model_copy(update={"required_dish": None}))
+        recipes, result = self._checked[key]
+        return recipes, self._with_required_dish(constraints, recipes, result)
+
+    def dish_pool(self, constraints: WeeklyMealPlanRequest) -> tuple[list[Recipe], list]:
+        """The recipes a plan may use, and the priced recommendations that passed the household's limits."""
+        recipes, result = self._checked_candidates(self._live(constraints))
+        return recipes, result.recommendations
+
+    def dish_blockers(self, constraints: WeeklyMealPlanRequest, recipe: Recipe) -> list[str] | None:
+        """Why the household's limits rule this recipe out, whatever its time or price; None when it has no price."""
+        eased = self._live(constraints).model_copy(
+            update={
+                "max_cooking_time_minutes": recipe.total_time_minutes,
+                "max_sodium_mg_per_meal": None,
+                "budget_per_meal_sgd": None,
+                "pricing_mode": "fixture",
+            }
+        )
+        found = self.recommendation_service.recommend(
+            eased, deduct_pantry_from_cost=False, recipes=[recipe], priced_release_only=True
+        )
+        return [] if found.recommendations else ([r for item in found.excluded for r in item.reasons] or None)
 
     def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
         """What any week `generate` could plan for these constraints costs at least, without a search."""
