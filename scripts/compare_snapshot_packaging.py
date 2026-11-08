@@ -8,7 +8,8 @@ from decimal import Decimal
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "backend"))
+BACKEND_ROOT = ROOT / "backend" if (ROOT / "backend" / "app").is_dir() else ROOT
+sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.planning.acceptance_evidence import compare_package_policies  # noqa: E402
 

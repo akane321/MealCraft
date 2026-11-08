@@ -7,7 +7,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "backend"))
+BACKEND_ROOT = ROOT / "backend" if (ROOT / "backend" / "app").is_dir() else ROOT
+sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.planning.acceptance_evidence import assess_real_minimum_readiness  # noqa: E402
 from app.schemas.planning_v2 import PlanningShoppingSelection  # noqa: E402
