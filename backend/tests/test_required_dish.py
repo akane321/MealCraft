@@ -508,3 +508,15 @@ def test_a_change_to_a_saved_week_is_free_to_swap_the_dish():
     service = SimpleNamespace(live_feedback=False)
 
     assert MealPlanReplanningService._constraints(service, saved).required_dish is None
+
+
+def test_asking_for_a_store_s_prices_turns_on_live_prices_for_any_parser():
+    from app.agent.parser import apply_rule_dish
+    from app.schemas.agent import AgentConstraintExtraction
+
+    asked = AgentConstraintExtraction()
+    apply_rule_dish(asked, "Two of us, about S$150, using FairPrice prices.")
+    assert asked.pricing_mode == "live"
+    plain = AgentConstraintExtraction()
+    apply_rule_dish(plain, "Two of us, about S$150.")
+    assert plain.pricing_mode is None
