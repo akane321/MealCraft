@@ -3,8 +3,8 @@ import { onMounted, shallowRef } from "vue";
 // app/assets/food-images.json (scripts/build_food_images.py): each dish image with the recipes it stands for (a curated slug, or the last 12
 // characters of a release slug, space separated to keep the file small), the ingredients that have a picture, and for a dish imported from the
 // web the picture of each title word, rarest word first, then the picture to use when no word matches.
-export type FoodImageFile = { dishes: Record<string, string>; ingredients: string[]; words: Record<string, string>; fallback: string };
-export type FoodImageIndex = { dishes: Map<string, string>; ingredients: Set<string>; words: Map<string, { image: string; rank: number }>; fallback: string };
+export type FoodImageFile = { dishes: Record<string, string>; ingredients: string[]; ingredient_aliases?: Record<string, string>; words: Record<string, string>; fallback: string };
+export type FoodImageIndex = { dishes: Map<string, string>; ingredients: Set<string>; aliases: Record<string, string>; words: Map<string, { image: string; rank: number }>; fallback: string };
 
 export function indexFoodImages(file: FoodImageFile): FoodImageIndex {
   const dishes = new Map<string, string>();
@@ -12,7 +12,7 @@ export function indexFoodImages(file: FoodImageFile): FoodImageIndex {
     for (const id of ids.split(" ")) dishes.set(id, image);
   }
   const words = new Map(Object.entries(file.words).map(([word, image], rank) => [word, { image, rank }]));
-  return { dishes, ingredients: new Set(file.ingredients), words, fallback: file.fallback };
+  return { dishes, ingredients: new Set(file.ingredients), aliases: file.ingredient_aliases ?? {}, words, fallback: file.fallback };
 }
 
 function nearestByTitle(index: FoodImageIndex, title: string): string {
@@ -27,7 +27,8 @@ export function dishImageSrc(index: FoodImageIndex | null, slug: string, title =
 }
 
 export function ingredientImageSrc(index: FoodImageIndex | null, name: string): string | null {
-  const key = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const shown = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const key = index?.aliases[shown] ?? shown;
   return index?.ingredients.has(key) ? `/images/ingredients/${key}.webp` : null;
 }
 
