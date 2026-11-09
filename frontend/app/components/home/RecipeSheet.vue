@@ -36,7 +36,7 @@ useDialog(overlay, () => emit("close"));
   <div ref="overlay" class="mc-overlay" role="dialog" aria-modal="true" :aria-label="recipe ? recipe.title : 'Recipe'">
     <section class="mc-panel panel">
       <header class="mc-sheet-head">
-        <span v-if="recipe" class="icon"><HomeDishIcon :slug="slug" :title="recipe.title" :course="recipe.course" :ingredients="recipe.ingredients.map(item => item.name)" :size="56" /></span>
+        <span v-if="recipe" class="icon"><HomeDishIcon :slug="slug" :title="recipe.title" :size="56" /></span>
         <div>
           <h2>{{ recipe?.title ?? "Recipe" }}</h2>
           <p v-if="recipe">{{ recipe.total_time_minutes }} min · serves {{ recipe.servings }} · {{ recipe.cuisine }}</p>
@@ -82,7 +82,6 @@ useDialog(overlay, () => emit("close"));
 <style scoped>
 .panel { width: min(920px, calc(100vw - 64px)); max-height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; }
 .icon { min-width: 36px; min-height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px; }
-.icon:has(svg) { background: #fafafa; }
 /* Two columns split by a thin rule, no cards inside the sheet. */
 .body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: stretch; padding: 0; }
 .card { padding: 20px 24px 24px; }
