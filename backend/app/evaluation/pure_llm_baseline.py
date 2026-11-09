@@ -576,6 +576,7 @@ def conversation_arm():
         responder=conversation_responder,
         estimate=conversation_estimate,
         model_factory=rag_baseline.LiveModel,
+        max_usd=7.0,  # owner, 2026-11-07: the held-out dry run projected US$4.9 of US$5
     )
 
 

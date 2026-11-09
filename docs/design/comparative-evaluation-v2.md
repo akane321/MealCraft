@@ -685,15 +685,15 @@ measured rates of ADR-0118 and its ledger beside its cap.
   `comparison-{action,strict,plan}.json` (`heldout_statistics.compare`, overall only)
   and `manifest.json` (commit, data digests, each arm's fingerprint, cap, max
   this run, ledger and spend, answered and valid counts, stop reason).
-- **Outcomes, a draft to register before the run** (`formal-outcome-v1`):
+- **Outcomes, a draft to register before the run** (`formal-outcome-v2`):
   `missing` (not reached or cut by the cap), `error` (call or scorer failed),
   `failure` (invalid output). `action`: success when the final output takes the
   action the gold expects: `expected_fields.action` when the output slots can
   show it, else what the disposition implies; a disposition of clarify or refuse
   beats an action naming the user's intent; an `infeasible` case succeeds with
-  anything but a plan; an intent action the slots cannot show is voided, and so is
-a `catalog_dependent` case until the sealed adjudication, as only the product plans
-from the catalog and may rightly decline (the owner confirms this when registering).
+  anything but a plan; an intent action the slots cannot show is voided. A
+`catalog_dependent` case expects a plan, though only the product plans from the catalog
+and may rightly decline, so `action-no-catalog` reports the same scores without those cases.
 A refusal stated as an answer or a question fails it, counted per arm as
 `refuse_stated_as_reply`. `strict`:
   success only where the code checks the whole gold (an intent case passing

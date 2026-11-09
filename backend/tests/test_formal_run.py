@@ -154,9 +154,11 @@ def test_the_public_output_holds_aggregates_only_and_failures_stay_local(tmp_pat
     assert "SECRET" not in public and "case-0" not in public
     assert {path.name for path in (tmp_path / "out").iterdir()} == {
         "aggregate-action.json",
+        "aggregate-action-no-catalog.json",
         "aggregate-plan.json",
         "aggregate-strict.json",
         "comparison-action.json",
+        "comparison-action-no-catalog.json",
         "comparison-plan.json",
         "comparison-strict.json",
         "manifest.json",
@@ -203,7 +205,7 @@ def test_a_fault_in_the_plan_aggregate_loses_that_file_alone_and_names_only_its_
         ({"kind": "replan", "disposition": "feasible", "expected_fields": {"action": "swap"}}, "plan"),
         ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "swap"}}, None),
         ({"kind": "intent", "disposition": "answer", "expected_fields": {"action": "plan"}}, "plan"),
-        ({"kind": "plan", "disposition": "catalog_dependent", "expected_fields": {"action": "plan"}}, None),
+        ({"kind": "plan", "disposition": "catalog_dependent", "expected_fields": {"action": "plan"}}, "plan"),
         ({"class": "infeasible"}, formal_run.NO_PLAN),
         ({"class": "feasible"}, "plan"),
     ],
@@ -246,7 +248,7 @@ def test_the_dry_run_shows_the_voids_from_the_gold_alone(tmp_path, capsys):
     assert gold["action_voided"] == {} and gold["action_overridden"] == 0
 
 
-def test_catalog_dependent_cases_are_voided_counted_and_not_read_as_overridden():
+def test_catalog_dependent_cases_are_scored_counted_and_not_read_as_overridden():
     gold = {"kind": "plan", "disposition": "catalog_dependent", "expected_fields": {"action": "plan"}}
     args = SimpleNamespace(
         allow_heldout=False, anchor_date=date(2026, 9, 28), ledger_dir=None, model="m", credit_usd=1.0
@@ -260,11 +262,11 @@ def test_catalog_dependent_cases_are_voided_counted_and_not_read_as_overridden()
         "turns": ["q"],
     }
     found = formal_run.dry_run([], [with_gold], args)["gold"]
-    assert found["catalog_dependent"] == {"planning": 1} and found["action_voided"] == {"planning": 1}
+    assert found["catalog_dependent"] == {"planning": 1} and found["action_voided"] == {}
     assert found["action_overridden"] == 0
     answer = record(UnifiedOutput(answer="No."))
     rows = formal_run.outcomes([with_gold], {"mealcraft": {"c": answer}}, heldout=False)[0]
-    assert rows[0].voided
+    assert not rows[0].voided and rows[0].status == "failure"
 
 
 def test_a_refusal_stated_as_a_reply_is_counted_for_that_arm_only():
