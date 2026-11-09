@@ -1555,3 +1555,15 @@ def test_a_saved_soup_is_dropped_for_this_plan_and_the_profile_keeps_it(costly_s
     assert plan["grocery_estimate"]["purchase_total_sgd"] <= 45
     assert {dish["role_id"] for dish in plan["days"]} == {"main", "vegetable"}
     assert costly_soup.get("/api/household-profiles/current").json() == saved
+
+
+def test_the_running_product_prices_at_the_store_whatever_the_model_echoes(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from app.agent import workflow
+
+    monkeypatch.setattr(workflow, "get_settings", lambda: SimpleNamespace(default_pricing_mode="live"))
+    merged = workflow.AgentConstraintWorkflow._merge_constraints(
+        AgentConstraintState(), AgentConstraintExtraction(pricing_mode="fixture")
+    )
+    assert merged.pricing_mode == "live"

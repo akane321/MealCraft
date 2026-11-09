@@ -1404,7 +1404,7 @@ onUnmounted(() => {
 .composer { position: relative; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 10px 16px; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
 .composer:hover { border-color: #d4d4d8; }
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
-.composer textarea { display: block; width: 100%; height: 40px; min-height: 40px; padding: 9px 0; resize: none; overflow-y: auto; font-size: 14.5px; line-height: 22px; font-weight: 400; color: #18181b; }
+.composer textarea { flex: 1 0 auto; display: block; width: 100%; height: 40px; min-height: 40px; padding: 9px 0; resize: none; overflow-y: auto; font-size: 14.5px; line-height: 22px; font-weight: 400; color: #18181b; }
 /* Words just put in by voice: the box glows for a moment. */
 .composer.flash { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22); }
 .composer.flash textarea { background: linear-gradient(90deg, rgba(237, 233, 254, 0), rgba(237, 233, 254, 0.9), rgba(237, 233, 254, 0)) no-repeat; animation: mc-flash 1.1s ease-out both; }

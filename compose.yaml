@@ -29,6 +29,7 @@ services:
       # Docker Desktop on Windows passes no file-change events through the bind mounts below, so the reloader
       # polls; `--reload-dir app` keeps it to the code, not the data and docs it also mounts.
       WATCHFILES_FORCE_POLLING: "true"
+      DEFAULT_PRICING_MODE: live
     command:
       - sh
       - -c

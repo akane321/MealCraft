@@ -11,6 +11,7 @@ from app.agent.plan_dates import MEAL_ORDER, default_start, read_span, read_star
 from app.agent.replies import language, say
 from app.agent.shape_change import setup_shape
 from app.core import clock
+from app.core.config import get_settings
 from app.schemas.agent import (
     AgentConstraintExtraction,
     AgentConstraintState,
@@ -352,6 +353,8 @@ class AgentConstraintWorkflow:
             value = getattr(extraction, field)
             if value is not None:
                 state[field] = value
+        if get_settings().default_pricing_mode == "live":
+            state["pricing_mode"] = "live"  # also over a model that echoes the schema's default
         if extraction.requires_halal:
             state["requires_halal"] = True
         if (
