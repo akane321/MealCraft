@@ -354,9 +354,7 @@ def apply_rule_dish(extraction: AgentConstraintExtraction, message: str) -> None
         targets.calories_kcal = None  # one number read twice: a ceiling, not a number to aim at
     extraction.required_dish = extraction.required_dish or read_required_dish(message)
     # Asking for a store's prices is a plain phrase, so it holds for the model parser too.
-    if extraction.pricing_mode is None and any(
-        word in message.lower() for word in ("live price", "实时价格", "fairprice")
-    ):
+    if any(word in message.lower() for word in ("live price", "实时价格", "fairprice")):
         extraction.pricing_mode = "live"
 
 

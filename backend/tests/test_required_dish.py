@@ -517,6 +517,9 @@ def test_asking_for_a_store_s_prices_turns_on_live_prices_for_any_parser():
     asked = AgentConstraintExtraction()
     apply_rule_dish(asked, "Two of us, about S$150, using FairPrice prices.")
     assert asked.pricing_mode == "live"
+    echoed = AgentConstraintExtraction(pricing_mode="fixture")
+    apply_rule_dish(echoed, "Use FairPrice prices.")
+    assert echoed.pricing_mode == "live"
     plain = AgentConstraintExtraction()
     apply_rule_dish(plain, "Two of us, about S$150.")
     assert plain.pricing_mode is None
