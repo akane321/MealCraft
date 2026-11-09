@@ -102,14 +102,14 @@ def checked_at_fairprice(monkeypatch, price: float, *, unanswered: int = 0) -> N
     selected = {}
     refresh = ProductSearchService.refresh_selected
 
-    def refresh_synthetic(self, lines):
+    def refresh_synthetic(self, lines, find_replacement=None):
         for index, item in enumerate(lines):
             if item.product:
                 item.product = item.product.model_copy(update={"external_id": str(10000 + index)})
                 selected[item.evidence.query] = item.product
                 if list(selected).index(item.evidence.query) < unanswered:
                     item.evidence = item.evidence.model_copy(update={"source": "release_snapshot"})
-        return refresh(self, lines)
+        return refresh(self, lines, find_replacement)
 
     def search(self, query, *, limit, timeout_seconds):
         if list(selected).index(query) < unanswered:

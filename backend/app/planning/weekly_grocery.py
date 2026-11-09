@@ -2,12 +2,15 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal
 
+from app.data.ingredient_hierarchy import expand_exclusions
 from app.data.units import UNIT_BASE, in_grams, weighed
 from app.models.recipe import Recipe
 from app.planning import alternatives
 from app.planning.grocery_estimator import (
     GroceryEstimator,
     ProductMatcher,
+    ReplacementMatcher,
+    _fairprice_choice,
     choose_product,
     convert_quantity,
     not_purchased,
@@ -17,6 +20,14 @@ from app.planning.household_slots import assumed_basics, basics_note, rules_on
 from app.schemas.meal_plan import WeeklyGroceryEstimateResponse, WeeklyMealPlanRequest
 from app.schemas.product import GroceryLineEstimate
 from app.services.product import ProductSearchService
+
+# How an allergen of the checked vocabulary reads on a product; the others read as their own names.
+_ALLERGEN_WORDS = {
+    "dairy": ("milk", "cheese", "butter", "cream", "yogurt"),
+    "gluten": ("wheat", "barley", "rye"),
+    "shellfish": ("prawn", "shrimp", "crab", "lobster"),
+    "tree_nut": ("almond", "cashew", "walnut", "pecan", "hazelnut", "pistachio", "macadamia"),
+}
 
 
 @dataclass
@@ -32,9 +43,50 @@ class WeeklyGroceryAggregator:
         self.product_service = product_service
         self.matcher = matcher or ProductMatcher()
 
-    def refresh(self, grocery: WeeklyGroceryEstimateResponse) -> WeeklyGroceryEstimateResponse:
-        """Reprice the confirmed basket without reselecting products or package counts."""
-        lines = self.product_service.refresh_selected(grocery.items)
+    def refresh(
+        self, grocery: WeeklyGroceryEstimateResponse, constraints: WeeklyMealPlanRequest
+    ) -> WeeklyGroceryEstimateResponse:
+        """Reprice the confirmed basket without reselecting products or package counts, except a line FairPrice
+        could not confirm, which takes the product a live FairPrice choice finds for it, if there is one."""
+        avoid = [
+            word
+            for allergen in constraints.allergens
+            for word in _ALLERGEN_WORDS.get(allergen, (allergen.replace("_", " "),))
+        ] + [name.replace("_", " ") for name in expand_exclusions(constraints.excluded_ingredients)]
+
+        def live_replacement(line: GroceryLineEstimate, search) -> GroceryLineEstimate | None:
+            choice = _fairprice_choice(
+                search,
+                ReplacementMatcher(),
+                line.ingredient_name,
+                line.ingredient_display_name,
+                line.unit,
+                live=True,
+                quantity=line.remaining_quantity,
+                requires_halal=constraints.requires_halal,
+                reviewed_first=True,
+            )
+            if choice.product is None:
+                return None
+            label = f"{choice.product.name} {choice.product.brand or ''}".lower()
+            if any(word in label for word in avoid):
+                return None  # recipes are cleared by ingredient; a product swapped in is cleared here, by its name
+            priced = GroceryEstimator.price_line(
+                line.ingredient_name,
+                line.ingredient_display_name,
+                line.required_quantity,
+                line.unit,
+                line.pantry_deduction,
+                line.remaining_quantity,
+                choice.product,
+                choice.match_score,
+                choice.evidence,
+            )
+            if priced.consumed_cost_sgd is None and line.consumed_cost_sgd is not None:
+                return None  # a package it cannot cost would turn a known list total into an unknown one
+            return priced.model_copy(update={"shopping_trip": line.shopping_trip, "perishable": line.perishable})
+
+        lines = self.product_service.refresh_selected(grocery.items, live_replacement)
         for original, line in zip(grocery.items, lines, strict=True):
             if (
                 line.product is None
@@ -57,7 +109,7 @@ class WeeklyGroceryAggregator:
             line.purchase_cost_sgd = cents * line.packages_required / 100
             line.consumed_cost_sgd = priced.consumed_cost_sgd
         total = sum(round(line.purchase_cost_sgd * 100) for line in lines) / 100
-        complete = grocery.complete and all(line.consumed_cost_sgd is not None for line in lines)
+        complete = not grocery.unmapped_ingredients and all(line.consumed_cost_sgd is not None for line in lines)
         consumed = sum(round(line.consumed_cost_sgd * 100) for line in lines) / 100 if complete else None
         budget = grocery.weekly_budget_sgd
         within = (

@@ -137,7 +137,7 @@ class WeeklyMealPlanService:
         selected, grocery = result.selected, result.grocery
         self._priced_as_asked(result.trace, constraints)
         if constraints.pricing_mode == "live":
-            grocery = self.grocery_aggregator.refresh(grocery)
+            grocery = self.grocery_aggregator.refresh(grocery, constraints)
             # Only the saved list is checked at FairPrice (ADR-0058): what it came to, as the household sees it.
             result.trace["final_list"] = {
                 "pricing_mode": grocery.pricing_mode,

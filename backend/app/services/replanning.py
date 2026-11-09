@@ -720,7 +720,7 @@ class MealPlanReplanningService:
         proposed_recipe = proposed[0] if proposed else None
         grocery = WeeklyGroceryEstimateResponse.model_validate(event.after_grocery)
         if plan.pricing_mode == "live" and event.event_type != "LOCK_MEAL":
-            grocery = self.grocery_aggregator.refresh(grocery)
+            grocery = self.grocery_aggregator.refresh(grocery, WeeklyMealPlanRequest.model_validate(plan.constraints))
             before = self._current_grocery(plan)
             event.after_grocery = grocery.model_dump(mode="json")
             event.grocery_delta = self._grocery_delta(before, grocery)

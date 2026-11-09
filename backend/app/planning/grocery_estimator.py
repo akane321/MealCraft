@@ -176,20 +176,26 @@ def _fairprice_choice(
     live: bool,
     quantity: float | None,
     requires_halal: bool,
+    reviewed_first: bool = False,
 ) -> ProductChoice:
     """The FairPrice branches of `choose_product`.
 
     Curated ingredients keep the name matcher they were tuned against. When it
     finds nothing, or a package the line's unit cannot convert to, a reviewed
     release mapping is used instead. Unmatchable, unmapped ingredients are never
-    searched: in live mode each search is a request.
+    searched: in live mode each search is a request. `reviewed_first` skips the
+    matcher when the reviewed mapping can serve the line.
 
     For a halal household a line that needs a certified product (meat) only takes
     certified products, whatever they cost; with none, the line has no product.
     """
     choice = ProductChoice()
     certified_only = requires_halal and halal_data.needs_certification(ingredient_name)
-    if ingredient_name in matchable_ingredients():
+    reviewed = (
+        release_products().get(ingredient_name, {}).get("status") == "mapped"
+        and convert_quantity(1.0, unit, "g") is not None
+    )
+    if ingredient_name in matchable_ingredients() and not (reviewed_first and reviewed):
         search = product_service.search(ingredient_display_name, live=live, limit=8)
         if search.warning:
             choice.warnings.append(search.warning)
@@ -447,6 +453,34 @@ class ProductMatcher:
     @staticmethod
     def _normalize(value: str) -> str:
         return " ".join(value.lower().replace("_", " ").replace("-", " ").split())
+
+
+def _stem(word: str) -> str:
+    return word.rstrip("s").rstrip("e")  # carrots, tomatoes and noodles against carrot, tomato and noodle
+
+
+class ReplacementMatcher(ProductMatcher):
+    """The name matcher for a saved line FairPrice could not confirm. It reads a real search page, where a shorter
+    processed food outscores the produce, so it keeps to what is plainly the ingredient: a reviewed ingredient's
+    reviewed products, or else a product named for it and ending with it (not "Carrot Cake" or "Garlic Powder")."""
+
+    def choose(
+        self,
+        ingredient_name: str,
+        ingredient_display_name: str,
+        unit: str | None,
+        products: list[ProductResponse],
+    ) -> tuple[ProductResponse | None, float | None]:
+        plain = [product for product in products if self._plainly(ingredient_name, product)]
+        return super().choose(ingredient_name, ingredient_display_name, unit, plain)
+
+    def _plainly(self, ingredient_name: str, product: ProductResponse) -> bool:
+        entry = release_products().get(ingredient_name)
+        if entry is not None and entry["status"] == "mapped":
+            return product.external_id in {item["external_id"] for item in entry["products"]}
+        words = [_stem(word) for word in self._normalize(product.name).split() if word.isalpha()]
+        wanted = [_stem(word) for word in ingredient_name.split("_")]
+        return bool(words) and words[-1] == wanted[-1] and set(wanted) <= set(words)
 
 
 class GroceryEstimator:
