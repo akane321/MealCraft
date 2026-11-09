@@ -30,6 +30,7 @@ INGREDIENTS = [
     ingredient("ING_ICE", "ice", 10),
     ingredient("ING_STOCK_CUBE", "stock cube", 7),
 ]
+USAGE = {row["ingredient_id"]: row["recipe_occurrences"] for row in INGREDIENTS}
 EMPTY_LAYERS = {name: set() for name, _ in gaps.LAYERS}
 
 
@@ -62,7 +63,7 @@ class RankingTest(unittest.TestCase):
     layers = dict(EMPTY_LAYERS, fairprice={"salt"})
 
     def names(self, layers):
-        return [row["ingredient_id"] for row in gaps.unpriced(INGREDIENTS, layers)]
+        return [row["ingredient_id"] for row in gaps.unpriced(INGREDIENTS, layers, USAGE)]
 
     def test_priced_water_and_ice_are_left_out(self):
         names = self.names(self.layers)
@@ -76,13 +77,45 @@ class RankingTest(unittest.TestCase):
         self.assertNotIn("ING_TURKEY", self.names(dict(self.layers, manual={"turkey"})))
 
     def test_cumulative_share_reaches_one(self):
-        rows = gaps.unpriced(INGREDIENTS, self.layers)
+        rows = gaps.unpriced(INGREDIENTS, self.layers, USAGE)
         shares = gaps.cumulative_share(rows, sum(r["recipes"] for r in rows))
         self.assertEqual(shares[-1], 1.0)
         self.assertEqual(shares, sorted(shares))
 
     def test_cumulative_share_of_nothing_is_zero(self):
         self.assertEqual(gaps.cumulative_share([{"recipes": 0}], 0), [0.0])
+
+
+def recipe(*ingredient_ids: str) -> dict:
+    return {"ingredients": [{"canonical_ingredient_id": i, "original_text": i} for i in ingredient_ids]}
+
+
+class UsageTest(unittest.TestCase):
+    def write_release(self, folder: str, recipes: list[dict]) -> Path:
+        release = Path(folder)
+        (release / "recipes.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recipes), encoding="utf-8")
+        return release
+
+    def test_usage_counts_distinct_recipes_and_a_repeated_line_counts_once(self):
+        with tempfile.TemporaryDirectory() as folder:
+            release = self.write_release(
+                folder, [recipe("ING_TURKEY", "ING_TURKEY", "ING_LARD"), recipe("ING_TURKEY"), recipe("ING_SALT")]
+            )
+            usage = gaps.recipe_usage(release)
+        self.assertEqual((usage["ING_TURKEY"], usage["ING_LARD"], usage["ING_SALT"]), (2, 1, 1))
+
+    def test_ranking_follows_the_recipes_not_the_stale_field_in_the_ingredients_file(self):
+        # ING_LARD's stored recipe_occurrences (20) is larger than its real use; the recipes decide.
+        with tempfile.TemporaryDirectory() as folder:
+            release = self.write_release(folder, [recipe("ING_TURKEY")] * 3 + [recipe("ING_LARD")])
+            usage = gaps.recipe_usage(release)
+        rows = gaps.unpriced(INGREDIENTS, EMPTY_LAYERS, usage)
+        self.assertEqual([r["ingredient_id"] for r in rows][:2], ["ING_TURKEY", "ING_LARD"])
+        self.assertEqual([r["recipes"] for r in rows][:2], [3, 1])
+
+    def test_an_ingredient_no_recipe_uses_counts_zero(self):
+        rows = gaps.unpriced(INGREDIENTS, EMPTY_LAYERS, {})
+        self.assertTrue(all(row["recipes"] == 0 for row in rows))
 
 
 class CoverageTest(unittest.TestCase):
@@ -128,7 +161,7 @@ def observation(ingredient_id: str, query: str, ids: list[str], status: str = "o
 
 
 class PacketTest(unittest.TestCase):
-    def test_observations_merge_and_the_first_sighting_wins(self):
+    def test_observations_merge_across_files_and_the_later_file_wins(self):
         with tempfile.TemporaryDirectory() as folder:
             first, second = Path(folder) / "a.jsonl", Path(folder) / "b.jsonl"
             first.write_text(json.dumps(observation("ING_TURKEY", "turkey", ["1"])) + "\n", encoding="utf-8")
@@ -141,8 +174,28 @@ class PacketTest(unittest.TestCase):
             )
             found = gaps.observed_products(first, second, Path(folder) / "missing.jsonl")
         self.assertEqual(set(found["ING_TURKEY"]), {"1", "2"})
-        self.assertEqual(found["ING_TURKEY"]["1"]["query"], "turkey")
+        self.assertEqual(found["ING_TURKEY"]["1"]["query"], "turkey breast")
         self.assertNotIn("ING_LARD", found)
+
+    def test_a_later_capture_replaces_price_and_stock_of_an_earlier_one(self):
+        old = observation("ING_TURKEY", "turkey", ["1"])
+        new = observation("ING_TURKEY", "turkey", ["1"])
+        old["products"][0].update(final_price=2.0, in_stock=True)
+        new["products"][0].update(final_price=9.5, in_stock=False)
+        new["fetched_at"] = "later"
+        with tempfile.TemporaryDirectory() as folder:
+            first, second = Path(folder) / "a.jsonl", Path(folder) / "b.jsonl"
+            first.write_text(json.dumps(old) + "\n", encoding="utf-8")
+            second.write_text(json.dumps(new) + "\n", encoding="utf-8")
+            found = gaps.observed_products(first, second)["ING_TURKEY"]["1"]
+        self.assertEqual((found["final_price"], found["in_stock"], found["fetched_at"]), (9.5, False, "later"))
+
+    def test_rewriting_with_fewer_shards_leaves_no_stale_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            gaps.write_packets([{"n": i} for i in range(4)], 4, Path(folder))
+            gaps.write_packets([{"n": i} for i in range(4)], 2, Path(folder))
+            names = sorted(path.name for path in Path(folder).glob("packet-*.jsonl"))
+        self.assertEqual(names, ["packet-1.jsonl", "packet-2.jsonl"])
 
     def test_packet_marks_products_the_earlier_review_rejected(self):
         rows = [{"ingredient_id": "ING_TURKEY", "canonical_name": "turkey", "recipes": 84}]
@@ -169,7 +222,7 @@ class PacketTest(unittest.TestCase):
         self.assertEqual(sizes, [3, 2])
 
     def test_worklist_is_utf8_with_bom_and_ranked(self):
-        rows = gaps.unpriced(INGREDIENTS, EMPTY_LAYERS)
+        rows = gaps.unpriced(INGREDIENTS, EMPTY_LAYERS, USAGE)
         with tempfile.TemporaryDirectory() as folder:
             path = gaps.write_worklist(rows, sum(r["recipes"] for r in rows), Path(folder))
             self.assertTrue(path.read_bytes().startswith(b"\xef\xbb\xbf"))

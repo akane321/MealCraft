@@ -2,8 +2,8 @@
 
 The v3 mapping stays frozen: `data/products/fairprice-v2-snapshot.json` is not read for writing here and nothing in
 this script writes under `data/products/`. The output is a worklist and review packets under a directory you choose
-(default `data/review/fairprice-gaps/`, not committed); the candidates a person confirms are stored separately by
-`fairprice_overlay.py`.
+(default `data/review/fairprice-gaps/`, not committed). Where the candidates a person confirms are stored is still
+to be decided with the owner; nothing here depends on it.
 
     python scripts/fairprice_gaps.py rank [--top 120]        # worklist.csv: unpriced ingredients, most used first
     python scripts/fairprice_gaps.py packet --top 120        # packet-<i>.jsonl for the AI proposer / the reviewer
@@ -11,8 +11,9 @@ this script writes under `data/products/`. The output is a worklist and review p
 
 An ingredient is *priced* when some layer (FairPrice, Cold Storage, RedMart, the hand-recorded sheet) maps it to a
 product that is in stock, the same rule the backend's `price_coverage.priced` applies. Water and ice are not
-purchased and never appear. Ingredients are ranked by the number of release recipes that use them
-(`recipe_occurrences` in the release), so the first rows are the ones whose pricing unlocks the most recipes.
+purchased and never appear. Ingredients are ranked by the number of distinct release recipes that use them, counted
+from `recipes.jsonl` (the `recipe_occurrences` field of `ingredients.jsonl` does not agree with it and is not used),
+so the first rows are the ones whose pricing unlocks the most recipes.
 
 A packet line carries everything a reviewer needs to judge a FairPrice candidate without opening the site: the
 ingredient, a few recipe lines, what the FairPrice mapping said about it before, and every product any capture
@@ -79,14 +80,23 @@ def release_ingredients(release: Path = RELEASE) -> list[dict]:
     return read_jsonl(release / "ingredients.jsonl")
 
 
-def unpriced(ingredients: list[dict], layers: dict[str, set[str]]) -> list[dict]:
+def recipe_usage(release: Path = RELEASE) -> dict[str, int]:
+    """Distinct recipes that use each ingredient, counted from the recipes themselves."""
+    counts: dict[str, int] = defaultdict(int)
+    for recipe in read_jsonl(release / "recipes.jsonl"):
+        for ingredient_id in {item["canonical_ingredient_id"] for item in recipe["ingredients"]}:
+            counts[ingredient_id] += 1
+    return counts
+
+
+def unpriced(ingredients: list[dict], layers: dict[str, set[str]], usage: dict[str, int]) -> list[dict]:
     """The bought ingredients no layer prices, most used first (ties by id, so the order is stable)."""
     covered = set().union(*layers.values()) if layers else set()
     rows = [
         {
             "ingredient_id": row["ingredient_id"],
             "canonical_name": row["canonical_name"],
-            "recipes": row["recipe_occurrences"],
+            "recipes": usage.get(row["ingredient_id"], 0),
         }
         for row in ingredients
         if row["ingredient_id"] not in NOT_PURCHASED and runtime_name(row["ingredient_id"]) not in covered
@@ -131,19 +141,26 @@ def fairprice_history(path: Path = FAIRPRICE_MAPPING) -> dict[str, dict]:
 
 
 def observed_products(*paths: Path) -> dict[str, dict[str, dict]]:
-    """Every product any capture returned per ingredient, keyed by product id; the first sighting wins."""
+    """Every product any capture returned per ingredient, keyed by product id.
+
+    Within one file the first sighting wins (its search rank is kept); a product seen again in a later file is replaced
+    by that file's record, so a newer capture's price and stock override an older one's.
+    """
     products: dict[str, dict[str, dict]] = defaultdict(dict)
     for path in paths:
         if not path.exists():
             continue
+        seen: dict[str, dict[str, dict]] = defaultdict(dict)
         for row in read_jsonl(path):
             if row.get("status") != "ok":
                 continue
             for rank, product in enumerate(row["products"], start=1):
-                products[row["ingredient_id"]].setdefault(
+                seen[row["ingredient_id"]].setdefault(
                     product["product_id"],
                     dict(product, query=row["query"], rank=rank, fetched_at=row["fetched_at"]),
                 )
+        for ingredient_id, found in seen.items():
+            products[ingredient_id].update(found)
     return products
 
 
@@ -225,6 +242,8 @@ def write_worklist(rows: list[dict], total_uses: int, out: Path) -> Path:
 
 def write_packets(packets: list[dict], shards: int, out: Path) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
+    for stale in out.glob("packet-*.jsonl"):  # a rerun with fewer shards must not leave old ones behind
+        stale.unlink()
     paths = []
     for shard in range(shards):
         path = out / f"packet-{shard + 1}.jsonl"
@@ -255,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "summary":
         print(json.dumps(coverage(ingredients, layers), indent=1))
         return 0
-    rows = unpriced(ingredients, layers)
+    rows = unpriced(ingredients, layers, recipe_usage(args.release))
     total_uses = sum(row["recipes"] for row in rows)
     top = rows[: args.top]
     if args.command == "rank":
