@@ -28,3 +28,720 @@
 {"cached_tokens": 4480, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 5548, "output_tokens": 999, "searches": 0, "total_tokens": 6547, "usd": 0.0086565}
 {"event": "reserve", "total_tokens": 24060, "usd": 0.060545}
 {"cached_tokens": 5504, "call": "response", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 6572, "output_tokens": 79, "searches": 0, "total_tokens": 6651, "usd": 0.0052845}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 9690, "output_tokens": 1028, "searches": 1, "total_tokens": 10718, "usd": 0.0218935}
+{"event": "reserve", "total_tokens": 13923, "usd": 0.05544225}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 2133, "output_tokens": 932, "searches": 0, "total_tokens": 3065, "usd": 0.00579375}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13991, "output_tokens": 846, "searches": 2, "total_tokens": 14837, "usd": 0.034300250000000004}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5568, "output_tokens": 178, "searches": 0, "total_tokens": 5746, "usd": 0.004977}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9618, "output_tokens": 217, "searches": 1, "total_tokens": 9835, "usd": 0.018189999999999998}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13831, "output_tokens": 2293, "searches": 3, "total_tokens": 16124, "usd": 0.050691749999999994}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 14200, "output_tokens": 3426, "searches": 3, "total_tokens": 17626, "usd": 0.056067}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5576, "output_tokens": 140, "searches": 0, "total_tokens": 5716, "usd": 0.004812}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9549, "output_tokens": 1703, "searches": 1, "total_tokens": 11252, "usd": 0.02482525}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 9664, "output_tokens": 952, "searches": 1, "total_tokens": 10616, "usd": 0.021532000000000003}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13607, "output_tokens": 1092, "searches": 3, "total_tokens": 14699, "usd": 0.04511925}
+{"event": "reserve", "total_tokens": 13930, "usd": 0.0554475}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 2145, "output_tokens": 862, "searches": 0, "total_tokens": 3007, "usd": 0.00548775}
+{"event": "reserve", "total_tokens": 29194, "usd": 0.0868955}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9660, "output_tokens": 2251, "searches": 1, "total_tokens": 11911, "usd": 0.027374500000000003}
+{"event": "reserve", "total_tokens": 30772, "usd": 0.088079}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 7726, "output_tokens": 2081, "searches": 0, "total_tokens": 9807, "usd": 0.015159}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13921, "output_tokens": 954, "searches": 2, "total_tokens": 14875, "usd": 0.03473375}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9268, "output_tokens": 262, "searches": 1, "total_tokens": 9530, "usd": 0.01813}
+{"event": "reserve", "total_tokens": 29894, "usd": 0.0874205}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5867, "output_tokens": 417, "searches": 0, "total_tokens": 6284, "usd": 0.00627675}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5573, "output_tokens": 1284, "searches": 0, "total_tokens": 6857, "usd": 0.00995775}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13904, "output_tokens": 1750, "searches": 3, "total_tokens": 15654, "usd": 0.048303}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5568, "output_tokens": 149, "searches": 0, "total_tokens": 5717, "usd": 0.0048465}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5580, "output_tokens": 182, "searches": 0, "total_tokens": 5762, "usd": 0.005004}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9645, "output_tokens": 553, "searches": 1, "total_tokens": 10198, "usd": 0.01972225}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5570, "output_tokens": 894, "searches": 0, "total_tokens": 6464, "usd": 0.0082005}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9715, "output_tokens": 1430, "searches": 1, "total_tokens": 11145, "usd": 0.02372125}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13736, "output_tokens": 392, "searches": 2, "total_tokens": 14128, "usd": 0.032066}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13721, "output_tokens": 5097, "searches": 2, "total_tokens": 18818, "usd": 0.053227250000000004}
+{"event": "reserve", "total_tokens": 32883, "usd": 0.08966225}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 10571, "output_tokens": 5030, "searches": 0, "total_tokens": 15601, "usd": 0.03056325}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13974, "output_tokens": 206, "searches": 2, "total_tokens": 14180, "usd": 0.0314075}
+{"event": "reserve", "total_tokens": 30806, "usd": 0.0881045}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5805, "output_tokens": 4805, "searches": 0, "total_tokens": 10610, "usd": 0.02597625}
+{"event": "reserve", "total_tokens": 16919, "usd": 0.05768925}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 6007, "output_tokens": 4822, "searches": 0, "total_tokens": 10829, "usd": 0.02620425}
+{"event": "reserve", "total_tokens": 32798, "usd": 0.0895985}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 10431, "output_tokens": 4875, "searches": 0, "total_tokens": 15306, "usd": 0.02976075}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9426, "output_tokens": 4650, "searches": 1, "total_tokens": 14076, "usd": 0.0379945}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9713, "output_tokens": 5950, "searches": 1, "total_tokens": 15663, "usd": 0.04405975}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9529, "output_tokens": 2639, "searches": 1, "total_tokens": 12168, "usd": 0.02902225}
+{"event": "reserve", "total_tokens": 29199, "usd": 0.08689925}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13912, "output_tokens": 5469, "searches": 2, "total_tokens": 19381, "usd": 0.055044499999999996}
+{"event": "reserve", "total_tokens": 17209, "usd": 0.05790675}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 6548, "output_tokens": 545, "searches": 0, "total_tokens": 7093, "usd": 0.0073635}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 14330, "output_tokens": 4997, "searches": 3, "total_tokens": 19327, "usd": 0.063234}
+{"event": "reserve", "total_tokens": 16936, "usd": 0.057702}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 6074, "output_tokens": 4630, "searches": 0, "total_tokens": 10704, "usd": 0.0253905}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9733, "output_tokens": 4230, "searches": 1, "total_tokens": 13963, "usd": 0.03633475}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9668, "output_tokens": 141, "searches": 1, "total_tokens": 9809, "usd": 0.0178855}
+{"event": "reserve", "total_tokens": 29812, "usd": 0.087359}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5732, "output_tokens": 197, "searches": 0, "total_tokens": 5929, "usd": 0.0051855}
+{"event": "reserve", "total_tokens": 29209, "usd": 0.08690675}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 184, "searches": 0, "total_tokens": 5736, "usd": 0.004992}
+{"event": "reserve", "total_tokens": 29222, "usd": 0.08691650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5559, "output_tokens": 900, "searches": 0, "total_tokens": 6459, "usd": 0.00821925}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 165, "searches": 0, "total_tokens": 5723, "usd": 0.004911}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 159, "searches": 0, "total_tokens": 5719, "usd": 0.0048855}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 181, "searches": 0, "total_tokens": 5741, "usd": 0.0049845}
+{"event": "reserve", "total_tokens": 29220, "usd": 0.086915}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13789, "output_tokens": 1840, "searches": 3, "total_tokens": 15629, "usd": 0.04862175}
+{"event": "reserve", "total_tokens": 29225, "usd": 0.08691875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5562, "output_tokens": 122, "searches": 0, "total_tokens": 5684, "usd": 0.0047205}
+{"event": "reserve", "total_tokens": 29218, "usd": 0.0869135}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5557, "output_tokens": 132, "searches": 0, "total_tokens": 5689, "usd": 0.00476175}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9578, "output_tokens": 710, "searches": 1, "total_tokens": 10288, "usd": 0.0203785}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5567, "output_tokens": 730, "searches": 0, "total_tokens": 6297, "usd": 0.00746025}
+{"event": "reserve", "total_tokens": 14147, "usd": 0.05561025}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 1928, "output_tokens": 732, "searches": 0, "total_tokens": 2660, "usd": 0.00474}
+{"event": "reserve", "total_tokens": 29211, "usd": 0.08690825}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5555, "output_tokens": 325, "searches": 0, "total_tokens": 5880, "usd": 0.00562875}
+{"event": "reserve", "total_tokens": 29225, "usd": 0.08691875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 177, "searches": 0, "total_tokens": 5737, "usd": 0.0049665}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 703, "searches": 0, "total_tokens": 6261, "usd": 0.007332}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 382, "searches": 0, "total_tokens": 5940, "usd": 0.0058875}
+{"event": "reserve", "total_tokens": 13769, "usd": 0.05532675}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 1577, "output_tokens": 395, "searches": 0, "total_tokens": 1972, "usd": 0.00296025}
+{"event": "reserve", "total_tokens": 29233, "usd": 0.08692475000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9798, "output_tokens": 236, "searches": 1, "total_tokens": 10034, "usd": 0.0184105}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 52, "searches": 0, "total_tokens": 5604, "usd": 0.004398}
+{"event": "reserve", "total_tokens": 29370, "usd": 0.08702750000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5626, "output_tokens": 125, "searches": 0, "total_tokens": 5751, "usd": 0.004782}
+{"event": "reserve", "total_tokens": 29216, "usd": 0.086912}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13886, "output_tokens": 130, "searches": 2, "total_tokens": 14016, "usd": 0.0309995}
+{"event": "reserve", "total_tokens": 30733, "usd": 0.08804975000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5710, "output_tokens": 169, "searches": 0, "total_tokens": 5879, "usd": 0.005043}
+{"event": "reserve", "total_tokens": 29218, "usd": 0.0869135}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5557, "output_tokens": 144, "searches": 0, "total_tokens": 5701, "usd": 0.00481575}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13943, "output_tokens": 371, "searches": 2, "total_tokens": 14314, "usd": 0.03212675}
+{"event": "reserve", "total_tokens": 29222, "usd": 0.08691650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13612, "output_tokens": 184, "searches": 2, "total_tokens": 13796, "usd": 0.031037000000000002}
+{"event": "reserve", "total_tokens": 29218, "usd": 0.0869135}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 10366, "output_tokens": 365, "searches": 3, "total_tokens": 10731, "usd": 0.039417}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 75, "searches": 0, "total_tokens": 5635, "usd": 0.0045075}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 143, "searches": 0, "total_tokens": 5703, "usd": 0.0048135}
+{"event": "reserve", "total_tokens": 29223, "usd": 0.08691725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5559, "output_tokens": 655, "searches": 0, "total_tokens": 6214, "usd": 0.00711675}
+{"event": "reserve", "total_tokens": 29220, "usd": 0.086915}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13751, "output_tokens": 412, "searches": 3, "total_tokens": 14163, "usd": 0.042167249999999996}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5561, "output_tokens": 77, "searches": 0, "total_tokens": 5638, "usd": 0.00451725}
+{"event": "reserve", "total_tokens": 29226, "usd": 0.08691950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5562, "output_tokens": 156, "searches": 0, "total_tokens": 5718, "usd": 0.0048735}
+{"event": "reserve", "total_tokens": 29221, "usd": 0.08691575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13875, "output_tokens": 1655, "searches": 3, "total_tokens": 15530, "usd": 0.04785375}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9672, "output_tokens": 360, "searches": 1, "total_tokens": 10032, "usd": 0.018874000000000002}
+{"event": "reserve", "total_tokens": 29225, "usd": 0.08691875}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9832, "output_tokens": 199, "searches": 1, "total_tokens": 10031, "usd": 0.0182695}
+{"event": "reserve", "total_tokens": 29215, "usd": 0.08691125000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9719, "output_tokens": 247, "searches": 1, "total_tokens": 9966, "usd": 0.01840075}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9250, "output_tokens": 364, "searches": 1, "total_tokens": 9614, "usd": 0.0185755}
+{"event": "reserve", "total_tokens": 29220, "usd": 0.086915}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13732, "output_tokens": 296, "searches": 2, "total_tokens": 14028, "usd": 0.031631}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9674, "output_tokens": 280, "searches": 1, "total_tokens": 9954, "usd": 0.0185155}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 10315, "output_tokens": 306, "searches": 2, "total_tokens": 10621, "usd": 0.02911325}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5555, "output_tokens": 60, "searches": 0, "total_tokens": 5615, "usd": 0.00443625}
+{"event": "reserve", "total_tokens": 29377, "usd": 0.08703275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9853, "output_tokens": 4053, "searches": 1, "total_tokens": 13906, "usd": 0.03562825}
+{"event": "reserve", "total_tokens": 29216, "usd": 0.086912}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13821, "output_tokens": 410, "searches": 2, "total_tokens": 14231, "usd": 0.032210749999999996}
+{"event": "reserve", "total_tokens": 29225, "usd": 0.08691875}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5565, "output_tokens": 3977, "searches": 0, "total_tokens": 9542, "usd": 0.02207025}
+{"event": "reserve", "total_tokens": 29223, "usd": 0.08691725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9727, "output_tokens": 259, "searches": 1, "total_tokens": 9986, "usd": 0.018460749999999998}
+{"event": "reserve", "total_tokens": 29228, "usd": 0.086921}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13813, "output_tokens": 409, "searches": 3, "total_tokens": 14222, "usd": 0.042200249999999995}
+{"event": "reserve", "total_tokens": 29218, "usd": 0.0869135}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9426, "output_tokens": 182, "searches": 1, "total_tokens": 9608, "usd": 0.0178885}
+{"event": "reserve", "total_tokens": 29934, "usd": 0.0874505}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5762, "output_tokens": 1815, "searches": 0, "total_tokens": 7577, "usd": 0.012489}
+{"event": "reserve", "total_tokens": 31008, "usd": 0.088256}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 7321, "output_tokens": 1876, "searches": 0, "total_tokens": 9197, "usd": 0.01393275}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5567, "output_tokens": 52, "searches": 0, "total_tokens": 5619, "usd": 0.00440925}
+{"event": "reserve", "total_tokens": 29385, "usd": 0.08703875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5646, "output_tokens": 5635, "searches": 0, "total_tokens": 11281, "usd": 0.029592}
+{"event": "reserve", "total_tokens": 35040, "usd": 0.09128}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 11041, "output_tokens": 5697, "searches": 0, "total_tokens": 16738, "usd": 0.03391725}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9786, "output_tokens": 216, "searches": 1, "total_tokens": 10002, "usd": 0.0183115}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13560, "output_tokens": 348, "searches": 2, "total_tokens": 13908, "usd": 0.031736}
+{"event": "reserve", "total_tokens": 30753, "usd": 0.08806475}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13678, "output_tokens": 447, "searches": 2, "total_tokens": 14125, "usd": 0.03227}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 1209, "searches": 0, "total_tokens": 6767, "usd": 0.009609}
+{"event": "reserve", "total_tokens": 14615, "usd": 0.05596125}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 2401, "output_tokens": 1388, "searches": 0, "total_tokens": 3789, "usd": 0.00804675}
+{"event": "reserve", "total_tokens": 29220, "usd": 0.086915}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5561, "output_tokens": 155, "searches": 0, "total_tokens": 5716, "usd": 0.00486825}
+{"event": "reserve", "total_tokens": 29227, "usd": 0.08692025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 146, "searches": 0, "total_tokens": 5704, "usd": 0.0048255}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5529, "output_tokens": 203, "searches": 0, "total_tokens": 5732, "usd": 0.00506025}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 136, "searches": 0, "total_tokens": 5664, "usd": 0.004758}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5530, "output_tokens": 270, "searches": 0, "total_tokens": 5800, "usd": 0.0053625}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5530, "output_tokens": 143, "searches": 0, "total_tokens": 5673, "usd": 0.004791}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 87, "searches": 0, "total_tokens": 5615, "usd": 0.0045375}
+{"event": "reserve", "total_tokens": 29183, "usd": 0.08688725}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5526, "output_tokens": 218, "searches": 0, "total_tokens": 5744, "usd": 0.0051255}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5527, "output_tokens": 133, "searches": 0, "total_tokens": 5660, "usd": 0.00474375}
+{"event": "reserve", "total_tokens": 29185, "usd": 0.08688875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 176, "searches": 0, "total_tokens": 5707, "usd": 0.00494025}
+{"event": "reserve", "total_tokens": 29183, "usd": 0.08688725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5526, "output_tokens": 311, "searches": 0, "total_tokens": 5837, "usd": 0.005544}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 129, "searches": 0, "total_tokens": 5657, "usd": 0.0047265}
+{"event": "reserve", "total_tokens": 29183, "usd": 0.08688725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5524, "output_tokens": 192, "searches": 0, "total_tokens": 5716, "usd": 0.005007}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5527, "output_tokens": 149, "searches": 0, "total_tokens": 5676, "usd": 0.00481575}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 230, "searches": 0, "total_tokens": 5758, "usd": 0.005181}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 49, "searches": 0, "total_tokens": 5577, "usd": 0.0043665}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5529, "output_tokens": 48, "searches": 0, "total_tokens": 5577, "usd": 0.00436275}
+{"event": "reserve", "total_tokens": 29185, "usd": 0.08688875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5532, "output_tokens": 172, "searches": 0, "total_tokens": 5704, "usd": 0.004923}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9680, "output_tokens": 371, "searches": 1, "total_tokens": 10051, "usd": 0.018929500000000002}
+{"event": "reserve", "total_tokens": 29185, "usd": 0.08688875}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5534, "output_tokens": 108, "searches": 0, "total_tokens": 5642, "usd": 0.0046365}
+{"event": "reserve", "total_tokens": 29184, "usd": 0.086888}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 63, "searches": 0, "total_tokens": 5591, "usd": 0.0044295}
+{"event": "reserve", "total_tokens": 29183, "usd": 0.08688725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5528, "output_tokens": 139, "searches": 0, "total_tokens": 5667, "usd": 0.0047715}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 62, "searches": 0, "total_tokens": 5593, "usd": 0.00442725}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 91, "searches": 0, "total_tokens": 5622, "usd": 0.00455775}
+{"event": "reserve", "total_tokens": 29189, "usd": 0.08689175}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5542, "output_tokens": 118, "searches": 0, "total_tokens": 5660, "usd": 0.0046875}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 45, "searches": 0, "total_tokens": 5580, "usd": 0.00435375}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 104, "searches": 0, "total_tokens": 5635, "usd": 0.00461625}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5536, "output_tokens": 111, "searches": 0, "total_tokens": 5647, "usd": 0.0046515}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 84, "searches": 0, "total_tokens": 5619, "usd": 0.00452925}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5542, "output_tokens": 68, "searches": 0, "total_tokens": 5610, "usd": 0.0044625}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5537, "output_tokens": 127, "searches": 0, "total_tokens": 5664, "usd": 0.00472425}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5532, "output_tokens": 47, "searches": 0, "total_tokens": 5579, "usd": 0.0043605}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5540, "output_tokens": 57, "searches": 0, "total_tokens": 5597, "usd": 0.0044115}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5536, "output_tokens": 152, "searches": 0, "total_tokens": 5688, "usd": 0.004836}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5543, "output_tokens": 78, "searches": 0, "total_tokens": 5621, "usd": 0.00450825}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5534, "output_tokens": 117, "searches": 0, "total_tokens": 5651, "usd": 0.004677}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5536, "output_tokens": 68, "searches": 0, "total_tokens": 5604, "usd": 0.004458}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 59, "searches": 0, "total_tokens": 5594, "usd": 0.00441675}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 55, "searches": 0, "total_tokens": 5590, "usd": 0.00439875}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5541, "output_tokens": 79, "searches": 0, "total_tokens": 5620, "usd": 0.00451125}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 61, "searches": 0, "total_tokens": 5596, "usd": 0.00442575}
+{"event": "reserve", "total_tokens": 29186, "usd": 0.08688950000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5534, "output_tokens": 47, "searches": 0, "total_tokens": 5581, "usd": 0.004362}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5547, "output_tokens": 80, "searches": 0, "total_tokens": 5627, "usd": 0.00452025}
+{"event": "reserve", "total_tokens": 29231, "usd": 0.08692325000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5625, "output_tokens": 152, "searches": 0, "total_tokens": 5777, "usd": 0.00490275}
+{"event": "reserve", "total_tokens": 29191, "usd": 0.08689325}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 14096, "output_tokens": 2643, "searches": 2, "total_tokens": 16739, "usd": 0.0424655}
+{"event": "reserve", "total_tokens": 31180, "usd": 0.088385}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 8005, "output_tokens": 473, "searches": 0, "total_tokens": 8478, "usd": 0.00813225}
+{"event": "reserve", "total_tokens": 31507, "usd": 0.08863025000000001}
+{"cached_tokens": 7936, "call": "response", "event": "charge", "input_tokens": 8482, "output_tokens": 1721, "searches": 0, "total_tokens": 10203, "usd": 0.014106}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5549, "output_tokens": 88, "searches": 0, "total_tokens": 5637, "usd": 0.00455775}
+{"event": "reserve", "total_tokens": 29236, "usd": 0.086927}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9690, "output_tokens": 373, "searches": 1, "total_tokens": 10063, "usd": 0.018946}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5541, "output_tokens": 448, "searches": 0, "total_tokens": 5989, "usd": 0.00617175}
+{"event": "reserve", "total_tokens": 29484, "usd": 0.08711300000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5970, "output_tokens": 127, "searches": 0, "total_tokens": 6097, "usd": 0.005049}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5534, "output_tokens": 100, "searches": 0, "total_tokens": 5634, "usd": 0.0046005}
+{"event": "reserve", "total_tokens": 29262, "usd": 0.08694650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5645, "output_tokens": 651, "searches": 0, "total_tokens": 6296, "usd": 0.00716325}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9696, "output_tokens": 302, "searches": 1, "total_tokens": 9998, "usd": 0.018631}
+{"event": "reserve", "total_tokens": 30204, "usd": 0.08765300000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9806, "output_tokens": 2198, "searches": 1, "total_tokens": 12004, "usd": 0.0272455}
+{"event": "reserve", "total_tokens": 14954, "usd": 0.0562155}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 3273, "output_tokens": 2101, "searches": 0, "total_tokens": 5374, "usd": 0.01190925}
+{"event": "reserve", "total_tokens": 30784, "usd": 0.088088}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7678, "output_tokens": 3416, "searches": 0, "total_tokens": 11094, "usd": 0.0211305}
+{"event": "reserve", "total_tokens": 29187, "usd": 0.08689025}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5539, "output_tokens": 121, "searches": 0, "total_tokens": 5660, "usd": 0.00469875}
+{"event": "reserve", "total_tokens": 29245, "usd": 0.08693375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5665, "output_tokens": 981, "searches": 0, "total_tokens": 6646, "usd": 0.00866325}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 214, "searches": 0, "total_tokens": 5759, "usd": 0.00512175}
+{"event": "reserve", "total_tokens": 29310, "usd": 0.0869825}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5760, "output_tokens": 152, "searches": 0, "total_tokens": 5912, "usd": 0.005004}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 13960, "output_tokens": 317, "searches": 2, "total_tokens": 14277, "usd": 0.0318965}
+{"event": "reserve", "total_tokens": 29278, "usd": 0.08695850000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9485, "output_tokens": 325, "searches": 1, "total_tokens": 9810, "usd": 0.018576250000000002}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13706, "output_tokens": 2266, "searches": 3, "total_tokens": 15972, "usd": 0.0504765}
+{"event": "reserve", "total_tokens": 15016, "usd": 0.056262}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 3211, "output_tokens": 1645, "searches": 0, "total_tokens": 4856, "usd": 0.00981075}
+{"event": "reserve", "total_tokens": 30408, "usd": 0.08780600000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7184, "output_tokens": 90, "searches": 0, "total_tokens": 7274, "usd": 0.005793}
+{"event": "reserve", "total_tokens": 30464, "usd": 0.08784800000000001}
+{"cached_tokens": 7168, "call": "response", "event": "charge", "input_tokens": 7268, "output_tokens": 1852, "searches": 0, "total_tokens": 9120, "usd": 0.013785}
+{"event": "reserve", "total_tokens": 29204, "usd": 0.08690300000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5543, "output_tokens": 158, "searches": 0, "total_tokens": 5701, "usd": 0.00486825}
+{"event": "reserve", "total_tokens": 29354, "usd": 0.08701550000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5705, "output_tokens": 437, "searches": 0, "total_tokens": 6142, "usd": 0.00624525}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9675, "output_tokens": 1970, "searches": 1, "total_tokens": 11645, "usd": 0.02612125}
+{"event": "reserve", "total_tokens": 31082, "usd": 0.0883115}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7388, "output_tokens": 1818, "searches": 0, "total_tokens": 9206, "usd": 0.013722}
+{"event": "reserve", "total_tokens": 29209, "usd": 0.08690675}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5551, "output_tokens": 422, "searches": 0, "total_tokens": 5973, "usd": 0.00606225}
+{"event": "reserve", "total_tokens": 13788, "usd": 0.055341}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 1607, "output_tokens": 425, "searches": 0, "total_tokens": 2032, "usd": 0.00311775}
+{"event": "reserve", "total_tokens": 29214, "usd": 0.0869105}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9710, "output_tokens": 296, "searches": 1, "total_tokens": 10006, "usd": 0.0186145}
+{"event": "reserve", "total_tokens": 29459, "usd": 0.08709425}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5778, "output_tokens": 99, "searches": 0, "total_tokens": 5877, "usd": 0.004779}
+{"event": "reserve", "total_tokens": 29204, "usd": 0.08690300000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9890, "output_tokens": 2326, "searches": 1, "total_tokens": 12216, "usd": 0.0278845}
+{"event": "reserve", "total_tokens": 31477, "usd": 0.08860775}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 7734, "output_tokens": 85, "searches": 0, "total_tokens": 7819, "usd": 0.006183}
+{"event": "reserve", "total_tokens": 29208, "usd": 0.086906}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5549, "output_tokens": 108, "searches": 0, "total_tokens": 5657, "usd": 0.00464775}
+{"event": "reserve", "total_tokens": 29323, "usd": 0.08699225000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5652, "output_tokens": 120, "searches": 0, "total_tokens": 5772, "usd": 0.004779}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5536, "output_tokens": 121, "searches": 0, "total_tokens": 5657, "usd": 0.0046965}
+{"event": "reserve", "total_tokens": 29331, "usd": 0.08699825}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9938, "output_tokens": 1060, "searches": 1, "total_tokens": 10998, "usd": 0.0222235}
+{"event": "reserve", "total_tokens": 14522, "usd": 0.0558915}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 2281, "output_tokens": 1059, "searches": 0, "total_tokens": 3340, "usd": 0.00647625}
+{"event": "reserve", "total_tokens": 30399, "usd": 0.08779925000000001}
+{"cached_tokens": 5632, "call": "response", "event": "charge", "input_tokens": 6660, "output_tokens": 994, "searches": 0, "total_tokens": 7654, "usd": 0.009468}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 13863, "output_tokens": 307, "searches": 3, "total_tokens": 14170, "usd": 0.041778749999999996}
+{"event": "reserve", "total_tokens": 29355, "usd": 0.08701625}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5685, "output_tokens": 112, "searches": 0, "total_tokens": 5797, "usd": 0.00476775}
+{"event": "reserve", "total_tokens": 29489, "usd": 0.08711675}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9768, "output_tokens": 594, "searches": 1, "total_tokens": 10362, "usd": 0.019999}
+{"event": "reserve", "total_tokens": 30280, "usd": 0.08771000000000001}
+{"cached_tokens": 5632, "call": "response", "event": "charge", "input_tokens": 10539, "output_tokens": 12000, "searches": 1, "total_tokens": 22539, "usd": 0.07190425}
+{"event": "reserve", "total_tokens": 29201, "usd": 0.08690075}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5544, "output_tokens": 93, "searches": 0, "total_tokens": 5637, "usd": 0.0045765}
+{"event": "reserve", "total_tokens": 29309, "usd": 0.08698175000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9813, "output_tokens": 200, "searches": 1, "total_tokens": 10013, "usd": 0.018259749999999998}
+{"event": "reserve", "total_tokens": 30128, "usd": 0.08759600000000001}
+{"cached_tokens": 5632, "call": "response", "event": "charge", "input_tokens": 5862, "output_tokens": 1080, "searches": 0, "total_tokens": 6942, "usd": 0.0092565}
+{"event": "reserve", "total_tokens": 14597, "usd": 0.05594775}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 2343, "output_tokens": 1096, "searches": 0, "total_tokens": 3439, "usd": 0.00668925}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 14167, "output_tokens": 2593, "searches": 3, "total_tokens": 16760, "usd": 0.05229375}
+{"event": "reserve", "total_tokens": 31766, "usd": 0.0888245}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7940, "output_tokens": 2289, "searches": 0, "total_tokens": 10229, "usd": 0.0162555}
+{"event": "reserve", "total_tokens": 34222, "usd": 0.0906665}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 10247, "output_tokens": 120, "searches": 0, "total_tokens": 10367, "usd": 0.00822525}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 106, "searches": 0, "total_tokens": 5641, "usd": 0.00462825}
+{"event": "reserve", "total_tokens": 29300, "usd": 0.08697500000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5633, "output_tokens": 85, "searches": 0, "total_tokens": 5718, "usd": 0.00460725}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5533, "output_tokens": 141, "searches": 0, "total_tokens": 5674, "usd": 0.00478425}
+{"event": "reserve", "total_tokens": 29368, "usd": 0.087026}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9725, "output_tokens": 1290, "searches": 1, "total_tokens": 11015, "usd": 0.02309875}
+{"event": "reserve", "total_tokens": 29207, "usd": 0.08690525}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9659, "output_tokens": 263, "searches": 1, "total_tokens": 9922, "usd": 0.01842775}
+{"event": "reserve", "total_tokens": 29409, "usd": 0.08705675}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5729, "output_tokens": 563, "searches": 0, "total_tokens": 6292, "usd": 0.00683025}
+{"event": "reserve", "total_tokens": 29202, "usd": 0.0869015}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9794, "output_tokens": 192, "searches": 1, "total_tokens": 9986, "usd": 0.0182095}
+{"event": "reserve", "total_tokens": 29336, "usd": 0.08700200000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5672, "output_tokens": 153, "searches": 0, "total_tokens": 5825, "usd": 0.0049425}
+{"event": "reserve", "total_tokens": 29203, "usd": 0.08690225}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 14121, "output_tokens": 449, "searches": 3, "total_tokens": 14570, "usd": 0.042611249999999996}
+{"event": "reserve", "total_tokens": 29538, "usd": 0.08715350000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5831, "output_tokens": 115, "searches": 0, "total_tokens": 5946, "usd": 0.00489075}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9829, "output_tokens": 2102, "searches": 1, "total_tokens": 11931, "usd": 0.02683075}
+{"event": "reserve", "total_tokens": 31279, "usd": 0.08845925}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7565, "output_tokens": 1777, "searches": 0, "total_tokens": 9342, "usd": 0.01367025}
+{"event": "reserve", "total_tokens": 29202, "usd": 0.0869015}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9487, "output_tokens": 232, "searches": 1, "total_tokens": 9719, "usd": 0.018159250000000002}
+{"event": "reserve", "total_tokens": 29341, "usd": 0.08700575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5689, "output_tokens": 50, "searches": 0, "total_tokens": 5739, "usd": 0.00449175}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9513, "output_tokens": 137, "searches": 1, "total_tokens": 9650, "usd": 0.01775125}
+{"event": "reserve", "total_tokens": 29823, "usd": 0.08736725000000001}
+{"event": "reserve", "total_tokens": 29199, "usd": 0.08689925}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 9886, "output_tokens": 6152, "searches": 1, "total_tokens": 16038, "usd": 0.0450985}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5558, "output_tokens": 360, "searches": 0, "total_tokens": 5918, "usd": 0.0057885}
+{"event": "reserve", "total_tokens": 29209, "usd": 0.08690675}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5551, "output_tokens": 769, "searches": 0, "total_tokens": 6320, "usd": 0.00762375}
+{"event": "reserve", "total_tokens": 30011, "usd": 0.08750825000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 6310, "output_tokens": 769, "searches": 0, "total_tokens": 7079, "usd": 0.008193}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 13674, "output_tokens": 2231, "searches": 2, "total_tokens": 15905, "usd": 0.040295}
+{"event": "reserve", "total_tokens": 31357, "usd": 0.08851775}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 7573, "output_tokens": 1383, "searches": 0, "total_tokens": 8956, "usd": 0.01190325}
+{"event": "reserve", "total_tokens": 32758, "usd": 0.08956850000000001}
+{"cached_tokens": 7552, "call": "response", "event": "charge", "input_tokens": 8918, "output_tokens": 1928, "searches": 0, "total_tokens": 10846, "usd": 0.0153645}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 1906, "searches": 0, "total_tokens": 7451, "usd": 0.01273575}
+{"event": "reserve", "total_tokens": 31196, "usd": 0.088397}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 7426, "output_tokens": 53, "searches": 0, "total_tokens": 7479, "usd": 0.005808}
+{"event": "reserve", "total_tokens": 31356, "usd": 0.088517}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7501, "output_tokens": 1917, "searches": 0, "total_tokens": 9418, "usd": 0.01425225}
+{"event": "reserve", "total_tokens": 29202, "usd": 0.0869015}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5542, "output_tokens": 140, "searches": 0, "total_tokens": 5682, "usd": 0.0047865}
+{"event": "reserve", "total_tokens": 29359, "usd": 0.08701925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9887, "output_tokens": 251, "searches": 1, "total_tokens": 10138, "usd": 0.01854475}
+{"event": "reserve", "total_tokens": 30377, "usd": 0.08778275}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5936, "output_tokens": 174, "searches": 0, "total_tokens": 6110, "usd": 0.005235}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9593, "output_tokens": 1917, "searches": 1, "total_tokens": 11510, "usd": 0.025821249999999997}
+{"event": "reserve", "total_tokens": 15314, "usd": 0.0564855}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 3018, "output_tokens": 1829, "searches": 0, "total_tokens": 4847, "usd": 0.010494}
+{"event": "reserve", "total_tokens": 31184, "usd": 0.08838800000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 7383, "output_tokens": 1840, "searches": 0, "total_tokens": 9223, "usd": 0.01381725}
+{"event": "reserve", "total_tokens": 33175, "usd": 0.08988125000000001}
+{"cached_tokens": 7296, "call": "response", "event": "charge", "input_tokens": 9230, "output_tokens": 110, "searches": 0, "total_tokens": 9340, "usd": 0.0074175}
+{"event": "reserve", "total_tokens": 29191, "usd": 0.08689325}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5550, "output_tokens": 161, "searches": 0, "total_tokens": 5711, "usd": 0.004887}
+{"event": "reserve", "total_tokens": 29191, "usd": 0.08689325}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5548, "output_tokens": 110, "searches": 0, "total_tokens": 5658, "usd": 0.004656}
+{"event": "reserve", "total_tokens": 29192, "usd": 0.086894}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5551, "output_tokens": 166, "searches": 0, "total_tokens": 5717, "usd": 0.00491025}
+{"event": "reserve", "total_tokens": 29192, "usd": 0.086894}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5550, "output_tokens": 92, "searches": 0, "total_tokens": 5642, "usd": 0.0045765}
+{"event": "reserve", "total_tokens": 29210, "usd": 0.0869075}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5547, "output_tokens": 123, "searches": 0, "total_tokens": 5670, "usd": 0.00471375}
+{"event": "reserve", "total_tokens": 29252, "usd": 0.086939}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5582, "output_tokens": 72, "searches": 0, "total_tokens": 5654, "usd": 0.0045105}
+{"event": "reserve", "total_tokens": 29233, "usd": 0.08692475000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5570, "output_tokens": 78, "searches": 0, "total_tokens": 5648, "usd": 0.0045285}
+{"event": "reserve", "total_tokens": 29265, "usd": 0.08694875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5588, "output_tokens": 160, "searches": 0, "total_tokens": 5748, "usd": 0.004911}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 91, "searches": 0, "total_tokens": 5636, "usd": 0.00456825}
+{"event": "reserve", "total_tokens": 29209, "usd": 0.08690675}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 189, "searches": 0, "total_tokens": 5734, "usd": 0.00500925}
+{"event": "reserve", "total_tokens": 29192, "usd": 0.086894}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5550, "output_tokens": 113, "searches": 0, "total_tokens": 5663, "usd": 0.004671}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5548, "output_tokens": 101, "searches": 0, "total_tokens": 5649, "usd": 0.0046155}
+{"event": "reserve", "total_tokens": 29192, "usd": 0.086894}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5554, "output_tokens": 184, "searches": 0, "total_tokens": 5738, "usd": 0.0049935}
+{"event": "reserve", "total_tokens": 29204, "usd": 0.08690300000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5546, "output_tokens": 128, "searches": 0, "total_tokens": 5674, "usd": 0.0047355}
+{"event": "reserve", "total_tokens": 29250, "usd": 0.0869375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5584, "output_tokens": 136, "searches": 0, "total_tokens": 5720, "usd": 0.0048}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5550, "output_tokens": 67, "searches": 0, "total_tokens": 5617, "usd": 0.004464}
+{"event": "reserve", "total_tokens": 29260, "usd": 0.08694500000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5592, "output_tokens": 160, "searches": 0, "total_tokens": 5752, "usd": 0.004914}
+{"event": "reserve", "total_tokens": 29211, "usd": 0.08690825}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 88, "searches": 0, "total_tokens": 5640, "usd": 0.00456}
+{"event": "reserve", "total_tokens": 29214, "usd": 0.0869105}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5551, "output_tokens": 144, "searches": 0, "total_tokens": 5695, "usd": 0.00481125}
+{"event": "reserve", "total_tokens": 29205, "usd": 0.08690375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 77, "searches": 0, "total_tokens": 5622, "usd": 0.00450525}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5553, "output_tokens": 214, "searches": 0, "total_tokens": 5767, "usd": 0.00512775}
+{"event": "reserve", "total_tokens": 29189, "usd": 0.08689175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5544, "output_tokens": 213, "searches": 0, "total_tokens": 5757, "usd": 0.0051165}
+{"event": "reserve", "total_tokens": 29188, "usd": 0.08689100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5543, "output_tokens": 198, "searches": 0, "total_tokens": 5741, "usd": 0.00504825}
+{"event": "reserve", "total_tokens": 29191, "usd": 0.08689325}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 155, "searches": 0, "total_tokens": 5707, "usd": 0.0048615}
+{"event": "reserve", "total_tokens": 29211, "usd": 0.08690825}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5542, "output_tokens": 137, "searches": 0, "total_tokens": 5679, "usd": 0.004773}
+{"event": "reserve", "total_tokens": 29208, "usd": 0.086906}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5544, "output_tokens": 108, "searches": 0, "total_tokens": 5652, "usd": 0.004644}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 124, "searches": 0, "total_tokens": 5669, "usd": 0.00471675}
+{"event": "reserve", "total_tokens": 29208, "usd": 0.086906}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5542, "output_tokens": 113, "searches": 0, "total_tokens": 5655, "usd": 0.004665}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5546, "output_tokens": 129, "searches": 0, "total_tokens": 5675, "usd": 0.00474}
+{"event": "reserve", "total_tokens": 29212, "usd": 0.086909}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5547, "output_tokens": 115, "searches": 0, "total_tokens": 5662, "usd": 0.00467775}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5549, "output_tokens": 334, "searches": 0, "total_tokens": 5883, "usd": 0.00566475}
+{"event": "reserve", "total_tokens": 29190, "usd": 0.0868925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5549, "output_tokens": 422, "searches": 0, "total_tokens": 5971, "usd": 0.00606075}
+{"event": "reserve", "total_tokens": 29189, "usd": 0.08689175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5547, "output_tokens": 249, "searches": 0, "total_tokens": 5796, "usd": 0.00528075}
+{"event": "reserve", "total_tokens": 29213, "usd": 0.08690975000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5546, "output_tokens": 117, "searches": 0, "total_tokens": 5663, "usd": 0.004686}
+{"event": "reserve", "total_tokens": 29214, "usd": 0.0869105}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5548, "output_tokens": 92, "searches": 0, "total_tokens": 5640, "usd": 0.004575}
+{"event": "reserve", "total_tokens": 29212, "usd": 0.086909}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 116, "searches": 0, "total_tokens": 5661, "usd": 0.00468075}
+{"event": "reserve", "total_tokens": 29205, "usd": 0.08690375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5539, "output_tokens": 191, "searches": 0, "total_tokens": 5730, "usd": 0.00501375}
+{"event": "reserve", "total_tokens": 29211, "usd": 0.08690825}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5544, "output_tokens": 79, "searches": 0, "total_tokens": 5623, "usd": 0.0045135}
+{"event": "reserve", "total_tokens": 29211, "usd": 0.08690825}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 109, "searches": 0, "total_tokens": 5654, "usd": 0.00464925}
+{"event": "reserve", "total_tokens": 29216, "usd": 0.086912}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5547, "output_tokens": 109, "searches": 0, "total_tokens": 5656, "usd": 0.00465075}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5530, "output_tokens": 69, "searches": 0, "total_tokens": 5599, "usd": 0.004458}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5538, "output_tokens": 57, "searches": 0, "total_tokens": 5595, "usd": 0.00441}
+{"event": "reserve", "total_tokens": 29217, "usd": 0.08691275}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 122, "searches": 0, "total_tokens": 5674, "usd": 0.004713}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 137, "searches": 0, "total_tokens": 5689, "usd": 0.0047805}
+{"event": "reserve", "total_tokens": 29207, "usd": 0.08690525}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5548, "output_tokens": 68, "searches": 0, "total_tokens": 5616, "usd": 0.004467}
+{"event": "reserve", "total_tokens": 29193, "usd": 0.08689475}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5530, "output_tokens": 76, "searches": 0, "total_tokens": 5606, "usd": 0.0044895}
+{"event": "reserve", "total_tokens": 29189, "usd": 0.08689175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5525, "output_tokens": 44, "searches": 0, "total_tokens": 5569, "usd": 0.00434175}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 50, "searches": 0, "total_tokens": 5581, "usd": 0.00437325}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 78, "searches": 0, "total_tokens": 5609, "usd": 0.00449925}
+{"event": "reserve", "total_tokens": 29234, "usd": 0.0869255}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5557, "output_tokens": 83, "searches": 0, "total_tokens": 5640, "usd": 0.00454125}
+{"event": "reserve", "total_tokens": 29200, "usd": 0.0869}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5535, "output_tokens": 99, "searches": 0, "total_tokens": 5634, "usd": 0.00459675}
+{"event": "reserve", "total_tokens": 29207, "usd": 0.08690525}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5540, "output_tokens": 78, "searches": 0, "total_tokens": 5618, "usd": 0.004506}
+{"event": "reserve", "total_tokens": 29223, "usd": 0.08691725}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5559, "output_tokens": 97, "searches": 0, "total_tokens": 5656, "usd": 0.00460575}
+{"event": "reserve", "total_tokens": 29220, "usd": 0.086915}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5552, "output_tokens": 85, "searches": 0, "total_tokens": 5637, "usd": 0.0045465}
+{"event": "reserve", "total_tokens": 29462, "usd": 0.08709650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5749, "output_tokens": 120, "searches": 0, "total_tokens": 5869, "usd": 0.00485175}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5534, "output_tokens": 75, "searches": 0, "total_tokens": 5609, "usd": 0.004488}
+{"event": "reserve", "total_tokens": 29276, "usd": 0.086957}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5600, "output_tokens": 134, "searches": 0, "total_tokens": 5734, "usd": 0.004803}
+{"event": "reserve", "total_tokens": 29240, "usd": 0.08693000000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5573, "output_tokens": 91, "searches": 0, "total_tokens": 5664, "usd": 0.00458925}
+{"event": "reserve", "total_tokens": 29239, "usd": 0.08692925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5574, "output_tokens": 115, "searches": 0, "total_tokens": 5689, "usd": 0.004698}
+{"event": "reserve", "total_tokens": 29552, "usd": 0.087164}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5861, "output_tokens": 312, "searches": 0, "total_tokens": 6173, "usd": 0.00579975}
+{"event": "reserve", "total_tokens": 29233, "usd": 0.08692475000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5563, "output_tokens": 122, "searches": 0, "total_tokens": 5685, "usd": 0.00472125}
+{"event": "reserve", "total_tokens": 29208, "usd": 0.086906}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5546, "output_tokens": 48, "searches": 0, "total_tokens": 5594, "usd": 0.0043755}
+{"event": "reserve", "total_tokens": 29222, "usd": 0.08691650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 83, "searches": 0, "total_tokens": 5643, "usd": 0.0045435}
+{"event": "reserve", "total_tokens": 29207, "usd": 0.08690525}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5546, "output_tokens": 159, "searches": 0, "total_tokens": 5705, "usd": 0.004875}
+{"event": "reserve", "total_tokens": 29229, "usd": 0.08692175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5565, "output_tokens": 160, "searches": 0, "total_tokens": 5725, "usd": 0.00489375}
+{"event": "reserve", "total_tokens": 29196, "usd": 0.086897}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 91, "searches": 0, "total_tokens": 5622, "usd": 0.00455775}
+{"event": "reserve", "total_tokens": 29199, "usd": 0.08689925}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5536, "output_tokens": 59, "searches": 0, "total_tokens": 5595, "usd": 0.0044175}
+{"event": "reserve", "total_tokens": 29238, "usd": 0.0869285}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5563, "output_tokens": 88, "searches": 0, "total_tokens": 5651, "usd": 0.00456825}
+{"event": "reserve", "total_tokens": 29257, "usd": 0.08694275}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5581, "output_tokens": 282, "searches": 0, "total_tokens": 5863, "usd": 0.00545475}
+{"event": "reserve", "total_tokens": 29229, "usd": 0.08692175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5559, "output_tokens": 88, "searches": 0, "total_tokens": 5647, "usd": 0.00456525}
+{"event": "reserve", "total_tokens": 29245, "usd": 0.08693375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5570, "output_tokens": 155, "searches": 0, "total_tokens": 5725, "usd": 0.004875}
+{"event": "reserve", "total_tokens": 29262, "usd": 0.08694650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5583, "output_tokens": 84, "searches": 0, "total_tokens": 5667, "usd": 0.00456525}
+{"event": "reserve", "total_tokens": 29222, "usd": 0.08691650000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5554, "output_tokens": 598, "searches": 0, "total_tokens": 6152, "usd": 0.0068565}
+{"event": "reserve", "total_tokens": 29197, "usd": 0.08689775000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5533, "output_tokens": 113, "searches": 0, "total_tokens": 5646, "usd": 0.00465825}
+{"event": "reserve", "total_tokens": 29281, "usd": 0.08696075}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5606, "output_tokens": 313, "searches": 0, "total_tokens": 5919, "usd": 0.005613}
+{"event": "reserve", "total_tokens": 29244, "usd": 0.08693300000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5571, "output_tokens": 296, "searches": 0, "total_tokens": 5867, "usd": 0.00551025}
+{"event": "reserve", "total_tokens": 29198, "usd": 0.0868985}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5537, "output_tokens": 150, "searches": 0, "total_tokens": 5687, "usd": 0.00482775}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5532, "output_tokens": 114, "searches": 0, "total_tokens": 5646, "usd": 0.004662}
+{"event": "reserve", "total_tokens": 29239, "usd": 0.08692925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5570, "output_tokens": 427, "searches": 0, "total_tokens": 5997, "usd": 0.006099}
+{"event": "reserve", "total_tokens": 29210, "usd": 0.0869075}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5545, "output_tokens": 263, "searches": 0, "total_tokens": 5808, "usd": 0.00534225}
+{"event": "reserve", "total_tokens": 29268, "usd": 0.086951}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9907, "output_tokens": 460, "searches": 1, "total_tokens": 10367, "usd": 0.01950025}
+{"event": "reserve", "total_tokens": 29250, "usd": 0.0869375}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5576, "output_tokens": 206, "searches": 0, "total_tokens": 5782, "usd": 0.005109}
+{"event": "reserve", "total_tokens": 29242, "usd": 0.08693150000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9809, "output_tokens": 565, "searches": 1, "total_tokens": 10374, "usd": 0.01989925}
+{"event": "reserve", "total_tokens": 29270, "usd": 0.0869525}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5598, "output_tokens": 337, "searches": 0, "total_tokens": 5935, "usd": 0.005715}
+{"event": "reserve", "total_tokens": 29203, "usd": 0.08690225}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5539, "output_tokens": 105, "searches": 0, "total_tokens": 5644, "usd": 0.00462675}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5543, "output_tokens": 87, "searches": 0, "total_tokens": 5630, "usd": 0.00454875}
+{"event": "reserve", "total_tokens": 29219, "usd": 0.08691425}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5554, "output_tokens": 240, "searches": 0, "total_tokens": 5794, "usd": 0.0052455}
+{"event": "reserve", "total_tokens": 29185, "usd": 0.08688875}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5523, "output_tokens": 81, "searches": 0, "total_tokens": 5604, "usd": 0.00450675}
+{"event": "reserve", "total_tokens": 29229, "usd": 0.08692175}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5561, "output_tokens": 208, "searches": 0, "total_tokens": 5769, "usd": 0.00510675}
+{"event": "reserve", "total_tokens": 29195, "usd": 0.08689625000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5530, "output_tokens": 187, "searches": 0, "total_tokens": 5717, "usd": 0.004989}
+{"event": "reserve", "total_tokens": 29194, "usd": 0.0868955}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5531, "output_tokens": 111, "searches": 0, "total_tokens": 5642, "usd": 0.00464775}
+{"event": "reserve", "total_tokens": 29392, "usd": 0.08704400000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5696, "output_tokens": 1056, "searches": 0, "total_tokens": 6752, "usd": 0.009024}
+{"event": "reserve", "total_tokens": 29208, "usd": 0.086906}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5540, "output_tokens": 278, "searches": 0, "total_tokens": 5818, "usd": 0.005406}
+{"event": "reserve", "total_tokens": 29255, "usd": 0.08694125}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5580, "output_tokens": 228, "searches": 0, "total_tokens": 5808, "usd": 0.005211}
+{"event": "reserve", "total_tokens": 29206, "usd": 0.08690450000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9602, "output_tokens": 306, "searches": 1, "total_tokens": 9908, "usd": 0.018578499999999998}
+{"event": "reserve", "total_tokens": 29282, "usd": 0.0869615}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5599, "output_tokens": 586, "searches": 0, "total_tokens": 6185, "usd": 0.00683625}
+{"event": "reserve", "total_tokens": 29313, "usd": 0.08698475}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9631, "output_tokens": 330, "searches": 1, "total_tokens": 9961, "usd": 0.018708250000000003}
+{"event": "reserve", "total_tokens": 30033, "usd": 0.08752475}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5994, "output_tokens": 3700, "searches": 0, "total_tokens": 9694, "usd": 0.0211455}
+{"event": "reserve", "total_tokens": 29281, "usd": 0.08696075}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5611, "output_tokens": 614, "searches": 0, "total_tokens": 6225, "usd": 0.00697125}
+{"event": "reserve", "total_tokens": 29231, "usd": 0.08692325000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5564, "output_tokens": 474, "searches": 0, "total_tokens": 6038, "usd": 0.006306}
+{"event": "reserve", "total_tokens": 29553, "usd": 0.08716475}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5868, "output_tokens": 1542, "searches": 0, "total_tokens": 7410, "usd": 0.01134}
+{"event": "reserve", "total_tokens": 29227, "usd": 0.08692025}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5560, "output_tokens": 184, "searches": 0, "total_tokens": 5744, "usd": 0.004998}
+{"event": "reserve", "total_tokens": 29294, "usd": 0.0869705}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5620, "output_tokens": 820, "searches": 0, "total_tokens": 6440, "usd": 0.007905}
+{"event": "reserve", "total_tokens": 29328, "usd": 0.086996}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5655, "output_tokens": 752, "searches": 0, "total_tokens": 6407, "usd": 0.00762525}
+{"event": "reserve", "total_tokens": 29363, "usd": 0.08702225000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9869, "output_tokens": 821, "searches": 1, "total_tokens": 10690, "usd": 0.02109625}
+{"event": "reserve", "total_tokens": 29300, "usd": 0.08697500000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 14126, "output_tokens": 671, "searches": 3, "total_tokens": 14797, "usd": 0.043614}
+{"event": "reserve", "total_tokens": 29439, "usd": 0.08707925000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5767, "output_tokens": 355, "searches": 0, "total_tokens": 6122, "usd": 0.00592275}
+{"event": "reserve", "total_tokens": 29271, "usd": 0.08695325000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5590, "output_tokens": 404, "searches": 0, "total_tokens": 5994, "usd": 0.0060105}
+{"event": "reserve", "total_tokens": 29210, "usd": 0.0869075}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5540, "output_tokens": 70, "searches": 0, "total_tokens": 5610, "usd": 0.00447}
+{"event": "reserve", "total_tokens": 29284, "usd": 0.086963}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9946, "output_tokens": 476, "searches": 1, "total_tokens": 10422, "usd": 0.0196015}
+{"event": "reserve", "total_tokens": 29239, "usd": 0.08692925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 9794, "output_tokens": 721, "searches": 1, "total_tokens": 10515, "usd": 0.02059}
+{"event": "reserve", "total_tokens": 29239, "usd": 0.08692925}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5569, "output_tokens": 232, "searches": 0, "total_tokens": 5801, "usd": 0.00522075}
+{"event": "reserve", "total_tokens": 29254, "usd": 0.0869405}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5575, "output_tokens": 365, "searches": 0, "total_tokens": 5940, "usd": 0.00582375}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5556, "output_tokens": 95, "searches": 0, "total_tokens": 5651, "usd": 0.0045945}
+{"event": "reserve", "total_tokens": 29267, "usd": 0.08695025}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9671, "output_tokens": 394, "searches": 1, "total_tokens": 10065, "usd": 0.01902625}
+{"event": "reserve", "total_tokens": 29314, "usd": 0.08698550000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5640, "output_tokens": 345, "searches": 0, "total_tokens": 5985, "usd": 0.0057825}
+{"event": "reserve", "total_tokens": 29487, "usd": 0.08711525}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5785, "output_tokens": 574, "searches": 0, "total_tokens": 6359, "usd": 0.00692175}
+{"event": "reserve", "total_tokens": 29247, "usd": 0.08693525}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5576, "output_tokens": 495, "searches": 0, "total_tokens": 6071, "usd": 0.0064095}
+{"event": "reserve", "total_tokens": 29232, "usd": 0.086924}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5563, "output_tokens": 441, "searches": 0, "total_tokens": 6004, "usd": 0.00615675}
+{"event": "reserve", "total_tokens": 29224, "usd": 0.08691800000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5563, "output_tokens": 164, "searches": 0, "total_tokens": 5727, "usd": 0.00491025}
+{"event": "reserve", "total_tokens": 29344, "usd": 0.087008}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5658, "output_tokens": 836, "searches": 0, "total_tokens": 6494, "usd": 0.0080055}
+{"event": "reserve", "total_tokens": 29292, "usd": 0.086969}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9870, "output_tokens": 475, "searches": 1, "total_tokens": 10345, "usd": 0.019540000000000002}
+{"event": "reserve", "total_tokens": 29216, "usd": 0.086912}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5553, "output_tokens": 335, "searches": 0, "total_tokens": 5888, "usd": 0.00567225}
+{"event": "reserve", "total_tokens": 29301, "usd": 0.08697575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5622, "output_tokens": 150, "searches": 0, "total_tokens": 5772, "usd": 0.0048915}
+{"event": "reserve", "total_tokens": 29251, "usd": 0.08693825000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5583, "output_tokens": 473, "searches": 0, "total_tokens": 6056, "usd": 0.00631575}
+{"event": "reserve", "total_tokens": 29328, "usd": 0.086996}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5650, "output_tokens": 275, "searches": 0, "total_tokens": 5925, "usd": 0.005475}
+{"event": "reserve", "total_tokens": 29394, "usd": 0.0870455}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9858, "output_tokens": 602, "searches": 1, "total_tokens": 10460, "usd": 0.020102500000000002}
+{"event": "reserve", "total_tokens": 29388, "usd": 0.08704100000000001}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5701, "output_tokens": 641, "searches": 0, "total_tokens": 6342, "usd": 0.00716025}
+{"event": "reserve", "total_tokens": 29240, "usd": 0.08693000000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 5575, "output_tokens": 652, "searches": 0, "total_tokens": 6227, "usd": 0.00711525}
+{"event": "reserve", "total_tokens": 29301, "usd": 0.08697575}
+{"cached_tokens": 5504, "call": "response", "event": "charge", "input_tokens": 5627, "output_tokens": 154, "searches": 0, "total_tokens": 5781, "usd": 0.00491325}
+{"event": "reserve", "total_tokens": 29316, "usd": 0.08698700000000001}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 9628, "output_tokens": 5288, "searches": 1, "total_tokens": 14916, "usd": 0.041017}
+{"event": "reserve", "total_tokens": 34914, "usd": 0.0911855}
+{"cached_tokens": 4480, "call": "response", "event": "charge", "input_tokens": 10928, "output_tokens": 4791, "searches": 0, "total_tokens": 15719, "usd": 0.0297555}
+{"event": "reserve", "total_tokens": 29317, "usd": 0.08698775}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 9711, "output_tokens": 1175, "searches": 1, "total_tokens": 10886, "usd": 0.02257075}
+{"event": "reserve", "total_tokens": 29270, "usd": 0.0869525}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5594, "output_tokens": 170, "searches": 0, "total_tokens": 5764, "usd": 0.0049605}
+{"event": "reserve", "total_tokens": 29293, "usd": 0.08696975}
+{"cached_tokens": 0, "call": "response", "event": "charge", "input_tokens": 5616, "output_tokens": 372, "searches": 0, "total_tokens": 5988, "usd": 0.005886}
