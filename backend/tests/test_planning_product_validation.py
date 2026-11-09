@@ -3,14 +3,96 @@ import pytest
 from app.core.paths import repository_root
 from app.planning.final_scope_reference import FinalScopeReferencePlanner
 from app.planning.final_scope_validator import FinalPlanningValidator
+from app.planning.product_path import product_dish_kind_checks
 from app.schemas.planning_v2 import FinalPlanningProblem
 
 FIXTURE = repository_root() / "data/fixtures/planning-v2/final-scope-multislot.json"
 
 
+def test_product_acceptance_rechecks_same_meal_dish_kinds():
+    from types import SimpleNamespace
+
+    problem = SimpleNamespace(
+        recipes=[
+            SimpleNamespace(recipe_id="egg-rice", title="Egg Fried Rice"),
+            SimpleNamespace(recipe_id="chicken-rice", title="Chicken Fried Rice"),
+        ],
+        slots=[SimpleNamespace(slot_id="dinner", composition=["main", "side"])],
+    )
+    assignments = [
+        SimpleNamespace(slot_id="dinner", recipe_id="egg-rice"),
+        SimpleNamespace(slot_id="dinner", recipe_id="chicken-rice"),
+    ]
+    checks = product_dish_kind_checks(problem, assignments)
+    assert [(check.code, check.status, check.scope_id) for check in checks] == [
+        ("meal_duplicate_dish_kind", "failed", "dinner")
+    ]
+
+
 def sample():
     problem = FinalPlanningProblem.model_validate_json(FIXTURE.read_text(encoding="utf-8"))
     return problem, FinalScopeReferencePlanner().solve(problem)
+
+
+def test_product_builder_and_validator_accept_a_mixed_package_line():
+    problem, solution = sample()
+    original = next(line for line in solution.shopping if line.remaining_quantity and line.unit)
+    base = next(product for product in problem.products if product.product_id == original.selected_product_id)
+    demand = original.remaining_quantity
+    products = [
+        base.model_copy(update={"product_id": "large", "package_quantity": demand * 0.6, "price_sgd": 4}),
+        base.model_copy(update={"product_id": "small", "package_quantity": demand * 0.4, "price_sgd": 3}),
+    ]
+    packet = problem.model_copy(
+        update={
+            "products": [product for product in problem.products if product.ingredient_id != base.ingredient_id]
+            + products
+        }
+    )
+    line = next(
+        item
+        for item in FinalScopeReferencePlanner()._build_shopping(packet, solution.assignments)
+        if item.ingredient_id == base.ingredient_id and item.unit == base.package_unit and item.trip == original.trip
+    )
+    assert line.selected_product_id is None and line.packages == 0
+    assert [(item.product_id, item.packages) for item in line.allocations] == [("large", 1), ("small", 1)]
+    assert line.purchase_cost_sgd == 7 and line.surplus_quantity == 0
+
+    checks, total, complete = FinalPlanningValidator._product_checks(packet, [line])
+    assert checks == [] and total == 7 and complete
+    assert FinalPlanningValidator._shopping_checks(packet, {}, [line]) == []
+
+
+@pytest.mark.parametrize(
+    "update,code",
+    [
+        ({"purchase_cost_sgd": 6}, "purchase_cost"),
+        ({"surplus_quantity": 1}, "surplus_quantity"),
+        ({"allocation_count": 1}, "insufficient_coverage"),
+        ({"selected_product_id": "large", "packages": 1}, "allocation_compatibility"),
+    ],
+)
+def test_mixed_package_validation_rejects_inconsistent_output(update, code):
+    problem, _ = sample()
+    source = problem.products[0]
+    products = [
+        source.model_copy(update={"product_id": "large", "package_quantity": 600, "price_sgd": 4}),
+        source.model_copy(update={"product_id": "small", "package_quantity": 400, "price_sgd": 3}),
+    ]
+    line = FinalScopeReferencePlanner._choose_product(
+        ingredient_id=source.ingredient_id,
+        required=1000,
+        unit=source.package_unit,
+        deduction=0,
+        remaining=1000,
+        products=products,
+    )
+    if "allocation_count" in update:
+        line = line.model_copy(update={"allocations": line.allocations[: update["allocation_count"]]})
+    else:
+        line = line.model_copy(update=update)
+    checks, _, _ = FinalPlanningValidator._product_checks(problem.model_copy(update={"products": products}), [line])
+    assert any(check.code == code for check in checks)
 
 
 def test_forged_zero_prices_cannot_hide_budget_failure():

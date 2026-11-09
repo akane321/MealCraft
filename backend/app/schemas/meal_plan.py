@@ -112,6 +112,13 @@ def week_shape(constraints: dict) -> MealPlanShape:
     return MealPlanShape.model_validate({"meals": {"dinner": roles}})
 
 
+class PriorMealCompletion(BaseModel):
+    """Small deterministic history input: the latest day this household completed a recipe."""
+
+    recipe_id: int = Field(gt=0)
+    completed_on: date
+
+
 class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     nutrition_constraints: list[ProductNutritionTarget] = Field(default_factory=list, max_length=12)
     nutrition_guard_band: float = Field(default=0.25, ge=0, le=1, allow_inf_nan=False)
@@ -132,6 +139,8 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
     avoid_recipe_ids: list[int] = Field(default_factory=list, max_length=200)
     # The household's members, rules and limits (layer 08); None plans exactly as before.
     household: HouseholdPlanning | None = None
+    # Supplied from persisted entries by the live product service. Empty means no recency signal.
+    prior_completions: list[PriorMealCompletion] = Field(default_factory=list, max_length=500)
 
     @model_serializer(mode="wrap")
     def _no_household_key(self, handler):
@@ -142,6 +151,8 @@ class WeeklyMealPlanRequest(RecipeRecommendationRequest):
             data.pop("household", None)
         if self.planning_preferences == PlanningPreferences() and isinstance(data, dict):
             data.pop("planning_preferences", None)
+        if not self.prior_completions and isinstance(data, dict):
+            data.pop("prior_completions", None)
         return data
 
     @model_validator(mode="after")

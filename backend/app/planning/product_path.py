@@ -87,7 +87,7 @@ from app.schemas.planning_v2 import (
     PlanningSlot,
     structured,
 )
-from app.schemas.product import GroceryLineEstimate
+from app.schemas.product import GroceryLineEstimate, GroceryPackageAllocation
 from app.schemas.recipe import RecipeListItemResponse
 from app.services.recipe import RecipeService
 
@@ -897,7 +897,12 @@ class ProductPlanningEngine:
             if ablated("retrieval_off") and losses:
                 # Evaluation (#397): every dish ranks alike, at the mean, so the search adds no relevance back.
                 losses = dict.fromkeys(losses, fmean(losses.values()))
-            trace["ranking"] = {"policy": "recommendation-score-v1", "digest": digest(losses)}
+            trace["ranking"] = {
+                "policy": "recommendation-score-v1",
+                "recency_policy": "cross-week-recency-v1",
+                "completion_count": len(constraints.prior_completions),
+                "digest": digest(losses),
+            }
             titles = {r.recipe.slug: r.recipe.title for r in recommendations}
 
             # Evaluation (#397): no variety term; the household's own repeat limits still hold.
@@ -1312,8 +1317,29 @@ class ProductPlanningEngine:
         perishables = perishable_ingredients(by_id.values()) if household_rules else set()
         lines = []
         for row in shopping:
+            selection = row.allocations or (
+                [type("LegacyAllocation", (), {"product_id": row.selected_product_id, "packages": row.packages})]
+                if row.selected_product_id is not None and row.packages > 0
+                else []
+            )
+            allocated = [
+                GroceryPackageAllocation(
+                    product=observations[item.product_id],
+                    packages_required=item.packages,
+                    purchase_cost_sgd=round(observations[item.product_id].price_sgd * item.packages, 2),
+                    evidence=provenance.get(item.product_id),
+                    retailer=retailer_of(observations[item.product_id]),
+                )
+                for item in selection
+            ]
             product = observations.get(row.selected_product_id)
-            consumed = (row.remaining_quantity * product.price_sgd / product.package_size) if product else 0.0
+            consumed = (
+                row.remaining_quantity * row.purchase_cost_sgd / (row.remaining_quantity + row.surplus_quantity)
+                if row.remaining_quantity is not None
+                and row.surplus_quantity is not None
+                and row.remaining_quantity + row.surplus_quantity > 0
+                else 0.0
+            )
             lines.append(
                 GroceryLineEstimate(
                     ingredient_name=row.ingredient_id,
@@ -1333,6 +1359,7 @@ class ProductPlanningEngine:
                     retailer=retailer_of(product) if product is not None else None,
                     shopping_trip=row.trip,
                     perishable=True if row.ingredient_id in perishables else None,
+                    allocations=allocated,
                 )
             )
         budget_check = next((c for c in report.checks if c.code == "purchase_budget"), None)
@@ -1463,6 +1490,7 @@ def product_validation(validator, problem, assignments, shopping, *, minimum_dis
     """The same complete product acceptance boundary for beam and every improvement move."""
     report = validator.validate(problem, assignments, shopping)
     extra = per_meal_budget_checks(problem, assignments, per_meal_budget) if per_meal_budget is not None else []
+    extra.extend(product_dish_kind_checks(problem, assignments))
     if minimum_distinct_dishes:
         extra.append(
             PlanningConstraintCheck(
@@ -1482,6 +1510,28 @@ def product_validation(validator, problem, assignments, shopping, *, minimum_dis
         # Evaluation (#397): every built week is accepted; the checks and totals stay for the scorer.
         report.status = "passed"
     return report
+
+
+def product_dish_kind_checks(problem, assignments):
+    """Recompute the product beam's same-meal kind rule from returned output."""
+    recipes = {recipe.recipe_id: recipe for recipe in problem.recipes}
+    slots = {slot.slot_id: slot for slot in problem.slots}
+    by_meal = defaultdict(list)
+    checks = []
+    for assignment in assignments:
+        if assignment.recipe_id in recipes and assignment.slot_id in slots:
+            by_meal[assignment.slot_id].append(dish_kind(recipes[assignment.recipe_id].title))
+    for slot_id, kinds in by_meal.items():
+        if slots[slot_id].composition is not None and len(kinds) != len(set(kinds)):
+            checks.append(
+                PlanningConstraintCheck(
+                    code="meal_duplicate_dish_kind",
+                    status="failed",
+                    scope_id=slot_id,
+                    detail="Two product dishes in one composed meal have the same dish kind.",
+                )
+            )
+    return checks
 
 
 def per_meal_budget_checks(problem, assignments, budget):

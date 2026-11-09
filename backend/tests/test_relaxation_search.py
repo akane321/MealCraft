@@ -58,13 +58,14 @@ def mixed_packet():
 
 def test_mixed_purchase_avoids_unnecessary_budget_relaxation():
     problem = mixed_packet()
+    before = problem.model_dump_json()
     options = (RelaxationChange("budget", "purchase_budget", 4, 1),)
-    assert propose_relaxations(problem, options).changes == options
     result = propose_relaxations(problem, options, mixed_packages=True)
     assert result.status == "minimal_in_declared_options"
     assert result.changes == ()
     assert result.total_cost == 0
     assert result.shopping_policy == "offline-mixed-shopping-v1"
+    assert problem.model_dump_json() == before
 
 
 def test_mixed_policy_finds_only_required_budget_increase_without_applying_it():

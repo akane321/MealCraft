@@ -27,6 +27,18 @@ LOWER_CALORIE_UPPER_RANGE_KCAL = 1000.0
 # The planner searches at most this many recommendations. They are the best
 # scored within budget across the whole catalog, not the first rows by id.
 CANDIDATE_LIMIT = 500
+RECENCY_PENALTY_POINTS = 10.0
+RECENCY_FADE_DAYS = 21
+
+
+def cross_week_recency_penalty(recipe_id: int, constraints: RecipeRecommendationRequest) -> float:
+    """A bounded linear soft penalty, strongest on completion day and zero after three weeks (ADR-0073)."""
+    history = getattr(constraints, "prior_completions", ())
+    dates = [item.completed_on for item in history if item.recipe_id == recipe_id]
+    if not dates:
+        return 0.0
+    age_days = max(0, (constraints.start_date - max(dates)).days)
+    return RECENCY_PENALTY_POINTS * max(0.0, 1.0 - age_days / RECENCY_FADE_DAYS)
 
 
 @dataclass(frozen=True)
@@ -221,6 +233,10 @@ class RecipeRecommendationEngine:
         total_score = sum(score * weight for score, weight in weighted_scores) / sum(
             weight for _, weight in weighted_scores
         )
+        recency_penalty = cross_week_recency_penalty(recipe.id, constraints)
+        total_score = max(0.0, total_score - recency_penalty)
+        if recency_penalty:
+            reasons.append(f"Recent household completion applies a {recency_penalty:.1f}-point soft ranking penalty.")
 
         return RecipeRecommendationResponse(
             recipe=RecipeListItemResponse.model_validate(recipe),

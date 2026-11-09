@@ -1,0 +1,445 @@
+{
+  "schema_version": "snapshot-package-policy-comparison-v1",
+  "generator": "scripts/compare_snapshot_packaging.py",
+  "snapshot_version": "fairprice-v2",
+  "comparison": "same ingredient, demand, availability, package sizes and observed prices",
+  "fixed_policy": "minimum checkout using repetitions of one product type",
+  "mixed_policy": "exact bounded combination of all valid in-stock product types",
+  "demand_source": "synthetic developer grid derived from observed package sizes; not household demand",
+  "claim_scope": "matched package-policy diagnostic; not a plan optimum or real-catalog five-percent result",
+  "row_count": 3108,
+  "skipped_count": 0,
+  "mixed_saving_row_count": 227,
+  "same_cost_row_count": 2881,
+  "total_savings_sgd": "771.85",
+  "max_savings_sgd": "56.59",
+  "rows_sha256": "a08e4ee1d39ecf6464f88b39f3533e284a746085a295f045b7879a7c4d1f0629",
+  "largest_savings_rows": [
+    {
+      "ingredient_id": "grand_marnier",
+      "demand_grams": "748.2",
+      "fixed_product_cost_sgd": "138.60",
+      "mixed_package_cost_sgd": "82.01",
+      "savings_sgd": "56.59",
+      "mixed_allocations": [
+        [
+          "90227019",
+          1
+        ],
+        [
+          "90227050",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "vanilla_bean",
+      "demand_grams": "119.0",
+      "fixed_product_cost_sgd": "183.00",
+      "mixed_package_cost_sgd": "131.7",
+      "savings_sgd": "51.30",
+      "mixed_allocations": [
+        [
+          "90087545",
+          1
+        ],
+        [
+          "90223613",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "cod",
+      "demand_grams": "1075.0",
+      "fixed_product_cost_sgd": "134.43",
+      "mixed_package_cost_sgd": "105.44",
+      "savings_sgd": "28.99",
+      "mixed_allocations": [
+        [
+          "90098736",
+          1
+        ],
+        [
+          "90143953",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "macadamia_nut",
+      "demand_grams": "1035.0",
+      "fixed_product_cost_sgd": "60.58",
+      "mixed_package_cost_sgd": "34.88",
+      "savings_sgd": "25.70",
+      "mixed_allocations": [
+        [
+          "13026050",
+          1
+        ],
+        [
+          "90224497",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "coconut_oil",
+      "demand_grams": "1854.0",
+      "fixed_product_cost_sgd": "59.8",
+      "mixed_package_cost_sgd": "36.98",
+      "savings_sgd": "22.82",
+      "mixed_allocations": [
+        [
+          "13073726",
+          1
+        ],
+        [
+          "90034804",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "parm_or_romano",
+      "demand_grams": "1075.0",
+      "fixed_product_cost_sgd": "55.25",
+      "mixed_package_cost_sgd": "36.9",
+      "savings_sgd": "18.35",
+      "mixed_allocations": [
+        [
+          "13242910",
+          1
+        ],
+        [
+          "90215710",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "parmesan",
+      "demand_grams": "1075.0",
+      "fixed_product_cost_sgd": "55.25",
+      "mixed_package_cost_sgd": "36.9",
+      "savings_sgd": "18.35",
+      "mixed_allocations": [
+        [
+          "13242910",
+          1
+        ],
+        [
+          "90215710",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "vodka",
+      "demand_grams": "833.0",
+      "fixed_product_cost_sgd": "110.52",
+      "mixed_package_cost_sgd": "92.35",
+      "savings_sgd": "18.17",
+      "mixed_allocations": [
+        [
+          "199936",
+          1
+        ],
+        [
+          "352683",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "broth_tomato_juice",
+      "demand_grams": "2593.5",
+      "fixed_product_cost_sgd": "39.38",
+      "mixed_package_cost_sgd": "24.59",
+      "savings_sgd": "14.79",
+      "mixed_allocations": [
+        [
+          "90217607",
+          1
+        ],
+        [
+          "90232761",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "pine_nut",
+      "demand_grams": "515.0",
+      "fixed_product_cost_sgd": "53.7",
+      "mixed_package_cost_sgd": "39.21",
+      "savings_sgd": "14.49",
+      "mixed_allocations": [
+        [
+          "90121364",
+          1
+        ],
+        [
+          "90121365",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "sake",
+      "demand_grams": "1900.0",
+      "fixed_product_cost_sgd": "80.0",
+      "mixed_package_cost_sgd": "66.0",
+      "savings_sgd": "14.0",
+      "mixed_allocations": [
+        [
+          "12313792",
+          1
+        ],
+        [
+          "13020635",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "arugula",
+      "demand_grams": "530.0",
+      "fixed_product_cost_sgd": "33.98",
+      "mixed_package_cost_sgd": "20.99",
+      "savings_sgd": "12.99",
+      "mixed_allocations": [
+        [
+          "90103437",
+          1
+        ],
+        [
+          "90147060",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "lemon_extract",
+      "demand_grams": "501.0",
+      "fixed_product_cost_sgd": "56.78",
+      "mixed_package_cost_sgd": "44.89",
+      "savings_sgd": "11.89",
+      "mixed_allocations": [
+        [
+          "90224697",
+          1
+        ],
+        [
+          "90224734",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "rum",
+      "demand_grams": "808.5",
+      "fixed_product_cost_sgd": "100.98",
+      "mixed_package_cost_sgd": "89.17",
+      "savings_sgd": "11.81",
+      "mixed_allocations": [
+        [
+          "124412",
+          1
+        ],
+        [
+          "13153970",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "rum",
+      "demand_grams": "951.0",
+      "fixed_product_cost_sgd": "100.98",
+      "mixed_package_cost_sgd": "89.17",
+      "savings_sgd": "11.81",
+      "mixed_allocations": [
+        [
+          "124412",
+          1
+        ],
+        [
+          "13153970",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "dried_shiitake",
+      "demand_grams": "525.0",
+      "fixed_product_cost_sgd": "32.0",
+      "mixed_package_cost_sgd": "21.2",
+      "savings_sgd": "10.8",
+      "mixed_allocations": [
+        [
+          "90034240",
+          1
+        ],
+        [
+          "90218593",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "chia",
+      "demand_grams": "1050.0",
+      "fixed_product_cost_sgd": "45.21",
+      "mixed_package_cost_sgd": "34.93",
+      "savings_sgd": "10.28",
+      "mixed_allocations": [
+        [
+          "13084318",
+          1
+        ],
+        [
+          "90127114",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "red_wine",
+      "demand_grams": "835.5",
+      "fixed_product_cost_sgd": "37.0",
+      "mixed_package_cost_sgd": "27.5",
+      "savings_sgd": "9.5",
+      "mixed_allocations": [
+        [
+          "13182943",
+          1
+        ],
+        [
+          "90039340",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "prune",
+      "demand_grams": "1050.0",
+      "fixed_product_cost_sgd": "27.75",
+      "mixed_package_cost_sgd": "19.15",
+      "savings_sgd": "8.60",
+      "mixed_allocations": [
+        [
+          "13270095",
+          1
+        ],
+        [
+          "90221711",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "red_snapper",
+      "demand_grams": "1075.0",
+      "fixed_product_cost_sgd": "33.6",
+      "mixed_package_cost_sgd": "25.12",
+      "savings_sgd": "8.48",
+      "mixed_allocations": [
+        [
+          "90148215",
+          1
+        ],
+        [
+          "90254101",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "durian",
+      "demand_grams": "850.0",
+      "fixed_product_cost_sgd": "75.0",
+      "mixed_package_cost_sgd": "66.79",
+      "savings_sgd": "8.21",
+      "mixed_allocations": [
+        [
+          "90132364",
+          1
+        ],
+        [
+          "90223968",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "white_wine",
+      "demand_grams": "843.0",
+      "fixed_product_cost_sgd": "33.90",
+      "mixed_package_cost_sgd": "25.95",
+      "savings_sgd": "7.95",
+      "mixed_allocations": [
+        [
+          "13182942",
+          1
+        ],
+        [
+          "90039360",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "glutinous_rice",
+      "demand_grams": "5500.0",
+      "fixed_product_cost_sgd": "23.0",
+      "mixed_package_cost_sgd": "15.53",
+      "savings_sgd": "7.47",
+      "mixed_allocations": [
+        [
+          "13215764",
+          1
+        ],
+        [
+          "90254025",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "grapeseed_oil",
+      "demand_grams": "1036.0",
+      "fixed_product_cost_sgd": "29.0",
+      "mixed_package_cost_sgd": "21.8",
+      "savings_sgd": "7.2",
+      "mixed_allocations": [
+        [
+          "11448142",
+          1
+        ],
+        [
+          "90040576",
+          1
+        ]
+      ]
+    },
+    {
+      "ingredient_id": "powdered_milk",
+      "demand_grams": "2750.0",
+      "fixed_product_cost_sgd": "58.08",
+      "mixed_package_cost_sgd": "50.94",
+      "savings_sgd": "7.14",
+      "mixed_allocations": [
+        [
+          "13036834",
+          1
+        ],
+        [
+          "13165664",
+          1
+        ]
+      ]
+    }
+  ],
+  "snapshot_sha256": "2cfd10e150fd38cb448cbd1da2eff9f2f59369c202dce18648dc119f4f1beb91"
+}

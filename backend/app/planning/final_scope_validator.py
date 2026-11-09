@@ -19,6 +19,8 @@ from app.planning.meal_composition import (
     structured_slot,
 )
 from app.planning.member_coverage import dish_base_servings, servable
+from app.planning.package_optimizer import PackageAllocation, PackageResult
+from app.planning.package_validator import validate_packages
 from app.schemas.planning_v2 import (
     CheckStatus,
     FinalPlanningProblem,
@@ -685,9 +687,15 @@ class FinalPlanningValidator:
             ):
                 if not matches(actual, expected):
                     issue(code, ingredient, f"Submitted quantity {actual} differs from recomputed quantity {expected}.")
-            products = [product for product in problem.products if product.product_id == line.selected_product_id]
-            if len(products) == 1 and products[0].package_unit == unit:
-                coverage = products[0].package_quantity * line.packages
+            allocations = FinalPlanningValidator._line_allocations(line)
+            selected = [
+                product
+                for allocation in allocations
+                for product in problem.products
+                if product.product_id == allocation.product_id
+            ]
+            if len(selected) == len(allocations) and allocations and all(p.package_unit == unit for p in selected):
+                coverage = sum(p.package_quantity * a.packages for p, a in zip(selected, allocations, strict=True))
                 if not isfinite(coverage) or coverage + 1e-9 < remaining:
                     issue("demand_coverage", ingredient, "Packages do not cover independently recomputed demand.")
                 if not matches(line.surplus_quantity, coverage - remaining):
@@ -716,24 +724,88 @@ class FinalPlanningValidator:
             def reject(code: str, detail: str, scope_id: str = line.ingredient_id) -> None:
                 checks.append(FinalPlanningValidator._failed(code, detail, scope_id))
 
-            if line.selected_product_id is None:
-                if line.packages != 0 or line.purchase_cost_sgd != 0:
-                    reject("product_selection", "A purchase requires an identified product.")
+            if not line.allocations:
+                if line.selected_product_id is None:
+                    if line.packages != 0 or line.purchase_cost_sgd != 0:
+                        reject("product_selection", "A purchase requires an identified product.")
+                        complete = False
+                    if line.remaining_quantity is None or line.remaining_quantity > 0:
+                        complete = False
+                    continue
+                matches = products[line.selected_product_id]
+                if len(matches) != 1:
+                    reject("product_identity", "Selected product must identify exactly one snapshot record.")
                     complete = False
-                if line.remaining_quantity is None or line.remaining_quantity > 0:
+                    continue
+                product = matches[0]
+                if not isfinite(product.price_sgd) or not isfinite(product.package_quantity):
+                    reject("product_numeric", "Snapshot price and package quantity must be finite.")
                     complete = False
+                    continue
+                expected = round(product.price_sgd * line.packages, 2)
+                if not isfinite(expected) or not isfinite(total + expected):
+                    reject("purchase_numeric", "Package cost or running total exceeded finite arithmetic.")
+                    complete = False
+                    continue
+                total += expected
+                if not isfinite(line.purchase_cost_sgd) or abs(line.purchase_cost_sgd - expected) > 0.005:
+                    checks.append(
+                        PlanningConstraintCheck(
+                            code="purchase_cost",
+                            status="failed",
+                            scope_id=line.ingredient_id,
+                            actual=line.purchase_cost_sgd,
+                            limit=expected,
+                            detail="Submitted cost differs from snapshot price multiplied by packages.",
+                        )
+                    )
+                if not product.available:
+                    reject("product_available", "Selected product is unavailable in the snapshot.")
+                if problem.requires_halal and needs_certification(line.ingredient_id) and not product.halal_certified:
+                    reject("halal_product", "A meat line of a halal household needs a halal-certified product.")
+                if product.ingredient_id != line.ingredient_id:
+                    reject("product_ingredient", "Selected product belongs to a different ingredient.")
+                if product.package_unit != line.unit:
+                    reject("product_unit", "Package and demand units are incompatible.")
+                elif (
+                    line.remaining_quantity is not None
+                    and product.package_quantity * line.packages + 0.0005 < line.remaining_quantity
+                ):
+                    reject("package_coverage", "Purchased packages do not cover the stated remaining demand.")
                 continue
-            matches = products[line.selected_product_id]
-            if len(matches) != 1:
-                reject("product_identity", "Selected product must identify exactly one snapshot record.")
+
+            allocations = FinalPlanningValidator._line_allocations(line)
+            if line.selected_product_id is not None or line.packages != 0:
+                reject("allocation_compatibility", "A mixed purchase must not claim one legacy selected product.")
+            result = PackageResult(
+                status="optimal",
+                allocations=tuple(allocations),
+                purchase_cost_sgd=line.purchase_cost_sgd,
+                supplied_quantity=(line.remaining_quantity or 0) + (line.surplus_quantity or 0),
+                surplus_quantity=line.surplus_quantity,
+            )
+            errors = validate_packages(
+                line.ingredient_id, line.remaining_quantity or 0, line.unit or "", result, problem.products
+            )
+            for code in errors:
+                reject(
+                    code if code != "purchase_cost" else "purchase_cost", f"Mixed-package validation failed: {code}."
+                )
+            identity_errors = {"product_identity", "invalid_product_numbers"}.intersection(errors)
+            if identity_errors:
                 complete = False
-                continue
-            product = matches[0]
-            if not isfinite(product.price_sgd) or not isfinite(product.package_quantity):
-                reject("product_numeric", "Snapshot price and package quantity must be finite.")
-                complete = False
-                continue
-            expected = round(product.price_sgd * line.packages, 2)
+            expected = 0.0
+            for allocation in allocations:
+                matches = products[allocation.product_id]
+                if len(matches) != 1:
+                    continue
+                product = matches[0]
+                expected += product.price_sgd * allocation.packages
+                if not product.available:
+                    reject("product_available", "Selected product is unavailable in the snapshot.")
+                if problem.requires_halal and needs_certification(line.ingredient_id) and not product.halal_certified:
+                    reject("halal_product", "A meat line of a halal household needs a halal-certified product.")
+            expected = round(expected, 2)
             if not isfinite(expected) or not isfinite(total + expected):
                 reject("purchase_numeric", "Package cost or running total exceeded finite arithmetic.")
                 complete = False
@@ -750,19 +822,15 @@ class FinalPlanningValidator:
                         detail="Submitted cost differs from snapshot price multiplied by packages.",
                     )
                 )
-            if not product.available:
-                reject("product_available", "Selected product is unavailable in the snapshot.")
-            if problem.requires_halal and needs_certification(line.ingredient_id) and not product.halal_certified:
-                reject("halal_product", "A meat line of a halal household needs a halal-certified product.")
-            if product.ingredient_id != line.ingredient_id:
-                reject("product_ingredient", "Selected product belongs to a different ingredient.")
-            if product.package_unit != line.unit:
-                reject("product_unit", "Package and demand units are incompatible.")
-            elif line.remaining_quantity is not None:
-                coverage = product.package_quantity * line.packages
-                if coverage + 0.0005 < line.remaining_quantity:
-                    reject("package_coverage", "Purchased packages do not cover the stated remaining demand.")
         return checks, round(total, 2), complete
+
+    @staticmethod
+    def _line_allocations(line: PlanningShoppingSelection) -> tuple[PackageAllocation, ...]:
+        if line.allocations:
+            return tuple(PackageAllocation(item.product_id, item.packages) for item in line.allocations)
+        if line.selected_product_id is not None and line.packages > 0:
+            return (PackageAllocation(line.selected_product_id, line.packages),)
+        return ()
 
     @staticmethod
     def _shopping_checks(
@@ -781,7 +849,7 @@ class FinalPlanningValidator:
                         detail="Required quantity or unit could not be normalized.",
                     )
                 )
-            elif line.remaining_quantity > 0 and line.selected_product_id is None:
+            elif line.remaining_quantity > 0 and not FinalPlanningValidator._line_allocations(line):
                 checks.append(
                     PlanningConstraintCheck(
                         code="product_mapping",
@@ -790,7 +858,10 @@ class FinalPlanningValidator:
                         detail="No compatible available product was selected.",
                     )
                 )
-            elif line.remaining_quantity > 0 and line.packages <= 0:
+            elif (
+                line.remaining_quantity > 0
+                and sum(allocation.packages for allocation in FinalPlanningValidator._line_allocations(line)) <= 0
+            ):
                 checks.append(
                     FinalPlanningValidator._failed(
                         "package_coverage",

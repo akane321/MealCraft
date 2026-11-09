@@ -186,6 +186,35 @@ def test_full_capability_plans_and_stores_a_week_of_composed_dinners(composed_cl
     assert salmon["nutrition_per_person"]["calories_kcal"] == 300  # 500 kcal x 0.6
 
 
+def test_product_path_accepts_valid_fixed_one_and_three_dish_compositions(composed_client):
+    """Ranking, search, validation and response serialization do not assume one fixed dinner size."""
+    from tests.test_planning_product_path import latest_trace
+
+    shapes = (
+        [{"role_id": "main", "courses": ["main"]}],
+        COMPOSITION,
+    )
+    for composition, expected_roles in zip(shapes, ({"main"}, {"main", "vegetable", "soup"}), strict=True):
+        response = composed_client.post(
+            "/api/plans/generate",
+            json={
+                "requires_halal": False,
+                "start_date": "2026-09-28",
+                "day_count": 1,
+                "household_size": 4,
+                "max_cooking_time_minutes": 90,
+                "pricing_mode": "fixture",
+                "meal_composition": composition,
+            },
+        )
+
+        assert response.status_code == 201, response.text
+        assert {dish["role_id"] for dish in response.json()["days"]} == expected_roles
+        _, trace = latest_trace()
+        assert trace["validation"]["status"] == "passed"
+        assert not any(check["hard"] and check["status"] != "passed" for check in trace["validation"]["checks"])
+
+
 def _composed_plan(client):
     response = client.post(
         "/api/plans/generate",

@@ -65,7 +65,7 @@ class SharedObjectiveBeamPlanner(DiversityAwareGreedyPlanner):
                     report = self.candidates.validator.validate(prefix, assignments, shopping)
                     if any(
                         row.remaining_quantity is None
-                        or (row.remaining_quantity > 0 and row.selected_product_id is None)
+                        or (row.remaining_quantity > 0 and row.selected_product_id is None and not row.allocations)
                         for row in shopping
                     ):
                         continue

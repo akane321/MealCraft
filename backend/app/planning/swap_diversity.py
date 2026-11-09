@@ -8,7 +8,12 @@ from app.planning.near_duplicate_groups import NearDuplicatePolicy, classify
 from app.planning.recipe_pair_similarity import RecipePairIndex
 from app.planning.recipe_similarity import recipe_key
 
-SWAP_POLICY = NearDuplicatePolicy("peer-review-dev-v2", 0.2, 0.05, 0.75, fried_rice_cosine_min=0.64)
+# Frozen product-swap acceptance thresholds.  Exploratory calibration remains in
+# scripts/calibrate_recipe_pairs.py and must not silently change these values.
+FROZEN_SWAP_ACCEPTANCE_POLICY = NearDuplicatePolicy(
+    "product-swap-acceptance-v1", 0.2, 0.05, 0.75, fried_rice_cosine_min=0.64
+)
+SWAP_POLICY = FROZEN_SWAP_ACCEPTANCE_POLICY
 
 
 class SwapDiversity:

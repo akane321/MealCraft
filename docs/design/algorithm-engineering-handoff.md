@@ -44,8 +44,11 @@ For developer diagnosis, `scripts/product_household_comparison.py --profile`
 records candidate generation, shopping, validation and objective durations.
 These stage durations are inclusive and overlap, so they must not be summed
 as total runtime. `--cases` selects named developer households and `--steps`
-selects iteration counts; omitted options retain the full comparison. Profiling
-adds overhead and does not enter product traces, scores or stopping rules.
+selects iteration counts. `--widths` selects product beam widths and `--repeats`
+runs matched rounds with a rotated condition order, rather than measuring every
+setting in one block. Omitted options retain the full comparison and current
+default width. Profiling adds overhead and does not enter product traces,
+scores or stopping rules.
 
 ### Replacement near-dish checks
 
@@ -63,13 +66,22 @@ the week. A pair with no vector is unknown: it is neither filtered nor
 penalised, so it does not prove that the replacement is different and the
 repetition penalty does not apply to it. This does not change the
 product improvement objective or its `dish_kind` grouping (ADR-0089).
+For a composed meal, replanning also recomputes the product's title-based
+`dish_kind` invariant and rejects a candidate whose kind is already retained in
+that meal. The 21-dish product preview acceptance requires every swap across
+seven three-role dinners to succeed, so role and kind checks are non-vacuous; a separate 21-confirmation
+regression continues to check persistence and revision semantics.
 
-The explicit developer policy combines title and ingredient overlap with
-vector cosine. A lower cosine threshold applies only when both titles name
+The frozen product-swap acceptance policy is `product-swap-acceptance-v1`:
+title overlap at least 0.20, ingredient overlap at least 0.05 and vector cosine
+at least 0.75. A cosine threshold of 0.64 applies only when both titles name
 fried rice, excluding titles that indicate soup, cakes, noodles, burgers or other listed forms.
-The policy and thresholds live in `SWAP_POLICY`; this title cue is not a
-general understanding of cooking methods. Developer regression agreement is
-not independent accuracy or a frozen near-duplicate acceptance result.
+The policy and thresholds live in `FROZEN_SWAP_ACCEPTANCE_POLICY`; this title
+cue is not a general understanding of cooking methods. The exploratory fit in
+`scripts/calibrate_recipe_pairs.py` remains separate and cannot update the
+frozen product policy. The supplied review did not record reviewer identity and
+left one pair unsure, so these frozen operational thresholds are not independent
+accuracy evidence or full-catalog acceptance.
 
 This document is the implementation handoff for the contributor completing
 MealCraft's planning and validation algorithm. It defines the **accepted final
@@ -202,9 +214,13 @@ remaining_i = Q_i - d_i
 
 Package coverage and purchase budget are:
 
-Multiple `P_i` alternatives express the optimization target and offline mixed
-purchase tools. The integrated product's fixed compatible-product policy is a
-special case, not a claim that mixed-package optimization is already active.
+Multiple `P_i` alternatives are active in the product shopping builder. A
+shopping line keeps the legacy `selected_product_id` and `packages` fields for
+one-product purchases and adds `allocations[{product_id, packages}]` for a
+mixed purchase; mixed lines leave the legacy selection empty so it cannot be
+mistaken for the whole basket. The product response binds each allocation to
+its product, price evidence, retailer, package count and line cost. Checkout
+expands such a line into one cart row per product.
 
 ```text
 sum_(p in P_i) a_ip * y_ip >= remaining_i
@@ -268,6 +284,24 @@ Weights apply only to active, observable dimensions. Missing fields are masked
 from the denominator rather than scored as zero satisfaction. Stable recipe and
 product IDs provide deterministic tie-breaking.
 
+### Cross-week completion recency
+
+The live household planning service supplies the latest persisted completion
+date for each previously completed recipe. Planned and skipped entries do not
+count. For a recipe completed `age_days` before the requested plan start date,
+the recommendation score loses:
+
+```text
+10 * max(0, 1 - max(0, age_days) / 21) points
+```
+
+This `cross-week-recency-v1` policy is linear, bounded to ten score points and
+neutral at 21 days. It is a soft recommendation/ranking input only: eligibility,
+hard repetition minima and maxima, safety, availability, roles, nutrition
+limits, budget checks and independent validation are unchanged. Missing history
+serializes as no input and preserves the previous ranking. The date basis is the
+Singapore completion date and the requested plan start date (ADR-0064/0073).
+
 ## Proposed production algorithm
 
 ### Phase 1: compile and filter
@@ -310,12 +344,23 @@ number of retrieve-repair rounds and preserve every snapshot and rejection.
 Live retrieval is for product operation. Comparative evaluation uses a frozen
 snapshot so all methods receive the same facts.
 
+The developer snapshot package-policy comparison keeps the ingredient, demand,
+availability, package sizes and observed FairPrice prices identical between the
+single-product and mixed-package conditions. Its synthetic package-size-derived
+demands isolate the purchasing policy only; they are not evidence about a full
+household plan or the global catalog minimum.
+
 ### Phase 5: independent validation
 
 The validator receives the immutable problem, selected assignments and Shopping
 List. It recomputes constraints without trusting planner score fields. Each
 check reports code, scope, actual value, limit, margin, hard/soft status and
 detail. A failed soft band remains visible but does not become a hard failure.
+For mixed purchases it independently checks allocation identity and uniqueness,
+whole package counts, ingredient/unit/availability/halal compatibility,
+coverage, supplied and surplus quantities, per-allocation prices, line totals
+and the basket total. This validates arithmetic and consistency, not global
+optimality of the whole plan.
 
 ### Phase 6: infeasibility and relaxation
 
@@ -329,6 +374,19 @@ Use one of these evidence levels in the trace:
 Generate minimal relaxation options by assigning predeclared costs to
 relaxable, non-safety constraints. Allergens and prohibited ingredients are
 never auto-relaxed. The user chooses whether to accept a relaxation.
+
+The product acceptance regressions keep counterfactuals on that boundary:
+allergen, excluded-ingredient and hard nutrition obstructions produce no
+relaxation proposal; missing data and bounded-search exhaustion do not start a
+counterfactual search; a claimed proof is independently rechecked; and only a
+re-solved, independently validated budget or cooking-time witness is presented
+for confirmation. A nearby feasible control is accepted without a refusal.
+
+Meal composition is not fixed to one output size. The population-to-dinner-role
+table is checked at each 1–2, 3–4, 5–6 and 7+ boundary, while the HTTP product
+path has focused accepted cases for fixed one-dish and three-dish dinners. Both
+pass the same independent validator and response serialization; role,
+filling-core and composition rules are unchanged.
 
 ## Interfaces with other modules
 

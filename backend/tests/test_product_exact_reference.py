@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 
 from app.api.routes.meal_plans import build_meal_plan_service
+from app.planning.acceptance_evidence import PriceReferenceDomain, assess_price_gap
 from app.planning.algorithm_cp_sat import SharedScoreCpSat
 from app.planning.algorithm_reference import AnnealingPlanner, EnumeratedReference
 from app.planning.meal_beam import MealBeamPlanner
@@ -85,6 +86,17 @@ def test_product_price_within_five_percent(
     minimum = exact["minimum_checkout_sgd"]
     # Issue 310 asks for a five-percent gap, not exact optimality from the
     # heuristic. The reference covers generated options and fixture packages.
-    assert minimum - 0.005 <= price <= minimum * 1.05 + 0.005
+    evidence = assess_price_gap(
+        price,
+        minimum,
+        PriceReferenceDomain(
+            candidate_scope="generated_options",
+            packaging_scope="fixed_product",
+            price_source="fixture",
+            exact=True,
+        ),
+    )
+    assert evidence.claim_scope == "generated-domain-reference"
+    assert evidence.within_five_percent
     if days <= 4:
         assert price == pytest.approx(minimum, abs=0.005)

@@ -10,6 +10,7 @@ from app.planning import algorithm_reference
 from app.planning.algorithm_objective import AlgorithmObjective
 from app.planning.final_scope_validator import FinalPlanningValidator
 from app.planning.meal_beam import MealBeamPlanner
+from app.services.recommendation import RecipeRecommendationService
 
 
 class PlanningStageProfile:
@@ -38,6 +39,7 @@ class PlanningStageProfile:
 
     def __enter__(self):
         targets = [
+            (RecipeRecommendationService, "recommend", "candidate_generation"),
             (algorithm_reference, "domains", "annealing_domains"),
             (algorithm_reference, "evaluate", "annealing_proposal"),
             (MealBeamPlanner, "meal_options", "meal_options"),

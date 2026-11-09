@@ -103,7 +103,8 @@ class WeeklyMealPlanService:
     def _live(self, constraints: WeeklyMealPlanRequest) -> WeeklyMealPlanRequest:
         if not self.live_feedback:
             return constraints
-        return with_never_again(constraints, self.repository.session, self.repository.household_id)
+        constraints = with_never_again(constraints, self.repository.session, self.repository.household_id)
+        return constraints.model_copy(update={"prior_completions": self.repository.prior_completions()})
 
     def generate(
         self,

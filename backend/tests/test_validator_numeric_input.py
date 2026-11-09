@@ -64,11 +64,12 @@ def test_finite_price_times_package_count_overflow_keeps_budget_indeterminate():
     problem = FinalPlanningProblem.model_validate_json(path.read_text(encoding="utf-8"))
     problem.purchase_budget_sgd = 100
     solution = FinalScopeReferencePlanner().solve(problem)
-    selected = solution.shopping[0].selected_product_id
+    allocations = solution.shopping[0].allocations
+    selected = {allocation.product_id for allocation in allocations}
     for product in problem.products:
-        if product.product_id == selected:
+        if product.product_id in selected:
             product.price_sgd = 1e308
-    assert solution.shopping[0].packages >= 2
+    assert sum(allocation.packages for allocation in allocations) >= 2
     report = FinalPlanningValidator().validate(problem, solution.assignments, solution.shopping)
     assert report.status == "failed"
     assert any(c.code == "purchase_numeric" for c in report.checks)
