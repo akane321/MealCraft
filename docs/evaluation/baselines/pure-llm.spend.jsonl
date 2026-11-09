@@ -7,3 +7,759 @@
 {"call": "chat", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 1027, "output_tokens": 3902, "total_tokens": 4929, "usd": 0.01832925}
 {"event": "reserve", "total_tokens": 9356, "usd": 0.029517}
 {"call": "chat", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 4814, "output_tokens": 3954, "total_tokens": 8768, "usd": 0.0214035}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 679, "total_tokens": 1724, "usd": 0.00383925}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 743, "total_tokens": 1788, "usd": 0.00412725}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1050, "output_tokens": 1131, "total_tokens": 2181, "usd": 0.005877}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1047, "output_tokens": 1231, "total_tokens": 2278, "usd": 0.00632475}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1048, "output_tokens": 289, "total_tokens": 1337, "usd": 0.0020865}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1060, "output_tokens": 235, "total_tokens": 1295, "usd": 0.0018525}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1048, "output_tokens": 126, "total_tokens": 1174, "usd": 0.001353}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 446, "total_tokens": 1501, "usd": 0.00279825}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 197, "total_tokens": 1252, "usd": 0.00167775}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1058, "output_tokens": 229, "total_tokens": 1287, "usd": 0.001824}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1049, "output_tokens": 221, "total_tokens": 1270, "usd": 0.00178125}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1043, "output_tokens": 150, "total_tokens": 1193, "usd": 0.00145725}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 208, "total_tokens": 1253, "usd": 0.00171975}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 357, "total_tokens": 1412, "usd": 0.00239775}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1052, "output_tokens": 1599, "total_tokens": 2651, "usd": 0.0079845}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1052, "output_tokens": 1645, "total_tokens": 2697, "usd": 0.0081915}
+{"event": "reserve", "total_tokens": 13946, "usd": 0.0554595}
+{"call": "chat", "event": "charge", "input_tokens": 2682, "output_tokens": 1570, "total_tokens": 4252, "usd": 0.0090765}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1047, "output_tokens": 272, "total_tokens": 1319, "usd": 0.00200925}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1059, "output_tokens": 1448, "total_tokens": 2507, "usd": 0.00731025}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1051, "output_tokens": 1439, "total_tokens": 2490, "usd": 0.00726375}
+{"event": "reserve", "total_tokens": 13762, "usd": 0.0553215}
+{"call": "chat", "event": "charge", "input_tokens": 2480, "output_tokens": 1341, "total_tokens": 3821, "usd": 0.0078945}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1049, "output_tokens": 1105, "total_tokens": 2154, "usd": 0.00575925}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1052, "output_tokens": 223, "total_tokens": 1275, "usd": 0.0017925}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1053, "output_tokens": 4690, "total_tokens": 5743, "usd": 0.02189475}
+{"event": "reserve", "total_tokens": 15625, "usd": 0.05671875}
+{"call": "chat", "event": "charge", "input_tokens": 5679, "output_tokens": 4695, "total_tokens": 10374, "usd": 0.02538675}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1051, "output_tokens": 203, "total_tokens": 1254, "usd": 0.00170175}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1050, "output_tokens": 5340, "total_tokens": 6390, "usd": 0.0248175}
+{"event": "reserve", "total_tokens": 16338, "usd": 0.0572535}
+{"call": "chat", "event": "charge", "input_tokens": 6210, "output_tokens": 5165, "total_tokens": 11375, "usd": 0.0279}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 4894, "total_tokens": 5949, "usd": 0.02281425}
+{"event": "reserve", "total_tokens": 15975, "usd": 0.05698125}
+{"call": "chat", "event": "charge", "input_tokens": 5777, "output_tokens": 4787, "total_tokens": 10564, "usd": 0.02587425}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1052, "output_tokens": 248, "total_tokens": 1300, "usd": 0.001905}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1050, "output_tokens": 2398, "total_tokens": 3448, "usd": 0.0115785}
+{"event": "reserve", "total_tokens": 14399, "usd": 0.05579925}
+{"call": "chat", "event": "charge", "input_tokens": 3421, "output_tokens": 2472, "total_tokens": 5893, "usd": 0.01368975}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1057, "output_tokens": 4969, "total_tokens": 6026, "usd": 0.02315325}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1057, "output_tokens": 5709, "total_tokens": 6766, "usd": 0.02648325}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1046, "output_tokens": 4812, "total_tokens": 5858, "usd": 0.0224385}
+{"event": "reserve", "total_tokens": 15781, "usd": 0.05683575}
+{"call": "chat", "event": "charge", "input_tokens": 5760, "output_tokens": 6594, "total_tokens": 12354, "usd": 0.033993}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 255, "total_tokens": 1300, "usd": 0.00193125}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1053, "output_tokens": 206, "total_tokens": 1259, "usd": 0.00171675}
+{"event": "reserve", "total_tokens": 13023, "usd": 0.05476725}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 203, "total_tokens": 1234, "usd": 0.00168675}
+{"event": "reserve", "total_tokens": 13035, "usd": 0.05477625}
+{"call": "chat", "event": "charge", "input_tokens": 1038, "output_tokens": 880, "total_tokens": 1918, "usd": 0.0047385}
+{"event": "reserve", "total_tokens": 13867, "usd": 0.05540025}
+{"call": "chat", "event": "charge", "input_tokens": 1934, "output_tokens": 812, "total_tokens": 2746, "usd": 0.0051045}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 214, "total_tokens": 1251, "usd": 0.00174075}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 552, "total_tokens": 1591, "usd": 0.00326325}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 127, "total_tokens": 1166, "usd": 0.00135075}
+{"event": "reserve", "total_tokens": 13033, "usd": 0.05477475}
+{"call": "chat", "event": "charge", "input_tokens": 1034, "output_tokens": 1405, "total_tokens": 2439, "usd": 0.007098}
+{"event": "reserve", "total_tokens": 13039, "usd": 0.05477925}
+{"call": "chat", "event": "charge", "input_tokens": 1041, "output_tokens": 846, "total_tokens": 1887, "usd": 0.00458775}
+{"event": "reserve", "total_tokens": 13827, "usd": 0.05537025}
+{"call": "chat", "event": "charge", "input_tokens": 1880, "output_tokens": 897, "total_tokens": 2777, "usd": 0.0054465}
+{"event": "reserve", "total_tokens": 13031, "usd": 0.05477325}
+{"call": "chat", "event": "charge", "input_tokens": 1036, "output_tokens": 514, "total_tokens": 1550, "usd": 0.00309}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 661, "total_tokens": 1698, "usd": 0.00375225}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 773, "total_tokens": 1810, "usd": 0.00425625}
+{"event": "reserve", "total_tokens": 13035, "usd": 0.05477625}
+{"call": "chat", "event": "charge", "input_tokens": 1046, "output_tokens": 523, "total_tokens": 1569, "usd": 0.003138}
+{"event": "reserve", "total_tokens": 13024, "usd": 0.054768}
+{"call": "chat", "event": "charge", "input_tokens": 1034, "output_tokens": 116, "total_tokens": 1150, "usd": 0.0012975}
+{"event": "reserve", "total_tokens": 13038, "usd": 0.0547785}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 342, "total_tokens": 1381, "usd": 0.00231825}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 272, "total_tokens": 1309, "usd": 0.00200175}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 501, "total_tokens": 1538, "usd": 0.00303225}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 422, "total_tokens": 1459, "usd": 0.00267675}
+{"event": "reserve", "total_tokens": 13414, "usd": 0.0550605}
+{"call": "chat", "event": "charge", "input_tokens": 1446, "output_tokens": 459, "total_tokens": 1905, "usd": 0.00315}
+{"event": "reserve", "total_tokens": 13046, "usd": 0.0547845}
+{"call": "chat", "event": "charge", "input_tokens": 1044, "output_tokens": 167, "total_tokens": 1211, "usd": 0.0015345}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 762, "total_tokens": 1793, "usd": 0.00420225}
+{"event": "reserve", "total_tokens": 13701, "usd": 0.05527575}
+{"call": "chat", "event": "charge", "input_tokens": 1774, "output_tokens": 748, "total_tokens": 2522, "usd": 0.0046965}
+{"event": "reserve", "total_tokens": 13029, "usd": 0.05477175}
+{"call": "chat", "event": "charge", "input_tokens": 1041, "output_tokens": 1231, "total_tokens": 2272, "usd": 0.00632025}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1036, "output_tokens": 1113, "total_tokens": 2149, "usd": 0.0057855}
+{"event": "reserve", "total_tokens": 14020, "usd": 0.055515}
+{"call": "chat", "event": "charge", "input_tokens": 2122, "output_tokens": 1130, "total_tokens": 3252, "usd": 0.0066765}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 145, "total_tokens": 1173, "usd": 0.0014235}
+{"event": "reserve", "total_tokens": 13036, "usd": 0.054777}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 884, "total_tokens": 1923, "usd": 0.00475725}
+{"event": "reserve", "total_tokens": 13031, "usd": 0.05477325}
+{"call": "chat", "event": "charge", "input_tokens": 1038, "output_tokens": 1435, "total_tokens": 2473, "usd": 0.007236}
+{"event": "reserve", "total_tokens": 14356, "usd": 0.055767}
+{"call": "chat", "event": "charge", "input_tokens": 2466, "output_tokens": 1520, "total_tokens": 3986, "usd": 0.0086895}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 1087, "total_tokens": 2126, "usd": 0.00567075}
+{"event": "reserve", "total_tokens": 14003, "usd": 0.05550225}
+{"call": "chat", "event": "charge", "input_tokens": 2111, "output_tokens": 1072, "total_tokens": 3183, "usd": 0.00640725}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 1378, "total_tokens": 2417, "usd": 0.00698025}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 479, "total_tokens": 1518, "usd": 0.00293475}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1038, "output_tokens": 185, "total_tokens": 1223, "usd": 0.001611}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1034, "output_tokens": 1249, "total_tokens": 2283, "usd": 0.006396}
+{"event": "reserve", "total_tokens": 14126, "usd": 0.0555945}
+{"call": "chat", "event": "charge", "input_tokens": 2254, "output_tokens": 1275, "total_tokens": 3529, "usd": 0.007428}
+{"event": "reserve", "total_tokens": 13031, "usd": 0.05477325}
+{"call": "chat", "event": "charge", "input_tokens": 1040, "output_tokens": 1565, "total_tokens": 2605, "usd": 0.0078225}
+{"event": "reserve", "total_tokens": 14512, "usd": 0.055884}
+{"call": "chat", "event": "charge", "input_tokens": 2582, "output_tokens": 1556, "total_tokens": 4138, "usd": 0.0089385}
+{"event": "reserve", "total_tokens": 13040, "usd": 0.05478}
+{"call": "chat", "event": "charge", "input_tokens": 1041, "output_tokens": 1652, "total_tokens": 2693, "usd": 0.00821475}
+{"event": "reserve", "total_tokens": 14512, "usd": 0.055884}
+{"call": "chat", "event": "charge", "input_tokens": 2575, "output_tokens": 1880, "total_tokens": 4455, "usd": 0.01039125}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 870, "total_tokens": 1909, "usd": 0.00469425}
+{"event": "reserve", "total_tokens": 13816, "usd": 0.055362}
+{"call": "chat", "event": "charge", "input_tokens": 1874, "output_tokens": 905, "total_tokens": 2779, "usd": 0.005478}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1036, "output_tokens": 106, "total_tokens": 1142, "usd": 0.001254}
+{"event": "reserve", "total_tokens": 13038, "usd": 0.0547785}
+{"call": "chat", "event": "charge", "input_tokens": 1043, "output_tokens": 1142, "total_tokens": 2185, "usd": 0.00592125}
+{"event": "reserve", "total_tokens": 13029, "usd": 0.05477175}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 8921, "total_tokens": 9950, "usd": 0.04091625}
+{"event": "reserve", "total_tokens": 21053, "usd": 0.06078975}
+{"call": "chat", "event": "charge", "input_tokens": 9655, "output_tokens": 8581, "total_tokens": 18236, "usd": 0.04585575}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1048, "output_tokens": 3641, "total_tokens": 4689, "usd": 0.0171705}
+{"event": "reserve", "total_tokens": 16336, "usd": 0.057252}
+{"call": "chat", "event": "charge", "input_tokens": 4611, "output_tokens": 3673, "total_tokens": 8284, "usd": 0.01998675}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1035, "output_tokens": 4829, "total_tokens": 5864, "usd": 0.02250675}
+{"event": "reserve", "total_tokens": 17280, "usd": 0.05796}
+{"call": "chat", "event": "charge", "input_tokens": 5668, "output_tokens": 4843, "total_tokens": 10511, "usd": 0.0260445}
+{"event": "reserve", "total_tokens": 13033, "usd": 0.05477475}
+{"call": "chat", "event": "charge", "input_tokens": 1033, "output_tokens": 201, "total_tokens": 1234, "usd": 0.00167925}
+{"event": "reserve", "total_tokens": 13031, "usd": 0.05477325}
+{"call": "chat", "event": "charge", "input_tokens": 1041, "output_tokens": 4324, "total_tokens": 5365, "usd": 0.02023875}
+{"event": "reserve", "total_tokens": 16855, "usd": 0.05764125}
+{"call": "chat", "event": "charge", "input_tokens": 5254, "output_tokens": 4275, "total_tokens": 9529, "usd": 0.023178}
+{"event": "reserve", "total_tokens": 13031, "usd": 0.05477325}
+{"call": "chat", "event": "charge", "input_tokens": 1034, "output_tokens": 1219, "total_tokens": 2253, "usd": 0.006261}
+{"event": "reserve", "total_tokens": 13868, "usd": 0.055401}
+{"call": "chat", "event": "charge", "input_tokens": 1963, "output_tokens": 3896, "total_tokens": 5859, "usd": 0.01900425}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 5364, "total_tokens": 6393, "usd": 0.02490975}
+{"event": "reserve", "total_tokens": 17772, "usd": 0.058329}
+{"call": "chat", "event": "charge", "input_tokens": 6248, "output_tokens": 5412, "total_tokens": 11660, "usd": 0.02904}
+{"event": "reserve", "total_tokens": 13038, "usd": 0.0547785}
+{"call": "chat", "event": "charge", "input_tokens": 1044, "output_tokens": 4312, "total_tokens": 5356, "usd": 0.020187}
+{"event": "reserve", "total_tokens": 17035, "usd": 0.05777625}
+{"call": "chat", "event": "charge", "input_tokens": 5397, "output_tokens": 4331, "total_tokens": 9728, "usd": 0.02353725}
+{"event": "reserve", "total_tokens": 13036, "usd": 0.054777}
+{"call": "chat", "event": "charge", "input_tokens": 1040, "output_tokens": 4326, "total_tokens": 5366, "usd": 0.020247}
+{"event": "reserve", "total_tokens": 13041, "usd": 0.05478075}
+{"call": "LengthFinishReasonError", "event": "charge", "input_tokens": 1039, "output_tokens": 12000, "total_tokens": 13039, "usd": 0.05477925}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1036, "output_tokens": 1749, "total_tokens": 2785, "usd": 0.0086475}
+{"event": "reserve", "total_tokens": 14554, "usd": 0.0559155}
+{"call": "chat", "event": "charge", "input_tokens": 2766, "output_tokens": 1822, "total_tokens": 4588, "usd": 0.0102735}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1046, "output_tokens": 4006, "total_tokens": 5052, "usd": 0.0188115}
+{"event": "reserve", "total_tokens": 16636, "usd": 0.057477}
+{"call": "chat", "event": "charge", "input_tokens": 4934, "output_tokens": 3889, "total_tokens": 8823, "usd": 0.021201}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1041, "output_tokens": 1836, "total_tokens": 2877, "usd": 0.00904275}
+{"event": "reserve", "total_tokens": 14715, "usd": 0.05603625}
+{"call": "chat", "event": "charge", "input_tokens": 2858, "output_tokens": 1874, "total_tokens": 4732, "usd": 0.0105765}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1035, "output_tokens": 5005, "total_tokens": 6040, "usd": 0.02329875}
+{"event": "reserve", "total_tokens": 17524, "usd": 0.058143}
+{"call": "chat", "event": "charge", "input_tokens": 5886, "output_tokens": 5031, "total_tokens": 10917, "usd": 0.027054}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 1180, "total_tokens": 2217, "usd": 0.00608775}
+{"event": "reserve", "total_tokens": 14047, "usd": 0.05553525}
+{"call": "chat", "event": "charge", "input_tokens": 2159, "output_tokens": 1145, "total_tokens": 3304, "usd": 0.00677175}
+{"event": "reserve", "total_tokens": 13033, "usd": 0.05477475}
+{"call": "chat", "event": "charge", "input_tokens": 1040, "output_tokens": 3604, "total_tokens": 4644, "usd": 0.016998}
+{"event": "reserve", "total_tokens": 13040, "usd": 0.05478}
+{"call": "chat", "event": "charge", "input_tokens": 1037, "output_tokens": 175, "total_tokens": 1212, "usd": 0.00156525}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1008, "output_tokens": 150, "total_tokens": 1158, "usd": 0.001431}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 215, "total_tokens": 1222, "usd": 0.00172275}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1009, "output_tokens": 284, "total_tokens": 1293, "usd": 0.00203475}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1009, "output_tokens": 186, "total_tokens": 1195, "usd": 0.00159375}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 130, "total_tokens": 1137, "usd": 0.00134025}
+{"event": "reserve", "total_tokens": 12996, "usd": 0.054747}
+{"call": "chat", "event": "charge", "input_tokens": 1005, "output_tokens": 129, "total_tokens": 1134, "usd": 0.00133425}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1006, "output_tokens": 60, "total_tokens": 1066, "usd": 0.0010245}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 473, "total_tokens": 1483, "usd": 0.002886}
+{"event": "reserve", "total_tokens": 12996, "usd": 0.054747}
+{"call": "chat", "event": "charge", "input_tokens": 1005, "output_tokens": 475, "total_tokens": 1480, "usd": 0.00289125}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 135, "total_tokens": 1142, "usd": 0.00136275}
+{"event": "reserve", "total_tokens": 12996, "usd": 0.054747}
+{"call": "chat", "event": "charge", "input_tokens": 1003, "output_tokens": 277, "total_tokens": 1280, "usd": 0.00199875}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1006, "output_tokens": 194, "total_tokens": 1200, "usd": 0.0016275}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 1012, "total_tokens": 2019, "usd": 0.00530925}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 57, "total_tokens": 1064, "usd": 0.00101175}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1008, "output_tokens": 60, "total_tokens": 1068, "usd": 0.001026}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1011, "output_tokens": 135, "total_tokens": 1146, "usd": 0.00136575}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1008, "output_tokens": 289, "total_tokens": 1297, "usd": 0.0020565}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1013, "output_tokens": 226, "total_tokens": 1239, "usd": 0.00177675}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 59, "total_tokens": 1066, "usd": 0.00102075}
+{"event": "reserve", "total_tokens": 12997, "usd": 0.05474775}
+{"call": "chat", "event": "charge", "input_tokens": 1007, "output_tokens": 185, "total_tokens": 1192, "usd": 0.00158775}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 67, "total_tokens": 1077, "usd": 0.001059}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 57, "total_tokens": 1067, "usd": 0.001014}
+{"event": "reserve", "total_tokens": 13002, "usd": 0.0547515}
+{"call": "chat", "event": "charge", "input_tokens": 1021, "output_tokens": 164, "total_tokens": 1185, "usd": 0.00150375}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 36, "total_tokens": 1050, "usd": 0.0009225}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 91, "total_tokens": 1101, "usd": 0.001167}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 117, "total_tokens": 1132, "usd": 0.00128775}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 86, "total_tokens": 1100, "usd": 0.0011475}
+{"event": "reserve", "total_tokens": 13002, "usd": 0.0547515}
+{"call": "chat", "event": "charge", "input_tokens": 1021, "output_tokens": 62, "total_tokens": 1083, "usd": 0.00104475}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1016, "output_tokens": 133, "total_tokens": 1149, "usd": 0.0013605}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1011, "output_tokens": 57, "total_tokens": 1068, "usd": 0.00101475}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 64, "total_tokens": 1083, "usd": 0.00105225}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 199, "total_tokens": 1214, "usd": 0.00165675}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1022, "output_tokens": 82, "total_tokens": 1104, "usd": 0.0011355}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1013, "output_tokens": 193, "total_tokens": 1206, "usd": 0.00162825}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 74, "total_tokens": 1089, "usd": 0.00109425}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 64, "total_tokens": 1078, "usd": 0.0010485}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 80, "total_tokens": 1094, "usd": 0.0011205}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1020, "output_tokens": 69, "total_tokens": 1089, "usd": 0.0010755}
+{"event": "reserve", "total_tokens": 12999, "usd": 0.05474925}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 49, "total_tokens": 1063, "usd": 0.000981}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1013, "output_tokens": 52, "total_tokens": 1065, "usd": 0.00099375}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 87, "total_tokens": 1113, "usd": 0.001161}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1109, "output_tokens": 1009, "total_tokens": 2118, "usd": 0.00537225}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1109, "output_tokens": 767, "total_tokens": 1876, "usd": 0.00428325}
+{"event": "reserve", "total_tokens": 13004, "usd": 0.054753}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 1874, "total_tokens": 2905, "usd": 0.00920625}
+{"event": "reserve", "total_tokens": 14130, "usd": 0.0555975}
+{"call": "chat", "event": "charge", "input_tokens": 2912, "output_tokens": 62, "total_tokens": 2974, "usd": 0.002463}
+{"event": "reserve", "total_tokens": 14158, "usd": 0.0556185}
+{"call": "chat", "event": "charge", "input_tokens": 2999, "output_tokens": 1839, "total_tokens": 4838, "usd": 0.01052475}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 215, "total_tokens": 1243, "usd": 0.0017385}
+{"event": "reserve", "total_tokens": 13090, "usd": 0.0548175}
+{"call": "chat", "event": "charge", "input_tokens": 1251, "output_tokens": 1068, "total_tokens": 2319, "usd": 0.00574425}
+{"event": "reserve", "total_tokens": 13641, "usd": 0.05523075}
+{"call": "chat", "event": "charge", "input_tokens": 2307, "output_tokens": 1204, "total_tokens": 3511, "usd": 0.00714825}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1020, "output_tokens": 545, "total_tokens": 1565, "usd": 0.0032175}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1020, "output_tokens": 97, "total_tokens": 1117, "usd": 0.0012015}
+{"event": "reserve", "total_tokens": 13026, "usd": 0.0547695}
+{"call": "chat", "event": "charge", "input_tokens": 1106, "output_tokens": 528, "total_tokens": 1634, "usd": 0.0032055}
+{"event": "reserve", "total_tokens": 13345, "usd": 0.05500875}
+{"call": "chat", "event": "charge", "input_tokens": 1631, "output_tokens": 551, "total_tokens": 2182, "usd": 0.00370275}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1013, "output_tokens": 759, "total_tokens": 1772, "usd": 0.00417525}
+{"event": "reserve", "total_tokens": 13426, "usd": 0.0550695}
+{"call": "chat", "event": "charge", "input_tokens": 1757, "output_tokens": 611, "total_tokens": 2368, "usd": 0.00406725}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 2202, "total_tokens": 3221, "usd": 0.01067325}
+{"event": "reserve", "total_tokens": 14291, "usd": 0.05571825}
+{"call": "chat", "event": "charge", "input_tokens": 3157, "output_tokens": 2191, "total_tokens": 5348, "usd": 0.01222725}
+{"event": "reserve", "total_tokens": 15605, "usd": 0.05670375}
+{"call": "chat", "event": "charge", "input_tokens": 5387, "output_tokens": 3467, "total_tokens": 8854, "usd": 0.01964175}
+{"event": "reserve", "total_tokens": 13000, "usd": 0.05475}
+{"call": "chat", "event": "charge", "input_tokens": 1018, "output_tokens": 137, "total_tokens": 1155, "usd": 0.00138}
+{"event": "reserve", "total_tokens": 13047, "usd": 0.05478525}
+{"call": "chat", "event": "charge", "input_tokens": 1162, "output_tokens": 1064, "total_tokens": 2226, "usd": 0.0056595}
+{"event": "reserve", "total_tokens": 13686, "usd": 0.0552645}
+{"call": "chat", "event": "charge", "input_tokens": 2201, "output_tokens": 1074, "total_tokens": 3275, "usd": 0.00648375}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 3767, "total_tokens": 4791, "usd": 0.0177195}
+{"event": "reserve", "total_tokens": 15093, "usd": 0.05631975}
+{"call": "chat", "event": "charge", "input_tokens": 4705, "output_tokens": 3785, "total_tokens": 8490, "usd": 0.02056125}
+{"event": "reserve", "total_tokens": 17162, "usd": 0.0578715}
+{"call": "chat", "event": "charge", "input_tokens": 8349, "output_tokens": 3421, "total_tokens": 11770, "usd": 0.02165625}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 2318, "total_tokens": 3341, "usd": 0.01119825}
+{"event": "reserve", "total_tokens": 15189, "usd": 0.05639175}
+{"call": "chat", "event": "charge", "input_tokens": 3348, "output_tokens": 2354, "total_tokens": 5702, "usd": 0.013104}
+{"event": "reserve", "total_tokens": 17389, "usd": 0.05804175}
+{"call": "chat", "event": "charge", "input_tokens": 5732, "output_tokens": 2267, "total_tokens": 7999, "usd": 0.0145005}
+{"event": "reserve", "total_tokens": 19474, "usd": 0.0596055}
+{"call": "chat", "event": "charge", "input_tokens": 8022, "output_tokens": 2223, "total_tokens": 10245, "usd": 0.01602}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1018, "output_tokens": 3423, "total_tokens": 4441, "usd": 0.016167}
+{"event": "reserve", "total_tokens": 15169, "usd": 0.05637675}
+{"call": "chat", "event": "charge", "input_tokens": 4412, "output_tokens": 3027, "total_tokens": 7439, "usd": 0.0169305}
+{"event": "reserve", "total_tokens": 17098, "usd": 0.0578235}
+{"call": "chat", "event": "charge", "input_tokens": 7458, "output_tokens": 2898, "total_tokens": 10356, "usd": 0.0186345}
+{"event": "reserve", "total_tokens": 13017, "usd": 0.05476275}
+{"call": "chat", "event": "charge", "input_tokens": 1022, "output_tokens": 557, "total_tokens": 1579, "usd": 0.003273}
+{"event": "reserve", "total_tokens": 13528, "usd": 0.055146}
+{"call": "chat", "event": "charge", "input_tokens": 1588, "output_tokens": 507, "total_tokens": 2095, "usd": 0.0034725}
+{"event": "reserve", "total_tokens": 13019, "usd": 0.05476425}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 1726, "total_tokens": 2752, "usd": 0.0085365}
+{"event": "reserve", "total_tokens": 14521, "usd": 0.05589075}
+{"call": "chat", "event": "charge", "input_tokens": 2696, "output_tokens": 1743, "total_tokens": 4439, "usd": 0.0098655}
+{"event": "reserve", "total_tokens": 16055, "usd": 0.05704125}
+{"call": "chat", "event": "charge", "input_tokens": 4406, "output_tokens": 1745, "total_tokens": 6151, "usd": 0.011157}
+{"event": "reserve", "total_tokens": 13022, "usd": 0.0547665}
+{"call": "chat", "event": "charge", "input_tokens": 1030, "output_tokens": 767, "total_tokens": 1797, "usd": 0.004224}
+{"event": "reserve", "total_tokens": 13739, "usd": 0.05530425}
+{"call": "chat", "event": "charge", "input_tokens": 1799, "output_tokens": 731, "total_tokens": 2530, "usd": 0.00463875}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 856, "total_tokens": 1884, "usd": 0.004623}
+{"event": "reserve", "total_tokens": 13845, "usd": 0.05538375}
+{"call": "chat", "event": "charge", "input_tokens": 1858, "output_tokens": 683, "total_tokens": 2541, "usd": 0.004467}
+{"event": "reserve", "total_tokens": 13017, "usd": 0.05476275}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 2233, "total_tokens": 3261, "usd": 0.0108195}
+{"event": "reserve", "total_tokens": 15044, "usd": 0.056283}
+{"call": "chat", "event": "charge", "input_tokens": 3187, "output_tokens": 2238, "total_tokens": 5425, "usd": 0.01246125}
+{"event": "reserve", "total_tokens": 17098, "usd": 0.0578235}
+{"call": "chat", "event": "charge", "input_tokens": 5377, "output_tokens": 2202, "total_tokens": 7579, "usd": 0.01394175}
+{"event": "reserve", "total_tokens": 13021, "usd": 0.05476575}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 537, "total_tokens": 1565, "usd": 0.0031875}
+{"event": "reserve", "total_tokens": 13499, "usd": 0.05512425}
+{"call": "chat", "event": "charge", "input_tokens": 1558, "output_tokens": 574, "total_tokens": 2132, "usd": 0.0037515}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 536, "total_tokens": 1551, "usd": 0.00317325}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 735, "total_tokens": 1750, "usd": 0.00406875}
+{"event": "reserve", "total_tokens": 13682, "usd": 0.0552615}
+{"call": "chat", "event": "charge", "input_tokens": 1728, "output_tokens": 1172, "total_tokens": 2900, "usd": 0.00657}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1017, "output_tokens": 2223, "total_tokens": 3240, "usd": 0.01076625}
+{"event": "reserve", "total_tokens": 14918, "usd": 0.0561885}
+{"call": "chat", "event": "charge", "input_tokens": 3171, "output_tokens": 2169, "total_tokens": 5340, "usd": 0.01213875}
+{"event": "reserve", "total_tokens": 16871, "usd": 0.05765325}
+{"call": "chat", "event": "charge", "input_tokens": 5371, "output_tokens": 2249, "total_tokens": 7620, "usd": 0.01414875}
+{"event": "reserve", "total_tokens": 13014, "usd": 0.0547605}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 732, "total_tokens": 1755, "usd": 0.00406125}
+{"event": "reserve", "total_tokens": 13673, "usd": 0.05525475}
+{"call": "chat", "event": "charge", "input_tokens": 1751, "output_tokens": 1109, "total_tokens": 2860, "usd": 0.00630375}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1017, "output_tokens": 2851, "total_tokens": 3868, "usd": 0.01359225}
+{"event": "reserve", "total_tokens": 15595, "usd": 0.05669625}
+{"call": "chat", "event": "charge", "input_tokens": 3788, "output_tokens": 2874, "total_tokens": 6662, "usd": 0.015774}
+{"event": "reserve", "total_tokens": 18217, "usd": 0.05866275}
+{"call": "chat", "event": "charge", "input_tokens": 6601, "output_tokens": 1611, "total_tokens": 8212, "usd": 0.01220025}
+{"event": "reserve", "total_tokens": 18217, "usd": 0.05866275}
+{"call": "chat", "event": "charge", "input_tokens": 6601, "output_tokens": 1656, "total_tokens": 8257, "usd": 0.01240275}
+{"event": "reserve", "total_tokens": 19753, "usd": 0.05981475}
+{"call": "chat", "event": "charge", "input_tokens": 8289, "output_tokens": 1678, "total_tokens": 9967, "usd": 0.01376775}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 116, "total_tokens": 1130, "usd": 0.0012825}
+{"event": "reserve", "total_tokens": 13099, "usd": 0.05482425}
+{"call": "chat", "event": "charge", "input_tokens": 1121, "output_tokens": 457, "total_tokens": 1578, "usd": 0.00289725}
+{"event": "reserve", "total_tokens": 13520, "usd": 0.05514}
+{"call": "chat", "event": "charge", "input_tokens": 1581, "output_tokens": 459, "total_tokens": 2040, "usd": 0.00325125}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1012, "output_tokens": 134, "total_tokens": 1146, "usd": 0.001362}
+{"event": "reserve", "total_tokens": 13145, "usd": 0.05485875}
+{"call": "chat", "event": "charge", "input_tokens": 1145, "output_tokens": 1398, "total_tokens": 2543, "usd": 0.00714975}
+{"event": "reserve", "total_tokens": 14479, "usd": 0.05585925}
+{"call": "chat", "event": "charge", "input_tokens": 2550, "output_tokens": 1410, "total_tokens": 3960, "usd": 0.0082575}
+{"event": "reserve", "total_tokens": 13020, "usd": 0.054765}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 404, "total_tokens": 1430, "usd": 0.0025875}
+{"event": "reserve", "total_tokens": 13391, "usd": 0.05504325}
+{"call": "chat", "event": "charge", "input_tokens": 1429, "output_tokens": 492, "total_tokens": 1921, "usd": 0.00328575}
+{"event": "reserve", "total_tokens": 13015, "usd": 0.05476125}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 1804, "total_tokens": 2829, "usd": 0.00888675}
+{"event": "reserve", "total_tokens": 14557, "usd": 0.05591775}
+{"call": "chat", "event": "charge", "input_tokens": 2771, "output_tokens": 1844, "total_tokens": 4615, "usd": 0.01037625}
+{"event": "reserve", "total_tokens": 16152, "usd": 0.057114}
+{"call": "chat", "event": "charge", "input_tokens": 4578, "output_tokens": 116, "total_tokens": 4694, "usd": 0.0039555}
+{"event": "reserve", "total_tokens": 13016, "usd": 0.054762}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 3354, "total_tokens": 4373, "usd": 0.01585725}
+{"event": "reserve", "total_tokens": 16104, "usd": 0.057078}
+{"call": "chat", "event": "charge", "input_tokens": 4268, "output_tokens": 3399, "total_tokens": 7667, "usd": 0.0184965}
+{"event": "reserve", "total_tokens": 19256, "usd": 0.059442}
+{"call": "chat", "event": "charge", "input_tokens": 7582, "output_tokens": 145, "total_tokens": 7727, "usd": 0.006339}
+{"event": "reserve", "total_tokens": 13020, "usd": 0.054765}
+{"call": "chat", "event": "charge", "input_tokens": 1027, "output_tokens": 2242, "total_tokens": 3269, "usd": 0.01085925}
+{"event": "reserve", "total_tokens": 15045, "usd": 0.05628375}
+{"call": "chat", "event": "charge", "input_tokens": 3240, "output_tokens": 2244, "total_tokens": 5484, "usd": 0.012528}
+{"event": "reserve", "total_tokens": 17120, "usd": 0.05784}
+{"call": "chat", "event": "charge", "input_tokens": 5509, "output_tokens": 2218, "total_tokens": 7727, "usd": 0.01411275}
+{"event": "reserve", "total_tokens": 13016, "usd": 0.054762}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 2312, "total_tokens": 3335, "usd": 0.01117125}
+{"event": "reserve", "total_tokens": 14972, "usd": 0.056229}
+{"call": "chat", "event": "charge", "input_tokens": 3270, "output_tokens": 2259, "total_tokens": 5529, "usd": 0.012618}
+{"event": "reserve", "total_tokens": 16965, "usd": 0.05772375}
+{"call": "chat", "event": "charge", "input_tokens": 5559, "output_tokens": 81, "total_tokens": 5640, "usd": 0.00453375}
+{"event": "reserve", "total_tokens": 13019, "usd": 0.05476425}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 1587, "total_tokens": 2611, "usd": 0.0079095}
+{"event": "reserve", "total_tokens": 14424, "usd": 0.055818}
+{"call": "chat", "event": "charge", "input_tokens": 2555, "output_tokens": 1548, "total_tokens": 4103, "usd": 0.00888225}
+{"event": "reserve", "total_tokens": 15870, "usd": 0.0569025}
+{"call": "chat", "event": "charge", "input_tokens": 4131, "output_tokens": 1580, "total_tokens": 5711, "usd": 0.01020825}
+{"event": "reserve", "total_tokens": 13015, "usd": 0.05476125}
+{"call": "chat", "event": "charge", "input_tokens": 1021, "output_tokens": 1691, "total_tokens": 2712, "usd": 0.00837525}
+{"event": "reserve", "total_tokens": 14540, "usd": 0.055905}
+{"call": "chat", "event": "charge", "input_tokens": 2665, "output_tokens": 1752, "total_tokens": 4417, "usd": 0.00988275}
+{"event": "reserve", "total_tokens": 16135, "usd": 0.05710125}
+{"call": "chat", "event": "charge", "input_tokens": 4383, "output_tokens": 116, "total_tokens": 4499, "usd": 0.00380925}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1016, "output_tokens": 2317, "total_tokens": 3333, "usd": 0.0111885}
+{"event": "reserve", "total_tokens": 15144, "usd": 0.056358}
+{"call": "chat", "event": "charge", "input_tokens": 3278, "output_tokens": 2311, "total_tokens": 5589, "usd": 0.012858}
+{"event": "reserve", "total_tokens": 17310, "usd": 0.0579825}
+{"call": "chat", "event": "charge", "input_tokens": 5580, "output_tokens": 123, "total_tokens": 5703, "usd": 0.0047385}
+{"event": "reserve", "total_tokens": 13004, "usd": 0.054753}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 144, "total_tokens": 1173, "usd": 0.00141975}
+{"event": "reserve", "total_tokens": 13004, "usd": 0.054753}
+{"call": "chat", "event": "charge", "input_tokens": 1027, "output_tokens": 143, "total_tokens": 1170, "usd": 0.00141375}
+{"event": "reserve", "total_tokens": 13005, "usd": 0.05475375}
+{"call": "chat", "event": "charge", "input_tokens": 1030, "output_tokens": 78, "total_tokens": 1108, "usd": 0.0011235}
+{"event": "reserve", "total_tokens": 13005, "usd": 0.05475375}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 205, "total_tokens": 1234, "usd": 0.00169425}
+{"event": "reserve", "total_tokens": 13023, "usd": 0.05476725}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 69, "total_tokens": 1095, "usd": 0.00108}
+{"event": "reserve", "total_tokens": 13065, "usd": 0.05479875}
+{"call": "chat", "event": "charge", "input_tokens": 1061, "output_tokens": 78, "total_tokens": 1139, "usd": 0.00114675}
+{"event": "reserve", "total_tokens": 13047, "usd": 0.05478525}
+{"call": "chat", "event": "charge", "input_tokens": 1049, "output_tokens": 123, "total_tokens": 1172, "usd": 0.00134025}
+{"event": "reserve", "total_tokens": 13078, "usd": 0.0548085}
+{"call": "chat", "event": "charge", "input_tokens": 1067, "output_tokens": 714, "total_tokens": 1781, "usd": 0.00401325}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 119, "total_tokens": 1143, "usd": 0.0013035}
+{"event": "reserve", "total_tokens": 13022, "usd": 0.0547665}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 97, "total_tokens": 1121, "usd": 0.0012045}
+{"event": "reserve", "total_tokens": 13005, "usd": 0.05475375}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 194, "total_tokens": 1223, "usd": 0.00164475}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1027, "output_tokens": 140, "total_tokens": 1167, "usd": 0.00140025}
+{"event": "reserve", "total_tokens": 13005, "usd": 0.05475375}
+{"call": "chat", "event": "charge", "input_tokens": 1033, "output_tokens": 148, "total_tokens": 1181, "usd": 0.00144075}
+{"event": "reserve", "total_tokens": 13017, "usd": 0.05476275}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 105, "total_tokens": 1130, "usd": 0.00124125}
+{"event": "reserve", "total_tokens": 13063, "usd": 0.05479725}
+{"call": "chat", "event": "charge", "input_tokens": 1063, "output_tokens": 130, "total_tokens": 1193, "usd": 0.00138225}
+{"event": "reserve", "total_tokens": 13026, "usd": 0.0547695}
+{"call": "chat", "event": "charge", "input_tokens": 1029, "output_tokens": 76, "total_tokens": 1105, "usd": 0.00111375}
+{"event": "reserve", "total_tokens": 13074, "usd": 0.0548055}
+{"call": "chat", "event": "charge", "input_tokens": 1071, "output_tokens": 185, "total_tokens": 1256, "usd": 0.00163575}
+{"event": "reserve", "total_tokens": 13024, "usd": 0.054768}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 130, "total_tokens": 1161, "usd": 0.00135825}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1030, "output_tokens": 177, "total_tokens": 1207, "usd": 0.001569}
+{"event": "reserve", "total_tokens": 13018, "usd": 0.0547635}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 76, "total_tokens": 1100, "usd": 0.00111}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1032, "output_tokens": 129, "total_tokens": 1161, "usd": 0.0013545}
+{"event": "reserve", "total_tokens": 13002, "usd": 0.0547515}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 197, "total_tokens": 1220, "usd": 0.00165375}
+{"event": "reserve", "total_tokens": 13001, "usd": 0.05475075}
+{"call": "chat", "event": "charge", "input_tokens": 1022, "output_tokens": 271, "total_tokens": 1293, "usd": 0.001986}
+{"event": "reserve", "total_tokens": 13004, "usd": 0.054753}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 233, "total_tokens": 1264, "usd": 0.00182175}
+{"event": "reserve", "total_tokens": 13024, "usd": 0.054768}
+{"call": "chat", "event": "charge", "input_tokens": 1021, "output_tokens": 99, "total_tokens": 1120, "usd": 0.00121125}
+{"event": "reserve", "total_tokens": 13022, "usd": 0.0547665}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 101, "total_tokens": 1124, "usd": 0.00122175}
+{"event": "reserve", "total_tokens": 13026, "usd": 0.0547695}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 123, "total_tokens": 1147, "usd": 0.0013215}
+{"event": "reserve", "total_tokens": 13021, "usd": 0.05476575}
+{"call": "chat", "event": "charge", "input_tokens": 1021, "output_tokens": 108, "total_tokens": 1129, "usd": 0.00125175}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 105, "total_tokens": 1130, "usd": 0.00124125}
+{"event": "reserve", "total_tokens": 13025, "usd": 0.05476875}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 112, "total_tokens": 1138, "usd": 0.0012735}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 299, "total_tokens": 1327, "usd": 0.0021165}
+{"event": "reserve", "total_tokens": 13004, "usd": 0.054753}
+{"call": "chat", "event": "charge", "input_tokens": 1028, "output_tokens": 156, "total_tokens": 1184, "usd": 0.001473}
+{"event": "reserve", "total_tokens": 13003, "usd": 0.05475225}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 301, "total_tokens": 1327, "usd": 0.002124}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 136, "total_tokens": 1161, "usd": 0.00138075}
+{"event": "reserve", "total_tokens": 13027, "usd": 0.05477025}
+{"call": "chat", "event": "charge", "input_tokens": 1027, "output_tokens": 152, "total_tokens": 1179, "usd": 0.00145425}
+{"event": "reserve", "total_tokens": 13025, "usd": 0.05476875}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 106, "total_tokens": 1130, "usd": 0.001245}
+{"event": "reserve", "total_tokens": 13019, "usd": 0.05476425}
+{"call": "chat", "event": "charge", "input_tokens": 1018, "output_tokens": 157, "total_tokens": 1175, "usd": 0.00147}
+{"event": "reserve", "total_tokens": 13024, "usd": 0.054768}
+{"call": "chat", "event": "charge", "input_tokens": 1023, "output_tokens": 75, "total_tokens": 1098, "usd": 0.00110475}
+{"event": "reserve", "total_tokens": 13024, "usd": 0.054768}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 156, "total_tokens": 1180, "usd": 0.00147}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1026, "output_tokens": 93, "total_tokens": 1119, "usd": 0.001188}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1009, "output_tokens": 96, "total_tokens": 1105, "usd": 0.00118875}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1017, "output_tokens": 157, "total_tokens": 1174, "usd": 0.00146925}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 103, "total_tokens": 1134, "usd": 0.00123675}
+{"event": "reserve", "total_tokens": 13037, "usd": 0.05477775}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 90, "total_tokens": 1121, "usd": 0.00117825}
+{"event": "reserve", "total_tokens": 13020, "usd": 0.054765}
+{"call": "chat", "event": "charge", "input_tokens": 1027, "output_tokens": 165, "total_tokens": 1192, "usd": 0.00151275}
+{"event": "reserve", "total_tokens": 13006, "usd": 0.0547545}
+{"call": "chat", "event": "charge", "input_tokens": 1009, "output_tokens": 67, "total_tokens": 1076, "usd": 0.00105825}
+{"event": "reserve", "total_tokens": 13002, "usd": 0.0547515}
+{"call": "chat", "event": "charge", "input_tokens": 1004, "output_tokens": 82, "total_tokens": 1086, "usd": 0.001122}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 95, "total_tokens": 1105, "usd": 0.001185}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 103, "total_tokens": 1113, "usd": 0.001221}
+{"event": "reserve", "total_tokens": 13047, "usd": 0.05478525}
+{"call": "chat", "event": "charge", "input_tokens": 1036, "output_tokens": 96, "total_tokens": 1132, "usd": 0.001209}
+{"event": "reserve", "total_tokens": 13013, "usd": 0.05475975}
+{"call": "chat", "event": "charge", "input_tokens": 1014, "output_tokens": 68, "total_tokens": 1082, "usd": 0.0010665}
+{"event": "reserve", "total_tokens": 13020, "usd": 0.054765}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 93, "total_tokens": 1112, "usd": 0.00118275}
+{"event": "reserve", "total_tokens": 13036, "usd": 0.054777}
+{"call": "chat", "event": "charge", "input_tokens": 1038, "output_tokens": 81, "total_tokens": 1119, "usd": 0.001143}
+{"event": "reserve", "total_tokens": 13034, "usd": 0.0547755}
+{"call": "chat", "event": "charge", "input_tokens": 1031, "output_tokens": 113, "total_tokens": 1144, "usd": 0.00128175}
+{"event": "reserve", "total_tokens": 13274, "usd": 0.0549555}
+{"call": "chat", "event": "charge", "input_tokens": 1228, "output_tokens": 105, "total_tokens": 1333, "usd": 0.0013935}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1013, "output_tokens": 152, "total_tokens": 1165, "usd": 0.00144375}
+{"event": "reserve", "total_tokens": 13089, "usd": 0.05481675}
+{"call": "chat", "event": "charge", "input_tokens": 1079, "output_tokens": 157, "total_tokens": 1236, "usd": 0.00151575}
+{"event": "reserve", "total_tokens": 13052, "usd": 0.054789}
+{"call": "chat", "event": "charge", "input_tokens": 1052, "output_tokens": 155, "total_tokens": 1207, "usd": 0.0014865}
+{"event": "reserve", "total_tokens": 13052, "usd": 0.054789}
+{"call": "chat", "event": "charge", "input_tokens": 1053, "output_tokens": 131, "total_tokens": 1184, "usd": 0.00137925}
+{"event": "reserve", "total_tokens": 13364, "usd": 0.055023}
+{"call": "chat", "event": "charge", "input_tokens": 1340, "output_tokens": 276, "total_tokens": 1616, "usd": 0.002247}
+{"event": "reserve", "total_tokens": 13046, "usd": 0.0547845}
+{"call": "chat", "event": "charge", "input_tokens": 1042, "output_tokens": 81, "total_tokens": 1123, "usd": 0.001146}
+{"event": "reserve", "total_tokens": 13021, "usd": 0.05476575}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 51, "total_tokens": 1076, "usd": 0.00099825}
+{"event": "reserve", "total_tokens": 13035, "usd": 0.05477625}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 95, "total_tokens": 1134, "usd": 0.00120675}
+{"event": "reserve", "total_tokens": 13021, "usd": 0.05476575}
+{"call": "chat", "event": "charge", "input_tokens": 1025, "output_tokens": 88, "total_tokens": 1113, "usd": 0.00116475}
+{"event": "reserve", "total_tokens": 13042, "usd": 0.0547815}
+{"call": "chat", "event": "charge", "input_tokens": 1044, "output_tokens": 136, "total_tokens": 1180, "usd": 0.001395}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 111, "total_tokens": 1121, "usd": 0.001257}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1015, "output_tokens": 75, "total_tokens": 1090, "usd": 0.00109875}
+{"event": "reserve", "total_tokens": 13051, "usd": 0.05478825}
+{"call": "chat", "event": "charge", "input_tokens": 1042, "output_tokens": 136, "total_tokens": 1178, "usd": 0.0013935}
+{"event": "reserve", "total_tokens": 13070, "usd": 0.0548025}
+{"call": "chat", "event": "charge", "input_tokens": 1060, "output_tokens": 322, "total_tokens": 1382, "usd": 0.002244}
+{"event": "reserve", "total_tokens": 13042, "usd": 0.0547815}
+{"call": "chat", "event": "charge", "input_tokens": 1038, "output_tokens": 137, "total_tokens": 1175, "usd": 0.001395}
+{"event": "reserve", "total_tokens": 13058, "usd": 0.0547935}
+{"call": "chat", "event": "charge", "input_tokens": 1049, "output_tokens": 92, "total_tokens": 1141, "usd": 0.00120075}
+{"event": "reserve", "total_tokens": 13075, "usd": 0.05480625}
+{"call": "chat", "event": "charge", "input_tokens": 1062, "output_tokens": 89, "total_tokens": 1151, "usd": 0.001197}
+{"event": "reserve", "total_tokens": 13036, "usd": 0.054777}
+{"call": "chat", "event": "charge", "input_tokens": 1033, "output_tokens": 569, "total_tokens": 1602, "usd": 0.00333525}
+{"event": "reserve", "total_tokens": 13010, "usd": 0.0547575}
+{"call": "chat", "event": "charge", "input_tokens": 1012, "output_tokens": 410, "total_tokens": 1422, "usd": 0.002604}
+{"event": "reserve", "total_tokens": 13094, "usd": 0.0548205}
+{"call": "chat", "event": "charge", "input_tokens": 1085, "output_tokens": 361, "total_tokens": 1446, "usd": 0.00243825}
+{"event": "reserve", "total_tokens": 13057, "usd": 0.05479275}
+{"call": "chat", "event": "charge", "input_tokens": 1050, "output_tokens": 370, "total_tokens": 1420, "usd": 0.0024525}
+{"event": "reserve", "total_tokens": 13011, "usd": 0.05475825}
+{"call": "chat", "event": "charge", "input_tokens": 1016, "output_tokens": 166, "total_tokens": 1182, "usd": 0.001509}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1011, "output_tokens": 171, "total_tokens": 1182, "usd": 0.00152775}
+{"event": "reserve", "total_tokens": 13053, "usd": 0.05478975}
+{"call": "chat", "event": "charge", "input_tokens": 1049, "output_tokens": 455, "total_tokens": 1504, "usd": 0.00283425}
+{"event": "reserve", "total_tokens": 13023, "usd": 0.05476725}
+{"call": "chat", "event": "charge", "input_tokens": 1024, "output_tokens": 292, "total_tokens": 1316, "usd": 0.002082}
+{"event": "reserve", "total_tokens": 13081, "usd": 0.05481075}
+{"call": "chat", "event": "charge", "input_tokens": 1075, "output_tokens": 392, "total_tokens": 1467, "usd": 0.00257025}
+{"event": "reserve", "total_tokens": 13063, "usd": 0.05479725}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 321, "total_tokens": 1376, "usd": 0.00223575}
+{"event": "reserve", "total_tokens": 13055, "usd": 0.05479125}
+{"call": "chat", "event": "charge", "input_tokens": 1054, "output_tokens": 475, "total_tokens": 1529, "usd": 0.002928}
+{"event": "reserve", "total_tokens": 13083, "usd": 0.05481225}
+{"call": "chat", "event": "charge", "input_tokens": 1077, "output_tokens": 609, "total_tokens": 1686, "usd": 0.00354825}
+{"event": "reserve", "total_tokens": 13017, "usd": 0.05476275}
+{"call": "chat", "event": "charge", "input_tokens": 1018, "output_tokens": 231, "total_tokens": 1249, "usd": 0.001803}
+{"event": "reserve", "total_tokens": 13020, "usd": 0.054765}
+{"call": "chat", "event": "charge", "input_tokens": 1022, "output_tokens": 95, "total_tokens": 1117, "usd": 0.001194}
+{"event": "reserve", "total_tokens": 13032, "usd": 0.054774}
+{"call": "chat", "event": "charge", "input_tokens": 1033, "output_tokens": 273, "total_tokens": 1306, "usd": 0.00200325}
+{"event": "reserve", "total_tokens": 12998, "usd": 0.0547485}
+{"call": "chat", "event": "charge", "input_tokens": 1002, "output_tokens": 90, "total_tokens": 1092, "usd": 0.0011565}
+{"event": "reserve", "total_tokens": 13042, "usd": 0.0547815}
+{"call": "chat", "event": "charge", "input_tokens": 1040, "output_tokens": 269, "total_tokens": 1309, "usd": 0.0019905}
+{"event": "reserve", "total_tokens": 13008, "usd": 0.054756}
+{"call": "chat", "event": "charge", "input_tokens": 1009, "output_tokens": 243, "total_tokens": 1252, "usd": 0.00185025}
+{"event": "reserve", "total_tokens": 13007, "usd": 0.05475525}
+{"call": "chat", "event": "charge", "input_tokens": 1010, "output_tokens": 216, "total_tokens": 1226, "usd": 0.0017295}
+{"event": "reserve", "total_tokens": 13203, "usd": 0.05490225}
+{"call": "chat", "event": "charge", "input_tokens": 1175, "output_tokens": 944, "total_tokens": 2119, "usd": 0.00512925}
+{"event": "reserve", "total_tokens": 13022, "usd": 0.0547665}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 258, "total_tokens": 1277, "usd": 0.00192525}
+{"event": "reserve", "total_tokens": 13068, "usd": 0.054801}
+{"call": "chat", "event": "charge", "input_tokens": 1059, "output_tokens": 369, "total_tokens": 1428, "usd": 0.00245475}
+{"event": "reserve", "total_tokens": 13019, "usd": 0.05476425}
+{"call": "chat", "event": "charge", "input_tokens": 1018, "output_tokens": 247, "total_tokens": 1265, "usd": 0.001875}
+{"event": "reserve", "total_tokens": 13095, "usd": 0.05482125}
+{"call": "chat", "event": "charge", "input_tokens": 1078, "output_tokens": 704, "total_tokens": 1782, "usd": 0.0039765}
+{"event": "reserve", "total_tokens": 13126, "usd": 0.0548445}
+{"call": "chat", "event": "charge", "input_tokens": 1127, "output_tokens": 316, "total_tokens": 1443, "usd": 0.00226725}
+{"event": "reserve", "total_tokens": 13094, "usd": 0.0548205}
+{"call": "chat", "event": "charge", "input_tokens": 1090, "output_tokens": 631, "total_tokens": 1721, "usd": 0.003657}
+{"event": "reserve", "total_tokens": 13045, "usd": 0.05478375}
+{"call": "chat", "event": "charge", "input_tokens": 1043, "output_tokens": 267, "total_tokens": 1310, "usd": 0.00198375}
+{"event": "reserve", "total_tokens": 13363, "usd": 0.05502225}
+{"call": "chat", "event": "charge", "input_tokens": 1347, "output_tokens": 855, "total_tokens": 2202, "usd": 0.00485775}
+{"event": "reserve", "total_tokens": 13040, "usd": 0.05478}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 248, "total_tokens": 1287, "usd": 0.00189525}
+{"event": "reserve", "total_tokens": 13106, "usd": 0.0548295}
+{"call": "chat", "event": "charge", "input_tokens": 1099, "output_tokens": 1026, "total_tokens": 2125, "usd": 0.00544125}
+{"event": "reserve", "total_tokens": 13141, "usd": 0.05485575}
+{"call": "chat", "event": "charge", "input_tokens": 1134, "output_tokens": 521, "total_tokens": 1655, "usd": 0.003195}
+{"event": "reserve", "total_tokens": 13176, "usd": 0.054882}
+{"call": "chat", "event": "charge", "input_tokens": 1158, "output_tokens": 735, "total_tokens": 1893, "usd": 0.004176}
+{"event": "reserve", "total_tokens": 13109, "usd": 0.05483175}
+{"call": "chat", "event": "charge", "input_tokens": 1110, "output_tokens": 369, "total_tokens": 1479, "usd": 0.002493}
+{"event": "reserve", "total_tokens": 13249, "usd": 0.05493675}
+{"call": "chat", "event": "charge", "input_tokens": 1246, "output_tokens": 766, "total_tokens": 2012, "usd": 0.0043815}
+{"event": "reserve", "total_tokens": 13083, "usd": 0.05481225}
+{"call": "chat", "event": "charge", "input_tokens": 1069, "output_tokens": 313, "total_tokens": 1382, "usd": 0.00221025}
+{"event": "reserve", "total_tokens": 13023, "usd": 0.05476725}
+{"call": "chat", "event": "charge", "input_tokens": 1019, "output_tokens": 94, "total_tokens": 1113, "usd": 0.00118725}
+{"event": "reserve", "total_tokens": 13097, "usd": 0.05482275}
+{"call": "chat", "event": "charge", "input_tokens": 1085, "output_tokens": 462, "total_tokens": 1547, "usd": 0.00289275}
+{"event": "reserve", "total_tokens": 13052, "usd": 0.054789}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 312, "total_tokens": 1357, "usd": 0.00218775}
+{"event": "reserve", "total_tokens": 13052, "usd": 0.054789}
+{"call": "chat", "event": "charge", "input_tokens": 1048, "output_tokens": 283, "total_tokens": 1331, "usd": 0.0020595}
+{"event": "reserve", "total_tokens": 13067, "usd": 0.05480025}
+{"call": "chat", "event": "charge", "input_tokens": 1054, "output_tokens": 284, "total_tokens": 1338, "usd": 0.0020685}
+{"event": "reserve", "total_tokens": 13035, "usd": 0.05477625}
+{"call": "chat", "event": "charge", "input_tokens": 1035, "output_tokens": 224, "total_tokens": 1259, "usd": 0.00178425}
+{"event": "reserve", "total_tokens": 13080, "usd": 0.05481}
+{"call": "chat", "event": "charge", "input_tokens": 1077, "output_tokens": 280, "total_tokens": 1357, "usd": 0.00206775}
+{"event": "reserve", "total_tokens": 13126, "usd": 0.0548445}
+{"call": "chat", "event": "charge", "input_tokens": 1119, "output_tokens": 490, "total_tokens": 1609, "usd": 0.00304425}
+{"event": "reserve", "total_tokens": 13299, "usd": 0.05497425}
+{"call": "chat", "event": "charge", "input_tokens": 1264, "output_tokens": 674, "total_tokens": 1938, "usd": 0.003981}
+{"event": "reserve", "total_tokens": 13060, "usd": 0.054795}
+{"call": "chat", "event": "charge", "input_tokens": 1055, "output_tokens": 292, "total_tokens": 1347, "usd": 0.00210525}
+{"event": "reserve", "total_tokens": 13045, "usd": 0.05478375}
+{"call": "chat", "event": "charge", "input_tokens": 1042, "output_tokens": 429, "total_tokens": 1471, "usd": 0.002712}
+{"event": "reserve", "total_tokens": 13038, "usd": 0.0547785}
+{"call": "chat", "event": "charge", "input_tokens": 1042, "output_tokens": 378, "total_tokens": 1420, "usd": 0.0024825}
+{"event": "reserve", "total_tokens": 13156, "usd": 0.054867}
+{"call": "chat", "event": "charge", "input_tokens": 1137, "output_tokens": 919, "total_tokens": 2056, "usd": 0.00498825}
+{"event": "reserve", "total_tokens": 13105, "usd": 0.05482875}
+{"call": "chat", "event": "charge", "input_tokens": 1100, "output_tokens": 423, "total_tokens": 1523, "usd": 0.0027285}
+{"event": "reserve", "total_tokens": 13030, "usd": 0.0547725}
+{"call": "chat", "event": "charge", "input_tokens": 1032, "output_tokens": 310, "total_tokens": 1342, "usd": 0.002169}
+{"event": "reserve", "total_tokens": 13114, "usd": 0.0548355}
+{"call": "chat", "event": "charge", "input_tokens": 1101, "output_tokens": 300, "total_tokens": 1401, "usd": 0.00217575}
+{"event": "reserve", "total_tokens": 13064, "usd": 0.054798}
+{"call": "chat", "event": "charge", "input_tokens": 1062, "output_tokens": 492, "total_tokens": 1554, "usd": 0.0030105}
+{"event": "reserve", "total_tokens": 13140, "usd": 0.054855}
+{"call": "chat", "event": "charge", "input_tokens": 1129, "output_tokens": 462, "total_tokens": 1591, "usd": 0.00292575}
+{"event": "reserve", "total_tokens": 13206, "usd": 0.0549045}
+{"call": "chat", "event": "charge", "input_tokens": 1198, "output_tokens": 402, "total_tokens": 1600, "usd": 0.0027075}
+{"event": "reserve", "total_tokens": 13201, "usd": 0.05490075}
+{"call": "chat", "event": "charge", "input_tokens": 1180, "output_tokens": 868, "total_tokens": 2048, "usd": 0.004791}
+{"event": "reserve", "total_tokens": 13053, "usd": 0.05478975}
+{"call": "chat", "event": "charge", "input_tokens": 1054, "output_tokens": 811, "total_tokens": 1865, "usd": 0.00444}
+{"event": "reserve", "total_tokens": 13113, "usd": 0.05483475}
+{"call": "chat", "event": "charge", "input_tokens": 1106, "output_tokens": 923, "total_tokens": 2029, "usd": 0.004983}
+{"event": "reserve", "total_tokens": 13129, "usd": 0.05484675}
+{"call": "chat", "event": "charge", "input_tokens": 1118, "output_tokens": 3954, "total_tokens": 5072, "usd": 0.0186315}
+{"event": "reserve", "total_tokens": 13129, "usd": 0.05484675}
+{"call": "chat", "event": "charge", "input_tokens": 1126, "output_tokens": 848, "total_tokens": 1974, "usd": 0.0046605}
+{"event": "reserve", "total_tokens": 13081, "usd": 0.05481075}
+{"call": "chat", "event": "charge", "input_tokens": 1073, "output_tokens": 230, "total_tokens": 1303, "usd": 0.00183975}
+{"event": "reserve", "total_tokens": 13105, "usd": 0.05482875}
+{"call": "chat", "event": "charge", "input_tokens": 1095, "output_tokens": 529, "total_tokens": 1624, "usd": 0.00320175}
+{"event": "reserve", "total_tokens": 13009, "usd": 0.05475675}
+{"call": "chat", "event": "charge", "input_tokens": 1045, "output_tokens": 792, "total_tokens": 1837, "usd": 0.00434775}
+{"event": "reserve", "total_tokens": 13012, "usd": 0.054759}
+{"call": "chat", "event": "charge", "input_tokens": 1057, "output_tokens": 5926, "total_tokens": 6983, "usd": 0.02745975}
+{"event": "reserve", "total_tokens": 16678, "usd": 0.0575085}
+{"call": "chat", "event": "charge", "input_tokens": 6865, "output_tokens": 5860, "total_tokens": 12725, "usd": 0.03151875}
+{"event": "reserve", "total_tokens": 13041, "usd": 0.05478075}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 4822, "total_tokens": 5861, "usd": 0.02247825}
+{"event": "reserve", "total_tokens": 13041, "usd": 0.05478075}
+{"call": "chat", "event": "charge", "input_tokens": 1039, "output_tokens": 4411, "total_tokens": 5450, "usd": 0.02062875}
+{"event": "reserve", "total_tokens": 16983, "usd": 0.05773725}
+{"call": "chat", "event": "charge", "input_tokens": 5252, "output_tokens": 4459, "total_tokens": 9711, "usd": 0.0240045}

@@ -103,7 +103,7 @@ const lastShown = new Map<number, string>();
           :class="{ done: meal.status === 'completed' || meal.status === 'skipped', named: severalMeals, fresh: meal.dishes.some(dish => fresh.has(dish.entry_id)) }"
         >
           <span v-if="!severalMeals" class="d"><b>{{ formatPlanDate(day.date, { weekday: "short" }) }}</b><span>{{ Number(day.date.slice(8, 10)) }}</span></span>
-          <HomeDishIcon class="icon" :slug="meal.dishes[0]!.recipe.slug" :title="meal.dishes[0]!.recipe.title" :course="meal.dishes[0]!.recipe.course" :role-id="meal.dishes[0]!.role_id" :size="32" />
+          <HomeDishIcon class="icon" :slug="meal.dishes[0]!.recipe.slug" :title="meal.dishes[0]!.recipe.title" :size="32" />
           <!-- One line per dish: its name, then its own changes, so a meal of several dishes never shows unlabelled rows. -->
           <span class="dishes">
             <span v-for="(dish, index) in meal.dishes" :key="dish.entry_id" class="dish" :class="{ side: index > 0 }">
