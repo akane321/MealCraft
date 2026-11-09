@@ -1,5 +1,4 @@
 import type { OpsDayPoint, OpsReplayDish, OpsTaskKind } from "~/types/ops";
-import { DISH_ROLES } from "./dish-icon";
 
 export function isConsoleAccount(actor: { user: { system_role: string } } | null | undefined) {
   return actor?.user.system_role === "admin";
@@ -181,6 +180,7 @@ export function diffFields(before: Record<string, unknown> | null | undefined, a
 
 export interface DishRow { slot: string; day: number | null; meal: string; role: string; before: string | null; after: string | null; changed: boolean }
 
+const DISH_ROLES = ["main", "vegetable", "soup", "salad", "drink", "dessert", "other"] as const;
 const orderIn = (order: readonly string[], value: string) => (order.includes(value) ? order.indexOf(value) : order.length);
 
 /** The two weeks dish by dish, matched on day, meal and role; in the order of the day: breakfast to snack, a main first. */
