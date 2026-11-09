@@ -1,3 +1,8 @@
+<script lang="ts">
+// Counts across the home page and the workspace, which each mount their own microphone.
+let demoIndex = 0;
+</script>
+
 <script setup lang="ts">
 import { DEMO_SENTENCES } from "~/lib/demo-script";
 import { revealTokens } from "~/lib/reveal";
@@ -34,7 +39,6 @@ let startedAt = 0;
 let lastLoud = 0;
 let heard = false;
 let cancelled = false;
-let demoIndex = 0;
 let demoWords: string[] = [];
 let demoShown = 0;
 let demoNextAt = 0;

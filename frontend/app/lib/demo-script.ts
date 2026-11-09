@@ -1,4 +1,6 @@
 export const DEMO_SENTENCES = [
-  "Plan dinners for the two of us next week, no beef, under eighty dollars.",
-  "下周给我们两个人安排晚餐，不要牛肉，预算八十块以内。",
+  "Plan dinners for next week.",
+  "Two of us, about ninety dollars, no seafood.",
+  "Swap Sunday's dinner.",
+  "Plan this week's dinners with S$60 for the week. We must have shrimp and scallop curry for dinner.",
 ];
