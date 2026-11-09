@@ -83,6 +83,27 @@ def test_a_composed_replay_that_runs_out_of_steps_says_so_not_that_details_are_m
     )
 
 
+def test_weeks_turned_down_only_by_the_budget_are_a_budget_answer_whatever_else_the_pool_holds(console) -> None:
+    """One odd recipe elsewhere in the pool said "details are missing" for a week every attempt priced too high."""
+    client, factory = console
+    with factory() as database:
+        chicken = database.scalars(select(Ingredient).where(Ingredient.normalized_name == "chicken_breast")).one()
+        party = _recipe("party-chicken", "Party Chicken", [(chicken, 3000, "g")], tags=[], minutes=40, nutrition=PLAIN)
+        party.servings = 30  # a planned dish serves 1 to 24
+        database.add(party)
+        database.commit()
+    week = {"start_date": "2026-09-01", "household_size": 4, "pricing_mode": "fixture", "plan_shape": LUNCH_AND_DINNER}
+    response = client.post("/api/plans/generate", json={"requires_halal": False, "weekly_budget_sgd": 20, **week})
+    (run_id,) = _planning_run_ids(factory)
+    with factory() as database:
+        stored = database.get(OperationRun, run_id).artifact_references[0]["data"]
+    assert stored["input_issues"] == ["invalid:servings"]
+    assert stored["validation_attempts"]  # priced weeks were turned down, not an empty search
+    assert response.status_code == 422, response.text
+    assert "details are missing" not in response.text
+    assert stored["status"] == "candidate_rejected"  # not a proof of infeasibility either: a recipe was left out
+
+
 def test_a_composed_week_refused_before_its_search_replays_with_its_own_step_budget(console, monkeypatch) -> None:
     """Refused while meals of several dishes were off, the run stored the one-dish limits; they are not its own."""
     client, factory = console
