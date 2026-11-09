@@ -10,9 +10,10 @@ from datetime import timedelta
 from math import inf
 
 from app.agent.limits import Refusal, day_name
-from app.agent.replies import listed, say
+from app.agent.replies import listed, say, word
 from app.data import meal_structure
 from app.planning import alternatives
+from app.planning.household_slots import slot_servings
 from app.planning.meal_composition import catalog_role_admits
 from app.planning.member_coverage import catalog_can_eat, member_limits
 from app.planning.product_path import dish_cost
@@ -77,13 +78,17 @@ def resolve(
     ranked: list,
     blockers: Callable[..., list[str] | None],
     lang: str,
+    every_course: Callable[[], list] = list,
 ) -> RequiredDish | Refusal:
     """The dish `asked` names, placed in this plan, or the reply that says why not (a question when it can ask one).
 
-    `blockers(recipe)` says why the household's limits rule a recipe out, [] for none, None for no price."""
+    `blockers(recipe)` says why the household's limits rule a recipe out, [] for none, None for no price;
+    `every_course()` is the recipes this plan's meals do not draw on, to tell a dish with no place from no such dish."""
     days = [(request.start_date + timedelta(days=day)).strftime("%A").lower() for day in range(request.day_count)]
     if asked.weekday is not None and asked.weekday not in days:
         return Refusal(FIELD, say("pin_not_in_plan", lang, day=day_name(asked.weekday, lang)))
+    if asked.meal is not None and asked.meal not in request.plan_shape.meals:
+        return Refusal(FIELD, say("pin_not_in_plan", lang, day=word(asked.meal, lang)))
     cost = {item.recipe.slug: dish_cost(item) for item in ranked}
     ceiling = request.nutrition_constraints[0].upper if request.nutrition_constraints else None
 
@@ -177,6 +182,9 @@ def resolve(
         if wanted and wanted <= _name_words(shown_title(recipe.title)) and _place(recipe, request, asked.meal)
     ]
     if not named:
+        titled = [r for r in [*recipes, *every_course()] if wanted and wanted <= _name_words(shown_title(r.title))]
+        if titled:  # the dish exists; no meal of this plan has a role for it
+            return Refusal(FIELD, say("pin_no_place", lang, title=shown_title(titled[0].title)))
         placed = [recipe for recipe in recipes if _place(recipe, request, asked.meal)]
         scores = shared_words(in_english(asked.name), placed)
         near = sorted((r for r in placed if scores.get(r.id)), key=lambda r: (-scores[r.id], r.slug))
@@ -199,14 +207,27 @@ def _groups(recipes: list) -> dict[str, list]:
     return groups
 
 
+def _home_share(pin: RequiredDish, request: WeeklyMealPlanRequest) -> float:
+    """The part of the household at the pinned meal: a dish's cost is for all of it, the meal is cooked for who is home
+    (the first day it can go, as the planner places it)."""
+    household = request.household
+    if household is None or household.members is None:
+        return 1.0
+    days = [request.start_date + timedelta(days=day) for day in range(request.day_count)]
+    home = [
+        slot_servings(household, day, pin.meal) for day in days if pin.weekday in (None, day.strftime("%A").lower())
+    ]
+    return next(filter(None, home), request.household_size) / request.household_size
+
+
 def similar(pin: RequiredDish, request: WeeklyMealPlanRequest, recipes: list, ranked: list) -> list[Replacement]:
     """Dishes that could fill the pinned dish's role and that everyone can eat, the most alike first (the catalog's
     embeddings where both have one, else the ingredients they share)."""
     by_slug, items = {recipe.slug: recipe for recipe in recipes}, {item.recipe.slug: item for item in ranked}
     pinned = by_slug.get(pin.recipe_slug)
-    if pinned is None or pin.recipe_slug not in items:
+    role = next((role for role in request.plan_shape.meals.get(pin.meal, []) if role.role_id == pin.role_id), None)
+    if pinned is None or pin.recipe_slug not in items or role is None:
         return []
-    role = next(role for role in request.plan_shape.meals[pin.meal] if role.role_id == pin.role_id)
     members = member_limits(request.household)
     others = [
         by_slug[slug]
@@ -225,7 +246,7 @@ def similar(pin: RequiredDish, request: WeeklyMealPlanRequest, recipes: list, ra
         signals = index.compare(recipe_key(pinned), recipe_key(recipe))
         return signals.vector_cosine if signals.vector_cosine is not None else signals.ingredient_overlap or 0.0
 
-    cost = dish_cost(items[pin.recipe_slug])
+    cost, share = dish_cost(items[pin.recipe_slug]), _home_share(pin, request)
     return [
         Replacement(
             RequiredDish(
@@ -236,7 +257,7 @@ def similar(pin: RequiredDish, request: WeeklyMealPlanRequest, recipes: list, ra
                 weekday=pin.weekday,
                 kcal=_kcal(recipe),
             ),
-            round(cost - dish_cost(items[recipe.slug]), 2),
+            round((cost - dish_cost(items[recipe.slug])) * share, 2),
             round(pin.kcal - _kcal(recipe)),
         )
         for recipe in sorted(others, key=lambda r: (-likeness(r), r.slug))

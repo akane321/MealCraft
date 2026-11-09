@@ -74,7 +74,8 @@ AMOUNT = re.compile(
     r"|(?:budget|预算)[^\d\n.,;，。；]{0,10}?(?<!for )(?<!for the )(\d+(?:\.\d+)?)"
     r"(?!\s*(?:people|persons?|人|个|min|分钟|g\b|kg\b|克|%|of us\b))"
     r"|(\d+(?:\.\d+)?)(?=\s*(?:per|each)\s*(?:meal|dinner)\b)"
-    r"|(?:每餐|一餐|每顿|一顿|每周|一周)(?:预算|不超过|最多|大约|约|花)?\s*(\d+(?:\.\d+)?)(?!\s*(?:人|个|分钟|天|次|顿|餐|道))"
+    r"|(?:每餐|一餐|每顿|一顿|每周|一周)(?:预算|不超过|最多|大约|约|花)?\s*(\d+(?:\.\d+)?)"
+    r"(?!\d|\.\d|\s*(?:人|个|分钟|天|次|顿|餐|道|千卡|大卡|卡|kcal|cal))"
 )
 # What an amount is for, from the words right after it, then right before it. A meal ("S$12 per dinner",
 # 每餐不超过15新币) is read first, then the week ("S$10 total", "total of S$10", "S$10 for the week", 一共10新币).
@@ -248,13 +249,17 @@ MEAL_KCAL = re.compile(
     r"|(\d{3,4})\s*(?:kcal|cal\b|calories?)\s*(?:or (?:less|under)\s*)?(?:per|each|a|every)\s+meal\b"
     r"|(?:每餐|一餐|每顿)[^\d，。；]{0,8}?(\d{3,4})\s*(?:千卡|大卡|卡)"
 )
-NOT_A_CEILING = re.compile(r"at least|minimum|no less than|more than|over \d|至少|不少于|不低于")
+# A floor, or a number to aim at. "No more than" is a ceiling; "more than" alone is a floor.
+NOT_A_CEILING = re.compile(
+    r"at least|minimum|not? less than|(?<!no )(?<!not )more than|over \d|target|\baim|around|about"
+    r"|至少|不少于|不低于|目标|约"
+)
 
 
 def read_meal_kcal(text: str) -> float | None:
     """The ceiling a lower-cased message puts on every meal's kcal; a floor ("at least 400") is not one."""
     match = MEAL_KCAL.search(text)
-    if match is None or NOT_A_CEILING.search(text[max(0, match.start() - 16) : match.end()]):
+    if match is None or NOT_A_CEILING.search(CLAUSE_END.split(text[max(0, match.start() - 16) : match.end()])[-1]):
         return None
     value = float(next(group for group in match.groups() if group))
     return value if 100 <= value <= 2500 else None
@@ -297,13 +302,21 @@ DISH_LEAD = re.compile(
 # Words that name no dish: "skip lunch on Friday", "something quick on Monday".
 NOT_A_DISH = re.compile(
     r"\d|\$|\b(?:no|not|don't|without|skip|cancel|away|out|home|plan|week|meals?|dish(?:es)?|something|anything|food|"
-    r"budget|people|lunch|dinner|breakfast|cooking|leftovers?|nothing)\b|[人份块元钱]|^做饭|^吃饭"
+    r"budget|people|lunch(?:es)?|dinners?|breakfasts?|cooking|leftovers?|nothing|start(?:ing)?|begin(?:ning)?|"
+    r"shop(?:ping)?|work(?:ing)?|guests?|late|busy)\b|[人份块元钱]|^做饭|^吃饭"
+)
+# A meal described, with no dish in the words: "spicy", "make it quick", 辣的, 简单一点.
+DESCRIBES = re.compile(
+    r"(?:(?:it|only|just|very|really|more|less|extra|super|quite|cook|eat|spicy|mild|hot|simple|easy|quick|fast|light|"
+    r"lighter|heavy|healthy|healthier|cheap|cheaper|vegetarian|vegan|halal|low[- ]?carb|low[- ]?fat|low[- ]?sodium|"
+    r"high[- ]?protein|fresh|homemade|filling|tasty|different)\b[\s,]*)+"
+    r"|(?:很|比较|清|得)?(?:辣|甜|酸|咸|淡|素|简单|清淡|便宜|快手|快|健康|好吃|营养|丰盛|家常|少油|少盐|低脂|低卡|低碳|高蛋白)(?:一点|一些|点|些|的)*"
 )
 
 
 def _dish_name(words: str) -> str | None:
     name = DISH_LEAD.sub("", words.strip()).strip()
-    return name if len(name) >= 2 and not NOT_A_DISH.search(name) else None
+    return name if len(name) >= 2 and not NOT_A_DISH.search(name) and not DESCRIBES.fullmatch(name) else None
 
 
 def read_required_dish(message: str) -> DishAsked | None:
@@ -336,8 +349,9 @@ def apply_rule_dish(extraction: AgentConstraintExtraction, message: str) -> None
     ceiling = read_meal_kcal(message.lower())
     if ceiling is not None:
         extraction.max_kcal_per_meal = ceiling
-    if extraction.max_kcal_per_meal is not None and extraction.nutrition_targets is not None:
-        extraction.nutrition_targets.calories_kcal = None  # a ceiling, not a number to aim at
+    targets = extraction.nutrition_targets
+    if targets is not None and extraction.max_kcal_per_meal == targets.calories_kcal:
+        targets.calories_kcal = None  # one number read twice: a ceiling, not a number to aim at
     extraction.required_dish = extraction.required_dish or read_required_dish(message)
 
 

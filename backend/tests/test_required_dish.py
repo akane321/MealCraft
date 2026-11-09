@@ -2,20 +2,22 @@
 offered verified ways out (owner, 2026-11-09)."""
 
 import re
-from datetime import date
+from datetime import date, timedelta
 from types import SimpleNamespace
 
 import pytest
 
 from app.agent import limits
 from app.agent.parser import RuleBasedConstraintParser, read_meal_kcal, read_required_dish
-from app.agent.required_dish import Replacement, resolve
+from app.agent.required_dish import Replacement, resolve, similar
+from app.core import clock
 from app.orchestration.interactions import say_interaction
 from app.orchestration.runtime import BoundedAgentOrchestrator
 from app.planning.meal_beam import meal_permitted
 from app.planning.product_path import ProductPlanningError
 from app.planning.week_floor import week_floor
 from app.schemas.agent import AgentConstraintState, DishAsked, OfferedChange
+from app.schemas.household_rules import HouseholdPlanning, PresenceRule
 from app.schemas.meal_plan import (
     MEAL_PRESETS,
     STRUCTURED_PRESETS,
@@ -60,6 +62,14 @@ def test_a_named_dish_is_read_with_its_day_and_meal(message, name, weekday, meal
         "no pork on Friday dinner",
         "周五晚餐不要鱼",
         "plan a week for 2",
+        "Five people want spicy dinners on Friday.",
+        "五个人，周五晚餐想吃辣的。",
+        "2 people. Friday dinner should be simple.",
+        "Friday's dinner is quick",
+        "Make it spicy on Friday",
+        "vegetarian on Friday",
+        "only cook on Friday",
+        "周六晚餐要简单一点",
     ],
 )
 def test_a_message_that_names_no_dish_pins_nothing(message):
@@ -74,6 +84,11 @@ def test_a_message_that_names_no_dish_pins_nothing(message):
         ("每餐不超过650千卡", 650),
         ("at least 400 kcal each meal", None),
         ("2000 kcal a day", None),
+        ("no more than 650 calories per meal", 650),
+        ("each meal not more than 650 kcal", 650),
+        ("eat more than 400 kcal per meal", None),
+        ("每餐目标550千卡", None),
+        ("budget about 60, each meal under 650 kcal", 650),
     ],
 )
 def test_only_a_ceiling_on_every_meal_is_read_as_one(message, ceiling):
@@ -86,6 +101,37 @@ def test_a_meal_ceiling_is_no_calorie_target_to_aim_at():
     )
     assert extraction.max_kcal_per_meal == 650
     assert extraction.nutrition_targets is None or extraction.nutrition_targets.calories_kcal is None
+
+
+def read(message: str):
+    return RuleBasedConstraintParser().parse(
+        message, current=AgentConstraintState(), acknowledged_unknowns=[], history=[]
+    )
+
+
+@pytest.mark.parametrize(
+    ("message", "kcal"), [("两个人，每餐目标550千卡。", 550), ("六个人，每餐目标600卡路里。", 600)]
+)
+def test_a_target_for_each_meal_stays_a_target(message, kcal):
+    extraction = read(message)
+    assert extraction.max_kcal_per_meal is None and extraction.nutrition_targets.calories_kcal == kcal
+
+
+def test_a_daily_target_stays_beside_a_meal_ceiling():
+    extraction = read("1800 kcal a day, each meal under 650 kcal")
+    assert extraction.max_kcal_per_meal == 650 and extraction.nutrition_targets.calories_kcal == 1800
+
+
+def test_no_more_than_is_the_meal_ceiling_and_no_daily_target():
+    extraction = read("no more than 650 calories per meal")
+    assert extraction.max_kcal_per_meal == 650
+    assert extraction.nutrition_targets is None or extraction.nutrition_targets.calories_kcal is None
+
+
+def test_a_chinese_calorie_ceiling_is_no_money():
+    extraction = read("每餐不超过650千卡")
+    assert extraction.max_kcal_per_meal == 650 and extraction.budget_per_meal_sgd is None
+    assert read("每餐不超过15").budget_per_meal_sgd == 15
 
 
 def catalog() -> list:
@@ -171,6 +217,94 @@ def test_fresh_food_named_past_its_days_offers_the_latest_day_it_fits():
     assert isinstance(refused, limits.Refusal) and "Friday is too late" in refused.text
     assert refused.options == (("Have it on Wednesday", "Have it on Wednesday"),)
     assert refused.changes[0].required_dish.weekday == "wednesday"
+
+
+def test_a_meal_the_plan_lacks_is_said_so_not_called_a_missing_dish(client):
+    session = start(client, "Dinners for 2 people. Chicken Roast for lunch on Friday.")
+    assert session["status"] == "collecting" and said(session) == "This plan doesn't include lunch."
+
+
+def message(client, session: dict, text: str) -> dict:
+    return client.post(f"/api/agent/sessions/{session['id']}/messages", json={"message": text}).json()
+
+
+def test_a_dish_the_plan_no_longer_has_a_day_for_leaves_it_and_says_so(client):
+    day = (clock.now() + timedelta(days=3)).strftime("%A")
+    session = start(client, f"A week of dinners for 2 people. Chicken Roast on {day} dinner.")
+    assert session["status"] == "ready", said(session)
+
+    after = message(client, session, "Actually just plan tomorrow's dinner")
+
+    assert after["status"] == "ready", said(after)
+    assert f"This plan doesn't include {day}. Chicken Roast is no longer in this plan." in said(after)
+    assert after["constraints"].get("required_dish") is None
+
+
+def test_an_exclusion_said_after_the_dish_leaves_it_and_says_why(client):
+    session = start(client, "A week of dinners for 2 people. Chicken Roast on Friday dinner.")
+
+    after = message(client, session, "no chicken")
+
+    assert after["status"] == "ready", said(after)
+    assert "I can't plan Chicken Roast: it has an ingredient you excluded." in said(after)
+    assert "Chicken Roast is no longer in this plan." in said(after)
+    assert after["constraints"].get("required_dish") is None
+
+
+def test_a_shape_with_no_role_for_the_dish_leaves_it_and_says_so(client):
+    session = start(client, "A week of dinners for 2 people. Broccoli Stirfry on Friday dinner.")
+    assert session["constraints"]["required_dish"]["role_id"] != "main"
+
+    after = message(client, session, "just a main for dinner")
+
+    assert after["status"] == "ready", said(after)
+    assert "This plan has no place for Broccoli Stirfry." in said(after)
+    assert after["constraints"].get("required_dish") is None
+
+
+def test_a_dish_still_in_the_plan_stays_through_a_later_message(client):
+    session = start(client, "A week of dinners for 2 people. Chicken Roast on Friday dinner.")
+
+    after = message(client, session, "under 60 minutes")
+
+    assert after["status"] == "ready", said(after)
+    assert after["constraints"]["required_dish"]["recipe_slug"] == "chicken-roast"
+
+
+def similar_case(household=None):
+    recipes = catalog()
+    cost = {"luxury-curry": 12.0, "salmon-curry": 6.0}
+    ranked = [
+        SimpleNamespace(recipe=recipe, grocery_estimate=SimpleNamespace(consumed_total_sgd=cost[recipe.slug]))
+        for recipe in recipes
+        if recipe.slug in cost
+    ]
+    request = WeeklyMealPlanRequest(
+        household_size=4,
+        start_date=date(2026, 11, 9),
+        plan_shape=MealPlanShape.model_validate(DINNER),
+        household=household,
+    )
+    return request, recipes, ranked
+
+
+@pytest.mark.parametrize("stale", [{"meal": "lunch"}, {"role_id": "soup"}])
+def test_a_pin_the_shape_has_lost_has_no_replacements(stale):
+    request, recipes, ranked = similar_case()
+    assert similar(CURRY.model_copy(update=stale), request, recipes, ranked) == []
+
+
+def test_money_saved_is_for_who_is_home_at_the_pinned_meal():
+    away = {"source_text": "x", "restatement": "x", "present": False, "weekdays": ["friday"], "meal_types": ["dinner"]}
+    household = HouseholdPlanning(
+        members=[{"name": name, "servings": 1} for name in "ABCD"],
+        presence_rules=[PresenceRule.model_validate({**away, "member_name": name}) for name in "CD"],
+    )
+
+    everyone = similar(CURRY, *similar_case())
+    two_home = similar(CURRY, *similar_case(household))
+
+    assert everyone[0].saved_sgd == 6.0 and two_home[0].saved_sgd == 3.0
 
 
 def budget_conflict(client) -> dict:
@@ -289,6 +423,7 @@ def test_none_qualifies_says_what_binds_and_offers_nothing():
     refused = conflict(passing={"pin_free"}, swaps=())
 
     assert refused.options == () and "Luxury Curry" in refused.text and "S$" in refused.text
+    assert "2 people" not in refused.text and "240" not in refused.text
 
 
 def test_a_conflict_a_week_without_the_dish_shares_is_not_the_dishs_to_answer():

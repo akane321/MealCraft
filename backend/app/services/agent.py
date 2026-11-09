@@ -56,6 +56,7 @@ from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.products.provider import ProductProviderError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
+from app.repositories.recipe import POOL_COURSES
 from app.retrieval.evidence import grocery_packet, packet_digest, verify_grocery_totals
 from app.schemas.agent import (
     AgentConfirmationResponse,
@@ -899,9 +900,10 @@ class AgentSessionService:
                 ranked,
                 lambda recipe: self.meal_plan_service.dish_blockers(request, recipe),
                 lang,
+                lambda: self.meal_plan_service.recipe_repository.list_for_planning(courses=sorted(POOL_COURSES)),
             )
         except (ValueError, ProductProviderError, WeeklyPlanSelectionError):
-            return limits.Refusal(required_dish.FIELD, say("pin_retry", lang))
+            return limits.Refusal(required_dish.FIELD, say("pin_retry", lang), retry=True)
 
     def _check(self, request: WeeklyMealPlanRequest) -> Callable[..., Exception | None]:
         """What Plan would answer for the request with `changes` made to it: None for a week, else its error."""

@@ -210,6 +210,15 @@ class AgentConstraintWorkflow:
             else:
                 merged.required_dish = found
                 notes.append(say("pin_noted", lang, title=found.title, when=pin_when(found, lang)))
+        elif merged.required_dish is not None and self.resolve_dish is not None:
+            # Whatever this message changed can leave the dish no place, or rule it out: the latest word wins, said.
+            pin = merged.required_dish
+            found = self.resolve_dish(DishAsked(name=pin.title, weekday=pin.weekday, meal=pin.meal), merged, lang)
+            if isinstance(found, RequiredDish):
+                merged.required_dish = found
+            elif not found.retry:
+                merged.required_dish = None
+                notes.append(say("pin_released", lang, why=found.text, title=pin.title))
         self._prorate_budget(
             merged,
             current,

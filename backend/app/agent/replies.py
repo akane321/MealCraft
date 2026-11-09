@@ -617,6 +617,8 @@ REPLIES: dict[str, tuple[str, str]] = {
         "I couldn't find {name} in the recipes. Which dish do you mean?",
         "菜谱里没有找到{name}。你想要哪道菜？",
     ),
+    "pin_no_place": ("This plan has no place for {title}.", "这次计划里排不下 {title}。"),
+    "pin_released": ("{why} {title} is no longer in this plan.", "{why}这次计划不再安排 {title}。"),
     "pin_which": ("Which {name} do you mean?", "你说的{name}是哪一道？"),
     "pin_not_in_plan": ("This plan doesn't include {day}.", "这次计划不包含{day}。"),
     "pin_not_fresh": (
@@ -643,9 +645,10 @@ REPLIES: dict[str, tuple[str, str]] = {
         "{title} 每份 {kcal:.0f} 千卡，加上这顿的其他菜，我找不到不超过 {limit:g} 千卡的{meal}。",
     ),
     "pin_stuck": (
-        "I found no plan with {title} at {when} within {limits}.",
-        "我找不到{when}有 {title} 又满足{limits}的计划。",
+        "With {limits}, I found no plan that has {title} at {when}.",
+        "在{limits}的条件下，我找不到{when}有 {title} 的计划。",
     ),
+    "pin_stuck_bare": ("I found no plan that has {title} at {when}.", "我找不到{when}有 {title} 的计划。"),
     "pin_swap_offer": ("{after} is the closest dish that fits.", "{after} 是最接近又排得下的菜。"),
     "pin_swap_saved": ("Against {before} it is {saved}.", "比起 {before}，{saved}。"),
     "pin_saved_money": ("S${amount:.2f} cheaper to cook", "做一次便宜 S${amount:.2f}"),

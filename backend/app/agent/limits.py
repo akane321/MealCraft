@@ -29,6 +29,7 @@ from app.planning.week_floor import WeekFloor
 from app.products.provider import ProductProviderError
 from app.schemas.agent import OfferedChange
 from app.schemas.meal_plan import MealPlanShape, default_plan_shape
+from app.schemas.recommendation import NO_COOKING_TIME_LIMIT
 
 # The floor is a float sum of per-unit prices; the planner rounds each ingredient's cost to the cent.
 SLACK_SGD = 0.05
@@ -371,8 +372,14 @@ def _pin_conflict(constraints, lang: str, check, cheapest, replacements) -> Refu
     elif calories:
         parts = [say("pin_over_kcal", lang, title=title, kcal=pin.kcal, meal=meal, limit=ceiling)]
     else:
-        limits = joined(details(constraints, lang), lang)
-        parts = [say("pin_stuck", lang, title=title, when=when, limits=limits)]
+        # What the household holds the week to: who eats is no limit, and the default time cap was never said.
+        minutes = constraints.max_cooking_time_minutes
+        minutes = None if minutes == NO_COOKING_TIME_LIMIT else minutes
+        limits = details(
+            constraints.model_copy(update={"household_size": None, "max_cooking_time_minutes": minutes}), lang
+        )
+        key, values = ("pin_stuck", {"limits": joined(limits, lang)}) if limits else ("pin_stuck_bare", {})
+        parts = [say(key, lang, title=title, when=when, **values)]
     options: list[tuple[str, str]] = []
     changes: list[OfferedChange] = []
 
