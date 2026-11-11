@@ -1,8 +1,3 @@
-<script lang="ts">
-// Counts across the home page and the workspace, which each mount their own microphone.
-let demoIndex = 0;
-</script>
-
 <script setup lang="ts">
 import { DEMO_SENTENCES } from "~/lib/demo-script";
 import { revealTokens } from "~/lib/reveal";
@@ -222,6 +217,11 @@ onBeforeUnmount(() => {
   document.removeEventListener("visibilitychange", onHidden);
   if (phase.value !== "idle") cancel();
 });
+</script>
+
+<script lang="ts">
+// Counts across the home page and the workspace, which each mount their own microphone.
+let demoIndex = 0;
 </script>
 
 <template>
