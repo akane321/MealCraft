@@ -16,7 +16,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.agent import limits
-from app.agent.limits import _budget_short, planning_failure
+from app.agent.limits import _budget_short, planning_failure, without_role
 from app.agent.parser import (
     FallbackConstraintParser,
     OpenAIConstraintParser,
@@ -24,13 +24,15 @@ from app.agent.parser import (
 )
 from app.agent.replies import language, planner_message
 from app.core.config import get_settings
+from app.orchestration.interactions import say_interaction
+from app.orchestration.runtime import BoundedAgentOrchestrator
 from app.planning import meal_beam
 from app.planning.meal_composition import portion_shares
 from app.planning.product_path import ProductPlanningEngine, ProductPlanningError
 from app.planning.week_floor import WeekFloor, _cheapest_days, _cheapest_meal, week_floor
 from app.products.provider import ProductProviderError
 from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState
-from app.schemas.meal_plan import MEAL_PRESETS, WeeklyMealPlanRequest
+from app.schemas.meal_plan import MEAL_ORDER, MEAL_PRESETS, STRUCTURED_PRESETS, MealPlanShape, WeeklyMealPlanRequest
 from app.schemas.planning_v2 import PlanningCompositionPolicy
 from app.services.agent import AgentSessionService
 from app.services.meal_plan import WeeklyMealPlanService
@@ -401,7 +403,8 @@ def test_a_budget_under_the_floor_is_refused_with_the_cheapest_week_and_no_four_
         "(7 meals). The cheapest week I could find costs S$31.70."
     )
     assert not told.aside and told.options[0] == ("Use S$32 for the week", "Make the weekly budget S$32")
-    assert asked == [{}, {"household_size": 1}]  # the cheapest week, then half the household's; no four-dish week
+    assert asked[:2] == [{}, {"household_size": 1}]  # the cheapest week, then half the household's; no four-dish week
+    assert all(set(changes) == {"plan_shape"} for changes in asked[2:])  # then the week without each dish it may drop
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
@@ -1262,3 +1265,305 @@ def test_a_repeated_dish_is_offered_for_a_swap_when_the_week_repeats_one(compose
     assert re.fullmatch(r"Swap the .+ on [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}", swap)
     previewed = tap(composed_client, offered, swap)
     assert previewed["pending_replan"]["status"] == "previewed"
+
+
+# Owner, 2026-11-09: under a weekly budget no week meets, the agent also proposes the one dish whose going lets a
+# real week fit; the household reads it, taps it, and can plan.
+
+SOUP_SENTENCE = {"en": "Drop the soup at dinner", "zh": "晚餐不要汤"}
+
+
+def full_shape() -> MealPlanShape:
+    return MealPlanShape.model_validate(
+        {"meals": {meal: list(STRUCTURED_PRESETS[meal].values())[0] for meal in MEAL_ORDER}}
+    )
+
+
+def taken_off(shape: MealPlanShape, base: MealPlanShape) -> tuple[str, str]:
+    (gone,) = [
+        (meal, role.role_id)
+        for meal, roles in base.meals.items()
+        for role in roles
+        if role.role_id not in {kept.role_id for kept in shape.meals[meal]}
+    ]
+    return gone
+
+
+def cheapest_by_dish(costs: dict, base: MealPlanShape, asked: list | None = None):
+    """Each dish taken off costs its entry in `costs`; any other change finds no week."""
+
+    def cheapest(**changes):
+        if "plan_shape" not in changes:
+            return None
+        dish = taken_off(changes["plan_shape"], base)
+        if asked is not None:
+            asked.append(dish)
+        return costs.get(dish)
+
+    return cheapest
+
+
+@pytest.mark.parametrize(
+    ("lang", "offer", "said"),
+    [
+        (
+            "en",
+            "Or I can drop the soup at dinner: the cheapest week I found without it costs S$31.50, within your S$40.",
+            "Drop the soup at dinner",
+        ),
+        ("zh", "也可以晚餐不要汤：这样我找到的最便宜的一周要 S$31.50，在 S$40 预算之内。", "晚餐不要汤"),
+    ],
+)
+def test_the_dish_whose_going_saves_most_is_offered_beside_the_budget(lang, offer, said):
+    base, asked = full_shape(), []
+    state = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=base)
+    costs = {("dinner", "soup"): 31.5, ("dinner", "vegetable"): 36.0, ("lunch", "vegetable"): 38.0}
+    told = _budget_short(52.0, state, lang, cheapest_by_dish(costs, base, asked), lambda **_: None)
+
+    assert told.text.endswith(offer)
+    assert told.options == (limits._option("use_weekly", lang, amount=52), ("Drop the soup at dinner", said))
+    # Never the main, a staple a protein main needs, a meal's only dish, or a dish for more people than eat.
+    assert sorted(asked) == [("dinner", "main-2"), ("dinner", "soup"), ("dinner", "vegetable"), ("lunch", "vegetable")]
+
+
+def test_a_dish_is_offered_only_when_a_real_week_within_the_budget_backs_it():
+    base = full_shape()
+    state = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=base)
+    plain = _budget_short(52.0, state, "en", lambda **_: None)
+    costs = {("dinner", "soup"): 31.5, ("dinner", "vegetable"): 36.0}
+    vegetable = without_role(base, "dinner", "vegetable")
+    checked = []
+
+    def nothing_plans(**changes):
+        checked.append(changes["plan_shape"])
+        return RuntimeError("no week")
+
+    assert _budget_short(52.0, state, "en", cheapest_by_dish(costs, base), nothing_plans) == plain
+    assert sorted(taken_off(shape, base) for shape in checked) == [("dinner", "soup"), ("dinner", "vegetable")]
+
+    def over_budget(**changes):
+        raise AssertionError("a week dearer than the budget is not checked")
+
+    dear = {("dinner", "soup"): 40.01}
+    assert _budget_short(52.0, state, "en", cheapest_by_dish(dear, base), over_budget) == plain
+
+    def only_the_vegetable(**changes):
+        return None if changes["plan_shape"] == vegetable else RuntimeError("no week")
+
+    told = _budget_short(52.0, state, "en", cheapest_by_dish(costs, base), only_the_vegetable)
+    assert told.options[-1] == ("Drop the vegetable dish at dinner", "Drop the vegetable dish at dinner")
+    assert "S$36.00" in told.text
+
+
+def test_a_second_dish_of_its_kind_is_named_apart_and_a_short_plan_says_plan():
+    base = full_shape()
+    state = AgentConstraintState(household_size=4, weekly_budget_sgd=20, plan_shape=base, day_count=3)
+    cheapest = cheapest_by_dish({("dinner", "main-2"): 18.0}, base)
+
+    told = _budget_short(30.0, state, "en", cheapest, lambda **_: None)
+    assert told.options[-1][0] == "Drop the second main dish at dinner"
+    assert "the cheapest plan I found without it costs S$18.00" in told.text
+    assert _budget_short(30.0, state, "zh", cheapest, lambda **_: None).options[-1][1] == "晚餐不要第2道主菜"
+
+
+def test_a_week_the_planner_could_not_find_offers_the_dish_too():
+    base = full_shape()
+    state = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=base)
+    cheapest = cheapest_by_dish({("dinner", "soup"): 31.5}, base)
+    failure = ProductPlanningError(
+        "infeasible",
+        "Over the budget.",
+        {
+            "validation_attempts": [
+                {
+                    "cheapest_search": True,
+                    "purchase_total_sgd": 52.0,
+                    "checks": [{"code": "purchase_budget", "status": "failed", "hard": True}],
+                }
+            ]
+        },
+    )
+    seen = {}
+    service = SimpleNamespace(
+        _plan_request=lambda constraints: "request",
+        _cheapest=lambda request: cheapest,
+        _check=lambda request: lambda **_: None,
+        repository=SimpleNamespace(explain_unplanned=lambda session_id, **told: seen.update(told)),
+    )
+    snapshot = SimpleNamespace(id=1, constraints=state, context_version=3)
+
+    text = AgentSessionService._explain_unplanned(service, snapshot, failure, "en")
+
+    assert "S$31.50" in text
+    assert seen["pending_interaction"].options[-1].value == "Drop the soup at dinner"
+
+
+class NoModel:
+    provider = "stub"
+
+    def parse(self, *args, **kwargs):
+        raise AssertionError("the tapped option went to the parser")
+
+    def classify(self, *args, **kwargs):
+        raise AssertionError("the tapped option went to the scope classifier")
+
+
+def tap_turn(sentence: str, current: AgentConstraintState, *, offered: bool = True):
+    options = [("Use S$52 for the week", "Make the weekly budget S$52"), ("Drop the soup at dinner", sentence)]
+    pending = say_interaction(options=options, question_id="q", context_version=2, lang="en") if offered else None
+    return BoundedAgentOrchestrator(NoModel(), scope_classifier=NoModel(), check=lambda *_: None).process(
+        sentence,
+        current=current,
+        acknowledged_unknowns=[],
+        history=[],
+        current_status="collecting",
+        current_missing_fields=["weekly_budget_sgd"],
+        current_questions=["That budget can't cover this week."],
+        context_version=2,
+        pending_interaction=pending,
+    )
+
+
+@pytest.mark.parametrize(
+    ("lang", "note"), [("en", "This plan leaves out the soup at dinner."), ("zh", "这次计划晚餐不要汤。")]
+)
+def test_tapping_the_dish_asks_no_model_and_changes_only_the_shape(lang, note):
+    base = full_shape()
+    current = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=base, allergens=["peanut"])
+
+    outcome = tap_turn(SOUP_SENTENCE[lang], current)
+
+    assert outcome.status == "ready" and outcome.missing_fields == [] and outcome.pending_interaction is None
+    assert outcome.assistant_message.startswith(note)
+    assert outcome.constraints.plan_shape == without_role(base, "dinner", "soup")
+    skip = {"plan_shape", "start_date", "dropped_dishes"}
+    left, before = (item.model_dump(exclude=skip) for item in (outcome.constraints, current))
+    assert left == before
+
+
+def test_the_same_words_unoffered_are_read_as_any_message():
+    current = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=full_shape())
+    with pytest.raises(AssertionError, match="scope classifier"):
+        tap_turn("Drop the soup at dinner", current, offered=False)
+
+
+def test_tapping_the_dish_on_a_short_plan_keeps_its_days_and_meals():
+    base = full_shape()
+    tonight = MealPlanShape.model_validate({"meals": {"dinner": base.meals["dinner"]}})
+    current = AgentConstraintState(
+        household_size=4, weekly_budget_sgd=10, plan_shape=tonight, usual_plan_shape=base, day_count=1
+    )
+
+    constraints = tap_turn("Drop the soup at dinner", current).constraints
+
+    assert constraints.day_count == 1 and list(constraints.plan_shape.meals) == ["dinner"]
+    assert "soup" not in {role.role_id for role in constraints.plan_shape.meals["dinner"]}
+    assert constraints.usual_plan_shape.meals["lunch"] == base.meals["lunch"]
+
+
+def test_tapping_a_dish_of_a_meal_the_household_lacks_leaves_the_household_its_meals():
+    base = full_shape()
+    usual = MealPlanShape.model_validate({"meals": {"dinner": base.meals["dinner"]}})
+    plan = MealPlanShape.model_validate({"meals": {"lunch": base.meals["lunch"], "dinner": base.meals["dinner"]}})
+    current = AgentConstraintState(
+        household_size=4,
+        weekly_budget_sgd=10,
+        base_weekly_budget_sgd=40,
+        plan_shape=plan,
+        usual_plan_shape=usual,
+        day_count=3,
+    )
+
+    constraints = tap_turn("Drop the vegetable dish at lunch", current).constraints
+
+    assert constraints.usual_plan_shape == usual
+    assert constraints.plan_shape == without_role(plan, "lunch", "vegetable")
+    assert (constraints.weekly_budget_sgd, constraints.base_weekly_budget_sgd) == (10, 40)
+
+
+def test_a_first_vegetable_dish_is_not_offered_while_a_second_one_would_stay():
+    base = full_shape()
+    state = AgentConstraintState(household_size=5, weekly_budget_sgd=40, plan_shape=base)
+    asked = []
+    costs = {("dinner", "vegetable"): 30.0, ("dinner", "vegetable-2"): 30.0}
+
+    told = _budget_short(52.0, state, "en", cheapest_by_dish(costs, base, asked), lambda **_: None)
+
+    assert ("dinner", "vegetable") not in asked
+    assert told.options[-1][0] == "Drop the second vegetable dish at dinner"
+
+
+def test_keeping_a_later_change_saves_the_dish_dropped_for_the_budget_as_the_household_had_it():
+    full = full_shape()
+    household = MealPlanShape.model_validate({"meals": {"lunch": full.meals["lunch"], "dinner": full.meals["dinner"]}})
+    current = AgentConstraintState(household_size=4, weekly_budget_sgd=40, plan_shape=household)
+    tapped = tap_turn("Drop the soup at dinner", current).constraints
+    stored = AgentConstraintState.model_validate(tapped.model_dump(mode="json"))  # as the conversation is kept
+    later = MealPlanShape(meals={**tapped.plan_shape.meals, "breakfast": full.meals["breakfast"]})
+    saved = []
+    service = SimpleNamespace(
+        meal_plan_service=SimpleNamespace(get=lambda plan_id: SimpleNamespace(plan_shape=later)),
+        keep_plan_shape=saved.append,
+        repository=SimpleNamespace(append_replan_exchange=lambda *_, **__: "updated"),
+        _to_response=lambda updated: updated,
+    )
+
+    AgentSessionService._answer_keep_shape(service, 1, SimpleNamespace(plan_id=1, constraints=stored), "yes", keep=True)
+
+    assert saved == [MealPlanShape(meals={**household.meals, "breakfast": full.meals["breakfast"]})]
+
+
+@pytest.fixture(params=["fixture", "openai"])
+def costly_soup(request, monkeypatch):
+    if request.param == "openai":
+        stub_openai(monkeypatch)
+    dishes = [
+        _dish("salmon-bake", "main", "salmon_fillet", 400, calories=500),
+        _dish("chicken-roast", "main", "chicken_breast", 400, calories=450),
+        _dish("broccoli-stirfry", "side", "broccoli", 300, calories=100),
+        _dish("spinach-saute", "side", "baby_spinach", 200, calories=80),
+        _dish("zucchini-salad", "salad", "zucchini", 300, calories=60),
+        _dish("costly-soup", "soup", "tomato", 8000, calories=150, cook=25),
+    ]
+    with dish_client(monkeypatch, dishes) as client:
+        client.mode = request.param
+        yield client
+
+
+def test_a_saved_soup_is_dropped_for_this_plan_and_the_profile_keeps_it(costly_soup):
+    dinner = [
+        {"role_id": "main", "courses": ["main"]},
+        {"role_id": "vegetable", "courses": ["side", "salad"], "required": False},
+        {"role_id": "soup", "courses": ["soup"]},
+    ]
+    profile_of_four(costly_soup, weekly_budget_sgd=45, plan_shape={"meals": {"dinner": dinner}})
+    saved = costly_soup.get("/api/household-profiles/current").json()
+
+    session = costly_soup.post("/api/agent/sessions", json={"message": "Plan a week for us"}).json()
+    reply = session["messages"][-1]["content"]
+    assert session["status"] == "collecting", reply
+    quoted = float(re.search(r"without it costs S\$(\d+\.\d\d), within your S\$45\.", reply).group(1))
+    assert quoted <= 45 < cheapest_quoted(reply)
+    assert labels(session)[0].startswith("Use S$") and labels(session)[-1] == "Drop the soup at dinner"
+
+    ready = tap(costly_soup, session, "Drop the soup at dinner")
+
+    assert ready["status"] == "ready" and ready["can_confirm"], ready["messages"][-1]["content"]
+    assert ready["messages"][-1]["content"].startswith("This plan leaves out the soup at dinner.")
+    assert [role["role_id"] for role in ready["constraints"]["plan_shape"]["meals"]["dinner"]] == ["main", "vegetable"]
+    plan = plans(costly_soup, ready)
+    assert plan["grocery_estimate"]["purchase_total_sgd"] <= 45
+    assert {dish["role_id"] for dish in plan["days"]} == {"main", "vegetable"}
+    assert costly_soup.get("/api/household-profiles/current").json() == saved
+
+
+def test_the_running_product_prices_at_the_store_whatever_the_model_echoes(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    from app.agent import workflow
+
+    monkeypatch.setattr(workflow, "get_settings", lambda: SimpleNamespace(default_pricing_mode="live"))
+    merged = workflow.AgentConstraintWorkflow._merge_constraints(
+        AgentConstraintState(), AgentConstraintExtraction(pricing_mode="fixture")
+    )
+    assert merged.pricing_mode == "live"

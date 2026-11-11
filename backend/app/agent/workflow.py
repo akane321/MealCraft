@@ -5,15 +5,22 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from app.agent import replies
-from app.agent.limits import Refusal
+from app.agent.limits import Refusal, dropped_dish_note, pin_when, without_role
 from app.agent.parser import ConstraintParser, bare_amount, read_budgets
 from app.agent.plan_dates import MEAL_ORDER, default_start, read_span, read_start, reads_week
 from app.agent.replies import language, say
 from app.agent.shape_change import setup_shape
 from app.core import clock
-from app.schemas.agent import AgentConstraintExtraction, AgentConstraintState, AgentMessageResponse
+from app.core.config import get_settings
+from app.schemas.agent import (
+    AgentConstraintExtraction,
+    AgentConstraintState,
+    AgentMessageResponse,
+    DishAsked,
+    OfferedChange,
+)
 from app.schemas.household_rules import HouseholdPlanning, limits_of_every_member
-from app.schemas.meal_plan import MealPlanShape, default_plan_shape
+from app.schemas.meal_plan import MealPlanShape, RequiredDish, default_plan_shape
 from app.schemas.recommendation import AvailableIngredientInput, NutritionTargets
 
 
@@ -32,17 +39,28 @@ class AgentWorkflowState(TypedDict, total=False):
     language: str
     refusal: Refusal | None
     asked: str | None
+    drop: tuple[str, str] | None  # the (meal, role) a tap on "drop this dish" took off: read without the model
+    change: OfferedChange | None  # what the option tapped does: read without the model too
 
 
 BUDGET_FIELDS = {"weekly_budget_sgd", "budget_per_meal_sgd"}
 # Before the assistant says it has everything: a limit no week can meet, or None (agent/limits.py).
 FeasibilityCheck = Callable[[AgentConstraintState, str], Refusal | None]
+# A dish named in the message: the recipe and role it is, or the reply that says why not.
+DishResolver = Callable[[DishAsked, AgentConstraintState, str], RequiredDish | Refusal]
 
 
 class AgentConstraintWorkflow:
-    def __init__(self, parser: ConstraintParser, *, check: FeasibilityCheck | None = None) -> None:
+    def __init__(
+        self,
+        parser: ConstraintParser,
+        *,
+        check: FeasibilityCheck | None = None,
+        resolve_dish: DishResolver | None = None,
+    ) -> None:
         self.parser = parser
         self.check = check
+        self.resolve_dish = resolve_dish
         graph = StateGraph(AgentWorkflowState)
         graph.add_node("parse_message", self._parse_message)
         graph.add_node("assess_constraints", self._assess_constraints)
@@ -59,20 +77,29 @@ class AgentConstraintWorkflow:
         acknowledged_unknowns: list[str],
         history: list[AgentMessageResponse],
         asked: str | None = None,
+        drop: tuple[str, str] | None = None,
+        change: OfferedChange | None = None,
     ) -> AgentWorkflowState:
-        """`asked` is the field the assistant's last question was about, if any."""
+        """`asked` is the field the assistant's last question was about, if any; `drop` a dish taken off by a tap,
+        `change` what another offered option does."""
         return self.graph.invoke(
             {
-                "message": message,
+                "message": "" if drop or change else message,  # the tap means `drop` or `change`: no rule reads it
                 "current_constraints": current.model_dump(mode="json"),
                 "acknowledged_unknowns": acknowledged_unknowns,
                 "history": history,
                 "language": language(message, history),
                 "asked": asked,
+                "drop": drop,
+                "change": change,
             }
         )
 
     def _parse_message(self, state: AgentWorkflowState) -> AgentWorkflowState:
+        if state.get("drop") or state.get("change"):
+            change = state.get("change")
+            amount = change.weekly_budget_sgd if change else None
+            return {"extraction": AgentConstraintExtraction(weekly_budget_sgd=amount).model_dump(mode="json")}
         current = AgentConstraintState.model_validate(state["current_constraints"])
         extraction = self.parser.parse(
             state["message"],
@@ -132,10 +159,22 @@ class AgentConstraintWorkflow:
             merged.day_count = day_count
         # "Dinners with a soup" in the request shapes the plan it sets up, and the reply says so.
         shaped = setup_shape(message, base, lang)
+        drop = state.get("drop")
+        if drop:  # this conversation's shape only: the saved household keeps its own
+            meal, role = drop
+            place = [item.role_id for item in shown.meals[meal]].index(role)
+            merged.dropped_dishes = [*merged.dropped_dishes, (meal, place, shown.meals[meal][place])]
+            left = without_role(shown, meal, role).meals[meal]
+            # A meal only this plan holds stays out of the household's meals.
+            kept = {**base.meals, meal: left} if meal in base.meals else base.meals
+            shaped = MealPlanShape(meals=kept), dropped_dish_note(meal, role, lang)
         if shaped is not None:
             base = shaped[0]
         keep = tuple(meals) if meals else (None if back or usual is None else tuple(shown.meals))
-        if keep is not None:
+        if drop:
+            merged.plan_shape = without_role(shown, *drop)
+            merged.usual_plan_shape = base if usual is not None else None
+        elif keep is not None:
             # Only these meals, each as the household composes it (one the household lacks, as the default does).
             full = default_plan_shape().meals
             merged.plan_shape = MealPlanShape(
@@ -158,6 +197,29 @@ class AgentConstraintWorkflow:
                 notes.append(say("plan_runs", lang, start=first, end=replies.weekday(end, lang)))
         if shaped is not None:
             notes.append(shaped[1])
+        pin_refusal = None
+        change = state.get("change")
+        if change is not None and change.required_dish is not None:
+            merged.required_dish = dish = change.required_dish
+            notes.append(say("pin_noted", lang, title=dish.title, when=pin_when(dish, lang)))
+        elif change is not None:
+            extraction.assistant_summary = say("got_it", lang, details=replies.details(extraction, lang)[0])
+        elif extraction.required_dish is not None and self.resolve_dish is not None:
+            found = self.resolve_dish(extraction.required_dish, merged, lang)
+            if isinstance(found, Refusal):
+                pin_refusal = found
+            else:
+                merged.required_dish = found
+                notes.append(say("pin_noted", lang, title=found.title, when=pin_when(found, lang)))
+        elif merged.required_dish is not None and self.resolve_dish is not None:
+            # Whatever this message changed can leave the dish no place, or rule it out: the latest word wins, said.
+            pin = merged.required_dish
+            found = self.resolve_dish(DishAsked(name=pin.title, weekday=pin.weekday, meal=pin.meal), merged, lang)
+            if isinstance(found, RequiredDish):
+                merged.required_dish = found
+            elif not found.retry:
+                merged.required_dish = None
+                notes.append(say("pin_released", lang, why=found.text, title=pin.title))
         self._prorate_budget(
             merged,
             current,
@@ -203,7 +265,8 @@ class AgentConstraintWorkflow:
                 questions.append(say("ask_quantity", lang, name=replies.word(item.normalized_name, lang)))
 
         # Everything is known: before saying so, a limit no week can meet is refused with its reason.
-        refusal = self.check(merged, lang) if self.check is not None and not missing else None
+        refusal = pin_refusal or (self.check(merged, lang) if self.check is not None and not missing else None)
+        merged.offered_changes = list(refusal.changes) if refusal is not None else []
         aside = None
         if refusal is not None and refusal.aside:  # the week plans: said after "ready" (ADR-0067)
             aside, refusal = refusal.text, None
@@ -283,12 +346,15 @@ class AgentConstraintWorkflow:
             "budget_per_meal_sgd",
             "weekly_budget_sgd",
             "max_sodium_mg_per_meal",
+            "max_kcal_per_meal",
             "pricing_mode",
             "max_uses_per_recipe",
         ):
             value = getattr(extraction, field)
             if value is not None:
                 state[field] = value
+        if get_settings().default_pricing_mode == "live":
+            state["pricing_mode"] = "live"  # also over a model that echoes the schema's default
         if extraction.requires_halal:
             state["requires_halal"] = True
         if (

@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic_core import to_jsonable_python
 
-from app.agent import limits, model_client
+from app.agent import limits, model_client, required_dish
 from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.plan_dates import default_start
 from app.agent.replanning import AgentReplanInterpreter
@@ -56,6 +56,7 @@ from app.planning.weekly_planner import WeeklyPlanSelectionError
 from app.products.provider import ProductProviderError
 from app.repositories.agent import AgentSessionRepository
 from app.repositories.agent_runs import AgentRunRepository
+from app.repositories.recipe import POOL_COURSES
 from app.retrieval.evidence import grocery_packet, packet_digest, verify_grocery_totals
 from app.schemas.agent import (
     AgentConfirmationResponse,
@@ -69,15 +70,18 @@ from app.schemas.agent import (
     AgentSessionCollectionResponse,
     AgentSessionLabel,
     AgentSessionResponse,
+    DishAsked,
 )
 from app.schemas.meal_plan import (
     MealPlanReplanEventResponse,
     MealPlanReplanPreviewRequest,
     MealPlanShape,
+    RequiredDish,
     WeeklyMealPlanRequest,
     WeeklyMealPlanResponse,
     default_plan_shape,
 )
+from app.schemas.planning_nutrition import ProductNutritionTarget
 from app.services.food_questions import (
     CatalogFoodQuestionAnswerer,
     OpenAIWebFoodQuestionAnswerer,
@@ -461,6 +465,7 @@ class AgentSessionService:
         self.orchestrator = BoundedAgentOrchestrator(
             parser,
             check=self._refusal,
+            resolve_dish=self._resolve_dish,
             food_question_handler=self._answer_food_question,
             food_question_context_handler=(
                 self.substitution_question_answerer.answer if self.substitution_question_answerer else None
@@ -846,6 +851,16 @@ class AgentSessionService:
             avoid_recipe_ids=constraints.avoid_recipe_ids,
             household=constraints.household,
             planning_preferences=constraints.planning_preferences,
+            required_dish=constraints.required_dish,
+            nutrition_constraints=(
+                [
+                    ProductNutritionTarget(
+                        metric="calories_kcal", scope="per_serving", upper=constraints.max_kcal_per_meal
+                    )
+                ]
+                if constraints.max_kcal_per_meal is not None
+                else []
+            ),
         )
 
     def _refusal(self, constraints: AgentConstraintState, lang: str) -> limits.Refusal | None:
@@ -859,18 +874,46 @@ class AgentSessionService:
                 constraints,
                 lambda **changes: self.meal_plan_service.week_floor(request.model_copy(update=changes)),
                 lang,
-                check=lambda **changes: self.meal_plan_service.check(
-                    request.model_copy(
-                        update={key: value for key, value in changes.items() if key != "minimum_distinct_dishes"}
-                    ),
-                    minimum_distinct_dishes=changes.get("minimum_distinct_dishes", 0),
-                ),
+                check=self._check(request),
                 distinct_dishes=lambda: self.meal_plan_service.checked_distinct_dishes(request),
                 cheapest=self._cheapest(request),
+                replacements=lambda pin: required_dish.similar(
+                    pin, request, *self.meal_plan_service.dish_pool(request)
+                ),
             )
         except (ProductProviderError, WeeklyPlanSelectionError):
             # Prices or recipes could not be read now: nothing is refused, and Plan answers for itself.
             return None
+
+    def _resolve_dish(
+        self, asked: DishAsked, constraints: AgentConstraintState, lang: str
+    ) -> RequiredDish | limits.Refusal:
+        """The dish a message names, in this plan's shape and days, or the reply that says why not."""
+        size = constraints.household_size or 1  # a dish can be named before who eats is known
+        try:
+            request = self._plan_request(constraints.model_copy(update={"household_size": size, "required_dish": None}))
+            recipes, ranked = self.meal_plan_service.dish_pool(request)
+            return required_dish.resolve(
+                asked,
+                request,
+                recipes,
+                ranked,
+                lambda recipe: self.meal_plan_service.dish_blockers(request, recipe),
+                lang,
+                lambda: self.meal_plan_service.recipe_repository.list_for_planning(courses=sorted(POOL_COURSES)),
+            )
+        except (ValueError, ProductProviderError, WeeklyPlanSelectionError):
+            return limits.Refusal(required_dish.FIELD, say("pin_retry", lang), retry=True)
+
+    def _check(self, request: WeeklyMealPlanRequest) -> Callable[..., Exception | None]:
+        """What Plan would answer for the request with `changes` made to it: None for a week, else its error."""
+
+        def check(**changes) -> Exception | None:
+            minimum_distinct_dishes = changes.pop("minimum_distinct_dishes", 0)
+            candidate = request.model_copy(update=changes)
+            return self.meal_plan_service.check(candidate, minimum_distinct_dishes=minimum_distinct_dishes)
+
+        return check
 
     def _cheapest(self, request: WeeklyMealPlanRequest) -> Callable[..., float | None]:
         """A found week's cost, backed by the same budgeted path that clicking its suggestion uses."""
@@ -1124,6 +1167,7 @@ class AgentSessionService:
             "start_date": plan.start_date,
             "day_count": plan.day_count,
             "avoid_recipe_ids": avoid_recipe_ids,
+            "required_dish": None,  # different dishes from the week it replaces, this one's named dish too
         }
         if plan.plan_shape is not None:
             changes["plan_shape"] = plan.plan_shape
@@ -1483,7 +1527,7 @@ class AgentSessionService:
         """After a week's shape changed: keep it as the household's usual one only on a yes (`keep_shape_answer`)."""
         plan = self.meal_plan_service.get(snapshot.plan_id) if keep else None
         if keep and plan is not None and plan.plan_shape is not None and self.keep_plan_shape is not None:
-            self.keep_plan_shape(plan.plan_shape)
+            self.keep_plan_shape(limits.with_dropped(plan.plan_shape, snapshot.constraints.dropped_dishes))
             reply = say("kept", lang)
         elif keep:
             reply = say("keep_failed", lang)
@@ -1869,8 +1913,9 @@ class AgentSessionService:
         The Plan card gives way to the explanation (the session collects again), unless the same request
         may simply plan next time (slow search, missing data).
         """
+        request = self._plan_request(snapshot.constraints)
         explained = limits.planning_failure(
-            error, snapshot.constraints, lang, cheapest=self._cheapest(self._plan_request(snapshot.constraints))
+            error, snapshot.constraints, lang, cheapest=self._cheapest(request), check=self._check(request)
         )
         context_version = max(snapshot.context_version, 1)
         self.repository.explain_unplanned(

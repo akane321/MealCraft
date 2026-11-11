@@ -190,6 +190,18 @@ export function describeShape(shape: PlanShape): string {
     .join(" · ");
 }
 
+/** The dishes a plan leaves out of the meals it plans, against the household's usual shape: "soup at dinner". */
+export function droppedDishes(shape: PlanShape | null | undefined, usual: PlanShape): string[] {
+  const nth: Record<string, string> = { 2: "second ", 3: "third " };
+  return PLANNED_MEALS.flatMap((meal) => {
+    const kept = shape?.meals[meal];
+    if (!kept) return [];
+    return (usual.meals[meal] ?? [])
+      .filter(role => !kept.some(item => item.role_id === role.role_id))
+      .map(role => `${nth[role.role_id.split("-")[1] ?? ""] ?? ""}${dishLabel(role).toLowerCase().replace(/^another /, "")} at ${meal}`);
+  });
+}
+
 /** A plan day by its weekday ("Sun"), from the plan's own start date; "day 4" only while no date is known. */
 export function planDayLabel(startDate: string | null | undefined, dayIndex: number): string {
   if (!startDate) return `day ${dayIndex}`;

@@ -160,8 +160,9 @@ class MealPlanReplanningService:
 
     def _constraints(self, plan: MealPlan) -> WeeklyMealPlanRequest:
         """The request a change to `plan` is planned with, priced at snapshot prices."""
+        # A dish the plan had to hold was held when the week was planned; a change is free to swap it.
         constraints = WeeklyMealPlanRequest.model_validate(plan.constraints).model_copy(
-            update={"pricing_mode": "fixture"}
+            update={"pricing_mode": "fixture", "required_dish": None}
         )
         if not self.live_feedback:
             return constraints
@@ -719,7 +720,7 @@ class MealPlanReplanningService:
         proposed_recipe = proposed[0] if proposed else None
         grocery = WeeklyGroceryEstimateResponse.model_validate(event.after_grocery)
         if plan.pricing_mode == "live" and event.event_type != "LOCK_MEAL":
-            grocery = self.grocery_aggregator.refresh(grocery)
+            grocery = self.grocery_aggregator.refresh(grocery, WeeklyMealPlanRequest.model_validate(plan.constraints))
             before = self._current_grocery(plan)
             event.after_grocery = grocery.model_dump(mode="json")
             event.grocery_delta = self._grocery_delta(before, grocery)

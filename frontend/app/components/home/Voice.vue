@@ -4,7 +4,6 @@ import { revealTokens } from "~/lib/reveal";
 
 // The microphone beside a message box (ADR-0116). A tap records, a tap (or about 3 s of quiet) stops; the clip goes
 // to POST /api/voice/transcriptions and the words come back into the box with `text`, never sent by themselves.
-// In demo-script mode nothing is uploaded: the next scripted sentence appears word by word while the mic hears sound.
 defineProps<{ disabled?: boolean }>();
 const emit = defineEmits<{ start: []; text: [value: string, final: boolean] }>();
 
@@ -35,7 +34,6 @@ let startedAt = 0;
 let lastLoud = 0;
 let heard = false;
 let cancelled = false;
-let demoIndex = 0;
 let demoWords: string[] = [];
 let demoShown = 0;
 let demoNextAt = 0;
@@ -219,6 +217,11 @@ onBeforeUnmount(() => {
   document.removeEventListener("visibilitychange", onHidden);
   if (phase.value !== "idle") cancel();
 });
+</script>
+
+<script lang="ts">
+// Counts across the home page and the workspace, which each mount their own microphone.
+let demoIndex = 0;
 </script>
 
 <template>

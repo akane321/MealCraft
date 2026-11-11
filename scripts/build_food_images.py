@@ -61,6 +61,27 @@ DISH_WORDS = [
     r"sauce|dip|dressing|salsa|pesto|chutney|gravy",
 ]
 RARE_BELOW = 0.3
+# The curated catalog's ingredients, by display name, and the picture of the same food in the release's 701.
+INGREDIENT_ALIASES = {
+    "cherry-tomatoes": "tomato",
+    "firm-tofu": "tofu",
+    "reduced-sodium-soy-sauce": "soy-sauce",
+    "red-lentils": "lentil",
+    "no-added-salt-canned-tomatoes": "canned-tomatoes",
+    "baby-spinach": "spinach",
+    "yellow-onion": "onion",
+    "ground-cumin": "cumin",
+    "low-sodium-vegetable-stock": "vegetable-broth",
+    "rolled-oats": "oats",
+    "eggs": "egg",
+    "salmon-fillet": "salmon",
+    "canned-tuna-in-water": "tuna",
+    "chickpeas": "chickpea",
+    "wholewheat-pasta": "pasta",
+    "plain-greek-yogurt": "yogurt",
+    "low-fat-milk": "milk",
+    "mushrooms": "mushroom",
+}
 # Title words that say nothing about the dish, and how many recipes a word needs to stand for a picture.
 FILLER_WORDS = frozenset(
     "a air an and au black bowl bowls brown de del easy for green homemade in my of on or plain plate quick recipe red "
@@ -224,7 +245,13 @@ def main() -> None:
     dishes = {image: " ".join(recipe["key"] for recipe in members) for image, members in pictured.items()}
     words = title_words(pictured)
     names = sorted(re.sub(r"[^a-z0-9]", "-", row["canonical_name"].lower()) for row in load_ingredients())
-    food_images = {"dishes": dishes, "ingredients": names, "words": words, "fallback": words["vegetable"]}
+    food_images = {
+        "dishes": dishes,
+        "ingredients": names,
+        "ingredient_aliases": INGREDIENT_ALIASES,
+        "words": words,
+        "fallback": words["vegetable"],
+    }
     OUTPUT.write_text(json.dumps(food_images, separators=(",", ":")), encoding="utf-8")
     recipes = sum(len(ids.split()) for ids in dishes.values())
     print(f"{len(dishes)} images, {recipes} recipes; moved to a nearer picture, by reason: {dict(dropped)}")

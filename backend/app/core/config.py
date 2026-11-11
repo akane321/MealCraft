@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     app_name: str = "MealCraft"
     app_version: str = "0.1.0"
     environment: str = "development"
+    # "live" prices every conversation at the store (compose.yaml); tests and CI stay offline.
+    default_pricing_mode: Literal["fixture", "live"] = "fixture"
     # Debugging and demos only (ignored in production): the date, or date and time, the product takes as now in
     # Singapore, e.g. "2026-10-19" or "2026-10-19T21:30" (app/core/clock.py).
     simulated_today: str | None = None

@@ -32,12 +32,15 @@ describe("food images", () => {
     expect(ingredientImageSrc(index, "Vanilla Ice Cream")).toBe("/images/ingredients/vanilla-ice-cream.webp");
     expect(ingredientImageSrc(index, "rice cake (tteok)")).toBe("/images/ingredients/rice-cake--tteok-.webp");
     expect(ingredientImageSrc(index, "no such thing")).toBeNull();
+    expect(ingredientImageSrc(index, "Baby spinach")).toBe("/images/ingredients/spinach.webp");
+    expect(ingredientImageSrc(index, "Red lentils")).toBe("/images/ingredients/lentil.webp");
   });
 
   it("every listed image is in the repo", () => {
     const missing = [
       ...[...Object.keys(file.dishes), ...Object.values(file.words), file.fallback].map(image => `dishes/${image}.webp`),
       ...file.ingredients.map(name => `ingredients/${name}.webp`),
+      ...Object.values(file.ingredient_aliases ?? {}).map(name => `ingredients/${name}.webp`),
     ].filter(path => !existsSync(new URL(path, IMAGES)));
     expect(missing).toEqual([]);
   });

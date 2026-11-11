@@ -527,6 +527,10 @@ class ProductPlanningEngine:
         """
         locked = locked or {}
         kept_dishes = {slug for roles in locked.values() for slug in roles.values()}
+        # The dish this plan must hold: locked in its role at the first of its meal on its day, as a kept dish is.
+        pin = getattr(constraints, "required_dish", None)
+        if pin is not None:
+            kept_dishes.add(pin.recipe_slug)
         household = getattr(constraints, "household", None)
         # A limit the household switched on is a hard band of each day, pro-rated to the meals planned.
         nutrition_targets = [
@@ -766,6 +770,14 @@ class ProductPlanningEngine:
                     floor_share = meal_structure.energy_floor_share(meal)
                     if kept_roles:
                         kept_roles = {r: d for r, d in kept_roles.items() if r in {x.role_id for x in meal_roles}}
+                if (
+                    pin is not None
+                    and meal == pin.meal
+                    and pin.weekday in (None, weekday)
+                    and any(role.role_id == pin.role_id for role in meal_roles or ())
+                ):
+                    kept_roles = {**(kept_roles or {}), pin.role_id: pin.recipe_slug}
+                    pin = None
                 slot = PlanningSlot(
                     slot_id=f"slot-{i}" if meal == "dinner" else f"slot-{i}-{meal}",
                     planned_date=planned_date,
@@ -791,6 +803,8 @@ class ProductPlanningEngine:
             trace["unattended_slots"] = unattended
         if not slots:
             raise ProductPlanningError("candidate_rejected", "Nobody is home for any planned meal this week.", trace)
+        if pin is not None:  # never a week without the dish it must hold
+            raise ProductPlanningError("candidate_rejected", "No planned meal can hold the dish you asked for.", trace)
         pantry = []
         for item in constraints.available_ingredients:
             quantity, unit = normalized(item.quantity, item.unit)
@@ -1169,8 +1183,9 @@ class ProductPlanningEngine:
             trace["search"]["completed_candidates"] = len(search.states)
         result = None
         passed = []  # with the budget only reported: every week that holds the rest, to compare
-        uncertain = bool(diagnostics)
+        uncertain = False
         only_budget_failures = bool(assignments_list)
+        every_week_over_budget = True
         # The validator only reads the problem, so one copy serves every week it checks (over the budget it
         # checks them all, and a copy each took about a second of a whole-week change); the builder it checks
         # still gets its own each time, so a builder that changed the problem could not change the check.
@@ -1219,7 +1234,9 @@ class ProductPlanningEngine:
             trace["validation_attempts"].append(redacted)
             uncertain |= report.status == "indeterminate"
             failed_codes = {c.code for c in report.checks if c.hard and c.status == "failed"}
-            only_budget_failures &= bool(failed_codes) and failed_codes <= {"purchase_budget", "per_meal_budget"}
+            over_budget = bool(failed_codes) and failed_codes <= {"purchase_budget", "per_meal_budget"}
+            only_budget_failures &= over_budget
+            every_week_over_budget &= over_budget
             if report.status == "passed":
                 if budget_is_hard:
                     if not cheapest:
@@ -1235,6 +1252,8 @@ class ProductPlanningEngine:
             # A search that built no week said why (a meal, the repeats, the budget) or ran out of steps: no week
             # reached a check, so an input issue elsewhere in the pool (one recipe's servings) did not decide it, and
             # "details are missing" sent the household to retry a request that cannot plan as asked.
+            # Weeks priced and turned down by the budget alone answer it, whatever odd recipe the pool also holds.
+            uncertain |= bool(diagnostics) and not (every_week_over_budget and trace["validation_attempts"])
             searched = trace.get("search", {}) if not trace["validation_attempts"] else {}
             emptied_by = searched.get("emptied_by")
             uncertain = uncertain and emptied_by is None and not searched.get("exhausted")
@@ -1245,6 +1264,7 @@ class ProductPlanningEngine:
                 evidence = "candidate_validation_failed"
             if (
                 not uncertain
+                and not diagnostics  # a recipe left out of the search: no proof
                 and only_budget_failures
                 and constraints.planner_strategy == "beam"
                 and composition is None  # the meal beam keeps only the best dishes per role

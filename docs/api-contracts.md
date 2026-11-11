@@ -1150,6 +1150,20 @@ ever a guess. After a refusal, a bare amount ("S$50", 那就50新币吧) answers
 budget it asked about. A per-meal amount is offered only when a week plans with
 it. When prices cannot be read, the check is skipped and Plan answers for itself.
 
+A weekly budget no week meets also offers the one dish whose going leaves the cheapest week within the budget
+("Drop the soup at dinner"), when a real week without it plans. A request can name one dish the plan must have
+("Chicken Curry on Friday dinner"; `constraints.required_dish` with the recipe, its role, its meal and the weekday
+if named), and a ceiling on every meal ("each meal under 650 kcal"; `constraints.max_kcal_per_meal`, a hard
+per-serving energy band of the plan request). A name no recipe holds, or several different dishes hold, is asked
+about with choices; a dish that breaks an allergy, diet, exclusion or halal is refused, plainly; fresh food named
+later than it keeps offers the latest day it fits. When that dish alone stands between the household and a week,
+the refusal says what binds in real numbers and offers, each only when a real week passes with exactly that change,
+at most three: the most alike dish of the same role that is safe for everyone (naming both, with the money and kcal
+it saves), a dish role dropped, and a verified budget. A calorie conflict is never offered money. Tapping one of
+these is deterministic, no model reads it, the session becomes `ready`, and the next plan holds exactly that choice;
+the saved household does not change. Each is an ordinary `message` interaction option. Changes to a saved week
+stay as they are: they are free to swap the dish.
+
 When clarification can be represented structurally, the response includes a
 `pending_interaction` with a stable `question_id`, `field_path`, option IDs and
 `context_version`. `POST /api/agent/sessions/{session_id}/interactions` accepts

@@ -3,11 +3,13 @@ from collections.abc import Callable
 
 from pydantic import BaseModel, Field
 
+from app.agent.limits import tapped_drop
 from app.agent.parser import ConstraintParser, requests_halal
 from app.agent.replies import language, say
-from app.agent.workflow import AgentConstraintWorkflow, FeasibilityCheck
+from app.agent.workflow import AgentConstraintWorkflow, DishResolver, FeasibilityCheck
 from app.orchestration.contracts import InteractionRequest, ScopeClass, ScopeDecision
 from app.orchestration.interactions import (
+    SAY_FIELD,
     household_size_interaction,
     pantry_quantity_interaction,
     say_interaction,
@@ -100,8 +102,9 @@ class BoundedAgentOrchestrator:
         food_question_handler: Callable[[str, str], str | None] | None = None,
         food_question_context_handler: Callable[[str, str, AgentConstraintState], str | None] | None = None,
         check: FeasibilityCheck | None = None,
+        resolve_dish: DishResolver | None = None,
     ) -> None:
-        self.workflow = AgentConstraintWorkflow(parser, check=check)
+        self.workflow = AgentConstraintWorkflow(parser, check=check, resolve_dish=resolve_dish)
         self.scope_policy = scope_policy or ReferenceScopePolicy()
         self.scope_classifier = scope_classifier or getattr(parser, "scope_classifier", None)
         self.food_question_handler = food_question_handler
@@ -136,7 +139,22 @@ class BoundedAgentOrchestrator:
         context_version: int,
         pending_interaction: InteractionRequest | None = None,
     ) -> AgentTurnOutcome:
-        decision = self.classify(message, history=history)
+        offered = pending_interaction is not None and pending_interaction.field_path == SAY_FIELD
+        tapped = offered and any(option.value == message for option in pending_interaction.options)
+        # An option offered in a refusal, tapped: a verified change no model may reinterpret, not even its scope.
+        change = next((item for item in current.offered_changes if item.value == message), None) if tapped else None
+        drop = tapped_drop(message, current) if tapped and change is None else None
+        decision = (
+            ScopeDecision(
+                scope_class=ScopeClass.DOMAIN_ACTION,
+                detected_intents=["drop_dish" if drop else "offered_change"],
+                supported_segments=[message],
+                should_mutate_state=True,
+                reason_code="DROP_DISH_OPTION" if drop else "OFFERED_CHANGE",
+            )
+            if drop or change
+            else self.classify(message, history=history)
+        )
         if decision.scope_class is ScopeClass.AMBIGUOUS and current_questions:
             decision = ScopeDecision(
                 scope_class=ScopeClass.DOMAIN_ACTION,
@@ -207,6 +225,8 @@ class BoundedAgentOrchestrator:
             acknowledged_unknowns=acknowledged_unknowns,
             history=history,
             asked=current_missing_fields[0] if current_missing_fields else None,
+            drop=drop,
+            change=change,
         )
         next_context_version = max(context_version + 1, 1)
         missing_fields = list(result["missing_fields"])

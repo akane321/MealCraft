@@ -1,5 +1,7 @@
+from collections import deque
+from collections.abc import Callable
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from time import monotonic
@@ -16,7 +18,7 @@ from app.products.provider import (
 from app.products.redmart import PARSER_VERSION as REDMART_PARSER_VERSION
 from app.products.redmart import RedMartProductProvider
 from app.repositories.product import ProductSnapshotRepository
-from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductSearchResponse, Retailer
+from app.schemas.product import GroceryLineEstimate, PriceEvidence, ProductResponse, ProductSearchResponse, Retailer
 from app.schemas.retrieval import RetrievalTrace
 
 
@@ -75,6 +77,54 @@ class _LiveStore:
     failures_in_a_row: int = 0
 
 
+@dataclass
+class _DeadlineSearch:
+    """`ProductSearchService.search` for a final price check's worker: live, inside the deadline, no database.
+
+    It asks for the same 20 products the price checks and the cart do, and asks for a page already read only once.
+    """
+
+    provider: FairPriceProductProvider
+    deadline: float
+    pages: dict[str, list[ProductResponse]] = field(default_factory=dict)
+
+    def search(self, query: str, *, live: bool, limit: int) -> ProductSearchResponse:
+        normalized_query = normalize_search_text(query)
+        page = self.pages.get(normalized_query)
+        if page is None:
+            remaining = self.deadline - monotonic()
+            if remaining <= 0:
+                raise ProductProviderError("The final price check ran out of time")
+            page = self.pages[normalized_query] = self.provider.search(
+                normalized_query, limit=20, timeout_seconds=remaining
+            )
+        items = page[:limit]
+        return ProductSearchResponse(
+            query=normalized_query,
+            provider_used="fairprice",
+            fallback_used=False,
+            cached=False,
+            warning=None,
+            items=items,
+            retrieval=ProductSearchService._trace(
+                query=normalized_query,
+                provider_used="fairprice",
+                mode="live",
+                status="success" if items else "no_match",
+                items=items,
+                parser_version="fairprice-next-data-v1",
+            ),
+        )
+
+
+def _whole_cents(price_sgd: float) -> bool:
+    try:
+        price = Decimal(str(price_sgd))
+        return price.is_finite() and price >= 0 and not price % Decimal("0.01")
+    except InvalidOperation:
+        return False
+
+
 class ProductSearchService:
     def __init__(
         self,
@@ -113,16 +163,25 @@ class ProductSearchService:
             ),
         }
 
-    def refresh_selected(self, lines: list[GroceryLineEstimate]) -> list[GroceryLineEstimate]:
+    def refresh_selected(
+        self,
+        lines: list[GroceryLineEstimate],
+        find_replacement: Callable[[GroceryLineEstimate, _DeadlineSearch], GroceryLineEstimate | None] | None = None,
+    ) -> list[GroceryLineEstimate]:
         """Only observe the already chosen SKUs; worker threads never access the database.
 
         A socket timeout cannot cancel a running thread. Stop waiting at the shared deadline,
         cancel queued work, and never apply/cache a late response. The shared executor caps
         actual provider concurrency even if a preceding basket has lingering requests.
+
+        `find_replacement` (runs on a worker) may give a line FairPrice could not confirm, one with no FairPrice
+        identity or whose product its search did not return, a live product. These go ahead of the price checks, as
+        they are the lines a cart cannot take, under the same deadline and workers; repeated failures stop them.
         """
         deadline = monotonic() + FINAL_PRICE_SECONDS
         refreshed = [line.model_copy(deep=True) for line in lines]
         queries: dict[str, list[int]] = {}
+        no_identity: list[int] = []
         for index, line in enumerate(refreshed):
             product = line.product
             if product is None or line.packages_required == 0 or product.source in SECOND_STORES:
@@ -152,6 +211,7 @@ class ProductSearchService:
                         "lookup_status": "no_external_id",
                     }
                 )
+                no_identity.append(index)
                 continue
             queries.setdefault(query, []).append(index)
 
@@ -170,12 +230,7 @@ class ProductSearchService:
                         }
                     )
                     continue
-                try:
-                    price = Decimal(str(matched.price_sgd))
-                    valid = price.is_finite() and price >= 0 and not price % Decimal("0.01")
-                except InvalidOperation:
-                    valid = False
-                if not valid:
+                if not _whole_cents(matched.price_sgd):
                     line.evidence = line.evidence.model_copy(
                         update={
                             "lookup_status": "invalid_price",
@@ -241,24 +296,37 @@ class ProductSearchService:
             items = self.live_provider.search(query, limit=20, timeout_seconds=remaining)
             return monotonic(), items
 
-        queue = iter(needed)
+        live_search = _DeadlineSearch(self.live_provider, deadline)
+
+        def replace(index):
+            found = find_replacement(refreshed[index], live_search)
+            return monotonic(), found
+
+        work = deque((fetch, query) for query in needed)
+        if find_replacement is not None:
+            work.extendleft((replace, index) for index in no_identity)
         pending = {}
+        failures_in_a_row = 0
         while monotonic() < deadline:
-            while len(pending) < FINAL_PRICE_CONCURRENCY:
-                query = next(queue, None)
-                if query is None:
-                    break
-                pending[_price_workers.submit(fetch, query)] = query
+            while work and len(pending) < FINAL_PRICE_CONCURRENCY:
+                job, key = work.popleft()
+                pending[_price_workers.submit(job, key)] = (job, key)
             if not pending:
                 break
             done, _ = wait(pending, timeout=max(0, deadline - monotonic()), return_when=FIRST_COMPLETED)
             if not done:
                 break
             for future in done:
-                query = pending.pop(future)
+                job, key = pending.pop(future)
                 try:
-                    completed_at, items = future.result()
+                    completed_at, outcome = future.result()
                 except (ProductProviderError, ValueError, OverflowError) as error:
+                    failures_in_a_row += 1
+                    if failures_in_a_row >= LIVE_FAILURE_LIMIT:
+                        work = deque(entry for entry in work if entry[0] is not replace)
+                    if job is replace:
+                        continue  # the line stays as it is
+                    query = key
                     status = (
                         "schema_drift"
                         if isinstance(error, ProductProviderError) and error.kind == "schema_drift"
@@ -276,8 +344,30 @@ class ProductSearchService:
                             }
                         )
                 else:
-                    if completed_at <= deadline:
-                        apply(query, items, "live")
+                    if completed_at > deadline:
+                        continue
+                    failures_in_a_row = 0
+                    if job is fetch:
+                        live_search.pages[key] = outcome
+                        apply(key, outcome, "live")
+                        if find_replacement is not None:
+                            work.extendleft(
+                                (replace, index)
+                                for index in queries[key]
+                                if refreshed[index].evidence.lookup_status == "selected_product_not_returned"
+                            )
+                    elif outcome is not None and _whole_cents(outcome.product.price_sgd):
+                        refreshed[key] = outcome.model_copy(
+                            update={
+                                "evidence": outcome.evidence.model_copy(
+                                    update={
+                                        "price_source": "live",
+                                        "lookup_status": "success",
+                                        "checked_at": datetime.now(UTC),
+                                    }
+                                )
+                            }
+                        )
         for future in pending:
             future.cancel()
         for line in refreshed:

@@ -137,7 +137,11 @@ class WeeklyMealPlanService:
         selected, grocery = result.selected, result.grocery
         self._priced_as_asked(result.trace, constraints)
         if constraints.pricing_mode == "live":
-            grocery = self.grocery_aggregator.refresh(grocery)
+            grocery = self.grocery_aggregator.refresh(grocery, constraints)
+            (recommendation_result, result), grocery = self._within_budget_at_todays_prices(
+                constraints, (recommendation_result, result), grocery, household_profile_version
+            )
+            selected = result.selected
             # Only the saved list is checked at FairPrice (ADR-0058): what it came to, as the household sees it.
             result.trace["final_list"] = {
                 "pricing_mode": grocery.pricing_mode,
@@ -196,6 +200,39 @@ class WeeklyMealPlanService:
             operation_run=self._operation_run(result.trace, started_at, warnings=warnings),
         )
         return self._to_response(plan)
+
+    def _within_budget_at_todays_prices(self, constraints, searched, grocery, profile_version):
+        """A week is chosen at snapshot prices (ADR-0058), and today's can bring its list over the budget. Then search
+        again with the budget cut by the overrun, at most twice, and keep the week whose list comes to the least: one
+        with as many different dishes as the first, recorded as the household's request, not the cut one."""
+        budget, target = constraints.weekly_budget_sgd, constraints.weekly_budget_sgd
+        first = searched[1].trace
+        variety = _distinct(searched[1])
+        retries = []
+        for _ in range(2):
+            if budget is None or grocery.within_weekly_budget is not False or not grocery.purchase_total_sgd:
+                break
+            target = round(target * budget / grocery.purchase_total_sgd, 2)
+            cut = constraints.model_copy(update={"weekly_budget_sgd": target})
+            try:
+                again = self._search(
+                    cut, self._candidates(cut), profile_version=profile_version, minimum_distinct_dishes=variety
+                )
+            except ProductPlanningError:
+                break
+            priced = self.grocery_aggregator.refresh(
+                again[1].grocery.model_copy(update={"weekly_budget_sgd": budget}), constraints
+            )
+            retries.append({"search_budget_sgd": target, "purchase_total_sgd": priced.purchase_total_sgd})
+            if priced.purchase_total_sgd >= grocery.purchase_total_sgd:
+                break
+            searched, grocery = again, priced
+            # Replays and the console read the request from the trace: the household's, not the cut budget.
+            again[1].trace.update({key: first[key] for key in ("request", "input_digest") if key in first})
+            self._priced_as_asked(again[1].trace, constraints)
+        if retries:
+            searched[1].trace["over_budget_at_todays_prices"] = retries
+        return searched, grocery
 
     @staticmethod
     def _priced_as_asked(trace: dict, constraints: WeeklyMealPlanRequest) -> None:
@@ -354,17 +391,49 @@ class WeeklyMealPlanService:
                 for r in result.recommendations
                 if r.recipe.id not in avoid or kept[course.get(r.recipe.id)] < constraints.day_count
             ]
-        return recipes, result
+        return recipes, self._with_required_dish(constraints, recipes, result)
+
+    def _with_required_dish(self, constraints: WeeklyMealPlanRequest, recipes, result):
+        """The candidates with the dish the plan must hold, however it ranked, if it passes the household's limits."""
+        pin = constraints.required_dish
+        if pin is None or any(item.recipe.slug == pin.recipe_slug for item in result.recommendations):
+            return result
+        pinned = [recipe for recipe in recipes if recipe.slug == pin.recipe_slug]
+        added = self.recommendation_service.recommend(
+            pool_constraints(constraints), deduct_pantry_from_cost=False, recipes=pinned, priced_release_only=True
+        ).recommendations
+        return result.model_copy(update={"recommendations": [*result.recommendations, *added]})
 
     def _checked_candidates(self, constraints: WeeklyMealPlanRequest):
         """`_candidates`, worked out once per request for the checks a chat turn makes before it answers.
 
         The weekly budget is not a recommendation input, so the floor and the cheapest week share one pass.
         """
-        key = constraints.model_dump_json(exclude={"weekly_budget_sgd"})
+        key = constraints.model_dump_json(exclude={"weekly_budget_sgd", "required_dish"})
         if key not in self._checked:
-            self._checked[key] = self._candidates(constraints)
-        return self._checked[key]
+            self._checked[key] = self._candidates(constraints.model_copy(update={"required_dish": None}))
+        recipes, result = self._checked[key]
+        return recipes, self._with_required_dish(constraints, recipes, result)
+
+    def dish_pool(self, constraints: WeeklyMealPlanRequest) -> tuple[list[Recipe], list]:
+        """The recipes a plan may use, and the priced recommendations that passed the household's limits."""
+        recipes, result = self._checked_candidates(self._live(constraints))
+        return recipes, result.recommendations
+
+    def dish_blockers(self, constraints: WeeklyMealPlanRequest, recipe: Recipe) -> list[str] | None:
+        """Why the household's limits rule this recipe out, whatever its time or price; None when it has no price."""
+        eased = self._live(constraints).model_copy(
+            update={
+                "max_cooking_time_minutes": recipe.total_time_minutes,
+                "max_sodium_mg_per_meal": None,
+                "budget_per_meal_sgd": None,
+                "pricing_mode": "fixture",
+            }
+        )
+        found = self.recommendation_service.recommend(
+            eased, deduct_pantry_from_cost=False, recipes=[recipe], priced_release_only=True
+        )
+        return [] if found.recommendations else ([r for item in found.excluded for r in item.reasons] or None)
 
     def week_floor(self, constraints: WeeklyMealPlanRequest) -> WeekFloor:
         """What any week `generate` could plan for these constraints costs at least, without a search."""

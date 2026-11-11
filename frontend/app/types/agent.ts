@@ -1,3 +1,4 @@
+import type { PlanShape } from "~/types/household";
 import type {
   MealPlanEventType,
   MealPlanReplanEvent,
@@ -55,6 +56,10 @@ export interface AgentConstraintState {
   pricing_mode: PricingMode;
   // How often one dish may be served in the week; 1 is "no repeats", null leaves it to the planner.
   max_uses_per_recipe: number | null;
+  plan_shape?: PlanShape | null;
+  max_kcal_per_meal?: number | null;
+  // The one dish this plan must hold; `weekday` is null when the first day of the meal will do.
+  required_dish?: { title: string; meal: string; weekday: string | null } | null;
   planning_preferences?: {
     repeat_allowed_meals: Array<"breakfast" | "lunch" | "dinner" | "snack">;
     flavor_boosts: Array<{

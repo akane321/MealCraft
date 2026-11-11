@@ -91,7 +91,7 @@ const healthOptions: { label: string; value: HealthPreference }[] = [
 const form = reactive({
   name: "My household",
   ...noGoals(),
-  pricingMode: "fixture" as PricingMode,
+  pricingMode: "live" as PricingMode,
   planningStartDate: todayIsoDate(),
 });
 function newMember(number: number): MemberForm {

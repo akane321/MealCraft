@@ -26,7 +26,6 @@ const left = computed(() => {
   return gap && { label: gap.over ? "Over" : "Left", value: gap.amount, tone: budgetTone(props.estimate) };
 });
 // A tight budget or few eligible dishes can bring a dinner back; say so rather than let it look like a slip.
-const repeats = computed(() => new Set(props.days.map(day => day.recipe.slug)).size < props.days.length);
 const slugCount = computed(() => {
   const counts = new Map<string, number>();
   for (const dish of props.days) counts.set(dish.recipe.slug, (counts.get(dish.recipe.slug) ?? 0) + 1);
@@ -86,7 +85,6 @@ const dishCount = (n: number) => `${n} ${n === 1 ? "dish" : "dishes"}`;
     <div class="foot">
       <button type="button" class="mc-btn secondary sm" @click="emit('open', 'groceries')"><UIcon name="i-lucide-shopping-basket" aria-hidden="true" />Shopping list</button>
       <button type="button" class="mc-btn secondary sm" @click="emit('open', 'nutrition')"><UIcon name="i-lucide-chart-pie" aria-hidden="true" />Nutrition</button>
-      <span v-if="repeats" class="mc-small repeat-note">Some dishes appear more than once: not enough different ones fit your limits in this plan.</span>
     </div>
   </section>
 </template>
@@ -146,7 +144,6 @@ h3 { margin: 0; }
 .more { white-space: nowrap; }
 .foot .iconify { width: 14px; height: 14px; color: #71717a; }
 .foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--c-line-soft); }
-.repeat-note { flex: 1 1 200px; text-align: right; }
 /* Phone: the figures under the title, the days a strip that scrolls sideways. */
 @media (max-width: 767px) {
   .head { flex-direction: column; align-items: stretch; padding: 14px 16px 12px; }

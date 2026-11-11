@@ -8,7 +8,7 @@ class ReferenceScopePolicy:
 
     @staticmethod
     def has_food_restriction(message: str) -> bool:
-        from app.agent.parser import ENGLISH_EXCLUSION, RuleBasedConstraintParser
+        from app.agent.parser import ENGLISH_EXCLUSION, RuleBasedConstraintParser, excludes_seafood
 
         if re.search(
             r"\b(?:allerg\w*|vegetarian|vegan|halal|gluten[- ]free|dairy[- ]free)\b"
@@ -16,6 +16,8 @@ class ReferenceScopePolicy:
             message,
             re.IGNORECASE,
         ):
+            return True
+        if excludes_seafood(message):
             return True
         # Reuse the parser's food vocabulary; 'no movies' must not become a meal action.
         aliases = {*RuleBasedConstraintParser._ingredient_aliases, *RuleBasedConstraintParser._allergen_aliases}

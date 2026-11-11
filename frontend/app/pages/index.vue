@@ -6,7 +6,7 @@ import { statedTimeLimit } from "~/lib/household-profile";
 import { formatPlanDate, planLabels, planRange, sentenceDay, todayIsoDate } from "~/lib/meal-plan-format";
 import { copyPlanningPreferences, planningPreferenceLabels } from "~/lib/planning-preferences";
 import type { PlanningPreferencesView } from "~/lib/planning-preferences";
-import { planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
+import { DEFAULT_SHAPE, droppedDishes, planDayLabel, shapeChangeSummary } from "~/lib/plan-shape";
 import { revealDuration } from "~/lib/reveal";
 import { AnimatePresence, motion } from "motion-v";
 import type { AgentMessage, AgentSession } from "~/types/agent";
@@ -108,6 +108,8 @@ async function undoPreferences() {
 }
 watch(() => session.value?.id, () => { editingPreferences.value = false; preferencesUndo.value = null; });
 // A stated cap on how often a dish may come back; 1 is the usual ask.
+const mustHaveLabel = (dish: { title: string; meal: string; weekday: string | null }) =>
+  `${dish.title}, ${dish.weekday ? `${dish.weekday[0]!.toUpperCase()}${dish.weekday.slice(1)} ` : ""}${dish.meal}`;
 const repeatLabel = (cap: number | null | undefined) => (cap == null ? null : cap === 1 ? "No repeats" : `Each dish up to ${cap} times`);
 const contextLabel = computed(() => {
   const c = constraints.value;
@@ -126,7 +128,10 @@ const heard = computed<Array<{ text: string; value: string; alert?: boolean }>>(
     ...c.dietary_preferences.map(value => ({ text: "", value: value.replaceAll("_", " ") })),
     ...c.excluded_ingredients.map(value => ({ text: "No", value: value.replaceAll("_", " ") })),
     ...c.allergens.map(value => ({ text: "No", value: allergenLabel(value).toLowerCase(), alert: true })),
+    ...droppedDishes(c.plan_shape, household.current.value?.current?.plan_shape ?? DEFAULT_SHAPE).map(value => ({ text: "No", value })),
     ...(repeatLabel(c.max_uses_per_recipe) ? [{ text: "", value: repeatLabel(c.max_uses_per_recipe)! }] : []),
+    ...(c.max_kcal_per_meal ? [{ text: "Each meal under", value: `${c.max_kcal_per_meal} kcal` }] : []),
+    ...(c.required_dish ? [{ text: "Must have", value: mustHaveLabel(c.required_dish) }] : []),
     ...planningPreferenceLabels(c.planning_preferences).map(value => ({ text: "Preference", value })),
   ];
 });
@@ -338,7 +343,9 @@ const weekId = ref<number | null>(null);
 
 async function removeConversation(item: AgentSession) {
   const removed = await agent.remove(item.id);
-  if (removed && item.id === session.value?.id) newChat();
+  if (!removed || item.id !== session.value?.id) return;
+  session.value = null; // gone: leaving it must not put it back in the list (showConversation keeps the one left)
+  newChat();
 }
 
 /** The draft, with the dish action its words came from, kept across sign-in and reloads (restored on mount). */
@@ -1399,7 +1406,7 @@ onUnmounted(() => {
 .composer { position: relative; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; padding: 10px 10px 10px 16px; border: 1px solid #e4e4e7; border-radius: 16px; background: #fff; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1); transition: border-color 150ms, box-shadow 150ms; }
 .composer:hover { border-color: #d4d4d8; }
 .composer:focus-within { border-color: #c4b5fd; box-shadow: 0 1px 2px rgba(16, 16, 20, 0.04), 0 8px 24px -12px rgba(16, 16, 20, 0.1), 0 0 0 4px rgba(139, 92, 246, 0.12); }
-.composer textarea { display: block; width: 100%; height: 40px; min-height: 40px; padding: 9px 0; resize: none; overflow-y: auto; font-size: 14.5px; line-height: 22px; font-weight: 400; color: #18181b; }
+.composer textarea { flex: 1 0 auto; display: block; width: 100%; height: 40px; min-height: 40px; padding: 9px 0; resize: none; overflow-y: auto; font-size: 14.5px; line-height: 22px; font-weight: 400; color: #18181b; }
 /* Words just put in by voice: the box glows for a moment. */
 .composer.flash { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.22); }
 .composer.flash textarea { background: linear-gradient(90deg, rgba(237, 233, 254, 0), rgba(237, 233, 254, 0.9), rgba(237, 233, 254, 0)) no-repeat; animation: mc-flash 1.1s ease-out both; }

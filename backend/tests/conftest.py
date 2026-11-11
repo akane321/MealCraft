@@ -11,8 +11,8 @@ from app.core.config import Settings, get_settings
 Settings.model_config["env_file"] = None
 
 # In the backend container the same .env arrives as process environment (compose `env_file`), which
-# `docker compose exec backend ... pytest` inherits. The settings that choose the parser and model or hold
-# a key are removed once, here, before any Settings is built; a test that wants one sets it itself.
+# `docker compose exec backend ... pytest` inherits. The settings that choose the parser, model or pricing or
+# hold a key are removed once, here, before any Settings is built; a test that wants one sets it itself.
 LIVE_SETTINGS = {
     "AGENT_PARSER_PROVIDER",
     "OPENAI_API_KEY",
@@ -20,6 +20,7 @@ LIVE_SETTINGS = {
     "OPENAI_TIMEOUT_SECONDS",
     "YOUTUBE_API_KEY",
     "ADMIN_ACCOUNTS",
+    "DEFAULT_PRICING_MODE",  # compose prices every conversation live (ADR-0125); the suite plans on snapshots
 }
 for name in [name for name in os.environ if name.upper() in LIVE_SETTINGS]:  # Settings ignores case
     del os.environ[name]
