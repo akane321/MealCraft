@@ -647,7 +647,7 @@ function onEnter(event: KeyboardEvent) {
   void send();
 }
 
-// Voice input: the words land at the caret (replacing a selection); scripted demo words arrive a few at a time.
+// Voice input: the words land at the caret (replacing a selection).
 let voiceAnchor: { before: string; after: string } | null = null;
 const voiceFlash = ref(false);
 const field = () => document.getElementById("mc-ask") as HTMLTextAreaElement | HTMLInputElement | null;

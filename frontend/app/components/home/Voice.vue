@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { DEMO_SENTENCES } from "~/lib/demo-script";
-import { revealTokens } from "~/lib/reveal";
 
 // The microphone beside a message box (ADR-0116). A tap records, a tap (or about 3 s of quiet) stops; the clip goes
 // to POST /api/voice/transcriptions and the words come back into the box with `text`, never sent by themselves.
@@ -14,7 +12,6 @@ const MAX_MS = 60_000;
 
 const config = useRuntimeConfig();
 const apiFetch = useApiFetch();
-const demo = Boolean(config.public.demoScript);
 const supported = ref(false);
 const phase = ref<"idle" | "ask" | "recording" | "transcribing">("idle");
 const level = ref(0);
@@ -34,9 +31,6 @@ let startedAt = 0;
 let lastLoud = 0;
 let heard = false;
 let cancelled = false;
-let demoWords: string[] = [];
-let demoShown = 0;
-let demoNextAt = 0;
 let errorTimer: ReturnType<typeof setTimeout> | undefined;
 
 const time = computed(() => `${Math.floor(elapsed.value / 60)}:${String(elapsed.value % 60).padStart(2, "0")}`);
@@ -83,20 +77,13 @@ async function start() {
   analyser = audio.createAnalyser();
   analyser.fftSize = 1024;
   audio.createMediaStreamSource(stream).connect(analyser);
-  if (demo) {
-    demoWords = revealTokens(DEMO_SENTENCES[demoIndex % DEMO_SENTENCES.length]!);
-    demoShown = 0;
-    demoNextAt = 0;
-  }
-  else {
-    const mime = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(type => MediaRecorder.isTypeSupported(type));
-    recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-    chunks = [];
-    recorder.ondataavailable = event => chunks.push(event.data);
-    recorder.onstop = upload;
-    // The whole clip at once: iPhone's timesliced pieces often do not decode when joined.
-    recorder.start();
-  }
+  const mime = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(type => MediaRecorder.isTypeSupported(type));
+  recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  chunks = [];
+  recorder.ondataavailable = event => chunks.push(event.data);
+  recorder.onstop = upload;
+  // The whole clip at once: iPhone's timesliced pieces often do not decode when joined.
+  recorder.start();
   cancelled = false;
   heard = false;
   startedAt = lastLoud = performance.now();
@@ -124,31 +111,12 @@ function tick(now: number) {
     lastLoud = now;
     heard = true;
   }
-  if (demo) {
-    // One more word (a space counts with the word after it) every ~160 ms while there is sound.
-    if (loud && now >= demoNextAt) {
-      do demoShown++;
-      while (demoShown < demoWords.length && !demoWords[demoShown - 1]!.trim());
-      demoNextAt = now + 160;
-      emit("text", demoWords.slice(0, demoShown).join(""), false);
-      if (demoShown >= demoWords.length) return stop();
-    }
-  }
-  else if (now - lastLoud > SILENCE_MS || now - startedAt > MAX_MS) {
-    return stop();
-  }
+  if (now - lastLoud > SILENCE_MS || now - startedAt > MAX_MS) return stop();
   frame = requestAnimationFrame(tick);
 }
 
 function stop() {
   if (phase.value !== "recording") return;
-  if (demo) {
-    emit("text", demoWords.join(""), true);
-    demoIndex++;
-    cleanup();
-    phase.value = "idle";
-    return;
-  }
   phase.value = "transcribing";
   cancelAnimationFrame(frame);
   level.value = 0;
@@ -158,7 +126,6 @@ function stop() {
 
 function cancel() {
   cancelled = true;
-  if (demo && phase.value === "recording") emit("text", "", true);
   if (recorder?.state === "recording") recorder.stop();
   cleanup();
   phase.value = "idle";
@@ -217,11 +184,6 @@ onBeforeUnmount(() => {
   document.removeEventListener("visibilitychange", onHidden);
   if (phase.value !== "idle") cancel();
 });
-</script>
-
-<script lang="ts">
-// Counts across the home page and the workspace, which each mount their own microphone.
-let demoIndex = 0;
 </script>
 
 <template>
