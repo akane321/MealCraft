@@ -138,6 +138,10 @@ class WeeklyMealPlanService:
         self._priced_as_asked(result.trace, constraints)
         if constraints.pricing_mode == "live":
             grocery = self.grocery_aggregator.refresh(grocery, constraints)
+            (recommendation_result, result), grocery = self._within_budget_at_todays_prices(
+                constraints, (recommendation_result, result), grocery, household_profile_version
+            )
+            selected = result.selected
             # Only the saved list is checked at FairPrice (ADR-0058): what it came to, as the household sees it.
             result.trace["final_list"] = {
                 "pricing_mode": grocery.pricing_mode,
@@ -196,6 +200,39 @@ class WeeklyMealPlanService:
             operation_run=self._operation_run(result.trace, started_at, warnings=warnings),
         )
         return self._to_response(plan)
+
+    def _within_budget_at_todays_prices(self, constraints, searched, grocery, profile_version):
+        """A week is chosen at snapshot prices (ADR-0058), and today's can bring its list over the budget. Then search
+        again with the budget cut by the overrun, at most twice, and keep the week whose list comes to the least: one
+        with as many different dishes as the first, recorded as the household's request, not the cut one."""
+        budget, target = constraints.weekly_budget_sgd, constraints.weekly_budget_sgd
+        first = searched[1].trace
+        variety = _distinct(searched[1])
+        retries = []
+        for _ in range(2):
+            if budget is None or grocery.within_weekly_budget is not False or not grocery.purchase_total_sgd:
+                break
+            target = round(target * budget / grocery.purchase_total_sgd, 2)
+            cut = constraints.model_copy(update={"weekly_budget_sgd": target})
+            try:
+                again = self._search(
+                    cut, self._candidates(cut), profile_version=profile_version, minimum_distinct_dishes=variety
+                )
+            except ProductPlanningError:
+                break
+            priced = self.grocery_aggregator.refresh(
+                again[1].grocery.model_copy(update={"weekly_budget_sgd": budget}), constraints
+            )
+            retries.append({"search_budget_sgd": target, "purchase_total_sgd": priced.purchase_total_sgd})
+            if priced.purchase_total_sgd >= grocery.purchase_total_sgd:
+                break
+            searched, grocery = again, priced
+            # Replays and the console read the request from the trace: the household's, not the cut budget.
+            again[1].trace.update({key: first[key] for key in ("request", "input_digest") if key in first})
+            self._priced_as_asked(again[1].trace, constraints)
+        if retries:
+            searched[1].trace["over_budget_at_todays_prices"] = retries
+        return searched, grocery
 
     @staticmethod
     def _priced_as_asked(trace: dict, constraints: WeeklyMealPlanRequest) -> None:

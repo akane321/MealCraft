@@ -747,3 +747,45 @@ def test_both_final_checks_pass_the_households_rules(monkeypatch, confirm):
         ["peanut"],
         ["coconut"],
     )
+
+
+def test_a_week_over_the_budget_at_todays_prices_is_searched_again_under_a_cut_budget(monkeypatch):
+    from app.products.provider import FairPriceProductProvider
+    from app.repositories.product import ProductSnapshotRepository
+    from tests.test_planning_capability import dish_client
+    from tests.test_wp1_snapshot_planning import dishes
+
+    refreshes = []
+    selected = {}
+    refresh = ProductSearchService.refresh_selected
+
+    def refresh_synthetic(self, lines, find_replacement=None):
+        refreshes.append(len(lines))
+        for index, item in enumerate(lines):
+            if item.product:
+                item.product = item.product.model_copy(update={"external_id": str(10000 + index)})
+                selected[item.evidence.query] = item.product
+        return refresh(self, lines, find_replacement)
+
+    def search(self, query, *, limit, timeout_seconds):
+        # Today's prices: far over the budget for the first week checked, cheap for the week searched again.
+        price = 50 if len(refreshes) == 1 else 1
+        return [
+            selected[query].model_copy(
+                update={"price_sgd": price, "source": "fairprice", "fetched_at": datetime.now(UTC)}
+            )
+        ]
+
+    monkeypatch.setattr(ProductSearchService, "refresh_selected", refresh_synthetic)
+    monkeypatch.setattr(FairPriceProductProvider, "search", search)
+    monkeypatch.setattr(ProductSnapshotRepository, "get_fresh", lambda *args, **kwargs: [])
+    with dish_client(monkeypatch, dishes()) as client:
+        response = client.post(
+            "/api/plans/generate",
+            json={"requires_halal": False, "household_size": 2, "weekly_budget_sgd": 100, "pricing_mode": "live"},
+        )
+        assert response.status_code == 201, response.text
+        grocery = response.json()["grocery_estimate"]
+    assert len(refreshes) == 2  # the first week's list, then the week searched again
+    assert grocery["weekly_budget_sgd"] == 100 and grocery["within_weekly_budget"] is True
+    assert not any("exceeds the weekly budget" in warning for warning in grocery["warnings"])
