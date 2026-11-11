@@ -6,3 +6,761 @@
 {"call": "product", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5450, "output_tokens": 198, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017817}
 {"event": "reserve", "total_tokens": 0, "usd": 0.05}
 {"call": "product", "episode_id": "mdw-dev-002", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5486, "output_tokens": 203, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018312}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5496, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017397}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5490, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017217}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5492, "output_tokens": 194, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017952}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5516, "output_tokens": 187, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017817}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5492, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018222}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5506, "output_tokens": 217, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0019092}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5506, "output_tokens": 203, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018462}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5512, "output_tokens": 207, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00186872}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5494, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017427}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5482, "output_tokens": 187, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017562}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5486, "output_tokens": 198, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018087}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5506, "output_tokens": 243, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0020262}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5500, "output_tokens": 209, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018687}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5500, "output_tokens": 237, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0019947}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 550, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004755}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5514, "output_tokens": 188, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017847}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5498, "output_tokens": 203, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018402}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 5, "input_tokens": 5494, "output_tokens": 251, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0020533}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5500, "output_tokens": 223, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0019317}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5501, "output_tokens": 208, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00186495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 3, "input_tokens": 5498, "output_tokens": 227, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00194826}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5495, "output_tokens": 209, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00186495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5506, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018327}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5499, "output_tokens": 201, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00183197}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5496, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017532}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5510, "output_tokens": 187, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017772}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5487, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00174645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5486, "output_tokens": 215, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018852}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5501, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00174345}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5457, "output_tokens": 206, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00182295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5471, "output_tokens": 232, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00195045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00170595}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00172245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5473, "output_tokens": 205, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00183047}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5463, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00170145}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5477, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00173895}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5467, "output_tokens": 159, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00161895}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 239, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00198045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5487, "output_tokens": 186, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175545}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 2, "input_tokens": 5463, "output_tokens": 230, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00193549}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 205, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00183045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00180495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 216, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00187695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5483, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00172995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5457, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00172395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5477, "output_tokens": 237, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00197745}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5467, "output_tokens": 209, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00184395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5451, "output_tokens": 235, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00194895}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00173595}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5471, "output_tokens": 209, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00184695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 309, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00229845}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 165, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00165045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5471, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00173445}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5463, "output_tokens": 192, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00176445}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5475, "output_tokens": 187, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5477, "output_tokens": 184, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00173895}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 2, "input_tokens": 5473, "output_tokens": 238, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00197899}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5467, "output_tokens": 180, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00171345}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5481, "output_tokens": 238, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00198495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 5453, "output_tokens": 163, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00482325}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 5491, "output_tokens": 159, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00301935}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5465, "output_tokens": 162, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00163095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5461, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00171345}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5477, "output_tokens": 165, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00165345}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5463, "output_tokens": 222, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00189945}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5453, "output_tokens": 206, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00181995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5483, "output_tokens": 186, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 2, "input_tokens": 5475, "output_tokens": 228, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00193549}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5473, "output_tokens": 157, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00161445}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 3, "input_tokens": 5467, "output_tokens": 190, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175851}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5487, "output_tokens": 187, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5477, "output_tokens": 219, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00189645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5465, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00169845}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 205, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00182745}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5475, "output_tokens": 201, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00181395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5469, "output_tokens": 203, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00181845}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 511, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045075}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004455}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 512, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000447}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 512, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004515}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 508, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004485}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 509, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045225}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 508, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004485}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 506, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000447}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 509, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 511, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045075}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 514, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000453}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 511, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045075}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 510, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045675}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5416, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016617}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 524, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000465}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5423, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00166695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045675}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5425, "output_tokens": 176, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00166395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 517, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045975}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5438, "output_tokens": 199, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017772}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 519, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046125}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 514, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004575}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 522, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004635}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5426, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016692}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 525, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046575}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5422, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016887}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 518, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004605}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 517, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 517, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045975}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 523, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5423, "output_tokens": 207, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00180195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5421, "output_tokens": 176, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00166095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5448, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017892}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 606, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000522}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5457, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00179595}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 1, "input_tokens": 6105, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00356537}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5452, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016932}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 620, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005325}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 523, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046425}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 581, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00050775}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5422, "output_tokens": 179, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016752}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5433, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177795}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6097, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00357285}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5432, "output_tokens": 234, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0019302}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6066, "output_tokens": 176, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0035271}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5443, "output_tokens": 157, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00159195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 646, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000552}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5442, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017847}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6029, "output_tokens": 176, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00349935}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5431, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6053, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00353985}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 4, "input_tokens": 5439, "output_tokens": 244, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00198053}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6126, "output_tokens": 159, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0034956}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5447, "output_tokens": 215, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00185595}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6113, "output_tokens": 173, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00354885}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5455, "output_tokens": 260, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00206447}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6156, "output_tokens": 259, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0039681}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 2, "input_tokens": 5451, "output_tokens": 246, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00199849}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6174, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0036126}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5451, "output_tokens": 192, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175547}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6159, "output_tokens": 176, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00359685}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5451, "output_tokens": 238, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00196245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6115, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00356835}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5425, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 604, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005205}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5429, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6062, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0035286}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5442, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017037}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 613, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00052725}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5429, "output_tokens": 179, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00168045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 628, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005385}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5423, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177045}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 592, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000516}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5420, "output_tokens": 179, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016737}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 602, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000519}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5447, "output_tokens": 219, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00187395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5445, "output_tokens": 192, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6084, "output_tokens": 199, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0036441}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5433, "output_tokens": 179, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00168345}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 628, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005385}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5450, "output_tokens": 159, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016062}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6076, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0035436}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5441, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00178395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 582, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000504}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 1, "input_tokens": 5443, "output_tokens": 211, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00183497}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 6172, "output_tokens": 194, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.005502}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5437, "output_tokens": 216, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00185295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 2688, "embedding_tokens": 0, "input_tokens": 6082, "output_tokens": 230, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0037821}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5427, "output_tokens": 178, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00167445}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 616, "output_tokens": 15, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5454, "output_tokens": 199, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017892}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 530, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 533, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00047175}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 532, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000471}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 529, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046875}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5517, "output_tokens": 216, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00191295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 552, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000486}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 570, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 527, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046725}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5443, "output_tokens": 162, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00161445}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 532, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000471}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5450, "output_tokens": 161, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016152}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 536, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000474}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5445, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00178695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 566, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004965}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5453, "output_tokens": 183, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00171645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5482, "output_tokens": 216, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018867}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 534, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004725}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5455, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00170895}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 527, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046725}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5459, "output_tokens": 163, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00163095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5441, "output_tokens": 201, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00178845}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5441, "output_tokens": 179, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00168945}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5458, "output_tokens": 180, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017067}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5437, "output_tokens": 162, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00160995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5441, "output_tokens": 180, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00169395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5443, "output_tokens": 196, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00176745}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5437, "output_tokens": 198, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00177195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 3, "input_tokens": 5445, "output_tokens": 162, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00161601}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5447, "output_tokens": 160, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00160845}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 531, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00047025}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5451, "output_tokens": 231, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00193095}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5448, "output_tokens": 180, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0016992}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 528, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000459}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 530, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004605}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5443, "output_tokens": 206, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00181245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 521, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045375}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9279, "output_tokens": 218, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01794025}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9293, "output_tokens": 199, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01786525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 529, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046875}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 512, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000447}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 520, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000453}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9194, "output_tokens": 239, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.017971}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 534, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004635}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9451, "output_tokens": 184, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01791625}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9110, "output_tokens": 123, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.017386}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 507, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044325}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044775}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044775}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 539, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046725}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 517, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045075}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 522, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004545}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9277, "output_tokens": 224, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01796575}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 534, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004635}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 731, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00061125}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9209, "output_tokens": 167, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01765825}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 582, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004995}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 555, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00047925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 556, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00048}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 843, "output_tokens": 22, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00073125}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 5231, "output_tokens": 129, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01450375}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 528, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000468}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9112, "output_tokens": 141, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.0174685}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 528, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000459}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 547, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00047325}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 513, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00044775}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 518, "output_tokens": 16, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004605}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 545, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00047175}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9177, "output_tokens": 168, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01763875}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 541, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00046875}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 552, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000477}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 5860, "output_tokens": 144, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.015043}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9227, "output_tokens": 322, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01836925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9235, "output_tokens": 254, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01806925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9311, "output_tokens": 407, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01881475}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9405, "output_tokens": 340, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01858375}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9392, "output_tokens": 201, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.0179485}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 8943, "output_tokens": 204, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01762525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5493, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00174195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 527, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045825}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 578, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004965}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 558, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004815}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9377, "output_tokens": 436, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01899475}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9280, "output_tokens": 333, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.0184585}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9293, "output_tokens": 146, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01762675}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9192, "output_tokens": 166, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.017641}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9334, "output_tokens": 301, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018355}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 5139, "output_tokens": 146, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01451125}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9418, "output_tokens": 227, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018085}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9121, "output_tokens": 199, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01773625}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9399, "output_tokens": 195, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01792675}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 753, "output_tokens": 44, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00076275}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 611, "output_tokens": 44, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00065625}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5513, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00175695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 521, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00045375}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9371, "output_tokens": 490, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01923325}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5649, "output_tokens": 212, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00199395}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5575, "output_tokens": 256, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00213645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9360, "output_tokens": 348, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018586}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 6089, "output_tokens": 204, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00228795}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9375, "output_tokens": 384, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01875925}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 602, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005145}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 637, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00054075}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 3, "input_tokens": 5711, "output_tokens": 317, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00251301}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5615, "output_tokens": 205, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00193695}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5887, "output_tokens": 204, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00213645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5534, "output_tokens": 204, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0018717}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5433, "output_tokens": 181, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00169245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9494, "output_tokens": 514, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.0194335}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5485, "output_tokens": 201, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00182145}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9152, "output_tokens": 262, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018043}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5504, "output_tokens": 182, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0017502}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 21, "input_tokens": 5466, "output_tokens": 302, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00226212}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5549, "output_tokens": 200, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00186495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5633, "output_tokens": 201, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00193245}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 767, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00063825}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 558, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0004815}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9236, "output_tokens": 350, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018502}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9411, "output_tokens": 477, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01920475}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 640, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.000543}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 603, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00051525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9252, "output_tokens": 288, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.018235}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5597, "output_tokens": 198, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00189195}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 565, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00048675}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5647, "output_tokens": 284, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00231645}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5791, "output_tokens": 207, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00207795}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 683, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00057525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 9411, "output_tokens": 506, "web_search_calls": 1}, "total_tokens": 0, "usd": 0.01933525}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 609, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00051975}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5631, "output_tokens": 177, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00182295}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 629, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00053475}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 4736, "embedding_tokens": 0, "input_tokens": 5541, "output_tokens": 208, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.00189495}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 0, "output_tokens": 0, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0}
+{"event": "reserve", "total_tokens": 0, "usd": 0.05}
+{"call": "product", "event": "charge", "input_tokens": 0, "output_tokens": 0, "runs": 1, "token_usage": {"cached_input_tokens": 0, "embedding_tokens": 0, "input_tokens": 598, "output_tokens": 14, "web_search_calls": 0}, "total_tokens": 0, "usd": 0.0005115}

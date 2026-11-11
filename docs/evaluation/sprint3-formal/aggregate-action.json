@@ -1,0 +1,3099 @@
+{
+  "note": "Counts only. Timeouts, errors and missing outputs stay in the denominator and are never successes.",
+  "refuse_stated_as_reply": {
+    "general-agent": 17,
+    "mealcraft": 8,
+    "mealcraft/ablation/diversity_off": 7,
+    "mealcraft/ablation/independent_validator_off": 8,
+    "mealcraft/ablation/local_improvement_off": 9,
+    "mealcraft/ablation/repair_off": 7,
+    "mealcraft/ablation/retrieval_off": 8,
+    "mealcraft/ablation/rule_only_parser": 33,
+    "pure-llm": 17,
+    "rag": 16,
+    "strong-rule": 36
+  },
+  "scoring": "formal-outcome-v2",
+  "systems": {
+    "general-agent": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 1,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.975
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 39,
+          "success_rate": 0.975,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 42,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.511628
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 44,
+          "success_rate": 0.511628,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 15,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 54,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 36,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 76,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.512821
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 80,
+          "success_rate": 0.512821,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 36,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 78,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.57377
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 105,
+          "success_rate": 0.57377,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.460317
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.460317,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 1,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.961538
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 25,
+          "success_rate": 0.961538,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 0,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            1.0
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 14,
+          "success_rate": 1.0,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 25,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 25,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 17,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.527778
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 19,
+          "success_rate": 0.527778,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.55
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 11,
+          "success_rate": 0.55,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 32,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.319149
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.319149,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.307692
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.307692,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.566667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 17,
+          "success_rate": 0.566667,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 112,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.544715
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 134,
+        "success_rate": 0.544715,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 16,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 24,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 32,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.627907
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.627907,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 19,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.366667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 11,
+          "success_rate": 0.366667,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 44,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.511111
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 46,
+          "success_rate": 0.511111,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 78,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 78,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.633333
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 57,
+          "success_rate": 0.633333,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 77,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.579235
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 106,
+          "success_rate": 0.579235,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.460317
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.460317,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.615385
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 16,
+          "success_rate": 0.615385,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.571429
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 8,
+          "success_rate": 0.571429,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 24,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.52
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.52,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 8,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.777778
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 28,
+          "success_rate": 0.777778,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.35
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.35,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 21,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.553191
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.553191,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.230769
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.230769,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.566667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 17,
+          "success_rate": 0.566667,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 111,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.54878
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 135,
+        "success_rate": 0.54878,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/diversity_off": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 17,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.575
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 23,
+          "success_rate": 0.575,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 32,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.627907
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.627907,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 17,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.433333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.433333,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 42,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.533333
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 48,
+          "success_rate": 0.533333,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 78,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 78,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 30,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.666667
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 60,
+          "success_rate": 0.666667,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 73,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.601093
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 110,
+          "success_rate": 0.601093,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 35,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.444444
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 28,
+          "success_rate": 0.444444,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.576923
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.576923,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.571429
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 8,
+          "success_rate": 0.571429,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 25,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 25,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.805556
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.805556,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 12,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 8,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 5,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 20,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.574468
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 27,
+          "success_rate": 0.574468,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.230769
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.230769,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 12,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 18,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 108,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.560976
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 138,
+        "success_rate": 0.560976,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/independent_validator_off": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 19,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.525
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 21,
+          "success_rate": 0.525,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 32,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.627907
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.627907,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.566667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 17,
+          "success_rate": 0.566667,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 38,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.577778
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 52,
+          "success_rate": 0.577778,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 72,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.538462
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 84,
+          "success_rate": 0.538462,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 30,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.666667
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 60,
+          "success_rate": 0.666667,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 68,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.628415
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 115,
+          "success_rate": 0.628415,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.460317
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.460317,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.571429
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 8,
+          "success_rate": 0.571429,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 24,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.52
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.52,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 8,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.777778
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 28,
+          "success_rate": 0.777778,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.55
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 11,
+          "success_rate": 0.55,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 4,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 6,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 16,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.659574
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 31,
+          "success_rate": 0.659574,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.230769
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.230769,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 12,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 18,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 102,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.585366
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 144,
+        "success_rate": 0.585366,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/local_improvement_off": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 20,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 20,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.616279
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 53,
+          "success_rate": 0.616279,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 18,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 12,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 42,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.533333
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 48,
+          "success_rate": 0.533333,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 79,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.49359
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 77,
+          "success_rate": 0.49359,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.622222
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 56,
+          "success_rate": 0.622222,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 80,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.562842
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 103,
+          "success_rate": 0.562842,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.47619
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 30,
+          "success_rate": 0.47619,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 24,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.52
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.52,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.75
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 27,
+          "success_rate": 0.75,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.35
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.35,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 5,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 20,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.574468
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 27,
+          "success_rate": 0.574468,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.307692
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.307692,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.566667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 17,
+          "success_rate": 0.566667,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 113,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.54065
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 133,
+        "success_rate": 0.54065,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/repair_off": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 18,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.55
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 22,
+          "success_rate": 0.55,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 31,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.639535
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 55,
+          "success_rate": 0.639535,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 18,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 12,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 45,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 45,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 79,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.49359
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 77,
+          "success_rate": 0.49359,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.633333
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 57,
+          "success_rate": 0.633333,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 78,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.57377
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 105,
+          "success_rate": 0.57377,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.460317
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.460317,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.576923
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.576923,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 24,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.52
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.52,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.805556
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 29,
+          "success_rate": 0.805556,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.35
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.35,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 5,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 21,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.553191
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.553191,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.230769
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.230769,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 14,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.533333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 16,
+          "success_rate": 0.533333,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 112,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.544715
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 134,
+        "success_rate": 0.544715,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/retrieval_off": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 18,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.55
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 22,
+          "success_rate": 0.55,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 32,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.627907
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.627907,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 19,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.366667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 11,
+          "success_rate": 0.366667,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 38,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.577778
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 52,
+          "success_rate": 0.577778,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 73,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.532051
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 83,
+          "success_rate": 0.532051,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 34,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.622222
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 56,
+          "success_rate": 0.622222,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 74,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.595628
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 109,
+          "success_rate": 0.595628,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.47619
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 30,
+          "success_rate": 0.47619,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.576923
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.576923,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 24,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.52
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.52,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 8,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.777778
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 28,
+          "success_rate": 0.777778,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 14,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.3
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 6,
+          "success_rate": 0.3,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 5,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 15,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.680851
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 32,
+          "success_rate": 0.680851,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 9,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.307692
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.307692,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 14,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.533333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 16,
+          "success_rate": 0.533333,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 107,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.565041
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 139,
+        "success_rate": 0.565041,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "mealcraft/ablation/rule_only_parser": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 2,
+          "failure_n": 27,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.275
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 11,
+          "success_rate": 0.275,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 76,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.116279
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 10,
+          "success_rate": 0.116279,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 1,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 18,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 8,
+          "failure_n": 38,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.488889
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 44,
+          "success_rate": 0.488889,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 10,
+          "failure_n": 90,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.358974
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 56,
+          "success_rate": 0.358974,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 1,
+          "failure_n": 62,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.3
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 27,
+          "success_rate": 0.3,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 10,
+          "failure_n": 99,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.404372
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 74,
+          "success_rate": 0.404372,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 1,
+          "failure_n": 53,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.142857
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 9,
+          "success_rate": 0.142857,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 2,
+          "failure_n": 17,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.269231
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.269231,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.285714
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.285714,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 43,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.14
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.14,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 33,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.083333
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.083333,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 1,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.7
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 14,
+          "success_rate": 0.7,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 6,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 6,
+          "failure_n": 15,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.553191
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.553191,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 1,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.153846
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 2,
+          "success_rate": 0.153846,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 1,
+          "failure_n": 13,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.533333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 16,
+          "success_rate": 0.533333,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 11,
+        "failure_n": 152,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.337398
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 83,
+        "success_rate": 0.337398,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "pure-llm": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 3,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.925
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 37,
+          "success_rate": 0.925,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 44,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.488372
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 42,
+          "success_rate": 0.488372,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 8,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.733333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 22,
+          "success_rate": 0.733333,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 36,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 55,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.647436
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 101,
+          "success_rate": 0.647436,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 36,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 54,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 54,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.704918
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 129,
+          "success_rate": 0.704918,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 37,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.412698
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 0.412698,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 2,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.923077
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 24,
+          "success_rate": 0.923077,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 1,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.928571
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.928571,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 27,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.46
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 23,
+          "success_rate": 0.46,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 17,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.527778
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 19,
+          "success_rate": 0.527778,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 5,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.75
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.75,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 3,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.7
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.7,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.765957
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 36,
+          "success_rate": 0.765957,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.230769
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.230769,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 15,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 15,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 91,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.630081
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 155,
+        "success_rate": 0.630081,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "rag": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 1,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.975
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 39,
+          "success_rate": 0.975,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 43,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.5
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 43,
+          "success_rate": 0.5,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.633333
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 19,
+          "success_rate": 0.633333,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 56,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.377778
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 34,
+          "success_rate": 0.377778,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 72,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.538462
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 84,
+          "success_rate": 0.538462,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 39,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.566667
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 51,
+          "success_rate": 0.566667,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 73,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.601093
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 110,
+          "success_rate": 0.601093,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 38,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.396825
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 25,
+          "success_rate": 0.396825,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 0,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            1.0
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 26,
+          "success_rate": 1.0,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 1,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.928571
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.928571,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 27,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.46
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 23,
+          "success_rate": 0.46,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 16,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.555556
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 20,
+          "success_rate": 0.555556,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.65
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 13,
+          "success_rate": 0.65,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 4,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.6
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 6,
+          "success_rate": 0.6,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 27,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.425532
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 20,
+          "success_rate": 0.425532,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.153846
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 2,
+          "success_rate": 0.153846,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 18,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.4
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 12,
+          "success_rate": 0.4,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 111,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.54878
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 135,
+        "success_rate": 0.54878,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    },
+    "strong-rule": {
+      "by_category": {
+        "adversarial": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 30,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.25
+          ],
+          "remaining_n": 40,
+          "runs": 1,
+          "success_n": 10,
+          "success_rate": 0.25,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent": {
+          "declared_n": 120,
+          "error_n": 0,
+          "failure_n": 82,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.046512
+          ],
+          "remaining_n": 86,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.046512,
+          "timeout_n": 0,
+          "voided_n": 34
+        },
+        "multi_turn": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 7,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.766667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 23,
+          "success_rate": 0.766667,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning": {
+          "declared_n": 90,
+          "error_n": 0,
+          "failure_n": 28,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.688889
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 62,
+          "success_rate": 0.688889,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "by_language": {
+        "en": {
+          "declared_n": 186,
+          "error_n": 0,
+          "failure_n": 87,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.442308
+          ],
+          "remaining_n": 156,
+          "runs": 1,
+          "success_n": 69,
+          "success_rate": 0.442308,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "zh": {
+          "declared_n": 94,
+          "error_n": 0,
+          "failure_n": 60,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.333333
+          ],
+          "remaining_n": 90,
+          "runs": 1,
+          "success_n": 30,
+          "success_rate": 0.333333,
+          "timeout_n": 0,
+          "voided_n": 4
+        }
+      },
+      "by_source": {
+        "authored": {
+          "declared_n": 187,
+          "error_n": 0,
+          "failure_n": 93,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.491803
+          ],
+          "remaining_n": 183,
+          "runs": 1,
+          "success_n": 90,
+          "success_rate": 0.491803,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "forum": {
+          "declared_n": 93,
+          "error_n": 0,
+          "failure_n": 54,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.142857
+          ],
+          "remaining_n": 63,
+          "runs": 1,
+          "success_n": 9,
+          "success_rate": 0.142857,
+          "timeout_n": 0,
+          "voided_n": 30
+        }
+      },
+      "cells": {
+        "adversarial|en|authored": {
+          "declared_n": 26,
+          "error_n": 0,
+          "failure_n": 19,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.269231
+          ],
+          "remaining_n": 26,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.269231,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "adversarial|zh|authored": {
+          "declared_n": 14,
+          "error_n": 0,
+          "failure_n": 11,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.214286
+          ],
+          "remaining_n": 14,
+          "runs": 1,
+          "success_n": 3,
+          "success_rate": 0.214286,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "intent|en|forum": {
+          "declared_n": 80,
+          "error_n": 0,
+          "failure_n": 46,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.08
+          ],
+          "remaining_n": 50,
+          "runs": 1,
+          "success_n": 4,
+          "success_rate": 0.08,
+          "timeout_n": 0,
+          "voided_n": 30
+        },
+        "intent|zh|authored": {
+          "declared_n": 40,
+          "error_n": 0,
+          "failure_n": 36,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.0
+          ],
+          "remaining_n": 36,
+          "runs": 1,
+          "success_n": 0,
+          "success_rate": 0.0,
+          "timeout_n": 0,
+          "voided_n": 4
+        },
+        "multi_turn|en|authored": {
+          "declared_n": 20,
+          "error_n": 0,
+          "failure_n": 4,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.8
+          ],
+          "remaining_n": 20,
+          "runs": 1,
+          "success_n": 16,
+          "success_rate": 0.8,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "multi_turn|zh|authored": {
+          "declared_n": 10,
+          "error_n": 0,
+          "failure_n": 3,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.7
+          ],
+          "remaining_n": 10,
+          "runs": 1,
+          "success_n": 7,
+          "success_rate": 0.7,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|authored": {
+          "declared_n": 47,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.787234
+          ],
+          "remaining_n": 47,
+          "runs": 1,
+          "success_n": 37,
+          "success_rate": 0.787234,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|en|forum": {
+          "declared_n": 13,
+          "error_n": 0,
+          "failure_n": 8,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.384615
+          ],
+          "remaining_n": 13,
+          "runs": 1,
+          "success_n": 5,
+          "success_rate": 0.384615,
+          "timeout_n": 0,
+          "voided_n": 0
+        },
+        "planning|zh|authored": {
+          "declared_n": 30,
+          "error_n": 0,
+          "failure_n": 10,
+          "missing_n": 0,
+          "per_run_success_rate": [
+            0.666667
+          ],
+          "remaining_n": 30,
+          "runs": 1,
+          "success_n": 20,
+          "success_rate": 0.666667,
+          "timeout_n": 0,
+          "voided_n": 0
+        }
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 147,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.402439
+        ],
+        "remaining_n": 246,
+        "runs": 1,
+        "success_n": 99,
+        "success_rate": 0.402439,
+        "timeout_n": 0,
+        "voided_n": 34
+      }
+    }
+  }
+}

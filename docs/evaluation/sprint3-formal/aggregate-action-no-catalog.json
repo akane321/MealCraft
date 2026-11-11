@@ -1,0 +1,569 @@
+{
+  "note": "Counts only. Timeouts, errors and missing outputs stay in the denominator and are never successes.",
+  "refuse_stated_as_reply": {
+    "general-agent": 17,
+    "mealcraft": 8,
+    "mealcraft/ablation/diversity_off": 7,
+    "mealcraft/ablation/independent_validator_off": 8,
+    "mealcraft/ablation/local_improvement_off": 9,
+    "mealcraft/ablation/repair_off": 7,
+    "mealcraft/ablation/retrieval_off": 8,
+    "mealcraft/ablation/rule_only_parser": 33,
+    "pure-llm": 17,
+    "rag": 16,
+    "strong-rule": 36
+  },
+  "scoring": "formal-outcome-v2",
+  "systems": {
+    "general-agent": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 46,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.659259
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 89,
+        "success_rate": 0.659259,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 51,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.622222
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 84,
+        "success_rate": 0.622222,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/diversity_off": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 51,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.622222
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 84,
+        "success_rate": 0.622222,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/independent_validator_off": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 55,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.592593
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 80,
+        "success_rate": 0.592593,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/local_improvement_off": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 55,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.592593
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 80,
+        "success_rate": 0.592593,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/repair_off": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 51,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.622222
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 84,
+        "success_rate": 0.622222,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/retrieval_off": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 53,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.607407
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 82,
+        "success_rate": 0.607407,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "mealcraft/ablation/rule_only_parser": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 3,
+        "failure_n": 107,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.185185
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 25,
+        "success_rate": 0.185185,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "pure-llm": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 53,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.607407
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 82,
+        "success_rate": 0.607407,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "rag": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 49,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.637037
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 86,
+        "success_rate": 0.637037,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    },
+    "strong-rule": {
+      "by_category": {
+        "adversarial": {
+          "remaining_n": 40
+        },
+        "intent": {
+          "remaining_n": 86
+        },
+        "multi_turn": {
+          "withheld": "withheld so the overall total cannot give back the small value beside it"
+        },
+        "planning": {
+          "withheld": "fewer than 5 remaining cases"
+        }
+      },
+      "by_language": {
+        "en": {
+          "remaining_n": 82
+        },
+        "zh": {
+          "remaining_n": 53
+        }
+      },
+      "by_source": {
+        "authored": {
+          "remaining_n": 82
+        },
+        "forum": {
+          "remaining_n": 53
+        }
+      },
+      "cells": {
+        "withheld": "a cell has fewer than 5 remaining cases"
+      },
+      "overall": {
+        "declared_n": 280,
+        "error_n": 0,
+        "failure_n": 120,
+        "missing_n": 0,
+        "per_run_success_rate": [
+          0.111111
+        ],
+        "remaining_n": 135,
+        "runs": 1,
+        "success_n": 15,
+        "success_rate": 0.111111,
+        "timeout_n": 0,
+        "voided_n": 145
+      }
+    }
+  }
+}

@@ -84,19 +84,36 @@ table: `source_suspicious_row_count / source_mapping_row_count`. The corrected
 rate uses all valid reviewed rows as its denominator. Allergen omissions and
 false allergen assignments are reported separately and list their row IDs.
 
-## No checked-in review table yet
+## The checked-in review table (development records, 2026-11-07)
 
-No review table is committed. An earlier revision of this directory carried a
-283-row dry-run table and its pre-review summary, said to come from a local,
-untracked `comparison.json`. Those files were not reproducible: the input is not
-in the repository, and their `mapping_method` and `review_reason` values
-(`exact`, `fixed_seed_matched_sample`, `candidate_suggestion`,
-`mapping_requires_human_confirmation`) are not what this tool writes. They were
-removed on 2026-11-02, and the table must not be filled in by hand.
+`review.jsonl` is the review table of the development records of the conversation-protocol arms, filled in;
+`accuracy.json` is its report. Inputs: the strong-rule arm on the 21 `v3-meal-day-week` development episodes
+(regenerated on `main` 9389a45, `docs/evaluation/baselines/dev/strong-rule.jsonl`), and the 11-04 RAG (6 episodes)
+and general-agent (3 episodes) trial records in the same folder. No held-out record is read.
 
-The repository holds no `offline-algorithm-comparison-dev-v1` output at the
-moment, so there is no input from which to regenerate a table. Once a
-development-set comparison output is committed (or its location is named here),
-add the exact `generate` command and the output file names to this section so
-anyone can reproduce the table byte for byte; the tool is deterministic for a
-given input and seed. Do not hand out a table for review until then.
+From `backend/`:
+
+```bash
+python -m app.evaluation.baseline_arms --arm strong-rule \
+  --episodes data/evaluation/dev/v3-meal-day-week/episodes --anchor-date 2026-09-28 \
+  --output docs/evaluation/baselines/dev/strong-rule.jsonl
+python -m app.evaluation.baseline_mapping_review generate \
+  ../docs/evaluation/baselines/dev/strong-rule.jsonl \
+  ../docs/evaluation/baselines/dev/rag.jsonl \
+  ../docs/evaluation/baselines/dev/general-agent.jsonl \
+  review-blank.jsonl
+python -m app.evaluation.baseline_mapping_review report \
+  ../docs/evaluation/baseline-mapping-review/review.jsonl \
+  ../docs/evaluation/baseline-mapping-review/accuracy.json
+```
+
+The blank table has 275 rows (all 75 `needs_review` and `unmatched` rows, 200 sampled `matched` rows, seed 364)
+from 3,403 source mapping rows. Two runs gave byte-identical files, sha256
+`78aa043f8b09c8825326b83c50e7ad21cfbc2d9cfa627ab83d70383c5091bc9d`. The strong-rule output differs between runs
+only in `elapsed_seconds`, which the table does not read.
+
+How the human fields were filled: AI suggested a decision for each row from rules Liu-ub set (listed in the
+2026-11-07 Knowledge task record); Liu-ub then checked every row and set `personally_reviewed` herself
+("逐行由 AI 辅助核验，Liu 已亲自核对"). The two `noodles` → `pasta` rows are incorrect, but the dish
+("Stir-fried chicken noodles") does not say which noodles and the catalog has no generic noodles, so their
+`corrected_ingredient` says so and `safety_error` stays null.

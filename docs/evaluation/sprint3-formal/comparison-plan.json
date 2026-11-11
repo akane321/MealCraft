@@ -1,0 +1,569 @@
+{
+  "bootstrap_samples": 10000,
+  "comparisons": {
+    "general-agent": {
+      "allergen_safe": {
+        "baseline_unpaired_n": 2,
+        "paired_n": 0,
+        "product_unpaired_n": 6,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "in_bounds": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 2,
+        "product_unpaired_n": 5,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 2,
+        "paired_n": 0,
+        "product_unpaired_n": 4,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/diversity_off": {
+      "allergen_safe": {
+        "baseline_rate": 1.0,
+        "baseline_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.609666,
+          1.0
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.0,
+        "product_rate": 1.0,
+        "product_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.609666,
+          1.0
+        ]
+      },
+      "in_bounds": {
+        "baseline_rate": 0.0,
+        "baseline_run_summary": {
+          "mean": 0.0,
+          "per_run": [
+            0.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.0,
+          0.390334
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 1,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 1
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.5
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.166667,
+        "product_rate": 0.166667,
+        "product_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 1,
+        "product_wilson_95_ci": [
+          0.030053,
+          0.563503
+        ]
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 4,
+        "product_unpaired_n": 0,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/independent_validator_off": {
+      "allergen_safe": {
+        "baseline_rate": 1.0,
+        "baseline_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 2,
+        "baseline_wilson_95_ci": [
+          0.609666,
+          1.0
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.0,
+        "product_rate": 1.0,
+        "product_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.609666,
+          1.0
+        ]
+      },
+      "in_bounds": {
+        "baseline_rate": 0.2,
+        "baseline_run_summary": {
+          "mean": 0.166667,
+          "per_run": [
+            0.166667
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 1,
+        "baseline_wilson_95_ci": [
+          0.036224,
+          0.624465
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 5,
+        "paired_rate_difference": 0.0,
+        "product_rate": 0.2,
+        "product_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 2,
+        "product_wilson_95_ci": [
+          0.036224,
+          0.624465
+        ]
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 16,
+        "paired_n": 2,
+        "product_unpaired_n": 2,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/local_improvement_off": {
+      "allergen_safe": {
+        "baseline_rate": 1.0,
+        "baseline_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.609666,
+          1.0
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.0,
+        "product_rate": 1.0,
+        "product_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.609666,
+          1.0
+        ]
+      },
+      "in_bounds": {
+        "baseline_rate": 0.0,
+        "baseline_run_summary": {
+          "mean": 0.0,
+          "per_run": [
+            0.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.0,
+          0.390334
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 1,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 1
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.5
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.166667,
+        "product_rate": 0.166667,
+        "product_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 1,
+        "product_wilson_95_ci": [
+          0.030053,
+          0.563503
+        ]
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 3,
+        "product_unpaired_n": 1,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/repair_off": {
+      "allergen_safe": {
+        "baseline_rate": 0.833333,
+        "baseline_run_summary": {
+          "mean": 0.833333,
+          "per_run": [
+            0.833333
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.436497,
+          0.969947
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 1,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 1
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.5
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.166667,
+        "product_rate": 1.0,
+        "product_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.609666,
+          1.0
+        ]
+      },
+      "in_bounds": {
+        "baseline_rate": 0.142857,
+        "baseline_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.02568,
+          0.513128
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 7,
+        "paired_rate_difference": 0.0,
+        "product_rate": 0.142857,
+        "product_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.02568,
+          0.513128
+        ]
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 3,
+        "product_unpaired_n": 1,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/retrieval_off": {
+      "allergen_safe": {
+        "baseline_rate": 1.0,
+        "baseline_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 1,
+        "baseline_wilson_95_ci": [
+          0.609666,
+          1.0
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 0,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 0
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.0,
+        "product_rate": 1.0,
+        "product_run_summary": {
+          "mean": 1.0,
+          "per_run": [
+            1.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 0,
+        "product_wilson_95_ci": [
+          0.609666,
+          1.0
+        ]
+      },
+      "in_bounds": {
+        "baseline_rate": 0.0,
+        "baseline_run_summary": {
+          "mean": 0.0,
+          "per_run": [
+            0.0
+          ],
+          "standard_deviation": 0.0
+        },
+        "baseline_unpaired_n": 0,
+        "baseline_wilson_95_ci": [
+          0.0,
+          0.390334
+        ],
+        "episode_aggregation": "mean across runs, then success when the mean is at least 0.5",
+        "higher_is_better": true,
+        "mcnemar": {
+          "baseline_only_success_n": 0,
+          "discordant_n": 1,
+          "exact_two_sided_p_value": 1.0,
+          "product_only_success_n": 1
+        },
+        "paired_bootstrap_95_ci": [
+          0.0,
+          0.5
+        ],
+        "paired_n": 6,
+        "paired_rate_difference": 0.166667,
+        "product_rate": 0.166667,
+        "product_run_summary": {
+          "mean": 0.142857,
+          "per_run": [
+            0.142857
+          ],
+          "standard_deviation": 0.0
+        },
+        "product_unpaired_n": 1,
+        "product_wilson_95_ci": [
+          0.030053,
+          0.563503
+        ]
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 3,
+        "paired_n": 4,
+        "product_unpaired_n": 0,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "mealcraft/ablation/rule_only_parser": {
+      "allergen_safe": {
+        "baseline_unpaired_n": 4,
+        "paired_n": 3,
+        "product_unpaired_n": 3,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "in_bounds": {
+        "baseline_unpaired_n": 2,
+        "paired_n": 3,
+        "product_unpaired_n": 4,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 11,
+        "paired_n": 3,
+        "product_unpaired_n": 1,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "pure-llm": {
+      "allergen_safe": {
+        "baseline_unpaired_n": 3,
+        "paired_n": 0,
+        "product_unpaired_n": 6,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "in_bounds": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 3,
+        "product_unpaired_n": 4,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 1,
+        "paired_n": 0,
+        "product_unpaired_n": 4,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "rag": {
+      "allergen_safe": {
+        "baseline_unpaired_n": 3,
+        "paired_n": 1,
+        "product_unpaired_n": 5,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "in_bounds": {
+        "baseline_unpaired_n": 3,
+        "paired_n": 2,
+        "product_unpaired_n": 5,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 12,
+        "paired_n": 1,
+        "product_unpaired_n": 3,
+        "withheld": "fewer than 5 paired cases"
+      }
+    },
+    "strong-rule": {
+      "allergen_safe": {
+        "baseline_unpaired_n": 4,
+        "paired_n": 3,
+        "product_unpaired_n": 3,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "in_bounds": {
+        "baseline_unpaired_n": 2,
+        "paired_n": 4,
+        "product_unpaired_n": 3,
+        "withheld": "fewer than 5 paired cases"
+      },
+      "within_budget": {
+        "baseline_unpaired_n": 17,
+        "paired_n": 2,
+        "product_unpaired_n": 2,
+        "withheld": "fewer than 5 paired cases"
+      }
+    }
+  },
+  "method": "paired episode-level comparison",
+  "note": "Pass rates on the cases where both arms planned, the case states the constraint and both are known. The metrics are the passes of allergen_violation, over_budget, nutrition_out_of_bounds; bootstrap and McNemar as in heldout_statistics.",
+  "product_system_id": "mealcraft",
+  "seed": 365
+}
