@@ -343,7 +343,9 @@ const weekId = ref<number | null>(null);
 
 async function removeConversation(item: AgentSession) {
   const removed = await agent.remove(item.id);
-  if (removed && item.id === session.value?.id) newChat();
+  if (!removed || item.id !== session.value?.id) return;
+  session.value = null; // gone: leaving it must not put it back in the list (showConversation keeps the one left)
+  newChat();
 }
 
 /** The draft, with the dish action its words came from, kept across sign-in and reloads (restored on mount). */
