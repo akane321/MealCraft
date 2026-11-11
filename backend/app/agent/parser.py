@@ -344,6 +344,48 @@ def read_required_dish(message: str) -> DishAsked | None:
     return None
 
 
+# "No seafood", 不吃海鲜, "no pork or seafood", "allergic to seafood": every fish and shellfish, which the allergen
+# families cover; not the one ingredient called seafood mix, which is all a model or the ingredient names find for the
+# word. "No seafood allergy" and 冰箱里没有海鲜 say nothing about what the table may hold.
+_SEAFOOD = r"sea\s?foods?\b(?!\s*allerg)(?!\s+(?:is|are)\s+(?:fine|ok|okay)\b)"
+SEAFOOD_EXCLUSION = re.compile(
+    ENGLISH_EXCLUSION + _SEAFOOD + r"|(?:不吃|不要|避免|禁用|不放|不加)\s*海鲜(?!过敏)", re.IGNORECASE
+)
+SEAFOOD_CHAIN = re.compile(r"(?:,|\band\b|\bor\b)\s*(?:any\s+|the\s+)?" + _SEAFOOD, re.IGNORECASE)
+SEAFOOD_CHAIN_ZH = re.compile(r"(?:和|、|及|与)\s*海鲜(?!过敏)")
+SEAFOOD_ALLERGY = re.compile(
+    r"allergic\s+to\s+(?:[a-z]+(?:\s*,\s*|\s+and\s+|\s+or\s+|\s+)){0,4}?sea\s?food"
+    r"|(?<!\bno )(?<!\bany )sea\s?food\s+allerg|(?<!没有)海鲜过敏",
+    re.IGNORECASE,
+)
+SEAFOOD_INGREDIENTS = {"seafood", "seafood_mix"}
+
+
+def excludes_seafood(message: str) -> bool:
+    text = message.replace("’", "'")
+    if SEAFOOD_EXCLUSION.search(text) or SEAFOOD_ALLERGY.search(text):
+        return True
+    chain = SEAFOOD_CHAIN.search(text)
+    if chain and re.search(ENGLISH_EXCLUSION, text[: chain.start()], re.IGNORECASE):
+        return True
+    chain = SEAFOOD_CHAIN_ZH.search(text)
+    return bool(chain and re.search(r"(?:不吃|不要|避免|禁用|不放|不加)", text[: chain.start()]))
+
+
+def apply_rule_seafood(extraction: AgentConstraintExtraction, message: str) -> None:
+    """A message that rules out seafood keeps fish and shellfish off the table, whatever the model read."""
+    if not excludes_seafood(message):
+        return
+    extraction.allergens = sorted({*(extraction.allergens or []), "fish", "shellfish"})
+    if extraction.excluded_ingredients:
+        kept = [name for name in extraction.excluded_ingredients if name not in SEAFOOD_INGREDIENTS]
+        extraction.excluded_ingredients = kept or None
+    # The model's own word for it ("seafood", "shellfish") is understood now, not left unmatched.
+    extraction.unmatched_terms = [
+        term for term in extraction.unmatched_terms if not re.search(r"sea\s?food|fish|海鲜", term, re.IGNORECASE)
+    ]
+
+
 def apply_rule_dish(extraction: AgentConstraintExtraction, message: str) -> None:
     """The per-meal kcal ceiling a message states, by rules; the dish it names, where the model read none."""
     ceiling = read_meal_kcal(message.lower())
@@ -741,6 +783,7 @@ class RuleBasedConstraintParser:
         )
         apply_rule_span(extraction, message, span)
         apply_rule_dish(extraction, message)
+        apply_rule_seafood(extraction, message)
         extraction.assistant_summary = self._summary(extraction, replies.language(message, history), week=per_week)
         return extraction
 
@@ -924,6 +967,7 @@ Latest user message: {message}
         aligned = align_to_vocabulary(result, self.vocabulary) if self.vocabulary else result
         apply_rule_span(aligned, message)
         apply_rule_dish(aligned, message)
+        apply_rule_seafood(aligned, message)
         if requests_halal(message):
             # A clear halal request is never dropped because the model left the flag out (ADR-0104).
             aligned.requires_halal = True
